@@ -28,7 +28,7 @@ from shapely.validation import explain_validity
 from rule_format.rulebook import MEASURES_FILE, load
 
 from ... import interpretations as law
-from ...stops import stop
+from ...stops import joined, stop
 from ...street_lines import _norm, matching_ids, street_verdict
 
 MEASURES = list(load(MEASURES_FILE))
@@ -1535,7 +1535,7 @@ def _building_problems(buildings: list[dict]) -> str | None:
         return stop("no_building")
     ids = [b["id"] for b in buildings]
     same = sorted({i for i in ids if ids.count(i) > 1}, key=str)
-    return "; ".join([p for b in buildings for p in b.get("problems") or []]
+    return joined([p for b in buildings for p in b.get("problems") or []]
                      + [stop("same_id", id=i) for i in same]
                      + ([stop("empty_building")] if any(not b.get("faces") and not b.get("problems")
                                                         for b in buildings) else [])
@@ -2079,7 +2079,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None
     if lot is None or lot.problems:
-        reason = "; ".join(problems or (lot.problems if lot else [stop("no_lot")]))
+        reason = joined(problems or (lot.problems if lot else [stop("no_lot")]))
         for name in UNITS:
             out.setdefault(name, _missing(name, reason))
         return out
@@ -2157,7 +2157,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         return [i for b in placed(bs) if place.get(b["id"]) == "off" for i in _parts(b)]
 
     def both(*whys):                # every reason that applies, each naming its own buildings (round 22)
-        return "; ".join(w for w in whys if w) or None
+        return joined(w for w in whys if w) or None
     why_main_off = unplaced(group)
     why_acc_off = unplaced(detached)
     why_inside = both(why_building, unplaced(buildings))    # coverage

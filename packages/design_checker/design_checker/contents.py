@@ -18,7 +18,7 @@ the most telling of its pieces' (rules > flag > not_checked_yet > not_for_checki
 import re
 from pathlib import Path
 
-from rule_format.labels import load_pieces
+from rule_format.labels import contents_section, load_pieces
 from rule_format.rulebook import load, read_jsonl
 
 RULES, FLAG, NOT_YET, NOT_FOR, NOT_IN = "rules", "flag", "not_checked_yet", "not_for_checking", "not_brought_in"
@@ -46,13 +46,9 @@ def _rows(path: Path) -> tuple[dict, list[dict]]:
     return (lines[0], lines[1:]) if lines else ({}, [])
 
 
-def section_of_piece(piece: str) -> str:
-    """The contents section a piece is in: "1006.2.1", "Table 1006.2.1" → "1006"; "202:floor_area_gross" → "202";
-    "R319.2.3" → "R319"; "325-8A", "325-3B:kitchen" → "325-8", "325-3"; "325-29.1A" → "325-29.1"."""
-    p = piece.split(":")[0]
-    p = p[len("Table "):] if p.startswith("Table ") else p
-    m = re.match(r"(325-\d+(?:\.\d+)*)", p) or re.match(r"(R?\d+)", p)
-    return m.group(1) if m else p
+def section_of_piece(piece: str) -> str | None:
+    """The contents section a piece is in (rule_format.labels.contents_section: the one rule, the extraction's too)."""
+    return contents_section(piece)
 
 
 def _folder_books(folder: Path, key: str, documents: dict) -> list[dict]:

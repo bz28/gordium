@@ -77,6 +77,7 @@ DATA = {
     "piece": "on `in_code`: the piece's id (its words are `piece_title`)",
     "section": "on `in_code`: the section's number (its words are `section_title`)",
     "chapter": "on `in_code` and a contents row: the chapter's number (its words are `chapter_title`)",
+    "params": "on `stops`: a reason part's blanks, as the measuring filled them (its words are `words`, checked)",
 }
 # words let through on purpose, each with its reason: none (egress.py's two, deferred while the NY building code
 # branch changed it, were made plain once it merged, 2026-11-23)

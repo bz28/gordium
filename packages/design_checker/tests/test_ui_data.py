@@ -42,8 +42,12 @@ def test_two_measures_from_one_fact_are_one_ask_naming_its_field():
 # ---- C2, C3, C5: one ask per clause, each with its kind, headline and elements ------------------------------
 
 def _zoning(reason, needs=(), objects=(), item_id="R-3a.height"):
-    return {"id": item_id, "status": present.REVIEW, "group": "building", "reason": reason, "needs": list(needs),
-            "objects": list(objects), "causes": [{"kind": "decide", "key": "reason:x", "words": reason, "elements": []}]}
+    """A zoning row in review whose reason is `reason` (a Said, as present makes it), its parts as data (`stops`)
+    and its cause as present.zoning_causes gives it."""
+    item = {"id": item_id, "status": present.REVIEW, "group": "building", "reason": reason, "needs": list(needs),
+            "objects": list(objects), "stops": present.reason_parts(reason)}
+    item["causes"] = present.zoning_causes(item)
+    return item
 
 
 SITE = {"buildings": [{"id": "w1", "name": 'LS New 6"', "problems": ["a building isn't a closed solid: LS New 6\""]},
@@ -58,47 +62,74 @@ def _ctx():
     return {"site": SITE, "place": place, "open_ids": ui_data._open_ids(SITE, place), "rule_kinds": {}}
 
 
-def test_a_reason_of_two_asks_is_two_asks_each_its_kind():
-    from model_measurement.stops import stop
-    reason = stop("open_solid", what='LS New 6"') + "; " + stop("corner_unknown")
-    got = ui_data.asks_of(_zoning(reason), _ctx())
+def test_a_reason_of_two_stops_is_two_asks_each_its_kind():
+    from model_measurement.stops import joined, stop
+    reason = joined([stop("open_solid", what='LS New 6"'), stop("corner_unknown")])
+    got = ui_data.asks_of(_zoning(reason, objects=["w1", "w2", "w3", "r1"]), _ctx())
     assert [a["kind"] for a in got] == [ui_data.FIX_MODEL, ui_data.MARK]
     assert got[0]["elements"] == ["w1", "w3"]           # C5: the open solids called so, not w2 (closed)
     assert got[0]["why"] == stop("open_solid", what='LS New 6"')
     assert got[1]["field"] == "facts.corner_lot" and got[1]["why"] == stop("corner_unknown")
     assert got[1]["headline"] == "Is the lot on two streets? (Corner lot, §325-19C)"
+    assert got[1]["elements"] == ["w1", "w2", "w3", "r1"]   # every ask carries the row's objects by default
 
 
 def test_a_survey_and_an_open_question_are_their_own_kinds():
-    from model_measurement.stops import stop
-    reason = stop("not_surveyed") + "; " + stop("all_street")
-    got = ui_data.asks_of(_zoning(reason), _ctx())
+    from model_measurement.stops import joined, stop
+    got = ui_data.asks_of(_zoning(joined([stop("not_surveyed"), stop("all_street")])), _ctx())
     assert [a["kind"] for a in got] == [ui_data.SURVEY, ui_data.OPEN_QUESTION]
 
 
-def test_a_clause_with_its_own_bracketed_semicolon_stays_whole():
-    from model_measurement.stops import stop
-    clause = stop("corner_unknown") + " (more if the §325-16C height bonus applies; the height isn't measured yet)"
-    got = ui_data.asks_of(_zoning(stop("open_solid", what="Roof") + "; " + clause), _ctx())
-    assert [a["kind"] for a in got] == [ui_data.FIX_MODEL, ui_data.MARK]
-    assert got[1]["why"] == clause
+def test_a_stop_rewritten_for_the_reader_keeps_its_code():
+    # present's _user_text rewrites "an open question for the architects" (review round 1: the words no longer
+    # matched any stop): the part keeps its code, its words are the rewritten ones
+    from model_measurement.stops import joined, stop
+    reason = present._user_text(joined([stop("not_surveyed"), stop("all_street")]))
+    assert "open question for the architects" not in reason
+    got = ui_data.asks_of(_zoning(reason), _ctx())
+    assert [a["kind"] for a in got] == [ui_data.SURVEY, ui_data.OPEN_QUESTION]
+    assert [a["why"] for a in got] == [p["words"] for p in present.reason_parts(reason)]
+
+
+def test_a_stop_with_a_semicolon_of_its_own_is_one_ask():
+    from model_measurement.stops import joined, stop
+    readings = stop("readings_differ", question="which front yard is the primary one; how a corner lot is read")
+    got = ui_data.asks_of(_zoning(joined([readings, stop("corner_unknown")])), _ctx())
+    assert [(a["kind"], a["why"]) for a in got] == [(ui_data.OPEN_QUESTION, readings),
+                                                   (ui_data.MARK, stop("corner_unknown"))]
+
+
+def test_each_open_question_a_row_depends_on_is_one_ask_with_the_whole_question():
+    from model_measurement.stops import said
+    reason = said("depends", "Complies under every reading, but it depends on open questions: a; b, with c; confirm "
+                  "with the zoning office", questions=["a", "b, with c"])
+    got = ui_data.asks_of(_zoning(reason), _ctx())
+    assert [(a["kind"], a["why"]) for a in got] == [(ui_data.OPEN_QUESTION, "a"), (ui_data.OPEN_QUESTION, "b, with c")]
+
+
+def test_a_scope_reason_is_one_fix_of_the_model_with_the_rows_objects():
+    from model_measurement.stops import said
+    reason = said("scope", "Complies for the buildings measured; 2 objects touching the building aren't measured "
+                  "(a porch or deck is part of the building, §325-18A) · Add to check…")
+    got = ui_data.asks_of(_zoning(reason, objects=["o1", "o2"]), _ctx())
+    assert [(a["kind"], a["elements"]) for a in got] == [(ui_data.FIX_MODEL, ["o1", "o2"])]
 
 
 def test_each_fact_a_row_waits_on_is_its_own_ask():
-    from model_measurement.stops import stop
-    reason = "enter the dwelling units, the rooms let for profit, and whether it is a conversion; " + \
-        stop("not_surveyed")
+    from model_measurement.stops import joined, stop
+    reason = joined([stop("no_units"), stop("not_surveyed")])
     got = ui_data.asks_of(_zoning(reason, needs=["dwelling_units", "rooms_let_for_profit", "conversion"]), _ctx())
     assert [a.get("field") for a in got] == ["facts.dwelling_units", "facts.rooms_let_for_profit",
                                              "facts.conversion", None]
-    assert got[-1]["kind"] == ui_data.SURVEY
+    assert got[0]["why"] == stop("no_units") and got[-1]["kind"] == ui_data.SURVEY
 
 
-def test_words_no_stop_gives_are_a_persons_to_decide_in_their_own_words():
-    got = ui_data.asks_of(_zoning("A judgment call: a person decides (this rule is a flag)."), _ctx())
+def test_a_rows_own_reason_is_by_its_code():
+    from model_measurement.stops import said
+    got = ui_data.asks_of(_zoning(said("flag", "A judgment call: a person decides (this rule is a flag).")), _ctx())
     assert [(a["kind"], a["headline"]) for a in got] == [(ui_data.DECIDE, ui_data.JUDGMENT)]
-    got = ui_data.asks_of(_zoning("something no measuring says"), _ctx())
-    assert got[0]["kind"] == ui_data.DECIDE and got[0]["why"] == "something no measuring says"
+    got = ui_data.asks_of(_zoning("something no part was kept for"), _ctx())
+    assert got[0]["kind"] == ui_data.DECIDE and got[0]["why"] == "something no part was kept for"
 
 
 def test_a_row_not_in_review_has_no_asks():
@@ -246,7 +277,7 @@ def test_the_contents_list_every_chapter_and_never_hide_a_rows_section(apartment
         if "in_code" in i:
             key = i.get("law_key") if i["group"] == present.LAW_GROUP else "zoning"
             got = listed.get((key, i["in_code"]["section"]))
-            assert got is not None and got["coverage"] != "not_brought_in", (i["id"], i["in_code"])
+            assert got is not None and got["coverage"] in ("rules", "flag"), (i["id"], i["in_code"], got)
 
 
 def test_the_apartments_limits_not_worked_out_say_what_they_depend_on(apartment):
@@ -259,9 +290,9 @@ def test_a_pick_is_the_architects_to_state_and_a_tax_map_row_needs_a_survey():
     from model_measurement.stops import stop
     got, = ui_data.asks_of(_zoning(stop("no_main_building"), objects=["b1", "b2"]), _ctx())
     assert (got["kind"], got["headline"], got["elements"]) == (ui_data.MARK, "Pick the main building", ["b1", "b2"])
-    item = _zoning("Lot lines are from the tax map (±2'-0\"): at worst 35'-0\" against 35'-0\" · Pick survey lot lines…",
-                   objects=["lot"])
-    item["causes"] = present.zoning_causes(item)
+    from model_measurement.stops import said
+    item = _zoning(said("tax_map", "Lot lines are from the tax map (±2'-0\"): at worst 35'-0\" against 35'-0\" · Pick "
+                        "survey lot lines…"), objects=["lot"])
     got, = ui_data.asks_of(item, _ctx())
     assert (got["kind"], got["elements"]) == (ui_data.SURVEY, ["lot"])
 
@@ -271,3 +302,94 @@ def test_a_headline_from_the_measurings_words_leaves_its_figures_to_the_why():
     clause = stop("ground_off_building", ground="0.0", bottom="2.25", top="40.25")
     got, = ui_data.asks_of(_zoning(clause), _ctx())
     assert got["headline"] == "The ground level doesn't meet the buildings" and got["why"] == clause
+
+
+# ---- the class pin: over every golden answer and the apartment's ---------------------------------------------
+
+def _expected(part: dict, ctx: dict) -> list[tuple]:
+    """(kind, field or None, why) each part of a row's reason must have an ask for, by its code."""
+    code, words = part["code"], part["words"]
+    if code in ui_data.SURVEY_STOPS or code == "tax_map":
+        return [(ui_data.SURVEY, None, words)]
+    if code in ui_data.OPEN_STOPS or code == "readings":
+        return [(ui_data.OPEN_QUESTION, None, words)]
+    if code == "depends" and (part.get("params") or {}).get("questions"):
+        return [(ui_data.OPEN_QUESTION, None, q) for q in part["params"]["questions"]]
+    facts = ui_data._stop_facts(code, ctx)
+    if facts:
+        return [(ui_data.MARK, f"facts.{f}", None) for f in facts]
+    if code in ("open_solid", "scope"):
+        return [(ui_data.FIX_MODEL, None, words)]
+    return [(None, None, words)]
+
+
+def class_problems(view: dict, ctx: dict) -> list[str]:
+    """What breaks the class of rules the asks keep (review round 1): every row in review has asks; each part of its
+    reason has an ask of the kind its code calls for; no ask's why is a piece of words (only a whole part's words, a
+    whole question, the whole reason or a cause's words); every element its cause names is in some ask."""
+    out = []
+    for i in view.get("items") or []:
+        if i.get("status") != present.REVIEW:
+            continue
+        asks = i.get("asks") or []
+        if not asks:
+            out.append(f"{i['id']}: no asks")
+            continue
+        parts = i.get("stops") or []
+        whole = {p["words"] for p in parts} | {str(q) for p in parts for q in (p.get("params") or {}).get("questions")
+                                               or []} | {str(i.get("reason") or "")} | \
+            {c.get("words") for c in i.get("causes") or []}
+        out += [f"{i['id']}: a why that is a piece of words: {a['why'][:80]!r}" for a in asks if a["why"] not in whole]
+        for p in parts:
+            for kind, field, why in _expected(p, ctx):
+                if not any((kind is None or a["kind"] == kind) and (field is None or a.get("field") == field)
+                           and (why is None or a["why"] == why) for a in asks):
+                    out.append(f"{i['id']}: {p['code']} has no {kind or 'ask'} ask ({field or why!r:.80})")
+        asked = {e for a in asks for e in a.get("elements") or []}
+        out += [f"{i['id']}: {e} of its cause is in no ask" for c in i.get("causes") or []
+                for e in c.get("elements") or [] if e not in asked]
+    return out
+
+
+def _views(answer):
+    if isinstance(answer, dict):
+        if isinstance(answer.get("items"), list) and any(isinstance(x, dict) and "status" in x
+                                                         for x in answer["items"]):
+            yield answer
+        for v in answer.values():
+            yield from _views(v)
+    elif isinstance(answer, list):
+        for v in answer:
+            yield from _views(v)
+
+
+def test_every_golden_answers_asks_keep_the_class_rules():
+    from design_checker import goldens
+    _, answers = goldens.stored()
+    ctx = _ctx()
+    found, problems = 0, []
+    for name, answer in answers.items():
+        for view in _views(answer):
+            found += 1
+            problems += [f"{name}: {p}" for p in class_problems(view, ctx)]
+    assert found >= 200 and not problems, (len(problems), problems[:10])
+
+
+def test_the_apartments_asks_keep_the_class_rules(apartment):
+    assert not class_problems(apartment["view"], _ctx())
+
+
+@pytest.mark.parametrize("folder", ["ithaca_city", "new_york_state", "new_york_state_building"])
+def test_every_brought_in_piece_lands_in_a_section_of_its_contents(folder):
+    from design_checker import contents
+    from rule_format.labels import load_pieces
+    root = REPO / "regulations/jurisdictions/new_york" / folder
+    book, = contents._folder_books(root, folder, {})
+    listed = {r["number"] for r in book["rows"] if r.get("kind") == "section"}
+    _, pieces = load_pieces(next((root / "2_extracted_text").glob("*.sections.jsonl")))
+    lost = [pid for pid, piece in pieces.items() if piece.get("kind") not in ("front_matter", "editors_note")
+            and contents.section_of_piece(pid) not in listed]
+    assert not lost, lost[:10]
+    # the RCNYS's appendices: their pieces are in their own sections (BF101, BO103), never dropped
+    if folder == "new_york_state":
+        assert contents.section_of_piece("BF101.2") == "BF101" and "BF101" in listed

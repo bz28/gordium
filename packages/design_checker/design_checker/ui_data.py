@@ -16,7 +16,8 @@ New fields on an item:
               "measure" (Gordium doesn't read or measure this yet: a person works it out by hand), "decide" (a person
               decides: a flag rule, a reading to confirm, the law's own review condition), "open_question" (the law
               reads more than one way and the readings disagree). headline: what to do, in a few words; why: the
-              checker's words for it (today's cause words, or the reason's own clause). key: rows sharing a key ask
+              checker's words for it, whole (today's cause words, or one part of the row's reason: a zoning
+              row's reason is read as data, its `stops` (present.reason_parts), never from its words). key: rows sharing a key ask
               the same thing.
   in_code     (C6) on a row of a rule: where it is in its document, {document, file, chapter, chapter_title, section,
               section_title, piece, piece_title}: the chapter (an ICC book) or article (the zoning chapter), the
@@ -189,51 +190,45 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
     return {**base, "kind": DECIDE, "headline": "A person decides this: see why"}
 
 
-def _clauses(reason: str) -> list[str]:
-    """A reason's clauses: split at "; " outside brackets (a clause's own "(more if …; …)" stays whole)."""
-    out, depth, start = [], 0, 0
-    for k, ch in enumerate(reason):
-        if ch in "([":
-            depth += 1
-        elif ch in ")]":
-            depth = max(0, depth - 1)
-        elif ch == ";" and depth == 0 and reason[k + 1:k + 2] == " ":
-            out.append(reason[start:k].strip())
-            start = k + 2
-    out.append(reason[start:].strip())
-    return [c for c in out if c]
-
-
-def _stop_of(clause: str):
-    """(stop key, its blanks) of a clause the measuring gave (model_measurement.stops.code_of), or None: words no
-    stop gives (or two give alike) are no stop, never a guess. A clause with a bracket after it ("… (more if the
-    §325-16C height bonus applies; …)") is read without the bracket."""
-    from model_measurement.stops import code_of
-    for text in (clause, re.sub(r"\s*\([^()]*\)\s*$", "", clause)):
-        try:
-            return code_of(text)
-        except ValueError:
-            continue
-    return None
+# what a row's own reason part (present.reason_parts: not the measuring's) asks: (kind, headline)
+ROW_PARTS = {
+    "depends": (OPEN_QUESTION, "An open question about the law decides this"),   # one per question it names
+    "readings": (OPEN_QUESTION, "The readings of the law give different answers here"),
+    "tax_map": (SURVEY, "Lot lines from a survey settle this (the tax map is good to 2 ft)"),
+    "scope": (FIX_MODEL, "Objects on the lot aren't in the check"),
+    "named": (DECIDE, "Confirm this reading with the zoning office"),
+    "reading_applied": (DECIDE, "Confirm the reading Gordium used"),
+    "height_bonus": (DECIDE, "The §325-16C height bonus may raise this limit"),
+    "unsettled": (DECIDE, "A person decides this: see why"),
+    "flag": (DECIDE, JUDGMENT),
+    "review_when": (DECIDE, "The law asks a person to decide here"),
+    "review": (DECIDE, "A person decides this: see why"),
+    "facts_conflict": (MARK, "Correct the facts that disagree"),
+    "words": (DECIDE, "A person decides this: see why"),
+}
+# the measuring's stops that are no fault of the model: a reading Gordium can't follow yet, or the city's files
+MEASURE_STOPS = ("reading_unknown", "sloped_ground", "curved_surface", "curved_edge")
+DECIDE_STOPS = ("law_missing",)
 
 
 def _is_pick(key: str) -> bool:
     """Whether the measuring's stop asks the architect to pick something (the main building, the street side):
-    its own words say "pick" (model_measurement/stops.py)."""
+    its own template says "pick" (model_measurement/stops.py's table, by its key)."""
     from model_measurement.stops import STOPS
     return bool(re.search(r"(^|: )pick ", STOPS.get(key, "")))
 
 
-def _pick_head(clause: str) -> str:
-    """A pick's headline: what to pick, from the stop's own words ("Pick the main building")."""
-    m = re.search(r"(?:^|: )(pick [^(:;]*)", clause)
-    return _cap(m.group(1).strip().rstrip(".")) if m else _clause_head(clause)
+def _pick_head(key: str) -> str:
+    """A pick's headline: what to pick, from the stop's own template ("Pick the main building")."""
+    from model_measurement.stops import STOPS
+    m = re.search(r"(?:^|: )(pick [^(:;{]*)", STOPS.get(key, ""))
+    return _cap(m.group(1).strip().rstrip(".")) if m else "Pick it again"
 
 
 def _open_ids(site: dict | None, place) -> list[str]:
     """The site's building objects that aren't closed solids, by the place's own measuring (its _open_ids), else by
-    the reader's own problem words."""
-    from model_measurement.stops import stop
+    the reader's own problems (each a stop: its key)."""
+    from model_measurement.stops import parts_of
     buildings = [b for b in (site or {}).get("buildings") or [] if isinstance(b, dict) and "id" in b]
     finder = getattr(place, "_open_ids", None)
     if finder is not None:
@@ -241,83 +236,91 @@ def _open_ids(site: dict | None, place) -> list[str]:
             return [str(i) for i in finder(buildings)]
         except Exception:
             pass
-    shut = stop("open_solid", what="")
-    return [str(b["id"]) for b in buildings if any(str(p).startswith(shut) for p in b.get("problems") or [])]
+    return [str(b["id"]) for b in buildings
+            if any(c == "open_solid" for p in b.get("problems") or [] for c, _, _ in parts_of(p))]
 
 
 def _named(site: dict | None, what: str, among: list[str]) -> list[str]:
-    """The ids, among `among`, of the objects the measuring names `what` (its name, else its id)."""
+    """The ids, among `among`, of the objects the measuring names `what` (its name, else its id: its _called)."""
     called = {str(b["id"]): str(b.get("name") or b["id"]) for b in (site or {}).get("buildings") or []
               if isinstance(b, dict) and "id" in b}
     return [i for i in among if called.get(i) == what]
 
 
-def _zoning_asks(item: dict, ctx: dict) -> list[dict]:
-    """A zoning row's asks: each fact it waits on (its `needs`), then each clause of its reason the measuring gave,
-    by the stop it is (a fact the site's questions answer, a survey, an open question, the model: C5 names the
-    objects that aren't closed solids), then any clause no stop gives that isn't a question its facts already ask
-    (a person decides it, in its own words). Nothing at all: the row's one cause, as it is."""
-    from design_checker.host_core.facts import USE_DETAILS_WHEN
-    out = []
-    needs = [n for n in item.get("needs") or [] if isinstance(n, str)]
-    reason = (item.get("reason") or "").strip()
-    if reason.startswith(USE_DETAILS_WHEN + ": "):
-        reason = reason[len(USE_DETAILS_WHEN) + 2:]
-    clauses = _clauses(reason) if reason else []
-    asked = set()
-    for n in needs:
-        out.append(_fact_ask(n, reason, ()))
-        asked.add(n)
-    place = ctx.get("place")
-    ask_of = getattr(place, "ASK", None) or {}
-    hint = item.get("hint")
-    if hint in (present.PICK_MAIN, present.PICK_ADU):
-        out.append({"kind": MARK, "key": f"pick:{hint}", "headline": hint.rstrip("…"), "why": reason,
-                    "elements": [o for o in item.get("objects") or [] if isinstance(o, str)]})
-    for clause in clauses:
-        got = _stop_of(clause)
-        key = got[0] if got else None
-        facts = SITE_STOPS.get(key) or [f for f, k in ask_of.items() if k == key] if key else []
-        if key and facts:
+def _stop_facts(code: str, ctx: dict) -> list[str]:
+    """The facts a measuring's stop asks the architect for: the site's own questions (SITE_STOPS), else the place's
+    table of what each stated fact's absence stops with (its measuring's ASK)."""
+    ask_of = getattr(ctx.get("place"), "ASK", None) or {}
+    return SITE_STOPS.get(code) or [f for f, k in ask_of.items() if k == code]
+
+
+def _part_asks(part: dict, item: dict, ctx: dict, objects: list[str], asked: set) -> list[dict]:
+    """What one part of a row's reason asks, by its code, never by its words: a measuring's stop by its key (a fact
+    the site's questions or the place's table ask for, a survey, an open question, a pick, the model), else the
+    row's own part (ROW_PARTS). Every ask carries the row's objects, narrowed only where a better set is known (the
+    walls that aren't closed solids)."""
+    from model_measurement.stops import STOPS
+    code, params, words = part["code"], part.get("params") or {}, part["words"]
+    if code in STOPS:
+        facts = _stop_facts(code, ctx)
+        if facts:
+            out = []
             for f in facts:
                 if f not in asked:
                     asked.add(f)
-                    out.append(_fact_ask(f, clause))
-        elif key in SURVEY_STOPS:
-            out.append({"kind": SURVEY, "key": f"stop:{key}", "headline": "The lot area needs a lot outline from a survey",
-                        "why": clause, "elements": []})
-        elif key in OPEN_STOPS:
-            out.append({"kind": OPEN_QUESTION, "key": f"stop:{key}:{clause}",
-                        "headline": "An open question about the lot decides this", "why": clause, "elements": []})
-        elif key == "open_solid":
-            what = got[1].get("what") or ""
-            ids = _named(ctx.get("site"), what, ctx["open_ids"])
-            out.append({"kind": FIX_MODEL, "key": f"stop:open_solid:{what}",
-                        "headline": f"“{what}” isn't a closed solid", "why": clause, "elements": ids})
-        elif key is not None and _is_pick(key):
-            out.append({"kind": MARK, "key": f"stop:{key}", "headline": _pick_head(clause), "why": clause,
-                        "elements": [o for o in item.get("objects") or [] if isinstance(o, str)]})
-        elif key is not None:
-            out.append({"kind": FIX_MODEL, "key": f"stop:{key}:{clause}", "headline": _clause_head(clause),
-                        "why": clause, "elements": []})
-        elif needs and re.match(r"(?i)(say whether|enter|answer)\b", clause):
-            continue                    # a question the row's facts ask (its follow-ups come once it is answered)
-        elif clause == JUDGMENT_WORDS:
-            out.append({"kind": DECIDE, "key": "flag", "headline": JUDGMENT, "why": clause, "elements": []})
-        elif not needs:
-            out.append({"kind": DECIDE, "key": f"reason:{item.get('id')}:{clause}", "headline":
-                        "A person decides this: see why", "why": clause, "elements": []})
-    if any(c.get("key") == "survey_lot_lines" for c in item.get("causes") or []):
-        # within the tax map's 2 ft either way, a survey's lot lines settle it (present.zoning_causes' own cause)
-        out = [a for a in out if a["kind"] != DECIDE] + [
-            {"kind": SURVEY, "key": "survey_lot_lines", "headline": "Lot lines from a survey settle this (the tax "
-             "map is good to 2 ft)", "why": reason, "elements": [o for o in item.get("objects") or []
-                                                                 if isinstance(o, str)]}]
+                    out.append(_fact_ask(f, words, objects))
+            return out
+        if code in SURVEY_STOPS:
+            return [{"kind": SURVEY, "key": f"stop:{code}", "headline": "The lot area needs a lot outline from a survey",
+                     "why": words, "elements": list(objects)}]
+        if code in OPEN_STOPS:
+            return [{"kind": OPEN_QUESTION, "key": f"stop:{code}:{words}",
+                     "headline": "An open question about the law decides this", "why": words,
+                     "elements": list(objects)}]
+        if code == "open_solid":
+            what = str(params.get("what") or "")
+            ids = _named(ctx.get("site"), what, ctx.get("open_ids") or [])
+            return [{"kind": FIX_MODEL, "key": f"stop:open_solid:{what}", "headline": f"“{what}” isn't a closed solid",
+                     "why": words, "elements": ids or list(objects)}]
+        if _is_pick(code):
+            return [{"kind": MARK, "key": f"stop:{code}", "headline": _pick_head(code), "why": words,
+                     "elements": list(objects)}]
+        kind = MEASURE if code in MEASURE_STOPS else DECIDE if code in DECIDE_STOPS else FIX_MODEL
+        return [{"kind": kind, "key": f"stop:{code}:{words}", "headline": _clause_head(words), "why": words,
+                 "elements": list(objects)}]
+    kind, headline = ROW_PARTS.get(code, ROW_PARTS["words"])
+    if code == "depends" and params.get("questions"):
+        return [{"kind": OPEN_QUESTION, "key": f"question:{q}", "headline": headline, "why": str(q),
+                 "elements": list(objects)} for q in params["questions"]]
+    out = {"kind": kind, "key": f"{code}:{item.get('id')}:{words}" if kind == DECIDE else f"{code}:{words}",
+           "headline": headline, "why": words, "elements": list(objects)}
+    if code == "facts_conflict":
+        out["fields"] = [f"facts.{n}" for n in item.get("needs") or [] if isinstance(n, str)]
+    return [out]
+
+
+def _zoning_asks(item: dict, ctx: dict) -> list[dict]:
+    """A zoning row's asks: each fact it waits on (its `needs`), then what each part of its reason asks, read from
+    the parts as data (`stops`: present.reason_parts), never from the words. A part asking for a fact the row
+    already asks for is that one ask. Every ask carries the row's objects (as its cause does), narrowed only where a
+    better set is known."""
+    objects = [o for o in item.get("objects") or [] if isinstance(o, str)]
+    needs = [n for n in item.get("needs") or [] if isinstance(n, str)]
+    parts = [p for p in item.get("stops") or [] if isinstance(p, dict)]
+    why = str(item.get("reason") or "")
+    out, asked = [], set()
+    for n in needs:
+        asked.add(n)
+        mine = next((p["words"] for p in parts if n in _stop_facts(p["code"], ctx)), None)
+        out.append(_fact_ask(n, mine or why, objects))
+    hint = item.get("hint")
+    if hint in (present.PICK_MAIN, present.PICK_ADU):
+        out.append({"kind": MARK, "key": f"pick:{hint}", "headline": hint.rstrip("…"), "why": why,
+                    "elements": list(objects)})
+    for part in parts:
+        out += _part_asks(part, item, ctx, objects, asked)
     if not out:
         out = [_from_cause(c, None) for c in item.get("causes") or []]
-    if item.get("id") == "scope.not_included":
-        out = [{"kind": FIX_MODEL, "key": "scope.not_included", "headline": "Objects on the lot aren't in the check",
-                "why": reason, "elements": [o for o in item.get("objects") or [] if isinstance(o, str)]}]
     return _deduped(out)
 
 

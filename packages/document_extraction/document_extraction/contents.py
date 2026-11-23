@@ -237,12 +237,9 @@ def _pages_rise(rows: list[dict]) -> list[str]:
 
 
 def section_of(piece_id: str) -> str | None:
-    """The contents section a sections-file piece is in: "1006.2.1" → "1006", "Table 1006.2.1" → "1006",
-    "R319.2.3" → "R319", "325-8A" → "325-8"; None for a definition or front matter."""
-    if ":" in piece_id:
-        return None
-    m = re.match(r"(?:Table )?([A-Z]{0,2}\d{3,4})(?:\.|$|\()", piece_id) or re.match(r"(325-\d+(?:\.\d+)*)", piece_id)
-    return m.group(1) if m else None
+    """The contents section a sections-file piece is in (rule_format.labels.contents_section: the one rule)."""
+    from rule_format.labels import contents_section
+    return contents_section(piece_id)
 
 
 def _all_listed(rows: list[dict], sections: list[str]) -> list[str]:
