@@ -21,6 +21,7 @@ internal static class SetupRun
     private static PlaceOptions? _options;
     private static Task? _asking;
     private static string? _notice;
+    private static IReadOnlyList<string>? _noticeFor;     // the facts needed when the notice was made (SetupNotice)
     private static SetupScreen? _shown;
     private static bool _reading;
     private static readonly SetupDraft Draft = new();
@@ -63,7 +64,16 @@ internal static class SetupRun
     internal static void Show(UIApplication ui, Document doc, SetupScreen? screen = null, string? notice = null)
     {
         screen ??= Read(doc);
-        _notice = notice;
+        _noticeFor = screen.Needed;                         // a new notice (or none): made for the facts missing now
+        ShowKept(ui, doc, screen, notice);
+    }
+
+    /// <summary>Shows the form with the notice it had, while the facts it names are still the ones needed
+    /// (SetupNotice.Keep: after a Save or an edit that set one, it goes).</summary>
+    private static void ShowKept(UIApplication ui, Document doc, SetupScreen screen, string? notice)
+    {
+        _notice = SetupNotice.Keep(notice, _noticeFor, screen);
+        notice = _notice;
         _shown = screen;
         AskOptions();
         ResultsPane.ShowSetup(ui, doc, screen, Draft, Handlers, notice, Open);
@@ -75,7 +85,9 @@ internal static class SetupRun
     {
         if (_model is null || _doc is null || !_doc.IsValidObject)
             return;
-        ResultsPane.RedrawSetup(_shown = Screen(), Draft, Handlers, _notice, Open);
+        _shown = Screen();
+        _notice = SetupNotice.Keep(_notice, _noticeFor, _shown);   // only while the facts it names are still needed
+        ResultsPane.RedrawSetup(_shown, Draft, Handlers, _notice, Open);
     }
 
     /// <summary>The project shown in the form changed (Revit's DocumentChanged: a value set in Properties after Select
@@ -220,7 +232,7 @@ internal static class SetupRun
                 ResultsPane.Say(refused);
             return;
         }
-        Show(ui, doc, screen, _notice);
+        ShowKept(ui, doc, screen, _notice);                 // the notice only while it still holds
         ResultsPane.Say(said);
     }
 

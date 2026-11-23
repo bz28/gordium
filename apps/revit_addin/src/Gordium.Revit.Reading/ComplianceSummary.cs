@@ -29,8 +29,7 @@ public static class ComplianceSummary
         if (model is null)
             return "Nothing has been checked in this session yet: click Check project, then save the summary.";
         if (model.Stale is not null)
-            return $"The model changed after the check at {checkedAt.ToString("HH:mm", CultureInfo.InvariantCulture)}, so its results " +
-                   "may not hold: click Check project, then save the summary.";
+            return PaneWords.StaleSummaryRefusal(checkedAt.ToString("HH:mm", CultureInfo.InvariantCulture), model.StaleKind ?? StaleReason.ModelChanged);
         return null;
     }
 

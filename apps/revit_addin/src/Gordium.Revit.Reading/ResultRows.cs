@@ -133,6 +133,9 @@ public sealed record ResultModel(Verdict State, string Headline, string Checked,
     /// the answer doesn't say (then no line is shown).</summary>
     public WhichCode? Code { get; init; }
 
+    /// <summary>Why the results are stale (<see cref="Stale"/> says it in words), or null while they stand.</summary>
+    public StaleReason? StaleKind { get; init; }
+
     /// <summary>The worker's cause cards, in its order (<see cref="CauseCards.Read"/>): "Fix these first".</summary>
     public IReadOnlyList<CauseCard> Causes { get; init; } = [];
 
@@ -144,6 +147,15 @@ public sealed record ResultModel(Verdict State, string Headline, string Checked,
         Verdict.Complies => Tone.Complies,
         _ => Tone.Review,
     };
+}
+
+/// <summary>Why results no longer stand for the model: what the stale banner's title says (PaneWords.StaleTitle).</summary>
+public enum StaleReason
+{
+    /// <summary>The model changed after the check (an edit, or one while the checker worked).</summary>
+    ModelChanged,
+    /// <summary>A check was cancelled: these are the earlier results, and the model may have changed since.</summary>
+    Cancelled,
 }
 
 /// <summary>The parts of the results panel, top to bottom (<see cref="ResultRows.Layout"/>).</summary>
@@ -239,13 +251,14 @@ public static class ResultRows
     /// model that may no longer comply), the words kept, and why said ("The model changed since this check (14:32):
     /// click Check again"), or <paramref name="why"/> when given (CheckWords: an answer whose model changed while
     /// the checker worked, or the earlier results after a cancelled check).</summary>
-    public static ResultModel Stale(ResultModel model, DateTime checkedAt, string? why = null)
+    public static ResultModel Stale(ResultModel model, DateTime checkedAt, string? why = null, StaleReason reason = StaleReason.ModelChanged)
     {
         ArgumentNullException.ThrowIfNull(model);
         static ResultRow Grey(ResultRow r) => r with { Tone = Tone.Neutral };
         return model with
         {
             Stale = why ?? $"The model changed since this check ({checkedAt:HH:mm}): click Check again",
+            StaleKind = reason,
             Counts = model.Counts.Select(c => c with { Chips = c.Chips.Select(x => x with { Tone = Tone.Neutral }).ToList() }).ToList(),
             Groups = model.Groups.Select(g => g with
             {

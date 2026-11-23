@@ -63,6 +63,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private Func<W.UIElement>? _summary;                     // the state and the counts: the list's first entry
     private readonly C.WrapPanel _chips = new() { Margin = new W.Thickness(0, 4, 0, 0) };
     private readonly C.TextBox _search = new() { MinWidth = 120, Margin = new W.Thickness(0, 6, 0, 0) };
+    private C.Grid? _searchBox;
     private readonly C.TextBlock _searchHint = Small("Search rules, sections, elements (Ctrl+F)");
     private readonly C.TextBlock _shown = Small("");
     private readonly C.ListBox _list = new();
@@ -100,7 +101,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private (string Project, DateTime When)? _shownCheck;     // the check shown (a stale redraw is the same check)
     // per project: the last check that arrived current (what the next is compared with), and the last check's ticks
     private readonly Dictionary<string, (DateTime When, ResultModel Model)> _compared = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, (ResultModel Model, LookedAt Looked)> _ticked = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, (ResultModel Model, LookedAt Looked, IReadOnlyDictionary<string, string> Labels)> _ticked = new(StringComparer.Ordinal);
 
     internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action projectInformation,
                          Action<CardRequest> card, Action setUp, PanelTheme theme)
@@ -181,8 +182,71 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         all.Children.Add(_bodyHost);
         Content = all;
         _bodyHost.Child = _missingScroll;
-        _sub.Text = "Click Check project on the Gordium tab to check this project.";
+        _sub.Text = PaneWords.NotCheckedYet;
+        _again.Visibility = PaneWords.HeaderCheckAgain(PaneShows.Welcome, _everShown) ? W.Visibility.Visible : W.Visibility.Collapsed;
+        Welcome();
     }
+
+    /// <summary>Whether a check's results were ever shown in this pane (the welcome shows until then: PaneWords.WelcomeShows).</summary>
+    private bool _everShown;
+
+    /// <summary>The empty body (the intuitive pane, change 1): the check's progress card while one runs, and the
+    /// first-run welcome while no results were ever shown here (PaneWords.WelcomeShows); never over results or the
+    /// Setup form (those replace the body). In the pane, never a dialog.</summary>
+    private void Welcome(string? checking = null)
+    {
+        _missing.Children.Clear();
+        if (checking is not null)
+            _missing.Children.Add(Banner(PanelStatus.Review, PanelTokens.BgSurface, PanelTokens.Line, Progressing(checking), bottom: 10));
+        if (!PaneWords.WelcomeShows(PaneShows.Welcome, _everShown))
+            return;
+        var card = new C.StackPanel { Tag = WelcomeTag };
+        card.Children.Add(Typed(new C.TextBlock { Text = PaneWords.WelcomeTitle, TextWrapping = W.TextWrapping.Wrap }, "type.title"));
+        foreach (var (lead, words) in PaneWords.WelcomeLines)
+        {
+            var t = Typed(new C.TextBlock { TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 6, 0, 0) }, Body);
+            t.Inlines.Add(new W.Documents.Run(lead) { FontWeight = W.FontWeights.SemiBold });
+            t.Inlines.Add(new W.Documents.Run(words));
+            card.Children.Add(t);
+        }
+        if (checking is null)
+        {
+            var go = CauseCardsView.Primary("Check project", () => _checkAgain());
+            go.HorizontalAlignment = W.HorizontalAlignment.Left;
+            go.Margin = new W.Thickness(0, 10, 0, 0);
+            card.Children.Add(go);
+            card.Children.Add(Small("Also on the Gordium tab of the ribbon.", top: 4));
+        }
+        var frame = new C.Border { Child = card, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4), Padding = new W.Thickness(12, 10, 12, 12) };
+        frame.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
+        frame.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
+        _missing.Children.Add(frame);
+    }
+
+    /// <summary>The welcome card's tag (the tests find it by it).</summary>
+    internal const string WelcomeTag = "pane.welcome";
+
+    /// <summary>The check's progress as a card (the intuitive pane, change 12): what is happening, in plain words, and
+    /// that Revit is free; the bar moves on its own (no stage is measured as a share of the whole).</summary>
+    private W.UIElement Progressing(string line)
+    {
+        var p = new C.StackPanel();
+        p.Children.Add(Typed(new C.TextBlock { Text = PaneWords.Checking(_checkingProject), FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
+        _progressLine = Small(line, top: 2);
+        p.Children.Add(_progressLine);
+        var bar = new C.ProgressBar { IsIndeterminate = true, Height = 4, Margin = new W.Thickness(0, 6, 0, 0), BorderThickness = new W.Thickness(0) };
+        bar.SetResourceReference(C.Control.ForegroundProperty, PanelTokens.Accent);
+        bar.SetResourceReference(C.Control.BackgroundProperty, PanelTokens.Line);
+        p.Children.Add(bar);
+        return p;
+    }
+
+    private string? _checkingProject;
+
+    /// <summary>The progress card's line, ticked with the checker's seconds.</summary>
+    private C.TextBlock? _progressLine;
+
+    private const string CheckingNoResults = "Checking: no results yet";
 
     /// <summary>The filter chips (the count bar's kinds) and the search box, with what they show.</summary>
     private C.StackPanel Tools()
@@ -204,6 +268,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _searchHint.TextWrapping = W.TextWrapping.NoWrap;
         _searchHint.TextTrimming = W.TextTrimming.CharacterEllipsis;
         box.Children.Add(_searchHint);
+        _searchBox = box;
+        box.Visibility = W.Visibility.Collapsed;               // opened by Search or Ctrl+F (the intuitive pane, change 7)
         tools.Children.Add(box);
         _shown.Margin = new W.Thickness(0, 4, 0, 0);
         _shown.Visibility = W.Visibility.Collapsed;
@@ -223,6 +289,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _failed = false;
         _again.Visibility = W.Visibility.Visible;
         _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
+        _everShown |= content.Model is not null;
         _sub.Text = $"Checked {content.When:HH:mm} · {content.Project}";
         Say(_checkAgainState.Status(ClearPrefills.PanelStatus(content.MarksAdded, content.ClearWords, stale: content.Model?.Stale is not null)));
         _summary = null;
@@ -279,6 +346,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _shownCheck = (content.Key ?? content.Project, content.When);
         _openCards.Clear();
         _allCards = false;
+        _groups = null;
         if (content.Model is not { } model)
         {
             _change = null;
@@ -290,9 +358,12 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _change = key is not null && _compared.TryGetValue(key, out var before) ? CheckChanges.Between(before.Model, before.When, model) : null;
         if (key is not null && model.Stale is null)
             _compared[key] = (content.When, model);
-        _looked = key is not null && _ticked.TryGetValue(key, out var t) ? LookedAt.Carry(t.Looked, t.Model, model) : new LookedAt();
+        // the fixes' ticks too (by fix key, made with each check's own element names), where the fix is the same;
+        // by the document's identity (none known: nothing carried)
+        _looked = key is not null && _ticked.TryGetValue(key, out var t)
+            ? LookedAt.Carry(t.Looked, t.Model, model, t.Labels, content.Labels) : new LookedAt();
         if (key is not null)
-            _ticked[key] = (model, _looked);
+            _ticked[key] = (model, _looked, content.Labels);
     }
 
     /// <summary>The list's first entry: the stale notice (when stale), the worker's state (grey once stale, never
@@ -318,9 +389,17 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             switch (part)
             {
                 case PanelPart.Stale:
-                    summary.Children.Add(Banner(PanelStatus.Stale, PanelTokens.StatusReviewFill, PanelTokens.StatusReview,
-                                                Typed(new C.TextBlock { Text = model.Stale, FontWeight = W.FontWeights.SemiBold,
-                                                                        TextWrapping = W.TextWrapping.Wrap }, Body), bottom: 6));
+                    // plain words and the way out in the banner itself (the intuitive pane, change 11); the worker's
+                    // or the add-in's own stale words (a cancelled check's) on hover
+                    var sw = new C.StackPanel { ToolTip = model.Stale };
+                    var why = model.StaleKind ?? StaleReason.ModelChanged;
+                    sw.Children.Add(Typed(new C.TextBlock { Text = PaneWords.StaleTitle(why, _content?.When ?? DateTime.Now), FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
+                    sw.Children.Add(Small(PaneWords.StaleWords(why), top: 2));
+                    var sa = CauseCardsView.Primary("Check again", () => _checkAgain());
+                    sa.HorizontalAlignment = W.HorizontalAlignment.Left;
+                    sa.Margin = new W.Thickness(0, 6, 0, 0);
+                    sw.Children.Add(sa);
+                    summary.Children.Add(Banner(PanelStatus.Stale, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, sw, bottom: 6));
                     break;
                 case PanelPart.Code when model.Code is { } code:
                     // which code and why, the worker's words: plain when decided (never green), needs review when not,
@@ -341,39 +420,81 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     W.Automation.AutomationProperties.SetName(codeBox, code.Words);
                     summary.Children.Add(codeBox);
                     break;
+                case PanelPart.State when !stale:
+                    // the state, then where to start (the intuitive pane, change 7): what fails, then fix 1
+                    var fails = PaneWords.FilterCount(_placed, ListFilter.Fails);
+                    var st = StatusLook.Of(model.StateTone, stale);
+                    summary.Children.Add(WithGlyph(st, Ink(Typed(new C.TextBlock { Text = ResultText.StateWords(model.State), TextWrapping = W.TextWrapping.Wrap }, "type.state"), StatusLook.Colour(st)), size: 18));
+                    summary.Children.Add(Typed(new C.TextBlock
+                    {
+                        Text = PaneWords.StartHere(fails, Groups.Count),
+                        TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 2, 0, 2),
+                    }, Body));
+                    break;
                 case PanelPart.State:
                     var state = StatusLook.Of(model.StateTone, stale);
                     summary.Children.Add(WithGlyph(state, Ink(Typed(new C.TextBlock
                     {
-                        Text = ResultText.StateWords(model.State) + (model.Stale is null ? "" : " (before the model changed)"),
+                        Text = model.Stale is null ? ResultText.StateWords(model.State)
+                            : PaneWords.StaleState(ResultText.StateWords(model.State), model.StaleKind ?? StaleReason.ModelChanged),
                         TextWrapping = W.TextWrapping.Wrap,
-                    }, stale ? "type.title" : "type.state"), StatusLook.Colour(state)), size: stale ? 16 : 18));   // stale: smaller, its "(before the model changed)" on one line
+                    }, stale ? "type.title" : "type.state"), StatusLook.Colour(state)), size: stale ? 16 : 18));   // stale: smaller, its "(before ...)" on one line
                     break;
                 case PanelPart.Counts:
                     // the compact count bar (CountBar): one line per law, its short name and its most important
                     // counts (every failure), the rest behind "+N more" (opened in place), all of them in the tooltip
-                    foreach (var line in model.Counts)
-                        summary.Children.Add(CountLineView(line, stale, CountBar.Keep));
+                    // (the intuitive pane, change 7) the filters above carry the counts, so the count by law is one fold
+                    // away, open once stale (the clock on every count says the results may not hold)
+                    var byLaw = _openCounts.Contains(ByLaw) || stale;
+                    if (!stale)
+                    {
+                        var fold = CauseCardsView.Link(PaneWords.CountsByLaw(model.Counts.Select(c => CountBar.Short(c.Title)), byLaw), () =>
+                        {
+                            if (!_openCounts.Remove(ByLaw))
+                                _openCounts.Add(ByLaw);
+                            Relayout();
+                        });
+                        fold.Margin = new W.Thickness(0, 2, 0, 0);
+                        summary.Children.Add(fold);
+                    }
+                    if (byLaw)
+                        foreach (var line in model.Counts)
+                            summary.Children.Add(CountLineView(line, stale, CountBar.Keep));
                     if (_change is { } change)
-                        summary.Children.Add(ChangeLine(change));
+                        summary.Children.Add(ChangeLine(change, stale));
                     break;
             }
         return summary;
     }
 
-    /// <summary>What changed since the check before (CheckChanges), one line under the counts: the worker's verdicts
-    /// only, by row id; plain (never a status colour: it says what changed, not whether it passes), the whole on hover.</summary>
-    private static C.Border ChangeLine(CheckChange change)
+    /// <summary>The fold key of the count by law.</summary>
+    private const string ByLaw = "pane.counts_by_law";
+
+    /// <summary>What changed since the check before (CheckChanges; the intuitive pane, change 9), under the counts: a
+    /// short list, each result with its new verdict's glyph (the worker's; green only for its complies), the rest
+    /// counted; the whole sentence on hover.</summary>
+    private static C.Border ChangeLine(CheckChange change, bool stale)
     {
-        var words = Typed(new C.TextBlock
+        var p = new C.StackPanel();
+        if (!PaneWords.ChangeIsList(change))                   // no verdict changed: the worker's one line, as it says
+            p.Children.Add(Typed(new C.TextBlock { Text = change.Words, TextWrapping = W.TextWrapping.Wrap }, Caption));
+        else
         {
-            Text = change.Words, TextWrapping = W.TextWrapping.Wrap, TextTrimming = W.TextTrimming.CharacterEllipsis,
-            MaxHeight = 4 * 1.4 * PanelTokens.TypeOf(Caption).Size, ToolTip = change.Words,
-        }, Caption);
+            p.Children.Add(Ink(Typed(new C.TextBlock { Text = PaneWords.ChangeHeading(change), TextWrapping = W.TextWrapping.Wrap }, "type.overline"), PanelTokens.TextMuted));
+            foreach (var r in PaneWords.ChangesShown(change))
+            {
+                var w = Typed(new C.TextBlock { Text = r.Words, TextWrapping = W.TextWrapping.Wrap }, Caption);
+                var line = WithGlyph(PaneWords.ChangeStatus(r, stale), w, size: 11, gap: 5);     // stale: the clock, never green
+                line.Margin = new W.Thickness(0, 3, 0, 0);
+                p.Children.Add(line);
+            }
+            if (PaneWords.ChangesMore(change) is { } more)
+                p.Children.Add(Small(more, top: 3));
+        }
         var b = new C.Border
         {
-            Child = words, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),
-            Padding = new W.Thickness(8, 4, 8, 4), Margin = new W.Thickness(0, 6, 0, 0),
+            Child = p, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),
+            Padding = new W.Thickness(8, 5, 8, 6), Margin = new W.Thickness(0, 6, 0, 0), ToolTip = change.Words,
         };
         b.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
         b.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
@@ -457,8 +578,42 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _bodyHost.Child = _missingScroll;
         Relayout();
         _sub.Text = "Not checked";
-        Say(_checkAgainState.Status(words));
+        if (words.Length == 0)
+        {
+            _sub.Text = _everShown ? "Not checked" : PaneWords.NotCheckedYet;
+            Say("");
+            Welcome();                                          // a cancelled first check: back to the empty pane
+            return;
+        }
+        // the error as one plain sentence (the intuitive pane, change 10); the technical words (the exception, the
+        // log's path) go to the clipboard and the tooltip, not the screen
+        var card = new C.StackPanel { Tag = ErrorTag, ToolTip = words };
+        card.Children.Add(Typed(new C.TextBlock { Text = PaneWords.ErrorTitle, FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
+        card.Children.Add(Typed(new C.TextBlock { Text = PaneWords.ErrorWords, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 4, 0, 0) }, Body));
+        var buttons = new C.WrapPanel { Margin = new W.Thickness(0, 8, 0, 0) };
+        var again = CauseCardsView.Primary(PaneWords.TryAgain, () => _checkAgain());
+        again.Margin = new W.Thickness(0, 0, 8, 0);
+        buttons.Children.Add(again);
+        var copy = CauseCardsView.Secondary(PaneWords.CopyDetails, () =>
+        {
+            try
+            {
+                W.Clipboard.SetText(words);
+            }
+            catch (System.Runtime.InteropServices.ExternalException)
+            {
+                // another program holds the clipboard: the details stay in the tooltip
+            }
+        });
+        copy.ToolTip = words;
+        buttons.Children.Add(copy);
+        card.Children.Add(buttons);
+        _missing.Children.Add(Banner(PanelStatus.Review, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, card, bottom: 6));
+        Say("");
     }
+
+    /// <summary>The error card's tag (the tests find it by it).</summary>
+    internal const string ErrorTag = "pane.error";
 
     /// <summary>Whether the last thing shown was a failure (the error state).</summary>
     private bool _failed;
@@ -507,8 +662,22 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _again.Content = CheckWords.Button(stage);
         _again.Visibility = W.Visibility.Visible;
         _again.IsEnabled = _checkAgainState.Enabled;
+        // the progress as a card where the architect is looking (the intuitive pane, change 12): in the empty body
+        // (with the welcome under it on a first run), or in the Setup form's foot; over results, the line as before
         if (_content is null)
-            _sub.Text = "Checking this project: no results yet";
+        {
+            _sub.Text = CheckingNoResults;
+            Welcome(_checkAgainState.Line);
+            Say("");
+        }
+        else if (ShowsSetup)
+        {
+            var foot = new C.Border { Child = Progressing(_checkAgainState.Line), BorderThickness = new W.Thickness(0, 1, 0, 0), Padding = new W.Thickness(12, 8, 12, 10) };
+            foot.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
+            foot.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
+            _setupFoot.Child = foot;
+            Say("");
+        }
         _ticks?.Stop();
         if (stage != CheckStage.Checking)
             return;
@@ -521,6 +690,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             _checkAgainState.Running(CheckWords.Checking(DateTime.Now - since));
             if (showing)
                 Say(_checkAgainState.Line);
+            if (_progressLine is not null)
+                _progressLine.Text = _checkAgainState.Line;
         };
         _ticks.Start();
     }
@@ -534,8 +705,17 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         Say(_checkAgainState.Stop(_status.Text));        // what the check's redraw had to say, or a failure's words
         _again.Content = CheckWords.CheckAgain;
         _again.IsEnabled = _checkAgainState.Enabled;
-        if (_content is null && _sub.Text == "Checking this project: no results yet")
-            _sub.Text = _failed ? "Not checked" : "Click Check project on the Gordium tab to check this project.";
+        _progressLine = null;
+        if (ShowsSetup && _setup is not null)
+            _setupFoot.Child = _setup.Footer;                   // the form's own foot back
+        if (_content is null && _sub.Text == CheckingNoResults)
+        {
+            _sub.Text = _failed ? "Not checked" : PaneWords.NotCheckedYet;
+            if (!_failed)
+                Welcome();                                      // the progress card gone, the welcome as it was
+        }
+        if (_content is null && !_failed)
+            _again.Visibility = PaneWords.HeaderCheckAgain(PaneShows.Welcome, _everShown) ? W.Visibility.Visible : W.Visibility.Collapsed;
     }
 
     /// <summary>A cancelled check: back to what the panel showed before it (CheckFlow.Cancel's <paramref name="had"/>):
@@ -548,7 +728,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         switch (restored)
         {
             case PanelHad.Results when _content is { Model: { } model } content:
-                Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When)), MarksAdded = 0, ClearWords = "" });
+                Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When), StaleReason.Cancelled), MarksAdded = 0, ClearWords = "" });
                 break;
             case PanelHad.Missing:
                 break;                                      // what to fill in, as it was
@@ -589,7 +769,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private C.ScrollViewer? _setupScroll;
 
     /// <summary>Whether the Setup form is what the pane shows.</summary>
-    internal bool ShowsSetup => _setupScroll is not null && ReferenceEquals(_bodyHost.Child, _setupScroll);
+    internal bool ShowsSetup => _setupPage is not null && ReferenceEquals(_bodyHost.Child, _setupPage);
+
+    private C.DockPanel? _setupPage;
+    private readonly C.Border _setupFoot = new();
 
     /// <summary>The Setup form in place of the results: "what to fill in" for a cancelled check to go back to (its
     /// content has no rows, as the missing state's: CheckFlow.Had says Missing).</summary>
@@ -600,27 +783,38 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _detailId = null;
         _placed = [];
         _summary = null;
-        _again.Visibility = W.Visibility.Visible;
+        _again.Visibility = PaneWords.HeaderCheckAgain(PaneShows.Setup, _everShown) ? W.Visibility.Visible : W.Visibility.Collapsed;
         _again.IsEnabled = _checkAgainState.Enabled;
-        _sub.Text = $"Setup · {project}";
+        _sub.Text = _everShown ? $"Setup · {project}" : $"Before the first check · {project}";
+        _checkingProject = project;
         Say(_checkAgainState.Status(""));
         _setupScroll = new C.ScrollViewer
         {
             VerticalScrollBarVisibility = C.ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = C.ScrollBarVisibility.Disabled,
         };
+        // the form scrolls; its one action (SetupView.Footer) is pinned at the pane's foot (the intuitive pane, change 3)
+        var page = new C.DockPanel();
+        if (_setupFoot.Parent is C.Panel before)
+            before.Children.Remove(_setupFoot);                 // the form shown again (the facts read again): one foot
+        C.DockPanel.SetDock(_setupFoot, C.Dock.Bottom);
+        page.Children.Add(_setupFoot);
+        page.Children.Add(_setupScroll);
+        _setupPage = page;
+        _bodyHost.Child = page;
         RedrawSetup(screen, draft, handlers, notice, open, force: true);
-        _bodyHost.Child = _setupScroll;
         Relayout();
     }
 
     /// <summary>The form drawn again at the same scroll position; only while it is shown (never over results).</summary>
     internal void RedrawSetup(SetupScreen screen, SetupDraft draft, SetupHandlers handlers, string? notice, HashSet<string> open, bool force = false)
     {
-        if (_setupScroll is null || !force && !ReferenceEquals(_bodyHost.Child, _setupScroll))
+        if (_setupScroll is null || !force && !ShowsSetup)
             return;
         var offset = _setupScroll.VerticalOffset;
         _setup = new SetupView(screen, draft, handlers, notice, open);
         _setupScroll.Content = _setup;
+        if (!_checkAgainState.IsRunning)                        // while a check runs, its progress holds the foot
+            _setupFoot.Child = _setup.Footer;
         _setupScroll.ScrollToVerticalOffset(offset);
     }
 
@@ -633,14 +827,15 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _chips.Children.Clear();
         foreach (var chip in ResultList.Chips(_placed, stale))
         {
-            W.UIElement words = Typed(new C.TextBlock { Text = chip.Words, VerticalAlignment = W.VerticalAlignment.Center }, Caption);
+            // each filter says how many results it shows (the intuitive pane, change 7)
+            W.UIElement words = Typed(new C.TextBlock { Text = $"{chip.Words} {PaneWords.FilterCount(_placed, chip.Filter)}", VerticalAlignment = W.VerticalAlignment.Center }, Caption);
             var button = new C.Primitives.ToggleButton
             {
                 Content = chip.Status is { } s ? WithGlyph(s, words, size: 11) : words, IsChecked = chip.Filter == _filter,
                 Padding = new W.Thickness(7, 1, 8, 1), Margin = new W.Thickness(0, 0, 4, 4),
                 ToolTip = chip.Filter switch
                 {
-                    ListFilter.All => "Every row",
+                    ListFilter.All => "Every result",
                     ListFilter.Fails => "Only what does not comply",
                     ListFilter.Review => "What needs review, is to check by hand, or isn't checked",
                     _ => "Only what complies or doesn't apply",
@@ -650,12 +845,25 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             button.Click += (_, _) =>
             {
                 _filter = filter;
-                foreach (var b in _chips.Children.OfType<C.Primitives.ToggleButton>())
+                foreach (var b in _chips.Children.OfType<C.Primitives.ToggleButton>().Where(b => !Equals(b.Tag, SearchTag)))
                     b.IsChecked = ReferenceEquals(b, button);
                 Relayout();
             };
             _chips.Children.Add(button);
         }
+        var search = new C.Primitives.ToggleButton
+        {
+            Content = Typed(new C.TextBlock { Text = "Search" }, Caption), Padding = new W.Thickness(7, 1, 8, 1), Margin = new W.Thickness(0, 0, 4, 4),
+            ToolTip = "Search rules, sections and elements (Ctrl+F)", IsChecked = _searchBox?.Visibility == W.Visibility.Visible, Tag = SearchTag,
+        };
+        W.Automation.AutomationProperties.SetName(search, "Search");
+        search.Click += (_, _) =>
+        {
+            ShowSearch(search.IsChecked == true);
+            if (search.IsChecked == true)
+                _search.Focus();
+        };
+        _chips.Children.Add(search);
     }
 
     /// <summary>The list again, from the rows placed, the filter, the search and the folds; the selected row kept
@@ -711,8 +919,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         }
         var rows = _entries.Count(e => e is ListRowEntry);
         _shown.Text = !narrowed ? "" : rows == 0
-            ? ResultList.Terms(_search.Text).Count > 0 ? $"No row matches “{_search.Text.Trim()}” here." : "No row here."
-            : $"Showing {rows} of {_placed.Count} rows.";
+            ? ResultList.Terms(_search.Text).Count > 0 ? $"No result matches “{_search.Text.Trim()}” here." : "No result here."
+            : $"Showing {rows} of {PaneWords.Results(_placed.Count)}.";
         _shown.Visibility = _shown.Text.Length == 0 ? W.Visibility.Collapsed : W.Visibility.Visible;
     }
 
@@ -797,18 +1005,34 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         }
         if (e.Key == I.Key.F && (I.Keyboard.Modifiers & I.ModifierKeys.Control) != 0 && ReferenceEquals(_bodyHost.Child, _results))
         {
+            ShowSearch(true);
             _search.Focus();
             _search.SelectAll();
             e.Handled = true;
         }
     }
 
+    /// <summary>The search box shown or folded (Search on the filters' line, or Ctrl+F); a folded box keeps no words.</summary>
+    private void ShowSearch(bool show)
+    {
+        if (_searchBox is null)
+            return;
+        _searchBox.Visibility = show ? W.Visibility.Visible : W.Visibility.Collapsed;
+        foreach (var t in _chips.Children.OfType<C.Primitives.ToggleButton>().Where(t => Equals(t.Tag, SearchTag)))
+            t.IsChecked = show;
+        if (!show && _search.Text.Length > 0)
+            _search.Clear();
+    }
+
+    private const string SearchTag = "pane.search";
+
     /// <summary>Ctrl+C: the row as the text file writes it (stale: when it was checked), on the clipboard.</summary>
     private void Copy(RowItem row) => Copy(row.Row);
 
     private void Copy(ListRow row)
     {
-        var text = ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When);
+        var text = ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When,
+                                       _content?.Model?.StaleKind ?? StaleReason.ModelChanged);
         try
         {
             W.Clipboard.SetText(text);
@@ -903,7 +1127,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _detailId = id;
         _selectedId = id;
         var stale = _content?.Model?.Stale is not null ? _content.When : (DateTime?)null;
-        var detail = Details.Of(rows[index], index, rows.Count, _content?.Labels, stale, _content?.Ids);
+        var detail = Details.Of(rows[index], index, rows.Count, _content?.Labels, stale, _content?.Ids, _content?.Model?.StaleKind ?? StaleReason.ModelChanged);
         _detail = DetailView.Build(detail, this, canStepBack: index > 0, canStepOn: index < rows.Count - 1);
         _bodyHost.Child = _detail;
         _detail.Focus();
@@ -1011,6 +1235,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
 
     public IReadOnlyList<CauseCard> AllCards => _content?.Model?.Causes ?? [];
 
+    /// <summary>The worker's cards joined where they share one fix, ranked (Fixes.Of; the intuitive pane, change 4).</summary>
+    public IReadOnlyList<Fix> Groups => _groups ??= Fixes.Of(AllCards, Labels);
+
+    private IReadOnlyList<Fix>? _groups;
+
     public bool AllShown => _allCards;
 
     public void ShowAllCards(bool all)
@@ -1019,34 +1248,34 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         Relayout();
     }
 
-    public bool IsOpen(CauseCard card) => _openCards.Contains(card.Key);
+    public bool IsOpen(Fix group) => _openCards.Contains(group.Key);
 
-    public void SetOpen(CauseCard card, bool open)
+    public void SetOpen(Fix group, bool open)
     {
         if (open)
-            _openCards.Add(card.Key);
+            _openCards.Add(group.Key);
         else
-            _openCards.Remove(card.Key);
+            _openCards.Remove(group.Key);
         Relayout();
     }
 
-    /// <summary>A card's button: Show, Show and open Properties (both on Revit's thread), Open Project Information
-    /// (the mark named in the line), or the card opened on its rows (check by hand, decide).</summary>
-    public void Act(CauseCard card, CardAction action)
+    /// <summary>A card's one button: Show or Set in Properties (its elements selected, on Revit's thread), Open
+    /// Project Information, or the card opened on its results (measure by hand, decide).</summary>
+    public void Act(Fix group, CardAction action)
     {
+        var first = group.Members[0];
         switch (action)
         {
             case CardAction.Show or CardAction.ShowAndProperties:
-                _card(new CardRequest(card, action, CauseCards.ShowIds(card, Labels), Short(card.Words)));
+                _card(new CardRequest(first, action, Fixes.ShowIds(group, Labels), Short(group.Title)));
                 break;
             case CardAction.ProjectInformation:
                 _projectInformation();
-                Say(CauseCards.Note(card, Labels) ?? "");
+                Say(Fixes.Note(group) ?? "");
                 break;
             case CardAction.ByHand or CardAction.Decide:
-                if (!IsOpen(card))
-                    SetOpen(card, true);
-                Say(CauseCards.Note(card, Labels) ?? "");
+                if (!IsOpen(group))
+                    SetOpen(group, true);
                 break;
         }
     }
@@ -1085,9 +1314,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
 
     public LookedAt Looked => _looked;
 
-    public void TickCard(CauseCard card, bool ticked)
+    public void TickCard(Fix group, bool ticked)
     {
-        _looked.SetCard(card.Key, ticked);
+        _looked.SetCard(group.Key, ticked);
         RefreshTicks();
     }
 
@@ -1121,7 +1350,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                             box.IsChecked = t.Card ? _looked.Card(t.Key) : _looked.Row(t.Key);
                             break;
                         case C.TextBlock { Tag: CauseCardsView.ProgressTag } line:
-                            line.Text = _looked.Progress(AllCards, _placed);
+                            line.Text = Fixes.Progress(_looked, Groups, _placed);        // the same words as when drawn
                             break;
                     }
     }
@@ -1183,7 +1412,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var status = StatusLook.Of(chip.Tone, stale);
         var b = new C.Border
         {
-            Child = WithGlyph(status, Typed(new C.TextBlock { Text = chip.Words }, Caption), size: 10, gap: 4),
+            Child = WithGlyph(status, Typed(new C.TextBlock { Text = PaneWords.Count(chip.Words) }, Caption), size: 10, gap: 4),
             BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(8), Padding = new W.Thickness(5, 1, 6, 1),
             Margin = new W.Thickness(0, 2, 3, 0),
         };

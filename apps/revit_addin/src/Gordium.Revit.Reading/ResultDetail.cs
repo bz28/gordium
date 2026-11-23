@@ -62,6 +62,14 @@ public sealed record ResultDetail(string Position, PanelStatus Status, string Ve
     /// <summary>The worker's row id (what its tick is kept by).</summary>
     public string Id { get; init; } = "";
 
+    /// <summary>The generic "What to do" step of a row in review with no advice of its own: the pane shows the fix the
+    /// row waits on in its place (<see cref="Fixes.Step"/>), when there is one.</summary>
+    public const string ResolveStep =
+        "Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.";
+
+    /// <summary>Whether a step is the generic one (<see cref="ResolveStep"/>).</summary>
+    public static bool IsGenericStep(DetailStep step) => step?.Words == ResolveStep;
+
     /// <summary>The detail as plain text, top to bottom (the snapshot tests' form, and what a screen reader reads).</summary>
     public string Text()
     {
@@ -110,20 +118,18 @@ public static class Details
     /// <paramref name="staleSince"/>: when the check was made, once the model changed after it; <paramref name="ids"/>:
     /// each element's Revit id by UniqueId (its Show tooltip says it, for Select by ID).</summary>
     public static ResultDetail Of(ListRow row, int index, int count, IReadOnlyDictionary<string, string>? labels, DateTime? staleSince,
-                                  IReadOnlyDictionary<string, long>? ids = null)
+                                  IReadOnlyDictionary<string, long>? ids = null, StaleReason staleReason = StaleReason.ModelChanged)
     {
         ArgumentNullException.ThrowIfNull(row);
         var r = row.Row;
-        var stale = staleSince is { } at
-            ? $"The model changed after this check ({at:HH:mm}): this verdict may no longer hold. Check again before acting on it."
-            : null;
+        var stale = staleSince is { } at ? PaneWords.StaleDetail(at, staleReason) : null;
         var elements = r.Elements.Select(uid => labels?.GetValueOrDefault(uid) is { } name
             ? new DetailElement(uid, name, true, ids is not null && ids.TryGetValue(uid, out var id) ? id : null)
             : new DetailElement(uid, NotInModel, false)).ToList();
         var why = r.Reason is null || r.ReasonIsFigures || r.Reason == r.Hint ? null : r.Reason;
         return new ResultDetail(
             string.Create(CultureInfo.InvariantCulture, $"{index + 1} of {count}"), row.Status, r.VerdictWords, r.Name, r.Section,
-            stale, why, Steps(row, elements, stale is not null), r.FigureLines, r.HowFar, r.Quotes,
+            stale, why, Steps(row, elements, stale is not null, staleReason), r.FigureLines, r.HowFar, r.Quotes,
             r.Quotes.Count == 0 ? "The checker sent no quote with this row" + (r.Section is null ? "." : $": see {r.Section}.") : null,
             r.Links, elements)
         {
@@ -135,7 +141,8 @@ public static class Details
     /// failure is changed in the design; a needs review is resolved as its reason says, or decided by hand; a row to
     /// check by hand is checked against the law's words; then show its elements, open the law, and Check again. A row
     /// that complies or doesn't apply has nothing to do, unless the model changed since (then: Check again).</summary>
-    public static IReadOnlyList<DetailStep> Steps(ListRow row, IReadOnlyList<DetailElement> elements, bool stale)
+    public static IReadOnlyList<DetailStep> Steps(ListRow row, IReadOnlyList<DetailElement> elements, bool stale,
+                                                  StaleReason staleReason = StaleReason.ModelChanged)
     {
         ArgumentNullException.ThrowIfNull(row);
         ArgumentNullException.ThrowIfNull(elements);
@@ -144,7 +151,7 @@ public static class Details
         if (row.Section == ListSection.Complies)
         {
             if (stale)
-                steps.Add(new("Check again: the model changed after this check.", DetailAction.CheckAgain));
+                steps.Add(new(PaneWords.StaleStep(staleReason), DetailAction.CheckAgain));
             return steps;
         }
         if (r.Hint is not null)
@@ -157,7 +164,7 @@ public static class Details
             ListSection.ByHand when r.Verdict == Gordium.Worker.Verdict.NotChecked
                 => "Give what the check needs (the reason above says what), or check it by hand against the law's words below.",
             ListSection.ByHand => "Check it by hand against the law's words below: Gordium doesn't decide this one yet.",
-            _ => "Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.",
+            _ => ResultDetail.ResolveStep,
         }, DetailAction.None));
         var shown = elements.Count(e => e.InModel);
         if (shown > 0)

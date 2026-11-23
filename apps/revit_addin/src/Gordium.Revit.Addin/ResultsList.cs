@@ -124,7 +124,7 @@ public sealed class EntryView : C.Border
             C.DockPanel.SetDock(chevron, C.Dock.Left);
             line.Children.Add(chevron);
             line.Cursor = I.Cursors.Hand;
-            line.ToolTip = h.Folded ? "Click to show these rows" : "Click to fold these rows";
+            line.ToolTip = h.Folded ? "Click to show these results" : "Click to fold these results";
             line.MouseLeftButtonDown += (_, e) =>
             {
                 e.Handled = true;                                                  // a heading is never selected
@@ -137,7 +137,7 @@ public sealed class EntryView : C.Border
         line.Children.Add(glyph);
         line.Children.Add(Ink(Typed(new C.TextBlock
         {
-            Text = $"{h.Title.ToUpperInvariant()} · {h.Rows} row{(h.Rows == 1 ? "" : "s")}", TextWrapping = W.TextWrapping.Wrap,
+            Text = $"{h.Title.ToUpperInvariant()} · {PaneWords.Results(h.Rows)}", TextWrapping = W.TextWrapping.Wrap,
             VerticalAlignment = W.VerticalAlignment.Center,
         }, "type.overline"), StatusLook.Colour(h.Status)));
         if (!h.Foldable)

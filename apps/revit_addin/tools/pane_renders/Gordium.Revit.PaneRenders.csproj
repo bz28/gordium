@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Off-screen renders of the Gordium pane, step by step through an architect's first run (welcome, Setup, checking,
+       results, a fix opened, a result's detail, What changed, error, stale), from the checker's real answers, light and
+       dark, 340 px wide at 430 and 900 px: what docs/revit/ui_design_pass.md's images are made with. It compiles the
+       add-in's own view files (linked, unchanged), so what it draws is what Revit shows; it is not part of the add-in,
+       is never loaded by Revit, and is not in Gordium.Worker.slnx or CI. It needs Revit 2027 installed only because the
+       view files name Revit's types (never called here).
+       Run: dotnet run -c Release - - <out dir>    (from this folder) -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks></TargetFrameworks>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>Gordium.Revit.PaneRenders</RootNamespace>
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+    <RevitDir>$(ProgramW6432)\Autodesk\Revit 2027</RevitDir>
+    <DefineConstants>$(DefineConstants);REVIT2027</DefineConstants>
+    <NoWarn>$(NoWarn);CS1591;MSB3277</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="RevitAPI" HintPath="$(RevitDir)\RevitAPI.dll" Private="false" />
+    <Reference Include="RevitAPIUI" HintPath="$(RevitDir)\RevitAPIUI.dll" Private="false" />
+    <ProjectReference Include="../../src/Gordium.Worker/Gordium.Worker.csproj" />
+    <ProjectReference Include="../../src/Gordium.Revit.Reading/Gordium.Revit.Reading.csproj" />
+  </ItemGroup>
+  <ItemGroup Label="the add-in's own view files, unchanged">
+    <Compile Include="../../src/Gordium.Revit.Addin/ResultsView.cs" Link="Addin/ResultsView.cs" />
+    <Compile Include="../../src/Gordium.Revit.Addin/ResultsList.cs" Link="Addin/ResultsList.cs" />
+    <Compile Include="../../src/Gordium.Revit.Addin/CauseCardsView.cs" Link="Addin/CauseCardsView.cs" />
+    <Compile Include="../../src/Gordium.Revit.Addin/DetailView.cs" Link="Addin/DetailView.cs" />
+    <Compile Include="../../src/Gordium.Revit.Addin/SetupView.cs" Link="Addin/SetupView.cs" />
+    <Compile Include="../../src/Gordium.Revit.Addin/PanelLook.cs" Link="Addin/PanelLook.cs" />
+    <Page Remove="**/*.xaml" />
+    <EmbeddedResource Include="../../src/Gordium.Revit.Addin/PanelStyles.xaml" LogicalName="Gordium.Revit.Addin.PanelStyles.xaml" Link="Addin/PanelStyles.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fixtures/*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../tests/Gordium.Revit.Reading.Tests/answers/*.json" Link="answers/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

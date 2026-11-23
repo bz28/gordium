@@ -84,9 +84,11 @@ Two weeks: ten working days of work (days 1 to 10), then spare days (11 to 12) a
 If a day's question is answered early, move on; if a go / no-go question is answered "no", stop and use section 6.
 
 The trial's test tools (**Check box house**, **Record scenes**, **Read inside**, **Record houses**) are in the Gordium
-tab's **Trial** panel. `apps/revit_addin/install_trial_addin.ps1` installs a trial build, which always has it; the
-build an architect gets (`-Architect`) shows only Check project, Mark facts, Panel and About, and the Trial panel only
-with `GORDIUM_TRIAL=1` set in the environment Revit starts in. The request files (`run_request.json`,
+tab's **Trial** panel, hidden by default (Ben, 2026-11-23: the add-in is demoed to architects).
+`apps/revit_addin/install_trial_addin.ps1` installs the build an architect gets, which shows only Check project, Mark
+facts, Panel and About. To turn the developer tools back on, install with `-Dev` (a trial build: the Trial panel always
+there), or set `GORDIUM_TRIAL=1` in the environment Revit starts in (any build; for example `$env:GORDIUM_TRIAL = "1"`
+in PowerShell, then start Revit from that window). The request files (`run_request.json`,
 `check_project_request.json` and the others, read while Revit is idle) need no button: they work in either build.
 Mark facts (was Mark for egress), About, Read inside and Record houses moved panels, so a Quick Access Toolbar copy or
 keyboard shortcut made for them before is lost once: add it again.

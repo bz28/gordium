@@ -379,10 +379,11 @@ public static class ResultList
     /// <summary>What Ctrl+C copies: the row as the text file writes it (<see cref="ResultText.Row"/>: its verdict, name,
     /// figures, reason and elements, each element by the project's label), and, once the model changed after the
     /// check, when it was checked, so a copied verdict is never read as the model's now.</summary>
-    public static string CopyText(ResultRow row, IReadOnlyDictionary<string, string>? labels, DateTime? staleSince)
+    public static string CopyText(ResultRow row, IReadOnlyDictionary<string, string>? labels, DateTime? staleSince,
+                                  StaleReason staleReason = StaleReason.ModelChanged)
     {
         ArgumentNullException.ThrowIfNull(row);
         var line = row.Line(uid => labels?.GetValueOrDefault(uid));
-        return staleSince is { } at ? $"{line} (checked {at:HH:mm}, before the model changed)" : line;
+        return staleSince is { } at ? PaneWords.StaleCopy(line, at, staleReason) : line;
     }
 }

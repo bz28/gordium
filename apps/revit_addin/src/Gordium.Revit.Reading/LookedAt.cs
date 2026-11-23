@@ -58,11 +58,15 @@ public sealed class LookedAt
     }
 
     /// <summary>The ticks a new check (<paramref name="after"/>) of the same project starts with, from the ticks of the
-    /// check before (<paramref name="before"/>, ticked on <paramref name="was"/>): a card's tick only when the new
-    /// answer has a card of the same key, the same words and the same rows; a row's only when the new answer has
-    /// it with the same verdict (words and all), reason, figures and how far, and it still takes a tick. Everything
-    /// else starts unticked (it changed: look again). No check before, or one of nothing (a fact missing): none.</summary>
-    public static LookedAt Carry(LookedAt? before, ResultModel? was, ResultModel after)
+    /// check before (<paramref name="before"/>, ticked on <paramref name="was"/>): a worker card's tick only when the
+    /// new answer has a card of the same key, the same words and the same rows; a fix's tick ("Start here": the pane
+    /// ticks fixes by <see cref="Fix.Key"/>, each fix made with the element names of its check, <paramref name="wasLabels"/>
+    /// and <paramref name="afterLabels"/>) only when the new answer has a fix of the same key whose cards are the same,
+    /// in the same order (each card's key, words and rows); a row's only when the new answer has it with the same
+    /// verdict (words and all), reason, figures and how far, and it still takes a tick. Everything else starts
+    /// unticked (it changed: look again). No check before, or one of nothing (a fact missing): none.</summary>
+    public static LookedAt Carry(LookedAt? before, ResultModel? was, ResultModel after,
+                                 IReadOnlyDictionary<string, string>? wasLabels = null, IReadOnlyDictionary<string, string>? afterLabels = null)
     {
         ArgumentNullException.ThrowIfNull(after);
         var now = new LookedAt();
@@ -72,12 +76,20 @@ public sealed class LookedAt
         foreach (var c in after.Causes)
             if (before.Card(c.Key) && oldCards.TryGetValue(c.Key, out var o) && o.Words == c.Words && o.Items.SequenceEqual(c.Items))
                 now._cards.Add(c.Key);
+        var oldFixes = Fixes.Of(was.Causes, wasLabels).ToDictionary(f => f.Key, StringComparer.Ordinal);
+        foreach (var f in Fixes.Of(after.Causes, afterLabels))
+            if (before.Card(f.Key) && oldFixes.TryGetValue(f.Key, out var of) && SameCards(of.Members, f.Members))
+                now._cards.Add(f.Key);
         var oldRows = ResultList.Place(was).ToDictionary(r => r.Row.Id, StringComparer.Ordinal);
         foreach (var r in ResultList.Place(after))
             if (before.Row(r.Row.Id) && Tickable(r) && oldRows.TryGetValue(r.Row.Id, out var p) && Same(p.Row, r.Row))
                 now._rows.Add(r.Row.Id);
         return now;
     }
+
+    /// <summary>Whether two fixes join the same cards, in the same order: each card's key, words and rows.</summary>
+    private static bool SameCards(IReadOnlyList<CauseCard> a, IReadOnlyList<CauseCard> b) =>
+        a.Count == b.Count && a.Zip(b).All(p => p.First.Key == p.Second.Key && p.First.Words == p.Second.Words && p.First.Items.SequenceEqual(p.Second.Items));
 
     /// <summary>Whether a row says the same in two checks: its verdict (and its words), reason, figures and how far.</summary>
     private static bool Same(ResultRow a, ResultRow b) =>
