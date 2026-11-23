@@ -26,10 +26,10 @@ from model_measurement.interior.doors import measure_door
 from model_measurement.interior import has_none as none_of
 from model_measurement.interior.guards import measure_guard
 from model_measurement.interior.openings import measure_opening
-from model_measurement.interior.read import FORMAT, INCHES, Reader, name_of
+from model_measurement.interior.read import FORMAT, INCHES, Reader, name_of, yes_no
 from model_measurement.interior.rooms import floor_elevation, measure_room
 from model_measurement.interior.stairs import measure_stair
-from model_measurement.interior.stops import Stop
+from model_measurement.interior.stops import STOPS, Stop, given_text
 
 MEASURED_FORMAT = "gordium.interior_measured/1"
 # kind → (the description's key, the words for a list of them, the flag each must carry, what the flag asks)
@@ -40,6 +40,29 @@ KINDS = {
     "egress_door": ("doors", "doors", "exit", "the required exit door"),
     "guard": ("guards", "guards", None, None),
 }
+
+
+def asked_field(problem: str) -> str | None:
+    """The interior description's field a problem of the description's (`problems`) asks the architect to state, read
+    back from its words exactly as `_given` makes them: a flag one of a kind's entries doesn't give ("door D01 doesn't
+    say whether it is the required exit door (yes or no)": "doors[].exit"), or a kind's list the description doesn't
+    give at all ("the stairs weren't read: ...": "stairs"). None for any other words (never a guess): a host names
+    its own mark from the field (the Revit add-in's Marks.cs `Feeds`)."""
+    if not isinstance(problem, str):
+        return None
+    for key, words, flag, question in KINDS.values():
+        if problem == Stop("not_read", what=words, key=key).reason:
+            return key
+        if flag:
+            for stop in ("flag_missing", "flag_not_yes_no"):
+                before, after = STOPS[stop].split("{what}")
+                before = before + key[:-1] + " "
+                head, _, tail = after.partition("{got}")
+                head = head.format(question=f"it is {question}")
+                if problem.startswith(before) and len(problem) > len(before) + len(head) and (
+                        problem.endswith(head) if not tail else head in problem and problem.endswith(tail)):
+                    return f"{key}[].{flag}"
+    return None
 
 
 def _given(description: dict, kind: str, problems: list):
@@ -56,9 +79,12 @@ def _given(description: dict, kind: str, problems: list):
         if not isinstance(item, dict):
             problems.append(Stop("not_a_mapping", what=key[:-1], n=n).reason)
             return None
-        if flag and not isinstance(item.get(flag), bool):
-            problems.append(Stop("flag_missing", what=key[:-1], name=name_of(item), question=question, key=flag).reason)
-            return None
+        if flag:
+            try:
+                yes_no(item, flag, f"{key[:-1]} {name_of(item)}", f"it is {question}", required=True)
+            except Stop as s:
+                problems.append(s.reason)
+                return None
     return got
 
 
@@ -69,7 +95,7 @@ def _unknown_spaces(description: dict, problems: list):
     if got is None:
         return []
     if not isinstance(got, list):
-        problems.append(Stop("not_a_list", key="unknown_spaces").reason)
+        problems.append(Stop("not_a_list", key="enclosed spaces with no room drawn in them").reason)
         return None
     for n, item in enumerate(got, 1):
         if not isinstance(item, dict) or not isinstance(item.get("id"), str) or not item["id"].strip():
@@ -117,11 +143,11 @@ def measure(description) -> dict:
         problems.append(Stop("not_a_description").reason)
         return out
     if description.get("format") != FORMAT:
-        problems.append(Stop("wrong_format", got=description.get("format")).reason)
+        problems.append(Stop("wrong_format", got=given_text(description.get("format"), "no form named")).reason)
         return out
     units = description.get("units")
     if not isinstance(units, str) or units not in INCHES:
-        problems.append(Stop("units", units=units).reason)
+        problems.append(Stop("units", units=given_text(units, "no unit named")).reason)
         return out
     reader = Reader(units)
     parts = out["parts"]

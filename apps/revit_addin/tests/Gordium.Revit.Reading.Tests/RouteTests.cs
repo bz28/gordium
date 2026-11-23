@@ -229,7 +229,7 @@ public sealed class RouteTests
         Assert.Equal("exit_enclosure", Door(read, "dS")["exit_kind"]!.GetValue<string>());
         Assert.Null(Door(read, "dS")["exit_id"]);
         Assert.Contains("neither room it joins", FakeFloor.Note(read, "dS", "doors.exit_id"));
-        Assert.Contains(StoryStops(Routes(read)), s => s.Contains("exit_id", StringComparison.Ordinal));
+        Assert.Contains(StoryStops(Routes(read)), s => s.Contains("which exit the exit door leads into", StringComparison.Ordinal));
 
         // marked as a door to outside but between two rooms; a horizontal exit: neither is read as an exit
         floor = new FakeFloor();
@@ -372,7 +372,7 @@ public sealed class RouteTests
         var read = InteriorReader.Read(floor.Model());
         Assert.Null(Room(read, "C")["obstructions"]);
         Assert.Contains("Beam", FakeFloor.Note(read, "C", "obstructions"));
-        Assert.Contains(StoryStops(Routes(read)), s => s.Contains("obstructions", StringComparison.Ordinal));
+        Assert.Contains(StoryStops(Routes(read)), s => s.Contains("what stands on its floor", StringComparison.Ordinal));
 
         // the same beam at 7 ft (above the 80 in headroom) stands in no one's way; a light fixture at 8 ft neither
         floor = new FakeFloor();

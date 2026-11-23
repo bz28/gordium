@@ -48,6 +48,11 @@ public sealed record CauseCard(string Key, CauseKind Kind, string Words, IReadOn
     /// there); empty when none.</summary>
     public IReadOnlyList<CauseRoom> Rooms { get; init; } = [];
 
+    /// <summary>The interior description's (or the project's) fields a mark card needs the architect to state, the
+    /// worker's <c>fields</c> (or its one <c>field</c>): "doors[].exit", "openings[].escape", "stairs", "facts.zone".
+    /// The add-in names its mark from them (<see cref="CauseCards.MarksOf"/>); empty when the worker sends none.</summary>
+    public IReadOnlyList<string> Fields { get; init; } = [];
+
     /// <summary>"11 rows · 7 rules": how many rows it holds (and rules, the worker's count), counted, never a figure.</summary>
     public string Count =>
         $"{Items.Count} row{(Items.Count == 1 ? "" : "s")}" + (Rules is { } n && n != Items.Count ? $" · {n} rule{(n == 1 ? "" : "s")}" : "");
@@ -99,6 +104,7 @@ public static class CauseCards
                 cards.Add(new CauseCard(key, KindOf(ResultRows.Text(c, "kind")), words, Strings(c, "elements"), items, rules, groupKey)
                 {
                     Rooms = RoomsOf(key, items.Select(id => rows[id].Raw)),
+                    Fields = FieldsOf(c),
                 });
             }
         }
@@ -158,7 +164,7 @@ public static class CauseCards
                 return shown ? CardAction.Show : CardAction.None;
             case CauseKind.Mark:
                 var marks = MarksOf(card);
-                if (marks.Count > 0 && (marks.All(OnProjectInformationOnly) || FactsFed(card)))
+                if (marks.Count > 0 && (marks.All(OnProjectInformationOnly) || FactsFed(card) || FieldsAreFacts(card)))
                     return CardAction.ProjectInformation;      // a project fact's mark is on Project Information
                 if (!shown)
                     return CardAction.None;
@@ -210,14 +216,22 @@ public static class CauseCards
         return $"Selected {selected} element{(selected == 1 ? "" : "s")}; Properties is open: set {names} there, then Check again.";
     }
 
-    /// <summary>The Gordium marks the card names, each once, in Gordium's list order: a mark named in its words
-    /// ("Gordium: Exit door"); the mark an interior-drawing field it names in back-quotes feeds (<c>`exit`</c>:
-    /// doors[].exit, Gordium: Exit door), when exactly one mark does; for a project fact's key (<c>fact:stories</c>,
-    /// <c>facts:a,b</c>), the mark each fact is fed by, only when every one has one. Never a mark that isn't one of
-    /// Gordium's (<see cref="Marks.All"/>).</summary>
+    /// <summary>The Gordium marks the card names, each once, in Gordium's list order. When the worker names the
+    /// fields the card needs (<see cref="CauseCard.Fields"/>): the mark that feeds each one exactly (doors[].exit:
+    /// Gordium: Exit door; stairs: Gordium: These are all the stairs; facts.zone: Gordium: Zone), only when every
+    /// field has one, else none (a field no mark feeds: never a mark guessed). With no fields (an older worker), as
+    /// before: a mark named in its words ("Gordium: Exit door"); the mark an interior-drawing field it names in
+    /// back-quotes feeds (<c>`exit`</c>: doors[].exit, Gordium: Exit door), when exactly one mark does; for a project
+    /// fact's key (<c>fact:stories</c>, <c>facts:a,b</c>), the mark each fact is fed by, only when every one has one.
+    /// Never a mark that isn't one of Gordium's (<see cref="Marks.All"/>).</summary>
     public static IReadOnlyList<MarkDefinition> MarksOf(CauseCard card)
     {
         ArgumentNullException.ThrowIfNull(card);
+        if (card.Fields.Count > 0)
+        {
+            var byField = card.Fields.Select(f => Marks.All.FirstOrDefault(m => Fields(m).Contains(f))).ToList();
+            return byField.All(m => m is not null) ? Marks.All.Where(byField.Contains).ToList() : [];
+        }
         var found = Marks.All.Where(m => card.Words.Contains(m.Name, StringComparison.Ordinal)).ToList();
         // a shorter name inside a longer one ("Gordium: Exit" in "Gordium: Exit door") is the longer one's
         found = found.Where(m => !found.Any(o => o != m && o.Name.Contains(m.Name, StringComparison.Ordinal))).ToList();
@@ -254,6 +268,20 @@ public static class CauseCards
     }
 
     private static bool OnProjectInformationOnly(MarkDefinition m) => m.Categories is [Marks.ProjectInformation];
+
+    /// <summary>Whether every field the card names is a project fact's (<c>facts.use</c>): set on Project Information,
+    /// as <see cref="FactsFed"/>.</summary>
+    private static bool FieldsAreFacts(CauseCard card) =>
+        card.Fields.Count > 0 && card.Fields.All(f => f.StartsWith("facts.", StringComparison.Ordinal));
+
+    /// <summary>The worker's <c>fields</c> (text, each once), or its one <c>field</c>; none when it sends neither.</summary>
+    private static List<string> FieldsOf(JsonElement c)
+    {
+        var fields = Strings(c, "fields");
+        if (fields.Count == 0 && ResultRows.Text(c, "field") is { Length: > 0 } one)
+            fields.Add(one);
+        return fields;
+    }
 
     /// <summary>Whether the card is a project fact's (<c>fact:</c>/<c>facts:</c>) whose every fact a mark feeds (as
     /// <c>facts.use</c> by Gordium: Use, which is on Project Information and on Rooms): set on Project Information.</summary>

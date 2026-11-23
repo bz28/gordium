@@ -106,7 +106,7 @@ def test_21_every_room_marked_leaves_no_point_to_measure_from():
     sp = story_part(d)
     for name in NFPA:
         assert name not in sp["measures"]
-        assert "every room on the story is marked `not_occupied`" in sp["not_measured"][name]
+        assert "every room on the story is marked not occupied" in sp["not_measured"][name]
 
 
 def test_21_the_ibc_figure_keeps_a_marked_room_that_has_a_route():
@@ -132,13 +132,13 @@ def test_21_a_room_whose_use_is_occupancy_cant_be_marked_not_occupied(change, wo
     d = layout(abandoned=False)
     d["rooms"][1].update(change, not_occupied=True)
     stops = read(d).stories["L1"].stops
-    assert any("o is marked `not_occupied: true`, but " + words in s for s in stops), stops
+    assert any("o is marked not occupied, but " + words in s for s in stops), stops
 
 
 def test_21_a_mark_that_isnt_true_or_false_isnt_read():
     d = layout(marked="yes")
     stops = read(d).stories["L1"].stops
-    assert any("abandoned isn't read" in s and "`not_occupied`" in s for s in stops), stops
+    assert any("abandoned isn't read" in s and "isn't read: it gives whether it is not occupied as the text 'yes', not as a yes/no value" in s for s in stops), stops
 
 
 def test_21_the_mark_changes_nothing_but_the_start_points():
