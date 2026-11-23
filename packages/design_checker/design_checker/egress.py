@@ -136,7 +136,7 @@ def laws(jurisdiction) -> dict:
                     [f"its sources can't be read ({type(e).__name__}: {e})"], [], None
         law["not_checked_yet"], law["coverage_problem"] = _not_checked_yet(folder, law["rules"])
         out.append(law)
-    return {"place": p.name, "laws": out}
+    return {"place": p.name, "folder": p.folder, "laws": out}
 
 
 def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]:
@@ -237,7 +237,8 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
     section, so neither reads as the answer (principle 4). The decision is the result's `code_scope`."""
     waiting = _no_rooms(interior)
     building = interior.get("building") if isinstance(interior, dict) else None
-    scope = code_scope.decide(values, building, (allowed or {}).get("use") or None) if any(
+    # the place's own uses as they are (an empty set: it lists none, so every use needs review) and its own names
+    scope = code_scope.decide(values, building, (allowed or {}).get("use"), found.get("folder")) if any(
         law.get("scope") for law in found["laws"]) else None
     run = [law for law in found["laws"]
            if scope is None or law.get("scope") is None or scope["code"] in (None, law["scope"])]

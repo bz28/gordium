@@ -27,6 +27,7 @@ which, in plain words. Never a guess for the Residential Code (principle 4).
 
 import functools
 import math
+from pathlib import Path
 
 RESIDENTIAL = "residential_code"
 BUILDING = "building_code"
@@ -152,23 +153,28 @@ ATTACHED = "one_family_attached"                  # three to six units in a row 
 ASK_BY_HAND = "check which code governs by hand, then tick {mark} Yes if it is the Building Code"
 
 
-@functools.lru_cache(maxsize=1)
-def use_names() -> dict:
-    """{use: its name} from every place's 4_term_definitions/uses.yaml, the place's own words ("Retail store or
-    service commercial facility")."""
+@functools.lru_cache(maxsize=16)
+def use_names(place=None) -> dict:
+    """{use: its name} from a place's 4_term_definitions/uses.yaml, the place's own words ("Retail store or service
+    commercial facility"); with no place, every place's, the first place listing a use naming it (places in their
+    stable order), for a direct caller that names none."""
     from rule_format.place import places
     from rule_format.rulebook import load
     out = {}
-    for p in places():
-        f = p.folder / "4_term_definitions/uses.yaml"
+    for folder in ([place] if place is not None else [p.folder for p in places()]):
+        f = Path(folder) / "4_term_definitions/uses.yaml"
         if f.exists():
-            out.update({k: v.get("name") or k for k, v in (load(f) or {}).items() if isinstance(v, dict)})
+            for k, v in (load(f) or {}).items():
+                if isinstance(v, dict):
+                    out.setdefault(k, v.get("name") or k)
     return out
 
 
-def use_words(use) -> str:
-    """A use in the place's own words (uses.yaml), never its key; one it doesn't list, quoted exactly as typed."""
-    return use_names().get(use) or value_words(use) if isinstance(use, str) else value_words(use)
+def use_words(use, names: dict | None = None) -> str:
+    """A use in the place's own words (`names`: use_names of the place checked), never its key; one it doesn't
+    name, quoted exactly as typed."""
+    named = (use_names() if names is None else names).get(use) if isinstance(use, str) else None
+    return named or value_words(use)
 
 
 # the use as the architect chose it, for a line saying the facts disagree with it (the verdict lines name R101.2's
@@ -180,10 +186,10 @@ CHOSEN = {"one_family_detached": ("a one-family detached dwelling", ""),
           ATTACHED: ("a one-family attached dwelling", "")}
 
 
-def chosen_use_words(use: str, count: str) -> str:
+def chosen_use_words(use: str, count: str, names: dict | None = None) -> str:
     """The use as the architect chose it, with what the line counts in its brackets: "a one-family semi-detached
     dwelling (one of a pair, 2 dwelling units in the building)"."""
-    name, note = CHOSEN.get(use) or (use_words(use), "")
+    name, note = CHOSEN.get(use) or (use_words(use, names), "")
     return f"{name} ({note + ', ' if note else ''}{count})"
 
 
@@ -303,10 +309,13 @@ def stories_bound(values: dict, facts: dict) -> tuple[int | None, str]:
     return None, "not known"
 
 
-def decide(values: dict, building: dict | None, uses=None) -> dict:
+def decide(values: dict, building: dict | None, uses=None, place=None) -> dict:
     """Which book governs the building's egress (module docstring), with why and the sections behind it. `uses`: the
-    place's listed uses (its allowed values); None, every place's (use_names). A use not among them is one Gordium
-    can't place (a typo, a use it doesn't know): needs review, never a code (principle 4)."""
+    place's listed uses (its allowed values), as they are: an empty one is a place that lists none, where every use
+    needs review; None (a direct caller giving no list) is every place's (use_names). A use not among them is one
+    Gordium can't place (a typo, a use it doesn't know): needs review, never a code (principle 4). `place`: the
+    checked place's folder, whose own names (uses.yaml) say each use."""
+    names = use_names(place)
     values = values or {}
     # the building block's facts, and any the check's values carry (a host with no interior description may state
     # them as facts); the building block's own stand where both give one
@@ -341,7 +350,7 @@ def decide(values: dict, building: dict | None, uses=None) -> dict:
     if not isinstance(use, str) or not use:
         return _answer(None, "the building's use isn't stated", ["R101.2", "101.2 exception 1"], used,
                        f"state the building's use ({MARK['use']})")
-    if use not in (set(uses) if uses is not None else use_names()):
+    if use not in (set(uses) if uses is not None else names):
         return _answer(None, f"the use {value_words(use)} isn't one Gordium knows: correct {MARK['use']}",
                        ["R101.2"], used, f"correct the use ({MARK['use']})")
     groups = facts.get("occupancy_groups") or []
@@ -358,7 +367,7 @@ def decide(values: dict, building: dict | None, uses=None) -> dict:
                        "lodgers and five bedrooms for them)", ["R101.2 item 4", "R202 BED AND BREAKFAST DWELLING"],
                        used, by_hand)
     if use not in HOUSES and use != ATTACHED:
-        return _answer(BUILDING, f"its use ({use_words(use)}) is none of the dwellings R101.2 lists (101.2: every "
+        return _answer(BUILDING, f"its use ({use_words(use, names)}) is none of the dwellings R101.2 lists (101.2: every "
                        "other building)", ["R101.2", "101.2"], used)
     # a dwelling R101.2 can cover: each condition it sets, and how many dwelling units the building holds
     if values.get("care_facility") is True or facts.get("care_facility") is True:
@@ -435,7 +444,7 @@ def decide(values: dict, building: dict | None, uses=None) -> dict:
         if stated_building is not None and stated_building != n:
             used["attached_units_in_building"] = stated_building
             return _answer(None, "the use is " + chosen_use_words(use, f"{n} dwelling unit{'s' if n > 1 else ''} "
-                                                                  "in the building") + " but "
+                                                                  "in the building", names) + " but "
                            f"{value_words(stated_building)} units in the whole attached building are stated",
                            ["R202 DWELLING", "R101.2"], used,
                            f"correct the use ({MARK['use']}) or the units ({MARK['attached_units_in_building']})")
@@ -446,7 +455,7 @@ def decide(values: dict, building: dict | None, uses=None) -> dict:
     if type(stated) in (int, float) and stated != lot_units:
         used["dwelling_units"] = stated
         return _answer(None, "the use is " + chosen_use_words(use, f"{lot_units} dwelling unit"
-                                                              f"{'s' if lot_units > 1 else ''} on the lot") + " "
+                                                              f"{'s' if lot_units > 1 else ''} on the lot", names) + " "
                        f"but {value_words(stated)} dwelling units are stated" + (
                            ", which may or may not count the accessory dwelling unit in (Gordium: Dwelling units leaves "
                            "it out)" if adu is True and stated == lot_units + 1 else ""),
