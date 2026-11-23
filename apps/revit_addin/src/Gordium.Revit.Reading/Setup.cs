@@ -533,7 +533,7 @@ public static class SetupWords
     public static string Label(MarkDefinition m, string noun)
     {
         var name = m.Name.StartsWith("Gordium: ", StringComparison.Ordinal) ? m.Name["Gordium: ".Length..] : m.Name;
-        return InBuildingWords(name, noun);
+        return InBuildingWords(name, noun) + (Marks.Unit(m) is { } unit ? $" ({unit})" : "");
     }
 
     /// <summary>The form's notice when a check sent nothing, in plain words from what is missing (never the marks'

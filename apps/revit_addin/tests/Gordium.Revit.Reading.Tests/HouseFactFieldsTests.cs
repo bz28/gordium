@@ -154,6 +154,66 @@ public sealed class HouseFactFieldsTests
             Assert.Equal("The lot and the house", fields.Single(f => f.Mark == m).Group);
     }
 
+    // ---- review round 1: units before typing, and the law's words exactly ----------------------------------------
+
+    /// <summary>Every number a mark takes says what it is before it is typed: the Setup form's label names it ("Distance
+    /// from stream (ft)", "Garage cars (count)") and the tooltip's first words do ("In feet:", "A count:"), so 200 meant
+    /// as inches is never saved as 200 ft (§325-26 would pass).</summary>
+    [Fact]
+    public void Every_numeric_mark_names_its_unit_or_says_it_is_a_count_before_it_is_typed()
+    {
+        var numeric = Marks.All.Where(m => m.Kind is MarkValueKind.Length or MarkValueKind.Integer).ToList();
+        Assert.True(numeric.Count >= 13);
+        foreach (var m in numeric)
+        {
+            var (unit, first) = m.Kind == MarkValueKind.Length ? ("ft", "In feet: ") : ("count", "A count: ");
+            Assert.Equal(unit, Marks.Unit(m));
+            Assert.StartsWith(first, m.Description, StringComparison.Ordinal);
+            Assert.EndsWith($" ({unit})", SetupWords.Label(m, "house"), StringComparison.Ordinal);
+        }
+        Assert.All(Marks.All.Where(m => !numeric.Contains(m)), m => Assert.Null(Marks.Unit(m)));
+        // the form's fields carry it: what the architect reads above the box
+        var fields = SetupScreen.Build(Model(Needed()), [], null, null).Fields;
+        Assert.Equal("Distance from stream (ft)", fields.Single(f => f.Mark == Marks.StreamDistance).Label);
+        Assert.Equal("Garage cars (count)", fields.Single(f => f.Mark == Marks.GarageCars).Label);
+    }
+
+    private static string Plain(string text) =>
+        System.Text.RegularExpressions.Regex.Replace(text.Replace('“', '"').Replace('”', '"').Replace('’', '\'')
+                                                         .Replace('—', '-').Replace('–', '-'), @"\s+", " ");
+
+    /// <summary>The law's words for New York: the City's extracted text (each document's lines in order), every quote
+    /// the rulebooks and state law folders keep, and the code decision's cites (design_checker/code_scope.py CITES,
+    /// each read again from its PDF page by test_every_quote_is_on_its_page_in_the_book: the state books' own text
+    /// lives outside the repository).</summary>
+    private static readonly Lazy<string> Law = new(() =>
+    {
+        var root = Path.Combine(Env.Repo, "regulations", "jurisdictions", "new_york");
+        var sb = new StringBuilder();
+        foreach (var f in Directory.EnumerateFiles(root, "*.jsonl", SearchOption.AllDirectories).Where(f => f.Contains("2_extracted_text", StringComparison.Ordinal)))
+            foreach (var line in File.ReadLines(f))
+                if (JsonDocument.Parse(line).RootElement is { ValueKind: JsonValueKind.Object } o && o.TryGetProperty("text", out var t) && t.ValueKind == JsonValueKind.String)
+                    sb.Append(t.GetString()).Append(' ');
+        foreach (var f in Directory.EnumerateFiles(root, "*.yaml", SearchOption.AllDirectories))
+            sb.Append(File.ReadAllText(f).Replace("\\\"", "\"")).Append(' ');
+        sb.Append(Env.RunCode("import json; from design_checker import code_scope; print(json.dumps([q for _, _, q in code_scope.CITES.values()]))"));
+        return Plain(sb.ToString());
+    });
+
+    /// <summary>Every passage a mark's tooltip quotes is the law's words character for character: a quote that ends a
+    /// sentence the law goes on with (§325-26's exception) or changes a word is caught. A passage cut short ends where
+    /// the law's own words do, with no full stop of Gordium's.</summary>
+    [Fact]
+    public void Every_passage_a_mark_quotes_is_the_laws_words_exactly()
+    {
+        var quoted = Marks.All.SelectMany(m => System.Text.RegularExpressions.Regex.Matches(m.Description, "\"([^\"]{12,})\"")
+            .Select(q => (m.Name, Text: q.Groups[1].Value))).ToList();
+        Assert.True(quoted.Count >= 12);
+        Assert.All(quoted, q => Assert.True(Law.Value.Contains(Plain(q.Text), StringComparison.Ordinal), $"{q.Name} quotes words not in the law: \"{q.Text}\""));
+        Assert.Contains("measured at an average water level, except for those structures directly connected with marine or public or commercial recreation activities.",
+                        Marks.StreamNearLot.Description, StringComparison.Ordinal);
+    }
+
     // ---- the house's fix cards now have their button -----------------------------------------------------------
 
     private static readonly WorkerAbout About = new("1.3", "gordium.site/1", new string('f', 64), new Dictionary<string, string>());

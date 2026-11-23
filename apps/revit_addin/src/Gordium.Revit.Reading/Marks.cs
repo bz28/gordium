@@ -61,19 +61,19 @@ public static class Marks
     public static readonly MarkDefinition ClearWidth = new(
         "Gordium: Clear width", new("8cb5d70c-116d-4621-9876-fd15c4c55f5c"), MarkValueKind.Length, MarkBinding.Type,
         [Windows, Doors], "openings[].stated_clear.width, doors[].stated_clear.width",
-        "The maker's net clear opening width, as the maker publishes it for egress. For a door, measured as R318.2 " +
+        "In feet: the maker's net clear opening width, as the maker publishes it for egress. For a door, measured as R318.2 " +
         "measures it: between the face of the door open 90 degrees and the stop (never the door's size or its rough opening).");
 
     public static readonly MarkDefinition ClearHeight = new(
         "Gordium: Clear height", new("8a8a2307-84a5-4a36-9121-c21453707702"), MarkValueKind.Length, MarkBinding.Type,
         [Windows, Doors], "openings[].stated_clear.height, doors[].stated_clear.height",
-        "The maker's net clear opening height, as the maker publishes it for egress. For a door, measured as R318.2 " +
+        "In feet: the maker's net clear opening height, as the maker publishes it for egress. For a door, measured as R318.2 " +
         "measures it: from the top of the threshold to the bottom of the stop.");
 
     public static readonly MarkDefinition ClearOffset = new(
         "Gordium: Clear offset", new("07f4d517-54a6-4e39-ba85-90c299137a28"), MarkValueKind.Length, MarkBinding.Type,
         [Windows], "openings[].stated_clear.bottom",
-        "The height of the clear opening's bottom above the window's sill line (where Sill Height places it). Blank is not 0: no clear opening is sent.");
+        "In feet: the height of the clear opening's bottom above the window's sill line (where Sill Height places it). Blank is not 0: no clear opening is sent.");
 
     public static readonly MarkDefinition ClearSource = new(
         "Gordium: Clear source", new("2bc7eaef-1770-4077-870b-450ed224adde"), MarkValueKind.Text, MarkBinding.Type,
@@ -190,7 +190,7 @@ public static class Marks
     public static readonly MarkDefinition Stories = new(
         "Gordium: Stories", new("bf758947-8ee4-490c-a499-dee706a6f1e7"), MarkValueKind.Integer, MarkBinding.Instance,
         [ProjectInformation], "facts.stories",
-        "The building's number of stories as the City of Ithaca counts them (§325-3B STORY: from one floor level to the next floor or the roof; counted at the main entrance side, §325-8A Column 8). " +
+        "A count: the building's number of stories as the City of Ithaca counts them (§325-3B STORY: from one floor level to the next floor or the roof; counted at the main entrance side, §325-8A Column 8). " +
         "A basement counts when the floor above it is more than 6 ft above the grade plane or more than 12 ft above the finished ground at any point; a cellar never counts; " +
         "a mezzanine doesn't; an attic doesn't when unfinished and without human occupancy. A whole number, 1 or more: kept only within what the drawing allows. " +
         "Blank: the count is read from the drawing, and needs review where the drawing allows more than one.");
@@ -211,7 +211,7 @@ public static class Marks
     public static readonly MarkDefinition StoriesAboveGradePlane = new(
         "Gordium: Stories above grade plane", new("3f5ba80f-f877-49d9-bc47-a86de4a87a19"), MarkValueKind.Integer,
         MarkBinding.Instance, [ProjectInformation], "building.stories_above_grade_plane",
-        "The building's stories above grade plane as the NYS Residential Code counts them (R202 STORY ABOVE GRADE PLANE: a story whose floor is entirely above grade plane, or whose floor above is more than 6 ft above grade plane, more than 12 ft above the finished ground at any point, or more than 6 ft above the finished ground for more than half the perimeter; a habitable attic counts, R316.3). " +
+        "A count: the building's stories above grade plane as the NYS Residential Code counts them (R202 STORY ABOVE GRADE PLANE: a story whose floor is entirely above grade plane, or whose floor above is more than 6 ft above grade plane, more than 12 ft above the finished ground at any point, or more than 6 ft above the finished ground for more than half the perimeter; a habitable attic counts, R316.3). " +
         "It decides which code governs (R101.2: not more than three). A whole number, 1 or more. Blank: Gordium: Stories stands in where nothing is drawn below the ground.");
 
     /// <summary>Whether each dwelling unit has a separate means of egress (<c>building.separate_means_of_egress</c>).</summary>
@@ -253,13 +253,13 @@ public static class Marks
     public static readonly MarkDefinition DwellingUnits = new(
         "Gordium: Dwelling units", new("aa32131a-e757-47a3-abf8-9deb81d7a09a"), MarkValueKind.Integer, MarkBinding.Instance,
         [ProjectInformation], "facts.dwelling_units",
-        "The dwelling units on this lot (a building split along its party walls onto several lots: this lot's units only), an accessory dwelling unit not counted (Gordium: Accessory dwelling unit says it). A whole number, 1 or more. Blank: the use's own count (one for a detached one-family dwelling).");
+        "A count: the dwelling units on this lot (a building split along its party walls onto several lots: this lot's units only), an accessory dwelling unit not counted (Gordium: Accessory dwelling unit says it). A whole number, 1 or more. Blank: the use's own count (one for a detached one-family dwelling).");
 
     /// <summary>The dwelling units in the whole attached building, every lot it stands on (<c>facts.attached_units_in_building</c>).</summary>
     public static readonly MarkDefinition UnitsInAttachedBuilding = new(
         "Gordium: Units in the attached building", new("bccb088a-c087-475f-9ff9-53fd10133d0e"), MarkValueKind.Integer,
         MarkBinding.Instance, [ProjectInformation], "facts.attached_units_in_building",
-        "For an attached one-family dwelling (one_family_attached): the dwelling units in the whole attached building, every lot it stands on (§325-3B: three to six), 1 or more. It decides whether the building is a townhouse (RCNYS R202: three or more townhouse units). Blank: which code governs needs review.");
+        "A count: for an attached one-family dwelling (one_family_attached): the dwelling units in the whole attached building, every lot it stands on (§325-3B: three to six), 1 or more. It decides whether the building is a townhouse (RCNYS R202: three or more townhouse units). Blank: which code governs needs review.");
 
     /// <summary>Whether a home occupation is planned (<c>facts.home_occupation</c>).</summary>
     public static readonly MarkDefinition HomeOccupation = new(
@@ -271,7 +271,7 @@ public static class Marks
     public static readonly MarkDefinition RoomsLetForProfit = new(
         "Gordium: Rooms let for profit", new("2f038e8d-2d26-4e46-b92a-1c51d08bca87"), MarkValueKind.Integer,
         MarkBinding.Instance, [ProjectInformation], "facts.rooms_let_for_profit",
-        "The rooms let for profit (to roomers) in the building, 0 or more; with any, the Residential Code covers it only when owner-occupied with five or fewer guestrooms and a sprinkler system (RCNYS R101.2 item 6). Blank: Gordium assumes none and says so.");
+        "A count: the rooms let for profit (to roomers) in the building, 0 or more; with any, the Residential Code covers it only when owner-occupied with five or fewer guestrooms and a sprinkler system (RCNYS R101.2 item 6). Blank: Gordium assumes none and says so.");
 
     /// <summary>Whether an accessory dwelling unit is on the lot (<c>facts.accessory_dwelling_unit</c>).</summary>
     public static readonly MarkDefinition AccessoryDwellingUnit = new(
@@ -283,7 +283,7 @@ public static class Marks
     public static readonly MarkDefinition AdusOnParcel = new(
         "Gordium: ADUs on parcel", new("1fa82254-92d5-4f27-acef-924bfc047d7c"), MarkValueKind.Integer, MarkBinding.Instance,
         [ProjectInformation], "facts.adus_on_parcel",
-        "With an accessory dwelling unit on the lot: the accessory dwelling units on the parcel, any already there included (§325-28C(1): one per parcel), 1 or more. More than one keeps which code governs at needs review (each may be one more of the building's units, RCNYS R202 DWELLING). Blank: Gordium assumes one, the one stated, and says so.");
+        "A count: with an accessory dwelling unit on the lot, the accessory dwelling units on the parcel, any already there included (§325-28C(1): one per parcel), 1 or more. More than one keeps which code governs at needs review (each may be one more of the building's units, RCNYS R202 DWELLING). Blank: Gordium assumes one, the one stated, and says so.");
 
     /// <summary>Whether the accessory dwelling unit is detached (<c>facts.adu_detached</c>).</summary>
     public static readonly MarkDefinition AduDetached = new(
@@ -300,20 +300,20 @@ public static class Marks
         "Gordium: Stream within 20 ft", new("17620cff-9a18-449f-900b-cd66e0ed1b82"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "facts.stream_near_lot",
         "Yes when any inlet wall, or the bank of an inlet channel or stream (at average water level), is within 20 ft of the lot; then give the distance (Gordium: Distance from stream). " +
-        "§325-26: \"No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level.\" No: none. Blank: the rule needs review.");
+        "§325-26: \"No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level, except for those structures directly connected with marine or public or commercial recreation activities.\" No: none. Blank: the rule needs review.");
 
     /// <summary>The least distance from a new structure to that wall or bank (<c>facts.stream_distance</c>, feet).</summary>
     public static readonly MarkDefinition StreamDistance = new(
         "Gordium: Distance from stream", new("6b203698-192c-4814-b27c-4e5968fa8111"), MarkValueKind.Length,
         MarkBinding.Instance, [ProjectInformation], "facts.stream_distance",
-        "With a stream or inlet within 20 ft of the lot: the least horizontal distance from any new structure (house, addition, garage, deck, fence; not a patio) to the inlet wall or the stream's bank, at average water level, as typed (never rounded). " +
+        "In feet: with a stream or inlet within 20 ft of the lot, the least horizontal distance from any new structure (house, addition, garage, deck, fence; not a patio) to the inlet wall or the stream's bank, at average water level, as typed (never rounded). " +
         "§325-26: \"No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level\"; §325-3B: \"Structures shall not include patios or terraces.\" A length, 0 or more. Blank: the rule needs review.");
 
     /// <summary>The most people in any one dwelling unit not related to its family (<c>facts.unrelated_persons</c>).</summary>
     public static readonly MarkDefinition UnrelatedPersons = new(
         "Gordium: Unrelated people per unit", new("74a581ac-f1c6-4062-a97f-0504955d2175"), MarkValueKind.Integer,
         MarkBinding.Instance, [ProjectInformation], "facts.unrelated_persons",
-        "The most people in any one dwelling unit not related by blood, marriage or adoption to its household's family, minor dependent children in a parent's or relative's care left out. " +
+        "A count: the most people in any one dwelling unit not related by blood, marriage or adoption to its household's family, minor dependent children in a parent's or relative's care left out. " +
         "§325-3B DWELLING, ONE-FAMILY: \"A dwelling unit occupied exclusively for residential purposes by an individual or family and not more than one unrelated individual or a functional family unit. In the R-1 Zones, occupancy by an individual or a family and not more than two unrelated individuals is permitted if the dwelling is owner-occupied.\" " +
         "A whole number, 0 or more. Blank: the occupancy rule needs review.");
 
@@ -337,7 +337,7 @@ public static class Marks
     public static readonly MarkDefinition GarageCars = new(
         "Gordium: Garage cars", new("08e37847-735e-417a-85fa-fb945a28276f"), MarkValueKind.Integer,
         MarkBinding.Instance, [ProjectInformation], "facts.garage_cars",
-        "The cars the lot's private garages hold, all together: every enclosed garage, attached or detached; 0 if there is none (a carport isn't enclosed). " +
+        "A count: the cars the lot's private garages hold, all together: every enclosed garage, attached or detached; 0 if there is none (a carport isn't enclosed). " +
         "Zoning chart, Private garage, note 6: \"For not more than three cars.\" §325-3B GARAGE, PRIVATE: \"An enclosed space for the storage of one or more motor vehicles\". " +
         "A whole number, 0 or more. Blank: the garage rule needs review.");
 
@@ -345,7 +345,7 @@ public static class Marks
     public static readonly MarkDefinition PrivateGarages = new(
         "Gordium: Private garages", new("92d7674d-e182-407c-a43b-2acb0146265b"), MarkValueKind.Integer,
         MarkBinding.Instance, [ProjectInformation], "facts.private_garages",
-        "With more than three garage cars: the private garages on the lot, an attached garage counted. " +
+        "A count: with more than three garage cars, the private garages on the lot, an attached garage counted. " +
         "Zoning chart, Private garage, note 6: \"For not more than three cars.\" Whether that limits each garage or all of them together is an open question, so cars spread over garages of three or fewer each need a person's check. A whole number, 1 or more. Blank: the garage rule needs review when the cars are over three.");
 
     /// <summary>The <see cref="GroundFrom"/> words and the <c>grade_from</c> each sends.</summary>
@@ -466,6 +466,16 @@ public static class Marks
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
     ];
+
+    /// <summary>What a number typed in a mark means, said before it is typed (the Setup form's label: "Distance from
+    /// stream (ft)"; the tooltip's first words: "In feet:" or "A count:"): feet for a length (Revit's internal unit, what
+    /// the reader sends), a count for a whole number; null for a mark that takes no number.</summary>
+    public static string? Unit(MarkDefinition m) => m.Kind switch
+    {
+        MarkValueKind.Length => "ft",
+        MarkValueKind.Integer => "count",
+        _ => null,
+    };
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------
 
