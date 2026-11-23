@@ -65,7 +65,8 @@ public sealed class ReadSpeedTests
                      // the skip: only a closed solid with a box, apart by more than the margin from the band's 8-corner box
                      "case BandPiece.Body { Box: { } box } when box.ApartFrom(bandAround, CutMargin):",
                      "private const double CutMargin = 1.0;",
-                     "var bandAround = Box3.Turned(P(bandBox.Min), P(bandBox.Max), T(bandBox.Transform));",
+                     "var (bandMin, bandMax, bandAround) = boxes;",
+                     "Box3.Turned(P(b.Min), P(b.Max), T(b.Transform))",
                      "return Box3.Turned(P(b.Min), P(b.Max), T(b.Transform));",
                      // a solid Revit can't box is cut, as before; boxing it never throws into the walk
                      "internal sealed record Body(Solid Solid, Box3? Box) : BandPiece;",
@@ -108,6 +109,24 @@ public sealed class ReadSpeedTests
         // it runs where the outlines always ran: inside the enclosed areas' own transaction, after the geometry kept
         var close = source.IndexOf("}   // the geometry kept is let go here, before anything changes the model", StringComparison.Ordinal);
         Assert.True(source.IndexOf("() => OutlinesTogether(doc, phase, level,", StringComparison.Ordinal) > close);
+    }
+
+    [Fact]
+    public void The_bands_box_is_worked_out_once_per_band_at_the_first_element_that_needs_it()
+    {
+        var source = Addin("RevitInterior.cs");
+        var near = source.IndexOf("private static List<NearbyElement>? Near(", StringComparison.Ordinal);
+        var body = source[near..source.IndexOf("private static string Category(", near, StringComparison.Ordinal)];
+        // worked out inside the loop, just before the first InBand (where each InBand worked it out), then kept
+        var first = body.IndexOf("bandBoxes ??= BandBoxes.Of(band);", StringComparison.Ordinal);
+        var loop = body.IndexOf("foreach (var e in found)", StringComparison.Ordinal);
+        var inBand = body.IndexOf("InBand(e, band, bandBoxes, options)", StringComparison.Ordinal);
+        Assert.True(loop >= 0 && first > loop && inBand > first);
+        Assert.Contains("BandBoxes? bandBoxes = null;\n            foreach (var e in found)", body);
+        // the same boxes as before: the two corners through the transform, and the box round all 8
+        Assert.Contains("return new(b.Transform.OfPoint(b.Min), b.Transform.OfPoint(b.Max), Box3.Turned(P(b.Min), P(b.Max), T(b.Transform)));", source);
+        Assert.DoesNotContain("band.GetBoundingBox()", source[source.IndexOf("InBand(Element e,", StringComparison.Ordinal)..]
+            .Split("private sealed record BandBoxes")[0]);
     }
 
     private static int Count(string text, string what)

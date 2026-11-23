@@ -273,7 +273,7 @@ public sealed class ReadStepsTests
                      "ReadSteps.Count(step + \".candidates\", found.Count);",
                      "ReadSteps.Max(step + \".candidates_per_call\", found.Count);",
                      "ReadSteps.Time(step + \".faces\", () => Faces(e, options))",
-                     "ReadSteps.Time(step + \".band\", () => InBand(e, band, options))",
+                     "ReadSteps.Time(step + \".band\", () => InBand(e, band, bandBoxes, options))",
                      "ReadSteps.Count(step + \".read\", list.Count);",
                      "ReadSteps.Max(step + \".read_per_call\", list.Count);",
                      "ReadSteps.Count(\"inside.boolean_ops\");",
@@ -347,7 +347,7 @@ public sealed class ReadStepsTests
         // FacesRead only through the memo; one walk of the geometry for the band, never in InBand itself
         Assert.Equal(1, Count(source, "() => FacesRead(e, options)"));
         Assert.Equal(1, Count(source, "() => BandPieces(e, options)"));
-        var inBand = source.IndexOf("InBand(Element e, Solid band, Options options)", StringComparison.Ordinal);
+        var inBand = source.IndexOf("InBand(Element e, Solid band, BandBoxes boxes, Options options)", StringComparison.Ordinal);
         var pieces = source.IndexOf("private abstract record BandPiece", StringComparison.Ordinal);
         Assert.DoesNotContain("get_Geometry", source[inBand..pieces]);
         // the band's catch is the walk's own (Revit's three refusals), and the walk keeps every throw for it

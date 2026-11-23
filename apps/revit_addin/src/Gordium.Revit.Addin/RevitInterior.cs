@@ -1037,14 +1037,12 @@ internal static class RevitInterior
     /// read (<see cref="BandPieces"/>, kept by <see cref="BandPiecesKept"/>); only what depends on the band (each solid's
     /// intersection, each open shell's box against the band's) is worked out per band, piece by piece in the walk's
     /// order, so the result, its counts and where a throw stops it are the walk's own.</summary>
-    private static (List<SurfaceRecord> Faces, bool Failed, int OpenShells) InBand(Element e, Solid band, Options options)
+    private static (List<SurfaceRecord> Faces, bool Failed, int OpenShells) InBand(Element e, Solid band, BandBoxes boxes, Options options)
     {
         var faces = new List<SurfaceRecord>();
         var failed = false;
         var open = 0;
-        var bandBox = band.GetBoundingBox();
-        XYZ bandMin = bandBox.Transform.OfPoint(bandBox.Min), bandMax = bandBox.Transform.OfPoint(bandBox.Max);
-        var bandAround = Box3.Turned(P(bandBox.Min), P(bandBox.Max), T(bandBox.Transform));
+        var (bandMin, bandMax, bandAround) = boxes;
         var pieces = BandPiecesKept.Get(GeometryKey.Of(e, options), () => BandPieces(e, options));
         try
         {
@@ -1094,6 +1092,17 @@ internal static class RevitInterior
             return ([], true, 0);
         }
         return (faces, failed, open);
+    }
+
+    /// <summary>The band's box as <see cref="InBand"/> tests against it: its two corners through the box's transform
+    /// (an open shell's test) and the box round all 8 (a solid's), worked out once per band, not once per element.</summary>
+    private sealed record BandBoxes(XYZ Min, XYZ Max, Box3 Around)
+    {
+        internal static BandBoxes Of(Solid band)
+        {
+            var b = band.GetBoundingBox();
+            return new(b.Transform.OfPoint(b.Min), b.Transform.OfPoint(b.Max), Box3.Turned(P(b.Min), P(b.Max), T(b.Transform)));
+        }
     }
 
     /// <summary>A piece of an element's geometry as <see cref="InBand"/> uses it, in its walk's order: an open shell's
@@ -1203,6 +1212,7 @@ internal static class RevitInterior
             ReadSteps.Count(step + ".candidates", found.Count);
             ReadSteps.Max(step + ".candidates_per_call", found.Count);
             var list = new List<NearbyElement>();
+            BandBoxes? bandBoxes = null;
             foreach (var e in found)
             {
                 if (e.Id == skip || e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model } cat)
@@ -1214,7 +1224,10 @@ internal static class RevitInterior
                                              faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id));
                 if (band is not null)
                 {
-                    var (banded, bandFailed, openShells) = ReadSteps.Time(step + ".band", () => InBand(e, band, options));
+                    // the band's box worked out at the first element that needs it, where each InBand worked it out
+                    // before (a refusal there is the same refusal at the same element)
+                    bandBoxes ??= BandBoxes.Of(band);
+                    var (banded, bandFailed, openShells) = ReadSteps.Time(step + ".band", () => InBand(e, band, bandBoxes, options));
                     near = near with { Banded = banded, BandFailed = bandFailed, OpenShells = openShells };
                 }
                 list.Add(near);
