@@ -515,3 +515,23 @@ each fails when its behaviour is reverted. Differences from the agreed pictures:
 results, not 11 (its own two rows count too, one of them on the rooms card); two pills that don't fit side by side
 (a count over 99) sit at the top and bottom right; the summary covers every row, egress included, grouped as the
 checker groups them, and says the checker's headline and what was checked rather than the district and use.
+
+## Change 20: fields for the house's own facts
+
+Why: on 106 Ithaca Rd as Revit read it, the worker's first cards (a stream within 20 ft, who lives there, the garage's
+cars) said "No Gordium mark is named for this": the architect could only decide them by hand, never set them in Revit.
+
+What changed: seven Project Information marks (`Marks.cs`), each with a tooltip quoting the law it answers, read by
+`ProjectFacts.HouseFacts` and listed by the Setup form (it builds from `Marks.All`): Stream within 20 ft and Distance
+from stream (§325-26), Unrelated people per unit, Owner-occupied and Functional family unit (§325-3B DWELLING,
+ONE-FAMILY, OWNER, FUNCTIONAL FAMILY UNIT), Garage cars and Private garages (the zoning chart's private garage, note 6).
+The worker's cards already name the fields they need (`facts.stream_near_lot`…), so each card now finds its mark and
+opens Project Information; on the house, fix 1 becomes "Set 9 facts on Project Information" (a Project Information fix
+counts its facts by their marks: the stream's card asks two). What is left with no field: the stair nosings fact and
+the "these are all the rooms / openings / doors" lists.
+
+The rules kept: a blank field is not stated, so its rule needs review (never No or 0); a value Gordium can't read (not
+Yes or No, not a whole number, a count under its least, a distance under 0) is said in plain words, not sent, and named
+as not sent in a check sent anyway; the distance is a Feet field saved as typed (19.96 ft is never 20); nothing is
+written without Save. Pinned in `HouseFactFieldsTests` and `ProjectCheckTests` (through the real worker: blank, the
+stream, occupancy and garage rules need review; set, they comply; four cars in one garage fails).
