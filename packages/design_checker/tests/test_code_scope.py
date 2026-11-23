@@ -403,3 +403,14 @@ def test_a_set_aside_adu_count_is_never_read_as_unstated():
     got = code_scope.decide({**DRAWN, "use": "one_family_detached", "stories": 2,
                              code_scope.SET_ASIDE: {"adus_on_parcel": "the counts disagree"}}, None)
     assert got["code"] is None and "adus on parcel: the counts disagree" in got["why"]
+
+
+# ---- review round 6 (2026-11-22) --------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("use", ["one_family_semi_detached", "two_family", "one_family_detached"])
+def test_units_in_the_building_that_disagree_with_a_houses_use_need_review(use):
+    c, _, got = code({"use": use, "attached_units_in_building": 4, "stories": 2}, {"separate_means_of_egress": True})
+    assert c is None and "Gordium: Units in the attached building" in got["ask"]
+    own = {"one_family_semi_detached": 2, "two_family": 2, "one_family_detached": 1}[use]
+    assert code({"use": use, "attached_units_in_building": own, "stories": 2},
+                {"separate_means_of_egress": True})[0] == code_scope.RESIDENTIAL

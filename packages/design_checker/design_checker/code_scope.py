@@ -356,6 +356,15 @@ def decide(values: dict, building: dict | None) -> dict:
         what, item, n = HOUSES[use]
         lot_units = 2 if use == "two_family" else 1
         building_units = n + (1 if attached_adu else 0)
+        # the units of the whole building stated beside a house's use: they must be the use's own (review round 6:
+        # a count read only for an attached use was ignored for the others)
+        stated_building = values.get("attached_units_in_building")
+        if stated_building is not None and stated_building != n:
+            used["attached_units_in_building"] = stated_building
+            return _answer(None, f"the use is {use} ({n} dwelling unit{'s' if n > 1 else ''} in the building) but "
+                           f"{stated_building:g} units in the whole attached building are stated",
+                           ["R202 DWELLING", "R101.2"], used,
+                           f"correct the use ({MARK['use']}) or the units ({MARK['attached_units_in_building']})")
     # the dwelling units stated for the lot agree with the use, whatever the use word: Ithaca's dwelling_units leaves
     # an ADU out (its own fact, as the occupant counts read it: measure.py fact_conflicts; the mark's tooltip says so),
     # so only the use's own count agrees; one more beside a stated ADU may or may not count it in: needs review
