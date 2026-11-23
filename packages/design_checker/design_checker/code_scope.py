@@ -303,8 +303,10 @@ def stories_bound(values: dict, facts: dict) -> tuple[int | None, str]:
     return None, "not known"
 
 
-def decide(values: dict, building: dict | None) -> dict:
-    """Which book governs the building's egress (module docstring), with why and the sections behind it."""
+def decide(values: dict, building: dict | None, uses=None) -> dict:
+    """Which book governs the building's egress (module docstring), with why and the sections behind it. `uses`: the
+    place's listed uses (its allowed values); None, every place's (use_names). A use not among them is one Gordium
+    can't place (a typo, a use it doesn't know): needs review, never a code (principle 4)."""
     values = values or {}
     # the building block's facts, and any the check's values carry (a host with no interior description may state
     # them as facts); the building block's own stand where both give one
@@ -339,6 +341,9 @@ def decide(values: dict, building: dict | None) -> dict:
     if not isinstance(use, str) or not use:
         return _answer(None, "the building's use isn't stated", ["R101.2", "101.2 exception 1"], used,
                        f"state the building's use ({MARK['use']})")
+    if use not in (set(uses) if uses is not None else use_names()):
+        return _answer(None, f"the use {value_words(use)} isn't one Gordium knows: correct {MARK['use']}",
+                       ["R101.2"], used, f"correct the use ({MARK['use']})")
     groups = facts.get("occupancy_groups") or []
     if any(g != "R-3" for g in groups):
         if use in HOUSES or use == ATTACHED:

@@ -237,7 +237,8 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
     section, so neither reads as the answer (principle 4). The decision is the result's `code_scope`."""
     waiting = _no_rooms(interior)
     building = interior.get("building") if isinstance(interior, dict) else None
-    scope = code_scope.decide(values, building) if any(law.get("scope") for law in found["laws"]) else None
+    scope = code_scope.decide(values, building, (allowed or {}).get("use") or None) if any(
+        law.get("scope") for law in found["laws"]) else None
     run = [law for law in found["laws"]
            if scope is None or law.get("scope") is None or scope["code"] in (None, law["scope"])]
     undecided = scope is not None and scope["code"] is None

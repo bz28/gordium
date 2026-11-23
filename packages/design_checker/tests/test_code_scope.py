@@ -414,3 +414,16 @@ def test_units_in_the_building_that_disagree_with_a_houses_use_need_review(use):
     own = {"one_family_semi_detached": 2, "two_family": 2, "one_family_detached": 1}[use]
     assert code({"use": use, "attached_units_in_building": own, "stories": 2},
                 {"separate_means_of_egress": True})[0] == code_scope.RESIDENTIAL
+
+
+def test_a_use_gordium_doesnt_know_never_picks_a_code():
+    """Review round 5 (a decision fixed): a misspelled or unknown use got the Building Code as "none of the dwellings
+    R101.2 lists". A use the place doesn't list can't be placed, so it needs review, quoted exactly as typed."""
+    got = code_scope.decide({"use": "one_famly_detached", "dwelling_units": 1}, None)
+    assert got["code"] is None
+    assert got["why"] == "the use “one_famly_detached” isn't one Gordium knows: correct Gordium: Use"
+    assert got["ask"] == "correct the use (Gordium: Use)"
+    # the place's own list, as egress passes it: a use outside it is unknown there, whatever another place lists
+    assert code_scope.decide({"use": "retail_store_or_service_commercial"}, None, {"one_family_detached"})["code"] \
+        is None
+    assert code_scope.decide({"use": "retail_store_or_service_commercial"}, None)["code"] == code_scope.BUILDING
