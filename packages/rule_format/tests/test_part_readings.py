@@ -36,7 +36,10 @@ def test_one_reading_passing_and_one_failing_needs_review_naming_them(maine):
     rules, allowed = maine
     result, why = outcome(rules["general.nfpa_16_2_5_2_dead_end"], dead_end(30.0, 5.0), NEW_DAY_CARE, allowed)
     assert result == "needs_review"                                   # 30 > 20 fails, 5 passes (test 8)
-    assert "door_ends_dead_end = without_door" in why and "complies if door_ends_dead_end = with_door" in why
+    assert why == ("whether a door into a room with another way out ends a dead end is an open question (question 7): "
+                   "under one reading it complies (the door ends the dead end), under the other it doesn't comply or "
+                   "can't be told (the door doesn't end it)")
+    assert parts.is_reading_words(why)
 
 
 def test_both_readings_passing_pass_and_both_failing_fail(maine):
@@ -82,7 +85,12 @@ def test_15_the_10_percent_rule_is_worked_under_all_four_pairs_of_readings(maine
     rule["kind"] = "rule"
     result, why = outcome(rule, areas(5000, 5151, 490, 535.811), {}, allowed)
     assert result == "needs_review"
-    assert "accessory_area_face = outer_faces, story_area_face = inside" in why
+    assert why.startswith("whether a storage room's area is measured inside its walls or to their outer faces and "
+                          "whether a story's area is measured inside its exterior walls or to their outer faces are "
+                          "open questions (question 3): it complies if ")
+    assert ("doesn't comply or can't be told if the storage rooms' area is measured to the walls' outer faces and the "
+            "story's area is measured inside its walls") in why
+    assert "_" not in why and " = " not in why and parts.is_reading_words(why)
     assert outcome(rule, areas(5000, 5151, 490, 500), {}, allowed)[0] == "pass"
     assert outcome(rule, areas(5000, 5151, 520, 540), {}, allowed)[0] == "fail"
 
@@ -187,3 +195,22 @@ def test_the_architects_statement_is_said_beside_the_row_and_never_holds_a_pass(
     part = {"id": "L1", "measures": {}, "architect_stated": {"common_path_of_travel_occupied": LEFT_OUT}}
     row = row_of(rule, {"story": [part]}, SPRINKLERED_NEW, allowed)
     assert row["outcome"] == "needs_review" and "architect_stated" not in row
+
+
+def test_a_mixed_result_says_its_open_question_in_words_never_a_tag(maine):
+    """The reason an architect reads (the Revit pane's cause card and row): the question's own title and number
+    from the open questions list (docs/decisions/2026-11-20_route_measurement.md), never "tag = answer"."""
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_2_dead_end"]
+    # neither reading complies (one fails, one can't be told): said so, never "complies if none"
+    assert parts.reading_words([{Q7: "with_door"}, {Q7: "without_door"}], [], [{Q7: "with_door"}, {Q7: "without_door"}])         == ("whether a door into a room with another way out ends a dead end is an open question (question 7): under "
+            "either reading it doesn't comply or can't be told (the door ends the dead end; the door doesn't end it)")
+    # a tag the list doesn't have yet is still words
+    assert parts.question_words(["some_new_question"]) == "“some new question” is an open question"
+    assert "_" not in parts.reading_words([{"q_x": "a_b"}, {"q_x": "c"}], [{"q_x": "a_b"}], [{"q_x": "c"}])
+    # every tag the route measuring names its readings by has its words and number
+    from model_measurement.routes import areas, dead_ends
+    for tag in (dead_ends.QUESTION, areas.STORY_AREA_QUESTION, areas.ACCESSORY_AREA_QUESTION):
+        assert {"question", "number", "answers"} <= set(parts.READING_QUESTIONS[tag])
+    assert set(parts.READING_QUESTIONS[dead_ends.QUESTION]["answers"]) == {dead_ends.WITH, dead_ends.WITHOUT}
+    assert outcome(rule, dead_end(30.0, 5.0), NEW_DAY_CARE, allowed)[0] == "needs_review"
