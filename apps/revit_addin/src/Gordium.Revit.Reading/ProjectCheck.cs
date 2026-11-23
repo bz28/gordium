@@ -64,9 +64,12 @@ public static class ProjectCheck
         var interior = InteriorReader.Read(inside);
         if (building.Building is { } said)       // which New York code governs: the architect's statements, as given
             interior.Interior["building"] = said;
-        // sent anyway: the lot facts set but not sent (a count under its least) are named, so the code decision reads
-        // each as stated and unread, never as not stated (code_scope.py facts_not_sent; review round 5)
-        var unsent = notStated.Select(m => m.Feeds).Where(f => f.StartsWith("facts.", StringComparison.Ordinal))
+        // sent anyway: only the lot facts whose mark holds a value Gordium couldn't send (a count under its least) are
+        // named, so the code decision reads each as stated and unread, never as not stated (code_scope.py
+        // facts_not_sent; review round 5); a mark simply not set (a blank Use) is not stated, and the decision asks for
+        // it as such (review round 6)
+        var unsent = notStated.Where(m => inside.ProjectMarks.TryGetValue(m.Guid, out var v) && v.HasValue)
+                              .Select(m => m.Feeds).Where(f => f.StartsWith("facts.", StringComparison.Ordinal))
                               .Select(f => (JsonNode)f["facts.".Length..].Split(' ')[0].TrimEnd(',')).ToList();
         if (unsent.Count > 0)
         {

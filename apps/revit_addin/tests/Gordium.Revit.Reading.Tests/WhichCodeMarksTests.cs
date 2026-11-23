@@ -153,6 +153,25 @@ public sealed class WhichCodeMarksTests(RealWorker worker) : IClassFixture<RealW
         Assert.Equal(2, ProjectFacts.Read(house.Model()).Facts["adus_on_parcel"]!.GetValue<int>());
     }
 
+    /// <summary>Review round 6: a mark simply not set is not "stated, but not sent": sent anyway with Use blank, the
+    /// building block names no "use", and the code decision asks for the use, never calling it stated.</summary>
+    [Fact]
+    public async Task Sent_anyway_a_blank_use_is_not_stated_never_stated_but_not_sent()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        house.ProjectMarks.Remove(Marks.Use.Guid);
+        Mark(house, Marks.StoriesAboveGradePlane, new(true, 1));
+        var client = await worker.RunningAsync();
+        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client), anyway: true);
+        Assert.Contains(Marks.Use, prepared.NotStated);
+        var notSent = prepared.Request!.Interior["building"]?["facts_not_sent"]?.AsArray().Select(n => n!.GetValue<string>()) ?? [];
+        Assert.DoesNotContain("use", notSent);
+        var which = (await ProjectCheck.SendAsync(client, prepared.Request)).Raw.GetProperty("which_code");
+        Assert.Equal(JsonValueKind.Null, which.GetProperty("code").ValueKind);
+        Assert.DoesNotContain("not sent", which.GetProperty("why").GetString(), StringComparison.Ordinal);   // "isn't stated"
+        Assert.Contains("Gordium: Use", which.GetProperty("ask").GetString(), StringComparison.Ordinal);
+    }
+
     private static (FakeHouse, RevitModel) Project(string house)
     {
         var h = FakeHouse.Draw(house);
