@@ -108,93 +108,10 @@ def _folder(jurisdiction) -> Path:
     return p if p.is_absolute() else REPO / p
 
 
-# Each book's validation (its Context and the rule checks: the slow, file-pure part of laws), kept by a snapshot of
-# every file and folder under the roots it can read from, taken before and after it runs (review round 9: watching
-# its reads missed a file appearing, an edit during the run and a passing error). Kept only when the two snapshots
-# agree and it raised nothing; used again only when a fresh snapshot equals the one it was kept by. Everything else
-# laws gives (titles, scopes, sections, the list not checked yet) is worked out fresh at every call.
-_VALIDATED: dict = {}
-
-
-def _roots(folder: Path) -> list[Path]:
-    """Where a book's validation can read from: the regulations (every place's and state's folders, the reviewers,
-    the extraction guide) and the rule format's own files."""
-    return [REPO / "regulations", REPO / "packages/rule_format/rule_format"]
-
-
-def _snapshot(roots) -> tuple:
-    """Every file and folder under the roots, each (path, size, change time), folders too (one gains or loses an
-    entry when a file is added, deleted or renamed): any change anywhere changes it. Stat-only."""
-    import os
-    out = []
-
-    def walk(top: str):
-        try:
-            with os.scandir(top) as entries:
-                for e in entries:
-                    if e.name == "__pycache__":
-                        continue
-                    try:
-                        s = e.stat(follow_symlinks=False)
-                    except OSError:
-                        out.append((e.path, None, None))
-                        continue
-                    out.append((e.path, s.st_size, s.st_mtime_ns))
-                    if e.is_dir(follow_symlinks=False):
-                        walk(e.path)
-        except OSError:
-            out.append((top, None, None))
-
-    for r in roots:
-        try:
-            s = os.stat(r)
-            out.append((str(r), s.st_size, s.st_mtime_ns))
-        except OSError:
-            out.append((str(r), None, None))
-        if os.path.isdir(r):
-            walk(str(r))
-    return tuple(sorted(out))
-
-
-def _validate(folder: Path, book: Path) -> tuple[dict, bool]:
-    """A book's validation: ({problems, documents, kinds, rules}, whether it raised). Rules only when it passes the
-    rule checks. Never a crash (zoning's answer goes with it), never a rule used unchecked."""
-    try:
-        ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
-        problems = ctx.problems + state_settings_problems(folder, ctx) + rulebook_file_problems(book, ctx)
-        return {"problems": problems, "documents": ctx.sources,
-                "kinds": {k: v for k, v in ctx.allowed().items() if k not in ("use", "district")},
-                "rules": [] if problems else load(book)["rules"]}, False
-    except Exception as e:
-        return {"problems": [f"its sources can't be read ({type(e).__name__}: {e})"], "documents": {}, "kinds": {},
-                "rules": []}, True
-
-
-def _validated(folder: Path, book: Path) -> dict:
-    """_validate, kept while nothing under its roots changes (and no reader it calls is swapped: a test's
-    monkeypatch), each caller given its own copy. Fails closed: an edit during the run, or an error, is never kept."""
-    import copy
-    readers = (id(load), id(rulebook_file_problems), id(state_settings_problems),
-               id(Context.for_jurisdiction.__func__))     # a class method's bound object is new at every look
-    key = (str(folder), str(book), readers)
-    roots = _roots(folder)
-    before = _snapshot(roots)
-    hit = _VALIDATED.get(key)
-    if hit is not None and hit[0] == before:
-        return copy.deepcopy(hit[1])
-    result, raised = _validate(folder, book)
-    if not raised and _snapshot(roots) == before:
-        _VALIDATED[key] = (before, result)
-    else:
-        _VALIDATED.pop(key, None)
-    return copy.deepcopy(result)
-
-
 def laws(jurisdiction) -> dict:
     """The place and every state law it inherits, ready to check: {"place": its name, "laws": [{key, title, short,
     folder, rulebook, rules, problems, section_of, documents}]}. A rulebook that doesn't pass the rule checks gives
-    no rules and its problems (needs review, never a row). Each book's validation is kept by the files it read
-    (_validated); the rest is worked out at every call."""
+    no rules and its problems (needs review, never a row)."""
     refuse_state_alone(jurisdiction)
     p = place_of(_folder(jurisdiction))
     out = []
@@ -206,12 +123,17 @@ def laws(jurisdiction) -> dict:
         if book is None:
             law["problems"] = [NO_RULES.format(folder=law["key"])]
         else:
-            law.update(_validated(folder, book))
-            if not law["problems"]:
-                try:
+            try:          # never a crash (zoning's answer goes with it), never a rule used unchecked
+                ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
+                law["problems"] = ctx.problems + state_settings_problems(folder, ctx) + rulebook_file_problems(book, ctx)
+                law["documents"] = ctx.sources
+                law["kinds"] = {k: v for k, v in ctx.allowed().items() if k not in ("use", "district")}
+                if not law["problems"]:
+                    law["rules"] = load(book)["rules"]
                     law["section_of"] = _sections(folder)
-                except Exception as e:
-                    law["problems"], law["rules"] = [f"its sources can't be read ({type(e).__name__}: {e})"], []
+            except Exception as e:
+                law["problems"], law["rules"], law["section_of"] = \
+                    [f"its sources can't be read ({type(e).__name__}: {e})"], [], None
         law["not_checked_yet"], law["coverage_problem"] = _not_checked_yet(folder, law["rules"])
         out.append(law)
     return {"place": p.name, "laws": out}
