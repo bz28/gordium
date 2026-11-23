@@ -291,6 +291,63 @@ public static class Marks
         [ProjectInformation], "facts.adu_detached",
         "Yes when the accessory dwelling unit is in its own building; No when it is in or on the main building, where it is one more of the building's dwelling units (RCNYS R202 DWELLING: one or two). Blank, with an ADU on the lot: which code governs needs review.");
 
+    // ---- the house's own facts Ithaca's zoning reads and no drawing shows (UI design change 20): sent as the lot facts
+    // of the same names (host_core.facts.STATED_FACTS), each only when set, so an unset one is not stated and its rows
+    // need review (never No or 0); a value Gordium can't read is said, never sent, and its rows need review
+
+    /// <summary>Whether a stream or inlet is within 20 ft of the lot (<c>facts.stream_near_lot</c>, §325-26).</summary>
+    public static readonly MarkDefinition StreamNearLot = new(
+        "Gordium: Stream within 20 ft", new("17620cff-9a18-449f-900b-cd66e0ed1b82"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "facts.stream_near_lot",
+        "Yes when any inlet wall, or the bank of an inlet channel or stream (at average water level), is within 20 ft of the lot; then give the distance (Gordium: Distance from stream). " +
+        "§325-26: \"No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level.\" No: none. Blank: the rule needs review.");
+
+    /// <summary>The least distance from a new structure to that wall or bank (<c>facts.stream_distance</c>, feet).</summary>
+    public static readonly MarkDefinition StreamDistance = new(
+        "Gordium: Distance from stream", new("6b203698-192c-4814-b27c-4e5968fa8111"), MarkValueKind.Length,
+        MarkBinding.Instance, [ProjectInformation], "facts.stream_distance",
+        "With a stream or inlet within 20 ft of the lot: the least horizontal distance from any new structure (house, addition, garage, deck, fence; not a patio) to the inlet wall or the stream's bank, at average water level, as typed (never rounded). " +
+        "§325-26: \"No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level\"; §325-3B: \"Structures shall not include patios or terraces.\" A length, 0 or more. Blank: the rule needs review.");
+
+    /// <summary>The most people in any one dwelling unit not related to its family (<c>facts.unrelated_persons</c>).</summary>
+    public static readonly MarkDefinition UnrelatedPersons = new(
+        "Gordium: Unrelated people per unit", new("74a581ac-f1c6-4062-a97f-0504955d2175"), MarkValueKind.Integer,
+        MarkBinding.Instance, [ProjectInformation], "facts.unrelated_persons",
+        "The most people in any one dwelling unit not related by blood, marriage or adoption to its household's family, minor dependent children in a parent's or relative's care left out. " +
+        "§325-3B DWELLING, ONE-FAMILY: \"A dwelling unit occupied exclusively for residential purposes by an individual or family and not more than one unrelated individual or a functional family unit. In the R-1 Zones, occupancy by an individual or a family and not more than two unrelated individuals is permitted if the dwelling is owner-occupied.\" " +
+        "A whole number, 0 or more. Blank: the occupancy rule needs review.");
+
+    /// <summary>Whether the owner lives in the one-family dwelling itself (<c>facts.owner_occupied</c>).</summary>
+    public static readonly MarkDefinition OwnerOccupied = new(
+        "Gordium: Owner-occupied", new("489c2902-38ec-430f-aa5e-47675cb48eff"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "facts.owner_occupied",
+        "Yes when the owner lives in the one-family dwelling itself, not only in an accessory dwelling unit on the lot. " +
+        "§325-3B: \"In the R-1 Zones, occupancy by an individual or a family and not more than two unrelated individuals is permitted if the dwelling is owner-occupied.\" OWNER: \"A person who maintains his/her principal residence in property for more than six months of each calendar year\". " +
+        "No: not owner-occupied. Blank: the occupancy rule needs review where it matters.");
+
+    /// <summary>Whether the household is to be shown to the City to be a functional family unit (<c>facts.functional_family_unit</c>).</summary>
+    public static readonly MarkDefinition FunctionalFamilyUnit = new(
+        "Gordium: Functional family unit", new("868efeab-7254-4c46-bf04-564a4c853946"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "facts.functional_family_unit",
+        "Yes when the household is to be shown to the City to be a functional family unit (the City's finding: Gordium then says a person checks it). " +
+        "§325-3B FUNCTIONAL FAMILY UNIT: \"A group of individuals living together in a single dwelling unit and functioning as a family with respect to those characteristics that are consistent with the purposes of zoning restrictions in residential neighborhoods.\" " +
+        "No: not one. Blank: the occupancy rule needs review where it matters.");
+
+    /// <summary>The cars all the lot's private garages hold together (<c>facts.garage_cars</c>).</summary>
+    public static readonly MarkDefinition GarageCars = new(
+        "Gordium: Garage cars", new("08e37847-735e-417a-85fa-fb945a28276f"), MarkValueKind.Integer,
+        MarkBinding.Instance, [ProjectInformation], "facts.garage_cars",
+        "The cars the lot's private garages hold, all together: every enclosed garage, attached or detached; 0 if there is none (a carport isn't enclosed). " +
+        "Zoning chart, Private garage, note 6: \"For not more than three cars.\" §325-3B GARAGE, PRIVATE: \"An enclosed space for the storage of one or more motor vehicles\". " +
+        "A whole number, 0 or more. Blank: the garage rule needs review.");
+
+    /// <summary>The private garages on the lot (<c>facts.private_garages</c>), asked only once the cars are over three.</summary>
+    public static readonly MarkDefinition PrivateGarages = new(
+        "Gordium: Private garages", new("92d7674d-e182-407c-a43b-2acb0146265b"), MarkValueKind.Integer,
+        MarkBinding.Instance, [ProjectInformation], "facts.private_garages",
+        "With more than three garage cars: the private garages on the lot, an attached garage counted. " +
+        "Zoning chart, Private garage, note 6: \"For not more than three cars.\" Whether that limits each garage or all of them together is an open question, so cars spread over garages of three or fewer each need a person's check. A whole number, 1 or more. Blank: the garage rule needs review when the cars are over three.");
+
     /// <summary>The <see cref="GroundFrom"/> words and the <c>grade_from</c> each sends.</summary>
     public static IReadOnlyList<(string Word, string GradeFrom)> GroundWords => [("Spot grades", "spot"), ("Finished spot grades", "finished_spots")];
     /// <summary>A level the architect says has no rooms at all (a roof, a turret's top: Revit finds enclosed areas
@@ -407,6 +464,7 @@ public static class Marks
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
+        StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------

@@ -26,6 +26,9 @@ public enum FieldKind
     /// <summary>A whole number (the stories).</summary>
     Number,
 
+    /// <summary>A distance in feet, as typed (a decimal number, 0 or more: the distance from a stream), never rounded.</summary>
+    Feet,
+
     /// <summary>The street edge: picked on the plan by a click (the check's own street pick), never typed.</summary>
     StreetPick,
 
@@ -231,6 +234,8 @@ public static class SetupFacts
                      (Marks.RoomsLetForProfit, "rooms_let_for_profit"), (Marks.AdusOnParcel, "adus_on_parcel") })
             if (Marks.Count(Get(model, m)) is not null && read.Facts[key] is null)
                 left.Add(m);
+        // the house's own facts (UI design change 20): one holding what Gordium can't send
+        left.AddRange(ProjectFacts.HouseFacts(model).Select(p => p.Mark));
         return left;
     }
 
@@ -242,6 +247,7 @@ public static class SetupFacts
         ArgumentNullException.ThrowIfNull(model);
         var zone = draft?.Chosen(Marks.Zone) ?? Marks.Text(Get(model, Marks.Zone));
         var fields = new List<SetupField>();
+        var unsendable = ProjectFacts.HouseFacts(model).ToDictionary(p => p.Mark.Guid, p => p.Problem);
         foreach (var m in Marks.All.Where(m => m.Categories.Contains(Marks.ProjectInformation)))
         {
             var v = Get(model, m);
@@ -293,9 +299,20 @@ public static class SetupFacts
                     fields.Add(new(m, label, kind, group, required, choices ?? [], text, Plain.TryGetValue(m.Guid, out var plain) ? plain : law, problem));
                     break;
                 }
+                case MarkValueKind.Length:
+                {
+                    var feet = Marks.Length(v);
+                    fields.Add(new(m, label, FieldKind.Feet, group, required, [],
+                                   feet?.ToString("R", CultureInfo.InvariantCulture), law, null));
+                    break;
+                }
                 default:
-                    break;                                  // no length mark on Project Information
+                    break;
             }
+            // a house fact holding what Gordium can't send (another kind of value, under its least): said, so the form
+            // waits for it, never shown as blank
+            if (unsendable.TryGetValue(m.Guid, out var why) && fields.Count > 0 && fields[^1].Mark == m && fields[^1].Problem is null)
+                fields[^1] = fields[^1] with { Problem = why };
         }
         return fields.OrderBy(f => Order(f.Group)).ToList();      // stable: Marks.All's order within each heading
     }
@@ -401,6 +418,8 @@ public sealed class SetupDraft
                 FieldKind.Number when int.TryParse(chosen, NumberStyles.None, CultureInfo.InvariantCulture, out var n)
                                       && n >= SetupFacts.Least(f.Mark) => new MarkValue(true, n),
                 FieldKind.Choice when f.Choices.FirstOrDefault(c => c.Value == chosen) is { } c => new MarkValue(true, Text: c.Value),
+                FieldKind.Feet when double.TryParse(chosen, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var ft)
+                                    && double.IsFinite(ft) && ft >= 0 => new MarkValue(true, Number: ft),
                 FieldKind.Text => new MarkValue(true, Text: chosen),
                 // the street edge: only edges Gordium's pick kept (never typed text)
                 FieldKind.StreetPick when StreetEdges.Parse(chosen) is not null => new MarkValue(true, Text: chosen),
@@ -411,6 +430,7 @@ public sealed class SetupDraft
                 problems.Add(f.Kind switch
                 {
                     FieldKind.Number => $"{f.Label}: \"{chosen}\" isn't a whole number {SetupFacts.Least(f.Mark)} or more: not saved",
+                    FieldKind.Feet => $"{f.Label}: \"{chosen}\" isn't a distance in feet, 0 or more (a number such as 18.5): not saved",
                     FieldKind.StreetPick => $"{f.Label}: pick it on the plan",
                     _ => $"{f.Label}: \"{chosen}\" isn't one of its choices: not saved",
                 });

@@ -88,6 +88,14 @@ public sealed class MarksTests
             ("Gordium: Accessory dwelling unit", "6fcbf10d-a1c2-406a-b6c7-e726b4a695f2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: ADU detached", "ebd07d28-ce47-4e7d-95e7-6e164d7d7bc8", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: ADUs on parcel", "1fa82254-92d5-4f27-acef-924bfc047d7c", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // the house's own facts Ithaca's zoning reads (UI design change 20: the house's fix cards had no button)
+            ("Gordium: Stream within 20 ft", "17620cff-9a18-449f-900b-cd66e0ed1b82", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Distance from stream", "6b203698-192c-4814-b27c-4e5968fa8111", MarkValueKind.Length, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Unrelated people per unit", "74a581ac-f1c6-4062-a97f-0504955d2175", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Owner-occupied", "489c2902-38ec-430f-aa5e-47675cb48eff", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Functional family unit", "868efeab-7254-4c46-bf04-564a4c853946", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Garage cars", "08e37847-735e-417a-85fa-fb945a28276f", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Private garages", "92d7674d-e182-407c-a43b-2acb0146265b", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

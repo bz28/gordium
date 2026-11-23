@@ -93,6 +93,35 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         Assert.Contains("prepare", Assert.IsType<Dictionary<string, object>>(steps.ToLog()["steps"]).Keys);
     }
 
+    /// <summary>UI design change 20, through the real worker: the house's own facts left blank keep their rules at needs
+    /// review (never read as No or 0); set on Project Information, the same rules are decided from them.</summary>
+    [Fact]
+    public async Task The_house_facts_blank_keep_their_rules_at_needs_review_and_set_decide_them()
+    {
+        string[] rules = ["R-1b.stream_setback", "R-1b.occupancy_one_family", "R-1b.private_garage"];
+        var (house, outside) = Project("1_ranch_compliant");
+        var (_, blank) = await Check(house, outside);
+        foreach (var id in rules)
+            Assert.Equal(Verdict.NeedsReview, Assert.Single(blank.Items, i => i.Id == id).Status);
+        Mark(house, Marks.StreamNearLot, new(true, 0));
+        Mark(house, Marks.UnrelatedPersons, new(true, 0));
+        Mark(house, Marks.OwnerOccupied, new(true, 1));
+        Mark(house, Marks.FunctionalFamilyUnit, new(true, 0));
+        Mark(house, Marks.AccessoryDwellingUnit, new(true, 0));
+        Mark(house, Marks.GarageCars, new(true, 2));
+        var (prepared, set) = await Check(house, outside);
+        Assert.Equal((false, 0, true, false, 2), (prepared.Request!.Facts["stream_near_lot"]!.GetValue<bool>(),
+            prepared.Request.Facts["unrelated_persons"]!.GetValue<int>(), prepared.Request.Facts["owner_occupied"]!.GetValue<bool>(),
+            prepared.Request.Facts["functional_family_unit"]!.GetValue<bool>(), prepared.Request.Facts["garage_cars"]!.GetValue<int>()));
+        foreach (var id in rules)
+            Assert.Equal(Verdict.Complies, Assert.Single(set.Items, i => i.Id == id).Status);
+        // too many cars: the garage rule fails, said as the worker's own verdict
+        Mark(house, Marks.GarageCars, new(true, 4));
+        Mark(house, Marks.PrivateGarages, new(true, 1));
+        var (_, over) = await Check(house, outside);
+        Assert.Equal(Verdict.DoesNotComply, Assert.Single(over.Items, i => i.Id == "R-1b.private_garage").Status);
+    }
+
     [Fact]
     public async Task The_box_house_with_a_compliant_ranch_inside_gives_the_scenes_verdicts_and_egress_rows()
     {
