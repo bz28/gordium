@@ -432,7 +432,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             {
                 // said back before it is kept: Revit highlights the whole property line, never the edge it took
                 var words = StreetEdges.Describe(got, toShared);
-                var ask = new TaskDialog(Title)
+                var ask = new TaskDialog(StreetEdges.PickTitle)
                 {
                     MainInstruction = $"Use {words} as the street line?",
                     MainContent = "Shared coordinates, feet. No: the click is forgotten; click the edge again.",
@@ -451,7 +451,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             else
             {
                 said.Add(why!);
-                TaskDialog.Show(Title, why);
+                TaskDialog.Show(StreetEdges.PickTitle, why);
             }
         }
         log["street_picks"] = said;

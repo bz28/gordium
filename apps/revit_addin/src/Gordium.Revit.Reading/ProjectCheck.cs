@@ -408,6 +408,14 @@ public static class StreetEdges
     public static readonly string OpenAPlan = $"{Marks.StreetEdge.Name}: open a site plan (or a floor plan) that shows the " +
                                               "property line, then click Check again: it asks you to click the lot edge along the street.";
 
+    /// <summary>The same, said where Pick on plan was pressed in the Setup form: the next step is that button again.</summary>
+    public static readonly string OpenAPlanFromSetup = $"{Marks.StreetEdge.Name}: open a site plan (or a floor plan) that " +
+                                                       "shows the property line, then press Pick on plan again.";
+
+    /// <summary>The title of the street edge pick's own dialogs (its confirmation, a click refused), wherever it was
+    /// asked from (Check project or the Setup form's Pick on plan).</summary>
+    public const string PickTitle = "Gordium: street edge";
+
     /// <summary>Whether to ask for the street edge now (Revit trial, 2026-11-20: asked from a sheet view, the pick
     /// waited with no prompt where no property line could be clicked). Only when the street edge is the one fact
     /// still to give (<paramref name="needed"/>: not set, or kept but no longer a lot edge) and every other fact is

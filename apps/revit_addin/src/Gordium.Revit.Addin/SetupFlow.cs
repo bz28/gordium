@@ -254,7 +254,7 @@ internal static class SetupRun
         }
         if (!CheckProjectCommand.ShowsPropertyLine(uidoc))
         {
-            ResultsPane.Say(StreetEdges.OpenAPlan);
+            ResultsPane.Say(StreetEdges.OpenAPlanFromSetup);     // pressed in the form: the next step is that button
             return;
         }
         var log = new Dictionary<string, object?> { ["document"] = doc.Title };
