@@ -98,20 +98,28 @@ public sealed class PaneTests
     {
         var r = House();
         Assert.Equal(46, Model(r).Causes.Count);
-        Assert.Equal(CardAction.None, CauseCards.Action(Model(r).Causes[0], Labels(r)));     // the worker's first: no button
+        // the worker's first card, the ADU fact, has its mark on Project Information since 2026-11-22 (Gordium: Accessory
+        // dwelling unit, the NY code decision's marks), so it too is set there
+        Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(Model(r).Causes[0], Labels(r)));
         var fixes = FixesOf(r);
         Assert.Equal(8, fixes.Count);
         Assert.Equal("pi", fixes[0].Key);
         Assert.Equal(CardAction.ProjectInformation, fixes[0].Action);
-        Assert.Equal("Set 2 facts on Project Information: the stairs list and the guards and handrails list", fixes[0].Title);
-        Assert.Equal("In Manage › Project Information, set Gordium: These are all the stairs and Gordium: These are all the guards and handrails, then Check again.",
-                     Fixes.Note(fixes[0]));
-        Assert.Equal("2 results waiting on this · 2 facts", fixes[0].Count);
+        // the ADU's fact joins the two lists there (its mark since 2026-11-22)
+        Assert.StartsWith("Set 3 facts on Project Information: ", fixes[0].Title, StringComparison.Ordinal);
+        Assert.EndsWith("the stairs list and the guards and handrails list", fixes[0].Title, StringComparison.Ordinal);
+        Assert.Contains("accessory dwelling unit", fixes[0].Title, StringComparison.OrdinalIgnoreCase);
+        var note = Fixes.Note(fixes[0]);
+        Assert.StartsWith("In Manage › Project Information, set Gordium: ", note, StringComparison.Ordinal);
+        foreach (var mark in new[] { "Gordium: Accessory dwelling unit", "Gordium: These are all the stairs", "Gordium: These are all the guards and handrails" })
+            Assert.Contains(mark, note, StringComparison.Ordinal);
+        Assert.EndsWith(", then Check again.", note, StringComparison.Ordinal);
+        Assert.Equal("8 results waiting on this · 3 facts", fixes[0].Count);   // 2, and the ADU card's 6
         Assert.Equal(["Stairs: 11 things Gordium couldn't measure from the model", "Escape windows: 10 things Gordium couldn't measure from the model"],
                      fixes.Skip(1).Take(2).Select(f => f.Title));
         var nofield = fixes[^1];
         Assert.Equal(("nofield", CardAction.Decide, 3), (nofield.Key, nofield.Action, nofield.Tier));
-        Assert.Equal("+5 more fixes (76 results)", Fixes.MoreWords(fixes));
+        Assert.Equal("+5 more fixes (70 results)", Fixes.MoreWords(fixes));   // the ADU card's 6 results now in fix 1
         Assert.Equal(3, Fixes.Shown(fixes, all: false).Count);
         Assert.Equal(8, Fixes.Shown(fixes, all: true).Count);
     }
@@ -265,7 +273,7 @@ public sealed class PaneTests
                                       [new DetailStep(ResultDetail.ResolveStep, DetailAction.None)], [], null, [], null, [], []) { Id = id };
         var step = Fixes.Step(detail, fixes, detail.Steps[0]);
         Assert.NotNull(step);
-        Assert.StartsWith("Fix 1: Set 2 facts on Project Information", step!.Words, StringComparison.Ordinal);
+        Assert.StartsWith("Fix 1: Set 3 facts on Project Information", step!.Words, StringComparison.Ordinal);   // the ADU's too
         Assert.Null(Fixes.Step(detail, fixes, new DetailStep("Change the design so it meets the limit (the figures below).", DetailAction.None)));
         Assert.Null(Fixes.Step(detail with { Id = "not a row" }, fixes, detail.Steps[0]));
         Assert.Contains("Fixes.Step(d, causes.Groups, step)", Read("DetailView.cs"), StringComparison.Ordinal);
