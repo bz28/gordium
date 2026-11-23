@@ -88,13 +88,32 @@ public static class PaneWords
     public static string SaveAndCheck(int chosen, bool checksAfter) =>
         (chosen == 0 ? "Save" : $"Save {chosen} {(chosen == 1 ? "fact" : "facts")}") + (checksAfter && chosen > 0 ? " and check" : "");
 
-    /// <summary>Whether saving the draft leaves nothing the check needs missing: every needed fact is a field the
-    /// architect chose a value for.</summary>
+    /// <summary>Whether Save runs the check: SetupGate's own rule (<see cref="SetupGate.RunsByItself"/>) on the form
+    /// now and the form as it will be once the draft is written (each needed fact the architect chose, no longer
+    /// needed). A form with nothing needed never checks on Save (Mark facts opened on a project already set).</summary>
     public static bool ChecksAfterSave(SetupScreen screen, SetupDraft draft)
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(draft);
-        return screen.Needed.All(n => screen.Fields.Any(f => f.Mark.Name == n && draft.Chosen(f.Mark) is not null));
+        return SetupGate.RunsByItself(screen, screen with { Needed = StillNeeded(screen, draft) });
+    }
+
+    /// <summary>The needed facts the draft doesn't choose: what stays needed after Save.</summary>
+    public static IReadOnlyList<string> StillNeeded(SetupScreen screen, SetupDraft draft)
+    {
+        ArgumentNullException.ThrowIfNull(screen);
+        ArgumentNullException.ThrowIfNull(draft);
+        return screen.Needed.Where(n => !screen.Fields.Any(f => f.Mark.Name == n && draft.Chosen(f.Mark) is not null)).ToList();
+    }
+
+    /// <summary>The footer's words for a form and its draft: the needed facts, how many of them are chosen, and the
+    /// street edge's way when it is one of those still needed (each from the form's own Needed list).</summary>
+    public static string SetupFooter(SetupScreen screen, SetupDraft draft)
+    {
+        ArgumentNullException.ThrowIfNull(screen);
+        ArgumentNullException.ThrowIfNull(draft);
+        var still = StillNeeded(screen, draft);
+        return SetupFooter(screen.Needed.Count, screen.Needed.Count - still.Count, still.Contains(Marks.StreetEdge.Name));
     }
 
     /// <summary>Check now anyway, as a link beside Save.</summary>
@@ -168,6 +187,10 @@ public static class PaneWords
         return more.Count == 0 ? null : "And " + string.Join("; ", more) + " (hover for all).";
     }
 
+    /// <summary>A changed result's glyph status: its new verdict's (<see cref="ChangeTone"/>) while the results
+    /// stand, the clock once they are stale (never a green complies for a model that may have changed).</summary>
+    public static PanelStatus ChangeStatus(RowChange change, bool stale) => StatusLook.Of(ChangeTone(change), stale);
+
     /// <summary>A changed result's glyph: its new verdict's (the worker's; complies only from a known complies).</summary>
     public static Tone ChangeTone(RowChange change)
     {
@@ -194,11 +217,20 @@ public static class PaneWords
 
     public const string CopyDetails = "Copy details for support";
 
-    /// <summary>"The model changed after this check (14:32)".</summary>
-    public static string StaleTitle(DateTime when) => $"The model changed after this check ({when:HH:mm})";
+    /// <summary>The stale banner's title, from why: "The model changed after this check (14:32)", or for a cancelled
+    /// check "These results are from 14:32, before the check you cancelled".</summary>
+    public static string StaleTitle(StaleReason reason, DateTime when) => reason switch
+    {
+        StaleReason.Cancelled => $"These results are from {when:HH:mm}, before the check you cancelled",
+        _ => $"The model changed after this check ({when:HH:mm})",
+    };
 
-    /// <summary>What stale means for the results below.</summary>
-    public const string StaleWords = "Any result below may have changed: they are greyed until you check again.";
+    /// <summary>What stale means for the results below, from why.</summary>
+    public static string StaleWords(StaleReason reason) => reason switch
+    {
+        StaleReason.Cancelled => "The model may have changed since: they are greyed until you check again.",
+        _ => "Any result below may have changed: they are greyed until you check again.",
+    };
 
     /// <summary>The check's progress card's title.</summary>
     public static string Checking(string? project) => $"Checking {project ?? "this project"}…";

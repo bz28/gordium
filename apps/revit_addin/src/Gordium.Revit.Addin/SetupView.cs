@@ -153,8 +153,7 @@ internal sealed class SetupView : C.StackPanel
         W.Automation.AutomationProperties.SetName(_save, (string)_save.Content);
         _save.IsEnabled = changes > 0;
         if (_footWords is not null)
-            _footWords.Text = PaneWords.SetupFooter(_screen.Needed.Count, changes,
-                _screen.Fields.Any(f => f.Kind == FieldKind.StreetPick && f.Required && !f.IsSet && _draft.Chosen(f.Mark) is null));
+            _footWords.Text = PaneWords.SetupFooter(_screen, _draft);   // from the form's own Needed list
     }
 
     private W.UIElement Field(SetupField f)

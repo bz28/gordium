@@ -88,7 +88,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private (string Project, DateTime When)? _shownCheck;     // the check shown (a stale redraw is the same check)
     // per project: the last check that arrived current (what the next is compared with), and the last check's ticks
     private readonly Dictionary<string, (DateTime When, ResultModel Model)> _compared = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, (ResultModel Model, LookedAt Looked)> _ticked = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, (ResultModel Model, LookedAt Looked, IReadOnlyDictionary<string, string> Labels)> _ticked = new(StringComparer.Ordinal);
 
     internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action projectInformation,
                          Action<CardRequest> card, Action setUp, PanelTheme theme)
@@ -342,8 +342,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _change = _compared.TryGetValue(key, out var before) ? CheckChanges.Between(before.Model, before.When, model) : null;
         if (model.Stale is null)
             _compared[key] = (content.When, model);
-        _looked = _ticked.TryGetValue(key, out var t) ? LookedAt.Carry(t.Looked, t.Model, model) : new LookedAt();
-        _ticked[key] = (model, _looked);
+        // the fixes' ticks too (by fix key, made with each check's own element names), where the fix is the same
+        _looked = _ticked.TryGetValue(key, out var t) ? LookedAt.Carry(t.Looked, t.Model, model, t.Labels, content.Labels) : new LookedAt();
+        _ticked[key] = (model, _looked, content.Labels);
     }
 
     /// <summary>The list's first entry: the stale notice (when stale), the worker's state (grey once stale, never
@@ -372,8 +373,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     // plain words and the way out in the banner itself (the intuitive pane, change 11); the worker's
                     // or the add-in's own stale words (a cancelled check's) on hover
                     var sw = new C.StackPanel { ToolTip = model.Stale };
-                    sw.Children.Add(Typed(new C.TextBlock { Text = PaneWords.StaleTitle(_content?.When ?? DateTime.Now), FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
-                    sw.Children.Add(Small(PaneWords.StaleWords, top: 2));
+                    var why = model.StaleKind ?? StaleReason.ModelChanged;
+                    sw.Children.Add(Typed(new C.TextBlock { Text = PaneWords.StaleTitle(why, _content?.When ?? DateTime.Now), FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
+                    sw.Children.Add(Small(PaneWords.StaleWords(why), top: 2));
                     var sa = CauseCardsView.Primary("Check again", () => _checkAgain());
                     sa.HorizontalAlignment = W.HorizontalAlignment.Left;
                     sa.Margin = new W.Thickness(0, 6, 0, 0);
@@ -402,7 +404,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                 case PanelPart.State when !stale:
                     // the state, then where to start (the intuitive pane, change 7): what fails, then fix 1
                     var fails = PaneWords.FilterCount(_placed, ListFilter.Fails);
-                    var st = StatusLook.Of(model.StateTone, false);
+                    var st = StatusLook.Of(model.StateTone, stale);
                     summary.Children.Add(WithGlyph(st, Ink(Typed(new C.TextBlock { Text = ResultText.StateWords(model.State), TextWrapping = W.TextWrapping.Wrap }, "type.state"), StatusLook.Colour(st)), size: 18));
                     summary.Children.Add(Typed(new C.TextBlock
                     {
@@ -439,7 +441,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                         foreach (var line in model.Counts)
                             summary.Children.Add(CountLineView(line, stale, CountBar.Keep));
                     if (_change is { } change)
-                        summary.Children.Add(ChangeLine(change));
+                        summary.Children.Add(ChangeLine(change, stale));
                     break;
             }
         return summary;
@@ -451,7 +453,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     /// <summary>What changed since the check before (CheckChanges; the intuitive pane, change 9), under the counts: a
     /// short list, each result with its new verdict's glyph (the worker's; green only for its complies), the rest
     /// counted; the whole sentence on hover.</summary>
-    private static C.Border ChangeLine(CheckChange change)
+    private static C.Border ChangeLine(CheckChange change, bool stale)
     {
         var p = new C.StackPanel();
         if (!PaneWords.ChangeIsList(change))                   // no verdict changed: the worker's one line, as it says
@@ -462,7 +464,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             foreach (var r in PaneWords.ChangesShown(change))
             {
                 var w = Typed(new C.TextBlock { Text = r.Words, TextWrapping = W.TextWrapping.Wrap }, Caption);
-                var line = WithGlyph(StatusLook.Of(PaneWords.ChangeTone(r), false), w, size: 11, gap: 5);
+                var line = WithGlyph(PaneWords.ChangeStatus(r, stale), w, size: 11, gap: 5);     // stale: the clock, never green
                 line.Margin = new W.Thickness(0, 3, 0, 0);
                 p.Children.Add(line);
             }
@@ -706,7 +708,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         switch (restored)
         {
             case PanelHad.Results when _content is { Model: { } model } content:
-                Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When)), MarksAdded = 0, ClearWords = "" });
+                Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When), StaleReason.Cancelled), MarksAdded = 0, ClearWords = "" });
                 break;
             case PanelHad.Missing:
                 break;                                      // what to fill in, as it was
@@ -1305,7 +1307,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                             box.IsChecked = t.Card ? _looked.Card(t.Key) : _looked.Row(t.Key);
                             break;
                         case C.TextBlock { Tag: CauseCardsView.ProgressTag } line:
-                            line.Text = $"Looked at: {Groups.Count(g => _looked.Card(g.Key))} of {Groups.Count} fixes · {_looked.Rows.Count} of {_placed.Count(LookedAt.Tickable)} results";
+                            line.Text = Fixes.Progress(_looked, Groups, _placed);        // the same words as when drawn
                             break;
                     }
     }
