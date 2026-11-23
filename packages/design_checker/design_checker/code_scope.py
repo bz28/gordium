@@ -25,6 +25,7 @@ which, in plain words. Never a guess for the Residential Code (principle 4).
 `building` the interior description's `building` block (the architect's statements for the state's code: FACTS).
 """
 
+import functools
 import math
 
 RESIDENTIAL = "residential_code"
@@ -151,14 +152,23 @@ ATTACHED = "one_family_attached"                  # three to six units in a row 
 ASK_BY_HAND = "check which code governs by hand, then tick {mark} Yes if it is the Building Code"
 
 
-def use_words(use: str) -> str:
-    """A use in an architect's words, never its key: R101.2's dwelling for a house ("a detached one-family
-    dwelling"), else the key's own words ("retail store or service commercial")."""
-    if use in HOUSES:
-        return HOUSES[use][0]
-    if use == ATTACHED:
-        return "an attached one-family dwelling"
-    return str(use).replace("_", " ")
+@functools.lru_cache(maxsize=1)
+def use_names() -> dict:
+    """{use: its name} from every place's 4_term_definitions/uses.yaml, the place's own words ("Retail store or
+    service commercial facility")."""
+    from rule_format.place import places
+    from rule_format.rulebook import load
+    out = {}
+    for p in places():
+        f = p.folder / "4_term_definitions/uses.yaml"
+        if f.exists():
+            out.update({k: v.get("name") or k for k, v in (load(f) or {}).items() if isinstance(v, dict)})
+    return out
+
+
+def use_words(use) -> str:
+    """A use in the place's own words (uses.yaml), never its key; one it doesn't list, quoted exactly as typed."""
+    return use_names().get(use) or value_words(use) if isinstance(use, str) else value_words(use)
 
 
 # the use as the architect chose it, for a line saying the facts disagree with it (the verdict lines name R101.2's
@@ -196,7 +206,15 @@ def value_words(v) -> str:
         return "[" + ", ".join(value_words(x) for x in v) + "]"
     if isinstance(v, dict):
         return "{" + ", ".join(f"{fact_words(k)}: {value_words(x)}" for k, x in v.items()) + "}"
-    return f"{v:g}" if isinstance(v, (int, float)) else f"“{v}”"
+    if isinstance(v, int):
+        return str(v)                         # every digit, as typed: -1234567, never -1.23457e+06
+    if isinstance(v, float):
+        if math.isnan(v):
+            return "not a number"
+        if math.isinf(v):
+            return "infinity" if v > 0 else "minus infinity"
+        return repr(v)                        # 2.0000001 and 2.0 as typed, never rounded to "2"
+    return f"“{v}”"
 
 
 def _given(building) -> tuple[dict, list[str]]:
@@ -351,7 +369,7 @@ def decide(values: dict, building: dict | None) -> dict:
     rooms = values.get("rooms_let_for_profit")
     if type(rooms) in (int, float) and rooms > 0:
         used["rooms_let_for_profit"] = rooms
-        return _answer(None, f"{rooms:g} rooms let for profit: a lodging house is under the Residential Code only "
+        return _answer(None, f"{value_words(rooms)} rooms let for profit: a lodging house is under the Residential Code only "
                        "owner-occupied with five or fewer guestrooms and a P2904 sprinkler system (R101.2 item 6)",
                        ["R101.2 item 6", "310.4.2"], used, by_hand)
     # an accessory dwelling unit on the lot: in or on the building it is one more of the building's dwelling units.
@@ -363,7 +381,7 @@ def decide(values: dict, building: dict | None) -> dict:
         adu = False                                    # "0 ADUs on the parcel": none, stated
     if adu is not True and (detached is not None or (many is not None and many > 0)):
         said = " and ".join(x for x in ("whether it is detached" if detached is not None else "",
-                                        f"{many:g} on the parcel" if many is not None and many > 0 else "") if x)
+                                        f"{value_words(many)} on the parcel" if many is not None and many > 0 else "") if x)
         return _answer(None, f"the accessory dwelling unit's facts ({said}) are stated, but "
                        + ("not that there is one" if adu is None else "so is that there is none") +
                        ": in or on the building it would be one more of its dwelling units (R202 DWELLING: one or two)",
@@ -382,7 +400,7 @@ def decide(values: dict, building: dict | None) -> dict:
     # more of its units each (review round 4): needs review
     if adu is True and many is not None and many > 1:
         used["adus_on_parcel"] = many
-        return _answer(None, f"{many:g} accessory dwelling units are on the parcel, and whether each is detached isn't "
+        return _answer(None, f"{value_words(many)} accessory dwelling units are on the parcel, and whether each is detached isn't "
                        "known (ADU detached describes one): each in or on the building is one more of its dwelling "
                        "units, and more than two in one building is Group R-2 (R202 DWELLING, 310.3)",
                        ["R202 DWELLING", "310.3"], used,
@@ -413,7 +431,7 @@ def decide(values: dict, building: dict | None) -> dict:
             used["attached_units_in_building"] = stated_building
             return _answer(None, "the use is " + chosen_use_words(use, f"{n} dwelling unit{'s' if n > 1 else ''} "
                                                                   "in the building") + " but "
-                           f"{stated_building:g} units in the whole attached building are stated",
+                           f"{value_words(stated_building)} units in the whole attached building are stated",
                            ["R202 DWELLING", "R101.2"], used,
                            f"correct the use ({MARK['use']}) or the units ({MARK['attached_units_in_building']})")
     # the dwelling units stated for the lot agree with the use, whatever the use word: Ithaca's dwelling_units leaves
@@ -424,7 +442,7 @@ def decide(values: dict, building: dict | None) -> dict:
         used["dwelling_units"] = stated
         return _answer(None, "the use is " + chosen_use_words(use, f"{lot_units} dwelling unit"
                                                               f"{'s' if lot_units > 1 else ''} on the lot") + " "
-                       f"but {stated:g} dwelling units are stated" + (
+                       f"but {value_words(stated)} dwelling units are stated" + (
                            ", which may or may not count the accessory dwelling unit in (Gordium: Dwelling units leaves "
                            "it out)" if adu is True and stated == lot_units + 1 else ""),
                        ["R202 DWELLING", "R101.2"], used,

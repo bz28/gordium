@@ -884,10 +884,10 @@
     "sections": "2159bd51d8c9905a994b6b2fafced40cbc9c17fa3fe42b2d16c25a792c88cb7b",
     "statuses": "d284fd70c22d32394f4e2c4c6d5111f212044102342cfb72cc5c5046ad5c48a2",
     "summary": "d1dc54960b68bd1527af216c57fafd50598cae8b6fb75273e066ee00ed572a06",
-    "view": "64e4cb66c9e1c0893b00ec1b66021f03ed29ac93a15b4156d9b863b358257828",
-    "which_code": "f9e4241faec11e55332b1defe1a06f445f59eeda4aad245bff9b18537757e0bb"
+    "view": "6ff7f22719dee71ed0daeed8a892f468697f79a23a4eb201861b775cb78a7f98",
+    "which_code": "0dd345e7e6719d499834278da7c9e86788290f6ba333d9583b87e37ec0038026"
    },
-   "sha256": "4068c7b1f7cf2cac4d2aed830242d7c7d6a25d1552ca732bcf24ed4206a95b01"
+   "sha256": "05d9a86cdd5f787ed7f8361521d3bccaa51179e9487af1b7b4688473fb416971"
   },
   "scenarios/13_b2a_two_story_retail_office/start": {
    "parts": {
@@ -924,10 +924,10 @@
     "sections": "9b4bffd342a310d7cc225a8871095e48ac3603eb4d8be25151ba46af1210d004",
     "statuses": "03ec5a64e539bb5e6191a927aca37a472e9373c47daa45cfa26a9a25b9a7e626",
     "summary": "6bfe3a5f4330dbff17d65ce38fe0c6a43a3502f0ebd6d42900d0f9978bb632a7",
-    "view": "b1b231572845c868606f88e0bb7f575ea2175ba644feb44da04ec92443b6e821",
-    "which_code": "4c3b861a92aad62f30086d4a2b8cefb6b9fae25de8d03b7f2ed0dae6999c7756"
+    "view": "e62e055d1b642520fdcf663e8bd5bfdc862f444228d422f160bc07a19ce6501a",
+    "which_code": "40711aef0003a57b851e7cd51a53643b6f194b8b5c3dac72484940e4367a65d3"
    },
-   "sha256": "bc7a5d5b553865c51bb273f0fee2e839dd43e5b29435b13bc3b6ecaba34a64b1"
+   "sha256": "4c9c587c7bcaf2f2cf93d276e9a03f499cf79d8a19c4203eef426db7d99a5c02"
   },
   "scenarios/14_b1b_two_story_office_under_the_minimum_height/start": {
    "parts": {
@@ -964,10 +964,10 @@
     "sections": "d8ce83c104ac073412d81b09e5058451bcdd95738283f88b209c5f303a25d212",
     "statuses": "9338d16e48fe34e0888d442e97c92d044a74c4795b54147b80064ee108b1b787",
     "summary": "243659d52fe7ec9de4266f3e0b39af54b1690b1b518a7f73d5d0c5c90efa3871",
-    "view": "f6e6709343fe028ae0f579c9b103ecece7b2f0403abbf5dc0d2a7eaff8918e07",
-    "which_code": "f9e4241faec11e55332b1defe1a06f445f59eeda4aad245bff9b18537757e0bb"
+    "view": "21f8fb141e7212f8c3c2b04d9474ed438f584cdb9d8a520fe213a8fe5db6b072",
+    "which_code": "0dd345e7e6719d499834278da7c9e86788290f6ba333d9583b87e37ec0038026"
    },
-   "sha256": "7bd59cd1c31f1dad181c032dbfd770fd00f4f87da9ecb881a432dc4e50e7ae43"
+   "sha256": "7c4d08f0ac8b10dd4c7404fdf3f8c70ad519b8895073f1e4ad3907b2fb602355"
   },
   "scenarios/15_b2a_one_story_store_over_half_the_lot/start": {
    "parts": {
@@ -1004,10 +1004,10 @@
     "sections": "b52d7f146bb664a7f0c206d04747ec406bea2bedf540769ed7a58dc2e2dbaeb5",
     "statuses": "777a1a68ef15a0e8b046919dc9a454b2fa00466ff54048bdbd16c183ecb82f6c",
     "summary": "1aaa738d15e045f04aa1f2a2a80bb3d159fe41040093271f3d0333acb2031815",
-    "view": "8145394d54ebda15017a0f227875fdf2066286e066d17a31228e6d1209cf2534",
-    "which_code": "f9e4241faec11e55332b1defe1a06f445f59eeda4aad245bff9b18537757e0bb"
+    "view": "10b12a36f51337a004272331b47366495fcc48bed9dbcc5e3e434aed6e10f8d9",
+    "which_code": "0dd345e7e6719d499834278da7c9e86788290f6ba333d9583b87e37ec0038026"
    },
-   "sha256": "e29ea72cc8f7c5d2105d0f55d91505b8de08aa32766bd3286ac3e47567054bde"
+   "sha256": "f5b6d2b7008265f55aa2bcba6c38eeda8672a38486429f9032c8dd3543c4ecf4"
   },
   "scenarios/16_cbd60_five_story_mixed_use/start": {
    "parts": {
@@ -1044,10 +1044,10 @@
     "sections": "0b0781c57c6b453d04bff0a250c21ffad8c148c688583dd5337e8741436a7bbd",
     "statuses": "da5e546316b33ea56f9cbc10a52b5988217fd87f6c6d315c4facd6ddf0c5cdab",
     "summary": "ae863d911c0f5a06e31602f487266d7a468e52d4d6617f2c0a858f406fd697cc",
-    "view": "1fb545fde250675487ce4022a3cf3d7fc5b1b14ee6922b733439d62396d164ac",
-    "which_code": "4c3b861a92aad62f30086d4a2b8cefb6b9fae25de8d03b7f2ed0dae6999c7756"
+    "view": "08f572d15f518709726b90700e2219344ca0419e9e792d6062fa3c7ec4cac185",
+    "which_code": "40711aef0003a57b851e7cd51a53643b6f194b8b5c3dac72484940e4367a65d3"
    },
-   "sha256": "0a30bcf82f438916707575a814a3e1cc33f305d13f5cae7e2f6c744e812914c5"
+   "sha256": "d9e82d7a064756722b7cf6983c94b52f51b091e261e7bf2a44c7562d9719d895"
   },
   "scenarios/17_cbd60_six_story_office_over_the_height/start": {
    "parts": {
@@ -1084,10 +1084,10 @@
     "sections": "9f51822cf98beff2b980ffb88c482110721ea048135949a85c7817c69b09d2f0",
     "statuses": "14a922fcc7f26bb09b73fb47849987f01d2b098b592de3ed81b3fb65b86ab8d8",
     "summary": "c30d740cb4c689ae47c7ee9bb41b3d31a04e974777e4a9b029cc7c4e06f6f001",
-    "view": "7b6e8c0f358847b54fcd3ef78c8b9cfa8b58115c857aeac9229afb0e226da8ab",
-    "which_code": "f9e4241faec11e55332b1defe1a06f445f59eeda4aad245bff9b18537757e0bb"
+    "view": "62983059fcd5533e2a2aea03dec2516f5e2416cc537421c533fd78bdc50014a8",
+    "which_code": "0dd345e7e6719d499834278da7c9e86788290f6ba333d9583b87e37ec0038026"
    },
-   "sha256": "c1f9c29b79069e7528720760d9086ee062ebabd4e5f6128eb895cdd004383387"
+   "sha256": "f8ca0ce03224cbd0525e18479319463cd33172ba7390bf58064537b74f2c65e5"
   },
   "scenarios/18_cbd85_west_green_street_seven_stories/start": {
    "parts": {
