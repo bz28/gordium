@@ -45,7 +45,7 @@ internal static class Program
             foreach (var g in Fixes.Of(cs, Labels(r)))
                 Console.WriteLine($"   tier {g.Tier} {g.Action}, {g.Rows.Count} results, {g.Members.Count} cards | {g.Title}");
         }
-        Numbers.AppendLine("step\tpane\ttheme\theight\twords\tbuttons\tcards shown\tcards in all");
+        Numbers.AppendLine("step\ttheme\theight\twords\tbuttons\tfixes shown\tfixes in all\tcause cards");
         foreach (var theme in new[] { PanelTheme.Light, PanelTheme.Dark })
             foreach (var make in new Func<PanelTheme, List<string>, Pane>[] { (t, a) => new Pane(t, a) })
             {
