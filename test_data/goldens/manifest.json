@@ -864,9 +864,9 @@
     "sections": "4496e7d811ee08f3a94da5037c2631182487720daa7a820dd14b1472a6d1de08",
     "statuses": "6ea02a7f56067a3918f1b67a669ea9a6390754471d3421d8d36d42c7e08879a6",
     "summary": "3bbbc5c3638cf52f2cfcfb9c81123416cca8f6b8ca9eba9af4afa91e55a9733d",
-    "view": "9b1365c69a1d91a74b27804418cf8f2036012bb609911cc0caf467e19acb798c"
+    "view": "48690cc09340a93555b34a9fef8e0b965a083ae68a9c17a55e69244b1ad399b9"
    },
-   "sha256": "43ddd3c955d499a1f253a6d575c7cfb97c47c910a1996e20d8e8541a3f48cfae"
+   "sha256": "8fc8978e11790a210901dfed3ab7ac2ff8b3f66ad4024bf57e29fb2e66cacaa1"
   },
   "scenarios/13_b2a_two_story_retail_office/start": {
    "parts": {
@@ -903,9 +903,9 @@
     "sections": "2ccc9283a461e4743b261d9108962cc55991a5ba5a5fb3b5d173c15be297b530",
     "statuses": "f6f44f37a30718977cdd022ff2964d1d33a3cb4549ac36bc362a35e87497a5d0",
     "summary": "0ee842edd67d544718a0f4f88343172fe453f4e3abdfafa1462cae12fee1d827",
-    "view": "b72bf0c934bdd98f8b6a4d32d71c7f42f7bd2af726d1ddee7820f30ca67d99a2"
+    "view": "519cd38997bc085cfdf8682348e1e00bd7571f0010ff9367359abfe80e96bf5f"
    },
-   "sha256": "9195747dfcb8a810e2f83f9894473ec4fdeb22f504a18172ac74c92322379e29"
+   "sha256": "cbae0e03b812af9fed55b81c737f336aeeda1466bbfb9d6ea2507b260100bd7d"
   },
   "scenarios/14_b1b_two_story_office_under_the_minimum_height/start": {
    "parts": {
@@ -942,9 +942,9 @@
     "sections": "08cd4b14ea9296037b45e352aeccbcb2ff03f5ce790f149654b51bf75ceab406",
     "statuses": "56910af4e1ca90409cda5f562f6b9d39ceee2d96070b3218f12afb934275ae63",
     "summary": "7e1b8e4bcdac2f340acd3ca8dd41662518519545672258b53e2e88b4c79ce0c7",
-    "view": "213db8b9ed92374b1b5dc1d933916d82010aacc17f97219efc982c34686f4de7"
+    "view": "39c9f9ec4f1e9b21011e11e77507a31ee76b63f8f11eb0c82f397d4d53ba4985"
    },
-   "sha256": "b9da40644fc0cf68cba04d55a02f92051a62a3b7d71b3712cfae3cdfd7579a5b"
+   "sha256": "539e38c32854ff5f3e8eb463d341a881e0583747956bbb2d09c0c9b177321bfa"
   },
   "scenarios/15_b2a_one_story_store_over_half_the_lot/start": {
    "parts": {
