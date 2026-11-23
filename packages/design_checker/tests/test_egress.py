@@ -307,11 +307,11 @@ def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer(
     stairs = [r for r in found["laws"][0]["rules"] if r.get("for_each") == "stair"]
     found["laws"][0]["rules"] = stairs                          # a house with no stairs: every row not applicable
     house = dict(ranch(), stairs=[])
-    got = egress.check(found, house, dict(egress_house.HOUSE), {"use": set()})
+    got = egress.check(found, house, dict(egress_house.HOUSE), egress_house.ALLOWED)
     assert [(i["id"], i["status"]) for i in got["items"]] == [("egress.nothing_applied", present.REVIEW),
                                                               ("egress.not_checked_yet", present.REVIEW)]
     found["laws"][0]["not_checked_yet"] = []     # this pin is about nothing_applied alone: every section checked
-    got = egress.check(found, house, dict(egress_house.HOUSE), {"use": set()})
+    got = egress.check(found, house, dict(egress_house.HOUSE), egress_house.ALLOWED)
     assert [(i["id"], i["status"]) for i in got["items"]] == [("egress.nothing_applied", present.REVIEW)]
     view = {"items": [{"id": "z", "rule": "z", "name": "Rear yard", "group": "building", "status": present.COMPLIES}]}
     egress.add_to_view(view, got, "City of Ithaca")
@@ -357,7 +357,7 @@ def test_a_state_rule_not_written_for_each_part_needs_review_never_dropped():
     whole = {k: v for k, v in copy.deepcopy(found["laws"][0]["rules"][0]).items() if k not in egress.part_rules.PART_FIELDS}
     whole["id"] = "general.whole_building"
     found["laws"][0]["rules"].append(whole)
-    got = egress.check(found, ranch(), dict(egress_house.HOUSE), {"use": set()})
+    got = egress.check(found, ranch(), dict(egress_house.HOUSE), egress_house.ALLOWED)
     assert got["results"]["general.whole_building"] == "needs_review"
     [row] = [i for i in got["items"] if i["rule"] == "general.whole_building"]
     assert row["status"] == present.REVIEW and row["reason"] == egress.NOT_PER_PART

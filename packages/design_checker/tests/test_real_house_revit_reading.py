@@ -66,8 +66,8 @@ def readings() -> list:
 
 def compare(found, interior):
     house, hand = load("house.yaml"), {r["id"]: r for r in load("hand_check.yaml")["rules"]}
-    want = egress.check(found, house, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()})
-    got = egress.check(found, interior, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()})
+    want = egress.check(found, house, {"dwelling_units": 1, **egress_house.HOUSE}, egress_house.ALLOWED)
+    got = egress.check(found, interior, {"dwelling_units": 1, **egress_house.HOUSE}, egress_house.ALLOWED)
     set_aside = {k for i in want["items"] for k in (i.get("has_none") or {}).get("rules", [])}
     return want["results"], got["results"], set_aside, hand
 
