@@ -31,7 +31,7 @@ internal static class Ribbon
     private static readonly Dictionary<string, Type> Commands = new(StringComparer.Ordinal)
     {
         [RibbonPlan.CheckProject] = typeof(CheckProjectCommand),
-        [RibbonPlan.MarkFacts] = typeof(MarkForEgressCommand),        // the checklist in the pane comes later (PR 7)
+        [RibbonPlan.MarkFacts] = typeof(MarkForEgressCommand),        // opens the Setup form in the pane
         [RibbonPlan.Panel] = typeof(TogglePanelCommand),
         [RibbonPlan.About] = typeof(AboutCommand),
         [RibbonPlan.CheckBoxHouse] = typeof(CheckBoxHouseCommand),

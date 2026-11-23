@@ -200,6 +200,26 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Throws<AnswerMissingException>(() => answer.Get("recheck"));   // its fields weren't sent
     }
 
+    /// <summary>The Setup form's Zone and Use choices: the older <c>options</c> command, read strictly, gives the
+    /// districts that have a rulebook (each one's file is in the repo), the city's use words with their names as the
+    /// uses file gives them, and each district's uses, permitted first; the same worker answers a check afterwards.</summary>
+    [Fact]
+    public async Task Options_give_the_districts_with_a_rulebook_and_the_use_names()
+    {
+        var options = await Client.OptionsAsync("regulations/jurisdictions/new_york/ithaca_city");
+        var rules = Path.Combine(Env.Repo, "regulations", "jurisdictions", "new_york", "ithaca_city", "5_zoning_rules");
+        var files = Directory.GetFiles(rules, "*.yaml").Concat(Directory.Exists(Path.Combine(rules, "drafted"))
+            ? Directory.GetFiles(Path.Combine(rules, "drafted"), "*.yaml") : []).Select(Path.GetFileNameWithoutExtension).ToHashSet();
+        Assert.Contains("R-1b", options.Zones);
+        Assert.All(options.Zones, z => Assert.Contains(z, files));
+        Assert.Contains(("one_family_detached", "One-family dwelling, detached"), options.Uses);
+        var r1b = options.DistrictUses["R-1b"];
+        Assert.Equal("one_family_detached", r1b[0].Id);
+        Assert.True(r1b[0].Permitted);
+        Assert.False(Client.IsStopped);
+        Assert.Equal(Client.About.Protocol, (await Client.HelloAsync()).Protocol);
+    }
+
     [Fact]
     public async Task A_refused_part_is_an_error_and_the_other_parts_still_answer()
     {

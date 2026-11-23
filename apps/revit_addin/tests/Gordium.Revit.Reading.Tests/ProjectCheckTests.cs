@@ -180,6 +180,55 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         Assert.StartsWith(mark + ":", Assert.Single(prepared.Missing), StringComparison.Ordinal);
     }
 
+    /// <summary>The Setup form's "Check now anyway": sent with what is stated, each required fact not set (here the use
+    /// and the street edge) left out of the facts and listed, never filled in; the worker then says the rules they decide
+    /// need review, never a pass: the use rule and the front yard need review, and nothing that complies with every
+    /// fact stated (the same project, all stated) complies here that didn't there.</summary>
+    [Fact]
+    public async Task Check_now_anyway_sends_what_is_stated_and_every_missing_fact_is_needs_review()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        var client = await worker.RunningAsync();
+        var full = await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client));
+        var all = await ProjectCheck.SendAsync(client, full.Request!);
+        house.ProjectMarks.Remove(Marks.Use.Guid);
+        house.ProjectMarks.Remove(Marks.StreetEdge.Guid);
+        // without anyway: nothing is sent, as before
+        Assert.Null((await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client))).Request);
+        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client), anyway: true);
+        Assert.NotNull(prepared.Request);
+        Assert.Null(prepared.Request.Facts["use"]);
+        Assert.Null(prepared.Request.Facts["street_line"]);
+        Assert.Equal([Marks.Use, Marks.StreetEdge], prepared.NotStated);
+        var result = await ProjectCheck.SendAsync(client, prepared.Request);
+        Assert.NotEqual(Verdict.Complies, result.State);
+        var rows = result.Items.ToDictionary(i => i.Id);
+        Assert.Equal(Verdict.NeedsReview, rows["R-1b.use"].Status);
+        Assert.Equal(Verdict.NeedsReview, rows["R-1b.front_yard"].Status);
+        var before = all.Items.ToDictionary(i => i.Id);
+        Assert.DoesNotContain(result.Items, i => i.Status == Verdict.Complies
+                                                 && !(before.TryGetValue(i.Id, out var b) && b.Status == Verdict.Complies));
+        // R2 #4: a kept street edge no longer on the lot is set, not missing: anyway never leaves it out, it is asked
+        // for again (nothing sent, the re-pick's refusal), so a street edge is never dropped without asking
+        Mark(house, Marks.Use, new(true, Text: "one_family_detached"));
+        Mark(house, Marks.StreetEdge, new(true, Text: StreetEdges.Format([(new Xyz(0, 0, 0), new Xyz(30, 0, 0))])));
+        var moved = await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client), anyway: true);
+        Assert.Null(moved.Request);
+        Assert.Equal(StreetRefusal.NoLongerAnEdge, moved.StreetRefused);
+        Assert.True(StreetEdges.NeedsNewPick(moved));
+    }
+
+    /// <summary>The zone chooses the rules: without it nothing is sent, even anyway (the form then says why).</summary>
+    [Fact]
+    public async Task Check_now_anyway_never_sends_without_the_zone()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        house.ProjectMarks.Remove(Marks.Zone.Guid);
+        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new NeverAsked(), anyway: true);
+        Assert.Null(prepared.Request);
+        Assert.StartsWith("Gordium: Zone:", Assert.Single(prepared.Missing), StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task Marks_never_added_list_every_required_fact()
     {

@@ -19,7 +19,12 @@ public sealed record ProjectRequest(JsonObject Site, JsonObject Facts, JsonObjec
 /// <param name="StreetRefused">Why the street edge kept wasn't sent, typed (<see cref="StreetEdges.NeedsNewPick"/>).</param>
 public sealed record ProjectPrepared(ProjectRequest? Request, IReadOnlyList<string> Missing, string? PhaseChecked,
                                      IReadOnlyList<string> OptionsChecked, InteriorReadResult? Inside, string? Street = null,
-                                     StreetRefusal StreetRefused = StreetRefusal.None);
+                                     StreetRefusal StreetRefused = StreetRefusal.None)
+{
+    /// <summary>A check sent anyway (the Setup form's "Check now anyway"): the facts not set, or holding what Gordium
+    /// can't read, that were left out, so the rules each decides need review (SetupWords.SentWithout says how).</summary>
+    public IReadOnlyList<MarkDefinition> NotStated { get; init; } = [];
+}
 
 /// <summary>
 /// "Check my project" without Revit (reading design note, section 9): the architect's own open project read outside
@@ -33,8 +38,11 @@ public static class ProjectCheck
     /// <paramref name="outside"/> is RevitRead's model (elements, lot lines), <paramref name="inside"/> RevitInterior's
     /// (marks, Project Information, the interior records). Refused (<see cref="ReadRefusedException"/>) when the two
     /// don't name the same phases and design options: the outside and the inside must be the same design.</summary>
+    /// <remarks><c>anyway</c>: the architect's "Check now anyway" (the Setup form): sent with what is stated, every
+    /// fact not set (or holding what Gordium can't read) left out and listed (<see cref="ProjectPrepared.NotStated"/>), so
+    /// each rule it decides needs review; never without the zone, which chooses the rules.</remarks>
     public static async Task<ProjectPrepared> PrepareAsync(RevitModel outside, RevitModel inside, ILeftOutAsker asker,
-                                                           CancellationToken cancel = default)
+                                                           CancellationToken cancel = default, bool anyway = false)
     {
         ArgumentNullException.ThrowIfNull(outside);
         ArgumentNullException.ThrowIfNull(inside);
@@ -43,21 +51,23 @@ public static class ProjectCheck
             throw new ReadRefusedException("the outside and the inside weren't read in the same design (" + differs +
                                            "): nothing is sent; click Check project again");
         var read = ProjectFacts.Read(inside);
-        if (read.Missing.Count > 0)
+        if (read.Missing.Count > 0 && !(anyway && read.Facts["zone"] is not null))
             return new ProjectPrepared(null, read.Missing, null, [], null);
+        var notStated = read.Missing.Count > 0 ? SetupFacts.NotSent(inside, read) : [];
 
         // everything read from the records before the first await, on the caller's thread (Revit's: a lot line's
         // points call back into the API; SiteReader reads the lot before it asks the worker anything)
         var interior = InteriorReader.Read(inside);
         var site = await SiteReader.DescribeAsync(outside, read.Facts, asker, cancel).ConfigureAwait(false);
-        var match = StreetEdges.Match(read.StreetEdges!, site.Site["lot"] as JsonObject, outside.InternalToShared);
-        if (match.StreetLine is not { } street)
+        var match = read.StreetEdges is { } kept ? StreetEdges.Match(kept, site.Site["lot"] as JsonObject, outside.InternalToShared) : null;
+        // a kept edge no longer on the lot is asked for again, anyway too: anyway leaves out only what isn't set
+        if (match is not null && match.StreetLine is null)
             return new ProjectPrepared(null, [match.Why!], site.PhaseChecked, site.OptionsChecked, null, StreetRefused: match.Reason);
         var facts = read.Facts.DeepClone().AsObject();
-        facts["street_line"] = street;
-        var words = match.Words;
+        if (match?.StreetLine is { } line)
+            facts["street_line"] = line;
         return new ProjectPrepared(new ProjectRequest(site.Site, facts, interior.Interior), [], site.PhaseChecked,
-                                   site.OptionsChecked, interior, words);
+                                   site.OptionsChecked, interior, match?.Words) { NotStated = notStated };
     }
 
     /// <summary>The one check_site: the site, the facts and the interior, together.</summary>
