@@ -78,7 +78,8 @@ public sealed class PaneReviewTests
         Assert.Equal(SetupGate.RunsByItself(waiting, waiting with { Needed = [] }), PaneWords.ChecksAfterSave(waiting, chosen));
         // the footer counts from the same Needed list
         Assert.Equal("1 fact needed; 1 chosen, not saved yet.", PaneWords.SetupFooter(waiting, chosen));
-        Assert.Equal("Every fact the check needs is set.", PaneWords.SetupFooter(ready, draft));
+        // a ready form with Stories changed: the footer says what Save writes (review round 2)
+        Assert.Equal("Every fact the check needs is set; 1 chosen, not saved yet.", PaneWords.SetupFooter(ready, draft));
         Assert.Contains("PaneWords.SetupFooter(_screen, _draft)", Read("SetupView.cs"), StringComparison.Ordinal);
     }
 
