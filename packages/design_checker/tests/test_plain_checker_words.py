@@ -1,13 +1,14 @@
 """Every word the checker sends an architect is plain: no back-quoted field name, no identifier with an underscore,
 no "name = value" (an engineer's words, which showed in the Revit pane's cause cards and details before 2026-11-23).
 
-What an architect sees is the answer's `view` (the panel's rows, cards, groups, details, header and summary) and its
-`sections`; each string there is read here, except the fields that are data the host reads, never shows (DATA, each
-with its reason). Over every committed golden answer (test_data/goldens/: zoning, every scenario, the deep-run
-sites, the stress lots), and over the egress answers of every interior house, as drawn and with its stairs left out
-(the goldens have no interior). Each wording is fixed where it is made (each_part.not_sent_words,
-rule_format.parts.reading_words, present.tag_pattern); the few made in code another branch is changing are listed
-in NOT_YET, each with its reason, and only those."""
+What an architect sees is the answer's `view` (the panel's rows, cards, groups, details, header and summary), its
+`sections` and its `which_code` (the line saying which NY code governs); each string there is read here, except the
+fields that are data the host reads, never shows (DATA, each with its reason). Over every committed golden answer
+(test_data/goldens/: zoning, every scenario, the deep-run sites, the stress lots), and over the egress answers of
+every interior house, as drawn and with its stairs left out (the goldens have no interior). Each wording is fixed
+where it is made (each_part.not_sent_words, code_scope's use in words,
+rule_format.parts.reading_words, present.tag_pattern, egress.NOT_PER_PART and NOT_YET_WHY); any let through on
+purpose would be listed in NOT_YET with its reason (none are)."""
 
 import json
 import re
@@ -61,18 +62,17 @@ DATA = {
     "outline": "plan points",
     "stop": "a room's stop key (its words are `why`, checked)",
     "unit": "a unit key",
+    "facts": "on code_scope: the lot facts the code choice read, as their keys and stored values (never shown)",
     "refused": "keys of the floors the stories measuring left out (\"below_floors\"); the Revit pane doesn't show them",
     "gordium": "on `open`: Gordium's gap key",
     "kinds": "on `open`: part kinds' keys",
     "part": "on `part`: the part's kind key",
     "rules": "on `has_none`: rule ids (on a cause, a count in words: a string checked where it is words)",
 }
-# words still made in code the NY building code branch (feat/ny-building-code-in-check) is changing: egress.py.
-# Fixed once it lands; listed in the report of 2026-11-23 with the wording each would get.
-NOT_YET = {
-    egress.NOT_PER_PART: "egress.py: \"(no for_each)\"",
-}
-NOT_YET_PARTS = ("(The list: ",)        # egress.NOT_YET_WHY ends with the coverage file's path (egress.py)
+# words let through on purpose, each with its reason: none (egress.py's two, deferred while the NY building code
+# branch changed it, were made plain once it merged, 2026-11-23)
+NOT_YET: dict = {}
+NOT_YET_PARTS: tuple = ()
 
 
 def _strings(x, path=()):
@@ -92,7 +92,7 @@ def _strings(x, path=()):
 
 def problems(answer: dict) -> list[str]:
     out = []
-    for top in ("view", "sections"):
+    for top in ("view", "sections", "which_code"):
         for where, text in _strings(answer.get(top), (top,)):
             if text in NOT_YET or any(p in text for p in NOT_YET_PARTS):
                 continue
@@ -119,6 +119,22 @@ def test_the_pin_finds_each_kind_of_engineers_word():
         assert problems({"view": {"items": [{"reason": text}]}}), text
     assert not problems({"view": {"items": [{"reason": "Allowed: 25% × lot area 7,200 sf = 1,800 sf",
                                              "rule": "R-1b.lot_coverage"}]}})
+
+
+def test_the_egress_law_s_own_rows_are_in_plain_words():
+    """Two of the law's own rows: a rule not written part by part, and the sections not checked yet (no file path)."""
+    assert egress.NOT_PER_PART == ("this rule isn't written to be checked part by part (each room, door or stair), "
+                                   "and a state law's rules are checked only that way: it isn't checked, so check it "
+                                   "by hand")
+    assert "{file}" not in egress.NOT_YET_WHY and "(The list" not in egress.NOT_YET_WHY
+    assert egress.NOT_YET_WHY.endswith("Check each by hand: {all}.")
+
+
+def test_which_code_says_the_use_in_words():
+    from design_checker import code_scope
+    assert code_scope.decide({"use": "retail_store_or_service_commercial"}, None)["why"] == (
+        "its use (retail store or service commercial) is none of the dwellings R101.2 lists (101.2: every other "
+        "building)")
 
 
 def test_no_golden_answer_shows_an_architect_an_engineers_word():
