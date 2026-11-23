@@ -163,6 +163,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var all = new C.DockPanel();
         C.DockPanel.SetDock(head, C.Dock.Top);
         all.Children.Add(head);
+        C.DockPanel.SetDock(SelectionSlot, C.Dock.Top);         // the selection strip's slot (UI change 14: PaneExtras)
+        all.Children.Add(SelectionSlot);
         all.Children.Add(_bodyHost);
         Content = all;
         _bodyHost.Child = _missingScroll;
@@ -205,6 +207,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     {
         NewCheck(content);
         _content = content;
+        Shown?.Invoke(this, content);                            // the ribbon badge and the selection strip (PaneExtras)
         _failed = false;
         _again.Visibility = W.Visibility.Visible;
         _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
@@ -433,6 +436,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     {
         _failed = true;
         _content = null;
+        Shown?.Invoke(this, null);
         _detailId = null;
         _placed = [];
         _summary = null;
@@ -1037,6 +1041,28 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     public void ShowRoom(CauseCard card, CauseRoom room) => _card(new CardRequest(card, CardAction.Show, [room.Id], room.Name));
 
     public void OpenRow(string id) => OpenDetail(id);
+
+    /// <summary>What the pane shows, each time it changes: a check's content (stale once the model changed), or null
+    /// when its rows are taken down (UI changes 13 and 14: PaneExtras draws the ribbon badge and the selection strip).</summary>
+    internal static event Action<ResultsView, PanelContent?>? Shown;
+
+    /// <summary>The selection strip's place, under the header (UI change 14: PaneExtras fills it).</summary>
+    internal C.Border SelectionSlot { get; } = new();
+
+    /// <summary>A result opened from the selection strip (UI change 14): its detail, after clearing a filter, a search
+    /// or the fold that hides it in the list.</summary>
+    internal void OpenResult(string id)
+    {
+        if (!_entries.OfType<ListRowEntry>().Any(e => e.Row.Row.Id == id))
+        {
+            _filter = ListFilter.All;
+            _opened.Add(ListSection.Complies);
+            _search.Text = "";
+            Chips(_content?.Model?.Stale is not null);
+            Relayout();
+        }
+        OpenDetail(id);
+    }
 
     public IReadOnlyDictionary<string, string>? Labels => _content?.Labels;
 

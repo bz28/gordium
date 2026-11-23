@@ -27,6 +27,7 @@ public static class RibbonIcons
     public const string MarkFacts = "mark_facts";
     public const string Panel = "panel";
     public const string About = "about";
+    public const string Summary = "summary";
     public const string TrialTool = "trial_tool";
 
     /// <summary>The two sizes Revit's ribbon shows: Image (16) and LargeImage (32).</summary>
@@ -76,6 +77,14 @@ public static class RibbonIcons
             Mark(P(11.5, 5.5), P(12.5, 5.5)),
             Mark(P(11.5, 8.5), P(12.5, 8.5)),
             Mark(P(11.5, 11.5), P(12.5, 11.5)),
+        ]),
+        // a page with its corner turned, its lines in the accent: the printable summary
+        new IconShape(Summary,
+        [
+            Outline(P(3.5, 1.5), P(10, 1.5), P(12.5, 4), P(12.5, 14.5), P(3.5, 14.5)),
+            Mark(P(5.5, 6.5), P(10.5, 6.5)),
+            Mark(P(5.5, 9.5), P(10.5, 9.5)),
+            Mark(P(5.5, 12.5), P(8.5, 12.5)),
         ]),
         // an i in a circle
         new IconShape(About,

@@ -46,7 +46,7 @@ public static class RibbonBadge
     {
         if (failed)
             return new(BadgeKind.NotChecked, 0, 0,
-                       "The last check didn't finish, so nothing was checked. Click to check this project again.");
+                       "Nothing is checked now: the last check didn't finish, or the project checked was closed. Click to check this project.");
         if (model is null)
             return new(BadgeKind.NotChecked, 0, 0, missing > 0
                 ? $"Not checked yet: {Count(missing, "fact", "facts")} to set first; the Gordium pane lists {(missing == 1 ? "it" : "them")}. Click to check again."
