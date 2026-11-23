@@ -237,12 +237,13 @@ def _coincident_doors(story) -> None:
 
 def _reader(description) -> Reader:
     if not isinstance(description, dict):
-        raise Stop("description", reason="it isn't a mapping")
+        raise Stop("description", reason="it isn't a set of named entries")
     if description.get("format") != FORMAT:
-        raise Stop("description", reason=f"its format isn't {FORMAT} (it says {description.get('format')})")
+        raise Stop("description", reason=f"it is in a form Gordium doesn't read (it says {description.get('format')}, not {FORMAT})")
     units = description.get("units")
     if not isinstance(units, str) or units not in INCHES:
-        raise Stop("description", reason=f"its units ({units}) aren't one of in, ft, mm, m")
+        raise Stop("description", reason=f"it gives its sizes in {repr(units) if units is not None else 'no unit named'}, not in "
+                                               "inches, feet, millimetres or metres")
     return Reader(units)
 
 
@@ -300,13 +301,18 @@ def _levels(description, reader, stops):
     return levels
 
 
+FLAG_QUESTIONS = {"lockable": "whether it can be locked", "pass_through": "whether an exit route may pass through it",
+                  "not_occupied": "whether it is not occupied"}
+
+
 def _flag(item, key):
-    """True, False, or None (not given); anything else isn't read."""
+    """True, False, or None (not given); anything else isn't read (said as the question it answers, never the
+    field's name)."""
     got = item.get(key)
     if got is None or isinstance(got, bool):
         return got
-    raise InteriorStop("choice", what=f"its {key.replace('_', ' ')}", got=got,
-                       choices="yes or no (a yes/no value, not text)")
+    raise Stop("flag_text", question=FLAG_QUESTIONS[key][0].upper() + FLAG_QUESTIONS[key][1:],
+               got=f"the text {got!r}" if isinstance(got, str) else repr(got))
 
 
 def _room(item, reader, level) -> Room:
@@ -337,7 +343,7 @@ def _room(item, reader, level) -> Room:
             choice(ob.get("kind"), OBSTRUCTION_KINDS, f"obstruction #{n}'s kind")
             if not isinstance(ob.get("fixed"), bool):
                 raise InteriorStop("missing", what=f"whether obstruction #{n} is fixed (yes or no)")
-    except InteriorStop as s:
+    except (InteriorStop, Stop) as s:                  # (a yes/no mark given otherwise: _flag's own reason)
         raise Stop("room_not_read", name=name, reason=s.reason) from None
     # decision 1b: a room whose own use is occupancy (sleeping, the day care's rooms) is never one nobody occupies
     occupied_by_use = "a sleeping room" if sleeping else "a day_care room" if use == "day_care" else ""

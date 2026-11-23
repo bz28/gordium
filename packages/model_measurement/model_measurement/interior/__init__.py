@@ -140,7 +140,7 @@ def measure(description) -> dict:
         return out
     units = description.get("units")
     if not isinstance(units, str) or units not in INCHES:
-        problems.append(Stop("units", units=units).reason)
+        problems.append(Stop("units", units=repr(units) if units is not None else "no unit named").reason)
         return out
     reader = Reader(units)
     parts = out["parts"]

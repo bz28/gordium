@@ -247,6 +247,7 @@ def _door_within_zone():
 
 FLOOR_CASES = {
     "description": lambda: _with(room_on_corridor(), "cubits", "units"),
+    "flag_text": lambda: _with(room_on_corridor(), "no", "rooms", 0, "lockable"),
     "no_levels": _no_levels,
     "level_entry": lambda: _with(room_on_corridor(), [{"id": "L1", "name": "Level 1"}], "levels"),
     "level_twice": _two_levels_one_id,

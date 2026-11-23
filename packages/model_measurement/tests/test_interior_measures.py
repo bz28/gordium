@@ -1744,10 +1744,10 @@ def test_units(units, scale):
 
 
 @pytest.mark.parametrize("desc, words", [
-    ([], "isn't a mapping"),
-    ({"format": "gordium.site/1"}, "format isn't gordium.interior/1"),
-    ({"format": "gordium.interior/1", "units": "cubits"}, "units (cubits)"),
-    ({"format": "gordium.interior/1"}, "units (None)"),
+    ([], "isn't a set of named entries"),
+    ({"format": "gordium.site/1"}, "it says gordium.site/1, not gordium.interior/1"),
+    ({"format": "gordium.interior/1", "units": "cubits"}, "gives its sizes in 'cubits', not in inches"),
+    ({"format": "gordium.interior/1"}, "gives its sizes in no unit named, not in inches"),
 ])
 def test_a_description_that_cant_be_read_reads_nothing(desc, words):
     got = measure(desc)

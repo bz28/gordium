@@ -10,7 +10,7 @@ design: docs/decisions/2026-11-20_route_measurement.md.
 
 STOPS = {
     # the description as a whole (every story's route measures need review)
-    "description": "the interior description can't be read for routes: {reason}",
+    "description": "the model can't be read for escape routes: {reason}",
     "no_levels": "the model gives no levels: which story each room and door is on isn't known",
     "level_entry": "level #{n} can't be read (a level has an id, a name and an elevation): {reason}",
     "level_twice": "{count} levels have the id {id!r}",
@@ -101,6 +101,7 @@ STOPS = {
     "passage_in_ring": "the passage from the room {name} has its middle within 12 in of a corner: whether a route "
                        "leaves by it isn't worked out",
     "no_room_doors": "the story has no room besides its corridors: no room door to measure from",
+    "flag_text": "{question} is given as {got}, not as a yes/no value",
     "no_exit_access": "the room {name} has no door from which a route reaches an exit without coming back into it",
     # areas (areas.py)
     "area_room_not_read": "the room {name} isn't read, so what it adds to the story's areas isn't known",

@@ -160,8 +160,9 @@ def test_route_reasons_as_read_have_no_back_quotes_underscored_fields_or_coordin
     assert len({w for w in said}) >= 6, said
     for w in said:
         assert "`" not in w and not COORDINATES.search(w), w
+        assert "description" not in w, w                            # the model, never Gordium's file
         assert not re.search(r"\b[a-z]+_[a-z_]+\b", w), w            # no field name of the file format
-    assert any("not one of yes or no (a yes/no value, not text)" in w for w in said), said
+    assert any("Whether it is not occupied is given as the text 'yes', not as a yes/no value" in w for w in said), said
     assert any("story outline #1 isn't on one of the model's levels" in w for w in said), said
 
 
@@ -172,3 +173,27 @@ def test_a_dead_ends_door_off_its_legs_is_named_without_coordinates():
     import inspect
     from model_measurement.routes import dead_ends
     assert "at the closed end (" not in inspect.getsource(dead_ends)
+
+
+@pytest.mark.parametrize("key, question", [("lockable", "Whether it can be locked"),
+                                           ("pass_through", "Whether an exit route may pass through it"),
+                                           ("not_occupied", "Whether it is not occupied")])
+def test_a_yes_no_mark_given_as_text_is_said_as_its_question(key, question):
+    """"its lockable is 'no', not one of yes or no" named the field and contradicted itself: said as the question."""
+    from model_measurement.routes.floor import read
+    from routes_layouts import room_on_corridor
+    d = room_on_corridor()
+    d["rooms"][0][key] = "no"
+    said = [r for s in read(d).stories.values() for r in s.stops]
+    assert any(f"{question} is given as the text 'no', not as a yes/no value" in r for r in said), said
+    assert not any("not one of yes or no" in r or key in r for r in said), said
+    d["rooms"][0][key] = 1
+    assert any(f"{question} is given as 1, not as a yes/no value" in r for s in read(d).stories.values()
+               for r in s.stops)
+
+
+def test_the_interiors_own_reasons_say_the_model_not_the_description():
+    for key, blanks in (("not_a_description", {}), ("wrong_format", {"got": "x"}), ("units", {"units": "cubits"})):
+        assert "description" not in Stop(key, **blanks).reason, key
+    from model_measurement.routes.stops import Stop as RouteStop
+    assert RouteStop("description", reason="r").reason.startswith("the model can't be read for escape routes")

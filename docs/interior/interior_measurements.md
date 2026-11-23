@@ -116,9 +116,9 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 
 | Key | Reason |
 |---|---|
-| `not_a_description` | the interior description isn't a mapping |
-| `wrong_format` | the interior description's format isn't gordium.interior/1 (it says {got}) |
-| `units` | the interior description's units ({units}) aren't one of in, ft, mm, m |
+| `not_a_description` | the interior sent from the model can't be read (it isn't a set of named entries) |
+| `wrong_format` | the interior sent from the model is in a form Gordium doesn't read (it says {got}, not gordium.interior/1) |
+| `units` | the interior sent from the model gives its sizes in {units}, not in inches, feet, millimetres or metres |
 | `not_read` | the {what} weren't read: the model doesn't say these are all the {what} (or that there are none) |
 | `not_a_list` | the {key} sent from the model can't be read (they aren't a list) |
 | `not_a_mapping` | {what} #{n} isn't a mapping |
