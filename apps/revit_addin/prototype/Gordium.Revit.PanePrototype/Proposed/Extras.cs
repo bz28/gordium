@@ -171,9 +171,9 @@ internal static class Extras
                     if (o.GetString() is { } uid)
                         Add(uid, p.Row.Id);
         foreach (var card in model.Causes)
-            foreach (var uid in card.Elements)
+            foreach (var room in card.Rooms)                      // a room a cause names (the rooms with no route)
                 foreach (var row in card.Items)
-                    Add(uid, row);
+                    Add(room.Id, row);
         if (about.Count == 0)
             return;
         var (picked, rows) = about.Where(kv => !labels[kv.Key].StartsWith("Level", StringComparison.Ordinal)).DefaultIfEmpty(about.First())

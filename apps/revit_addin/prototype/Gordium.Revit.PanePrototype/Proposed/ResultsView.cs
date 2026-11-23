@@ -725,7 +725,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var street = needed.Any(f => f.Kind == FieldKind.StreetPick && !f.IsSet && draft.Chosen(f.Mark) is null);
         p.Children.Add(Typed(new C.TextBlock
         {
-            Text = $"{chosen} of {needed.Count} needed facts chosen" + (changes > 0 ? ", not saved yet" : "") +
+            Text = $"{screen.Needed.Count} {(screen.Needed.Count == 1 ? "fact" : "facts")} needed" + (changes > 0 ? $"; {changes} chosen, not saved yet" : "; none chosen yet") +
                    (street ? ". You pick the street edge on the plan when the check starts." : "."),
             TextWrapping = W.TextWrapping.Wrap,
         }, Caption));
