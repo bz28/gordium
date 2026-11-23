@@ -55,11 +55,12 @@ documents:
       # parts under it: their exempt locations and extent are the architect's statement); 1006.2.1 and Table
       # 1006.2.1 (common path, spaces with one exit, p.315, with 1006.2.2 after); 1006.3.3, Table 1006.3.3, 1006.3.4
       # and Table 1006.3.4(2) (a story's number of exits, and when one will do: pp.316-317, so a story is held to two
-      # separated exits only where it needs two; review round 3, 2026-11-22); 1007.1 (exit separation, p.318, with
+      # separated exits only where it needs two; review round 3, 2026-11-22; Table 1006.3.4(1), Group R-2's
+      # dwelling units, 2026-11-23: section group 2 of docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md); 1007.1 (exit separation, p.318, with
       # SECTION 1008 after); 1016.2 (egress through intervening spaces, pp.340-341) and Section 1017 (exit access
       # travel distance, pp.341-342, with SECTION 1018 after); 1020.5 (dead ends, p.344, with 1020.6 after).
       pages: 32-68, 79, 147, 273-274, 315-318, 340-342, 344
-      sections: ['308.5', '508.2', '1006.2.1', Table 1006.2.1, '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(2),
+      sections: ['308.5', '508.2', '1006.2.1', Table 1006.2.1, '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(1), Table 1006.3.4(2),
                  '1007.1', '1016.2', '1017', Table 1017.2, '1020.5']
       alone: ['903.3.1.1', '903.3.1.2']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
