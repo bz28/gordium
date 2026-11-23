@@ -119,7 +119,7 @@ def test_every_answer_is_the_predicted_one_and_never_a_false_pass(found, name):
             continue
         assert i["status"] == ("needs_review" if claim.get("reading") else "not_applicable"), i["name"]
         assert " ".join(claim["source"].split()) in i["reason"], i["name"]
-        assert "the description says the house has no" in i["reason"], i["name"]
+        assert "the model says the house has no" in i["reason"], i["name"]
     assert len([i for i in got["items"] if i.get("has_none")]) == len(claims)
     # every rule a claim sets aside is named in that claim's item, so a not applicable is never hidden; the rest are
     # not applicable from a fact the house gives (every escape opening a window), as the hand-check predicted
@@ -127,7 +127,7 @@ def test_every_answer_is_the_predicted_one_and_never_a_false_pass(found, name):
     for k, v in got["results"].items():
         if v == "not_applicable":
             assert (k in set_aside) == ("has_none" in by_id[k]["because"]), k
-    assert got["interior"]["problems"] == ["the stairs weren't read (no `stairs` in the description)"]
+    assert got["interior"]["problems"] == ["the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)"]
 
 
 @pytest.mark.parametrize("name", NAMES)
