@@ -38,7 +38,9 @@ internal static class Program
         var house = Load(Path.Combine(answers, "ithaca_106_house_check_answer.json"));
         var houseAfter = Load(Path.Combine(answers, "ithaca_106_house_after_check_answer.json"));
         var childcare = Load(Path.Combine(answers, "children_odyssey_check_answer.json"));
-        foreach (var (n, r) in new[] { ("house", house), ("childcare", childcare) })
+        // the four-unit apartment as Ben checked it in the Revit trial (2026-11-23 11:42, results.jsonl's last answered check_project)
+        var apartment = Load(Path.Combine(fix, "apartment_check_answer.json"));
+        foreach (var (n, r) in new[] { ("house", house), ("childcare", childcare), ("apartment", apartment) })
         {
             var cs = ResultRows.Build(r, "New Construction", [], null).Causes;
             Console.WriteLine($"{n}: {cs.Count} cause cards");
@@ -53,7 +55,7 @@ internal static class Program
                 // a: first open, before any check
                 Step(make(theme, []), "01_welcome", 430, dark, _ => { });
                 // the house (106 Ithaca Rd) and the childcare centre (Children's Odyssey)
-                foreach (var (tag, title, setupFile, answer) in new[] { ("house", "106 Ithaca Rd", "setup_ithaca106.json", house), ("childcare", "Children's Odyssey", "setup_childcare.json", childcare) })
+                foreach (var (tag, title, setupFile, answer) in new[] { ("house", "106 Ithaca Rd", "setup_ithaca106.json", house), ("childcare", "Children's Odyssey", "setup_childcare.json", childcare), ("apartment", "Four-unit apartment", "setup_apartment.json", apartment) })
                 {
                     if (dark && tag == "childcare")
                         continue;                       // dark: the house only
@@ -61,6 +63,9 @@ internal static class Program
                     var blank = SetupScreen.Build(model, sides, options, new SetupDraft());
                     // b: Check project with facts missing: the Setup form
                     Step(make(theme, []), $"02_setup_{tag}", 430, dark, p => p.Setup(title, blank, new SetupDraft()));
+                    // the whole form at once (no scroll): where its needed facts sit (UI polish proposal, 2026-11-23)
+                    if (tag == "apartment")
+                        Step(make(theme, []), $"02_setup_{tag}_whole", 1500, dark, p => p.Setup(title, blank, new SetupDraft()));
                     // c: the form filled in, then the check running
                     var draft = Filled(blank, tag);
                     var filled = SetupScreen.Build(model, sides, options, draft);
@@ -123,6 +128,10 @@ internal static class Program
                     // the error state, and stale
                     Step(make(theme, []), "10_error_house", 430, dark, p => p.Failed(
                         CheckWords.CheckerStopped("the worker exited with code 1") + @" (logged to C:\Users\you\AppData\Local\Gordium\trial\results.jsonl)"));
+                    // the timeout as Ben saw it in the trial (2026-11-23 11:28): CheckProject.cs's words for a check that timed out
+                    Step(make(theme, []), "10_error_timeout", 430, dark, p => p.Failed(
+                        CheckWords.CheckerStopped("WorkerTimeoutException: The Gordium checker gave no answer to check_site in 60 s, so it was stopped and nothing from it is shown")
+                        + @" (logged to C:\Users\benja\AppData\Local\Gordium\trial\results.jsonl)"));
                     Step(make(theme, []), "11_stale_house", 430, dark, p =>
                     {
                         p.Show(title, when, rows, labels);
@@ -151,8 +160,8 @@ internal static class Program
         var draft = new SetupDraft();
         foreach (var f in blank.Fields.Where(f => f.Required && f.Current is null))
         {
-            var pick = f.Mark == Marks.Zone ? (tag == "house" ? "R-1b" : f.Choices.FirstOrDefault()?.Value)
-                : f.Mark == Marks.Use ? (tag == "house" ? "one_family_detached" : f.Choices.FirstOrDefault(c => c.Value.Contains("day_care"))?.Value ?? f.Choices.FirstOrDefault()?.Value)
+            var pick = f.Mark == Marks.Zone ? (tag == "house" ? "R-1b" : tag == "apartment" ? "R-3a" : f.Choices.FirstOrDefault()?.Value)
+                : f.Mark == Marks.Use ? (tag == "house" ? "one_family_detached" : tag == "apartment" ? "multiple_family" : f.Choices.FirstOrDefault(c => c.Value.Contains("day_care"))?.Value ?? f.Choices.FirstOrDefault()?.Value)
                 : f.Kind == FieldKind.YesNo ? "Yes" : f.Choices.FirstOrDefault()?.Value;
             if (pick is not null && f.Kind != FieldKind.StreetPick)
                 draft.Choose(f.Mark, pick);
