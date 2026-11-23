@@ -137,6 +137,40 @@ def test_which_code_says_the_use_in_words():
         "building)")
 
 
+def test_every_code_choice_says_itself_in_plain_words():
+    """Not only the goldens' few: decide() over test_code_scope_property's walk of every fact it reads (every path
+    it returns by), the first case of each different answer and every 100th besides, a few thousand; and the
+    building block's own mistakes, which the walk doesn't make (a fact Gordium doesn't read, values of the wrong
+    kind). Each answer as the pane shows it: which_code, and the egress law's line made from it (SCOPE_OPEN_WHY,
+    SCOPE_WHY)."""
+    from design_checker import code_scope
+    from test_code_scope_property import decided, walk
+
+    def shown(got):
+        cites = ", ".join(c["section"] for c in got["cites"])
+        line = (egress.SCOPE_OPEN_WHY.format(why=got["why"], cites=cites, ask=got["ask"]) if got["code"] is None
+                else egress.SCOPE_WHY.format(book=got["title"], why=got["why"], cites=cites))
+        return {"which_code": got, "view": {"items": [{"reason": line}]}}
+
+    answers, shapes = [], set()
+    for i, f in enumerate(walk()):
+        got = decided(f)
+        shape = re.sub(r"\d+", "N", got["why"])
+        if shape not in shapes or i % 100 == 0:
+            shapes.add(shape)
+            answers.append(got)
+    odd = {"stories_abvoe": 3, "sprinkler_system": "nfpa_13x", "occupancy_groups": ["R_3"], "townhouse_units": "no"}
+    for building in ({k: v} for k, v in odd.items()):
+        answers.append(code_scope.decide({"use": "one_family_detached", "dwelling_units": "two_units"}, building))
+        answers.append(code_scope.decide({"use": "multiple_family", "stories": "three_up"}, building))
+    answers.append(code_scope.decide({"use": "one_family_detached"}, ["not", "a_mapping"]))
+    assert len(answers) > 3000 and len(shapes) > 50
+    found = [p for got in answers for p in problems(shown(got))]
+    assert not found, f"{len(found)} problems, e.g.\n" + "\n".join(found[:10])
+    assert code_scope.use_words("one_family_detached") == "a detached one-family dwelling"
+    assert "stories abvoe" in code_scope.decide({"use": "two_family"}, {"stories_abvoe": 3})["why"]
+
+
 def test_no_golden_answer_shows_an_architect_an_engineers_word():
     _, answers = goldens.stored()
     found = [f"{case}: {p}" for case, value in answers.items() for a in _answers(value) for p in problems(a)]
