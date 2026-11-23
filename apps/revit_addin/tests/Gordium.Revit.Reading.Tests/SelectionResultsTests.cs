@@ -55,9 +55,9 @@ public sealed class SelectionResultsTests
                 foreach (var uid in r.Row.Elements)
                     Expect(uid, r.Row.Id);
             foreach (var c in model.Causes)
-                foreach (var room in c.Rooms)
+                foreach (var room in c.Rooms.Select(r => r.Id).Concat(c.Key.StartsWith("rooms:", StringComparison.Ordinal) ? c.Elements : []))
                     foreach (var id in c.Items)
-                        Expect(room.Id, id);
+                        Expect(room, id);
             Assert.NotEmpty(expected);
             Assert.Equal(expected.Keys.OrderBy(k => k, StringComparer.Ordinal), map.Elements.OrderBy(k => k, StringComparer.Ordinal));
             foreach (var (uid, rows) in expected)

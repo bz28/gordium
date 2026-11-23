@@ -21,7 +21,8 @@ internal static class PaneExtras
 {
     private static PushButton? _check;
     private static PanelTheme _theme = PanelTheme.Light;
-    private static BadgeState _badge = RibbonBadge.Of(null, default);
+    private static readonly FollowedState Followed = new();
+    private static IReadOnlyDictionary<string, string> _labels = new Dictionary<string, string>();
     private static ResultsView? _view;
     private static SelectionMap? _map;
 
@@ -36,8 +37,9 @@ internal static class PaneExtras
     // a selection the pane made itself (a result's Show): never answered by the strip
     private static (HashSet<long> Ids, DateTime At)? _own;
 
-    /// <summary>What the pane shows now (null: nothing checked, or its rows taken down): what the summary is made of.</summary>
-    internal static PanelContent? Content { get; private set; }
+    /// <summary>The check the badge, the strip and the summary follow (review round 1: its own project's changes and
+    /// closing, whatever project the pane shows; the Setup form never replaces it).</summary>
+    internal static FollowedState State => Followed;
 
     /// <summary>At startup, after the ribbon is built and its theme handler added: finds Check project's button, and
     /// follows the pane, Revit's selection and its theme (after the ribbon's own icon swap, so the badge is drawn
@@ -57,6 +59,8 @@ internal static class PaneExtras
         ResultsView.Shown += OnShown;
         app.SelectionChanged += OnSelectionChanged;
         app.ThemeChanged += OnThemeChanged;
+        app.ControlledApplication.DocumentChanged += OnDocumentChanged;
+        app.ControlledApplication.DocumentClosing += OnDocumentClosing;
         Trial.Log("pane_extras", new Dictionary<string, object?> { ["check_button"] = _check is not null });
     }
 
@@ -65,6 +69,8 @@ internal static class PaneExtras
         ResultsView.Shown -= OnShown;
         app.SelectionChanged -= OnSelectionChanged;
         app.ThemeChanged -= OnThemeChanged;
+        app.ControlledApplication.DocumentChanged -= OnDocumentChanged;
+        app.ControlledApplication.DocumentClosing -= OnDocumentClosing;
     }
 
     private static PanelTheme Theme() => PanelLook.OfRevit(UIThemeManager.CurrentTheme);
@@ -80,23 +86,59 @@ internal static class PaneExtras
                 _view = view;
                 view.LayoutUpdated += (_, _) => HideOverSetup();
             }
-            Content = content;
-            _badge = content switch
-            {
-                null => RibbonBadge.Of(null, default, failed: true),
-                { Model: null } => RibbonBadge.Of(null, content.When, missing: content.Missing.Count),
-                _ => RibbonBadge.Of(content.Model, content.When),
-            };
-            ShowBadge();
-            _map = content?.Model is { } model ? SelectionMap.Of(model, content.When) : null;
-            if (_map is null || content?.Project != _selectedIn)
-                Hide();                                   // nothing to answer from, or another project's results
-            else if (_stripOn)
-                Draw();                                   // the same selection, from this answer (stale: the clocks)
+            var before = Followed.Check;
+            Followed.Shown(content is null ? null : new FollowedCheck(content.Project, content.When, content.Model, content.Missing.Count,
+                                                                      content.NotStated, content.ClearWords, content.MarksAdded));
+            if (!ReferenceEquals(before, Followed.Check))
+                _labels = content?.Labels ?? new Dictionary<string, string>();
+            Follow();
         }
         catch (Exception x)       // never out of the pane's redraw
         {
             Trial.Log("pane_extras", new Dictionary<string, object?> { ["shown"] = $"{x.GetType().Name}: {x.Message}" });
+        }
+    }
+
+    /// <summary>The badge and the strip drawn again from the check followed.</summary>
+    private static void Follow()
+    {
+        ShowBadge();
+        var check = Followed.Check;
+        _map = check?.Model is { } model ? SelectionMap.Of(model, check.When) : null;
+        if (_map is null || check?.Project != _selectedIn)
+            Hide();                                       // nothing to answer from, or another project's results
+        else if (_stripOn)
+            Draw();                                       // the same selection, from this answer (stale: the clocks)
+    }
+
+    /// <summary>Revit's DocumentChanged: a change that changes the check (ResultRows.ChangesTheCheck) to the project
+    /// whose check is followed makes it stale, whichever project the pane shows. Never throws out of Revit's event.</summary>
+    private static void OnDocumentChanged(object? sender, Autodesk.Revit.DB.Events.DocumentChangedEventArgs e)
+    {
+        try
+        {
+            if (ResultRows.ChangesTheCheck(e.GetTransactionNames().ToList(),
+                                           committed: e.Operation == Autodesk.Revit.DB.Events.UndoOperation.TransactionCommitted)
+                && Followed.Changed(e.GetDocument().Title))
+                Follow();
+        }
+        catch (Exception x)       // never out of Revit's event
+        {
+            Trial.Log("pane_extras", new Dictionary<string, object?> { ["document_changed"] = $"{x.GetType().Name}: {x.Message}" });
+        }
+    }
+
+    /// <summary>Revit's DocumentClosing: the check followed taken down when its project closes.</summary>
+    private static void OnDocumentClosing(object? sender, Autodesk.Revit.DB.Events.DocumentClosingEventArgs e)
+    {
+        try
+        {
+            if (Followed.Closed(e.Document.Title))
+                Follow();
+        }
+        catch (Exception x)       // never out of Revit's event
+        {
+            Trial.Log("pane_extras", new Dictionary<string, object?> { ["document_closing"] = $"{x.GetType().Name}: {x.Message}" });
         }
     }
 
@@ -106,9 +148,10 @@ internal static class PaneExtras
     {
         if (_check is null)
             return;
-        _check.LargeImage = Image(RibbonBadge.Png(_badge, 32, _theme));
-        _check.Image = Image(RibbonBadge.Png(_badge, 16, _theme));
-        _check.ToolTip = _badge.ToolTip;
+        var badge = Followed.Badge;
+        _check.LargeImage = Image(RibbonBadge.Png(badge, 32, _theme));
+        _check.Image = Image(RibbonBadge.Png(badge, 16, _theme));
+        _check.ToolTip = badge.ToolTip;
     }
 
     /// <summary>Revit's ThemeChanged, after the ribbon's own swap to the plain icons: the badge drawn back, in the new theme.</summary>
@@ -146,7 +189,7 @@ internal static class PaneExtras
     {
         try
         {
-            if (_view is null || _map is null || Content is null)
+            if (_view is null || _map is null || Followed.Check is not { } check)
                 return;
             var doc = e.GetDocument();
             var ids = e.GetSelectedElements();
@@ -155,7 +198,7 @@ internal static class PaneExtras
                 _own = null;
                 return;                                   // the pane's own: the strip stays as it was
             }
-            if (doc is null || doc.Title != Content.Project || ids.Count == 0 || ids.Count > 5000)
+            if (doc is null || doc.Title != check.Project || ids.Count == 0 || ids.Count > 5000)
             {
                 Hide();
                 return;
@@ -167,7 +210,7 @@ internal static class PaneExtras
                 {
                     uids.Add(el.UniqueId);
                     if (ids.Count == 1)
-                        names[el.UniqueId] = Content.Labels.TryGetValue(el.UniqueId, out var l) ? l : CheckProjectCommand.Label(doc, el.UniqueId);
+                        names[el.UniqueId] = _labels.TryGetValue(el.UniqueId, out var l) ? l : CheckProjectCommand.Label(doc, el.UniqueId);
                 }
             if (uids.Count == 0)
             {
@@ -233,19 +276,19 @@ public sealed class SaveSummaryCommand : IExternalCommand
 {
     public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
     {
-        var content = PaneExtras.Content;
-        if (content?.Model is not { } model || ComplianceSummary.Refusal(model, content.When) is not null)
+        var state = PaneExtras.State;
+        if (state.SummaryRefusal is { } why || state.Check is not { } check)
         {
-            Autodesk.Revit.UI.TaskDialog.Show("Gordium", ComplianceSummary.Refusal(content?.Model, content?.When ?? DateTime.Now)!);
+            Autodesk.Revit.UI.TaskDialog.Show("Gordium", state.SummaryRefusal ?? "Nothing to summarise.");
             return Result.Succeeded;
         }
-        var path = Ask(content.Project, content.When);
+        var path = Ask(check.Project, check.When);
         if (path is null)
             return Result.Cancelled;
         try
         {
-            File.WriteAllText(path, ComplianceSummary.Html(model, content.Project, content.When, DateTime.Now), new UTF8Encoding(false));
-            Trial.Log("summary", new Dictionary<string, object?> { ["file"] = path, ["project"] = content.Project });
+            File.WriteAllText(path, state.SummaryHtml(DateTime.Now), new UTF8Encoding(false));
+            Trial.Log("summary", new Dictionary<string, object?> { ["file"] = path, ["project"] = check.Project });
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
             return Result.Succeeded;
         }

@@ -13,7 +13,7 @@ public sealed record SelectionAnswer(string Title, string Line, IReadOnlyList<Li
 /// <summary>
 /// Which results mention an element (docs/revit/ui_design_pass.md, change 14), Revit-free so it is tested: an element
 /// is mentioned by a result whose own elements name it (a zoning row's <c>objects</c>, an egress row's part), and by
-/// every result of a cause card that names it as one of its rooms (the worker's "5 rooms have no route to an exit":
+/// every result of a cause card that names it as one of its rooms (<see cref="RoomsOf"/>) (the worker's "5 rooms have no route to an exit":
 /// the card's rows wait on those rooms). Built once per answer the pane shows; a selection is then a lookup. Nothing
 /// here makes or changes a verdict: each row is the pane's own <see cref="ListRow"/>, with its status.
 /// </summary>
@@ -54,11 +54,25 @@ public sealed class SelectionMap
             foreach (var uid in p.Row.Elements)
                 map.Add(uid, p);
         foreach (var card in model.Causes)
-            foreach (var room in card.Rooms)
+            foreach (var room in RoomsOf(card))
                 foreach (var id in card.Items)
                     if (byId.TryGetValue(id, out var p))
-                        map.Add(room.Id, p);
+                        map.Add(room, p);
         return map;
+    }
+
+    /// <summary>The rooms a cause card names: its rows' own rooms of its key (<see cref="CauseCard.Rooms"/>), and, for a
+    /// rooms card (key "rooms:..."), the card's own elements too. The worker merges rooms cards whose rooms overlap
+    /// (grouping._rooms_together: "rooms:A,B" and "rooms:B,C" become one "rooms:A,B,C" card) while each row keeps its
+    /// narrower key, so the card's Rooms can be empty: its elements are then the only place its rooms are named
+    /// (review round 1).</summary>
+    public static IReadOnlyList<string> RoomsOf(CauseCard card)
+    {
+        ArgumentNullException.ThrowIfNull(card);
+        var rooms = card.Rooms.Select(r => r.Id).ToList();
+        if (card.Key.StartsWith("rooms:", StringComparison.Ordinal))
+            rooms.AddRange(card.Elements);
+        return [.. rooms.Distinct(StringComparer.Ordinal)];
     }
 
     private void Add(string uid, ListRow row)

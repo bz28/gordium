@@ -51,10 +51,18 @@ public static class ComplianceSummary
         return [.. model.Groups.Select(g => (g, (IReadOnlyList<ResultRow>)[.. g.AllRows])).Where(s => s.Item2.Count > 0)];
     }
 
+    /// <summary>The pane's heading for a check sent anyway, each fact left out then listed (ResultsView's words).</summary>
+    public static string NotStatedTitle(int count) =>
+        $"Checked without {count} {(count == 1 ? "fact" : "facts")}: the rules they decide need review";
+
     /// <summary>The summary as one self-contained HTML file (no script, no file it loads), for <paramref name="project"/>
-    /// checked at <paramref name="checkedAt"/>, saved at <paramref name="madeAt"/>. Throws for a model
-    /// <see cref="Refusal"/> refuses.</summary>
-    public static string Html(ResultModel model, string project, DateTime checkedAt, DateTime madeAt)
+    /// checked at <paramref name="checkedAt"/>, saved at <paramref name="madeAt"/>. Everything the pane shows that
+    /// qualifies the results is said too, in its words: the facts a check sent anyway left out
+    /// (<paramref name="notStated"/>), which code (the worker's which_code line), the drafts this run filled
+    /// (<paramref name="drafts"/>: ClearPrefills.PanelStatus), and what wasn't read from the model
+    /// (<see cref="ResultModel.Inside"/>). Throws for a model <see cref="Refusal"/> refuses.</summary>
+    public static string Html(ResultModel model, string project, DateTime checkedAt, DateTime madeAt,
+                              IReadOnlyList<string>? notStated = null, string? drafts = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         ArgumentNullException.ThrowIfNull(project);
@@ -85,6 +93,7 @@ public static class ComplianceSummary
          .Append(".why { font-size: 9pt; margin-top: 2px; }\n")
          .Append(".law { font-family: Georgia, 'Times New Roman', serif; font-size: 9pt; }\n")
          .Append(".law p { margin: 0 0 4px; }\n")
+         .Append(".verbatim { white-space: pre-line; }\n")
          .Append("a { color: ").Append(C(PanelTokens.Accent)).Append("; }\n")
          .Append("@media print { body { padding: 0; max-width: none; } a { text-decoration: none; } }\n")
          .Append("</style>\n</head>\n<body>\n");
@@ -99,8 +108,20 @@ public static class ComplianceSummary
         h.Append("<p><b>").Append(E(model.Headline)).Append("</b></p>\n");
         if (model.Checked.Length > 0)
             h.Append("<p class=\"muted\">").Append(E(model.Checked)).Append("</p>\n");
+        if (notStated is { Count: > 0 })
+        {
+            // checked anyway: what was left out, each making its rules need review (the pane says it first)
+            h.Append("<div id=\"not-stated\"><p><b>").Append(E(NotStatedTitle(notStated.Count))).Append("</b></p><ul>");
+            foreach (var n in notStated)
+                h.Append("<li>").Append(E(n)).Append("</li>");
+            h.Append("</ul></div>\n");
+        }
         if (model.Code is { } code)
-            h.Append("<p class=\"muted\">").Append(E(code.Words)).Append("</p>\n");
+            h.Append("<p id=\"which-code\">").Append(E(code.Words)).Append("</p>\n");
+        if (drafts is { Length: > 0 })
+            h.Append("<p id=\"drafts\" class=\"verbatim\">").Append(E(drafts)).Append("</p>\n");
+        if (model.Inside.Length > 0)
+            h.Append("<h2>Not read from the model</h2>\n<p id=\"not-read\" class=\"verbatim\">").Append(E(model.Inside)).Append("</p>\n");
 
         foreach (var (group, rows) in Sections(model))
         {

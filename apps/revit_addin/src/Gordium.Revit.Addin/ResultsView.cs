@@ -64,7 +64,18 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private readonly C.TextBlock _searchHint = Small("Search rules, sections, elements (Ctrl+F)");
     private readonly C.TextBlock _shown = Small("");
     private readonly C.ListBox _list = new();
-    private PanelContent? _content;
+    // UI changes 13-15: every write of _content goes through this one setter, which raises Shown (PaneExtras follows
+    // it for the ribbon badge, the selection strip and the summary); never write _contentValue but here
+    private PanelContent? _contentValue;
+    private PanelContent? _content
+    {
+        get => _contentValue;
+        set
+        {
+            _contentValue = value;
+            Shown?.Invoke(this, value);
+        }
+    }
 
     // the list's state, kept across every redraw (a stale redraw, a new check): the filter, the folds, what is open
     private IReadOnlyList<ListRow> _placed = [];
@@ -207,7 +218,6 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     {
         NewCheck(content);
         _content = content;
-        Shown?.Invoke(this, content);                            // the ribbon badge and the selection strip (PaneExtras)
         _failed = false;
         _again.Visibility = W.Visibility.Visible;
         _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
@@ -436,7 +446,6 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     {
         _failed = true;
         _content = null;
-        Shown?.Invoke(this, null);
         _detailId = null;
         _placed = [];
         _summary = null;
@@ -1042,8 +1051,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
 
     public void OpenRow(string id) => OpenDetail(id);
 
-    /// <summary>What the pane shows, each time it changes: a check's content (stale once the model changed), or null
-    /// when its rows are taken down (UI changes 13 and 14: PaneExtras draws the ribbon badge and the selection strip).</summary>
+    /// <summary>Every write of the pane's content (its one setter): a check's (stale once the model changed), the
+    /// Setup form's (no rows, nothing to set), or null when its rows are taken down (UI changes 13 to 15: PaneExtras).</summary>
     internal static event Action<ResultsView, PanelContent?>? Shown;
 
     /// <summary>The selection strip's place, under the header (UI change 14: PaneExtras fills it).</summary>
