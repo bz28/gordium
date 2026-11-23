@@ -65,7 +65,7 @@ def test_the_line_is_on_a_checked_house_and_lists_every_section_not_checked_yet(
         assert f"({section})" in line["reason"]
     assert sorted(line["detail"]["citation"].split(", ")) == sorted(uncovered())
     assert line["reason"].startswith("Gordium doesn't check these sections of the NY State Residential Code 2025 yet")
-    assert "new_york_state/6_coverage_report/gov.ny.residential.2025.rules.yaml" in line["reason"]
+    assert "6_coverage_report" not in line["reason"] and line["reason"].endswith(".")      # no file path: plain words
     assert result["sections"][1]["state"] != present.COMPLIES
 
 
