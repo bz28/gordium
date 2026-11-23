@@ -10,40 +10,15 @@ using System.Windows.Media.Imaging;
 using Gordium.Revit.Reading;
 using Gordium.Worker;
 
-namespace Gordium.Revit.PanePrototype;
+namespace Gordium.Revit.PaneRenders;
 
-/// <summary>PROTOTYPE: one pane to draw, today's or the proposed (both take the same steps of the journey).</summary>
-internal interface IPane
-{
-    FrameworkElement View { get; }
-
-    string Name { get; }
-
-    void Setup(string title, SetupScreen screen, SetupDraft draft);
-
-    void Progress(CheckStage stage, DateTime since);
-
-    void Show(string project, DateTime when, ResultModel model, IReadOnlyDictionary<string, string> labels);
-
-    IReadOnlyList<string> FirstCardRows { get; }
-
-    void OpenFirstCard();
-
-    void OpenRow(string id);
-
-    /// <summary>Cards shown at first, cards in all, and the actions they ask for.</summary>
-    (int Shown, int Total, int Actions) Cards { get; }
-
-    void Stale();
-
-    void Failed(string words);
-}
+using Gordium.Revit.Addin;
 
 /// <summary>
-/// PROTOTYPE, render-only (Ben, 2026-11-22: design first, approval before anything ships): draws the Gordium pane
-/// off-screen, step by step through an architect's first run, today's and the proposed, from the checker's real
-/// answers, and counts what each step shows (words on screen, buttons, cards). Usage:
-/// <c>Gordium.Revit.PanePrototype &lt;fixtures dir&gt; &lt;childcare answer&gt; &lt;out dir&gt; [&lt;pictures dir&gt;]</c> (the pictures: a Revit screenshot, the childcare sheet and the ribbon icons, kept outside the repo).
+/// Off-screen renders of the Gordium pane (the add-in's own view files), step by step through an architect's first run,
+/// from the checker's real answers: the house (106 Ithaca Rd as Revit read it in the trial: the reader tests' answer)
+/// and the childcare centre (Children's Odyssey), light and dark; and what each screen shows (words, buttons, fixes).
+/// Usage: <c>Gordium.Revit.PaneRenders &lt;out dir&gt;</c>.
 /// </summary>
 internal static class Program
 {
@@ -54,58 +29,36 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
-        var fix = args[0];
-        var childcareAnswer = args[1];
-        _out = args[2];
+        _out = args[0];
         Directory.CreateDirectory(_out);
-        var options = Options(Path.Combine(fix, "options.json"));
-        var house = Load(Path.Combine(fix, "house_106.json"));
-        var houseAfter = Load(Path.Combine(fix, "house_106_after.json"));
-        var childcare = Load(childcareAnswer);
+        var here = AppContext.BaseDirectory;
+        var fix = Path.Combine(here, "fixtures");
+        var answers = Path.Combine(here, "answers");
+        var options = Options(Path.Combine(fix, "setup_options.json"));
+        var house = Load(Path.Combine(answers, "ithaca_106_house_check_answer.json"));
+        var houseAfter = Load(Path.Combine(answers, "ithaca_106_house_after_check_answer.json"));
+        var childcare = Load(Path.Combine(answers, "children_odyssey_check_answer.json"));
         foreach (var (n, r) in new[] { ("house", house), ("childcare", childcare) })
         {
             var cs = ResultRows.Build(r, "New Construction", [], null).Causes;
-            Console.WriteLine($"{n}: {cs.Count} cards");
-            var lb = Labels(r);
-            for (var k = 0; k < cs.Count; k++)
-                Console.WriteLine($"   today #{k + 1} {CauseCards.Action(cs[k], lb)} | {cs[k].Words[..Math.Min(70, cs[k].Words.Length)]}");
-            foreach (var g in Proposed.CardGroups.Of(cs, Labels(r)))
-                Console.WriteLine($"   T{g.Tier} {g.Action} rows {g.Rows.Count} members {g.Members.Count} | {g.Title}");
+            Console.WriteLine($"{n}: {cs.Count} cause cards");
+            foreach (var g in Fixes.Of(cs, Labels(r)))
+                Console.WriteLine($"   tier {g.Tier} {g.Action}, {g.Rows.Count} results, {g.Members.Count} cards | {g.Title}");
         }
-        // the proposed grouping's promises, checked on both real answers (a prototype's checks; the shipped version
-        // would pin each with a reader test that fails on revert)
-        foreach (var (n, r) in new[] { ("house", house), ("childcare", childcare), ("house after", houseAfter) })
-        {
-            var cs = ResultRows.Build(r, "New Construction", [], null).Causes;
-            var gs = Proposed.CardGroups.Of(cs, Labels(r));
-            Check(cs.All(c => gs.Count(g => g.Members.Contains(c)) == 1), $"{n}: every cause card is in exactly one fix");
-            Check(gs.SelectMany(g => g.Rows).ToHashSet().SetEquals(cs.SelectMany(c => c.Items)), $"{n}: the fixes' results are exactly the cards' results (none hidden, none added)");
-            Check(gs.All(g => g.Rows.SequenceEqual(g.Members.SelectMany(m => m.Items).Distinct())), $"{n}: a fix's results are its causes' results");
-            var again = Proposed.CardGroups.Of(cs.ToList(), Labels(r));
-            Check(gs.Select(g => g.Key).SequenceEqual(again.Select(g => g.Key)), $"{n}: the ranking is the same every time");
-            Check(gs.Zip(gs.Skip(1)).All(p => p.First.Tier < p.Second.Tier || p.First.Tier == p.Second.Tier && (p.First.Rows.Count > p.Second.Rows.Count
-                  || p.First.Rows.Count == p.Second.Rows.Count && p.First.FirstIndex < p.Second.FirstIndex)), $"{n}: ranked by where the fix is made, then results cleared, then the checker's order");
-        }
-        if (Failures > 0)
-            return Failures;
-        if (args.Length > 3 && args[3] == "groups")
-            return 0;
         Numbers.AppendLine("step\tpane\ttheme\theight\twords\tbuttons\tcards shown\tcards in all");
         foreach (var theme in new[] { PanelTheme.Light, PanelTheme.Dark })
-            foreach (var make in new Func<PanelTheme, List<string>, IPane>[] { (t, a) => new Addin.TodayPane(t, a), (t, a) => new Proposed.ProposedPane(t, a) })
+            foreach (var make in new Func<PanelTheme, List<string>, Pane>[] { (t, a) => new Pane(t, a) })
             {
                 var dark = theme == PanelTheme.Dark;
                 // a: first open, before any check
                 Step(make(theme, []), "01_welcome", 430, dark, _ => { });
                 // the house (106 Ithaca Rd) and the childcare centre (Children's Odyssey)
-                foreach (var (tag, title, setupFile, answer) in new[] { ("house", "106 Ithaca Rd", "ithaca106.json", house), ("childcare", "Children's Odyssey", "childcare.json", childcare) })
+                foreach (var (tag, title, setupFile, answer) in new[] { ("house", "106 Ithaca Rd", "setup_ithaca106.json", house), ("childcare", "Children's Odyssey", "setup_childcare.json", childcare) })
                 {
                     if (dark && tag == "childcare")
                         continue;                       // dark: the house only
                     var (setupTitle, model, sides) = Fixture(Path.Combine(fix, setupFile));
                     var blank = SetupScreen.Build(model, sides, options, new SetupDraft());
-                    if (!dark && args.Length > 4 && args[4] == "needed")
-                        Console.WriteLine($"needed {tag}: " + string.Join(" | ", blank.Needed) + " || required fields: " + string.Join(", ", blank.Fields.Where(f => f.Required).Select(f => $"{f.Label} ({f.Kind})")));
                     // b: Check project with facts missing: the Setup form
                     Step(make(theme, []), $"02_setup_{tag}", 430, dark, p => p.Setup(title, blank, new SetupDraft()));
                     // c: the form filled in, then the check running
@@ -127,14 +80,14 @@ internal static class Program
                     Step(make(theme, []), $"06_card_open_{tag}", 900, dark, p =>
                     {
                         p.Show(title, when, rows, labels);
-                        p.OpenFirstCard();
+                        p.OpenFirstFix();
                         ScrollToCards(p.View);
                     });
                     // f: a row's detail (the first card's first row)
                     Step(make(theme, []), $"07_detail_{tag}", 900, dark, p =>
                     {
                         p.Show(title, when, rows, labels);
-                        p.OpenRow(p.FirstCardRows[0]);
+                        p.OpenRow(p.FirstFixRows[0]);
                     });
                     if (tag != "house")
                         continue;
@@ -157,7 +110,6 @@ internal static class Program
                     });
                 }
             }
-        Proposed.Extras.All(_out, args.Length > 3 ? args[3] : "", house, childcare, Labels(house), Labels(childcare));
         File.WriteAllText(Path.Combine(_out, "numbers.tsv"), Numbers.ToString());
         Console.WriteLine(Numbers.ToString());
         Console.WriteLine(Failures == 0 ? "ALL CHECKS OK" : $"{Failures} CHECKS FAILED");
@@ -188,7 +140,7 @@ internal static class Program
             Failures++;
     }
 
-    private static void Step(IPane pane, string name, int height, bool dark, Action<IPane> act)
+    private static void Step(Pane pane, string name, int height, bool dark, Action<Pane> act)
     {
         var window = new Window
         {
@@ -198,15 +150,14 @@ internal static class Program
         window.Show();
         act(pane);
         Settle(pane.View);
-        var file = $"{name}_{pane.Name}{(height == 430 ? "" : "_" + height)}{(dark ? "_dark" : "")}.png";
+        var file = $"{name}_built{(height == 430 ? "" : "_" + height)}{(dark ? "_dark" : "")}.png";
         Render(pane.View, Path.Combine(_out, file));
         var (words, buttons) = Measure(pane.View);
-        var welcome = FindAll<TextBlock>(pane.View).Any(t => t.IsVisible && TextOf(t) == "Welcome to Gordium");
-        if (pane.Name == "proposed")
-            Check(welcome == name is "01_welcome" or "09_just_runs_house", $"{file}: the welcome {(welcome ? "shows" : "doesn't show")} (only before the first results, never over them)");
-        var (shown, total, _) = pane.Cards;
-        Numbers.AppendLine($"{name}\t{pane.Name}\t{(dark ? "dark" : "light")}\t{height}\t{words}\t{buttons}\t{shown}\t{total}");
-        Console.WriteLine($"{file}: {words} words, {buttons} buttons, cards {shown}/{total}");
+        var welcome = FindAll<TextBlock>(pane.View).Any(t => t.IsVisible && TextOf(t) == PaneWords.WelcomeTitle);
+        Check(welcome == name is "01_welcome" or "09_just_runs_house", $"{file}: the welcome {(welcome ? "shows" : "doesn't show")} (only before the first results, never over them)");
+        var (shown, total, cards) = pane.Cards;
+        Numbers.AppendLine($"{name}\t{(dark ? "dark" : "light")}\t{height}\t{words}\t{buttons}\t{shown}\t{total}\t{cards}");
+        Console.WriteLine($"{file}: {words} words, {buttons} buttons, fixes {shown}/{total} of {cards} cause cards");
         window.Close();
     }
 

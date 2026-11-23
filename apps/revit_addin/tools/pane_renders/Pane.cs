@@ -1,15 +1,14 @@
 using System.Windows;
 using Gordium.Revit.Reading;
-using Gordium.Revit.PanePrototype;
 
-// PROTOTYPE: drives the add-in's own view (linked unchanged) for "today"'s renders.
 namespace Gordium.Revit.Addin;
 
-internal sealed class TodayPane : IPane
+/// <summary>The add-in's own results view, driven step by step as the pane is (the callbacks only note what was asked).</summary>
+internal sealed class Pane
 {
     private readonly ResultsView _view;
 
-    public TodayPane(PanelTheme theme, List<string> asked)
+    public Pane(PanelTheme theme, List<string> asked)
     {
         _view = new ResultsView(r => asked.Add("zoom " + r.Id), r => asked.Add("select " + r.Id), () => asked.Add("check again"),
                                 () => asked.Add("project information"), c => asked.Add($"card {c.Action} {c.Elements.Count}"),
@@ -17,8 +16,6 @@ internal sealed class TodayPane : IPane
     }
 
     public FrameworkElement View => _view;
-
-    public string Name => "today";
 
     public void Setup(string title, SetupScreen screen, SetupDraft draft)
     {
@@ -34,13 +31,14 @@ internal sealed class TodayPane : IPane
         _view.Show(new PanelContent(project, when, model, [], 0, labels, "", ""));
     }
 
-    public IReadOnlyList<string> FirstCardRows => _view.AllCards.Count == 0 ? [] : _view.AllCards[0].Items;
+    public IReadOnlyList<string> FirstFixRows => _view.Groups.Count == 0 ? [] : _view.Groups[0].Rows;
 
-    public void OpenFirstCard() => _view.SetOpen(_view.AllCards[0], true);
+    public void OpenFirstFix() => _view.SetOpen(_view.Groups[0], true);
 
     public void OpenRow(string id) => _view.OpenRow(id);
 
-    public (int Shown, int Total, int Actions) Cards => (CauseCards.Shown(_view.AllCards, _view.AllShown).Count, _view.AllCards.Count, _view.AllCards.Count);
+    /// <summary>Fixes shown at first, fixes in all, and the worker's cause cards.</summary>
+    public (int Shown, int Total, int Cards) Cards => (Fixes.Shown(_view.Groups, _view.AllShown).Count, _view.Groups.Count, _view.AllCards.Count);
 
     public void Stale() => _view.MarkStale();
 
