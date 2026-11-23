@@ -26,7 +26,7 @@ from pathlib import Path
 import shapely
 import yaml
 
-from design_checker import code_scope, egress, present, reading_set, site_json
+from design_checker import code_scope, egress, present, reading_set, site_json, ui_data
 from design_checker import rhino_logic as logic
 from design_checker.rhino_logic import COLUMN_DELTA
 from envelope_builder import start as generator
@@ -1060,6 +1060,11 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                                                             getattr(measuring(facts["jurisdiction"]), "fact_conflicts",
                                                                     None)), allowed)
     egress.add_to_view(v, law, found["place"])
+    # what the rebuilt results pane reads beyond today's fields (C1-C9): new fields only, never a status
+    place_folder = egress._folder(facts["jurisdiction"])
+    ui_data.add(v, rules_by_id=by_id, laws=found["laws"], site=site, values=values,
+                place=measuring(facts["jurisdiction"]), place_folder=place_folder,
+                documents=ui_data.place_documents(place_folder))
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:
