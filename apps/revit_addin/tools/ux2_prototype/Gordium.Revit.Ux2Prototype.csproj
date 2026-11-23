@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The UI polish proposal's "after" screens (feat/ui-polish-proposal): a prototype drawn off-screen in plain WPF from
+       screens.json (make_screens.py, from two real checker answers), light and dark, at the docked pane's 340 px.
+       Not the add-in: it shares no code with it, is never loaded by Revit, needs no Revit install, and is not in
+       Gordium.Worker.slnx or CI. Once Ben approves the proposal, the add-in's own views are changed and the
+       pane_renders harness shows them.
+       Run: python make_screens.py; dotnet run -c Release - - <out dir>    (from this folder) -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks></TargetFrameworks>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Gordium.Revit.Ux2Prototype</RootNamespace>
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="screens.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,1077 @@
+{
+ "apartment": {
+  "title": "Four-unit apartment",
+  "at": "14:32",
+  "totals": {
+   "fail": 0,
+   "review": 98,
+   "pass": 1,
+   "na": 1,
+   "notyet": 8
+  },
+  "actions": [
+   {
+    "kind": "facts",
+    "title": "Answer 9 questions about the project",
+    "sub": "Set on Project Information. Nothing is saved until you click Save.",
+    "count": 62,
+    "entries": [
+     {
+      "label": "Sprinkler system",
+      "field": "Gordium: Sprinkler system",
+      "ask": "Is the building sprinklered throughout? Which system?",
+      "why": "Travel distance, common path and exit separation are longer with sprinklers (BCNYS 903.3.1.1, 903.3.1.2).",
+      "count": 28
+     },
+     {
+      "label": "Occupancy group",
+      "field": "Gordium: Occupancy groups",
+      "ask": "Which occupancy groups is the building? (e.g. R-2)",
+      "why": "The Building Code's egress limits change with the group. Today the checker asks “is it I-4?” (occupancy_group_i4), which the Occupancy groups field answers.",
+      "count": 22
+     },
+     {
+      "label": "Corner lot",
+      "field": "Gordium: Corner lot",
+      "ask": "Is the lot on two streets?",
+      "why": "A corner lot has two front yards and different side and rear yards (§325-19C).",
+      "count": 10
+     },
+     {
+      "label": "Accessory dwelling unit",
+      "field": "Gordium: Accessory dwelling unit",
+      "ask": "Is there an ADU on the lot?",
+      "why": "Six ADU rules apply only if there is one (§325-28).",
+      "count": 6
+     },
+     {
+      "label": "Dwelling units",
+      "field": "Gordium: Dwelling units",
+      "ask": "How many dwelling units? Any rooms let? A conversion?",
+      "why": "The lot area the district asks for grows with the units (§325-8, chart).",
+      "count": 2
+     },
+     {
+      "label": "Main buildings on the lot",
+      "field": "no field yet",
+      "ask": "How many main buildings are on the lot?",
+      "why": "Each main building needs its own lot area, and yards can't be shared (§325-7B, §325-8B).",
+      "count": 2
+     },
+     {
+      "label": "Home occupation",
+      "field": "Gordium: Home occupation",
+      "ask": "Is a home business planned?",
+      "why": "A home occupation has its own size limit (§325-3B).",
+      "count": 2
+     },
+     {
+      "label": "Stream nearby",
+      "field": "no field yet",
+      "ask": "Is a stream or inlet within 20 ft of the lot?",
+      "why": "New structures stay 20 ft from a stream bank or inlet wall (§325-26).",
+      "count": 1
+     },
+     {
+      "label": "Next to R-1 land",
+      "field": "no field yet",
+      "ask": "Does the lot touch or face R-1a or R-1b land?",
+      "why": "Stricter limits apply next to R-1 districts (§325-19E).",
+      "count": 1
+     }
+    ],
+    "button": "Answer here"
+   },
+   {
+    "kind": "drawing",
+    "title": "Fix the “LS New 6\"” walls",
+    "sub": "A wall of type “LS New 6\"” isn't a closed solid, so the footprint, height and yards can't be measured.",
+    "why": "Walls are measured as closed solids. Look for a wall with an open end, an in-place edit or a sweep that leaves a gap.",
+    "count": 8,
+    "entries": [],
+    "button": "Show in model"
+   },
+   {
+    "kind": "survey",
+    "title": "Get a survey for the lot area",
+    "sub": "The property line is traced from the tax map (±2 ft). Lot area and coverage need a surveyed line.",
+    "why": "Set “Property line from: Survey” once it is drawn from a survey.",
+    "count": 3,
+    "entries": [],
+    "button": null
+   },
+   {
+    "kind": "byhand",
+    "title": "Measure by hand (Gordium doesn't yet)",
+    "sub": "Gordium can't read these from the drawing yet. Check each against the code's words.",
+    "count": 16,
+    "entries": [
+     {
+      "label": "Occupant load of each space",
+      "count": 8
+     },
+     {
+      "label": "Egress through a room that can be locked",
+      "count": 8
+     },
+     {
+      "label": "Egress through kitchens, storage or other rooms",
+      "count": 8
+     },
+     {
+      "label": "Egress through a locked lobby",
+      "count": 8
+     }
+    ],
+    "button": null
+   },
+   {
+    "kind": "judgment",
+    "title": "25 code questions for you to decide",
+    "sub": "The code leaves these to judgment. Gordium shows the words; you decide.",
+    "count": 25,
+    "entries": [],
+    "button": null
+   },
+   {
+    "kind": "question",
+    "title": "1 open question about how to measure",
+    "sub": "Is a storage room's area measured inside its walls or to their outer faces? Either way, this result can't pass yet.",
+    "count": 2,
+    "entries": [],
+    "button": null
+   },
+   {
+    "kind": "notyet",
+    "title": "Not checked yet by Gordium",
+    "sub": "Overlays and 7 zoning sections. Check these by hand.",
+    "count": 8,
+    "entries": [],
+    "button": null
+   }
+  ],
+  "bycode": [
+   {
+    "title": "City of Ithaca Zoning",
+    "sub": "Chapter 325 · R-3a · chart April 2026",
+    "chapters": [
+     {
+      "num": "Art. I",
+      "title": "General Provisions",
+      "state": "review",
+      "line": "1 needs review",
+      "sections": [
+       {
+        "num": "§325-3",
+        "title": "Definitions and word usage",
+        "state": "review",
+        "line": "1 needs review",
+        "rules": [
+         {
+          "name": "Home occupation size",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≤ 500 sf"
+         }
+        ]
+       }
+      ],
+      "greyed": false
+     },
+     {
+      "num": "Art. II",
+      "title": "Zoning Districts",
+      "state": "review",
+      "line": "14 need review · 1 complies",
+      "sections": [
+       {
+        "num": "§325-7",
+        "title": "Application of regulations",
+        "state": "review",
+        "line": "1 needs review",
+        "rules": [
+         {
+          "name": "A yard required for one building can't count for another",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "—"
+         }
+        ]
+       },
+       {
+        "num": "§325-8",
+        "title": "District regulations (the chart)",
+        "state": "review",
+        "line": "13 need review · 1 complies",
+        "rules": [
+         {
+          "name": "Use",
+          "state": "pass",
+          "parts": 1,
+          "line": "1 complies",
+          "section": "",
+          "measured": "Multiple family dwelling",
+          "limit": "permitted"
+         },
+         {
+          "name": "Lot area",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "9,000 sf",
+          "limit": "≥ —"
+         },
+         {
+          "name": "Lot area per main building",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "9,000 sf",
+          "limit": "≥ —"
+         },
+         {
+          "name": "Lot width",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≥ 50'-0\""
+         },
+         {
+          "name": "Stories",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≤ 4"
+         },
+         {
+          "name": "Building height",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≤ 40'-0\""
+         },
+         {
+          "name": "Lot coverage",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≤ 35%"
+         },
+         {
+          "name": "Front yard",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≥ 10'-0\""
+         },
+         {
+          "name": "Side yard, narrower",
+          "state": "review",
+          "parts": 2,
+          "line": "2 need review",
+          "section": "",
+          "measured": "—",
+          "limit": "≥ 5'-0\""
+         },
+         {
+          "name": "Rear yard",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≥ —"
+         },
+         {
+          "name": "Parking per dwelling unit for buildings of several units",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "—"
+         },
+         {
+          "name": "Off-street loading",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "—"
+         },
+         {
+          "name": "Home occupation",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "—"
+         }
+        ]
+       }
+      ],
+      "greyed": false
+     },
+     {
+      "num": "Art. III",
+      "title": "Special Permits and Related Special Conditions",
+      "state": "notyet",
+      "line": "Gordium doesn't check this article",
+      "sections": [],
+      "greyed": true
+     },
+     {
+      "num": "Art. IV",
+      "title": "Cluster Subdivision, Floating Zones and Planned Unit Development Zones",
+      "state": "notyet",
+      "line": "Gordium doesn't check this article",
+      "sections": [],
+      "greyed": true
+     },
+     {
+      "num": "Art. V",
+      "title": "Supplementary Regulations",
+      "state": "review",
+      "line": "10 need review · 7 not checked yet",
+      "sections": [
+       {
+        "num": "§325-16",
+        "title": "Height regulations",
+        "state": "notyet",
+        "line": "1 not checked yet",
+        "rules": [
+         {
+          "name": "§325-16A, §325-16B Height exceptions (chimneys, spires, parapets)",
+          "state": "notyet",
+          "parts": 1,
+          "line": "1 not checked yet",
+          "section": "",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       },
+       {
+        "num": "§325-17",
+        "title": "Area regulations",
+        "state": "notyet",
+        "line": "1 not checked yet",
+        "rules": [
+         {
+          "name": "§325-17B Corner lots, the clear triangle at the street corner",
+          "state": "notyet",
+          "parts": 1,
+          "line": "1 not checked yet",
+          "section": "",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       },
+       {
+        "num": "§325-18",
+        "title": "Yard regulations",
+        "state": "review",
+        "line": "1 needs review · 1 not checked yet",
+        "rules": [
+         {
+          "name": "Eaves into front yard",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≥ ≥ 8'-0\""
+         },
+         {
+          "name": "§325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only)",
+          "state": "notyet",
+          "parts": 1,
+          "line": "1 not checked yet",
+          "section": "",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       },
+       {
+        "num": "§325-19",
+        "title": "Transition regulations",
+        "state": "review",
+        "line": "1 needs review",
+        "rules": [
+         {
+          "name": "Lots abutting R-1a or R-1b land: stricter limits",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "—"
+         }
+        ]
+       },
+       {
+        "num": "§325-20",
+        "title": "Off-street parking",
+        "state": "notyet",
+        "line": "2 not checked yet",
+        "rules": [
+         {
+          "name": "§325-20E Parking in front yards (lots over 50 ft wide, up to 25% of the front yard; narrower lots, a driveway up to 12 ft wide; cars square to the street)",
+          "state": "notyet",
+          "parts": 1,
+          "line": "1 not checked yet",
+          "section": "",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "§325-20D(2), §325-20F Driveways and parking areas (every driveway at least 8 ft wide; parking for 3 or more cars, its share of the side and rear yards)",
+          "state": "notyet",
+          "parts": 1,
+          "line": "1 not checked yet",
+          "section": "",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       },
+       {
+        "num": "§325-25",
+        "title": "Location of accessory structures",
+        "state": "review",
+        "line": "1 needs review · 1 not checked yet",
+        "rules": [
+         {
+          "name": "Accessory building",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≥ 10'-0\""
+         },
+         {
+          "name": "§325-25B, §325-25D Accessory structures below grade or across a common lot line",
+          "state": "notyet",
+          "parts": 1,
+          "line": "1 not checked yet",
+          "section": "",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       },
+       {
+        "num": "§325-26",
+        "title": "New structures along streams or inlets",
+        "state": "review",
+        "line": "1 needs review",
+        "rules": [
+         {
+          "name": "New structures at least 20 ft from an inlet wall or stream bank",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≥ 20'-0\""
+         }
+        ]
+       },
+       {
+        "num": "§325-28",
+        "title": "Accessory Dwelling Units (ADUs)",
+        "state": "review",
+        "line": "6 need review · 1 not checked yet",
+        "rules": [
+         {
+          "name": "Accessory dwelling unit: at most one per parcel",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≤ 1"
+         },
+         {
+          "name": "Accessory dwelling unit: at most two bedrooms",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≤ 2"
+         },
+         {
+          "name": "Detached ADU: not in the primary front yard nor a required one",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≥ 10'-0\""
+         },
+         {
+          "name": "Attached ADU: at most 40% of the primary structure's floor area",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≤ —"
+         },
+         {
+          "name": "Detached ADU: 800 sf footprint; two stories and 20 ft",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≤ 800 sf"
+         },
+         {
+          "name": "Detached ADU: 5 ft from the side and rear lot lines",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "",
+          "measured": "—",
+          "limit": "≥ 5'-0\""
+         },
+         {
+          "name": "§325-28C(5), §325-28C(6) An accessory dwelling unit may not be sold separately from the house, nor the lot subdivided to separate it",
+          "state": "notyet",
+          "parts": 1,
+          "line": "1 not checked yet",
+          "section": "",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       }
+      ],
+      "greyed": false
+     }
+    ],
+    "other": "Articles VA–XII (permits, appeals, special zones): Gordium doesn't check these",
+    "extra": [
+     {
+      "title": "Overlay districts (historic, gorge, flood)",
+      "line": "Not in this release · check by hand"
+     }
+    ]
+   },
+   {
+    "title": "NY State Building Code 2025",
+    "sub": "Governs this building: multiple-family use isn't a dwelling the Residential Code covers (R101.2)",
+    "chapters": [
+     {
+      "num": "Ch 3",
+      "title": "Occupancy Classification and Use",
+      "state": "review",
+      "line": "5 need review",
+      "sections": [
+       {
+        "num": "308",
+        "title": "Institutional Group I",
+        "state": "review",
+        "line": "5 need review",
+        "rules": [
+         {
+          "name": "Group I-4, day care facilities",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "308.5",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Child day care classified Group E",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "308.5.1",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Care during religious functions",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "308.5.2",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Five or fewer persons receiving care",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "308.5.3",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Five or fewer persons in a dwelling unit",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "308.5.4",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       }
+      ],
+      "greyed": false,
+      "notyet": null
+     },
+     {
+      "num": "Ch 5",
+      "title": "General Building Heights and Areas",
+      "state": "review",
+      "line": "6 need review",
+      "sections": [
+       {
+        "num": "508",
+        "title": "Mixed Use and Occupancy",
+        "state": "review",
+        "line": "6 need review",
+        "rules": [
+         {
+          "name": "Accessory occupancies at most 10% of the story",
+          "state": "review",
+          "parts": 2,
+          "line": "2 need review",
+          "section": "508.2.3",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Each accessory occupancy classified on its own",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "508.2.1",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Accessory occupancies: allowable height",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "508.2.2",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Accessory occupancies within Table 506.2's values",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "508.2.3",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "No separation from the main occupancy, with exceptions",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "508.2.4",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       }
+      ],
+      "greyed": false,
+      "notyet": null
+     },
+     {
+      "num": "Ch 10",
+      "title": "Means of Egress",
+      "state": "review",
+      "line": "62 need review · 26 sections not checked yet",
+      "sections": [
+       {
+        "num": "1006",
+        "title": "Number of Exits and Exit Access Doorways",
+        "state": "review",
+        "line": "21 need review",
+        "rules": [
+         {
+          "name": "Two exits over 10 occupants or a 75-ft common path, I-4",
+          "state": "review",
+          "parts": 8,
+          "line": "8 need review",
+          "section": "1006.2.1",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Three exits from 501-1,000 occupants, four above",
+          "state": "review",
+          "parts": 8,
+          "line": "8 need review",
+          "section": "1006.2.1.1",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Exits per story by occupant load, one where 1006.3.4 allows",
+          "state": "review",
+          "parts": 2,
+          "line": "2 need review",
+          "section": "1006.3.3",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Rows for other occupancies",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "Table 1006.2.1",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Single exits in mixed occupancies",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1006.3.4.1",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Rows for other occupancies",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "Table 1006.3.4(2)",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       },
+       {
+        "num": "1007",
+        "title": "Exit and Exit Access Doorway Configuration",
+        "state": "review",
+        "line": "21 need review",
+        "rules": [
+         {
+          "name": "Two exits at least 1/2 the diagonal apart, 1/3 sprinklered",
+          "state": "review",
+          "parts": 2,
+          "line": "2 need review",
+          "section": "1007.1.1",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "A space's doorways 1/2 the diagonal apart, 1/3 sprinklered",
+          "state": "review",
+          "parts": 8,
+          "line": "8 need review",
+          "section": "1007.1",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "A space needing three exits: two arranged per 1007.1.1",
+          "state": "review",
+          "parts": 8,
+          "line": "8 need review",
+          "section": "1007.1.2",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "A story with three or more exits",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1007.1.2",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Exit access stairways keep their separation",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1007.1.3",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Three or more exit access stairways",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1007.1.3.1",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       },
+       {
+        "num": "1016",
+        "title": "Exit Access",
+        "state": "review",
+        "line": "10 need review",
+        "rules": [
+         {
+          "name": "Egress not through locked rooms, kitchens, storage or closets",
+          "state": "review",
+          "parts": 8,
+          "line": "8 need review",
+          "section": "1016.2",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Intervening spaces in other occupancies",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1016.2",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Multiple tenants: no egress through another tenant",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1016.2.1",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       },
+       {
+        "num": "1017",
+        "title": "Exit Access Travel Distance",
+        "state": "review",
+        "line": "7 need review",
+        "rules": [
+         {
+          "name": "Exit access travel 150 ft, 200 ft sprinklered (NFPA 13), I-4",
+          "state": "review",
+          "parts": 2,
+          "line": "2 need review",
+          "section": "1017.2",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Rows for other occupancies",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "Table 1017.2",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Exterior egress balcony increase, up to 100 ft",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1017.2.1",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Groups F-1 and S-1 increase to 400 ft",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1017.2.2",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Group H-5 increase to 300 ft",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1017.2.3",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Travel within an atrium at most 200 ft",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1017.3.2.3",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       },
+       {
+        "num": "1020",
+        "title": "Corridors",
+        "state": "review",
+        "line": "3 need review",
+        "rules": [
+         {
+          "name": "Dead end at most 20 ft, or under 2.5 x its width, I-4",
+          "state": "review",
+          "parts": 2,
+          "line": "2 need review",
+          "section": "1020.5",
+          "measured": "",
+          "limit": ""
+         },
+         {
+          "name": "Dead ends in other occupancies",
+          "state": "review",
+          "parts": 1,
+          "line": "1 needs review",
+          "section": "1020.5",
+          "measured": "",
+          "limit": ""
+         }
+        ]
+       }
+      ],
+      "greyed": false,
+      "notyet": "26 other sections of Chapter 10 (doors, stairs, exit signs, …): not checked yet by Gordium"
+     }
+    ],
+    "other": "30 other chapters (construction types, fire protection, accessibility, …): not checked yet by Gordium",
+    "extra": []
+   }
+  ],
+  "detail": {
+   "title": "Two exits from a space over 10 occupants",
+   "where": "Apartment South L1 · BCNYS 1006.2.1",
+   "position": "3 of 106",
+   "headline": "Gordium needs the occupancy group, the sprinkler system and this space's occupant load.",
+   "why": "Level 1 › APARTMENT SOUTH L1 (1): occupancy group i4 not measured (or not usable); space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet; sprinklered 903 3 1 1 not measured (or not usable); sprinklered 903 3 1 2 not measured (or not usable)",
+   "steps": [
+    "Set Occupancy group and Sprinkler system (2 project questions).",
+    "Occupant load: Gordium has no field for it yet. Work it out by hand (Table 1004.5)."
+   ],
+   "quote": "1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined in accordance",
+   "quote_where": "BCNYS 1006.2.1 · PDF p.315",
+   "table": "I-1, I-2[fnd], I-4 10 NP NP 75[fna]"
+  }
+ },
+ "house": {
+  "title": "106 Ithaca Rd",
+  "at": "14:32",
+  "totals": {
+   "fail": 1,
+   "review": 132,
+   "pass": 10,
+   "na": 0,
+   "notyet": 9
+  },
+  "fails": [
+   {
+    "name": "Lot coverage",
+    "measured": "28.3%",
+    "limit": "≤ 25%",
+    "over": "−3.24%",
+    "cite": "§325-8 · District Regulations Chart"
+   }
+  ],
+  "after_totals": {
+   "fail": 1,
+   "review": 123,
+   "pass": 13,
+   "na": 0,
+   "notyet": 9
+  },
+  "changes": [
+   {
+    "name": "New structures at least 20 ft from an inlet wall or stream bank",
+    "before": "review",
+    "after": "pass",
+    "words": "Needs review → Complies"
+   },
+   {
+    "name": "One-family occupancy",
+    "before": "review",
+    "after": "pass",
+    "words": "Needs review → Complies"
+   },
+   {
+    "name": "Private garage: not more than three cars",
+    "before": "review",
+    "after": "pass",
+    "words": "Needs review → Complies"
+   },
+   {
+    "name": "Accessory dwelling unit: at most one per parcel",
+    "before": "review",
+    "after": "na",
+    "words": "Needs review → Doesn't apply"
+   },
+   {
+    "name": "Accessory dwelling unit: at most two bedrooms",
+    "before": "review",
+    "after": "na",
+    "words": "Needs review → Doesn't apply"
+   },
+   {
+    "name": "Detached ADU: not in the primary front yard nor a required one",
+    "before": "review",
+    "after": "na",
+    "words": "Needs review → Doesn't apply"
+   },
+   {
+    "name": "Attached ADU: at most 40% of the primary structure's floor area",
+    "before": "review",
+    "after": "na",
+    "words": "Needs review → Doesn't apply"
+   },
+   {
+    "name": "Detached ADU: 800 sf footprint; two stories and 20 ft",
+    "before": "review",
+    "after": "na",
+    "words": "Needs review → Doesn't apply"
+   },
+   {
+    "name": "Detached ADU: 5 ft from the side and rear lot lines",
+    "before": "review",
+    "after": "na",
+    "words": "Needs review → Doesn't apply"
+   }
+  ],
+  "new": 0
+ }
+}
