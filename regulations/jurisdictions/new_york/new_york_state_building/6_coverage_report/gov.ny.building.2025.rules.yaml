@@ -55,6 +55,16 @@ pieces:
     heading: Accessory occupancies › Separation of occupancies
     rules:
     - general.bc_508_2_4_separation
+  '1004.7':
+    label: flag
+    heading: Occupant load › Outdoor areas
+    rules:
+    - general.bc_1004_7_outdoor_areas
+  '1004.9':
+    label: flag
+    heading: Occupant load › Posting of occupant load
+    rules:
+    - general.bc_1004_9_posting
   1006.2.1:
     label: rule
     heading: Egress based on occupant load and common path of egress travel distance

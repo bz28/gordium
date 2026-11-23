@@ -344,6 +344,11 @@ def _over_rooms_measured(story, by_room: dict) -> dict:
 
 
 def _story_areas(sp, story, uses, unknown) -> None:
+    if story.inner is not None:                 # 202 FLOOR AREA, GROSS: within the inside perimeter of the exterior
+        sp["measures"]["story_gross_floor_area"] = story.inner.area / SF   # walls (the outlines have no courts in them)
+    else:
+        sp["not_measured"]["story_gross_floor_area"] = Stop(
+            "outline_needed", reason=story.outline_stop or "no outline is given for it").reason
     got = _try(sp, "story_building_area", lambda: areas.building_area(story))
     if got is not None:
         _readings(sp, "story_building_area", [(x.value / SF, x.question, x.answer) for x in got],
@@ -488,6 +493,7 @@ def _space_part(rid, name, story, routes, room, access, figures, why_not) -> dic
         for m in ("space_exit_count", "space_common_path"):
             p["not_measured"][m] = why
         return p
+    p["measures"]["space_floor_area"] = room.outline.area / SF        # inside its walls (section group 3)
     try:
         p["measures"]["space_is_exit"] = _is_exit(story, rid)
     except Stop as s:

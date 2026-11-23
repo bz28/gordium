@@ -11,21 +11,22 @@ second_reading:
     for pp.54-344, a third and a fourth for the pieces brought in on 2026-11-22 (p.47's FLOOR AREA, GROSS and NET;
     1006.3.3, 1006.3.4 and their tables), a fifth for Table 1006.3.4(1) on 2026-11-23, a sixth for the 23 pieces
     brought in by review round 1 on 2026-11-23 (1006.2.2, 1018.4, 1030.8, 407.4.2 and the 13 definitions their italics
-    name), and a helper for the comparison words)
+    name), a seventh for the 27 pieces of section group 3 (1004, Table 1004.5 and 12 definitions), and a helper
+    for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
-    labeled by its id (48 pages, 159 boxes; p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, and 14 pages, 24
-    boxes as step_5; p.47''s two and pp.42, 55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted
-    text transcribed every line of every box from the images alone (tables row by row, raised characters written
-    as sealed marks); the transcript went through document_extraction/numbers.py: 181 pieces, 415 numbers, every
-    piece agrees. The tables were also read a third way, by position: each cell''s characters with their sizes and
-    x positions (pdfplumber, pp.315-317 and p.341), which shows each raised note letter (5.04-point beside 8.4-point
-    digits) the plain text runs into its cell; sources.yaml brought_in.misread puts each right by line, and both
-    readings agree with the cells so read. A third helper that saw only each piece''s transcribed text and its numbers''
-    values (and, for a table, the sentence that uses it) marked each number''s comparison from the whole sentence
-    (second_reading_comparisons); where it differs from the recorded words, a flag says which is right. The transcript,
-    the page images and the comparison files are kept in the code cache (second_reading/step_1_*), outside the repo,
-    since they hold the book''s words.'
+    labeled by its id (48 pages, 159 boxes; p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
+    as step_5, and 14 pages, 29 boxes as step_6 (section group 3); p.47''s two and pp.42, 55, 316-317''s seven on
+    2026-11-22); helpers that never saw the extracted text transcribed every line of every box from the images alone
+    (tables row by row, raised characters written as sealed marks); the transcript went through document_extraction/numbers.py:
+    208 pieces, 504 numbers, every piece agrees. The tables were also read a third way, by position: each cell''s
+    characters with their sizes and x positions (pdfplumber, pp.315-317 and p.341), which shows each raised note
+    letter (5.04-point beside 8.4-point digits) the plain text runs into its cell; sources.yaml brought_in.misread
+    puts each right by line, and both readings agree with the cells so read. A third helper that saw only each piece''s
+    transcribed text and its numbers'' values (and, for a table, the sentence that uses it) marked each number''s
+    comparison from the whole sentence (second_reading_comparisons); where it differs from the recorded words, a
+    flag says which is right. The transcript, the page images and the comparison files are kept in the code cache
+    (second_reading/step_1_*), outside the repo, since they hold the book''s words.'
 pieces:
   '202':
     piece_sha256: d517861fa9698a910e750045fb415f0e7138ffa3e3a1ef2fd689171fda2f98b3
@@ -45,8 +46,20 @@ pieces:
     - '11'
     second_reading_comparisons:
     - none
+  202:addition:
+    piece_sha256: 0efc764c69f61e6f2b28b62f545c3e254cb3104a1a695afb51a4606b5f12f733
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:aggregate:
     piece_sha256: eec9a8499f90c13f08aafd20ba719709b279b84538a5e3fcf3794e5d5a1a122e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:agricultural_building:
+    piece_sha256: c179ca7e57ada8de19086dfe1726efccd47f915eec2ba67018e9aceaa265134d
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -375,6 +388,15 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:dormitory:
+    piece_sha256: aca6cca14e19824f04f11a752c1026c08a33244abd33028d665663801a1bb629
+    numbers:
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    second_reading_comparisons:
+    - none
   202:dwelling:
     piece_sha256: 06a06e15f89b13a6b38855bc6f25c5eb35d3efe187b8278b8826b36f29d18e89
     numbers:
@@ -559,6 +581,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:gaming:
+    piece_sha256: 9e34f6a3b1f471878dad116d68edce2c9efbdb91a5057197cf505582ee43a4c0
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:grade_lumber:
     piece_sha256: 2664b231c2bb59c53a4fbe34447fcdff7fdba8446c9b6662a35226c44eb9ca11
     numbers:
@@ -618,6 +646,18 @@ pieces:
     second_reading_comparisons: []
   202:horizontal_exit:
     piece_sha256: 8fc7ca31651bf9c8156e635c8956075f018c2be5c8cdc5868f41fe560f1f8bf1
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:information_technology_equipment_ite:
+    piece_sha256: eb6f7b6c883b3f11a71e15a1629fb12e2560bce41e94867553247c7c6307fb50
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:information_technology_equipment_facilities_itef:
+    piece_sha256: 7f4a216aec668d0b146659fca8173bbfdde05a2e2494f8fac71806644df2fb44
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -682,6 +722,15 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:load_factor:
+    piece_sha256: d9a041f27abe72f6129cbced94a6d69a0f26089a61318f306762ac641f1a7dc0
+    numbers:
+    - more than one
+    second_reading: agrees
+    second_reading_numbers:
+    - more than one
+    second_reading_comparisons:
+    - '>'
   202:loads:
     piece_sha256: 32e871ba7dbbabbdc13ee10d99cc891220807f111245480f4272669b49825a5f
     numbers: []
@@ -814,6 +863,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:owner:
+    piece_sha256: 70386dd0eeb1c09bcd4e38930757ca37adcd8c68813729a467af9805052e4a11
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:panic_hardware:
     piece_sha256: 0be0e2e6022b43acbae53aaec43c14803ec78216dfad6258f2283b750e790220
     numbers: []
@@ -838,6 +893,18 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:platform:
+    piece_sha256: cba47445614836ec18b24c06d1f38091ad465872a996a4a8e81d0bcd4f1654b9
+    numbers:
+    - one
+    - not more than 30
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - not more than 30
+    second_reading_comparisons:
+    - none
+    - <=
   202:public_way:
     piece_sha256: 9c30bb288f4686d66c6762dfcbf3145b9a1416cc78180b76405f8335b44d63f6
     numbers:
@@ -989,6 +1056,12 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:stage:
+    piece_sha256: 4dfe25009625829756304c737ae3deaac5882ce9d3347d1112b1aad001b025b9
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:stair:
     piece_sha256: 374a0feb8b74c749c79f3f5028d0957a48d1de5bc758b0a699d7bad7ac3a54f3
     numbers:
@@ -1095,6 +1168,21 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:swimming_pool:
+    piece_sha256: b2aff11d7119b9815f15d5bf5073e6994e0300e991ce82a28de547ced025cc94
+    numbers:
+    - 24 inch
+    - 610 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 24 inch
+    - 610 mm
+    second_reading_comparisons:
+    - '>'
+    - none
+    flags:
+    - '''24 inch'' (>): ''a depth greater than 24 inches''; the recorded words miss it (numbers.py reads comparison
+      words only directly before a number or after its unit). The second reading is right. Used by no rule.'
   202:temporary_structure:
     piece_sha256: deabf4124bca2397eb9764e2c48f42ee7861372fa300b2aabad982562a5859de
     numbers:
@@ -1146,6 +1234,12 @@ pieces:
     second_reading_comparisons:
     - none
     - '>'
+  202:wheelchair_space:
+    piece_sha256: 5186bca698ebc356a609c3689bfba26c79acbbe094148bb0b3f67fd54edce4d3
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:winder:
     piece_sha256: 6c2a73c23141a431fa6a7f0ee067cb9b191980de777733c6f301f0db55216fed
     numbers: []
@@ -1355,6 +1449,355 @@ pieces:
       comparison words only directly before a number or after its unit). The second reading is right.'
     - '''9144 mm or less'': the ''or less'' is the 30 feet''s (recorded ''<='' with it); the millimetres in brackets
       are a conversion and set no limit, so the second reading (none) is right.'
+  '1004':
+    piece_sha256: ca107e7301f29c5c026cdf74f3b4fd5a787aefc056d7a10c0ac5d3367f01dfa1
+    numbers:
+    - '1004'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004'
+    second_reading_comparisons:
+    - none
+  '1004.1':
+    piece_sha256: e9674e39ca920c686f6d3dd271569c1f844a5f9f8ea3cc819c24ae366137e28e
+    numbers:
+    - '1004.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.1'
+    second_reading_comparisons:
+    - none
+  '1004.2':
+    piece_sha256: 7e81ce3fb8b15f1a545d23e99e89875410af1af5a32a7ba3e1c58ba2b5e6c7de
+    numbers:
+    - '1004.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.2'
+    second_reading_comparisons:
+    - none
+  1004.2.1:
+    piece_sha256: 208f32f64c219d0dbd12b764ca7b38fee7f1d3de91060658fa77c7c5a623cbad
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  1004.2.2:
+    piece_sha256: 09a4130570a07874e34df1f127b3a54cdb2ee9df432f4c39e8dbe6b7835380ef
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1004.2.3:
+    piece_sha256: b266ce3c61ecb9bf5774ecded4a9b77f466ef707147376c05b5f3ce78306969c
+    numbers:
+    - '1005.6'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1005.6'
+    second_reading_comparisons:
+    - none
+  '1004.3':
+    piece_sha256: 36685cb1cd063642c6275ec50a158646925b48a3a052c30063ebccc3e2f06336
+    numbers:
+    - '1004.3'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.3'
+    second_reading_comparisons:
+    - none
+  '1004.4':
+    piece_sha256: 82bc648bbdf1e9b91d0e1635b992a9b7b77916f71ddcd990dc0187333386101d
+    numbers:
+    - '1004.4'
+    - two or more
+    - two or more
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.4'
+    - two or more
+    - two or more
+    second_reading_comparisons:
+    - none
+    - '>='
+    - '>='
+  '1004.5':
+    piece_sha256: 85b366c72bbcd25d8adf0e24227c115d9e45d25995b4e0c69b2a34d173c258db
+    numbers:
+    - '1004.5'
+    - one
+    - '1004.5'
+    - '1004.5'
+    - '1004.5'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.5'
+    - one
+    - '1004.5'
+    - '1004.5'
+    - '1004.5'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+  Table 1004.5:
+    piece_sha256: 2b60100d4f142c41c111ab9c6e5f3d768dec1c318644cffcb627b705c3487c43
+    numbers:
+    - '1004.5'
+    - 300 gross
+    - 300 gross
+    - 500 gross
+    - 20 gross
+    - 300 gross
+    - 100 gross
+    - 15 gross
+    - 11 gross
+    - '30'
+    - '1004.6'
+    - '7'
+    - '5'
+    - '15'
+    - '5'
+    - 15 foot
+    - '7'
+    - 150 gross
+    - '1004.8'
+    - '40'
+    - '35'
+    - 50 gross
+    - '20'
+    - '50'
+    - 50 gross
+    - 200 gross
+    - 100 gross
+    - 300 gross
+    - 240 gross
+    - 100 gross
+    - 120 gross
+    - 200 gross
+    - '50'
+    - 100 gross
+    - 50 gross
+    - 60 gross
+    - '1004.5'
+    - 300 gross
+    - 200 gross
+    - 200 gross
+    - 50 gross
+    - 15 gross
+    - '15'
+    - 500 gross
+    - 1 foot
+    - 304.8 mm
+    - 1 square foot
+    - 0.0929 m
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.5'
+    - 300 gross
+    - 300 gross
+    - 500 gross
+    - 20 gross
+    - 300 gross
+    - 100 gross
+    - 15 gross
+    - 11 gross
+    - '30'
+    - '1004.6'
+    - '7'
+    - '5'
+    - '15'
+    - '5'
+    - 15 foot
+    - '7'
+    - 150 gross
+    - '1004.8'
+    - '40'
+    - '35'
+    - 50 gross
+    - '20'
+    - '50'
+    - 50 gross
+    - 200 gross
+    - 100 gross
+    - 300 gross
+    - 240 gross
+    - 100 gross
+    - 120 gross
+    - 200 gross
+    - '50'
+    - 100 gross
+    - 50 gross
+    - 60 gross
+    - '1004.5'
+    - 300 gross
+    - 200 gross
+    - 200 gross
+    - 50 gross
+    - 15 gross
+    - '15'
+    - 500 gross
+    - 1 foot
+    - 304.8 mm
+    - 1 square foot
+    - 0.0929 m
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    flags:
+    - 'Occupant load factor cells: ''300'', ''500'', ''20'', ''100'', ''15'', ''11'', ''30'', ''7'', ''5'', ''150'',
+      ''40'', ''35'', ''50'', ''200'', ''240'', ''120'', ''60'' (none): square feet of floor area per occupant (note
+      a), a rate that divides a floor area (1004.5), not a limit; read cell by cell on p.312-313 and on the page
+      images. Each is frozen with its row in 5_building_code_rules/drafted/records/occupant_load_factors.yaml, checked
+      against this reading by design_checker/tests/test_occupant_load.py.'
+  1004.5.1:
+    piece_sha256: bbc43d9de11a2a919b77683e5ce35c74ec2a7bc5a5ec4bf21ee83758cf448d4e
+    numbers:
+    - '1004.5'
+    - not exceed one
+    - 7 square foot
+    - 0.65 m
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.5'
+    - not exceed one
+    - 7 square foot
+    - 0.65 m
+    second_reading_comparisons:
+    - none
+    - <=
+    - none
+    - none
+  '1004.6':
+    piece_sha256: d2f4f94d88ce061148bc07d4d2857d4a0704ceb87f827e6927cc4aabbc0d1e58
+    numbers:
+    - '1004.6'
+    - '1004.5'
+    - one
+    - and one
+    - one
+    - 18 inch
+    - 457 mm
+    - one
+    - 24 inch
+    - 610 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.6'
+    - '1004.5'
+    - one
+    - and one
+    - one
+    - 18 inch
+    - 457 mm
+    - one
+    - 24 inch
+    - 610 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+  '1004.7':
+    piece_sha256: a368d1c78ab9b87d4f68d04aaf1d12593fa5ae583c304a5803f83f8bc7796dbb
+    numbers:
+    - '1004.7'
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.7'
+    - one
+    second_reading_comparisons:
+    - none
+    - '>='
+    flags:
+    - '''one'' (>=): ''need only have one means of egress'', the least an exception allows; the recorded words miss
+      it (numbers.py reads comparison words only directly before a number or after its unit). The second reading
+      is right. Used by no rule (general.bc_1004_7_outdoor_areas is a flag).'
+  '1004.8':
+    piece_sha256: e88fbfdc4a3b1b5fa1f5c37d273f7ad603fa25be15121bd09da440bba606b36f
+    numbers:
+    - '1004.8'
+    - not less than one
+    - 50 square foot
+    - 4.65 m
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.8'
+    - not less than one
+    - 50 square foot
+    - 4.65 m
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - none
+  '1004.9':
+    piece_sha256: 2836799d1130c317bcf0f9c2fb68df782862d9fc0c90682cf16a2ee391eb3008
+    numbers:
+    - '1004.9'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1004.9'
+    second_reading_comparisons:
+    - none
   1006.2.1:
     piece_sha256: 85d4a9fd1b8484c8228e3888e992cbee10ca81d48325c328420fb78e8fa1c65d
     numbers:

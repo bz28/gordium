@@ -48,6 +48,8 @@ FACTS = {
     "emergency_escape_openings_1031": "yes_no",   # emergency escape and rescue openings per 1031 (Table 1006.3.4 note a)
     "special_egress_spaces": "yes_no",        # a space with its own exits or travel limit (1006.2.2, Table 1017.2 note a)
     "merchandise_pads": "yes_no",             # Group M merchandise pads (1018.4: their own common path)
+    "occupied_outdoor_areas": "yes_no",       # outdoor areas the occupants use (1004.7)
+    "occupant_load_increased": "yes_no",      # the design takes 1004.5.1's increased occupant load (up to 1 per 7 sq ft)
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -184,7 +186,7 @@ def _given(building) -> tuple[dict, list[str]]:
 def building_measures(building: dict | None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the seven stated yes/no facts. A fact
+    groups, the three sprinkler systems the limits name from the system, and the eight stated yes/no facts. A fact
     not stated is left out (its rules need review)."""
     facts, _ = _given(building)
     out = {}
@@ -200,7 +202,7 @@ def building_measures(building: dict | None) -> dict:
         out["sprinklered_903_3_1_2"] = facts["sprinkler_system"] == "nfpa_13r"
         out["sprinklered_903_3_1_3"] = facts["sprinkler_system"] == "nfpa_13d"
     for k in ("egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating", "special_egress_spaces",
-              "merchandise_pads", "r2_sleeping_units", "emergency_escape_openings_1031"):
+              "merchandise_pads", "r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas"):
         if k in facts:
             out[k] = facts[k]
     return out

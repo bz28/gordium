@@ -49,7 +49,7 @@ from rule_format.place import place as place_of
 from rule_format.rulebook import REPO, STATE_SETTINGS, Context, load, rulebook_file_problems
 from rule_format.state_law import state_settings_problems
 
-from design_checker import code_scope, each_part, present
+from design_checker import code_scope, each_part, occupant_load, present
 
 WAITING = "waiting"                                 # a law's section state while no interior is read
 WAITING_REASON = "no rooms drawn yet"              # why a law waits: its waiting item's own `waiting` (the headline's words)
@@ -287,6 +287,9 @@ SCOPE_NAME = "This building is under the {book}"
 SCOPE_WHY = "The {book} covers this building: {why} ({cites})"
 
 
+OCCUPANT_LOAD_FACTORS = "5_building_code_rules/drafted/records/occupant_load_factors.yaml"   # Table 1004.5, frozen
+
+
 def _measured(law: dict, interior, readings: dict) -> dict:
     """The parts a law's rules read, measured once per kind of reading: the house code's from the interior measuring
     (model_measurement.interior), the Building Code's from the routes (model_measurement.routes: story, space and
@@ -295,6 +298,10 @@ def _measured(law: dict, interior, readings: dict) -> dict:
     if kind not in readings:
         if kind == ROUTES:
             got = measure_routes(interior)
+            factors = Path(law["folder"]) / OCCUPANT_LOAD_FACTORS
+            if factors.exists() and isinstance(interior, dict):      # 1004.5: each room's function's load
+                occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors),
+                                    interior.get("building"))
             readings[kind] = {"parts": got["parts"], "problems": [str(p) for p in got["problems"]],
                               "not_checked": [], "has_none": {}}
         else:

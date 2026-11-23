@@ -333,6 +333,72 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1004_7_outdoor_areas
+  kind: flag
+  topic: means_of_egress
+  title: 'Outdoor areas: means of egress and occupant load (BCNYS 1004.7)'
+  applies_when: occupied_outdoor_areas
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 313
+    lines:
+    - 29
+    - 36
+    quote: '1004.7 Outdoor areas. Yards, patios, occupiable roofs, courts and similar outdoor areas accessible to and usable
+      by the building occupants shall be provided with means of egress as required by this chapter. The occupant load of such
+      outdoor areas shall be assigned by the building official in accordance with the anticipated use. Where outdoor areas
+      are to be used by persons in addition to the occupants of the building, and the path of egress travel from the outdoor
+      areas passes through the building, means of egress requirements for the building shall be based on the sum of the occupant
+      loads of the building plus the outdoor areas. Exceptions: 1. Outdoor areas used exclusively for service of the building
+      need only have one means of egress. 2. Both outdoor areas associated with Group R-3 and individual dwelling units of
+      Group R-2.'
+  examples:
+  - given:
+      occupied_outdoor_areas: true
+    expect: needs_review
+    note: 'Yards, patios, occupiable roofs or courts the occupants use: their means of egress and the occupant load the building
+      official assigns are a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupied_outdoor_areas: false
+    expect: not_applicable
+    note: 'None, as the architect states it: not applicable.'
+  notes: '1004.7: outdoor areas usable by the occupants need means of egress per Chapter 10, their occupant load assigned
+    by the building official, added to the building''s where their egress passes through it; exception 1 (service-only areas:
+    one means of egress) and 2 (Group R-3''s and Group R-2 dwelling units'' own outdoor areas) loosen it. Outdoor areas aren''t
+    drawn in the interior description. Hand-drafted in a Claude Code session (2026-11-23, section group 3).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1004_9_posting
+  kind: flag
+  topic: means_of_egress
+  title: An assembly room's occupant load posted (BCNYS 1004.9)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 313
+    lines:
+    - 41
+    - 43
+    quote: 1004.9 Posting of occupant load. Every room or space that is an assembly occupancy shall have the occupant load
+      of the room or space posted in a conspicuous place, near the main exit or exit access doorway from the room or space,
+      for the intended configurations. Posted signs shall be of an approved legible permanent design and shall be maintained
+      by the owner or the owner’s authorized agent.
+  examples:
+  - given:
+      occupancy_group: A-2
+    expect: needs_review
+    note: 'A sign near the main exit of each assembly room giving its occupant load: a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Not an assembly occupancy: not applicable.'
+  notes: '1004.9: every room or space that is an assembly occupancy posts its occupant load near its main exit or exit access
+    doorway; a sign isn''t in the model. Hand-drafted in a Claude Code session (2026-11-23, section group 3).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_407_4_2_sleeping_room_travel
   kind: rule
   topic: means_of_egress
@@ -5357,8 +5423,8 @@ rules:
     expect: needs_review
     note: 'No story: the rule''s when_none (needs_review).'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (general.bc_1006_3_3_story_exits)
-    and Group R-2 of dwelling units (Table 1006.3.4(1): general.bc_table_1006_3_4_1__r2_dwelling_units), with 1006.3.4''s single
-    exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants
+    and Group R-2 of dwelling units (Table 1006.3.4(1): general.bc_table_1006_3_4_1__r2_dwelling_units), with 1006.3.4''s
+    single exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants
     and 75 ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units
     10 and 75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13;
     the second story: B, F, M and S 29 and 75 ft, 100 ft per note b; the third story and higher NP), and item 4 (Groups R-3
@@ -5536,8 +5602,8 @@ rules:
     expect: needs_review
     note: 'No story: the rule''s when_none (needs_review).'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (general.bc_1006_3_3_story_exits)
-    and Group R-2 of dwelling units (Table 1006.3.4(1): general.bc_table_1006_3_4_1__r2_dwelling_units), with 1006.3.4''s single
-    exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants
+    and Group R-2 of dwelling units (Table 1006.3.4(1): general.bc_table_1006_3_4_1__r2_dwelling_units), with 1006.3.4''s
+    single exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants
     and 75 ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units
     10 and 75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13;
     the second story: B, F, M and S 29 and 75 ft, 100 ft per note b; the third story and higher NP), and item 4 (Groups R-3
@@ -5740,8 +5806,8 @@ rules:
     expect: needs_review
     note: 'No story: the rule''s when_none (needs_review).'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (general.bc_1006_3_3_story_exits)
-    and Group R-2 of dwelling units (Table 1006.3.4(1): general.bc_table_1006_3_4_1__r2_dwelling_units), with 1006.3.4''s single
-    exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants
+    and Group R-2 of dwelling units (Table 1006.3.4(1): general.bc_table_1006_3_4_1__r2_dwelling_units), with 1006.3.4''s
+    single exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants
     and 75 ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units
     10 and 75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13;
     the second story: B, F, M and S 29 and 75 ft, 100 ft per note b; the third story and higher NP), and item 4 (Groups R-3
