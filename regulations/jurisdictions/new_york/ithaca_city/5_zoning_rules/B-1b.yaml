@@ -1313,13 +1313,8 @@ rules:
     quote: Minimum Parking Requirement (# spaces) [fn2]
   - file: zoning_charts_2026-04.pdf
     page: 15
-    lines: [28, 30]
-    quote: >-
-      1 space per 250 sf of 1 space per 250 sf of Business or professional office - - - - - office floor office floor
-  - file: zoning_charts_2026-04.pdf
-    page: 15
-    lines: [31, 33]
-    quote: 1 space per 500 gross sf 1 space per 500 gross sf Retail store - - - - - of floor area of floor area
+    lines: [29, 29]
+    quote: Business or professional office - - - - -
   - &id013
     file: zoning_charts_2026-04.pdf
     page: 15

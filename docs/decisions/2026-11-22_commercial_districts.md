@@ -71,7 +71,7 @@ Sources: Chapter 325 as downloaded 2026-10-19 (§325-4's list of districts, p.22
 
 ## Open (research done, still unsettled)
 
-Five questions are on the architects' page (`docs/questions_for_architects.md` §5.24 to §5.28): a motel's lot size in
+Six questions are on the architects' page (`docs/questions_for_architects.md` §5.24 to §5.29): a dormitory's or nursing home's lot size in B-1a and B-1b (the multiple-family row or other use); a motel's lot size in
 B-4 and B-5 (chart 3,000 sf vs §325-22A 20,000 sf); the height bonus with no front yard required (B-2a, B-4); the
 500 sf exception and §325-16G's two stories (B-1a, B-1b, B-2d); an ADU where the chart's cell is blank (B-4, B-5);
 "-" on the parking chart (B-1a, B-1b, B-4, B-5). And for the City zoning office: **B-2b** (on the map and in §325-4,
