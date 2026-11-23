@@ -1,8 +1,7 @@
 # The Setup form: the architect states the facts in one place (2026-11-22)
 
 **Purpose:** what the Revit add-in shows when a fact the check needs is missing, what it writes and when, and why.\
-**For:** Ben; engineers changing the add-in's Setup form (`apps/revit_addin`, `Setup.cs`, `SetupView.cs`, `SetupFlow.cs`);
-architects trying the add-in.\
+**For:** Ben; engineers changing the add-in's Setup form (`apps/revit_addin`, `Setup.cs`, `SetupView.cs`, `SetupFlow.cs`); architects trying the add-in.\
 **Kept current by:** the PR that changes which facts the form asks, what it suggests, or when it writes.
 
 ## Decision
@@ -57,7 +56,7 @@ architects trying the add-in.\
    a lot surveyed not stated is read as traced from the tax map, never as surveyed. The results start with "Checked
    without N facts" and **Set up the facts**. The zone is the one exception: it chooses the rules, so without it nothing
    can be checked, and the form says so. Within a session, Check project doesn't show the form again for exactly the
-   facts the architect checked anyway without, but sends the check as Check now anyway does (no street pick, the
+   facts left out by Check now anyway, but sends the check as Check now anyway does (no street pick, the
    results headed "Checked without N facts"); a fact newly missing shows it again.
 8. **Wording follows the building**: "house" only for a one- or two-family dwelling; any other use, or none stated,
    is "building" ("This building has no stairs"; "Inside the building").
@@ -85,13 +84,13 @@ its rules need review, never a pass.
 ## Not done, and why
 
 - **Zone from the address** (packages/site_lookup's City of Ithaca adapter reads the City's zoning map): not wired. It
-  needs the network from the worker during setup, and a lookup's district is a suggestion the architect confirms, never
+  needs the network from the worker during setup, and a lookup's district is only a suggestion the architect accepts or not, never
   the mark itself; the wiring is a worker command that runs the adapter and returns the district with its source and
   date, shown as a suggestion beside the Zone dropdown.
 - **Confirming a maker's clear opening with one click**: not offered. Gordium already fills a maker's published clear
   opening as a draft where it holds that maker's data for the exact product (`MakerClearOpenings`, Marvin's); confirming
   it means checking the hardware option and stating the clear offset, which the formula doesn't give, so the checklist
-  lists what Gordium holds for each type and the architect confirms in the type's marks.
+  lists what Gordium holds for each type and the architect states it in the type's marks.
 - **The marks the building-code branch adds** (occupancy groups, sprinkler system...): they appear in the form under
   "Which building code" and "The lot and the building" as soon as they are in Marks.cs; their word lists become
   dropdowns with one line each in `SetupFacts.Listed` (until then, text boxes the worker checks).
