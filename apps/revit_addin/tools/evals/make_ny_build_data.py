@@ -10,6 +10,9 @@ and what it changes.
     .placed_drawing, checked by layout_problems), so the model is the one the recorded reading came from.
   - test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/revit_build_data.json: 106 Ithaca Rd as the architects'
     spreadsheet describes it (spreadsheet_design.yaml's cells; the same design as spreadsheet_design_model.3dm).
+  - test_data/test_sites/new_york/ithaca_city/four_unit_apartment/revit_build_data.json: Gordium's own two-story,
+    four-unit eval building for the Building Code of New York State (apartment.yaml: not a real project), with
+    `interior_of` (the interior description the Revit reader gives for it, which the Python eval checks).
 
     python make_ny_build_data.py            # writes both
     python make_ny_build_data.py --check    # says which committed file differs from a fresh one (exit 1), writes none
@@ -29,7 +32,9 @@ REPO = Path(__file__).resolve().parents[4]
 ORANGETOWN = "orangetown_ny_80_south_william"
 HOUSE_DIR = REPO / "test_data/real_houses" / ORANGETOWN
 SITE_DIR = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
-OUT = {"orangetown": HOUSE_DIR / "revit_build_data.json", "106_ithaca_rd": SITE_DIR / "revit_build_data.json"}
+APARTMENT_DIR = REPO / "test_data/test_sites/new_york/ithaca_city/four_unit_apartment"
+OUT = {"orangetown": HOUSE_DIR / "revit_build_data.json", "106_ithaca_rd": SITE_DIR / "revit_build_data.json",
+       "four_unit_apartment": APARTMENT_DIR / "revit_build_data.json"}
 TOOL = "apps/revit_addin/tools/evals/make_ny_build_data.py"
 LEVEL_NAMES = {"second_floor": "Second floor", "main_floor": "Main floor", "basement": "Basement"}
 
@@ -301,8 +306,139 @@ def ithaca_rd() -> dict:
     }
 
 
+def _apartment_source() -> tuple[Path, dict]:
+    f = APARTMENT_DIR / "apartment.yaml"
+    return f, yaml.safe_load(f.read_text(encoding="utf-8"))
+
+
+def _rect(r) -> list:
+    x0, y0, x1, y1 = r
+    return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+
+def apartment() -> dict:
+    """The eval building as apartment.yaml gives it, every value from a field of it: per level the four exterior
+    walls (their outside faces on the outline), the partitions, the doors (Level 1 also the two discharge doors), the
+    rooms at their middles, a floor slab under each level and the roof over Level 2."""
+    f, a = _apartment_source()
+    x0, y0, x1, y1 = a["inside"]
+    t, h = a["wall"], a["story_height"]
+    c = t / 2
+    outer = _rect([x0 - t, y0 - t, x1 + t, y1 + t])
+    levels, walls, doors, rooms, floors = [], [], [], [], []
+    for lv in a["levels"]:
+        name = lv["name"]
+        levels.append({"name": name, "elevation_ft": _r(lv["elevation"]), "source": f"apartment.yaml levels[{lv['id']}]"})
+        ids = {}
+        ext = {"south": ((x0 - t, y0 - c), (x1 + t, y0 - c)), "east": ((x1 + c, y0 - t), (x1 + c, y1 + t)),
+               "north": ((x1 + t, y1 + c), (x0 - t, y1 + c)), "west": ((x0 - c, y1 + t), (x0 - c, y0 - t))}
+        for side, (s, e) in ext.items():
+            ids[side] = len(walls) + 1
+            walls.append({"id": ids[side], "level": name, "start": [_r(v) for v in s], "end": [_r(v) for v in e],
+                          "thickness_in": _r(t * 12), "status": "New", "smoke_partition": False, "fire_rating": None,
+                          "height_ft": _r(h), "exterior": True,
+                          "source": f"apartment.yaml: the {side} exterior wall, its inside face on `inside` {a['inside']}, "
+                                    f"{t * 12:g} in thick (`wall`), {h:g} ft tall (`story_height`)"})
+        for w in a["partitions"]:
+            ids[w["name"]] = len(walls) + 1
+            walls.append({"id": ids[w["name"]], "level": name, "start": [_r(v) for v in w["start"]],
+                          "end": [_r(v) for v in w["end"]], "thickness_in": _r(t * 12), "status": "New",
+                          "smoke_partition": False, "fire_rating": None, "height_ft": _r(h), "exterior": False,
+                          "source": f"apartment.yaml partitions[{w['name']}]"})
+        for d in a["doors"] + (a["discharge_doors"] if lv["elevation"] == a["levels"][0]["elevation"] else []):
+            doors.append({"center": [_r(v) for v in d["at"]], "width_in": _r(a["door"]["leaf_in"]),
+                          "height_in": _r(a["door"]["height_in"]), "kind": "single",
+                          "host_wall": ids[d["wall"]], "house_id": f"{lv['id']}{d['id']}", "exit": False,
+                          "operation": "side_hinged",
+                          "source": f"apartment.yaml doors[{d['id']}] on {name}, its leaf apartment.yaml door"})
+        for r in a["rooms"]:
+            rx0, ry0, rx1, ry1 = r["rect"]
+            rooms.append({"number": str(len(rooms) + 1), "name": f"{r['name']} {lv['id']}", "level": name,
+                          "tag_point": [_r((rx0 + rx1) / 2), _r((ry0 + ry1) / 2)], "boundary": _ring(_rect(r["rect"])),
+                          "sleeping": False, "house_id": f"{lv['id']}{r['id']}",
+                          "area_sf": _r((rx1 - rx0) * (ry1 - ry0)),
+                          "source": f"apartment.yaml rooms[{r['id']}] on {name}"})
+        floors.append({"level": name, "outline": _ring(outer), "thickness_in": 12.0,
+                       "source": "apartment.yaml: a 12 in slab under the level over the outside of the walls (ASSUMED "
+                                 "thickness: assumptions)"})
+    top = a["levels"][-1]
+    floors.append({"level": top["name"], "outline": _ring(outer), "thickness_in": 12.0, "top_offset_ft": _r(h),
+                   "source": "the flat roof over Level 2, its top at the walls' top (ASSUMED thickness: assumptions)"})
+    lx0, ly0, lx1, ly1 = a["lot"]
+    spots = [((x0 + x1) / 2, y0 - t - 1), (x1 + t + 1, (y0 + y1) / 2), ((x0 + x1) / 2, y1 + t + 1),
+             (x0 - t - 1, (y0 + y1) / 2)]
+    return {
+        "project": "Four-unit apartment building (Gordium's eval building for the NY Building Code, not a real project)",
+        "units": "feet", "type_suffix": "NY four-unit eval", "levels": levels, "walls": walls, "doors": doors,
+        "windows": [], "rooms": rooms, "floors": floors,
+        "lot": {"outline": _ring(_rect(a["lot"])),
+                "source": f"apartment.yaml lot {a['lot']}: a stand-in, its south edge (y = {ly0:g}) the street"},
+        "spot_grades": [{"at": [_r(x), _r(y), a["ground"]], "source": "apartment.yaml ground: flat, 1 ft outside each "
+                                                                      "wall's middle"} for x, y in spots],
+        "plan": "x east, y north from the inside face of the south wall, feet",
+        "made_from": {"tool": TOOL, "sources": [{"file": _rel(f), "sha256": _sha(f)}]},
+        "not_drawn": {"stairs": "the two exit stair enclosures are drawn as rooms only: no Building Code rule here reads a "
+                                "stair's risers or treads, and the residential stair rules don't run (the Building Code "
+                                "governs)",
+                      "windows": "no rule checked reads a window (the Building Code's escape-window sections aren't "
+                                 "brought in)",
+                      "apartment interiors": "each apartment is one room: the rules checked read the routes from its "
+                                             "door, and its own rooms would only lengthen the travel figures, which no "
+                                             "rule checked for Group R-2 limits (expected.yaml)"},
+        "assumptions": [
+            {"what": "The slabs and the roof 12 in thick", "why": "the eval building has none given",
+             "effect": "none: no rule reads a slab's thickness"},
+            {"what": "Every door a 36 x 84 in single leaf, 34 in clear, 80 in high, no swing side",
+             "why": "the eval building's doors (apartment.yaml door; no maker named)",
+             "effect": "none on the verdicts: the routes pass each door's 34 in clear opening (over the 24 in they need), "
+                       "and the exits' separation is measured between the openings' nearest points across the corridor's "
+                       "length, which the opening's width along its wall doesn't change"}],
+        "stats": {"walls": len(walls), "doors": len(doors), "windows": 0, "rooms": len(rooms)},
+    }
+
+
+def interior_of() -> dict:
+    """The interior description the Revit reader gives for the eval building once marked (eval_marks.yaml): its
+    levels, rooms (inside the walls, with the route marks), doors (each clear opening's plan, the rooms either side,
+    the exits) and each story's outline (the outside and inside faces of its exterior walls), in apartment.yaml's
+    plan; the building block from the Project Information marks. What the Python eval checks
+    (packages/design_checker/tests/test_four_unit_apartment.py)."""
+    _, a = _apartment_source()
+    x0, y0, x1, y1 = a["inside"]
+    t = a["wall"]
+    words = {"Other": "other", "Corridor": "corridor", "Exit stair enclosure": "exit_enclosure",
+             "Exterior door at discharge": "exterior_at_discharge"}
+    rooms, doors = [], []
+    for lv in a["levels"]:
+        L = lv["id"]
+        for r in a["rooms"]:
+            rooms.append({"id": f"{L}{r['id']}", "name": f"{r['name']} {L}", "sleeping": False, "level": L,
+                          "floor": [list(p) for p in _rect(r["rect"])], "floor_elevation": lv["elevation"],
+                          "ceiling_height": a["story_height"] - 1, "use": words[r["use"]], "lockable": r["lockable"],
+                          "pass_through": r["pass_through"], "holes": [], "obstructions": []})
+        for d in a["doors"] + (a["discharge_doors"] if lv is a["levels"][0] else []):
+            door = {"id": f"{L}{d['id']}", "name": f"{d['name']} {L}", "exit": False, "level": L,
+                    # the type's clear opening as eval_marks.yaml door_types stamps it: the reader sends a door's
+                    # plan (its clear opening) only from that confirmed width, never the leaf's
+                    "stated_clear": {"width": a["door"]["clear_width_in"] / 12, "height": a["door"]["clear_height_in"] / 12,
+                                     "source": "eval_marks.yaml door_types (an eval assumption: no maker named)"},
+                    "plan": {"centre": list(d["at"]), "along": list(d["along"]),
+                             "clear_width": a["door"]["clear_width_in"] / 12, "wall_thickness": t},
+                    "sides": [s if s == "outside" else f"{L}{s}" for s in d["sides"]]}
+            if "exit" in d:
+                # the enclosure's room on this story (RouteReader.ExitId: the room every door of which is the exit's)
+                door["exit_kind"], door["exit_id"] = words[d["exit"]], f"{L}{d['sides'][1]}"
+            doors.append(door)
+    return {"format": "gordium.interior/1", "units": "ft",
+            "levels": [{"id": lv["id"], "name": lv["name"], "elevation": lv["elevation"]} for lv in a["levels"]],
+            "rooms": rooms, "doors": doors, "passages": [],
+            "story_outlines": [{"level": lv["id"], "outer": [list(p) for p in _rect([x0 - t, y0 - t, x1 + t, y1 + t])],
+                                "inner": [list(p) for p in _rect(a["inside"])]} for lv in a["levels"]],
+            "building": dict(a["building"])}
+
+
 def made() -> dict:
-    return {"orangetown": orangetown(), "106_ithaca_rd": ithaca_rd()}
+    return {"orangetown": orangetown(), "106_ithaca_rd": ithaca_rd(), "four_unit_apartment": apartment()}
 
 
 def text(data: dict) -> str:

@@ -195,6 +195,102 @@ public static class Marks
         "a mezzanine doesn't; an attic doesn't when unfinished and without human occupancy. A whole number, 1 or more: kept only within what the drawing allows. " +
         "Blank: the count is read from the drawing, and needs review where the drawing allows more than one.");
 
+    // ---- which New York code governs the building (design_checker/code_scope.py; docs/decisions/2026-11-22_which_ny_code.md):
+    // on Project Information, the architect's statements, sent as the interior description's `building` block. Each is
+    // optional; blank is not stated, and where the decision needs one it says which to fill in (never a guess).
+
+    /// <summary>R101.2's exception, the architect's one real choice of code: Yes applies the Building Code of New York
+    /// State to a house the Residential Code covers (<c>building.follows_building_code</c>).</summary>
+    public static readonly MarkDefinition FollowsBuildingCode = new(
+        "Gordium: Follows the Building Code", new("01405f95-7061-47e2-b2a3-7706747c0817"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.follows_building_code",
+        "Yes when this building is designed to the 2025 Building Code of New York State although the Residential Code covers it. RCNYS R101.2 exception: \"Application of the provisions of the Building Code of New York State to the construction, alteration, movement, enlargement, replacement, repair, equipment, use and occupancy, location, removal and demolition of the buildings and structures listed in Section R101.2 is permitted, provided that all applicable provisions of the Building Code of New York State are applied.\" " +
+        "Blank or No: Gordium picks the code from the building (a house of three stories or fewer above grade plane: the Residential Code; anything else: the Building Code).");
+
+    /// <summary>The building's stories above grade plane as New York counts them (<c>building.stories_above_grade_plane</c>).</summary>
+    public static readonly MarkDefinition StoriesAboveGradePlane = new(
+        "Gordium: Stories above grade plane", new("3f5ba80f-f877-49d9-bc47-a86de4a87a19"), MarkValueKind.Integer,
+        MarkBinding.Instance, [ProjectInformation], "building.stories_above_grade_plane",
+        "The building's stories above grade plane as the NYS Residential Code counts them (R202 STORY ABOVE GRADE PLANE: a story whose floor is entirely above grade plane, or whose floor above is more than 6 ft above grade plane, more than 12 ft above the finished ground at any point, or more than 6 ft above the finished ground for more than half the perimeter; a habitable attic counts, R316.3). " +
+        "It decides which code governs (R101.2: not more than three). A whole number, 1 or more. Blank: Gordium: Stories stands in where nothing is drawn below the ground.");
+
+    /// <summary>Whether each dwelling unit has a separate means of egress (<c>building.separate_means_of_egress</c>).</summary>
+    public static readonly MarkDefinition SeparateMeansOfEgress = new(
+        "Gordium: Separate means of egress", new("489999a0-b6a0-4d36-a186-a7874e8e78ff"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.separate_means_of_egress",
+        "For a building of two dwelling units: Yes when each unit has a separate means of egress (RCNYS R101.2 item 2: \"Detached two-family dwellings in which each dwelling unit has a separate means of egress.\"); No when they share one (then the Building Code governs). Blank: which code governs needs review.");
+
+    /// <summary>Whether every unit of an attached building is a townhouse unit (<c>building.townhouse_units</c>).</summary>
+    public static readonly MarkDefinition TownhouseUnits = new(
+        "Gordium: Townhouse units", new("81480188-21b7-4786-b2b3-c3da847439c2"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.townhouse_units",
+        "For three or more attached units: Yes when every unit is a townhouse unit (RCNYS R202: \"A single-family dwelling unit in a townhouse that extends from foundation to roof, that has a yard or public way on not less than two sides, and has a separate means of egress.\"). Blank: which code governs needs review.");
+
+    /// <summary>Whether people outside the household receive care in the building (<c>building.care_facility</c>).</summary>
+    public static readonly MarkDefinition CareFacility = new(
+        "Gordium: Care facility", new("58d76f42-7618-4c1c-8765-3af6c45b31d2"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.care_facility",
+        "Yes when people outside the household receive custodial, medical or personal care, or day care, in the building (BCNYS 308.2.4, 310.4.1: five or fewer in a dwelling may stay under the Residential Code with a sprinkler system). Yes: which code governs needs review. Blank or No: none.");
+
+    /// <summary>The building's occupancy groups (BCNYS Chapter 3), comma separated (<c>building.occupancy_groups</c>).</summary>
+    public static readonly MarkDefinition OccupancyGroups = new(
+        "Gordium: Occupancy groups", new("ea50d05c-05a2-46b3-aafc-6cbb22bf19ac"), MarkValueKind.Text,
+        MarkBinding.Instance, [ProjectInformation], "building.occupancy_groups",
+        "The building's occupancy groups as the 2025 Building Code of New York State classifies them (Chapter 3), separated by commas: " +
+        OccupancyGroupWords.Listed + ". The Building Code's egress rules read it (Group I-4 has its own limits). Blank: the rules that turn on the group need review.");
+
+    /// <summary>The building's automatic sprinkler system (<c>building.sprinkler_system</c>).</summary>
+    public static readonly MarkDefinition SprinklerSystem = new(
+        "Gordium: Sprinkler system", new("4b542577-d04e-463a-87fa-019dbc102374"), MarkValueKind.Text,
+        MarkBinding.Instance, [ProjectInformation], "building.sprinkler_system",
+        "The automatic sprinkler system the building is equipped with throughout, one of: " + SprinklerWords.Table.Listed +
+        " (BCNYS 903.3.1.1 NFPA 13, 903.3.1.2 NFPA 13R, 903.3.1.3 NFPA 13D). Blank: the limits that change with a sprinkler system need review.");
+
+    // ---- the dwelling's own facts which New York code needs (code_scope.py) and Ithaca's zoning reads too: sent as
+    // the lot facts of the same names (host_core.facts.STATED_FACTS), each only when set (unset is not stated)
+
+    /// <summary>The dwelling units on this lot (<c>facts.dwelling_units</c>), 1 or more.</summary>
+    public static readonly MarkDefinition DwellingUnits = new(
+        "Gordium: Dwelling units", new("aa32131a-e757-47a3-abf8-9deb81d7a09a"), MarkValueKind.Integer, MarkBinding.Instance,
+        [ProjectInformation], "facts.dwelling_units",
+        "The dwelling units on this lot (a building split along its party walls onto several lots: this lot's units only), an accessory dwelling unit not counted (Gordium: Accessory dwelling unit says it). A whole number, 1 or more. Blank: the use's own count (one for a detached one-family dwelling).");
+
+    /// <summary>The dwelling units in the whole attached building, every lot it stands on (<c>facts.attached_units_in_building</c>).</summary>
+    public static readonly MarkDefinition UnitsInAttachedBuilding = new(
+        "Gordium: Units in the attached building", new("bccb088a-c087-475f-9ff9-53fd10133d0e"), MarkValueKind.Integer,
+        MarkBinding.Instance, [ProjectInformation], "facts.attached_units_in_building",
+        "For an attached one-family dwelling (one_family_attached): the dwelling units in the whole attached building, every lot it stands on (§325-3B: three to six), 1 or more. It decides whether the building is a townhouse (RCNYS R202: three or more townhouse units). Blank: which code governs needs review.");
+
+    /// <summary>Whether a home occupation is planned (<c>facts.home_occupation</c>).</summary>
+    public static readonly MarkDefinition HomeOccupation = new(
+        "Gordium: Home occupation", new("c6a7cf3a-28b8-4c18-98f2-cf34215901bf"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [ProjectInformation], "facts.home_occupation",
+        "Yes when a home occupation is planned (§325-3B: a business, studio or office run by a resident in the dwelling unit); then which code governs needs a person's check (a live/work unit, BCNYS 508.5). No: none. Blank: Gordium assumes none and says so.");
+
+    /// <summary>The rooms let for profit (<c>facts.rooms_let_for_profit</c>), 0 or more.</summary>
+    public static readonly MarkDefinition RoomsLetForProfit = new(
+        "Gordium: Rooms let for profit", new("2f038e8d-2d26-4e46-b92a-1c51d08bca87"), MarkValueKind.Integer,
+        MarkBinding.Instance, [ProjectInformation], "facts.rooms_let_for_profit",
+        "The rooms let for profit (to roomers) in the building, 0 or more; with any, the Residential Code covers it only when owner-occupied with five or fewer guestrooms and a sprinkler system (RCNYS R101.2 item 6). Blank: Gordium assumes none and says so.");
+
+    /// <summary>Whether an accessory dwelling unit is on the lot (<c>facts.accessory_dwelling_unit</c>).</summary>
+    public static readonly MarkDefinition AccessoryDwellingUnit = new(
+        "Gordium: Accessory dwelling unit", new("6fcbf10d-a1c2-406a-b6c7-e726b4a695f2"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "facts.accessory_dwelling_unit",
+        "Yes when an accessory dwelling unit (§325-3B, §325-28) is on the lot, attached or detached; then say whether it is detached (Gordium: ADU detached). No: none. Blank: Gordium assumes none and says so.");
+
+    /// <summary>The accessory dwelling units on the parcel (<c>facts.adus_on_parcel</c>), 1 or more.</summary>
+    public static readonly MarkDefinition AdusOnParcel = new(
+        "Gordium: ADUs on parcel", new("1fa82254-92d5-4f27-acef-924bfc047d7c"), MarkValueKind.Integer, MarkBinding.Instance,
+        [ProjectInformation], "facts.adus_on_parcel",
+        "With an accessory dwelling unit on the lot: the accessory dwelling units on the parcel, any already there included (§325-28C(1): one per parcel), 1 or more. More than one keeps which code governs at needs review (each may be one more of the building's units, RCNYS R202 DWELLING). Blank: Gordium assumes one, the one stated, and says so.");
+
+    /// <summary>Whether the accessory dwelling unit is detached (<c>facts.adu_detached</c>).</summary>
+    public static readonly MarkDefinition AduDetached = new(
+        "Gordium: ADU detached", new("ebd07d28-ce47-4e7d-95e7-6e164d7d7bc8"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [ProjectInformation], "facts.adu_detached",
+        "Yes when the accessory dwelling unit is in its own building; No when it is in or on the main building, where it is one more of the building's dwelling units (RCNYS R202 DWELLING: one or two). Blank, with an ADU on the lot: which code governs needs review.");
+
     /// <summary>The <see cref="GroundFrom"/> words and the <c>grade_from</c> each sends.</summary>
     public static IReadOnlyList<(string Word, string GradeFrom)> GroundWords => [("Spot grades", "spot"), ("Finished spot grades", "finished_spots")];
     /// <summary>A level the architect says has no rooms at all (a roof, a turret's top: Revit finds enclosed areas
@@ -308,6 +404,9 @@ public static class Marks
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
         CanBeLocked, PassThrough, Exit, Stories, NotOccupied,
+        FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
+        SprinklerSystem, DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
+        AduDetached, AdusOnParcel,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------
@@ -403,6 +502,31 @@ public static class RoomUses
         ("Kitchen", "kitchen"), ("Toilet", "toilet"), ("Closet", "closet"), ("Workroom", "workroom"), ("Other", "other"));
 
     public static IReadOnlyList<string> Words => Table.Words;
+}
+
+/// <summary>The occupancy groups <c>Gordium: Occupancy groups</c> takes (BCNYS Chapter 3; code_scope.GROUPS).</summary>
+public static class OccupancyGroupWords
+{
+    public static IReadOnlyList<string> Words { get; } =
+        ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2", "H-3", "H-4", "H-5", "I-1", "I-2", "I-3",
+         "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"];
+
+    public static string Listed => string.Join(", ", Words);
+
+    /// <summary>The groups typed, each as the book writes it, or null when any word isn't a group (nothing sent).</summary>
+    public static IReadOnlyList<string>? Parse(string text)
+    {
+        var got = text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(p => Words.FirstOrDefault(w => string.Equals(w, p, StringComparison.OrdinalIgnoreCase))).ToList();
+        return got.Count > 0 && got.All(g => g is not null) ? got.Select(g => g!).Distinct().ToList() : null;
+    }
+}
+
+/// <summary>The sprinkler systems <c>Gordium: Sprinkler system</c> takes → <c>building.sprinkler_system</c>.</summary>
+public static class SprinklerWords
+{
+    public static WordTable Table { get; } = new(
+        ("None", "none"), ("NFPA 13", "nfpa_13"), ("NFPA 13R", "nfpa_13r"), ("NFPA 13D", "nfpa_13d"));
 }
 
 /// <summary>Which exit a door is (<c>Gordium: Exit</c>) → <c>doors[].exit_kind</c>, IBC 2009 1016.1's own list (the

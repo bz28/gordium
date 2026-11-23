@@ -35,8 +35,10 @@ def test_a_state_law_folder_is_law_but_no_place():
 
 
 def test_ithaca_inherits_new_york_states_law():
-    assert place("new_york/ithaca_city").inherits == (NY_STATE,)
-    assert (NY_STATE / STATE_SETTINGS).is_file()
+    # both of New York's books since 2026-11-22: the house code, and the Building Code for every other building
+    building = NY_STATE.parent / "new_york_state_building"
+    assert place("new_york/ithaca_city").inherits == (NY_STATE, building)
+    assert (NY_STATE / STATE_SETTINGS).is_file() and (building / STATE_SETTINGS).is_file()
 
 
 def _place_with(tmp_path, inherits, state_folder="new_york/new_york_state"):
@@ -277,7 +279,11 @@ def test_an_edited_cache_is_a_problem_even_where_no_quote_covers_the_edit(tmp_pa
         pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
     copy = tmp_path / "cache" / entry["sha256"]
     copy.mkdir(parents=True)
-    (copy / entry["file"]).symlink_to(cached(entry))
+    try:
+        (copy / entry["file"]).symlink_to(cached(entry))
+    except OSError:                              # Windows without the symlink privilege: a copy reads the same
+        import shutil
+        shutil.copyfile(cached(entry), copy / entry["file"])
     rows = [json.loads(x) for x in cached_text(entry).read_text(encoding="utf-8").splitlines()]
     assert Context.for_jurisdiction(NY_STATE).problems == []
     for r in rows[1:]:

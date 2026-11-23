@@ -51,13 +51,32 @@ public static class ProjectCheck
             throw new ReadRefusedException("the outside and the inside weren't read in the same design (" + differs +
                                            "): nothing is sent; click Check project again");
         var read = ProjectFacts.Read(inside);
-        if (read.Missing.Count > 0 && !(anyway && read.Facts["zone"] is not null))
-            return new ProjectPrepared(null, read.Missing, null, [], null);
-        var notStated = read.Missing.Count > 0 ? SetupFacts.NotSent(inside, read) : [];
+        var building = BuildingFacts.Read(inside);
+        IReadOnlyList<string> missing = [.. read.Missing, .. building.Missing];
+        if (missing.Count > 0 && !(anyway && read.Facts["zone"] is not null))
+            return new ProjectPrepared(null, missing, null, [], null);
+        // sent anyway: a building fact Gordium can't read goes as typed, so the code decision says it can't read it
+        // (needs review), never takes it as not stated; it is listed with the facts left out
+        IReadOnlyList<MarkDefinition> notStated = missing.Count > 0 ? [.. SetupFacts.NotSent(inside, read), .. building.NotRead] : [];
 
         // everything read from the records before the first await, on the caller's thread (Revit's: a lot line's
         // points call back into the API; SiteReader reads the lot before it asks the worker anything)
         var interior = InteriorReader.Read(inside);
+        if (building.Building is { } said)       // which New York code governs: the architect's statements, as given
+            interior.Interior["building"] = said;
+        // sent anyway: only the lot facts whose mark holds a value Gordium couldn't send (a count under its least) are
+        // named, so the code decision reads each as stated and unread, never as not stated (code_scope.py
+        // facts_not_sent; review round 5); a mark simply not set (a blank Use) is not stated, and the decision asks for
+        // it as such (review round 6)
+        var unsent = notStated.Where(m => inside.ProjectMarks.TryGetValue(m.Guid, out var v) && v.HasValue)
+                              .Select(m => m.Feeds).Where(f => f.StartsWith("facts.", StringComparison.Ordinal))
+                              .Select(f => (JsonNode)f["facts.".Length..].Split(' ')[0].TrimEnd(',')).ToList();
+        if (unsent.Count > 0)
+        {
+            var block = interior.Interior["building"] as JsonObject ?? new JsonObject();
+            block["facts_not_sent"] = new JsonArray([.. unsent]);
+            interior.Interior["building"] = block;
+        }
         var site = await SiteReader.DescribeAsync(outside, read.Facts, asker, cancel).ConfigureAwait(false);
         var match = read.StreetEdges is { } kept ? StreetEdges.Match(kept, site.Site["lot"] as JsonObject, outside.InternalToShared) : null;
         // a kept edge no longer on the lot is asked for again, anyway too: anyway leaves out only what isn't set
@@ -89,6 +108,73 @@ public static class ProjectCheck
             .Select(s => s.Id + ":" + string.Join(",", s.Options.OrderBy(o => o.Id, StringComparer.Ordinal)
                 .Select(o => o.Id + (o.IsPrimary ? "*" : "")))));
         return Sets(a) == Sets(b) ? null : "their design option sets differ";
+    }
+}
+
+/// <summary>The interior description's <c>building</c> block, from the marks on Project Information that say which
+/// New York code governs the building and what the Building Code's egress rules read (design_checker/code_scope.py
+/// FACTS): each only when set, so an unset one is not stated. <see cref="Building"/> is null when none is set (the
+/// description is then exactly as before). A word that isn't one of a mark's words, or a count under 1, is listed in
+/// <see cref="Missing"/> and nothing is sent: never sent as something near it.</summary>
+public sealed record BuildingFactsRead(JsonObject? Building, IReadOnlyList<string> Missing)
+{
+    /// <summary>The marks holding what Gordium can't read (each also in <see cref="Missing"/>, and in
+    /// <see cref="Building"/> as typed, so a check sent anyway says it can't read it).</summary>
+    public IReadOnlyList<MarkDefinition> NotRead { get; init; } = [];
+}
+
+/// <summary>Reads <see cref="BuildingFactsRead"/> from the marks.</summary>
+public static class BuildingFacts
+{
+    private const string Where = " on Project Information (Manage > Project Information)";
+
+    public static BuildingFactsRead Read(RevitModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        var missing = new List<string>();
+        var notRead = new List<MarkDefinition>();
+        var b = new JsonObject();
+        MarkValue? Get(MarkDefinition m) => model.ProjectMarks.TryGetValue(m.Guid, out var v) ? v : null;
+        foreach (var (mark, key) in new[] { (Marks.FollowsBuildingCode, "follows_building_code"),
+                     (Marks.SeparateMeansOfEgress, "separate_means_of_egress"), (Marks.TownhouseUnits, "townhouse_units"),
+                     (Marks.CareFacility, "care_facility") })
+            if (Marks.YesNo(Get(mark)) is { } yes)
+                b[key] = yes;
+        if (Marks.Count(Get(Marks.StoriesAboveGradePlane)) is { } stories)
+        {
+            if (stories < 1)
+            {
+                missing.Add($"{Marks.StoriesAboveGradePlane.Name} is {stories.ToString(CultureInfo.InvariantCulture)}: type " +
+                            $"the stories above grade plane, 1 or more, or leave it blank{Where}.");
+                notRead.Add(Marks.StoriesAboveGradePlane);
+            }
+            b["stories_above_grade_plane"] = stories;
+        }
+        if (Marks.Text(Get(Marks.OccupancyGroups)) is { } groups)
+        {
+            if (OccupancyGroupWords.Parse(groups) is { } parsed)
+                b["occupancy_groups"] = new JsonArray([.. parsed.Select(g => (JsonNode)g)]);
+            else
+            {
+                b["occupancy_groups"] = groups;
+                notRead.Add(Marks.OccupancyGroups);
+                missing.Add($"{Marks.OccupancyGroups.Name} is \"{groups}\": type the Building Code's groups separated by " +
+                            $"commas ({OccupancyGroupWords.Listed}), or leave it blank{Where}.");
+            }
+        }
+        if (Marks.Text(Get(Marks.SprinklerSystem)) is { } system)
+        {
+            if (SprinklerWords.Table.Of(system) is { } word)
+                b["sprinkler_system"] = word;
+            else
+            {
+                b["sprinkler_system"] = system;
+                notRead.Add(Marks.SprinklerSystem);
+                missing.Add($"{Marks.SprinklerSystem.Name} is \"{system}\": type one of {SprinklerWords.Table.Listed}, or " +
+                            $"leave it blank{Where}.");
+            }
+        }
+        return new BuildingFactsRead(b.Count > 0 ? b : null, missing) { NotRead = notRead };
     }
 }
 
@@ -154,6 +240,22 @@ public static class ProjectFacts
             else
                 facts["stories"] = stories;
         }
+        // the dwelling's own facts (optional; which New York code governs reads them, and Ithaca's zoning): each sent
+        // as stated, a count under its least asked again, never sent
+        foreach (var (mark, key, least) in new[] { (Marks.DwellingUnits, "dwelling_units", 1),
+                     (Marks.UnitsInAttachedBuilding, "attached_units_in_building", 1), (Marks.RoomsLetForProfit, "rooms_let_for_profit", 0),
+                     (Marks.AdusOnParcel, "adus_on_parcel", 1) })
+            if (Marks.Count(Get(mark)) is { } n)
+            {
+                if (n < least)
+                    missing.Add($"{mark.Name} is {n.ToString(CultureInfo.InvariantCulture)}: type {least} or more, or leave it blank{Where}.");
+                else
+                    facts[key] = n;
+            }
+        foreach (var (mark, key) in new[] { (Marks.HomeOccupation, "home_occupation"),
+                     (Marks.AccessoryDwellingUnit, "accessory_dwelling_unit"), (Marks.AduDetached, "adu_detached") })
+            if (Marks.YesNo(Get(mark)) is { } yes)
+                facts[key] = yes;
         IReadOnlyList<KeptEdge>? edges = null;
         var street = Marks.Text(Get(Marks.StreetEdge));
         if (street is null)
@@ -306,6 +408,14 @@ public static class StreetEdges
     public static readonly string OpenAPlan = $"{Marks.StreetEdge.Name}: open a site plan (or a floor plan) that shows the " +
                                               "property line, then click Check again: it asks you to click the lot edge along the street.";
 
+    /// <summary>The same, said where Pick on plan was pressed in the Setup form: the next step is that button again.</summary>
+    public static readonly string OpenAPlanFromSetup = $"{Marks.StreetEdge.Name}: open a site plan (or a floor plan) that " +
+                                                       "shows the property line, then press Pick on plan again.";
+
+    /// <summary>The title of the street edge pick's own dialogs (its confirmation, a click refused), wherever it was
+    /// asked from (Check project or the Setup form's Pick on plan).</summary>
+    public const string PickTitle = "Gordium: street edge";
+
     /// <summary>Whether to ask for the street edge now (Revit trial, 2026-11-20: asked from a sheet view, the pick
     /// waited with no prompt where no property line could be clicked). Only when the street edge is the one fact
     /// still to give (<paramref name="needed"/>: not set, or kept but no longer a lot edge) and every other fact is
@@ -330,6 +440,24 @@ public static class StreetEdges
     public static readonly string SwitchToIt = $"{Marks.StreetEdge.Name}: this project wasn't the active one when " +
         "Gordium asked for its street edge (a click would have landed in another project): switch to it, open a site " +
         "plan that shows the property line, and click Check again.";
+
+    // ---- the same refusals said where Pick on plan was pressed in the Setup form: the next step is that button ------
+
+    /// <summary><see cref="SwitchToIt"/> from the Setup form's Pick on plan.</summary>
+    public static readonly string SwitchToItFromSetup = $"{Marks.StreetEdge.Name}: this project isn't the active one (a " +
+        "click would land in another project): switch to it, open a site plan that shows the property line, and press " +
+        "Pick on plan again.";
+
+    /// <summary>The project has no property line to pick, from the Setup form's Pick on plan.</summary>
+    public static readonly string NoPropertyLineFromSetup = $"{Marks.StreetEdge.Name}: this project has no property line " +
+        "to pick: draw it (Massing & Site > Property Line), then press Pick on plan again.";
+
+    /// <summary>Esc pressed before any edge was kept, from the Setup form's Pick on plan.</summary>
+    public const string NonePickedFromSetup = "No street edge was picked: press Pick on plan again to pick it.";
+
+    /// <summary>Every message the Setup form's Pick on plan path can show before an edge is picked (the pick's own
+    /// per-click words, <see cref="Nearest"/>'s, name no button): each names Pick on plan as the next step.</summary>
+    public static IReadOnlyList<string> FromSetup => [OpenAPlanFromSetup, SwitchToItFromSetup, NoPropertyLineFromSetup, NonePickedFromSetup];
 
     /// <summary>What to fill in, as the panel lists it: when the view couldn't show the property line, the street
     /// edge's "click when Check project asks" replaced by <see cref="OpenAPlan"/> (a kept edge's own reason kept,

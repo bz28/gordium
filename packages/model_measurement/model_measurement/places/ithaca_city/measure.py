@@ -1273,8 +1273,10 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated, called: str | No
                                             height=f"{_r(_rise(tallest)):g}", most=most))
         if stated < least:              # (no floor blocks drawn: fewer than the first story every building has)
             return _refused("below_one", stop("stories_below_one", typed=f"{stated:g}"))
-        return _record("stories", "count", _r(stated), "stated by the architect for the whole building, within what "
-                       f"the drawing allows ({least} to {most}: {holds})", ids)
+        # `stated`: the count is the architect's, kept because it lies within what's drawn (never read from floors);
+        # code_scope says so in words (check.py reads the flag, never these words)
+        return dict(_record("stories", "count", _r(stated), "stated by the architect for the whole building, within "
+                            f"what the drawing allows ({least} to {most}: {holds})", ids), stated=True)
     if least == most:                   # the drawing allows one count only: read, nothing to ask
         return _record("stories", "count", _r(least), f"read from the drawing: {holds}" +
                        (f"; {counted} floor blocks drawn" if counted else ""), ids)
@@ -1442,6 +1444,8 @@ def _stories_over(assemblies, grade, why_grade, stated) -> dict:
     # another building read as the main one: pick the main building first)
     ranged = [kind for _, r, kind in found if r["value"] is None and "could hold up to" in (r["reason"] or "")]
     settles = bool(ranged) and "as_main" not in ranged
+    # the count typed stands in a candidate's value: said by the flag, whichever words the merged record gets
+    stated_in = {"stated": True} if any(r.get("stated") for _, r, _ in found) else {}
     if len(found) == 1:
         return dict(found[0][1], count_settles=settles)
     readings, questions, objects = [], [], []
@@ -1456,7 +1460,8 @@ def _stories_over(assemblies, grade, why_grade, stated) -> dict:
         if any(kind == "as_main" for _, _, kind in found):
             questions.append(MAIN_QUESTION)
     return dict(_decide("stories", readings, "the stories of the building, read over its candidate buildings",
-                        list(dict.fromkeys(objects)), "; ".join(dict.fromkeys(questions))), count_settles=settles)
+                        list(dict.fromkeys(objects)), "; ".join(dict.fromkeys(questions))), count_settles=settles,
+                **stated_in)
 
 
 # ---- measuring -------------------------------------------------------------------------------------------

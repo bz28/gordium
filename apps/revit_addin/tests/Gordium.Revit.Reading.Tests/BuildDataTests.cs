@@ -239,6 +239,21 @@ public sealed class BuildDataTests
         Assert.All(m.SpotGrades, s => Assert.Equal(0, s.Z));
     }
 
+    /// <summary>The Building Code eval's four-unit building (apartment.yaml): two levels, each with its four
+    /// exterior walls and four partitions, four doors (Level 1 also its two discharge doors) and five rooms, each room
+    /// closed by its own level's walls, a slab under each level and the roof.</summary>
+    [Fact]
+    public void The_four_unit_apartment_is_read_whole_on_its_two_levels()
+    {
+        var m = BuildData.Parse(NewYork("test_data/test_sites/new_york/ithaca_city/four_unit_apartment"));
+        Assert.Equal((16, 10, 0, 10), (m.Walls.Count, m.Doors.Count, m.Windows.Count, m.Rooms.Count));
+        Assert.Equal([("Level 1", 0.0), ("Level 2", 10.0)], m.Levels.Select(l => (l.Name, l.ElevationFt)));
+        Assert.Equal(3, m.Floors.Count);
+        Assert.Equal(6, m.Doors.Count(d => m.Walls.First(w => w.Id == d.HostWall).Level == "Level 1"));
+        foreach (var r in m.Rooms)
+            Assert.Empty(BuildData.BoundaryGaps(r, m.Walls.Where(w => m.LevelOf(w.Level) == m.LevelOf(r.Level)).ToList()));
+    }
+
     [Theory]
     [InlineData("both", "data: gives both level and levels: one or the other")]
     [InlineData("no level", "wall 1: no level (the data has several)")]

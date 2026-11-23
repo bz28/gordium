@@ -41,13 +41,15 @@ from pathlib import Path
 
 from model_measurement.interior import measure as measure_interior
 from model_measurement.interior.read import FORMAT as INTERIOR_FORMAT
+from model_measurement.routes import measure as measure_routes
 from rule_format import parts as part_rules
+from rule_format.formula import names as formula_names
 from rule_format.labels import load_pieces
 from rule_format.place import place as place_of
 from rule_format.rulebook import REPO, STATE_SETTINGS, Context, load, rulebook_file_problems
 from rule_format.state_law import state_settings_problems
 
-from design_checker import each_part, present
+from design_checker import code_scope, each_part, present
 
 WAITING = "waiting"                                 # a law's section state while no interior is read
 WAITING_REASON = "no rooms drawn yet"              # why a law waits: its waiting item's own `waiting` (the headline's words)
@@ -116,7 +118,7 @@ def laws(jurisdiction) -> dict:
     for folder, book in p.inherited_rulebooks():
         law = {"key": f"{folder.parent.name}/{folder.name}", "title": _title(folder), "folder": folder,
                "rulebook": book, "rules": [], "problems": [], "section_of": None, "documents": {},
-               "not_checked_yet": [], "coverage_problem": None}
+               "not_checked_yet": [], "coverage_problem": None, "kinds": {}, **_scope_settings(folder)}
         law["short"] = law["title"].split(" (")[0]
         if book is None:
             law["problems"] = [NO_RULES.format(folder=law["key"])]
@@ -125,6 +127,7 @@ def laws(jurisdiction) -> dict:
                 ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
                 law["problems"] = ctx.problems + state_settings_problems(folder, ctx) + rulebook_file_problems(book, ctx)
                 law["documents"] = ctx.sources
+                law["kinds"] = {k: v for k, v in ctx.allowed().items() if k not in ("use", "district")}
                 if not law["problems"]:
                     law["rules"] = load(book)["rules"]
                     law["section_of"] = _sections(folder)
@@ -174,6 +177,20 @@ def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]
              names[m["section"]].strip() else m["heading"]} for m in missing], None
 
 
+def _scope_settings(folder: Path) -> dict:
+    """state.yaml's `scope` (which buildings the law covers: code_scope.CODES, or None for every building) and its
+    `waiting_why` (what its waiting row says; None: WAITING_WHY, the house code's words). Read as words only; a
+    state.yaml that can't be read gives neither (its problem is said by state_settings_problems)."""
+    try:
+        s = load(folder / STATE_SETTINGS)
+    except Exception:
+        s = None
+    s = s if isinstance(s, dict) else {}
+    scope = s.get("scope") if s.get("scope") in code_scope.CODES else None
+    why = s.get("waiting_why") if isinstance(s.get("waiting_why"), str) and s["waiting_why"].strip() else None
+    return {"scope": scope, "waiting_why": " ".join(why.split()) if why else None}
+
+
 def _title(folder: Path) -> str:
     """How the law's results are headed: state.yaml's results_title, else "<name> building code"; a state.yaml that
     can't be read gives the folder's name (its problem is said by state_settings_problems, never a crash)."""
@@ -211,31 +228,109 @@ def _no_rooms(interior) -> bool:
 def check(found: dict, interior, values: dict, allowed: dict) -> dict:
     """Every inherited law's rows and items for one design. `interior`: the interior description
     (gordium.interior/1, docs/interior/interior_description_format.md), or None when none is drawn. `values`: the
-    building's measures (dwelling units…), `allowed`: the place's allowed values (its uses)."""
+    building's measures (dwelling units…), `allowed`: the place's allowed values (its uses).
+
+    Where the place inherits laws that each cover some buildings (state.yaml `scope`: New York's Residential Code and
+    Building Code), code_scope.decide picks the one that covers this building from `values` and the description's
+    `building` block, and only that one runs: a house the Residential Code covers is checked exactly as before. Where
+    it can't tell (a fact missing, or both possible), each runs with a needs-review line saying why, first in its
+    section, so neither reads as the answer (principle 4). The decision is the result's `code_scope`."""
     waiting = _no_rooms(interior)
-    measured = None if waiting else measure_interior(interior)
-    sections, items, rows, results, ids = [], [], [], {}, set()
-    for law in found["laws"]:
+    building = interior.get("building") if isinstance(interior, dict) else None
+    scope = code_scope.decide(values, building) if any(law.get("scope") for law in found["laws"]) else None
+    run = [law for law in found["laws"]
+           if scope is None or law.get("scope") is None or scope["code"] in (None, law["scope"])]
+    undecided = scope is not None and scope["code"] is None
+    sections, items, rows, results, ids, readings = [], [], [], {}, set(), {}
+    for law in run:
+        measured = None if waiting else _measured(law, interior, readings)
+        law_values, law_allowed = _law_values(law, values, allowed, building)
         # rules that can't be used are said whether or not rooms are drawn: never hidden behind "waiting"
-        mine = _law_items(law, measured, values, allowed, rows, results) if not waiting or law["problems"] \
-            else [_waiting_item(law)]
+        mine = _law_items(law, measured, law_values, law_allowed, rows, results) if not waiting or law["problems"]             else [_waiting_item(law)]
         if not waiting and not law["problems"]:   # rules refused: none was used (BAD_RULES says so); waiting stays
             mine += _not_yet_items(law)           # waiting, its row lists them (_waiting_item)
+        if scope is not None and law.get("scope"):
+            mine += _scope_items(law, scope)
         mine.sort(key=lambda i: ORDER[i["status"]])          # what fails first, then needs review (stable)
         for i in mine:                                       # one id per item, across laws too (hosts refuse twins)
             if i["id"] in ids:
                 i["id"] = f"{i['id']}#{law['key']}"
             ids.add(i["id"])
         items += mine
+        calm = waiting and not law["problems"] and not undecided    # a law only waiting for rooms
         sections.append({"key": law["key"], "title": law["title"],
-                         "state": WAITING if waiting and not law["problems"] else present.state(mine),
-                         "summary": WAITING_WORDS if waiting and not law["problems"] else present._law_summary(mine),
+                         "state": WAITING if calm else present.state(mine),
+                         "summary": WAITING_WORDS if calm else present._law_summary(mine),
                          "rules": len(law["rules"]), "rulebook": _shown(law["rulebook"]),
                          "problems": list(law["problems"])})
+    measured = next(iter(readings.values()), None)
     return {"sections": sections, "items": items, "rows": rows, "results": results, "waiting": waiting,
             "interior": None if measured is None else {k: measured[k] for k in ("parts", "problems", "not_checked",
                                                                                 "has_none")},
-            "interior_sha256": fingerprint(interior)}
+            "interior_sha256": fingerprint(interior), **({"code_scope": scope} if scope is not None else {})}
+
+
+def which_code(got: dict) -> dict | None:
+    """The code decision as a host shows it at the top of the results (Ben, 2026-11-22: chosen for the architect,
+    shown, never a choice offered): {code, title, why, cites: [{section, document, page, quote}], ask, assumes:
+    [words]}, the very words of code_scope.decide; None where the place's laws don't split buildings between books."""
+    scope = got.get("code_scope")
+    return None if scope is None else {k: scope[k] for k in ("code", "title", "why", "cites", "ask", "assumes")}
+
+
+ROUTES = "routes"
+SCOPE_ID = "code_scope"
+SCOPE_OPEN_NAME = "Which code governs this building: can't tell yet"
+SCOPE_OPEN_WHY = ("Gordium can't tell whether the Residential Code or the Building Code of New York State covers this "
+                  "building: {why} ({cites}). To settle it, {ask}. Both are shown; neither is the answer until then")
+SCOPE_NAME = "This building is under the {book}"
+SCOPE_WHY = "The {book} covers this building: {why} ({cites})"
+
+
+def _measured(law: dict, interior, readings: dict) -> dict:
+    """The parts a law's rules read, measured once per kind of reading: the house code's from the interior measuring
+    (model_measurement.interior), the Building Code's from the routes (model_measurement.routes: story, space and
+    corridor), in the same shape."""
+    kind = ROUTES if law.get("scope") == code_scope.BUILDING else "interior"
+    if kind not in readings:
+        if kind == ROUTES:
+            got = measure_routes(interior)
+            readings[kind] = {"parts": got["parts"], "problems": [str(p) for p in got["problems"]],
+                              "not_checked": [], "has_none": {}}
+        else:
+            readings[kind] = measure_interior(interior)
+    return readings[kind]
+
+
+def _law_values(law: dict, values: dict, allowed: dict, building) -> tuple[dict, dict]:
+    """The building values and allowed values a law's rules read: the check's own, and for the Building Code the
+    building block's measures (code_scope.building_measures: occupancy group, sprinkler system...). A proposed
+    measure's kind (the law's drafted/records/proposed_measures.yaml) is added only for one given a value, so a law
+    reads exactly what it did where none is given."""
+    if law.get("scope") == code_scope.BUILDING:
+        given = {k: values[k] for k in code_scope.FACTS if k in values}
+        values = {**values, **code_scope.building_measures({**given, **(building if isinstance(building, dict) else {})})}
+    kinds = {k: v for k, v in (law.get("kinds") or {}).items() if k in values and k not in allowed}
+    return values, ({**allowed, **kinds} if kinds else allowed)
+
+
+def _scope_items(law: dict, scope: dict) -> list[dict]:
+    """The law's line on which code governs: needs review where code_scope can't tell (first in each candidate's
+    section); for the Building Code chosen, a line saying why (counted toward nothing). None for the Residential Code
+    chosen: a house's check reads exactly as before, the decision in the result's `code_scope`."""
+    cites = ", ".join(c["section"] for c in scope["cites"])
+    if scope["code"] is None:
+        item = _own_item(law, f"{law['short'].lower()}.{SCOPE_ID}", SCOPE_OPEN_NAME, present.REVIEW,
+                         SCOPE_OPEN_WHY.format(why=scope["why"], cites=cites, ask=scope["ask"]))
+    elif scope["code"] == code_scope.BUILDING:
+        book = _book(law)
+        item = _own_item(law, f"{law['short'].lower()}.{SCOPE_ID}", SCOPE_NAME.format(book=book),
+                         present.NOT_APPLICABLE, SCOPE_WHY.format(book=book, why=scope["why"], cites=cites))
+    else:
+        return []
+    item["detail"]["citation"] = cites
+    item["code_scope"] = dict(scope)
+    return [item]
 
 
 def fingerprint(interior) -> str | None:
@@ -282,7 +377,9 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
     out = [_decorated(i, law, by_id.get(i["rule"])) for i in got["items"]]
     # a rule not written for each part is never dropped in silence: its own needs-review row and answer
     for n, rule in enumerate(law["rules"], 1):
-        if isinstance(rule, dict) and not part_rules.is_part_rule(rule):
+        if isinstance(rule, dict) and not part_rules.is_part_rule(rule) and rule.get("kind") == "flag":
+            out.append(_flag_item(law, rule, each_part._key(rule, n), values, allowed, results))
+        elif isinstance(rule, dict) and not part_rules.is_part_rule(rule):
             key = each_part._key(rule, n)
             results[key] = part_rules.rule_result([{"outcome": "needs_review"}] + ([{"outcome": results[key]}]
                                                                                    if key in results else []))
@@ -300,6 +397,30 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
         out.append(_own_item(law, f"{law['short'].lower()}.nothing_applied", f"{law['short']}: nothing checked",
                              present.REVIEW, NOTHING_APPLIED.format(title=law["title"])))
     return out
+
+
+FLAG_WHY = "A person checks this (Gordium doesn't decide it): {note}"
+FLAG_NOT_APPLICABLE = "Not applicable: {when} is not so, as stated ({names})"
+
+
+def _flag_item(law: dict, rule: dict, key: str, values: dict, allowed: dict, results: dict) -> dict:
+    """A flag written for the whole building (no for_each: the Building Code's classification and allowances): its
+    own line, needs review with the rule's words for what to check, or not applicable where its applies_when is
+    stated false (outcome() over the building's values, as a zoning flag). Never a pass."""
+    from rule_format.rulebook import _outcome
+    answer = _outcome(rule, values, allowed)
+    results[key] = part_rules.rule_result([{"outcome": answer}] + ([{"outcome": results[key]}] if key in results
+                                                                      else []))
+    note = next((e.get("note") for e in rule.get("examples") or [] if isinstance(e, dict) and e.get("note")
+                 and e.get("expect") == "needs_review"), None) or rule.get("notes") or rule.get("title") or key
+    if answer == "not_applicable":
+        when = str(rule.get("applies_when"))
+        status, why = present.NOT_APPLICABLE, FLAG_NOT_APPLICABLE.format(
+            when=when, names=", ".join(f"{n}: {values[n]}" for n in sorted(formula_names(when)) if n in values))
+    else:
+        status, why = present.REVIEW, FLAG_WHY.format(note=" ".join(str(note).split()))
+    item = _own_item(law, f"{law['short'].lower()}.{key}", law["short"], status, why)
+    return {**_decorated({**item, "rule": key}, law, rule), "reason": why}
 
 
 def _skipped(skip: dict, claims: dict) -> str:
@@ -411,7 +532,7 @@ def _book(law: dict) -> str:
 
 
 def _waiting_item(law: dict) -> dict:
-    why = WAITING_WHY + (NOT_YET_WAITING.format(all=_listed(law["not_checked_yet"])) if law["not_checked_yet"] else "")
+    why = (law.get("waiting_why") or WAITING_WHY) + (NOT_YET_WAITING.format(all=_listed(law["not_checked_yet"])) if law["not_checked_yet"] else "")
     if law["coverage_problem"]:
         why += ". " + NO_COVERAGE.format(title=_book(law), why=law["coverage_problem"])
     item = _own_item(law, f"{law['short'].lower()}.waiting", f"{law['short']}: {WAITING_WORDS}", present.NOT_CHECKED,

@@ -98,4 +98,35 @@ public sealed class PanelSupportTests
         Assert.Equal([refused[0], StreetEdges.OpenAPlan], StreetEdges.MissingAsShown(refused, StreetAsk.OpenAPlan));
         Assert.Equal("Click the lot edge along the street (Esc to skip)", StreetEdges.PickPrompt);
     }
+
+    /// <summary>The street edge's words for where its pick was asked (2026-11-23): from Check project the next step
+    /// is Check again, from the Setup form's Pick on plan that button again; the pick's own dialogs are titled for the
+    /// street edge, never "check my project" (wired in the add-in: the source says which it shows).</summary>
+    [Fact]
+    public void The_street_edge_says_its_next_step_for_where_the_pick_was_asked()
+    {
+        Assert.EndsWith("then click Check again: it asks you to click the lot edge along the street.", StreetEdges.OpenAPlan, StringComparison.Ordinal);
+        Assert.EndsWith("then press Pick on plan again.", StreetEdges.OpenAPlanFromSetup, StringComparison.Ordinal);
+        Assert.DoesNotContain("Check again", StreetEdges.OpenAPlanFromSetup, StringComparison.Ordinal);
+        Assert.Equal("Gordium: street edge", StreetEdges.PickTitle);
+        var addin = Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin");
+        var setup = File.ReadAllText(Path.Combine(addin, "SetupFlow.cs"));
+        // round 7: every message the Setup form's Pick on plan path shows names Pick on plan, never Check again, and
+        // the path shows only those (and the picked edge's own words)
+        Assert.All(StreetEdges.FromSetup, m => Assert.Contains("Pick on plan again", m, StringComparison.Ordinal));
+        Assert.All(StreetEdges.FromSetup, m => Assert.DoesNotContain("Check", m, StringComparison.Ordinal));
+        var path = setup[setup.IndexOf("private static void PickStreet()", StringComparison.Ordinal)..];
+        path = path[..path.IndexOf("Save writes it with the other facts.", StringComparison.Ordinal)];
+        foreach (var name in new[] { "OpenAPlanFromSetup", "SwitchToItFromSetup", "NoPropertyLineFromSetup", "NonePickedFromSetup" })
+            Assert.Contains("StreetEdges." + name, path, StringComparison.Ordinal);
+        Assert.DoesNotContain("StreetEdges.OpenAPlan)", path, StringComparison.Ordinal);
+        Assert.DoesNotContain("StreetEdges.SwitchToIt)", path, StringComparison.Ordinal);
+        Assert.DoesNotContain("Check again", path, StringComparison.Ordinal);
+        var check = File.ReadAllText(Path.Combine(addin, "CheckProject.cs"));
+        var pick = check[check.IndexOf("static List<PickedEdge> PickEdges(", StringComparison.Ordinal)..];
+        pick = pick[..pick.IndexOf("return kept;", StringComparison.Ordinal)];
+        Assert.Contains("new TaskDialog(StreetEdges.PickTitle)", pick, StringComparison.Ordinal);
+        Assert.Contains("TaskDialog.Show(StreetEdges.PickTitle, why)", pick, StringComparison.Ordinal);
+        Assert.DoesNotContain("(Title", pick, StringComparison.Ordinal);
+    }
 }

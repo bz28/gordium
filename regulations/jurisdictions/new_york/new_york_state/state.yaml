@@ -7,5 +7,8 @@ name: New York State
 
 results_title: Egress (NY State Residential Code 2025)   # how a check's results of this law are headed
 
+scope: residential_code               # which buildings it covers (R101.2): a check runs it only for a building
+                                      # design_checker/code_scope.py finds it covers (2026-11-22_which_ny_code.md)
+
 law:                                  # the documents in 1_source_documents/sources.yaml, by what they are
   residential_code: gov.ny.residential.2025.pdf    # 2025 Residential Code of New York State (kept outside the repo)

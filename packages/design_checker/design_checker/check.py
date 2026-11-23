@@ -26,7 +26,7 @@ from pathlib import Path
 import shapely
 import yaml
 
-from design_checker import egress, present, reading_set, site_json
+from design_checker import code_scope, egress, present, reading_set, site_json
 from design_checker import rhino_logic as logic
 from design_checker.rhino_logic import COLUMN_DELTA
 from envelope_builder import start as generator
@@ -1056,7 +1056,9 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     confirm_advice(v["items"], by_id, measured, allowed, facts, site)   # each "To comply" the checker's, or none
     found = egress.laws(facts["jurisdiction"])        # by place: the state law it inherits, its rules checked
-    law = egress.check(found, interior, values, allowed)
+    law = egress.check(found, interior, _with_stories_bound(values, measured, facts,
+                                                            getattr(measuring(facts["jurisdiction"]), "fact_conflicts",
+                                                                    None)), allowed)
     egress.add_to_view(v, law, found["place"])
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
@@ -1088,7 +1090,33 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
             "report_error": report_error,
             "statuses": statuses, "notice": notice_text,
             "sections": v["sections"],          # zoning's, then each inherited law's, each with its own state
-            "egress": {k: law[k] for k in ("rows", "results", "interior", "interior_sha256")}}
+            "egress": {k: law[k] for k in ("rows", "results", "interior", "interior_sha256")},
+            "which_code": egress.which_code(law)}      # which New York code governs the building (code_scope.py)
+
+
+def _with_stories_bound(values: dict, measured: dict, facts: dict | None = None, conflicts=None) -> dict:
+    """The values egress reads, with what the measuring established for which New York code governs:
+    code_scope.STORIES_DRAWN where the count was read from the drawn parts (the measuring then checked nothing drawn
+    is below the ground: places/ithaca_city/measure.py _stories_whole), never where it is a typed count kept because
+    nothing countable is drawn (no parts named) or any measurement hit a geometry error; code_scope.STORIES_HOW, typed
+    (the architect's count kept within what the drawing allows) or read; the most stories the drawing allows
+    (code_scope.STORIES_AT_MOST) where the count is an open question between readings; and code_scope.SET_ASIDE, each
+    stated fact the measuring set aside for contradicting another ({name: its reason}: the place's own
+    `conflicts`, its measuring's fact_conflicts), never read as unstated."""
+    record = measured.get("stories") or {}
+    drawn = bool(record.get("objects")) and not any(isinstance(r, dict) and r.get("geometry_error")
+                                                   for r in measured.values())
+    how = "typed" if record.get("stated") is True else "read"     # the measuring's flag (measure.py), never its words
+    aside = {}
+    for why, names in (conflicts(facts or {}) if conflicts else []):
+        for k in names:
+            if k in code_scope.READS:
+                aside.setdefault(k, why)
+    out = {**values, code_scope.STORIES_DRAWN: drawn, code_scope.STORIES_HOW: how, code_scope.SET_ASIDE: aside}
+    most = [r.get("value") for r in record.get("readings") or [] if isinstance(r, dict)]
+    if values.get("stories") is not None or not most or not all(type(v) in (int, float) for v in most):
+        return out
+    return {**out, code_scope.STORIES_AT_MOST: max(most)}
 
 
 def _envelope_facts(site: dict, facts: dict) -> dict:

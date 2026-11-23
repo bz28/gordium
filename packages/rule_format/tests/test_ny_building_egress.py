@@ -39,9 +39,12 @@ def test_the_rulebook_is_valid(ctx):
     assert rulebook_file_problems(RULEBOOK, ctx) == []
 
 
-def test_no_place_inherits_it_yet_so_no_check_runs_it():
-    """Not wired into a check (a later PR): Ithaca inherits the house code only."""
-    assert all(NY not in p.inherits for p in places())
+def test_ithaca_inherits_it_beside_the_house_code_and_a_check_picks_one():
+    """Wired into Check project 2026-11-22 (docs/decisions/2026-11-22_which_ny_code.md): Ithaca inherits both of New
+    York's books, each saying which buildings it covers, so a check runs the one that covers the building."""
+    [ithaca] = [p for p in places() if NY in p.inherits]
+    assert [f.name for f in ithaca.inherits] == ["new_york_state", "new_york_state_building"]
+    assert [load(f / "state.yaml")["scope"] for f in ithaca.inherits] == ["residential_code", "building_code"]
 
 
 # What the sheet measured, the measure Gordium reads it as, and the rule that decides it here

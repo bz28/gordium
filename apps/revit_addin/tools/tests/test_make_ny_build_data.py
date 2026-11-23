@@ -128,7 +128,7 @@ def test_the_106_ithaca_rd_box_is_the_spreadsheets(fresh):
 
 
 def test_check_says_which_file_is_stale(tmp_path, monkeypatch, capsys):
-    monkeypatch.setattr(tool, "OUT", {"orangetown": tmp_path / "a.json", "106_ithaca_rd": tool.OUT["106_ithaca_rd"]})
+    monkeypatch.setattr(tool, "OUT", {**tool.OUT, "orangetown": tmp_path / "a.json"})
     assert tool.main(["--check"]) == 1
     assert "differs from a fresh build" in capsys.readouterr().out
     assert not (tmp_path / "a.json").exists()                  # --check writes nothing

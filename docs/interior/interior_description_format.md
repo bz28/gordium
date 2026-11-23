@@ -175,6 +175,30 @@ clear needs review (its centre is inside its jambs' 12-in rings), as does an exi
 `floor`, a room or door that isn't read, a door onto a room that isn't read, two rooms that overlap, or no door
 marked as an exit.
 
+## The building block (which New York code governs)
+
+An optional `building` mapping: the architect's statements about the whole building that decide which New York code
+its egress is checked against and that the Building Code's rules read (`design_checker/code_scope.py`;
+[docs/decisions/2026-11-22_which_ny_code.md](../decisions/2026-11-22_which_ny_code.md)). Each key only when stated
+(the Revit add-in sends one only from a mark that is set, `BuildingFacts`); a key left out is not stated, and where
+the decision needs it the check says which to state. A value of the wrong kind is said, never used.
+
+```yaml
+building:
+  follows_building_code: true          # RCNYS R101.2's exception: the Building Code applied to a house it covers
+  stories_above_grade_plane: 2         # RCNYS R202 STORY ABOVE GRADE PLANE, a whole number 1 or more
+  separate_means_of_egress: true       # each dwelling unit has its own (R101.2 item 2)
+  townhouse_units: true                # every unit is an R202 TOWNHOUSE UNIT
+  care_facility: false                 # people outside the household receive care here (BCNYS 308.2.4, 310.4.1)
+  occupancy_groups: [R-2]              # BCNYS Chapter 3 groups (A-1 ... U)
+  sprinkler_system: none               # none, nfpa_13 (903.3.1.1), nfpa_13r (903.3.1.2), nfpa_13d (903.3.1.3)
+  egress_balcony_increase_taken: false # BCNYS 1017.2.1 (a fact the Building Code's flags read)
+  building_has_atrium: false
+  facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
+```
+
+`facts_not_sent` names lot facts whose value the host holds but couldn't send. An example is a count below its least (Gordium: Dwelling units 0), sent with the Revit add-in's Check now anyway. The code decision reads each one as stated but unread, so it needs review and names the fact. It never reads one as not stated. A fact the architect simply left blank is not listed: it is not stated.
+
 ## What comes back
 
 ```yaml
