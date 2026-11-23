@@ -46,6 +46,9 @@ internal static class RevitInterior
         // is what would be read again
         using (FacesKept.Open(Hits("inside.cache.faces")))
         using (BandPiecesKept.Open(Hits("inside.cache.band_pieces")))
+        using (NearKept.Open(Hits("inside.cache.near")))
+        using (ModelKept.Open())
+        using (IndexKept.Open())
         {
             // each step timed and counted for the log's read_steps (never part of the records)
             rooms = ReadSteps.Time("inside.rooms", () => new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms)
@@ -684,21 +687,31 @@ internal static class RevitInterior
                     }
                     areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated, point, level.UniqueId));
                 }
-                // then each one with no Room outlined, one sub-transaction each, rolled back; the circuit taken afresh
-                // from the level's topology each time (by its place in the list, its area checked), never one held
-                // across a change
-                for (var k = 0; k < listed.Count; k++)
-                    if (!areas[before + k].HasRoom)
-                    {
-                        List<string> by;
-                        using (ReadSteps.Step("inside.enclosed_areas.outline"))
-                            areas[before + k] = areas[before + k] with { Outline = OutlineOf(doc, phase, level, k, areas[before + k].Area, out by) };
-                        // an area Revit gives no point in (a sliver) is located by what bounds it, for the log
-                        if (areas[before + k].PointInside is null)
-                            diagnostics.Add($"enclosed area {k} on {level.Name} ({areas[before + k].Area:0.####} sq ft, no point inside): " +
-                                            (by.Count > 0 ? "bounded by " + string.Join(", ", by) : "Revit gave no boundary for a Room in it") +
-                                            (areas[before + k].Outline is { } o ? "; outline " + string.Join(" ", o.Select(q => $"({q.X:0.####},{q.Y:0.####})")) : ""));
-                    }
+                // then each one with no Room outlined: all of the level's at once (a Room placed in each, one
+                // regeneration, rolled back: Snowdon Towers spent 10.8 of its 11.3 s of outlines regenerating once per
+                // Room), else, when Revit refuses any of it, one sub-transaction each as before; the circuit taken
+                // afresh from the level's topology each time (by its place in the list, its area checked), never one
+                // held across a change
+                var wanted = Enumerable.Range(0, listed.Count).Where(k => !areas[before + k].HasRoom).ToList();
+                var together = wanted.Count == 0 ? null
+                    : ReadSteps.Time("inside.enclosed_areas.outlines_together",
+                                     () => OutlinesTogether(doc, phase, level, wanted.Select(k => (k, areas[before + k].Area)).ToList()));
+                if (wanted.Count > 0)
+                    ReadSteps.Count(together is null ? "inside.enclosed_areas.levels_one_by_one" : "inside.enclosed_areas.levels_together");
+                foreach (var k in wanted)
+                {
+                    List<string> by;
+                    using (ReadSteps.Step("inside.enclosed_areas.outline"))
+                        areas[before + k] = areas[before + k] with
+                        {
+                            Outline = together is not null ? Outlined(together[k], out by) : OutlineOf(doc, phase, level, k, areas[before + k].Area, out by),
+                        };
+                    // an area Revit gives no point in (a sliver) is located by what bounds it, for the log
+                    if (areas[before + k].PointInside is null)
+                        diagnostics.Add($"enclosed area {k} on {level.Name} ({areas[before + k].Area:0.####} sq ft, no point inside): " +
+                                        (by.Count > 0 ? "bounded by " + string.Join(", ", by) : "Revit gave no boundary for a Room in it") +
+                                        (areas[before + k].Outline is { } o ? "; outline " + string.Join(" ", o.Select(q => $"({q.X:0.####},{q.Y:0.####})")) : ""));
+                }
                 diagnostics.Add($"enclosed areas on {level.Name}: {areas.Count - before} " +
                                 $"({areas.Skip(before).Count(a => !a.HasRoom)} with no Room: " +
                                 string.Join(", ", areas.Skip(before).Where(a => !a.HasRoom)
@@ -717,6 +730,92 @@ internal static class RevitInterior
                 t.Dispose();
             }
         }
+    }
+
+    private static List<Xyz>? Outlined((List<Xyz>? Outline, List<string> By) one, out List<string> by)
+    {
+        by = one.By;
+        return one.Outline;
+    }
+
+    /// <summary>Each of the level's enclosed areas <paramref name="wanted"/> (its place in the level's circuits and its
+    /// area) outlined as <see cref="OutlineOf"/> does, all in one <c>SubTransaction</c> always rolled back: every
+    /// circuit checked against the topology before anything changes, a Room placed in each that passes, one
+    /// regeneration, then each Room's boundary read. A Room never bounds another, so each outline is the one its Room
+    /// alone gives. A circuit Revit refuses a Room in gets no outline, as alone. Null when the document can't be
+    /// changed for the moment or Revit refuses anything else: then each is outlined alone (<see cref="OutlineOf"/>),
+    /// as before.</summary>
+    private static Dictionary<int, (List<Xyz>? Outline, List<string> By)>? OutlinesTogether(Document doc, Phase phase, Level level,
+                                                                                         List<(int Index, double Area)> wanted)
+    {
+        if (!doc.IsModifiable)
+            return null;
+        var result = new Dictionary<int, (List<Xyz>? Outline, List<string> By)>();
+        using var st = new SubTransaction(doc);
+        try
+        {
+            var fresh = doc.get_PlanTopology(level, phase)?.Circuits?.Cast<PlanCircuit>().ToList();
+            // every check first, on the topology as it is (each OutlineOf checks it with no Room of its own placed)
+            var place = new List<(int Index, PlanCircuit Circuit)>();
+            foreach (var (index, area) in wanted)
+            {
+                if (fresh is null || index >= fresh.Count || Math.Abs(fresh[index].Area - area) > 1e-9 || fresh[index].IsRoomLocated)
+                    result[index] = (null, []);                  // not the same circuit: never outlined on a guess
+                else
+                    place.Add((index, fresh[index]));
+            }
+            if (place.Count == 0)
+                return result;
+            st.Start();
+            var rooms = new List<(int Index, Room Room)>();
+            foreach (var (index, circuit) in place)
+            {
+                var room = doc.Create.NewRoom(phase);
+                try
+                {
+                    doc.Create.NewRoom(room, circuit);
+                }
+                catch (Exception x) when (x is Autodesk.Revit.Exceptions.ArgumentException or Autodesk.Revit.Exceptions.InvalidOperationException)
+                {
+                    // Revit refuses a Room in this circuit (a sliver: "could not find a point within this circuit"; a
+                    // level with no plan view: "cannot find view for the room"), as it refuses it alone: no outline,
+                    // nothing bounding it read, as OutlineOf gives; the Room left unplaced bounds nothing
+                    result[index] = (null, []);
+                    continue;
+                }
+                rooms.Add((index, room));
+            }
+            if (rooms.Count == 0)
+                return result;
+            doc.Regenerate();
+            foreach (var (index, room) in rooms)
+            {
+                var loops = room.GetBoundarySegments(new SpatialElementBoundaryOptions { SpatialElementBoundaryLocation = SpatialElementBoundaryLocation.Finish });
+                var by = (loops ?? []).SelectMany(l => l).Select(s => doc.GetElement(s.ElementId)).OfType<Element>()
+                    .Select(e => $"{e.Category?.Name} {e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? e.Id.Value.ToString(CultureInfo.InvariantCulture)}")
+                    .Distinct().ToList();
+                result[index] = loops is null || loops.Count == 0 || loops.Any(l => l.Any(s => s.GetCurve() is not Line))
+                    ? (null, by)
+                    : (loops.OrderByDescending(LoopArea).First().Select(s => P(s.GetCurve().GetEndPoint(0))).ToList(), by);
+            }
+            return result;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return null;                                         // each outlined alone, as before
+        }
+        finally
+        {
+            if (st.HasStarted() && !st.HasEnded())
+                st.RollBack();
+        }
+    }
+
+    private static double LoopArea(IList<BoundarySegment> l)
+    {
+        var p = l.Select(s => s.GetCurve().GetEndPoint(0)).ToList();
+        return Math.Abs(p.Select((a, i) => a.X * p[(i + 1) % p.Count].Y - p[(i + 1) % p.Count].X * a.Y).Sum()) / 2;
     }
 
     /// <summary>An enclosed area's outline: a Room placed in it for the moment (<c>NewRoom(phase)</c>, then
@@ -876,9 +975,7 @@ internal static class RevitInterior
             // has a bounding box that meets the solid's box, so the box (padded by a foot) only passes extra candidates
             // the solid test then drops. The list is the same; the slow test runs on a room's neighbours, not on every
             // element of the model (Snowdon Towers: 300 of its 408 s of reading went here, read_steps 2026-11-22).
-            var hits = new FilteredElementCollector(doc).WhereElementIsNotElementType()
-                .WherePasses(new BoundingBoxIntersectsFilter(Padded(solid, 1.0)))
-                .WherePasses(new ElementIntersectsSolidFilter(solid))
+            var hits = Collect(doc, Padded(solid, 1.0), new ElementIntersectsSolidFilter(solid))
                 .Where(e => e.Id != room.Id)
                 .Select(e => new NearbyElement(e.UniqueId, Category(e), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
                                                PhaseDemolished: Id(e.DemolishedPhaseId), DesignOption: Id(e.DesignOption?.Id)))
@@ -941,13 +1038,12 @@ internal static class RevitInterior
     /// read (<see cref="BandPieces"/>, kept by <see cref="BandPiecesKept"/>); only what depends on the band (each solid's
     /// intersection, each open shell's box against the band's) is worked out per band, piece by piece in the walk's
     /// order, so the result, its counts and where a throw stops it are the walk's own.</summary>
-    private static (List<SurfaceRecord> Faces, bool Failed, int OpenShells) InBand(Element e, Solid band, Options options)
+    private static (List<SurfaceRecord> Faces, bool Failed, int OpenShells) InBand(Element e, Solid band, BandBoxes boxes, Options options)
     {
         var faces = new List<SurfaceRecord>();
         var failed = false;
         var open = 0;
-        var bandBox = band.GetBoundingBox();
-        XYZ bandMin = bandBox.Transform.OfPoint(bandBox.Min), bandMax = bandBox.Transform.OfPoint(bandBox.Max);
+        var (bandMin, bandMax, bandAround) = boxes;
         var pieces = BandPiecesKept.Get(GeometryKey.Of(e, options), () => BandPieces(e, options));
         try
         {
@@ -963,6 +1059,11 @@ internal static class RevitInterior
                             break;
                         open++;
                         ReadSteps.Count("inside.open_shells");
+                        break;
+                    case BandPiece.Body { Box: { } box } when box.ApartFrom(bandAround, CutMargin):
+                        // a solid whose box lies more than a foot from the band's: none of it is in the band, and its
+                        // cut is empty (on every trial model: 76,772 of Snowdon's 94,187 cuts, every one empty); skipped
+                        ReadSteps.Count("inside.boolean_ops_skipped");
                         break;
                     case BandPiece.Body { Solid: var s }:
                         ReadSteps.Count("inside.boolean_ops");
@@ -994,13 +1095,25 @@ internal static class RevitInterior
         return (faces, failed, open);
     }
 
+    /// <summary>The band's box as <see cref="InBand"/> tests against it: its two corners through the box's transform
+    /// (an open shell's test) and the box round all 8 (a solid's), worked out once per band, not once per element.</summary>
+    private sealed record BandBoxes(XYZ Min, XYZ Max, Box3 Around)
+    {
+        internal static BandBoxes Of(Solid band)
+        {
+            var b = band.GetBoundingBox();
+            return new(b.Transform.OfPoint(b.Min), b.Transform.OfPoint(b.Max), Box3.Turned(P(b.Min), P(b.Max), T(b.Transform)));
+        }
+    }
+
     /// <summary>A piece of an element's geometry as <see cref="InBand"/> uses it, in its walk's order: an open shell's
     /// box corners, a closed solid to cut, something that can't be read, or where the walk threw.</summary>
     private abstract record BandPiece
     {
         internal sealed record OpenShell(IReadOnlyList<XYZ> Corners) : BandPiece;
 
-        internal sealed record Body(Solid Solid) : BandPiece;
+        /// <summary>A closed solid, and its box in model coordinates (null when Revit gave none: then always cut).</summary>
+        internal sealed record Body(Solid Solid, Box3? Box) : BandPiece;
 
         internal sealed record Unread : BandPiece;
 
@@ -1034,7 +1147,7 @@ internal static class RevitInterior
                             .Select(sb.Transform.OfPoint).ToList()));
                         break;
                     case Solid s:
-                        pieces.Add(new BandPiece.Body(s));
+                        pieces.Add(new BandPiece.Body(s, BoxOf(s)));
                         break;
                     case GeometryInstance gi:
                         if (gi.GetInstanceGeometry() is { } inner)
@@ -1067,6 +1180,26 @@ internal static class RevitInterior
         return pieces;
     }
 
+    /// <summary>A solid's box in model coordinates, around its 8 corners through the box's own transform (only ever
+    /// bigger than the solid); null when Revit gives none or refuses, so a solid it can't box is cut, as before.</summary>
+    private static Box3? BoxOf(Solid s)
+    {
+        try
+        {
+            if (s.GetBoundingBox() is not { } b)
+                return null;
+            return Box3.Turned(P(b.Min), P(b.Max), T(b.Transform));
+        }
+        catch (Exception)
+        {
+            return null;                                         // never thrown on: the walk goes on as it did
+        }
+    }
+
+    /// <summary>How far apart (feet) a solid's box and the band's must be for the solid's cut to be skipped: far more
+    /// than Revit's geometry tolerance, so a solid that comes near the band is always cut.</summary>
+    private const double CutMargin = 1.0;
+
     /// <summary>The model elements (not view-specific) whose box meets <paramref name="box"/>, of the categories given
     /// (any for null), with their faces; with <paramref name="band"/>, also what of each lies in it. <paramref name="step"/>
     /// names the caller's steps in the log's read_steps (a room's under or over box, a stair run's, a railing's).</summary>
@@ -1075,23 +1208,36 @@ internal static class RevitInterior
         try
         {
             var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
-            var found = ReadSteps.Time(step + ".collect",
-                () => new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box)).ToList());
+            var found = ReadSteps.Time(step + ".collect", () => Collect(doc, box));
             ReadSteps.Count(step + ".candidates", found.Count);
             ReadSteps.Max(step + ".candidates_per_call", found.Count);
             var list = new List<NearbyElement>();
+            BandBoxes? bandBoxes = null;
             foreach (var e in found)
             {
-                if (e.Id == skip || e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model } cat)
+                if (e.Id == skip)
                     continue;
-                if (categories is not null && !categories.Contains(cat.BuiltInCategory))
+                // what doesn't depend on the box looked round (whether it is a model element, its category, its
+                // record with its faces): worked out once per read, as each look round worked it out before
+                var key = GeometryKey.Of(e, options);
+                var model = ModelKept.Get(key.Element, () => e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model } c
+                    ? null : c.BuiltInCategory);
+                if (model is not { } cat)
                     continue;
-                var (faces, failed) = ReadSteps.Time(step + ".faces", () => Faces(e, options));
-                var near = new NearbyElement(e.UniqueId, cat.BuiltInCategory.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
+                if (categories is not null && !categories.Contains(cat))
+                    continue;
+                var near = NearKept.Get(key, () =>
+                {
+                    var (faces, failed) = ReadSteps.Time(step + ".faces", () => Faces(e, options));
+                    return new NearbyElement(e.UniqueId, cat.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
                                              faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id));
+                });
                 if (band is not null)
                 {
-                    var (banded, bandFailed, openShells) = ReadSteps.Time(step + ".band", () => InBand(e, band, options));
+                    // the band's box worked out at the first element that needs it, where each InBand worked it out
+                    // before (a refusal there is the same refusal at the same element)
+                    bandBoxes ??= BandBoxes.Of(band);
+                    var (banded, bandFailed, openShells) = ReadSteps.Time(step + ".band", () => InBand(e, band, bandBoxes, options));
                     near = near with { Banded = banded, BandFailed = bandFailed, OpenShells = openShells };
                 }
                 list.Add(near);
@@ -1103,6 +1249,70 @@ internal static class RevitInterior
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)
         {
             return null;
+        }
+    }
+
+    /// <summary>Each element's <see cref="NearbyElement"/> as <see cref="Near"/> makes it before its band (the same for
+    /// every box it is found in), kept by element and geometry options while <see cref="Read"/>'s scope is open, as
+    /// <see cref="FacesKept"/>; and whether it is a model element, with its category (null when it isn't).</summary>
+    private static readonly ReadMemo<GeometryKey, NearbyElement> NearKept = new();
+
+    private static readonly ReadMemo<long, BuiltInCategory?> ModelKept = new();
+
+    /// <summary>The model's element boxes (<see cref="BoxIndex"/>), listed once while <see cref="Read"/>'s scope is open.</summary>
+    private static readonly ReadMemo<int, BoxIndex> IndexKept = new();
+
+    /// <summary>How much an element's box is grown before it is left out of what Revit's box filter is run on: far more
+    /// than any gap between the box Revit filters on and the one it gives (they are the same box).</summary>
+    private const double IndexPad = 1.0;
+
+    /// <summary>What <c>new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new
+    /// BoundingBoxIntersectsFilter(box))</c>, then <paramref name="then"/>, passes, in the order it gives them. With
+    /// <see cref="Read"/>'s scope open, Revit's filters are run on <see cref="BoxIndex.Candidates"/> alone (every
+    /// element whose box, grown a foot, meets the box, or with none: all that can pass), and what passes is put back
+    /// in the model's order; with more candidates than a quarter of the model, or no scope open, on the whole model as
+    /// before.</summary>
+    private static List<Element> Collect(Document doc, Outline box, ElementFilter? then = null)
+    {
+        if (IndexKept.IsOpen)
+        {
+            var index = IndexKept.Get(0, () => ReadSteps.Time("inside.index", () => IndexOf(doc)));
+            ReadSteps.Count("inside.index.asks");
+            if (index.Candidates(new Box3(P(box.MinimumPoint), P(box.MaximumPoint)), IndexPad, index.Count / 4) is { } candidates)
+            {
+                ReadSteps.Count("inside.index.candidates", candidates.Count);
+                if (candidates.Count == 0)
+                    return [];
+                var some = new FilteredElementCollector(doc, candidates.Select(k => new ElementId(k)).ToList()).WhereElementIsNotElementType()
+                    .WherePasses(new BoundingBoxIntersectsFilter(box));
+                return index.InOrder(then is null ? some : some.WherePasses(then), e => e.Id.Value);
+            }
+        }
+        var all = new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box));
+        return (then is null ? all : all.WherePasses(then)).ToList();
+    }
+
+    /// <summary>Every element Revit's box filter can pass (those it passes for a box round the whole of any model), in
+    /// the order it gives them, each with its box in model coordinates (null when it gives none, or refuses).</summary>
+    private static BoxIndex IndexOf(Document doc)
+    {
+        const double Everywhere = 1e9;
+        var all = new FilteredElementCollector(doc).WhereElementIsNotElementType()
+            .WherePasses(new BoundingBoxIntersectsFilter(new Outline(new XYZ(-Everywhere, -Everywhere, -Everywhere), new XYZ(Everywhere, Everywhere, Everywhere))))
+            .ToElements();
+        ReadSteps.Count("inside.index.elements", all.Count);
+        return new BoxIndex(all.Select(e => (e.Id.Value, ModelBox(e))).ToList());
+    }
+
+    private static Box3? ModelBox(Element e)
+    {
+        try
+        {
+            return e.get_BoundingBox(null) is { } b ? Box3.Turned(P(b.Min), P(b.Max), b.Transform is { } t ? T(t) : Reading.Transform3.Identity) : null;
+        }
+        catch (Exception)
+        {
+            return null;                                         // no box to tell by: always a candidate
         }
     }
 
