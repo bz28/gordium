@@ -16,7 +16,7 @@ from shapely.errors import GEOSException
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
-from model_measurement.interior.stops import Stop
+from model_measurement.interior.stops import Stop, given_as, said
 
 KEY = "has_none"
 # every kind a description may say the house has none of:
@@ -46,12 +46,12 @@ LISTED = {"sleeping_room": "rooms", "emergency_escape_opening": "openings", "sta
           "egress_door": "doors", "guard": "guards"}
 # the kinds that are spaces: an enclosed space whose use isn't known (`unknown_spaces`) could be one of them
 SPACES = ("basement", "habitable_attic", "sleeping_loft")
-SAID = "the description says the house has no {words}"
+SAID = "the model says the house has no {words}"
 ENTRY_KEYS = {"kind", "source", "reading"}
 
 
 def words(kind: str) -> str:
-    """"the description says the house has no ramps"."""
+    """"the model says the house has no ramps"."""
     return SAID.format(words=KINDS[kind]["words"])
 
 
@@ -223,13 +223,14 @@ def read(description: dict) -> tuple[dict, list[str]]:
             problems.append(Stop("has_none_sleeping_room").reason)
             continue
         if kind in LISTED:
-            problems.append(Stop("has_none_listed", kind=kind, key=LISTED[kind]).reason)
+            problems.append(Stop("has_none_listed", kind=kind.replace("_", " ") + "s",
+                                 key=LISTED[kind].replace("_", " ")).reason)
             continue
         if kind not in KINDS:
-            problems.append(Stop("has_none_kind", kind=kind, kinds=", ".join(KINDS)).reason)
+            problems.append(Stop("has_none_kind", kind=kind, kinds=", ".join(k.replace("_", " ") for k in KINDS)).reason)
             continue
         if extra := sorted(set(entry) - ENTRY_KEYS, key=str):    # a mistyped `reading` must never read as settled
-            problems.append(Stop("has_none_keys", words=KINDS[kind]["words"], keys=", ".join(map(str, extra))).reason)
+            problems.append(Stop("has_none_keys", words=KINDS[kind]["words"], keys=", ".join(str(said(k)) for k in extra)).reason)
             seen.setdefault(kind, []).append(None)
             continue
         source, reading = entry.get("source"), entry.get("reading", False)
@@ -238,7 +239,7 @@ def read(description: dict) -> tuple[dict, list[str]]:
             seen.setdefault(kind, []).append(None)          # still counted: a kind said twice is refused
             continue
         if type(reading) is not bool:
-            problems.append(Stop("has_none_reading", words=KINDS[kind]["words"]).reason)
+            problems.append(Stop("has_none_reading", words=KINDS[kind]["words"], got=given_as(reading)).reason)
             seen.setdefault(kind, []).append(None)
             continue
         seen.setdefault(kind, []).append((" ".join(source.split()), reading))
@@ -251,7 +252,7 @@ def read(description: dict) -> tuple[dict, list[str]]:
             continue
         listed = KINDS[kind]["list"]
         if listed is not None and listed in description and description[listed] != []:
-            problems.append(Stop("has_none_contradicted", words=KINDS[kind]["words"], key=listed).reason)
+            problems.append(Stop("has_none_contradicted", words=KINDS[kind]["words"], key=listed.replace("_", " ")).reason)
             continue
         spaces = description.get("unknown_spaces")
         if kind in SPACES and spaces is not None and spaces != []:

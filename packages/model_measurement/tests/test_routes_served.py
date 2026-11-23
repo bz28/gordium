@@ -67,9 +67,9 @@ def test_no_confirm_where_no_room_is_served():
     assert "confirm" not in measure(d)["parts"]["story"][0]
 
 
-@pytest.mark.parametrize("kitchen, words", [({"lockable": True}, "can be locked (`lockable: true`)"),
-                                            ({"lockable": None}, "doesn't say whether it can be locked"),
-                                            ({"use": None}, "doesn't give its `use`")])
+@pytest.mark.parametrize("kitchen, words", [({"lockable": True}, "can be locked, so"),
+                                            ({"lockable": None}, "doesn't say whether it can be locked, so"),
+                                            ({"use": None}, "doesn't give its use, so")])
 def test_20_a_kitchen_that_can_be_locked_or_isnt_said_still_blocks(kitchen, words):
     r = routes(kitchen_closet(kitchen))
     assert r.story.served_by == {}
@@ -77,6 +77,12 @@ def test_20_a_kitchen_that_can_be_locked_or_isnt_said_still_blocks(kitchen, word
         r.route(at(12, 18))
     assert stop.value.key == "no_route_host_blocked"
     assert "opens only into k" in stop.value.reason and words in stop.value.reason
+    # in plain words: the room by its name, never the point's coordinates; the field's name never in back-quotes
+    assert stop.value.reason.startswith("the room cl has no route to any exit: it opens only into k, which ")
+    assert "(12" not in stop.value.reason and "`" not in stop.value.reason
+    with pytest.raises(Stop) as stop:                    # one exit asked for: named by its door, never by its id
+        r.route(at(12, 18), ["A"])
+    assert stop.value.reason.startswith("the room cl has no route to the exit door x: it opens only into k")
     with pytest.raises(Stop) as stop:
         r.travel(at(12, 18))
     assert stop.value.key == "no_route_host_blocked"

@@ -8,7 +8,7 @@ import math
 
 from shapely.geometry import Polygon
 
-from model_measurement.interior.stops import Stop
+from model_measurement.interior.stops import Stop, given_as
 
 FORMAT = "gordium.interior/1"
 INCHES = {"in": (1, 1), "ft": (12, 1), "mm": (1, 25.4), "m": (1000, 25.4)}   # (times, divided by)
@@ -31,6 +31,22 @@ def number(value, what: str) -> float:
     if not math.isfinite(value):
         raise Stop("not_a_length", what=what)
     return value
+
+
+def yes_no(item: dict, key: str, what: str, question: str, required: bool):
+    """A yes/no mark (a room's sleeping, lockable, pass_through, not_occupied; an opening's escape; a door's exit; a
+    flight's spiral; an obstruction's fixed): True or False as given; not given, None where it is optional, else
+    flag_missing ("door D01 doesn't say whether it is the required exit door (yes or no)"); given as anything
+    else, flag_not_yes_no ("door D01 gives whether it is the required exit door as the text 'yes', not as a yes/no
+    value"), never read as yes or no. `what`: who says it ("door D01", or "it" where the reason already names it)."""
+    got = item.get(key) if isinstance(item, dict) else None
+    if isinstance(got, bool):
+        return got
+    if got is None:
+        if required:
+            raise Stop("flag_missing", what=what, question=question)
+        return None
+    raise Stop("flag_not_yes_no", what=what, question=question, got=given_as(got))
 
 
 def choice(value, choices, what: str):
@@ -95,7 +111,16 @@ class Reader:
 
 
 def name_of(part: dict) -> str:
-    return str(part.get("name") or part.get("id") or "(no name)")
+    """A part's name as a reason says it: its name where it is text with something in it, else its id where that is
+    text with something in it or a number (never a yes/no value), else "(no name)": never blank text, a yes/no
+    value or a list's or a mapping's own words."""
+    name = part.get("name")
+    if isinstance(name, str) and name.strip():
+        return name
+    pid = part.get("id")
+    if (isinstance(pid, str) and pid.strip()) or (isinstance(pid, (int, float)) and not isinstance(pid, bool)):
+        return str(pid)
+    return "(no name)"
 
 
 def tidy(value: float) -> float:

@@ -82,13 +82,13 @@ reasons:                                   # the exact reason for every measure 
   b4b/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
   front/door_clear_width: "the door's hinge side isn't given"
   front/door_clear_height: "the top of the threshold isn't given"
-  g_hall: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"
-  g_bridge_n: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"
-  g_bridge_s: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"
-  g_east: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"
-  g_stair_w: "the stair the guard is along couldn't be measured: the stairs weren't read (no `stairs` in the description)"
+  g_hall: "the guard's members (rails, balusters, posts, panels) isn't given"
+  g_bridge_n: "the guard's members (rails, balusters, posts, panels) isn't given"
+  g_bridge_s: "the guard's members (rails, balusters, posts, panels) isn't given"
+  g_east: "the guard's members (rails, balusters, posts, panels) isn't given"
+  g_stair_w: "the stair the guard is along couldn't be measured: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)"
 problems:
-  - "the stairs weren't read (no `stairs` in the description)"
+  - "the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)"
 not_checked:                               # escape openings in rooms that aren't sleeping rooms
   - x1
   - x2

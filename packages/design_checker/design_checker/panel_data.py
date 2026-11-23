@@ -7,11 +7,16 @@ kinder than the figures (room to spare rounds down; a certain shortfall is never
 
 New fields on an item (each optional; a host that doesn't know them ignores them):
 
-  causes      [{kind, key, words, elements, rooms?}] for a needs-review row, the first the one to act on first.
+  causes      [{kind, key, words, elements, rooms?, field?, fields?}] for a needs-review row, the first the one to act
+              on first.
               kind: "mark" (a fact or a mark the architect states), "fix_model" (the model or its marks, as the
               cause's words say), "measure_by_hand" (Gordium doesn't read or measure this yet), "decide" (a person
               decides: a flag rule, an open question, a reading to confirm). key: rows sharing a key share the cause
-              (one card, one job). elements: the element ids the cause names (the rooms with no route).
+              (one card, one job). elements: the element ids the cause names (the rooms with no route). field: on a
+              mark, the description field it needs the architect to state ("doors[].exit", "openings[].escape",
+              "rooms[].sleeping", "stairs", "facts.zone"), so a host names its own mark (Revit's Gordium: Exit door
+              feeds doors[].exit); fields: every one, when it needs several facts. No field where the description
+              has none for it yet (a mark Gordium doesn't have) or the cause is a pick, never a field guessed.
   how_far     how far off, in words that always carry their direction ("2.5 ft short", "1.2 ft over",
               "116.16 ft to spare if confirmed", "at the limit"), never a bare signed number; over several readings,
               what is true whichever is right ("at least …", "up to …").
@@ -289,7 +294,7 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
                  "this yet: measure it by hand", "elements": own_id})
         elif m not in own:                            # the building's: a fact the architect states for the project
             add({"kind": MARK, "key": f"fact:{m}", "words": f"{_words(rule, m)}: not stated for the project",
-                 "elements": [], "measure": m})
+                 "elements": [], "measure": m, "field": f"facts.{m}"})
         elif why and ("mark" in why or "stated by the architect" in why):
             add({"kind": MARK, "key": f"mark:{kind}:{m}", "words": f"{_words(rule, m)}: {why}", "elements": own_id,
                  "measure": m})

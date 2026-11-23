@@ -68,7 +68,7 @@ def test_a_claim_gives_not_applicable_shown_with_its_source(found):
     assert [i["name"] for i in items] == ["Ramps: not applicable"]
     item = items[0]
     assert item["status"] == present.NOT_APPLICABLE and item["mark"] == present.MARK[present.NOT_APPLICABLE]
-    assert item["reason"].startswith("Not applicable: the description says the house has no ramps (" + SOURCE + ")")
+    assert item["reason"].startswith("Not applicable: the model says the house has no ramps (" + SOURCE + ")")
     assert set(item["has_none"]["rules"]) == RAMP_RULES
     assert item["has_none"]["source"] == SOURCE
     assert item["detail"]["citation"] == "R318.8.1, R318.8.2, R318.8.3"
@@ -78,7 +78,7 @@ def test_a_claim_gives_not_applicable_shown_with_its_source(found):
         assert next(r for r in item["has_none"]["rules"] if r == rule)
     for row in (r for r in got["rows"] if r["rule"] in RAMP_RULES):
         assert row["outcome"] == "not_applicable" and row["has_none"] == "ramp"
-        assert row["line"] == f"Ramps: not applicable: the description says the house has no ramps ({SOURCE})"
+        assert row["line"] == f"Ramps: not applicable: the model says the house has no ramps ({SOURCE})"
     # the panel's own words for its status
     from design_checker.host_core.panel_words import status_words
     assert status_words(item) == "Not applicable"
@@ -113,7 +113,7 @@ def test_a_reading_is_one_to_confirm(found):
     item = claim_items(got)[0]
     assert item["status"] == present.REVIEW
     assert item["name"] == "Ramps: not applicable if this reading is confirmed"
-    assert item["reason"].startswith("Confirm: the description says the house has no ramps, a reading to confirm (")
+    assert item["reason"].startswith("Confirm: the model says the house has no ramps, a reading to confirm (")
     assert SOURCE in item["reason"]
     assert all(r["line"].startswith("Ramps: not applicable if confirmed: ") for r in got["rows"]
                if r["rule"] in RAMP_RULES)
@@ -136,7 +136,7 @@ def test_a_claim_not_taken_is_a_problem_item_and_its_rules_need_review(found, cl
 
 def test_a_contradicted_claim_says_which_list(found):
     got = run(found, house({"kind": "ramp", "source": SOURCE}, ramps=[{"id": "r1"}]))
-    assert any("yet it also gives `ramps`, which isn't an empty list" in i["reason"] for i in got["items"] if i["name"] == "Interior drawing")
+    assert any("yet it also gives ramps, and not an empty list" in i["reason"] for i in got["items"] if i["name"] == "Interior drawing")
 
 
 def test_a_claim_about_the_openings_sets_aside_only_the_rules_that_turn_on_it(found):
@@ -300,7 +300,7 @@ def test_a_not_applicable_line_says_not_applicable_once(found):
     """"Ramps: not applicable: the description says…", never "Ramps: not applicable: Not applicable: …"."""
     items = run(found, house({"kind": "ramp", "source": SOURCE}))["items"]
     [line] = [ln for g in _law_groups(items) for ln in g["lines"] if ln["status"] == present.NOT_APPLICABLE]
-    assert line["title"].startswith("Ramps: not applicable: the description says the house has no ramps (" + SOURCE)
+    assert line["title"].startswith("Ramps: not applicable: the model says the house has no ramps (" + SOURCE)
     assert line["title"].lower().count("not applicable") == 1
     assert line["mark"] == present.MARK[present.NOT_APPLICABLE] != present.MARK[present.COMPLIES]
     # a reason that doesn't repeat the name's last words is kept whole
