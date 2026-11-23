@@ -1312,16 +1312,21 @@ rules:
       for each building hereafter erected or altered. In addition, see Article IV and § 325-20.
   - file: zoning_charts_2026-04.pdf
     page: 15
-    cell: {section: Residential, row: First three bed or sleeping rooms per dwelling unit, column: B-1A}
+    lines: [7, 8]
+    quote: B-4 B-5 CBD B-1A B-1B B-2A B-2D [fn1]
   - file: zoning_charts_2026-04.pdf
     page: 15
-    cell: {section: Nonresidential, row: Business or professional office, column: B-1A}
+    lines: [9, 9]
+    quote: Minimum Parking Requirement (# spaces) [fn2]
   - file: zoning_charts_2026-04.pdf
     page: 15
-    cell: {section: Nonresidential, row: Retail store, column: B-1A}
+    lines: [28, 30]
+    quote: >-
+      1 space per 250 sf of 1 space per 250 sf of Business or professional office - - - - - office floor office floor
   - file: zoning_charts_2026-04.pdf
     page: 15
-    cell: {section: Nonresidential, row: Other Uses, column: B-1A}
+    lines: [31, 33]
+    quote: 1 space per 500 gross sf 1 space per 500 gross sf Retail store - - - - - of floor area of floor area
   - &id011
     file: zoning_charts_2026-04.pdf
     page: 15

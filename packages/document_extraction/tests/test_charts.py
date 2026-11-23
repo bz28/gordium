@@ -16,7 +16,9 @@ REPO = Path(__file__).resolve().parents[3]
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 CHARTS = ITHACA / "1_source_documents/zoning_charts_2026-04.pdf"
 SAVED = ITHACA / "2_extracted_text/zoning_charts_2026-04.cells.jsonl"
-PAGES = [2, 3, 14]
+PAGES = [2, 3, 4, 5, 14]
+RESIDENTIAL_PAGES = [2, 3, 14]
+COMMERCIAL_DISTRICTS = ["B-1A", "B-1B", "B-2A", "B-2C", "B-2D", "B-4", "B-5"]     # p.4; p.5 has no B-2C
 DISTRICT = place(ITHACA).district_column       # a chart column that is a district, as Ithaca's settings say
 DISTRICTS = ["R-1A", "R-1B", "R-2A", "R-2B", "R-2C", "R-3A", "R-3AA", "R-3B", "RU"]
 
@@ -43,19 +45,25 @@ def test_saved_cells_match_a_fresh_read(cells):
 def test_every_page_finds_the_district_columns(cells):
     pages = {r["page"]: r for r in cells[1:] if "columns" in r}
     assert sorted(pages) == PAGES
-    for page in PAGES:
+    for page in RESIDENTIAL_PAGES:
         names = [c["name"] for c in pages[page]["columns"]]
         assert names[:9] == DISTRICTS                                       # groups like "R-1" aren't columns
+    # the commercial pages: "B-1" and "B-2" group their districts and aren't columns; the CBD column is read under
+    # its heading ("Central Business"), not as a district
+    assert [c["name"] for c in pages[4]["columns"]] == COMMERCIAL_DISTRICTS + ["Central Business", "Additional Regulations"]
+    assert [c["name"] for c in pages[5]["columns"]] == [d for d in COMMERCIAL_DISTRICTS if d != "B-2C"] + ["Central Business"]
     assert [c["name"] for c in pages[2]["columns"]][9:] == ["Additional Regulations"]
     r1b = next(c for c in pages[3]["columns"] if c["name"] == "R-1B")
     assert r1b["headers"] == ["Single Family Residential", "R-1", "R-1B"]
     assert next(c for c in pages[2]["columns"] if c["name"] == "R-1B")["headers"][1] == "R-1 [fn1,2]"
 
 
-def test_only_the_notes_under_page_2_are_unresolved(cells):
+def test_only_the_notes_under_pages_2_and_5_are_unresolved(cells):
     unresolved = [r for r in cells[1:] if "unresolved" in r]
-    assert [(r["page"], r["unresolved"]) for r in unresolved] == [(2, "lines right after the table don't fit its columns")]
+    assert [(r["page"], r["unresolved"]) for r in unresolved] == [(2, "lines right after the table don't fit its columns"),
+                                                                  (5, "lines right after the table don't fit its columns")]
     assert unresolved[0]["text"].startswith("NOTES: (1) In R-1 and R-2 Districts")
+    assert unresolved[1]["text"].startswith("NOTES: (1) See")
 
 
 def test_every_line_inside_a_table_is_in_exactly_one_row(cells):
@@ -303,9 +311,9 @@ def test_a_row_with_one_uncertain_cell_writes_none_of_its_values(monkeypatch):
 def test_a_header_column_left_of_the_districts_is_unresolved(monkeypatch):
     page = Page([(0, 0, 50, 20), (50, 0, 100, 20), (100, 0, 150, 20), (0, 20, 50, 40), (50, 20, 100, 40),
                  (100, 20, 150, 40)],
-                [line(5, (55, "B-1"), (105, "R-1A")), line(25, (5, "Front"), (60, "25"), (110, "10"))])
+                [line(5, (55, "X-1"), (105, "R-1A")), line(25, (5, "Front"), (60, "25"), (110, "10"))])
     monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
-    assert read_page(page, 1, DISTRICT) == [{"page": 1, "unresolved": DIVIDED, "text": "B-1, 25"}]
+    assert read_page(page, 1, DISTRICT) == [{"page": 1, "unresolved": DIVIDED, "text": "X-1, 25"}]
 
 
 DIVIDED = "the label area is divided: a column left of the districts?"

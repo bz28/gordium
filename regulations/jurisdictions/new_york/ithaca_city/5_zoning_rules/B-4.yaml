@@ -1197,16 +1197,21 @@ rules:
       for each building hereafter erected or altered. In addition, see Article IV and § 325-20.
   - file: zoning_charts_2026-04.pdf
     page: 15
-    cell: {section: Residential, row: First three bed or sleeping rooms per dwelling unit, column: B-4}
+    lines: [7, 8]
+    quote: B-4 B-5 CBD B-1A B-1B B-2A B-2D [fn1]
   - file: zoning_charts_2026-04.pdf
     page: 15
-    cell: {section: Nonresidential, row: Business or professional office, column: B-4}
+    lines: [9, 9]
+    quote: Minimum Parking Requirement (# spaces) [fn2]
   - file: zoning_charts_2026-04.pdf
     page: 15
-    cell: {section: Nonresidential, row: Retail store, column: B-4}
+    lines: [28, 30]
+    quote: >-
+      1 space per 250 sf of 1 space per 250 sf of Business or professional office - - - - - office floor office floor
   - file: zoning_charts_2026-04.pdf
     page: 15
-    cell: {section: Nonresidential, row: Other Uses, column: B-4}
+    lines: [31, 33]
+    quote: 1 space per 500 gross sf 1 space per 500 gross sf Retail store - - - - - of floor area of floor area
   - &id008
     file: zoning_charts_2026-04.pdf
     page: 15
@@ -1319,17 +1324,16 @@ rules:
   title: 'Gasoline stations: referred to fire, police and traffic (§325-15F)'
   applies_when: use == "gasoline_station"
   sources:
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 46
-    lines: [5, 10]
-    quote: >-
-      F. Gasoline service stations. The Director of Planning and Development or designee shall refer all applications for
-      permits to construct or alter gasoline service stations to the Fire Chief, the Chief of Police and the City Traffic
-      Engineer for analysis of fire, traffic and other possible hazards. The Director of Planning and Development or designee
-      shall review their comments on the proposed new or altered facility and may require modification of the site plan
-      to lessen potential fire, traffic and other hazards.
   - file: zoning_charts_2026-04.pdf
     page: 4
     cell: {section: Primary Uses, row: Gasoline station, column: B-4}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [44, 44]
+    quote: Gasoline station - - - - - • • - §325-15(F)
+  notes: >-
+    The chart's Additional Regulations column points to §325-15(F): the Director refers every permit for a gasoline service
+    station to the Fire Chief, the Chief of Police and the City Traffic Engineer, and may require changes to the site plan.
+    The design depends on that review (the piece is labeled a flag).
   drafted_by: claude
   status: draft
