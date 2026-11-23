@@ -118,19 +118,18 @@ internal sealed class SetupView : C.StackPanel
         var p = new C.StackPanel();
         _footWords = Muted("", top: 0);
         p.Children.Add(_footWords);
-        var line = new C.DockPanel { Margin = new W.Thickness(0, 6, 0, 0), LastChildFill = false };
+        var line = new C.WrapPanel { Margin = new W.Thickness(0, 6, 0, 0) };   // the link under Save in a narrow pane
         var save = Button("Save", primary: true,
                           $"Writes only what you chose to Project Information, as one undo step ({SetupWrites.FactsTransaction}); the check then runs by itself");
         _save = save;
         SaveWords();
         save.Click += (_, _) => _do.Save();
-        C.DockPanel.SetDock(save, C.Dock.Left);
+        save.Margin = new W.Thickness(0, 0, 12, 4);
         line.Children.Add(save);
         var anyway = CauseCardsView.Link(PaneWords.CheckWithout, () => _do.Anyway());
         anyway.ToolTip = "Check with what is set now: each fact still missing makes the rules it decides need review, never a pass";
         anyway.VerticalAlignment = W.VerticalAlignment.Center;
-        anyway.Margin = new W.Thickness(12, 0, 0, 0);
-        C.DockPanel.SetDock(anyway, C.Dock.Left);
+        anyway.Margin = new W.Thickness(0, 0, 0, 4);
         line.Children.Add(anyway);
         p.Children.Add(line);
         var foot = new C.Border { Child = p, BorderThickness = new W.Thickness(0, 1, 0, 0), Padding = new W.Thickness(12, 8, 12, 10) };

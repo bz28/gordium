@@ -224,6 +224,11 @@ public sealed class PaneTests
         Assert.Contains("Footer = MakeFooter();", setup, StringComparison.Ordinal);
         Assert.DoesNotContain("line.Children.Add(save);\n        if (changes > 0)", setup, StringComparison.Ordinal);    // not under the facts
         Assert.DoesNotContain("\n        Children.Add(anyway);", setup, StringComparison.Ordinal);                     // nor Check now anyway first
+        // Revit 2027 trial (2026-11-23): shown again after Save (the facts read again), the foot moves to the new page
+        // (it was "already the logical child of another element"); in the docked pane the link wraps under Save
+        Assert.Contains("if (_setupFoot.Parent is C.Panel before)\n            before.Children.Remove(_setupFoot);", view, StringComparison.Ordinal);
+        Assert.Contains("var line = new C.WrapPanel", setup, StringComparison.Ordinal);
+        Assert.Contains("var buttons = new C.WrapPanel", Read("CauseCardsView.cs"), StringComparison.Ordinal);
     }
 
     // ---- change 7: the results' top -------------------------------------------------------------------------------

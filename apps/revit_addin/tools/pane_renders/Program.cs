@@ -83,6 +83,26 @@ internal static class Program
                         p.OpenFirstFix();
                         ScrollToCards(p.View);
                     });
+                    // the pane as narrow as Revit docks it in the trial (narrower than at 340: Revit draws the same words wider): the fix's button stays one
+                    // line and its link wraps under it, never squeezed to a letter a line (Revit 2027 trial, 2026-11-23)
+                    if (!dark)
+                        Step(make(theme, []), $"06_card_open_{tag}_narrow", 900, dark, p =>
+                        {
+                            p.Show(title, when, rows, labels);
+                            p.OpenFirstFix();
+                            ScrollToCards(p.View);
+                            Settle(p.View);
+                            var tall = FindAll<Button>(p.View).Where(b => b.IsVisible && b.Content is string && b.ActualHeight > 40).ToList();   // a button of words, not a wrapped link
+                            Check(tall.Count == 0, $"{tag} narrow: no button taller than a line ({tall.Count})");
+                        }, width: 280);
+                    // the form shown again (its facts read again after Save): one foot, no error
+                    if (!dark)
+                        Step(make(theme, []), $"03_setup_again_{tag}", 430, dark, p =>
+                        {
+                            p.Setup(title, filled, draft);
+                            p.Setup(title, filled, draft);
+                            Check(true, $"{tag}: the Setup form shown twice");
+                        });
                     // f: a row's detail (the first card's first row)
                     Step(make(theme, []), $"07_detail_{tag}", 900, dark, p =>
                     {
@@ -140,11 +160,11 @@ internal static class Program
             Failures++;
     }
 
-    private static void Step(Pane pane, string name, int height, bool dark, Action<Pane> act)
+    private static void Step(Pane pane, string name, int height, bool dark, Action<Pane> act, int width = 340)
     {
         var window = new Window
         {
-            Content = pane.View, Width = 340, Height = height, WindowStyle = WindowStyle.None, ShowInTaskbar = false,
+            Content = pane.View, Width = width, Height = height, WindowStyle = WindowStyle.None, ShowInTaskbar = false,
             Left = -20000, Top = -20000, ShowActivated = false, SizeToContent = SizeToContent.Manual,
         };
         window.Show();

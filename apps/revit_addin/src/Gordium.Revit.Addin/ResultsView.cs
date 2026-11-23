@@ -767,6 +767,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         };
         // the form scrolls; its one action (SetupView.Footer) is pinned at the pane's foot (the intuitive pane, change 3)
         var page = new C.DockPanel();
+        if (_setupFoot.Parent is C.Panel before)
+            before.Children.Remove(_setupFoot);                 // the form shown again (the facts read again): one foot
         C.DockPanel.SetDock(_setupFoot, C.Dock.Bottom);
         page.Children.Add(_setupFoot);
         page.Children.Add(_setupScroll);

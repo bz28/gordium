@@ -106,17 +106,18 @@ internal static class CauseCardsView
         body.Children.Add(Indented(EntryView.Muted(Fixes.Note(g), top: 3)));
 
         var open = host.IsOpen(g);
-        var buttons = new C.DockPanel { Margin = new W.Thickness(26, 7, 0, 0), LastChildFill = false };
+        // a wrap line: in a narrow pane the link goes under the button, never squeezed beside it (Revit 2027 trial)
+        var buttons = new C.WrapPanel { Margin = new W.Thickness(26, 7, 0, 0) };
         if (g.Action != CardAction.None)
         {
             var act = Primary(Fixes.ButtonWords(g.Action), () => host.Act(g, g.Action));
-            act.Margin = new W.Thickness(0, 0, 10, 0);
-            C.DockPanel.SetDock(act, C.Dock.Left);
+            act.Margin = new W.Thickness(0, 0, 10, 4);
+            act.VerticalAlignment = W.VerticalAlignment.Top;
             buttons.Children.Add(act);
         }
         var see = Link(open ? "Hide results" : $"See the {PaneWords.Results(g.Rows.Count)}", () => host.SetOpen(g, !open));
         see.VerticalAlignment = W.VerticalAlignment.Center;
-        C.DockPanel.SetDock(see, C.Dock.Left);
+        see.Margin = new W.Thickness(0, 0, 0, 4);
         buttons.Children.Add(see);
         body.Children.Add(buttons);
         if (open)
