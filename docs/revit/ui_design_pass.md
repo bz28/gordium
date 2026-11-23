@@ -550,3 +550,11 @@ says "The 6 causes asking 9 facts" (`Fix.MembersWords`), never a second number o
 tooltip quotes is the law's words exactly (§325-26 now quoted with its exception), checked against the City's extracted
 text, the rulebooks' quotes and the code decision's cites. Also fixed: What changed's hover now lists every changed
 verdict (`PaneWords.ChangesAll`), where it gave the worker's one line with a different "and N more" count than the pane's.
+
+Review round 2 (2 confirmed, both fixed and pinned): a length mark's tooltip is shown by Revit's own Project
+Information and Type Properties dialogs too, which read a typed number in the project's length units, so it now opens
+"A length, in this project's length units" and never names feet; the Setup form's length field follows the project's
+units the same way (`LengthUnits`, from `Units.GetFormatOptions(SpecTypeId.Length)`): labelled "(mm)" in a millimeters
+project, shown and typed in it, saved in feet so Revit shows the number typed; a project in units Gordium doesn't read
+takes feet and says so beside the field. And every passage a mark quotes is a whole sentence of the law or ends with
+"…" (Distance from stream now quotes §325-26 with its exception too).
