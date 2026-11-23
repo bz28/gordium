@@ -284,7 +284,10 @@ internal sealed class ResultsPane : IDockablePaneProvider
         if (!zoom && uids.Count == 0)
         {
             if (uidoc is not null && uidoc.Document.Equals(doc))
+            {
+                PaneExtras.OwnSelection([]);
                 uidoc.Selection.SetElementIds(new List<ElementId>());
+            }
             return 0;
         }
         if (uidoc is null || !uidoc.Document.Equals(doc))
@@ -304,6 +307,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
                 "read from the walls): click Check again.");
             return 0;
         }
+        PaneExtras.OwnSelection(found);                    // the pane's own selection: the selection strip leaves it be
         uidoc.Selection.SetElementIds(found);
         if (zoom)
             uidoc.ShowElements(found);

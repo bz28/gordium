@@ -370,7 +370,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             files = $"Logged to {Trial.LogPath()}";
         ResultsPane.Show(ui, doc, new PanelContent(doc.Title, when, model,
                                                    StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files,
-                                                   ClearWords: clear, Ids: ids,
+                                                   ClearWords: clear, Ids: ids, Key: DocKeys.Of(doc),
                                                    NotStated: run.Prepared.NotStated.Select(m => SetupWords.SentWithout(m, SetupWords.Noun(
                                                        run.Prepared.Request?.Facts["use"]?.GetValue<string>()))).ToList()));
     }
@@ -471,7 +471,7 @@ public sealed class CheckProjectCommand : IExternalCommand
 
     /// <summary>A UniqueId as the architect names the element (ElementNames: "CLOSET (40)", "Door D06", "Level: 1st
     /// floor"), by Revit's id only when nothing else names it; null for one not in the model.</summary>
-    private static string? Label(Document doc, string uid)
+    internal static string? Label(Document doc, string uid)
     {
         if (doc.GetElement(uid) is not { } e)
             return null;
