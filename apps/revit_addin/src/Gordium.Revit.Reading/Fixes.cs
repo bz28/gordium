@@ -25,7 +25,7 @@ public sealed record Fix(string Key, string Title, CardAction Action, IReadOnlyL
     /// <summary>Every element its cards name, each once, in their order.</summary>
     public IReadOnlyList<string> Elements { get; } = Members.SelectMany(m => m.Elements).Distinct(StringComparer.Ordinal).ToList();
 
-    /// <summary>What it joins, in words: "facts", "kinds of part", "causes".</summary>
+    /// <summary>What it joins, in words: "facts", "kinds of part", "causes" (the key's family, before its "@action").</summary>
     public string Noun => Key switch
     {
         "pi" or "nofield" => "facts",
@@ -68,17 +68,27 @@ public static class Fixes
         return order.Select(k =>
             {
                 var members = byKey[k].Select(m => m.Card).ToList();
+                // every member has this action (it is part of the key): the fix's button is every card's own
                 var action = k == "nofield" ? CardAction.Decide : CauseCards.Action(members[0], labels);
-                return new Fix(k, Title(k, members), action, members, TierOf(k, action), byKey[k][0].Index);
+                return new Fix(k, Title(k, members, labels), action, members, TierOf(k, action), byKey[k][0].Index);
             })
             .OrderBy(f => f.Tier).ThenByDescending(f => f.Rows.Count).ThenBy(f => f.FirstIndex).ToList();
     }
 
-    /// <summary>The fix a card shares with others: where it is made, and on what kind of thing.</summary>
+    /// <summary>The fix a card shares with others: where it is made, on what kind of thing, and with which button (the
+    /// action is part of the key, so a joined fix's button, tier and words hold for every card it joins: a card with
+    /// elements to Show never joins one with nothing to select). "pi" and "nofield" have one button whatever the card
+    /// (Open Project Information; Decide), so their keys carry none.</summary>
     public static string KeyOf(CauseCard card, IReadOnlyDictionary<string, string>? labels)
     {
         ArgumentNullException.ThrowIfNull(card);
         var action = CauseCards.Action(card, labels);
+        var family = Family(card, action);
+        return family is "pi" or "nofield" ? family : $"{family}@{action}";
+    }
+
+    private static string Family(CauseCard card, CardAction action)
+    {
         var marks = CauseCards.MarksOf(card);
         switch (card.Kind)
         {
@@ -106,7 +116,7 @@ public static class Fixes
         _ => 3,
     };
 
-    private static string Title(string key, IReadOnlyList<CauseCard> members)
+    private static string Title(string key, IReadOnlyList<CauseCard> members, IReadOnlyDictionary<string, string>? labels)
     {
         if (members.Count == 1)
             return PaneWords.Capital(members[0].Words);
@@ -118,12 +128,18 @@ public static class Fixes
         }
         if (key == "nofield")
             return $"{n} facts Gordium has no field for yet";
-        if (key.StartsWith("marks:", StringComparison.Ordinal))
-            return $"Set {PaneWords.And(key[6..].Split('+'))} on {members.SelectMany(m => m.Elements).Distinct().Count()} elements";
-        if (key.StartsWith("byhand:", StringComparison.Ordinal))
+        var family = key.Split('@')[0];
+        if (family.StartsWith("marks:", StringComparison.Ordinal))
+        {
+            // the elements Set in Properties selects (the same set: ShowIds), or none to select
+            var shown = members.SelectMany(m => CauseCards.ShowIds(m, labels)).Distinct(StringComparer.Ordinal).Count();
+            var marks = PaneWords.And(family[6..].Split('+'));
+            return shown > 0 ? $"Set {marks} on {shown} element{(shown == 1 ? "" : "s")}" : $"Set {marks}: {n} causes with no element to select";
+        }
+        if (family.StartsWith("byhand:", StringComparison.Ordinal))
             return $"Measure by hand: {n} kinds of part Gordium doesn't read yet";
-        if (key.StartsWith("fix:", StringComparison.Ordinal))
-            return $"{Thing(key[4..])}: {n} things Gordium couldn't measure from the model";
+        if (family.StartsWith("fix:", StringComparison.Ordinal))
+            return $"{Thing(family[4..])}: {n} things Gordium couldn't measure from the model";
         return PaneWords.Capital(members[0].Words);
     }
 
