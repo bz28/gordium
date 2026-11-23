@@ -261,7 +261,9 @@ Every reason the code gives today comes from the table:
   or another building (lot coverage counts every building on the lot, §325-8A)" (on every building when the tool
   sends `inventory_complete: false`); and an object the tool couldn't send, in the tool's own words, "<its words>"
   (an older Rhino plugin's words for a block on the Building layer): the building's measuring needs review all the
-  same.
+  same. A problem handed over as neither words nor a code the table has, with its blanks ({code, args}), is said as
+  "a problem sent with the drawing can't be read (<the problem>)" (`stops.words_of`, the one way a problem becomes
+  words): whatever it stops needs review, never a crash and never a pass.
 - **Accessory buildings:** "no accessory building on the lot (every solid is the main building or touches it)".
 - **A detached accessory dwelling unit** (§325-28C): "pick the detached accessory dwelling unit's building (the solid
   it is in) with Pick the ADU's building…"; "no detached accessory dwelling unit is said to be on the lot" (its rules
