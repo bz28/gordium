@@ -461,8 +461,8 @@ nothing is written to the model.
 - **15. A printable summary** (`ComplianceSummary`, `ComplianceSummaryTests`; the Results panel's new **Summary**
   button): every row of the check in the checker's groups and order, with the rule, proposed, required, the result
   (glyph and word), the checker's reason when it isn't a pass, and the law's exact words with section, page and link;
-  headed "Not a permit or an approval; every needs review is for the architect". **HTML, not PDF**: the architect's
-  browser opens and prints it (to paper or PDF, letter size, the table's head on each page) with working links to the
+  headed with a line saying it is not a permit and that every needs review is left to the person reading it (the
+  exact words are in `ComplianceSummary.cs`). **HTML, not PDF**: the architect's browser opens and prints it (to paper or PDF, letter size, the table's head on each page) with working links to the
   law, needs no font embedding for ≥, ≤ and §, and the add-in takes no PDF library. It is saved where the architect
   chooses, then opened. A stale answer is never summarised: Summary asks to check again first.
 
