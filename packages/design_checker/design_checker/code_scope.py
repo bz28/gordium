@@ -44,6 +44,8 @@ FACTS = {
     "egress_balcony_increase_taken": "yes_no",
     "building_has_atrium": "yes_no",
     "assembly_fixed_seating": "yes_no",       # rooms used for assembly with fixed seating (Table 1006.2.1 note c)
+    "special_egress_spaces": "yes_no",        # a space with its own exits or travel limit (1006.2.2, Table 1017.2 note a)
+    "merchandise_pads": "yes_no",             # Group M merchandise pads (1018.4: their own common path)
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -180,7 +182,7 @@ def _given(building) -> tuple[dict, list[str]]:
 def building_measures(building: dict | None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the two sprinkler systems the limits name from the system, and the three stated yes/no facts. A fact
+    groups, the three sprinkler systems the limits name from the system, and the five stated yes/no facts. A fact
     not stated is left out (its rules need review)."""
     facts, _ = _given(building)
     out = {}
@@ -194,7 +196,9 @@ def building_measures(building: dict | None) -> dict:
     if "sprinkler_system" in facts:
         out["sprinklered_903_3_1_1"] = facts["sprinkler_system"] == "nfpa_13"
         out["sprinklered_903_3_1_2"] = facts["sprinkler_system"] == "nfpa_13r"
-    for k in ("egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating"):
+        out["sprinklered_903_3_1_3"] = facts["sprinkler_system"] == "nfpa_13d"
+    for k in ("egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating", "special_egress_spaces",
+              "merchandise_pads"):
         if k in facts:
             out[k] = facts[k]
     return out

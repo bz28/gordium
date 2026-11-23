@@ -58,10 +58,16 @@ documents:
       # separated exits only where it needs two; review round 3, 2026-11-22); 1007.1 (exit separation, p.318, with
       # SECTION 1008 after); 1016.2 (egress through intervening spaces, pp.340-341) and Section 1017 (exit access
       # travel distance, pp.341-342, with SECTION 1018 after); 1020.5 (dead ends, p.344, with 1020.6 after).
-      pages: 32-68, 79, 147, 273-274, 315-318, 340-342, 344
-      sections: ['308.5', '508.2', '1006.2.1', Table 1006.2.1, '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(2),
-                 '1007.1', '1016.2', '1017', Table 1017.2, '1020.5']
-      alone: ['903.3.1.1', '903.3.1.2']   # brought in without the parts under them (exempt locations, balconies, attics)
+      # 2026-11-23 (review round 1 of docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md: the sections
+      # that tighten a drafted table's limits): 1006.2.2 (egress based on use, pp.315-316, with 1006.3 after; its
+      # 1006.2.2.6 caps Group R-3 and R-4 travel with an NFPA 13D system), 1018.4 (Group M merchandise pads'
+      # common path, p.342, with 1018.5 after on p.343, read to show where it ends) and 1030.8 alone (an assembly space's fixed-seat common path, p.355,
+      # with 1030.8.1 after), and 407.4.2 alone (a Group I-2 sleeping room's 50 ft to its exit access door,
+      # p.99, with 407.4.3 after).
+      pages: 32-68, 79, 99, 147, 273-274, 315-318, 340-344, 355
+      sections: ['308.5', '508.2', '1006.2.1', Table 1006.2.1, '1006.2.2', '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(2),
+                 '1007.1', '1016.2', '1017', Table 1017.2, '1018.4', '1020.5']
+      alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
           the rule measures the story's floor area by both of the book's own measures of floor area (README).
@@ -178,6 +184,11 @@ documents:
           smoke protected seating: The book prints "smoke protected seating" in italics; the defined term is
             SMOKE-PROTECTED ASSEMBLY SEATING, which the phrase does not name whole, so it is not brought in. Exception
             2 is for assembly seating (Section 1030.7, not brought in), not Group I-4.
+        '1030.8':
+          smoke-protected: 'The book prints "smoke-protected" in italics before "or open-air assembly seating"
+            (p.355, line 18), and the defined term is SMOKE-PROTECTED ASSEMBLY SEATING, which the word does not
+            name whole (OPEN-AIR ASSEMBLY SEATING, named whole, is brought in). Exception 2 loosens the limit (50
+            ft), and the rule''s review covers it.'
     contents: >
       Commercial egress step 1 (2026-11-21), the limits Gordium's route measures feed, as the Maine rulebook drafted
       them for a day-care centre (regulations/jurisdictions/maine/maine_state/): 1017 and Table 1017.2 (exit access

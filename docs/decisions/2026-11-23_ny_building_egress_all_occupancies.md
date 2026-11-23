@@ -52,6 +52,26 @@ Each group: its pieces brought in (`sources.yaml`, extracted, labeled, definitio
 
 Group 1 first: the measures exist, the tables are already read twice, and it gives the apartment its first real verdicts (travel distance, a dwelling unit's one exit, dead ends). Then group 2 (the apartment's story exits and separation), then the occupant load (group 3), which every load-based limit waits on. The rest follow the parts the measuring gives.
 
+## Review round 1 (2026-11-23): what tightens a table for some condition
+
+Two P0 findings (a fixed-seat assembly space passing on Table 1006.2.1's 75 ft; Group R-3 and R-4 with an NFPA 13D system passing Table 1017.2's 200 ft) and one P1 (a horizontal exit made the room beyond it an exit) led to a sweep of every footnote and cross-reference of the drafted tables, and of the sections elsewhere that tighten them. Each is now encoded where measured, or a review wherever its condition is stated or not ruled out; none falls back on the looser table value. `test_every_cross_reference_in_a_drafted_piece_has_a_handler` lists each with its handler, so a reference added without one fails.
+
+| Where | Tightens | Handled by |
+|---|---|---|
+| Table 1006.2.1 note c, 1030.8 (brought in) | an assembly space with fixed seating: 30 ft from any seat (75 ft under 50), any number of exits | the A, E, M row needs review over it where `assembly_fixed_seating` is yes or not stated (seats aren't drawn); flag `bc_1030_8_...` |
+| 1018.4 (brought in) | Group M merchandise pads: 30 ft from any point in a pad (75 ft for 50 or fewer) | the row needs review over it where `merchandise_pads` is yes or not stated; flag `bc_1018_4_...` |
+| Table 1017.2 note e, 1006.2.2.6 (brought in) | Groups R-3 and R-4 with NFPA 13D: 125 ft and 75 ft | the row's limit, and rule `bc_1006_2_2_6_...`; new fact `sprinklered_903_3_1_3` |
+| 1006.2.2.1 to 1006.2.2.5 (brought in) | boiler, refrigeration, refrigerated and electrical rooms: two exits; refrigeration rooms 150 ft unsprinklered | a one-exit space within its row needs review, and every travel row, where `special_egress_spaces` is yes or not stated; five flags |
+| Table 1017.2 note a: 402.8 malls (200 ft), 411.2 special amusement areas, 412.6 aircraft, 3103.4 temporary structures (100 ft), 3104.9 walkways (200 ft) | each its own distance | every travel row needs review where `special_egress_spaces` is yes or not stated |
+| note a: 407.4 (Group I-2) | 407.4.2: 50 ft within a sleeping room (brought in); 407.4.4 care suites | rule `bc_407_4_2_...` and the I-2 travel row (over 50 ft: review); care suites are `special_egress_spaces`'; 1016.2 needs review for I-2 with care suites not ruled out (407.4.4.1) |
+| note a: 408.6.1, 408.8.1 (Group I-3) | smoke-barrier doors within 150 and 200 ft | the I-3 travel row never passes; 1016.2 needs review for I-3 (408.6.3) |
+| 1017.3.2.3 | 200 ft within an atrium | rows allowing more than 200 ft need review over it where `building_has_atrium` is yes or not stated |
+| 1017.3 exception 1, 1030.7 | open parking garages measured to a riser; assembly travel along aisles, never over seats | Group S-2 over its row needs review; any Group A travel needs review while fixed seating isn't ruled out |
+| 1006.3.4 (note a) | a one-exit story's 75 or 125 ft | the story-exit rules (`bc_1006_3_3_story_exits`; every group in section group 2) |
+| Routes `_is_exit` (P1) | a horizontal exit's far room counted as an exit | only `exit_enclosure` and `exit_passageway` doors make the room they enter an exit |
+
+Checked on purpose and found loosening, not tightening: 1017.2.1 (balcony), 1017.2.2 (F-1, S-1), 1017.2.3 (H-5), 412.6 (aircraft manufacturing), 1030.7's exceptions, 1006.2.1's exceptions 1 and 3, Table 1006.2.1 note f; each already needs review only within the increase. New stated facts: `sprinklered_903_3_1_3` (from `sprinkler_system: nfpa_13d`), `special_egress_spaces`, `merchandise_pads` (the interior format's building block); the Revit add-in has no marks for the last two yet, so a Revit check leaves them unstated and the rows they guard need review.
+
 ## What the four-unit apartment still waits on
 
 Its remaining needs-review lines (1006.3.3's story exits, 1006.2.1.1, 508.2.3, and from group 4 a corridor's width and capacity) read an occupant load, which nothing gives yet: the routes leave `story_occupant_load`, `space_occupant_load` and `corridor_occupant_load` to the architect, and no host sends them. Group 3 needs a room's Table 1004.5 function from the model (a new room mark, e.g. "Gordium: Function", in the Revit add-in and the interior format), or the architect's stated loads; a whole building's one group can't stand in for it (an R-2 building's small exercise room is part of R-2 yet loaded at 50 sq ft per occupant, denser than residential's 200). The check request as sent carries no `building` block, so its occupancy and sprinkler system are unstated there: every row rule needs review, and only answers true whatever they are stand (two separation rules pass).
