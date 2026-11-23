@@ -31,6 +31,9 @@ public sealed class SelectionMap
     /// <summary>Whether the model changed after the check.</summary>
     public bool Stale { get; }
 
+    /// <summary>Why the results are stale (what the strip says: PaneWords.StaleSelection).</summary>
+    public StaleReason StaleKind { get; private init; }
+
     private SelectionMap(IReadOnlyList<ListRow> placed, DateTime checkedAt, bool stale)
     {
         Placed = placed;
@@ -46,7 +49,7 @@ public sealed class SelectionMap
     {
         ArgumentNullException.ThrowIfNull(model);
         var placed = ResultList.Place(model);
-        var map = new SelectionMap(placed, checkedAt, model.Stale is not null);
+        var map = new SelectionMap(placed, checkedAt, model.Stale is not null) { StaleKind = model.StaleKind ?? StaleReason.ModelChanged };
         var byId = new Dictionary<string, ListRow>(StringComparer.Ordinal);
         foreach (var p in placed)
             byId.TryAdd(p.Row.Id, p);
@@ -112,7 +115,7 @@ public sealed class SelectionMap
         if (rows.Count == 0)
             line = $"No result of this check mentions {it}. That is not a pass: Gordium may not read or check {it}.";
         else if (Stale)
-            line = $"{Results(rows.Count)} mentioned {it} at the check at {at}; the model changed since, so check again.";
+            line = PaneWords.StaleSelection($"{Results(rows.Count)} mentioned {it}", at, StaleKind);
         else
             line = $"{Results(rows.Count)} mention{(rows.Count == 1 ? "s" : "")} {it}: {Verdicts(rows)}";
         return new SelectionAnswer(title, line, rows);

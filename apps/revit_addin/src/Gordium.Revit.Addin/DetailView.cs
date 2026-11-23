@@ -46,9 +46,9 @@ internal static class DetailView
         var back = Button("‹ Back", "Back to the results, where you were (Backspace or Esc)", host.Back);
         C.DockPanel.SetDock(back, C.Dock.Left);
         top.Children.Add(back);
-        var next = Button("›", "Next row (Alt+Down)", () => host.Step(1));
+        var next = Button("›", "Next result (Alt+Down)", () => host.Step(1));
         next.IsEnabled = canStepOn;
-        var prev = Button("‹", "Previous row (Alt+Up)", () => host.Step(-1));
+        var prev = Button("‹", "Previous result (Alt+Up)", () => host.Step(-1));
         prev.IsEnabled = canStepBack;
         foreach (var b in new[] { next, prev })
         {
@@ -92,8 +92,8 @@ internal static class DetailView
 
         if (d.Why is not null)
         {
-            page.Children.Add(Heading("Why"));
-            page.Children.Add(Body(d.Why));
+            page.Children.Add(Heading(d.Status == PanelStatus.Review ? "Why it needs review" : "Why"));
+            page.Children.Add(Body(PaneWords.Capital(d.Why)));
         }
 
         if (d.Steps.Count > 0)
@@ -109,6 +109,24 @@ internal static class DetailView
                 C.DockPanel.SetDock(num, C.Dock.Left);
                 line.Children.Add(num);
                 var words = new C.StackPanel();
+                // the generic step ("Resolve what the reason above says...") is the fix this result waits on, by its
+                // number and title, with the fix's own button (Fixes.Step: the same words as on its card)
+                if (host is ICauseHost causes && Fixes.For(causes.Groups, d.Id) is { } wait && Fixes.Step(d, causes.Groups, step) is not null)
+                {
+                    var fix = wait.Fix;
+                    words.Children.Add(Body($"Fix {wait.Number}: {fix.Title}.", semi: true));
+                    words.Children.Add(Body(Fixes.Note(fix)));
+                    if (fix.Action != CardAction.None)
+                    {
+                        var go = CauseCardsView.Primary(Fixes.ButtonWords(fix.Action), () => causes.Act(fix, fix.Action));
+                        go.HorizontalAlignment = W.HorizontalAlignment.Left;
+                        go.Margin = new W.Thickness(0, 3, 0, 0);
+                        words.Children.Add(go);
+                    }
+                    line.Children.Add(words);
+                    page.Children.Add(line);
+                    continue;
+                }
                 words.Children.Add(Body(step.Words));
                 if (Act(step.Action, d, host) is { } act)
                 {
@@ -161,7 +179,7 @@ internal static class DetailView
             page.Children.Add(open);
         }
         if (d.Links.Count == 0)
-            page.Children.Add(EntryView.Muted("No link to the source was sent with this row: find it by the section and page above."));
+            page.Children.Add(EntryView.Muted("No link to the source was sent with this result: find it by the section and page above."));
 
         if (d.Elements.Count > 0)
         {
@@ -192,7 +210,7 @@ internal static class DetailView
                 page.Children.Add(line);
             }
         }
-        page.Children.Add(EntryView.Muted("Backspace or Esc: back to the results. Ctrl+C copies the row.", top: 12));
+        page.Children.Add(EntryView.Muted("Backspace or Esc: back to the results. Ctrl+C copies this result.", top: 12));
 
         var scroll = new C.ScrollViewer
         {
@@ -209,7 +227,7 @@ internal static class DetailView
         DetailAction.ShowElements => Button(d.Elements.Count(e => e.InModel) == 1 ? "Show" : "Show all", "Zoom to them in the model (Space)",
                                             () => host.ShowElements(null)),
         DetailAction.OpenLaw when d.Links.Count > 0 => Button("Open the law", d.Links[0].Url, () => host.OpenLaw(d.Links[0])),
-        DetailAction.CheckAgain => Primary(Button("Check again", "Check this project again: only the check changes a verdict", host.CheckAgain)),
+        DetailAction.CheckAgain => Button("Check again", "Check this project again: only the check changes a verdict", host.CheckAgain),   // one primary per screen: the header's (the intuitive pane, change 5)
         _ => null,
     };
 

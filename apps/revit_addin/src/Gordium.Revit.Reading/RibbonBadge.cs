@@ -53,8 +53,7 @@ public static class RibbonBadge
                 : NotCheckedTip);
         var at = checkedAt.ToString("HH:mm", CultureInfo.InvariantCulture);
         if (model.Stale is not null)
-            return new(BadgeKind.Stale, 0, 0,
-                       $"The model changed after the check at {at}: its results may not hold. Click to check again.");
+            return new(BadgeKind.Stale, 0, 0, PaneWords.StaleBadgeTip(model.StaleKind ?? StaleReason.ModelChanged, at));
         var placed = ResultList.Place(model);
         var fails = placed.Count(r => r.Section == ListSection.Fails);
         var review = placed.Count(r => r.Section is ListSection.Review or ListSection.ByHand);

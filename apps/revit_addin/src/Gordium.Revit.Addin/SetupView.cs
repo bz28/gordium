@@ -64,13 +64,10 @@ internal sealed class SetupView : C.StackPanel
             Children.Add(headline);
         else
             Children.Add(Banner(PanelStatus.Review, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, headline, bottom: 4));
-        Children.Add(Muted("Gordium writes only what you choose, when you click Save or Accept: one undo step each (Ctrl+Z). " +
-                           "When everything needed is set, the check runs by itself.", top: 2, bottom: 6));
-        var anyway = Button("Check now anyway", primary: false,
-            "Check with what is set now: each fact still missing makes the rules it decides need review, never a pass");
-        anyway.HorizontalAlignment = W.HorizontalAlignment.Left;
-        anyway.Click += (_, _) => _do.Anyway();
-        Children.Add(anyway);
+        // why the form, in one line; Save and Check without them are in the footer pinned at the pane's foot
+        // (the intuitive pane, change 3: before, Save was under every fact group, off a docked pane's screen)
+        if (!_screen.Ready)
+            Children.Add(Muted(PaneWords.SetupWhy, top: 2, bottom: 2));
     }
 
     // ---- the project facts -------------------------------------------------------------------------------------
@@ -95,12 +92,7 @@ internal sealed class SetupView : C.StackPanel
         }
         var changes = Changes();
         var line = new C.WrapPanel { Margin = new W.Thickness(0, 10, 0, 0) };
-        var save = Button("Save", primary: true,
-                          $"Writes what you chose to Project Information, as one undo step ({SetupWrites.FactsTransaction})");
-        _save = save;
-        SaveWords();
-        save.Click += (_, _) => _do.Save();
-        line.Children.Add(save);
+        Footer = MakeFooter();
         if (changes > 0)
         {
             var discard = Button("Discard", primary: false, "Forget the choices not saved: the fields show what Project Information holds");
@@ -116,8 +108,39 @@ internal sealed class SetupView : C.StackPanel
     }
 
     private C.Button? _save;
+    private C.TextBlock? _footWords;
 
-    private int Changes() => _screen.Fields.Count(f => _draft.Chosen(f.Mark) is { } c && c != f.Current);
+    /// <summary>The form's one action, for the pane to pin at its foot (never scrolled away): how many facts are
+    /// needed and chosen, Save and check, and Check without them.</summary>
+    internal C.Border Footer { get; private set; } = new();
+
+    private C.Border MakeFooter()
+    {
+        var p = new C.StackPanel();
+        _footWords = Muted("", top: 0);
+        p.Children.Add(_footWords);
+        var line = new C.WrapPanel { Margin = new W.Thickness(0, 6, 0, 0) };   // the link under Save in a narrow pane
+        var save = Button("Save", primary: true,
+                          $"Writes only what you chose to Project Information, as one undo step ({SetupWrites.FactsTransaction}); the check then runs by itself");
+        _save = save;
+        SaveWords();
+        save.Click += (_, _) => _do.Save();
+        save.Margin = new W.Thickness(0, 0, 12, 4);
+        line.Children.Add(save);
+        var anyway = CauseCardsView.Link(PaneWords.CheckWithout, () => _do.Anyway());
+        anyway.ToolTip = "Check with what is set now: each fact still missing makes the rules it decides need review, never a pass";
+        anyway.VerticalAlignment = W.VerticalAlignment.Center;
+        anyway.Margin = new W.Thickness(0, 0, 0, 4);
+        if (!_screen.Ready)                                     // nothing missing: nothing to check without
+            line.Children.Add(anyway);
+        p.Children.Add(line);
+        var foot = new C.Border { Child = p, BorderThickness = new W.Thickness(0, 1, 0, 0), Padding = new W.Thickness(12, 8, 12, 10) };
+        foot.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
+        foot.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
+        return foot;
+    }
+
+    private int Changes() => PaneWords.Unsaved(_screen, _draft);      // the footer's count too
 
     /// <summary>The Save button's words and whether it can be clicked, from the draft now (a box typed in updates it
     /// without the form being drawn again, so the click on Save is never lost to a redraw).</summary>
@@ -126,9 +149,11 @@ internal sealed class SetupView : C.StackPanel
         if (_save is null)
             return;
         var changes = Changes();
-        _save.Content = changes == 0 ? "Save" : $"Save {changes} {(changes == 1 ? "change" : "changes")}";
+        _save.Content = PaneWords.SaveAndCheck(changes, PaneWords.ChecksAfterSave(_screen, _draft));
         W.Automation.AutomationProperties.SetName(_save, (string)_save.Content);
         _save.IsEnabled = changes > 0;
+        if (_footWords is not null)
+            _footWords.Text = PaneWords.SetupFooter(_screen, _draft);   // from the form's own Needed list
     }
 
     private W.UIElement Field(SetupField f)

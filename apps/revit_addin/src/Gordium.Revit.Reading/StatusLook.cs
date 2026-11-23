@@ -37,7 +37,7 @@ public static class StatusLook
         PanelStatus.Review => "Needs review",
         PanelStatus.Complies => "Complies",
         PanelStatus.NotApplicable => "Not applicable",
-        PanelStatus.Stale => "Stale: the model changed after this check",
+        PanelStatus.Stale => "Stale: these results may not hold for the model now",   // why: the banner (PaneWords.StaleTitle)
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
 
