@@ -14,8 +14,9 @@ architects trying the add-in.\
    **Setup form** instead of the old "Nothing was checked: fill these in first" list, and the **Mark facts** button
    opens the same form instead of its text dialog. When nothing is missing, the check runs as before.
 2. **Project facts are a real form**: a dropdown where the answer is one of a known list (Zone: the districts the
-   place has rulebooks for; Use: Gordium's use words with their names, the district's permitted ones first, a
-   special-permit one saying so; Ground from: its two words), Yes/No toggles, a number box for the stories, and
+   place has rulebooks for; Use: every City use by the chart's own name, the district's permitted ones first, a
+   special-permit one saying so, then the others "not listed for" the district, so the true use can always be stated (its use
+   rule then needs review); only the list's exact word counts as set; Ground from: its two words), Yes/No toggles, a number box for the stories, and
    **Pick on plan** for the street edge (Revit's pick on Revit's thread, each edge said back and confirmed; the edge
    picked is kept in the form as "not saved yet" and written by Save with the other facts, in the same transaction). Each field shows the law
    it answers: the mark's own tooltip. The form lists **every mark Marks.cs binds to Project Information** (data, not a
@@ -55,7 +56,8 @@ architects trying the add-in.\
    a lot surveyed not stated is read as traced from the tax map, never as surveyed. The results start with "Checked
    without N facts" and **Set up the facts**. The zone is the one exception: it chooses the rules, so without it nothing
    can be checked, and the form says so. Within a session, Check project doesn't show the form again for exactly the
-   facts the architect checked anyway without; a fact newly missing shows it again.
+   facts the architect checked anyway without, but sends the check as Check now anyway does (no street pick, the
+   results headed "Checked without N facts"); a fact newly missing shows it again.
 8. **Wording follows the building**: "house" only for a one- or two-family dwelling; any other use, or none stated,
    is "building" ("This building has no stairs"; "Inside the building").
 
