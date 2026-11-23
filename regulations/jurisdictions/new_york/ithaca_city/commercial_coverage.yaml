@@ -246,8 +246,8 @@ pieces:
       status: flag
       rules:
       - use
-      mapped: A neighborhood commercial facility is a special-permit use here (chart p.2, SP), so the use entry says needs
-        review.
+      mapped: A neighborhood commercial facility is a special-permit use in every B district (chart p.4, SP), so the use
+        rule says needs review.
   325-3B:occupant:
   - what: Who counts as an occupant (R-2c), for the lot sizes that grow with occupants
     lines:
@@ -435,7 +435,7 @@ pieces:
       why: No rule checks the accessory uses on chart p.4 other than a home occupation's size (home_occupation_size, under
         §325-3B). Towers, neighborhood parking areas and gardens need a special permit; a structure for construction purposes
         may stay two years; parking is a flag (parking). An ADU is the next part.
-  - what: 'Column 3: an accessory dwelling unit (chart p.2 line 30)'
+  - what: 'Column 3: an accessory dwelling unit (chart p.4 line 51)'
     lines:
     - - 24
       - 17
@@ -783,7 +783,8 @@ pieces:
       status: flag
       rules:
       - use
-      mapped: A bed-and-breakfast inn is a special-permit use here (chart p.2), so the use entry says needs review.
+      mapped: A bed-and-breakfast inn is a special-permit use in every B district (chart p.4, SP), so the use rule says
+        needs review.
   - what: Neighborhood gardens (special-permit conditions)
     lines:
     - - 35
@@ -807,10 +808,10 @@ pieces:
       - 7
       - 25
     all:
-      status: flag
-      rules:
-      - use
-      mapped: A school is a special-permit use in every residential district (chart p.2), so the use entry says needs review.
+      status: not_applicable
+      quote: permits for schools and related uses in all residential districts
+      why: The conditions are for school special permits in residential districts; in every B district a school is permitted
+        by right (chart p.4, •).
   325-11B:
   - what: Cluster subdivisions (deviations the Planning and Development Board may approve)
     all:
@@ -1167,7 +1168,7 @@ pieces:
       why: Applies only in the U-1 District.
       quote: Parking for the U-1 Zoning District
   325-21A:
-  - what: Loading space size (450 sf), for the uses the district's loading flag lists
+  - what: Loading space size (450 sf)
     quote: An off-street loading space shall have a minimum of 450 square feet
     lines:
     - - 63
@@ -1177,7 +1178,7 @@ pieces:
       status: flag
       rules:
       - loading
-  - what: Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2)
+  - what: 'Loading for every other use (chart p.15 line 55, "Other use: See §325-21")'
     lines:
     - - 63
       - 41
@@ -1190,7 +1191,8 @@ pieces:
         space for entrance, exit and aisle space.
       page: 63
   325-21B:
-  - what: Which uses need loading spaces, and how many, for the uses the district's loading flag lists
+  - what: Which uses need loading spaces (all business and industrial land uses, and multiple dwellings of more than 25
+      units), and how many
     quote: shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units
     lines:
     - - 63
@@ -1203,7 +1205,7 @@ pieces:
       status: flag
       rules:
       - loading
-  - what: Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2)
+  - what: 'Loading for every other use (chart p.15 line 55, "Other use: See §325-21")'
     lines:
     - - 63
       - 43
@@ -1215,10 +1217,8 @@ pieces:
       status: flag
       rules:
       - loading
-      quote: (1) One space shall be made available for each use having 3,000 to 10,000 feet of floor space, plus one additional
-        space for each additional 15,000 square feet or major fraction thereof of floor space in a single occupancy over
-        and above 10,000 square feet. In no case shall more than four spaces be required for any use of a single occupancy.
-      page: 64
+      quote: B. Space requirements. The following off-street loading space requirements shall apply to all business
+      page: 63
   325-21C:
   - what: No loading in CBD districts
     all:

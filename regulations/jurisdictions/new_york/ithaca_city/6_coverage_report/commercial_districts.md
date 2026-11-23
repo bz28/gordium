@@ -29,7 +29,7 @@ A piece with several parts takes its worst part's status (MISSING first, then op
 | not applicable | 69 | 69 | 62 | 71 | 61 | 61 | 393 |
 | **pieces** | 164 | 164 | 164 | 164 | 164 | 164 | 984 |
 
-**Resting on a reading:** 582 of the 984 cells rest, in at least one part, on a person's reading rather than a citation (counted once per part of a cell: not applicable 433, parked 54, flag 207; and 133 with rules named by mapping, 115 of them on flags). Each not applicable, parked or flag reading quotes the law; code checks only that the quote is the law's words where it says, not that it supports the decision; a mapping gives its reason in words. They are listed after the table, for a person to check.
+**Resting on a reading:** 582 of the 984 cells rest, in at least one part, on a person's reading rather than a citation (counted once per part of a cell: not applicable 439, parked 54, flag 201; and 127 with rules named by mapping, 109 of them on flags). Each not applicable, parked or flag reading quotes the law; code checks only that the quote is the law's words where it says, not that it supports the decision; a mapping gives its reason in words. They are listed after the table, for a person to check.
 
 MISSING cells by priority (a piece missing in two parts counts twice):
 
@@ -275,7 +275,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 | R5 | §325-3B:dwelling_unit: What a dwelling unit is, as the rules count units and house types | all 6 districts | flag (needs review) by mapping: use. Each house type the architect states is defined by its dwelling units (research §6, a category), and each is a use the use rule checks. | “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10) |
 | R6 | §325-3B:green_space: Green space, at least 75% softscape, where a minimum applies | all 6 districts | not applicable: The commercial chart (p.5) sets no green-space minimum for the B districts. | “Where a minimum green space requirement applies” (Ch. 325 p.12 l.4) |
 | R7 | §325-3B:large_beverage_producer: Large beverage producers (production cap, silo height) | all 6 districts | not applicable: Not a use the commercial chart (p.4) lists for any B district, so it isn't permitted there (§325-8A(2) says the permitted uses are listed). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml). | “Uses which are permitted in each use district are listed” (Ch. 325 p.24 l.15) |
-| R8 | §325-3B:neighborhood_commercial_facility: What a neighborhood commercial facility may sell | all 6 districts | flag (needs review) by mapping: use. A neighborhood commercial facility is a special-permit use here (chart p.2, SP), so the use entry says needs review. | “Such facility shall be limited to the retail sale of convenience goods” (Ch. 325 p.15 l.28–29) |
+| R8 | §325-3B:neighborhood_commercial_facility: What a neighborhood commercial facility may sell | all 6 districts | flag (needs review) by mapping: use. A neighborhood commercial facility is a special-permit use in every B district (chart p.4, SP), so the use rule says needs review. | “Such facility shall be limited to the retail sale of convenience goods” (Ch. 325 p.15 l.28–29) |
 | R9 | §325-3B:occupant: Who counts as an occupant (R-2c), for the lot sizes that grow with occupants | all 6 districts | not applicable: The definition is for R-2c only. | “In R-2c Zones only” (Ch. 325 p.16 l.5) |
 | R10 | §325-3B:occupant: Least habitable space per occupant (sleeping rooms 80/120/180/240 sf..., unit 150/250/350/450 sf...) | all 6 districts | not applicable: The definition is for R-2c only. | “In R-2c Zones only” (Ch. 325 p.16 l.5) |
 | R11 | §325-3B:rooming_house: A rooming house (a multiple dwelling, §325-3B DWELLING, MULTIPLE (5)) and what it must include | B-1a, B-1b | in the rulebook by mapping: lot_area_multiple_family. A rooming house is a multiple dwelling (§325-3B DWELLING, MULTIPLE (5)), checked by the multiple-dwelling lot size. | — |
@@ -286,7 +286,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 | R16 | §325-7A: Every building and use conforms to its district's regulations | all 6 districts | not applicable: No requirement of its own beyond the district's regulations, each of which is its own row here (the checker applies the lot's zone's whole rulebook, rulebook.rulebook_for). | “unless in conformity with the regulations herein specified for the district in which it is located” (Ch. 325 p.24 l.6–7) |
 | R17 | §325-7B: A yard required for one building can't also count for another building | all 6 districts | flag: yards_not_shared | “B. Use of yard for another building. No part of a yard or other open space about any building required for the purposes of complying with the provisions of this chapter shall be included as a part of a yard or other open space similarly required for another building.” (Ch. 325 p.24 l.8–10) |
 | R18 | §325-8A: Column 3: a private garage's size (chart p.4) | all 6 districts | not applicable: The commercial chart's private garage row (p.4 line 53) is a plain • for every B district (no car limit, no note), so there is no garage size to check. | “Uses permitted to be accessory to the main use of the” (Ch. 325 p.24 l.17) |
-| R19 | §325-8A: Column 3: an accessory dwelling unit (chart p.2 line 30) | all 6 districts | flag (needs review) by mapping: accessory_dwelling_unit. In the B districts §325-28's requirements are a flag (accessory_dwelling_unit): needs review wherever an ADU is said to be on the lot; the residential districts' ADU rules aren't carried over yet. | “(3) Column 3: Permitted Accessory Uses. Uses permitted to be accessory to the main use of the” (Ch. 325 p.24 l.17) |
+| R19 | §325-8A: Column 3: an accessory dwelling unit (chart p.4 line 51) | all 6 districts | flag (needs review) by mapping: accessory_dwelling_unit. In the B districts §325-28's requirements are a flag (accessory_dwelling_unit): needs review wherever an ADU is said to be on the lot; the residential districts' ADU rules aren't carried over yet. | “(3) Column 3: Permitted Accessory Uses. Uses permitted to be accessory to the main use of the” (Ch. 325 p.24 l.17) |
 | R20 | §325-8A: Column 4: off-street parking | all 6 districts | flag: parking | “The off-street parking spaces listed in this column shall be provided” (Ch. 325 p.24 l.19–20) |
 | R21 | §325-8A: Column 5: off-street loading | all 6 districts | flag: loading | “(5) Column 5: Off-Street Loading Requirement. The off-street loading spaces listed in this column shall be provided for each building hereafter erected or altered, except for properties located in any CBD district. In addition, see Article IV and § 325-21.” (Ch. 325 p.24 l.22–24) |
 | R22 | §325-8A: Column 16: minimum height | B-1a, B-2a, B-4, B-5 | not applicable: This district's minimum height in feet on the commercial chart (p.5) is "-". | “Buildings hereafter erected shall have a minimum height as specified herein” (Ch. 325 p.26 l.4–5) |
@@ -299,8 +299,8 @@ Code can't prove that the law's words support a decision; it proves only that th
 | R29 | §325-8E: South Hill Overlay: no second primary structure on a parcel (R-1 and R-2) | all 6 districts | not applicable: Applies to R-1 and R-2 property in the overlay only. | “with a zoning designation of R-1 or R-2” (Ch. 325 p.29 l.32) |
 | R30 | §325-9B: (i) A home occupation needs a special permit unless it meets all four criteria | all 6 districts | not applicable: The law sets this for residential districts only; a B district is a business district. | “Home occupations in all residential districts” (Ch. 325 p.30 l.37) |
 | R31 | §325-9D: Criteria the Board uses to grant a special permit, for a primary use | all 6 districts | flag (needs review) by mapping: use. A special-permit primary use goes to needs review (the use entry); the criteria are the Board's judgment. | “A special permit shall be granted for a proposed use or activity if it meets the following criteria” (Ch. 325 p.33 l.9–10) |
-| R32 | §325-10C: Bed-and-breakfast inns (special-permit conditions) | all 6 districts | flag (needs review) by mapping: use. A bed-and-breakfast inn is a special-permit use here (chart p.2), so the use entry says needs review. | “Bed-and-breakfast inns in all districts” (Ch. 325 p.35 l.5) |
-| R33 | §325-10C: Schools and related uses (special-permit conditions) | all 6 districts | flag (needs review) by mapping: use. A school is a special-permit use in every residential district (chart p.2), so the use entry says needs review. | “Schools and related uses. The following specific conditions shall be applicable” (Ch. 325 p.37 l.7) |
+| R32 | §325-10C: Bed-and-breakfast inns (special-permit conditions) | all 6 districts | flag (needs review) by mapping: use. A bed-and-breakfast inn is a special-permit use in every B district (chart p.4, SP), so the use rule says needs review. | “Bed-and-breakfast inns in all districts” (Ch. 325 p.35 l.5) |
+| R33 | §325-10C: Schools and related uses (special-permit conditions) | all 6 districts | not applicable: The conditions are for school special permits in residential districts; in every B district a school is permitted by right (chart p.4, •). | “permits for schools and related uses in all residential districts” (Ch. 325 p.37 l.8) |
 | R34 | §325-12C: Planned unit development (PUD) intent | all 6 districts | not applicable: A PUD is its own district, made by rezoning. | “In reaching its decision on whether to rezone to a PUD” (Ch. 325 p.41 l.36) |
 | R35 | §325-12D: PUD uses and limits | all 6 districts | not applicable: A PUD's limits are set by its own rezoning law. | “shall be as set forth in the legislation rezoning the area to a PUD” (Ch. 325 p.41 l.43) |
 | R36 | §325-12E: PUD site plan approval | all 6 districts | not applicable: Applies within a PUD, its own district. | “No structure shall be erected or placed within a PUD” (Ch. 325 p.42 l.9) |
@@ -336,10 +336,10 @@ Code can't prove that the law's words support a decision; it proves only that th
 | R66 | §325-20H: Parking in WEDZ-1 | all 6 districts | not applicable: Applies only in WEDZ-1. | “Parking in WEDZ-1 District” (Ch. 325 p.61 l.27) |
 | R67 | §325-20I: Parking in the Southwest Area | all 6 districts | not applicable: Applies only in the Southwest Area. | “Parking in the Southwest Area” (Ch. 325 p.61 l.38) |
 | R68 | §325-20J: Parking in U-1 | all 6 districts | not applicable: Applies only in the U-1 District. | “Parking for the U-1 Zoning District” (Ch. 325 p.61 l.41) |
-| R69 | §325-21A: Loading space size (450 sf), for the uses the district's loading flag lists | all 6 districts | flag: loading | “An off-street loading space shall have a minimum of 450 square feet” (Ch. 325 p.63 l.41) |
-| R70 | §325-21A: Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2) | all 6 districts | flag: loading | “A. Size requirements. An off-street loading space shall have a minimum of 450 square feet plus necessary additional space for entrance, exit and aisle space.” (Ch. 325 p.63 l.41–42) |
-| R71 | §325-21B: Which uses need loading spaces, and how many, for the uses the district's loading flag lists | all 6 districts | flag: loading | “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3) |
-| R72 | §325-21B: Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2) | all 6 districts | flag: loading | “(1) One space shall be made available for each use having 3,000 to 10,000 feet of floor space, plus one additional space for each additional 15,000 square feet or major fraction thereof of floor space in a single occupancy over and above 10,000 square feet. In no case shall more than four spaces be required for any use of a single occupancy.” (Ch. 325 p.64 l.5–8) |
+| R69 | §325-21A: Loading space size (450 sf) | all 6 districts | flag: loading | “An off-street loading space shall have a minimum of 450 square feet” (Ch. 325 p.63 l.41) |
+| R70 | §325-21A: Loading for every other use (chart p.15 line 55, "Other use: See §325-21") | all 6 districts | flag: loading | “A. Size requirements. An off-street loading space shall have a minimum of 450 square feet plus necessary additional space for entrance, exit and aisle space.” (Ch. 325 p.63 l.41–42) |
+| R71 | §325-21B: Which uses need loading spaces (all business and industrial land uses, and multiple dwellings of more than 25 units), and how many | all 6 districts | flag: loading | “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3) |
+| R72 | §325-21B: Loading for every other use (chart p.15 line 55, "Other use: See §325-21") | all 6 districts | flag: loading | “B. Space requirements. The following off-street loading space requirements shall apply to all business” (Ch. 325 p.63 l.43) |
 | R73 | §325-21C: No loading in CBD districts | all 6 districts | not applicable: Applies only in CBD districts. | “in any CBD zoning district” (Ch. 325 p.64 l.9) |
 | R74 | §325-22A: Motels (lot size and frontage) | B-1a, B-1b, B-2d | not applicable: A hotel or motel is marked - for this district on the commercial chart (p.4), so it isn't permitted (§325-8A(2)). | “Uses which are permitted in each use district are listed” (Ch. 325 p.24 l.15) |
 | R75 | §325-22B: Motels (parking) | B-1a, B-1b, B-2d | not applicable: A hotel or motel is marked - for this district on the commercial chart (p.4), so it isn't permitted (§325-8A(2)). | “Uses which are permitted in each use district are listed” (Ch. 325 p.24 l.15) |
@@ -486,7 +486,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 ### §325-3B:neighborhood_commercial_facility NEIGHBORHOOD COMMERCIAL FACILITY (rule, p.15)
 
 - **What a neighborhood commercial facility may sell**
-  - all 6 districts: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A neighborhood commercial facility is a special-permit use here (chart p.2, SP), so the use entry says needs review. The law: “Such facility shall be limited to the retail sale of convenience goods” (Ch. 325 p.15 l.28–29).
+  - all 6 districts: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A neighborhood commercial facility is a special-permit use in every B district (chart p.4, SP), so the use rule says needs review. The law: “Such facility shall be limited to the retail sale of convenience goods” (Ch. 325 p.15 l.28–29).
 
 ### §325-3B:occupant OCCUPANT (rule, p.16)
 
@@ -566,7 +566,7 @@ Code can't prove that the law's words support a decision; it proves only that th
   - all 6 districts: not applicable: The commercial chart's private garage row (p.4 line 53) is a plain • for every B district (no car limit, no note), so there is no garage size to check. The law: “Uses permitted to be accessory to the main use of the” (Ch. 325 p.24 l.17).
 - **Column 3: the other permitted accessory uses (chart p.4: structure for construction purposes, towers, home occupation, parking areas, redemption center, gardens)**
   - all 6 districts: **MISSING** (medium): No rule checks the accessory uses on chart p.4 other than a home occupation's size (home_occupation_size, under §325-3B). Towers, neighborhood parking areas and gardens need a special permit; a structure for construction purposes may stay two years; parking is a flag (parking). An ADU is the next part.
-- **Column 3: an accessory dwelling unit (chart p.2 line 30)**
+- **Column 3: an accessory dwelling unit (chart p.4 line 51)**
   - all 6 districts: flag (needs review): `accessory_dwelling_unit` (mapped). Gordium's mapping, not a citation: In the B districts §325-28's requirements are a flag (accessory_dwelling_unit): needs review wherever an ADU is said to be on the lot; the residential districts' ADU rules aren't carried over yet. The law: “(3) Column 3: Permitted Accessory Uses. Uses permitted to be accessory to the main use of the” (Ch. 325 p.24 l.17).
 - **Column 4: off-street parking**
   - all 6 districts: flag (needs review): `parking` (cited) The law: “The off-street parking spaces listed in this column shall be provided” (Ch. 325 p.24 l.19–20).
@@ -648,11 +648,11 @@ Code can't prove that the law's words support a decision; it proves only that th
 ### §325-10C Additional conditions (rule, pp.35–37)
 
 - **Bed-and-breakfast inns (special-permit conditions)**
-  - all 6 districts: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A bed-and-breakfast inn is a special-permit use here (chart p.2), so the use entry says needs review. The law: “Bed-and-breakfast inns in all districts” (Ch. 325 p.35 l.5).
+  - all 6 districts: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A bed-and-breakfast inn is a special-permit use in every B district (chart p.4, SP), so the use rule says needs review. The law: “Bed-and-breakfast inns in all districts” (Ch. 325 p.35 l.5).
 - **Neighborhood gardens (special-permit conditions)**
   - all 6 districts: **MISSING** (low): A garden is an accessory use needing a special permit (chart p.4: SP in every B district); nothing asks about one.
 - **Schools and related uses (special-permit conditions)**
-  - all 6 districts: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: A school is a special-permit use in every residential district (chart p.2), so the use entry says needs review. The law: “Schools and related uses. The following specific conditions shall be applicable” (Ch. 325 p.37 l.7).
+  - all 6 districts: not applicable: The conditions are for school special permits in residential districts; in every B district a school is permitted by right (chart p.4, •). The law: “permits for schools and related uses in all residential districts” (Ch. 325 p.37 l.8).
 
 ### §325-11B Authorization and minimum requirements (rule, pp.38–39)
 
@@ -864,17 +864,17 @@ Code can't prove that the law's words support a decision; it proves only that th
 
 ### §325-21A Size requirements (rule, p.63)
 
-- **Loading space size (450 sf), for the uses the district's loading flag lists**
+- **Loading space size (450 sf)**
   - all 6 districts: flag (needs review): `loading` (cited) The law: “An off-street loading space shall have a minimum of 450 square feet” (Ch. 325 p.63 l.41).
-- **Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2)**
+- **Loading for every other use (chart p.15 line 55, "Other use: See §325-21")**
   - all 6 districts: flag (needs review): `loading` (cited) The law: “A. Size requirements. An off-street loading space shall have a minimum of 450 square feet plus necessary additional space for entrance, exit and aisle space.” (Ch. 325 p.63 l.41–42).
 
 ### §325-21B Space requirements (rule, pp.63–64)
 
-- **Which uses need loading spaces, and how many, for the uses the district's loading flag lists**
+- **Which uses need loading spaces (all business and industrial land uses, and multiple dwellings of more than 25 units), and how many**
   - all 6 districts: flag (needs review): `loading` (cited) The law: “shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units” (Ch. 325 p.63 l.43; p.64 l.3).
-- **Loading for a nonresidential use allowed by variance (chart p.14, "Allowed by variance", note 2)**
-  - all 6 districts: flag (needs review): `loading` (cited) The law: “(1) One space shall be made available for each use having 3,000 to 10,000 feet of floor space, plus one additional space for each additional 15,000 square feet or major fraction thereof of floor space in a single occupancy over and above 10,000 square feet. In no case shall more than four spaces be required for any use of a single occupancy.” (Ch. 325 p.64 l.5–8).
+- **Loading for every other use (chart p.15 line 55, "Other use: See §325-21")**
+  - all 6 districts: flag (needs review): `loading` (cited) The law: “B. Space requirements. The following off-street loading space requirements shall apply to all business” (Ch. 325 p.63 l.43).
 
 ### §325-21C There shall be no off-street loading requirement for any properties located in any CBD zoning district (rule, p.64)
 
