@@ -8,6 +8,12 @@ districts:
   # used as that district; any other code (another district, or a code Gordium doesn't know) is shown as the map
   # gives it and needs review.
   residential: [R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU]
+  # The commercial districts that have a rulebook, as the commercial chart's columns (p.5) and the rulebook files
+  # write them; the City's map writes them the same way (looked up 2026-11-22). Not here: B-2b (on the map and in
+  # §325-4, but in no chart column), the CBD districts and the special-purpose, waterfront, West End, Southwest and
+  # Collegetown districts (no rulebook yet): shown as the map gives them, needs review
+  # (docs/decisions/2026-11-22_commercial_districts.md).
+  commercial: [B-1a, B-1b, B-2a, B-2d, B-4, B-5]
   aliases:
     R-U:
       district: RU

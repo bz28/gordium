@@ -1,0 +1,74 @@
+title: "B-2a: a two-story shop with offices above, inside every B-2a limit"
+what: >-
+  A surveyed 60 ft × 100 ft lot in B-2a (General Business; 6,000 sf) with a two-story building 40 ft wide and 60 ft
+  deep: a retail store on the ground floor and offices above, stated as a retail store (the lot's primary use, chart
+  p.4). Two 14 ft stories to a 28 ft flat roof, 5 ft from the street, 10 ft from each side line, 35 ft from the rear.
+  Its footprint, 2,400 sf, is 40% of the lot. B-2a requires no front yard; one side yard of 10 ft and the other of
+  5 ft; a rear yard of 15% of the lot depth, at most 20 ft and at least 10 ft (chart p.5, note 9). Every limit the
+  chart sets is met; the transition yards (§325-19: is a neighbouring lot residential?), the parking and the loading
+  are flags that need a person's look on every B-2a lot. R-1b would fail the use, the front yard and the coverage.
+district: B-2a
+use: retail_store_or_service_commercial
+lot: {points: [[0, 0], [60, 0], [60, 100], [0, 100]], surveyed: true}
+buildings:
+  - id: shop_and_offices
+    outline: [[10, 5], [50, 5], [50, 65], [10, 65]]
+    base: 0
+    floors: [14, 14]
+grade: {elevation: 0}
+expected:
+  B-2a.use:
+    status: complies
+    at_limit: false
+    working: "retail store or service commercial facility: marked • for B-2A (chart p.4)"
+    cites: "§325-8A(2); chart p.4, B-2A, Retail store or service commercial facility: •"
+  B-2a.lot_area:
+    status: complies
+    at_limit: false
+    working: "lot area = 60 × 100 = 6,000 sf; required ≥ 3,000 sf (every use but a motel)"
+    cites: "§325-8A(6); chart p.5, B-2A, Minimum Lot Size, other use: 3,000 sf"
+  B-2a.lot_width:
+    status: complies
+    at_limit: false
+    working: "frontage 60 ft; required ≥ 40 ft"
+    cites: "§325-8A(7); chart p.5, B-2A, Minimum Lot Width, other use: 40 ft"
+  B-2a.stories:
+    status: complies
+    at_limit: false
+    working: "2 floor blocks, each one story = 2; limit 4"
+    cites: "§325-8A(8); chart p.5, B-2A, Maximum Building Height, Number of stories: 4"
+  B-2a.height:
+    status: complies
+    at_limit: false
+    working: "flat roof at 14 + 14 = 28 ft above the flat grade; limit 40 ft (no bonus used)"
+    cites: "§325-3 HEIGHT OF BUILDING; chart p.5, B-2A, Height in feet: 40 ft"
+  B-2a.lot_coverage:
+    status: complies
+    at_limit: false
+    working: "footprint = 40 × 60 = 2,400 sf; 2,400 / 6,000 = 40%; allowed 50% (75% only with parking within 500 ft, note 7)"
+    cites: "§325-8A(10); chart p.5, B-2A, Percent of lot area: 50% [fn7]"
+    measured: {building_area: 2400}
+  B-2a.side_yards:
+    status: complies
+    at_limit: true
+    working: "west 10 − 0 = 10 ft, east 60 − 50 = 10 ft: the narrower 10 ≥ 5 (Column 13), the wider 10 ≥ 10 (Column 12), at its limit"
+    cites: "§325-8A(12), (13); chart p.5, B-2A, Side (one side minimum) 10 ft, (other side minimum) 5 ft"
+  B-2a.rear_yard:
+    status: complies
+    at_limit: false
+    working: "rear line y = 100 to the rear wall at y = 65: 35 ft; required max(min(15% × 100, 20), 10) = 15 ft"
+    cites: "§325-8A(14); chart p.5, B-2A, Rear 15%/ 20 ft, note 9 (not less than 10 ft)"
+  B-2a.transition_yards:
+    status: needs_review
+    working: "a flag on every B-2a lot: whether a neighbouring lot is in a residential district isn't known to Gordium"
+    cites: "§325-19A, §325-19B"
+  B-2a.parking:
+    status: needs_review
+    working: "a flag: retail needs 1 space per 500 gross sf of floor area (chart p.15); Gordium doesn't count parking yet"
+    cites: "§325-8A(4); chart p.15, B-2A, Retail store: 1 space per 500 gross sf of floor area"
+  B-2a.loading:
+    status: needs_review
+    working: "a flag for a retail store: 1 space for each use with 3,000 to 10,000 sf of floor space (4,800 sf here)"
+    cites: "§325-8A(5); §325-21B; chart p.15, B-2A, Retail store"
+plan:
+  encroach: 0

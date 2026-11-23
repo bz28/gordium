@@ -51,7 +51,7 @@ def test_the_goldens_cover_every_case_and_every_case_has_a_stored_answer():
         for name in names:
             assert {f"{prefix}/{name}/check_as_drawn", f"{prefix}/{name}/start"} <= set(manifest)
     thens = [n for n in manifest if n.endswith("/check_then")]
-    assert len(scenarios) == 12 and len(sites) == 3 and len(thens) == 3
+    assert len(scenarios) == 15 and len(sites) == 3 and len(thens) == 3      # three B scenarios (13 to 15) since 2026-11-22
     assert not [n for n, a in answers.items() if isinstance(a, dict) and set(a) == {"error"}], \
         "a golden is a crash: the case is broken, not golden"
     # each stored answer is the one its sha256 names

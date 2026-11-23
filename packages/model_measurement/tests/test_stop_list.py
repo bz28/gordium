@@ -209,6 +209,7 @@ CASES = {
                          corner_lot=False),
     "corner_unknown": _plain(corner_lot=None),
     "corner_one_street": _plain(corner_lot=True, street_line=STREETS3[:2], street_ids=["A St", "A St"]),
+    "corner_outside_residential": _plain(zone="B-2a", corner_lot=True, street_line=STREETS3[:2], street_ids=["A St", "B St"]),
     "street_ids_needed": _plain(corner_lot=True, street_line=STREETS3[:2]),
     "street_lines_split": _plain(corner_lot=True, street_line=STREETS3, street_ids=["A St", "B St", "A St"]),
     "address_not_a_street": _plain(corner_lot=True, street_line=STREETS3[:2], street_ids=["A St", "B St"],

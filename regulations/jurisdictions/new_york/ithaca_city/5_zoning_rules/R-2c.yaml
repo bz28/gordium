@@ -1662,6 +1662,11 @@ rules:
         note: past 38.5 ft under every reading
       - given: {use: one_family_attached, building_height: 37, front_yard: 12, side_yard_smaller: 5, side_yard_larger: 12, rear_yard: 27, lot_depth: 100}
         expect: needs_review
+      # a deep lot: the review's rear yard is capped at 50 ft too (25% of 300 would be 75), plus the 2 ft of extra height
+      - given: {use: one_family_semi_detached, building_height: 37, front_yard: 12, side_yard_smaller: 5, side_yard_larger: 12, rear_yard: 52, lot_depth: 300}
+        expect: needs_review
+      - given: {use: one_family_semi_detached, building_height: 37, front_yard: 12, side_yard_smaller: 5, side_yard_larger: 12, rear_yard: 51.99, lot_depth: 300}
+        expect: fail
     open_questions:
     - '§325-16B: is an ornamental parapet or cornice (up to 5 ft above the limit) left out of building height, or allowed
       on top of the bonus height too?'
@@ -2208,6 +2213,9 @@ rules:
       - given: {use: one_family_semi_detached, front_yard_eaves: 8, side_yard_smaller_eaves: 0, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 100, building_height: 30}
         expect: needs_review
         note: an eave at the lot line on what may be the attached side
+      - given: {use: one_family_semi_detached, front_yard_eaves: 8, side_yard_smaller_eaves: 0, side_yard_larger_eaves: 8, rear_yard_eaves: 48, lot_depth: 300, building_height: 30}
+        expect: needs_review
+        note: a deep lot, the rear eave exactly 2 ft into the 50 ft rear yard (25% of 300 is 75, capped at 50)
       - given: {use: one_family_semi_detached, front_yard_eaves: 8, side_yard_smaller_eaves: 7.99, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 100, building_height: 30}
         expect: needs_review
       - given: {use: one_family_semi_detached, front_yard_eaves: 7.99, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 23, lot_depth: 100, building_height: 30}

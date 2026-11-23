@@ -245,7 +245,7 @@ pieces:
         status: flag
         rules: [use]
         mapped: Each house type the architect states is defined by its dwelling units (research §6, a category);
-          R-3a's and R-3b's use entry is a flag for the special-permit uses.
+          R-3a's and R-3b's use rule sends the special-permit uses to review.
       R-3aa, RU:
         status: rulebook
         rules: [lot_area_one_family_attached, lot_area_multiple_family]

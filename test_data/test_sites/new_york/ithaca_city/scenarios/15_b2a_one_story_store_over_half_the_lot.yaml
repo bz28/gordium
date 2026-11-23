@@ -1,0 +1,51 @@
+title: "B-2a: a one-story store covering 60% of its lot, allowed only with parking nearby"
+what: >-
+  A surveyed 50 ft × 100 ft lot in B-2a (5,000 sf) with a one-story retail store 40 ft wide and 75 ft deep, 16 ft to
+  a flat roof, 5 ft from the street, 5 ft from the west side line and 5 ft from the east, 20 ft from the rear. Its
+  footprint, 3,000 sf, is 60% of the lot: over B-2a's 50% but within note 7's 75%, which applies only "when adequate
+  off-street parking is available within 500 ft" (§325-20): Gordium doesn't know the parking, so needs review, never
+  complies. B-2a has no minimum height, so one story is fine (B-1a, B-1b and B-2d would require two, §325-16G). The
+  side yards are 5 and 5 ft: one side must be 10 ft, so does not comply.
+district: B-2a
+use: retail_store_or_service_commercial
+lot: {points: [[0, 0], [50, 0], [50, 100], [0, 100]], surveyed: true}
+buildings:
+  - id: store
+    outline: [[5, 5], [45, 5], [45, 80], [5, 80]]
+    base: 0
+    floors: [16]
+grade: {elevation: 0}
+expected:
+  B-2a.use:
+    status: complies
+    at_limit: false
+    working: "retail store: marked • for B-2A (chart p.4)"
+    cites: "chart p.4, B-2A, Retail store or service commercial facility: •"
+  B-2a.stories:
+    status: complies
+    at_limit: false
+    working: "1 story; limit 4 (and B-2a sets no minimum)"
+    cites: "chart p.5, B-2A, Number of stories: 4; Minimum Building Height: -"
+  B-2a.height:
+    status: complies
+    at_limit: false
+    working: "16 ft; limit 40 ft"
+    cites: "chart p.5, B-2A, Height in feet: 40 ft"
+  B-2a.lot_coverage:
+    status: needs_review
+    at_limit: false
+    working: "footprint 40 × 75 = 3,000 sf of 5,000 = 60%: over 50%, within note 7's 75% (only with adequate parking within 500 ft)"
+    cites: "§325-8A(10); chart p.5, B-2A, Percent of lot area: 50% [fn7]; note 7"
+    measured: {building_area: 3000}
+  B-2a.side_yards:
+    status: does_not_comply
+    at_limit: true
+    working: "west 5 ft, east 50 − 45 = 5 ft: one side is exactly the 5 ft the other side needs (Column 13), but neither is the 10 ft one side needs (Column 12)"
+    cites: "§325-8A(12); chart p.5, B-2A, Side (one side minimum): 10 ft"
+  B-2a.rear_yard:
+    status: complies
+    at_limit: false
+    working: "rear line y = 100 to the rear wall at y = 80: 20 ft; required max(min(15% × 100, 20), 10) = 15 ft"
+    cites: "§325-8A(14); chart p.5, B-2A, Rear 15%/ 20 ft, note 9"
+plan:
+  encroach: 1      # the side yard short of 10 ft, drawn red

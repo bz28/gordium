@@ -5,7 +5,7 @@ Gordium was run on them. **Not yet verified by an architect** (architect review 
 approval is): they are a careful second reading, not an outside check. When that deferred review happens, who
 and when is recorded here.
 
-Twelve designs an architect really draws on a City of Ithaca lot (ten in R-1b, one in R-1a, one in R-3a), each with the result **worked out by hand
+Fifteen designs an architect really draws on a City of Ithaca lot (ten in R-1b, one in R-1a, one in R-3a, two in B-2a and one in B-1b), each with the result **worked out by hand
 from the code's own words before Gordium was run on it**. The expected results are never changed to match
 Gordium. When Gordium disagrees, the disagreement is investigated: either the code is fixed, or the question goes
 to the architects (written up under `disagreements` in the scenario). A disagreement where Gordium is less
@@ -17,7 +17,10 @@ Each `<name>.yaml` holds:
 
 - `district` and `use` (optional): the district and use the architect states (not `zone`: a file with `zone` is a project); an R-1b one-family detached house
   when left out. `11_…` is an R-1a house legal in R-1b but over R-1a's 20% coverage; `12_…` is an R-3a
-  two-family house at its height, stories, coverage, front and side-yard limits (each one R-1b would fail).
+  two-family house at its height, stories, coverage, front and side-yard limits (each one R-1b would fail). `13_…` is
+  a two-story shop with offices above inside every B-2a limit; `14_…` a B-1b office building 1 ft under B-1b's 25 ft
+  minimum height; `15_…` a one-story B-2a store at 60% coverage (allowed only with parking nearby: needs review) with
+  side yards of 5 ft (one must be 10).
 - `lot`: the lot corners (feet; the street runs along the first edge), whether it's from a survey
 - `buildings`: each solid on the Building layer. A building with `floors` is stacked floor blocks, each one story,
   the way GordiumStart draws them. `others`: solids on the lot that are **not** on the Building layer.

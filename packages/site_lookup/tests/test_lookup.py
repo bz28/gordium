@@ -676,17 +676,18 @@ def test_the_city_maps_r_u_is_the_rulebooks_ru():
     assert "R-U" not in json.dumps(r["snapshot"]) and "RU" not in json.dumps(r["snapshot"]["facts"]["zone"])
 
 
-@pytest.mark.parametrize("code", ["B-1a", "CBD-60", "R-1A", "RU ", "R U"])
+@pytest.mark.parametrize("code", ["B-2b", "CBD-60", "R-1A", "B-1A", "RU ", "R U"])
 def test_a_district_code_gordium_doesnt_know_needs_review(code):
-    """Another district (B-1a, CBD-60, both on the City's map) or a code that only looks like a
-    residential one (R-1A, 'RU ', 'R U'): never matched by likeness, shown as the map gives it, needs review."""
+    """Another district (B-2b, CBD-60, both on the City's map, with no rulebook) or a code that only looks like one
+    Gordium has (R-1A, B-1A, 'RU ', 'R U'): never matched by likeness, shown as the map gives it, needs review."""
     r, _ = run("106_ithaca_rd", zones=[Fake.square(None, code)])
     z = both(r)["zone"]
-    assert z["value"] == code and z["status"] == "needs_review" and "isn't one of the residential districts" in z["reason"]
+    assert z["value"] == code and z["status"] == "needs_review" and "isn't one of the districts Gordium has rules" in z["reason"]
 
 
-def test_every_residential_district_as_written_is_used_as_is():
-    for code in ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b"]:
+def test_every_district_with_a_rulebook_as_written_is_used_as_is():
+    for code in ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b", "B-1a", "B-1b", "B-2a", "B-2d", "B-4",
+                 "B-5"]:
         r, _ = run("106_ithaca_rd", zones=[Fake.square(None, code)])
         z = both(r)["zone"]
         assert z["value"] == code and z["status"] == "suggested" and "map writes" not in (z.get("note") or ""), code
@@ -718,6 +719,19 @@ def test_the_residential_districts_are_the_zoning_charts_columns():
     assert all(a["district"] in d["residential"] for a in d["aliases"].values())
 
 
+def test_the_commercial_districts_are_the_rulebooks_and_the_bulk_charts_columns():
+    """names.yaml's commercial districts are the B columns of the commercial bulk chart (p.5, in order), written as
+    the rulebooks write them, and each has its rulebook (B-2C, on the use chart only, has none)."""
+    from site_lookup.adapters.ithaca_city.sources import NAMES
+    d = NAMES["districts"]
+    j = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    cells = j / "2_extracted_text/zoning_charts_2026-04.cells.jsonl"
+    page5 = next(r for r in map(json.loads, cells.read_text(encoding="utf-8").splitlines()) if r.get("page") == 5
+                 and "columns" in r)
+    assert [n.upper() for n in d["commercial"]] == [c["name"] for c in page5["columns"] if c["name"].startswith("B-")]
+    assert all((j / f"5_zoning_rules/{n}.yaml").is_file() for n in d["commercial"])
+
+
 @pytest.mark.parametrize("first", [True, False])
 def test_an_overlay_drawn_over_a_district_goes_to_the_overlays_and_needs_review(first):
     """The City's map draws the South Hill Overlay District over R-2a (and others) and returns the two in no set
@@ -739,12 +753,12 @@ def test_a_lot_under_an_overlay_only_isnt_on_the_map():
 
 
 def test_two_base_districts_drawn_over_each_other_ask():
-    """B-1a and CBD-60 overlap on the City's map: both count, so Gordium asks (and neither is a residential
-    district: needs review too)."""
+    """B-1a and CBD-60 overlap on the City's map: both count, so Gordium asks (and CBD-60 has no rulebook: needs
+    review too)."""
     r, _ = run("106_ithaca_rd", zones=[Fake.square(None, "B-1a"), Fake.square(None, "CBD-60")])
     z = both(r)["zone"]
     assert z["status"] == "ask" and set(z["value"]) == {"B-1a", "CBD-60"}
-    assert "isn't one of the residential districts" in z["reason"]
+    assert "gives CBD-60, which isn't one of the districts Gordium has rules" in z["reason"]
 
 
 def test_a_city_road_named_for_two_streets_is_the_addresss_street():

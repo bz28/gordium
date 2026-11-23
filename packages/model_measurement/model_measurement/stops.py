@@ -39,6 +39,9 @@ STOPS = {
                   "architects",
     # corner lots (§325-19C)
     "corner_unknown": "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no",
+    "corner_outside_residential": "a corner lot outside the residential districts: §325-19C gives two front yards only "
+                                  "to corner lots in residential districts, so which street yard is a front yard and "
+                                  "which a side yard is for a person to judge",
     "corner_one_street": "a corner lot, but the street lot lines given are all on one street: pick the lot lines on "
                          "both streets",
     "street_ids_needed": "which street lot lines are on which street isn't recorded: pick the street side so Gordium "

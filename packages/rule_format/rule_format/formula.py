@@ -26,7 +26,7 @@ import math
 from fractions import Fraction
 from functools import lru_cache
 
-MAX_LENGTH = 500
+MAX_LENGTH = 1000          # a district's permitted-use list is the longest formula (B-4 lists 28 uses, chart p.4)
 NAMES_KEPT = 4096          # formula texts whose measure names are kept (a city has a few hundred)
 FUNCTIONS = {"min": min, "max": max}
 AT_LIMIT_ABSOLUTE = Fraction(1, 10 ** 6)       # two numbers this close count as equal (ft, sq ft, counts)

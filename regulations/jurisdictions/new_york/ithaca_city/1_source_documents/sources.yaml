@@ -24,7 +24,8 @@ documents:
     notes: >
       A summary of Chapter 325, not the law itself. Does NOT include the
       Southside form districts adopted Nov 2025 (see ordinance below).
-    chart_pages: [2, 3, 14]   # tables read into cells (2_extracted_text/*.cells.jsonl); residential only for now
+    chart_pages: [2, 3, 4, 5, 14]   # tables read into cells (2_extracted_text/*.cells.jsonl): residential and
+                                    # commercial (B- and CBD) uses and dimensions; p.15, commercial parking, is quoted
 
   - file: ordinance_no_2025-12_southside_form_districts.pdf
     title: Ordinance No. 2025-12, adding §325-46 Southside Form Districts
