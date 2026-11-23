@@ -108,100 +108,85 @@ def _folder(jurisdiction) -> Path:
     return p if p.is_absolute() else REPO / p
 
 
-# Each book's validation (its Context and the rule checks: the slow, file-pure part of laws), kept by the files it
-# read. The files are recorded as it runs (every file opened, path stat'd and folder listed), never listed by hand,
-# so a file it reads that would not invalidate it can't exist (review round 8). Everything else laws gives (titles,
-# scopes, sections, the list not checked yet) is worked out fresh at every call.
+# Each book's validation (its Context and the rule checks: the slow, file-pure part of laws), kept by a snapshot of
+# every file and folder under the roots it can read from, taken before and after it runs (review round 9: watching
+# its reads missed a file appearing, an edit during the run and a passing error). Kept only when the two snapshots
+# agree and it raised nothing; used again only when a fresh snapshot equals the one it was kept by. Everything else
+# laws gives (titles, scopes, sections, the list not checked yet) is worked out fresh at every call.
 _VALIDATED: dict = {}
 
 
-class _Recorded:
-    """While it is open, every path opened (builtins.open, io.open), stat'd (os.stat: a file's existence or kind) or
-    listed (os.scandir, os.listdir), each as an absolute path."""
-
-    def __enter__(self):
-        import builtins
-        import io
-        import os
-        self.paths, self._saved = set(), (builtins.open, io.open, os.stat, os.scandir, os.listdir)
-        real_open, _, real_stat, real_scandir, real_listdir = self._saved
-
-        def note(path):
-            try:
-                self.paths.add(os.path.abspath(os.fspath(path)))
-            except TypeError:                    # a file descriptor: nothing to key on
-                pass
-
-        def opened(file, *a, **k):
-            note(file)
-            return real_open(file, *a, **k)
-
-        def stat(path, *a, **k):
-            note(path)
-            return real_stat(path, *a, **k)
-
-        def scandir(path=".", *a, **k):
-            note(path)
-            return real_scandir(path, *a, **k)
-
-        def listdir(path=".", *a, **k):
-            note(path)
-            return real_listdir(path, *a, **k)
-
-        builtins.open = io.open = opened
-        os.stat, os.scandir, os.listdir = stat, scandir, listdir
-        return self
-
-    def __exit__(self, *exc):
-        import builtins
-        import io
-        import os
-        builtins.open, io.open, os.stat, os.scandir, os.listdir = self._saved
-        return False
+def _roots(folder: Path) -> list[Path]:
+    """Where a book's validation can read from: the regulations (every place's and state's folders, the reviewers,
+    the extraction guide) and the rule format's own files."""
+    return [REPO / "regulations", REPO / "packages/rule_format/rule_format"]
 
 
-def _stamp(paths) -> tuple:
-    """Each path's size and change time now (None for one that doesn't exist): a folder's changes when an entry is
-    added or removed."""
+def _snapshot(roots) -> tuple:
+    """Every file and folder under the roots, each (path, size, change time), folders too (one gains or loses an
+    entry when a file is added, deleted or renamed): any change anywhere changes it. Stat-only."""
     import os
     out = []
-    for path in paths:
+
+    def walk(top: str):
         try:
-            s = os.stat(path)
-            out.append((path, s.st_size, s.st_mtime_ns))
+            with os.scandir(top) as entries:
+                for e in entries:
+                    if e.name == "__pycache__":
+                        continue
+                    try:
+                        s = e.stat(follow_symlinks=False)
+                    except OSError:
+                        out.append((e.path, None, None))
+                        continue
+                    out.append((e.path, s.st_size, s.st_mtime_ns))
+                    if e.is_dir(follow_symlinks=False):
+                        walk(e.path)
         except OSError:
-            out.append((path, None, None))
-    return tuple(out)
+            out.append((top, None, None))
+
+    for r in roots:
+        try:
+            s = os.stat(r)
+            out.append((str(r), s.st_size, s.st_mtime_ns))
+        except OSError:
+            out.append((str(r), None, None))
+        if os.path.isdir(r):
+            walk(str(r))
+    return tuple(sorted(out))
 
 
-def _validate(folder: Path, book: Path) -> dict:
-    """A book's validation: {problems, documents, kinds, rules}; rules only when it passes the rule checks. Never a
-    crash (zoning's answer goes with it), never a rule used unchecked."""
+def _validate(folder: Path, book: Path) -> tuple[dict, bool]:
+    """A book's validation: ({problems, documents, kinds, rules}, whether it raised). Rules only when it passes the
+    rule checks. Never a crash (zoning's answer goes with it), never a rule used unchecked."""
     try:
         ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
         problems = ctx.problems + state_settings_problems(folder, ctx) + rulebook_file_problems(book, ctx)
         return {"problems": problems, "documents": ctx.sources,
                 "kinds": {k: v for k, v in ctx.allowed().items() if k not in ("use", "district")},
-                "rules": [] if problems else load(book)["rules"]}
+                "rules": [] if problems else load(book)["rules"]}, False
     except Exception as e:
         return {"problems": [f"its sources can't be read ({type(e).__name__}: {e})"], "documents": {}, "kinds": {},
-                "rules": []}
+                "rules": []}, True
 
 
 def _validated(folder: Path, book: Path) -> dict:
-    """_validate, kept until any file it read changes (or a reader it calls is swapped: a test's monkeypatch), each
-    caller given its own copy."""
+    """_validate, kept while nothing under its roots changes (and no reader it calls is swapped: a test's
+    monkeypatch), each caller given its own copy. Fails closed: an edit during the run, or an error, is never kept."""
     import copy
     readers = (id(load), id(rulebook_file_problems), id(state_settings_problems),
                id(Context.for_jurisdiction.__func__))     # a class method's bound object is new at every look
     key = (str(folder), str(book), readers)
+    roots = _roots(folder)
+    before = _snapshot(roots)
     hit = _VALIDATED.get(key)
-    if hit is not None and _stamp(hit[0]) == hit[1]:
-        return copy.deepcopy(hit[2])
-    with _Recorded() as seen:
-        result = _validate(folder, book)
-    paths = tuple(sorted(seen.paths))
-    _VALIDATED[key] = (paths, _stamp(paths), result)
+    if hit is not None and hit[0] == before:
+        return copy.deepcopy(hit[1])
+    result, raised = _validate(folder, book)
+    if not raised and _snapshot(roots) == before:
+        _VALIDATED[key] = (before, result)
+    else:
+        _VALIDATED.pop(key, None)
     return copy.deepcopy(result)
 
 

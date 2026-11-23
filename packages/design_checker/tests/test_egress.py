@@ -445,31 +445,73 @@ def test_a_file_the_validation_read_changing_works_it_out_again(validations, sha
     assert len(validations) > 2, f"{shared} changed, but nothing was worked out again"
 
 
-def test_the_recorded_reads_hold_every_file_the_validation_opens(monkeypatch):
-    """An independent witness (Python's own audit hook for every open, on only while a book is validated) against
-    what _Recorded keeps it by: every file the validation opens is among them, the reviewers and the vocabulary too."""
+def test_a_file_appearing_clears_the_kept_validation_even_where_exists_skips_os_stat(validations, monkeypatch):
+    """Review round 9: on Python 3.13+ on Windows, Path.exists and is_file go through os.path (no os.stat), so a file
+    appearing later (a PDF copy put in 1_source_documents) was never seen; the snapshot walks the folders, so it is."""
     import os
-    opened, on = set(), []
-
-    def hook(event, args):
-        if on and event == "open" and isinstance(args[0], (str, bytes, os.PathLike)):
-            opened.add(str(Path(os.fsdecode(args[0])).resolve()))
-    sys.addaudithook(hook)                       # (an audit hook stays; it records only while `on`)
-    real = egress._validate
-
-    def watched(folder, book):
-        on.append(True)
-        try:
-            return real(folder, book)
-        finally:
-            on.clear()
-    monkeypatch.setattr(egress, "_validate", watched)
-    egress._VALIDATED.clear()
+    monkeypatch.setattr(Path, "exists", lambda self, **k: os.path.exists(self))
+    monkeypatch.setattr(Path, "is_file", lambda self, **k: os.path.isfile(self))
+    monkeypatch.setattr(Path, "is_dir", lambda self, **k: os.path.isdir(self))
     egress.laws(ITHACA)
-    kept = {str(Path(k).resolve()) for paths, _, _ in egress._VALIDATED.values() for k in paths}
-    from rule_format.rulebook import REVIEWERS_FILE, VOCABULARY_FILE
-    assert opened and opened <= kept, sorted(opened - kept)
-    assert {str(REVIEWERS_FILE.resolve()), str(VOCABULARY_FILE.resolve())} <= opened
+    copy = STATE / "1_source_documents" / "gov.ny.residential.2025.pdf"
+    assert not copy.exists()
+    copy.write_bytes(b"%PDF-1.7 a copy")
+    try:
+        egress.laws(ITHACA)
+    finally:
+        copy.unlink()
+    assert len(validations) > 2
+
+
+def test_a_new_file_anywhere_under_a_root_clears_the_kept_validation(validations):
+    egress.laws(ITHACA)
+    new = REPO / "regulations" / "jurisdictions" / "new_york" / "_a_new_file.tmp"
+    new.write_text("x", encoding="utf-8")
+    try:
+        egress.laws(ITHACA)
+    finally:
+        new.unlink()
+    assert len(validations) > 2
+
+
+def test_an_edit_during_the_validation_is_never_kept(monkeypatch):
+    """Fails closed: a file changed while a book was validated (between the two snapshots) keeps nothing."""
+    real, calls = egress._validate, []
+
+    def edited(folder, book):
+        calls.append(folder.name)
+        got = real(folder, book)
+        if len(calls) == 1:                       # the first validation sees the state file saved mid-run
+            undo = _touched(STATE / "state.yaml")
+            _validate_edits.append(undo)
+        return got
+    _validate_edits = []
+    monkeypatch.setattr(egress, "_validate", edited)
+    egress._VALIDATED.clear()
+    try:
+        egress.laws(ITHACA)
+        assert not any(k[0].endswith("new_york_state") for k in egress._VALIDATED)    # not kept ...
+        egress.laws(ITHACA)
+        assert calls.count("new_york_state") == 2                                    # ... so worked out again
+    finally:
+        for undo in _validate_edits:
+            undo()
+
+
+def test_a_validation_that_raised_is_never_kept(monkeypatch):
+    real, calls = egress._validate, []
+
+    def failing(folder, book):
+        calls.append(folder.name)
+        if len(calls) == 1:
+            return {"problems": ["its sources can't be read (OSError: a passing error)"], "documents": {},
+                    "kinds": {}, "rules": []}, True
+        return real(folder, book)
+    monkeypatch.setattr(egress, "_validate", failing)
+    egress._VALIDATED.clear()
+    assert egress.laws(ITHACA)["laws"][0]["problems"] == ["its sources can't be read (OSError: a passing error)"]
+    assert egress.laws(ITHACA)["laws"][0]["problems"] == []                # the error wasn't kept
+    assert calls.count("new_york_state") == 2
 
 
 def test_a_reader_patched_then_restored_gives_the_true_answer_again(monkeypatch):
