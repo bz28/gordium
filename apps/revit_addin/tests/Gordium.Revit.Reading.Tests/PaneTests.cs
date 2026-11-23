@@ -217,6 +217,8 @@ public sealed class PaneTests
         Assert.Equal("4 facts needed; 3 chosen, not saved yet. The street edge is picked on the plan (Pick on plan, above).",
                      PaneWords.SetupFooter(4, 3, streetToPick: true));
         Assert.Equal("1 fact needed; none chosen yet.", PaneWords.SetupFooter(1, 0, streetToPick: false));
+        // Revit 2027 trial: opened by Mark facts with everything set, never "0 facts needed" nor Check without them
+        Assert.Equal("Every fact the check needs is set.", PaneWords.SetupFooter(0, 0, streetToPick: false));
         var view = Read("ResultsView.cs");
         Assert.Contains("page.Children.Add(_setupFoot);\n        page.Children.Add(_setupScroll);", view, StringComparison.Ordinal);
         Assert.Contains("_setupFoot.Child = _setup.Footer;", view, StringComparison.Ordinal);
@@ -281,6 +283,11 @@ public sealed class PaneTests
         Assert.Equal("WHAT CHANGED SINCE THE LAST CHECK · 9 verdicts", PaneWords.ChangeHeading(change!));
         Assert.Equal(4, PaneWords.ChangesShown(change!).Count);
         Assert.StartsWith("And 5 more changed verdicts", PaneWords.ChangesMore(change!), StringComparison.Ordinal);
+        Assert.True(PaneWords.ChangeIsList(change!));
+        // nothing changed: the worker's own line, never "· 0 verdicts" (Revit 2027 trial)
+        var same = CheckChanges.Between(Model(House()), new DateTime(2026, 11, 22, 14, 32, 0), Model(House()));
+        Assert.False(PaneWords.ChangeIsList(same!));
+        Assert.Contains("if (!PaneWords.ChangeIsList(change))", Read("ResultsView.cs"), StringComparison.Ordinal);
         Assert.Equal(Tone.Complies, PaneWords.ChangeTone(new RowChange("a", "a", Verdict.NeedsReview, Verdict.Complies, "a now complies")));
         Assert.Equal(Tone.Review, PaneWords.ChangeTone(new RowChange("a", "a", Verdict.Complies, Verdict.NeedsReview, "a")));
         Assert.Equal(Tone.Review, PaneWords.ChangeTone(new RowChange("a", "a", Verdict.Complies, null, "a no longer in the check")));

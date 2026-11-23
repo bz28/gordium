@@ -66,7 +66,8 @@ internal sealed class SetupView : C.StackPanel
             Children.Add(Banner(PanelStatus.Review, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, headline, bottom: 4));
         // why the form, in one line; Save and Check without them are in the footer pinned at the pane's foot
         // (the intuitive pane, change 3: before, Save was under every fact group, off a docked pane's screen)
-        Children.Add(Muted(PaneWords.SetupWhy, top: 2, bottom: 2));
+        if (!_screen.Ready)
+            Children.Add(Muted(PaneWords.SetupWhy, top: 2, bottom: 2));
     }
 
     // ---- the project facts -------------------------------------------------------------------------------------
@@ -130,7 +131,8 @@ internal sealed class SetupView : C.StackPanel
         anyway.ToolTip = "Check with what is set now: each fact still missing makes the rules it decides need review, never a pass";
         anyway.VerticalAlignment = W.VerticalAlignment.Center;
         anyway.Margin = new W.Thickness(0, 0, 0, 4);
-        line.Children.Add(anyway);
+        if (!_screen.Ready)                                     // nothing missing: nothing to check without
+            line.Children.Add(anyway);
         p.Children.Add(line);
         var foot = new C.Border { Child = p, BorderThickness = new W.Thickness(0, 1, 0, 0), Padding = new W.Thickness(12, 8, 12, 10) };
         foot.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);

@@ -454,16 +454,21 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private static C.Border ChangeLine(CheckChange change)
     {
         var p = new C.StackPanel();
-        p.Children.Add(Ink(Typed(new C.TextBlock { Text = PaneWords.ChangeHeading(change), TextWrapping = W.TextWrapping.Wrap }, "type.overline"), PanelTokens.TextMuted));
-        foreach (var r in PaneWords.ChangesShown(change))
+        if (!PaneWords.ChangeIsList(change))                   // no verdict changed: the worker's one line, as it says
+            p.Children.Add(Typed(new C.TextBlock { Text = change.Words, TextWrapping = W.TextWrapping.Wrap }, Caption));
+        else
         {
-            var w = Typed(new C.TextBlock { Text = r.Words, TextWrapping = W.TextWrapping.Wrap }, Caption);
-            var line = WithGlyph(StatusLook.Of(PaneWords.ChangeTone(r), false), w, size: 11, gap: 5);
-            line.Margin = new W.Thickness(0, 3, 0, 0);
-            p.Children.Add(line);
+            p.Children.Add(Ink(Typed(new C.TextBlock { Text = PaneWords.ChangeHeading(change), TextWrapping = W.TextWrapping.Wrap }, "type.overline"), PanelTokens.TextMuted));
+            foreach (var r in PaneWords.ChangesShown(change))
+            {
+                var w = Typed(new C.TextBlock { Text = r.Words, TextWrapping = W.TextWrapping.Wrap }, Caption);
+                var line = WithGlyph(StatusLook.Of(PaneWords.ChangeTone(r), false), w, size: 11, gap: 5);
+                line.Margin = new W.Thickness(0, 3, 0, 0);
+                p.Children.Add(line);
+            }
+            if (PaneWords.ChangesMore(change) is { } more)
+                p.Children.Add(Small(more, top: 3));
         }
-        if (PaneWords.ChangesMore(change) is { } more)
-            p.Children.Add(Small(more, top: 3));
         var b = new C.Border
         {
             Child = p, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),

@@ -77,6 +77,8 @@ public static class PaneWords
     /// <summary>"4 facts needed; 3 chosen, not saved yet." (and the street edge's way, when it is still to pick).</summary>
     public static string SetupFooter(int needed, int chosen, bool streetToPick)
     {
+        if (needed == 0)                                         // the form opened with everything set (Mark facts)
+            return chosen == 0 ? "Every fact the check needs is set." : $"Every fact the check needs is set; {chosen} chosen, not saved yet.";
         var words = $"{needed} {(needed == 1 ? "fact" : "facts")} needed; " + (chosen == 0 ? "none chosen yet" : $"{chosen} chosen, not saved yet");
         return words + (streetToPick ? ". The street edge is picked on the plan (Pick on plan, above)." : ".");
     }
@@ -130,6 +132,14 @@ public static class PaneWords
 
     /// <summary>How many changed results are listed by name; the rest are counted.</summary>
     public const int ChangesListed = 4;
+
+    /// <summary>Whether what changed is a list (some verdict changed), or the worker's one line ("Nothing changed
+    /// since the check at 01:10.", "2 results say something new").</summary>
+    public static bool ChangeIsList(CheckChange change)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+        return change.Rows.Count > 0;
+    }
 
     /// <summary>"WHAT CHANGED SINCE THE LAST CHECK · 9 verdicts".</summary>
     public static string ChangeHeading(CheckChange change)
