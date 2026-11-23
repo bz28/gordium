@@ -2316,8 +2316,9 @@ def zoning_causes(item: dict) -> list[dict]:
             words = rhino_logic.enter_words(needs)
         except KeyError:
             words = "Enter " + ", ".join(n.replace("_", " ") for n in needs)
+        # the facts' own fields (a host names its mark from them: Revit's Gordium: Zone feeds facts.zone)
         return [{"kind": panel_data.MARK, "key": "facts:" + ",".join(sorted(needs)), "words": words,
-                 "elements": [], "needs": needs}]
+                 "elements": [], "needs": needs, "field": "facts." + needs[0], "fields": ["facts." + n for n in needs]}]
     if item.get("hint") in (PICK_MAIN, PICK_ADU):
         return [{"kind": panel_data.MARK, "key": "pick:" + item["hint"], "words": item["hint"], "elements": objects}]
     reason = (item.get("reason") or "").strip()
@@ -2346,11 +2347,16 @@ def law_causes(item: dict) -> list[dict]:
     if item.get("law_key") and tail.endswith(twin):   # egress.check's rename of an id two laws share
         tail = tail[:-len(twin)]
     if tail.startswith("interior#") or item.get("waiting"):
-        # the drawing's problem: a mark when it asks the architect to state something (say whether…, `x`: true or
-        # false), else the model is the architect's to fix; classed by the row's id, never by a word like "marked"
-        asks = "say whether" in reason or re.search(r"`[^`]+`: true or false", reason) is not None
-        return [{"kind": panel_data.MARK if asks else panel_data.FIX_MODEL, "key": f"drawing:{reason}",
-                 "words": reason, "elements": elements}]
+        # the drawing's problem: a mark when it asks the architect to state something (a flag an entry doesn't give,
+        # or a kind the drawing doesn't say it has all of), read back from the measuring's own words (asked_field),
+        # with the description's field it needs; else the model is the architect's to fix. Classed by the row's id
+        # and the measuring's words, never by a word like "marked"
+        from model_measurement.interior import asked_field
+        before = egress.INTERIOR_PROBLEM.split("{why}")[0]
+        drawing = reason.startswith(before) and tail.startswith("interior#")
+        field = asked_field(reason[len(before):]) if drawing else None
+        return [{"kind": panel_data.MARK if field else panel_data.FIX_MODEL, "key": f"drawing:{reason}",
+                 "words": reason, "elements": elements, **({"field": field} if field else {})}]
     if tail.startswith(egress.HAS_NONE_ID):
         return [{"kind": panel_data.DECIDE, "key": f"has_none:{tail}", "words": reason, "elements": elements}]
     if tail.startswith("skipped#") or tail in (egress.NOT_YET_ID, "rules", "nothing_applied")             or reason == egress.NOT_PER_PART or (item.get("open") or {}).get("gordium") == egress.SECTIONS:
