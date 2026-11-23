@@ -135,7 +135,8 @@ internal sealed class SetupView : C.StackPanel
     {
         var box = new C.StackPanel { Margin = new W.Thickness(0, 6, 0, 2) };
         var chosen = _draft.Chosen(f.Mark);
-        var shown = chosen ?? f.Current;
+        // what the check reads: a ground word in another case shows as its choice (a zone or use doesn't: its problem says why)
+        var shown = chosen ?? f.CurrentChoice?.Value ?? f.Current;
         var title = new C.WrapPanel();
         title.Children.Add(Words(f.Label, Body, semibold: true));
         if (f.Required && !f.IsSet && chosen is null)

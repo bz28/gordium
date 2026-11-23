@@ -55,7 +55,11 @@ public sealed record SetupField(MarkDefinition Mark, string Label, FieldKind Kin
     public bool IsSet => Current is not null && Problem is null;
 
     /// <summary>The label of what it holds now (a use's name, not its word), or null.</summary>
-    public string? CurrentLabel => Current is null ? null : Choices.FirstOrDefault(c => c.Value == Current)?.Label ?? Current;
+    public string? CurrentLabel => Current is null ? null : CurrentChoice?.Label ?? Current;
+
+    /// <summary>The choice the check reads what the mark holds as (SetupFacts.Reads, the one matcher: a ground word in
+    /// any case, a zone or use word for word), or null: what the form shows selected.</summary>
+    public FieldChoice? CurrentChoice => Current is null ? null : Choices.FirstOrDefault(c => SetupFacts.Reads(Mark, Current, [c]));
 }
 
 /// <summary>A window's or door's rooms on each side and its level (FamilyInstance.FromRoom / ToRoom in the last phase,

@@ -513,7 +513,15 @@ public sealed class SetupTests
         var project = new Dictionary<Guid, MarkValue>(AllStated()) { [Marks.GroundFrom.Guid] = new(true, Text: "spot grades") };
         var model = Model(project);
         var s = Screen(model);
-        Assert.Null(s.Fields.Single(f => f.Mark == Marks.GroundFrom).Problem);
+        var ground = s.Fields.Single(f => f.Mark == Marks.GroundFrom);
+        Assert.Null(ground.Problem);
+        // R3: shown as the choice it is read as (the form shows it selected), never blank
+        Assert.Equal("Spot grades", ground.CurrentLabel);
+        Assert.Equal("Spot grades", ground.CurrentChoice?.Value);
+        var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "SetupView.cs"));
+        Assert.Contains("var shown = chosen ?? f.CurrentChoice?.Value ?? f.Current;", view, StringComparison.Ordinal);
+        // a zone in another case: not shown as selected (its problem says why)
+        Assert.Null(Screen(Model(new(AllStated()) { [Marks.Zone.Guid] = new(true, Text: "r-1b") })).Fields.Single(f => f.Mark == Marks.Zone).CurrentChoice);
         Assert.DoesNotContain(Marks.GroundFrom.Name, s.Needed);
         var read = ProjectFacts.Read(model);
         Assert.Equal("spot", read.Facts["grade_from"]!.GetValue<string>());
