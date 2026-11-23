@@ -3,7 +3,11 @@
 The **City** of Ithaca, not the Town of Ithaca, which has its own zoning code.
 
 - Zoning code: Chapter 325 of the City Code.
-- Starting with residential districts: R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU.
+- Residential districts: R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU.
+- Commercial districts (2026-11-22): B-1a, B-1b, B-2a, B-2d, B-4, B-5. Every other non-residential district (B-2b,
+  B-2c, the CBD districts, the special-purpose, West End, Southwest, waterfront and Collegetown districts, the form
+  districts and overlays) is inventoried, with where its rules live and the plan for it, in
+  `docs/decisions/2026-11-22_commercial_districts.md`.
 - Note: the Southside ordinance (No. 2025-12, adopted Nov 2025) rezoned parts of some residential districts and is **not** reflected in the April 2026 zoning charts.
 
 See `regulations/README.md` for what each numbered step means.
