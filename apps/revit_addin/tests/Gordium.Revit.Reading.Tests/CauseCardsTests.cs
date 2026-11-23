@@ -157,8 +157,9 @@ public sealed class CauseCardsTests
         Assert.Equal("Selected 1 element; Properties is open: set Gordium: Exit door there, then Check again.", CauseCards.AfterProperties(cards[0], 1));
         Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(cards[1], labels));
         Assert.Equal("Set Gordium: Stories on Project Information.", CauseCards.Note(cards[1], labels));
-        Assert.Equal(CardAction.None, CauseCards.Action(cards[2], labels));                            // no mark feeds the ADU fact
-        Assert.Empty(CauseCards.MarksOf(cards[2]));
+        // the ADU fact has its mark on Project Information since 2026-11-22 (Gordium: Accessory dwelling unit)
+        Assert.Equal([Marks.AccessoryDwellingUnit], CauseCards.MarksOf(cards[2]));
+        Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(cards[2], labels));
         Assert.Equal([Marks.Zone, Marks.Stories], CauseCards.MarksOf(cards[3]));
         Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(cards[3], labels));
         // Gordium: Use is on Project Information and on Rooms: a project fact's is set on Project Information

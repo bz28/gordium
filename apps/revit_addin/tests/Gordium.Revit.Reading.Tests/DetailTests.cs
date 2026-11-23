@@ -36,6 +36,9 @@ public sealed class DetailTests(RealWorker worker) : IClassFixture<RealWorker>
         h.ProjectMarks[Marks.Use.Guid] = new(true, Text: "one_family_detached");
         h.ProjectMarks[Marks.LotSurveyed.Guid] = new(true, 1);
         h.ProjectMarks[Marks.StreetEdge.Guid] = new(true, Text: StreetEdges.Format([(edge.Start, edge.End)]));
+        // a house of a basement and one story: no ground is marked, so its stories above grade plane are stated for
+        // the Residential Code to govern (code_scope.py; else both of New York's books run)
+        h.ProjectMarks[Marks.StoriesAboveGradePlane.Guid] = new(true, 2);
         var client = await worker.RunningAsync();
         var prepared = await ProjectCheck.PrepareAsync(outside, h.Model(), new WorkerLeftOut(client));
         return await ProjectCheck.SendAsync(client, prepared.Request!);
