@@ -454,8 +454,9 @@ nothing is written to the model.
 - **14. Select an element, see its results** (`SelectionMap`, `SelectionResultsTests`): Revit's `SelectionChanged`
   (2023+) in the project the pane shows lists, under the pane's header, the results that mention what is selected: a
   result whose own elements name it, or every result of a cause card that names it as one of its rooms. Each is a link
-  to its detail (a filter, search or fold hiding it is cleared first); eight shown, then "Show all N"; "Show every
-  result" puts the strip away. An element no result names is said not to be a pass. The pane's own selections (a
+  to its detail (a filter, search or fold hiding it is cleared first), after which the strip folds to its title and
+  line ("List them" opens it again) so the detail has the pane; eight shown, then "Show all N"; "Show every result"
+  puts the strip away. An element no result names is said not to be a pass. The pane's own selections (a
   result's Show) leave the strip as it is.
 - **15. A printable summary** (`ComplianceSummary`, `ComplianceSummaryTests`; the Results panel's new **Summary**
   button): every row of the check in the checker's groups and order, with the rule, proposed, required, the result
@@ -465,7 +466,10 @@ nothing is written to the model.
   law, needs no font embedding for ≥, ≤ and §, and the add-in takes no PDF library. It is saved where the architect
   chooses, then opened. A stale answer is never summarised: Summary asks to check again first.
 
-How we know: the tests pin that the badge never shows a pass while a row needs review, that a stale answer shows the
+Confirmed in Revit 2027 (2026-11-23, 106 Ithaca Rd and the childcare model): Check project's image and tooltip change
+at runtime (a red 1 and an amber 99+ on the house, its counts in the tooltip; the clock and "the model changed" after a
+wall was nudged); selecting a wall lists the results that name it and a link opens its detail; Summary saves the page
+and opens it in the browser, and refuses once the model changed. How we know otherwise: the tests pin that the badge never shows a pass while a row needs review, that a stale answer shows the
 clock and no count, that the selection map never drops a row (every row naming an element, every row of a card naming
 a room), and that the summary holds exactly the checker's rows, each once, with its words and no figure of its own;
 each fails when its behaviour is reverted. Differences from the agreed pictures: STORAGE (13) is mentioned by 12
