@@ -504,22 +504,41 @@ def farthest_of(layout):
 
 # --- the apartment, timed --------------------------------------------------------------------------------------------
 
-def test_the_four_unit_apartments_route_measures_take_seconds_not_minutes():
-    """The four-unit apartment (test_data/test_sites/new_york/ithaca_city/four_unit_apartment): its route measures
-    took about 100 s of CPU before these speed-ups and take about 8 s now (Ben's Windows laptop). The bound is 30 s
-    of CPU time, generous because a laptop that has just been busy runs slower (the same code measured 24 s right
-    after a 15-s busy loop), and still far under the old 100 s, so a slowness that comes back is seen."""
+def test_the_four_unit_apartments_route_measures_do_a_tenth_of_the_work(monkeypatch):
+    """The four-unit apartment (test_data/test_sites/new_york/ithaca_city/four_unit_apartment), its route measures
+    counted, not timed (a count is the same on every machine and under any load): the 2x2 solves (own_h's, one
+    call per triangle worked once; main called 383,192, nine per own_h asked) and the shapely covers and distance
+    calls (main 411,412; the lines and points now tested many to a call, the reach test asked only near its line).
+    This branch makes 4,178 and 86,112. The bounds sit far between, so a speed-up taken out fails here. In time,
+    on Ben's laptop: main about 22-29 s of CPU, this branch about 4-7 s; the 60-s check below is only a sanity
+    check, far too generous to fail on a busy machine."""
+    import numpy
     from rule_format.rulebook import REPO
     from model_measurement.routes import measure
     sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
     import make_ny_build_data as build
     interior = build.interior_of()
+    counts = {"solve": 0, "shapely": 0}
+
+    def counted(f, key):
+        def call(*a, **k):
+            counts[key] += 1
+            return f(*a, **k)
+        return call
+
+    monkeypatch.setattr(numpy.linalg, "solve", counted(numpy.linalg.solve, "solve"))
+    monkeypatch.setattr(shapely, "covers", counted(shapely.covers, "shapely"))
+    monkeypatch.setattr(shapely, "distance", counted(shapely.distance, "shapely"))
+    for memo in ("_H_SEEN", "_REACH"):                    # nothing remembered from the tests before this one
+        getattr(remote, memo, {}).clear()
     start = time.process_time()
     got = measure(interior)
     took = time.process_time() - start
     assert [s["id"] for s in got["parts"]["story"]] == ["L1", "L2"]
     assert all("egress_travel_distance" in s["measures"] for s in got["parts"]["story"])
-    assert took < 30, f"{took:.1f} s of CPU"
+    assert counts["solve"] <= 10_000, counts                 # main: 383,192; this branch: 4,178
+    assert counts["shapely"] <= 150_000, counts              # main: 411,412; this branch: 86,112
+    assert took < 60, f"{took:.1f} s of CPU"
 
 
 if __name__ == "__main__":
