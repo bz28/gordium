@@ -68,3 +68,107 @@ def test_the_name_may_hold_anything_the_host_names_an_element_by():
     words = Stop("flag_missing", what="door", name=name, question="the required exit door", key="exit").reason
     assert words == f"door {name} doesn't say whether it is the required exit door (yes or no)"
     assert asked_field(words) == "doors[].exit"
+
+
+# ---- review round 1: the reasons as the measuring gives them, not only the table's words --------------------------
+
+def test_a_window_waiting_on_the_makers_size_names_every_part_of_it_it_needs():
+    """A window's maker's clear opening needs its bottom too (Revit: Gordium: Clear offset), never only a door's three."""
+    words = Stop("operation_needs_clear", n="n", operation="awning").reason
+    assert "bottom" in words and "width" in words and "height" in words and "source" in words
+    d = base()
+    d["openings"][0].update(operation="awning", stated_clear="big")
+    d["openings"][0].pop("frame", None)
+    why = measure(d)["parts"]["emergency_escape_opening"][0]["not_measured"]["opening_net_clear_area"]
+    assert "its clear width, height, bottom and source" in why
+
+
+@pytest.mark.parametrize("kind", ["stairs", "guards", "rooms"])
+def test_a_list_not_given_never_calls_the_building_a_house(kind):
+    """The Children's Odyssey is a day care: "all of the house's stairs" wasn't true of it."""
+    words = Stop("not_read", what=kind, key=kind).reason
+    assert "house" not in words and words.endswith(f"the model doesn't say these are all the {kind} (or that there "
+                                                   "are none)")
+
+
+def _claims(*entries, **lists):
+    d = base()
+    d["has_none"] = list(entries)
+    d.update(lists)
+    return d
+
+
+@pytest.mark.parametrize("entries, lists, words", [
+    # a kind with a list of its own, the list not given: never said to be given
+    ([{"kind": "stair", "source": "A-2"}], {}, "the model says the house has no stairs, but stairs have a list of "
+                                               "their own in the model"),
+    ([{"kind": "emergency_escape_opening", "source": "A-2"}], {}, "has no emergency escape openings, but openings"),
+    # more than an entry has: said as more, never "values it doesn't know"
+    ([{"kind": "ramp", "source": "A-2", "reding": True}], {}, "giving more than a kind, a source and, optionally, a "
+                                                             "reading (also reding)"),
+    # the text "yes" is no yes/no value: said so, never "isn't yes or no" of a "yes"
+    ([{"kind": "ramp", "source": "A-2", "reading": "yes"}], {}, "its reading isn't a yes/no value"),
+])
+def test_a_claim_not_taken_says_why_truly_and_plainly(entries, lists, words):
+    got = measure(_claims(*entries, **lists))
+    said = [p for p in got["problems"] if words in p]
+    assert said, got["problems"]
+    assert all("`" not in p and "_" not in p for p in said), said
+
+
+def test_the_door_makers_size_with_more_than_it_has_says_so():
+    d = base()
+    d["doors"][0]["stated_clear"] = {"width": 34, "height": 80, "source": "maker", "bottom": 0}
+    m = measure(d)["parts"]["egress_door"][0]["not_measured"]
+    assert "gives more than its width, height and source (also bottom)" in m["door_clear_width"]
+
+
+def test_route_reasons_as_read_have_no_back_quotes_underscored_fields_or_coordinates():
+    """The reasons the route reading gives for a description it can't read, as it gives them: the levels not a
+    list, a room with no id, a list that isn't of entries, a story outline on no level given, a not-occupied mark
+    given as text, obstructions not a list."""
+    from model_measurement.routes import measure as routes_measure
+    from model_measurement.routes.floor import read
+    from routes_layouts import room_on_corridor
+    cases = []
+    d = room_on_corridor()
+    d["levels"] = "x"
+    cases.append(d)
+    d = room_on_corridor()
+    del d["rooms"][0]["id"]
+    cases.append(d)
+    d = room_on_corridor()
+    d["passages"] = [1]
+    cases.append(d)
+    d = room_on_corridor()
+    d["story_outlines"] = [{"level": "nowhere", "outer": [], "inner": []}]
+    cases.append(d)
+    d = room_on_corridor()
+    d["rooms"][0]["not_occupied"] = "yes"
+    cases.append(d)
+    d = room_on_corridor()
+    d["rooms"][0]["obstructions"] = "a desk"
+    cases.append(d)
+    said = []
+    for d in cases:
+        floor = read(d)
+        said += list(floor.stops) + [r for s in floor.stories.values() for r in s.stops]
+        said += [s.outline_stop for s in floor.stories.values() if getattr(s, "outline_stop", None)]
+        for kind, parts in (routes_measure(d)["parts"] or {}).items():
+            for p in parts or []:
+                said += [w for w in (p.get("not_measured") or {}).values() if isinstance(w, str)]
+    assert len({w for w in said}) >= 6, said
+    for w in said:
+        assert "`" not in w and not COORDINATES.search(w), w
+        assert not re.search(r"\b[a-z]+_[a-z_]+\b", w), w            # no field name of the file format
+    assert any("not one of yes or no (a yes/no value, not text)" in w for w in said), said
+    assert any("story outline #1 isn't on one of the model's levels" in w for w in said), said
+
+
+def test_a_dead_ends_door_off_its_legs_is_named_without_coordinates():
+    from model_measurement.routes.stops import Stop as RouteStop
+    words = RouteStop("door_off_legs", name="at one of its closed ends").reason
+    assert not COORDINATES.search(words)
+    import inspect
+    from model_measurement.routes import dead_ends
+    assert "at the closed end (" not in inspect.getsource(dead_ends)

@@ -88,7 +88,7 @@ def _unknown_spaces(description: dict, problems: list):
     if got is None:
         return []
     if not isinstance(got, list):
-        problems.append(Stop("not_a_list", key="unknown_spaces").reason)
+        problems.append(Stop("not_a_list", key="enclosed spaces with no room drawn in them").reason)
         return None
     for n, item in enumerate(got, 1):
         if not isinstance(item, dict) or not isinstance(item.get("id"), str) or not item["id"].strip():

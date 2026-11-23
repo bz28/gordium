@@ -127,7 +127,7 @@ def test_every_answer_is_the_predicted_one_and_never_a_false_pass(found, name):
     for k, v in got["results"].items():
         if v == "not_applicable":
             assert (k in set_aside) == ("has_none" in by_id[k]["because"]), k
-    assert got["interior"]["problems"] == ["the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)"]
+    assert got["interior"]["problems"] == ["the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)"]
 
 
 @pytest.mark.parametrize("name", NAMES)

@@ -87,7 +87,7 @@ def drawn_clear(o: dict, reader, operation: str):
 def stated(o: dict, reader):
     s = o.get("stated_clear")
     if not isinstance(s, dict):
-        raise Stop("missing", what="the maker's clear opening (its width, height and bottom)")
+        raise Stop("missing", what="the maker's clear opening (its clear width, height, bottom and source)")
     width = reader.size(s.get("width"), "the maker's clear width")
     height = reader.size(s.get("height"), "the maker's clear height")
     bottom = reader.length(s.get("bottom"), "the maker's clear opening's bottom")

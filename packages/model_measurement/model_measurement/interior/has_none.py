@@ -223,10 +223,11 @@ def read(description: dict) -> tuple[dict, list[str]]:
             problems.append(Stop("has_none_sleeping_room").reason)
             continue
         if kind in LISTED:
-            problems.append(Stop("has_none_listed", kind=kind, key=LISTED[kind]).reason)
+            problems.append(Stop("has_none_listed", kind=kind.replace("_", " ") + "s",
+                                 key=LISTED[kind].replace("_", " ")).reason)
             continue
         if kind not in KINDS:
-            problems.append(Stop("has_none_kind", kind=kind, kinds=", ".join(KINDS)).reason)
+            problems.append(Stop("has_none_kind", kind=kind, kinds=", ".join(k.replace("_", " ") for k in KINDS)).reason)
             continue
         if extra := sorted(set(entry) - ENTRY_KEYS, key=str):    # a mistyped `reading` must never read as settled
             problems.append(Stop("has_none_keys", words=KINDS[kind]["words"], keys=", ".join(map(str, extra))).reason)
@@ -251,7 +252,7 @@ def read(description: dict) -> tuple[dict, list[str]]:
             continue
         listed = KINDS[kind]["list"]
         if listed is not None and listed in description and description[listed] != []:
-            problems.append(Stop("has_none_contradicted", words=KINDS[kind]["words"], key=listed).reason)
+            problems.append(Stop("has_none_contradicted", words=KINDS[kind]["words"], key=listed.replace("_", " ")).reason)
             continue
         spaces = description.get("unknown_spaces")
         if kind in SPACES and spaces is not None and spaces != []:

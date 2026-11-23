@@ -10,8 +10,7 @@ STOPS = {
     "not_a_description": "the interior description isn't a mapping",
     "wrong_format": "the interior description's format isn't gordium.interior/1 (it says {got})",
     "units": "the interior description's units ({units}) aren't one of in, ft, mm, m",
-    "not_read": "the {what} weren't read: the model doesn't say which are all of the house's {what} (or that it has "
-                "none)",
+    "not_read": "the {what} weren't read: the model doesn't say these are all the {what} (or that there are none)",
     "not_a_list": "the {key} sent from the model can't be read (they aren't a list)",
     "not_a_mapping": "{what} #{n} isn't a mapping",
     "flag_missing": "{what} {name} doesn't say whether it is {question} (yes or no)",
@@ -24,20 +23,20 @@ STOPS = {
     "has_none_not_a_list": "what the model says the house has none of can't be read (it isn't a list, each entry a "
                            "kind and its source): it isn't read",
     "has_none_entry": "entry #{n} of what the house has none of isn't a kind with its source: it isn't read",
-    "has_none_listed": "the model says the house has none of {kind!r}, which it also gives as a list: say there are "
-                       "none with an empty list of {key}, not as something the house has none of",
+    "has_none_listed": "the model says the house has no {kind}, but {key} have a list of their own in the model: say "
+                       "there are none with an empty list of {key}, not as something the house has none of",
     "has_none_sleeping_room": "the model says the house has no sleeping rooms: a room that isn't a sleeping room says "
                               "so itself (sleeping room: no), not as something the house has none of",
-    "has_none_kind": "the model says the house has none of {kind!r}, not a kind it can say that of ({kinds}): it isn't "
-                     "read",
+    "has_none_kind": "the model says the house has none of {kind!r}, not a kind it can say that of (one of: {kinds}): "
+                     "it isn't read",
     "has_none_no_source": "the model says the house has no {words} but not where that comes from (its source, "
                           "such as the sheet): it isn't taken, so their rules need review",
-    "has_none_reading": "the model says the house has no {words}, but its reading isn't yes or no: it "
+    "has_none_reading": "the model says the house has no {words}, but its reading isn't a yes/no value: it "
                         "isn't taken, so their rules need review",
     "has_none_twice": "the model says {count} times that the house has no {words}: it isn't taken, so their "
                       "rules need review",
-    "has_none_keys": "the model says the house has no {words}, with entries it doesn't know ({keys}; an entry "
-                     "has a kind, a source and, optionally, a reading): it isn't taken, so their rules need review",
+    "has_none_keys": "the model says the house has no {words}, giving more than a kind, a source and, "
+                     "optionally, a reading (also {keys}): it isn't taken, so their rules need review",
     "has_none_below_ground": "the model says the house has no basements, yet {what}: which is right is "
                              "unclear, so their rules need review",
     "has_none_room_within": "the model says the house has no sleeping lofts, yet {what}: which is right is "
@@ -77,7 +76,7 @@ STOPS = {
     "room_unknown": "the room the opening is in isn't one of the rooms given",
     "room_twice": "{count} rooms have the id {id!r}: which one the opening is in is unclear",
     "operation_needs_clear": "a{n} {operation} window's clear opening depends on how far it opens and its hardware: "
-                             "give the maker's net clear opening (its clear width, height and source)",
+                             "give the maker's net clear opening (its clear width, height, bottom and source)",
     "no_frame": "the opening's frame isn't given (and no maker's clear opening)",
     "hinge_angle": "the hinged sash's open angle ({angle}°) isn't between 0 and 180",
     "no_sashes": "the open sashes of a sliding window aren't given",
@@ -152,8 +151,8 @@ STOPS = {
                     "hung on that pin",
     "door_stated_shape": "the door's maker's clear opening isn't a width, a height and a source: neither clear "
                          "size counts",
-    "door_stated_keys": "the door's maker's clear opening has values it doesn't know ({keys}; it has a width, a "
-                        "height and a source): neither clear size counts",
+    "door_stated_keys": "the door's maker's clear opening gives more than its width, height and source (also "
+                        "{keys}): neither clear size counts",
     "door_stated_no_source": "the door's maker's clear opening doesn't say where it comes from "
                              "(its source, such as the maker's catalogue): neither clear size counts",
     "door_drawn_unread": "the door's clear {what} is drawn but can't be measured from the drawing ({reason}): the "

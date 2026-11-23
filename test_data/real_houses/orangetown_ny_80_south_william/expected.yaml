@@ -86,9 +86,9 @@ reasons:                                   # the exact reason for every measure 
   g_bridge_n: "the guard's members (rails, balusters, posts, panels) isn't given"
   g_bridge_s: "the guard's members (rails, balusters, posts, panels) isn't given"
   g_east: "the guard's members (rails, balusters, posts, panels) isn't given"
-  g_stair_w: "the stair the guard is along couldn't be measured: the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)"
+  g_stair_w: "the stair the guard is along couldn't be measured: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)"
 problems:
-  - "the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)"
+  - "the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)"
 not_checked:                               # escape openings in rooms that aren't sleeping rooms
   - x1
   - x2

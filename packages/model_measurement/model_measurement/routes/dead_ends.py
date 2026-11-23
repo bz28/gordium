@@ -882,7 +882,7 @@ def _corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
         room = near if rooms[near].outline.distance(Point(start)) <= SHALLOW + 2 * SAME else None
         if got is None or room is None:
             why = (Stop("dead_end_unbounded", x=_show(start)[0], y=_show(start)[1]).reason if got is None else
-                   Stop("door_off_legs", name=f"at the closed end ({_show(start)[0]}, {_show(start)[1]})").reason)
+                   Stop("door_off_legs", name="at one of its closed ends").reason)
             for n in g.component(leaf):
                 if owner[n] is not None:
                     for m in floors[owner[n]].rooms:

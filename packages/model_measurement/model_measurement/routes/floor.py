@@ -253,7 +253,8 @@ def _list(description, key, words, stops, required):
             stops.append(Stop("key_left_out", key=key.replace("_", " "), words=words).reason)
         return None
     if not isinstance(got, list) or not all(isinstance(i, dict) for i in got):
-        stops.append(Stop("description", reason=f"`{key}` isn't a list of mappings").reason)
+        stops.append(Stop("description", reason=f"the model's {key.replace('_', ' ')} can't be read (they aren't a "
+                                                  "list of entries)").reason)
         return None
     return got
 
@@ -263,7 +264,7 @@ def _twice(items, what, stops) -> bool:
     bad = False
     for n, item in enumerate(items, 1):
         if not isinstance(item.get("id"), str) or not item["id"].strip():
-            stops.append(Stop("description", reason=f"{what} #{n} has no text `id`").reason)
+            stops.append(Stop("description", reason=f"{what} #{n} has no id").reason)
             bad = True
     for i in sorted({i for i in ids if isinstance(i, str) and ids.count(i) > 1}):
         stops.append(Stop("id_twice", count=ids.count(i), what=what, id=i).reason)
@@ -277,7 +278,7 @@ def _levels(description, reader, stops):
         stops.append(Stop("no_levels").reason)
         return None
     if not isinstance(got, list):
-        stops.append(Stop("description", reason="`levels` isn't a list").reason)
+        stops.append(Stop("description", reason="the model's levels can't be read (they aren't a list)").reason)
         return None
     levels = {}
     for n, item in enumerate(got, 1):
@@ -304,7 +305,8 @@ def _flag(item, key):
     got = item.get(key)
     if got is None or isinstance(got, bool):
         return got
-    raise InteriorStop("choice", what=f"its {key.replace('_', ' ')}", got=got, choices="yes, no")
+    raise InteriorStop("choice", what=f"its {key.replace('_', ' ')}", got=got,
+                       choices="yes or no (a yes/no value, not text)")
 
 
 def _room(item, reader, level) -> Room:
@@ -327,7 +329,7 @@ def _room(item, reader, level) -> Room:
         if got is None:
             raise InteriorStop("missing", what="what stands on its floor (an empty list for nothing)")
         if not isinstance(got, list):
-            raise InteriorStop("not_a_list", key="obstructions")
+            raise InteriorStop("not_a_list", key="obstructions (what stands on its floor)")
         for n, ob in enumerate(got, 1):
             if not isinstance(ob, dict):
                 raise InteriorStop("not_a_mapping", what="obstruction", n=n)
@@ -362,7 +364,7 @@ def _outlines_of(item, key, reader, what) -> list:
     if got is None:
         raise InteriorStop("missing", what=f"its {key.replace('_', ' ')} (an empty list for none)")
     if not isinstance(got, list):
-        raise InteriorStop("not_a_list", key=key)
+        raise InteriorStop("not_a_list", key=key.replace("_", " "))
     return [reader.outline(h, f"{what} #{n}") for n, h in enumerate(got, 1)]
 
 
@@ -480,8 +482,8 @@ def _outlines(outlines, reader, stories) -> None:
         level = item.get("level") if isinstance(item, dict) else None
         if level not in stories:
             for story in stories.values():
-                story.outline_stop = Stop("outline_not_read", reason=f"`story_outlines` #{n} isn't on a level "
-                                          "given").reason
+                story.outline_stop = Stop("outline_not_read", reason=f"story outline #{n} isn't on one of the "
+                                          "model's levels").reason
             return
         given.setdefault(level, []).append(item)
     for level, story in stories.items():
