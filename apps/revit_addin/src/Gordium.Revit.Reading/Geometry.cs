@@ -44,6 +44,14 @@ public readonly record struct Box3(Xyz Min, Xyz Max)
 {
     public double[] ToArray() => [Min.X, Min.Y, Min.Z, Max.X, Max.Y, Max.Z];
 
+    /// <summary>Whether the two boxes lie apart by more than <paramref name="margin"/> feet along some axis: then
+    /// nothing in one can meet anything in the other (each box holds all of what it bounds). Touching, overlapping,
+    /// or apart by the margin or less is not apart; a box with a coordinate that isn't a number is never apart.</summary>
+    public bool ApartFrom(Box3 b, double margin) =>
+        Max.X + margin < b.Min.X || b.Max.X + margin < Min.X ||
+        Max.Y + margin < b.Min.Y || b.Max.Y + margin < Min.Y ||
+        Max.Z + margin < b.Min.Z || b.Max.Z + margin < Min.Z;
+
     public Box3 Union(Box3 b) => new(new(Math.Min(Min.X, b.Min.X), Math.Min(Min.Y, b.Min.Y), Math.Min(Min.Z, b.Min.Z)),
                                      new(Math.Max(Max.X, b.Max.X), Math.Max(Max.Y, b.Max.Y), Math.Max(Max.Z, b.Max.Z)));
 

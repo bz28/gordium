@@ -948,6 +948,7 @@ internal static class RevitInterior
         var open = 0;
         var bandBox = band.GetBoundingBox();
         XYZ bandMin = bandBox.Transform.OfPoint(bandBox.Min), bandMax = bandBox.Transform.OfPoint(bandBox.Max);
+        var bandAround = Box3.Turned(P(bandBox.Min), P(bandBox.Max), T(bandBox.Transform));
         var pieces = BandPiecesKept.Get(GeometryKey.Of(e, options), () => BandPieces(e, options));
         try
         {
@@ -963,6 +964,11 @@ internal static class RevitInterior
                             break;
                         open++;
                         ReadSteps.Count("inside.open_shells");
+                        break;
+                    case BandPiece.Body { Box: { } box } when box.ApartFrom(bandAround, CutMargin):
+                        // a solid whose box lies more than a foot from the band's: none of it is in the band, and its
+                        // cut is empty (on every trial model: 76,772 of Snowdon's 94,187 cuts, every one empty); skipped
+                        ReadSteps.Count("inside.boolean_ops_skipped");
                         break;
                     case BandPiece.Body { Solid: var s }:
                         ReadSteps.Count("inside.boolean_ops");
@@ -1000,7 +1006,8 @@ internal static class RevitInterior
     {
         internal sealed record OpenShell(IReadOnlyList<XYZ> Corners) : BandPiece;
 
-        internal sealed record Body(Solid Solid) : BandPiece;
+        /// <summary>A closed solid, and its box in model coordinates (null when Revit gave none: then always cut).</summary>
+        internal sealed record Body(Solid Solid, Box3? Box) : BandPiece;
 
         internal sealed record Unread : BandPiece;
 
@@ -1034,7 +1041,7 @@ internal static class RevitInterior
                             .Select(sb.Transform.OfPoint).ToList()));
                         break;
                     case Solid s:
-                        pieces.Add(new BandPiece.Body(s));
+                        pieces.Add(new BandPiece.Body(s, BoxOf(s)));
                         break;
                     case GeometryInstance gi:
                         if (gi.GetInstanceGeometry() is { } inner)
@@ -1066,6 +1073,26 @@ internal static class RevitInterior
         }
         return pieces;
     }
+
+    /// <summary>A solid's box in model coordinates, around its 8 corners through the box's own transform (only ever
+    /// bigger than the solid); null when Revit gives none or refuses, so a solid it can't box is cut, as before.</summary>
+    private static Box3? BoxOf(Solid s)
+    {
+        try
+        {
+            if (s.GetBoundingBox() is not { } b)
+                return null;
+            return Box3.Turned(P(b.Min), P(b.Max), T(b.Transform));
+        }
+        catch (Exception)
+        {
+            return null;                                         // never thrown on: the walk goes on as it did
+        }
+    }
+
+    /// <summary>How far apart (feet) a solid's box and the band's must be for the solid's cut to be skipped: far more
+    /// than Revit's geometry tolerance, so a solid that comes near the band is always cut.</summary>
+    private const double CutMargin = 1.0;
 
     /// <summary>The model elements (not view-specific) whose box meets <paramref name="box"/>, of the categories given
     /// (any for null), with their faces; with <paramref name="band"/>, also what of each lies in it. <paramref name="step"/>
