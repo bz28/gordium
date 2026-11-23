@@ -16,11 +16,12 @@ from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import unary_union
 
 from model_measurement.routes import common_path, remote
-from model_measurement.routes.paths import EPS, _seg_dist
+from model_measurement.routes.paths import EPS, _piece_length, _reverse, _seg_dist
 from model_measurement.routes.common_path import TOL, _box, _touching
 
 sys.path.insert(0, str(Path(__file__).parent))           # the layouts beside this file (pytest's importlib mode)
-from routes_layouts import column_room, description, door, l_corridor, rect, room, routes, table_room  # noqa: E402,E501
+from routes_layouts import (column_room, description, door, l_corridor, rect, room, routes,  # noqa: E402
+                            table_room)
 
 
 # --- the old code, as it was -----------------------------------------------------------------------------------------
@@ -83,6 +84,102 @@ def old_clear(leg, a, b) -> bool:
     if not leg.cover.covers(LineString([a, b])):
         return False
     return not len(leg.rings) or _seg_dist(leg.rings, a, b).min() >= leg.r - EPS
+
+
+def old_tangents(leg, p, k, c):
+    r = leg.r
+    d = math.dist(p, c)
+    if d < r - EPS:
+        return []
+    base = math.atan2(p[1] - c[1], p[0] - c[0])
+    if d <= r + EPS:
+        return [(base % (2 * math.pi), None, 0.0)]
+    alpha, out = math.acos(r / d), []
+    for ang in (base + alpha, base - alpha):
+        q = (c[0] + r * math.cos(ang), c[1] + r * math.sin(ang))
+        if old_clear(leg, p, q):
+            out.append((ang % (2 * math.pi), q, math.dist(p, q)))
+    return out
+
+
+def old_graph(self, points):
+    """`_Leg._graph` as it was."""
+    r, rings = self.r, self.rings
+    xy, adj = [], []
+
+    def node(pt):
+        xy.append((float(pt[0]), float(pt[1])))
+        adj.append([])
+        return len(xy) - 1
+
+    def link(a, b, piece):
+        w = _piece_length(piece)
+        adj[a].append((b, w, piece))
+        adj[b].append((a, w, _reverse(piece)))
+
+    ids = [node(q) for q in points]
+    on = [[] for _ in range(len(rings))]
+    for i, a in enumerate(ids):
+        for b in ids[i + 1:]:
+            if old_clear(self, xy[a], xy[b]):
+                link(a, b, ("line", xy[a], xy[b]))
+    for k, c in enumerate(rings):
+        c = (float(c[0]), float(c[1]))
+        for a in ids:
+            for ang, q, _ in old_tangents(self, xy[a], k, c):
+                if q is None:
+                    on[k].append((ang, a))
+                else:
+                    n = node(q)
+                    on[k].append((ang, n))
+                    link(a, n, ("line", xy[a], q))
+    for i in range(len(rings)):
+        ci = (float(rings[i][0]), float(rings[i][1]))
+        for j in range(i + 1, len(rings)):
+            cj = (float(rings[j][0]), float(rings[j][1]))
+            d = math.dist(ci, cj)
+            if d <= EPS:
+                continue
+            phi = math.atan2(cj[1] - ci[1], cj[0] - ci[0])
+            pairs = [(phi + math.pi / 2, phi + math.pi / 2), (phi - math.pi / 2, phi - math.pi / 2)]
+            if d > 2 * r + EPS:
+                beta = math.acos(2 * r / d)
+                pairs += [(phi + beta, phi + beta + math.pi), (phi - beta, phi - beta + math.pi)]
+            for ai, aj in pairs:
+                qi = (ci[0] + r * math.cos(ai), ci[1] + r * math.sin(ai))
+                qj = (cj[0] + r * math.cos(aj), cj[1] + r * math.sin(aj))
+                if old_clear(self, qi, qj):
+                    ni, nj = node(qi), node(qj)
+                    on[i].append((ai % (2 * math.pi), ni))
+                    on[j].append((aj % (2 * math.pi), nj))
+                    link(ni, nj, ("line", qi, qj))
+    for k in range(len(rings)):
+        c = (float(rings[k][0]), float(rings[k][1]))
+        on[k].sort()
+        ring = on[k]
+        if len(ring) < 2:
+            continue
+        for m, (a0, n0) in enumerate(ring):
+            a1, n1 = ring[(m + 1) % len(ring)]
+            sweep = (a1 - a0) % (2 * math.pi)
+            if old_arc_clear(self, k, c, a0, sweep):
+                link(n0, n1, ("arc", c, r, a0, sweep))
+    return xy, adj, on, ids
+
+
+def old_farthest_shared(a, b) -> tuple:
+    best = (0.0, None, None, None)
+    boxes = [_box(q) for q, _ in b.pieces]
+    for p, op in a.pieces:
+        bp = _box(p)
+        for (q, oq), bq in zip(b.pieces, boxes):
+            if bp[0] > bq[2] + TOL or bq[0] > bp[2] + TOL or bp[1] > bq[3] + TOL or bq[1] > bp[3] + TOL:
+                continue
+            for x in common_path._meetings(p, q):
+                u, v = common_path._along(p, x), common_path._along(q, x)
+                if u is not None and v is not None and max(op + u, oq + v) > best[0]:
+                    best = (max(op + u, oq + v), x, (p, op), (q, oq))
+    return best
 
 
 def old_touching(a, b) -> list:
@@ -312,6 +409,97 @@ def test_the_story_figure_reads_the_same_common_path_length():
             assert (fast.length, fast.exits, fast.at) == (want.length, want.exits, want.at)
             pairs += len(want.exits) == 2
     assert pairs > 10                                    # points with two exits' routes among them
+
+
+def test_a_zones_graph_is_the_old_one_node_for_node():
+    """The graph's lines tested many at a time: the same nodes, in the same order, the same links and pieces."""
+    rng = random.Random(23)
+    for leg in legs():
+        x0, y0, x1, y1 = leg.floor.bounds
+        for _ in range(4):
+            points = leg._base[0] + [(rng.uniform(x0, x1), rng.uniform(y0, y1)) for _ in range(3)]
+            assert leg._graph(points) == old_graph(leg, points)
+
+
+def test_the_walk_out_is_the_old_one():
+    """`_Walk` (no clearance) with its lines to every node tested in one shapely call: the same walk."""
+    rng = random.Random(29)
+    for leg in legs():
+        walk = remote._Walk(leg.floor, leg._base[0])
+        x0, y0, x1, y1 = leg.floor.bounds
+        for _ in range(30):
+            p = (rng.uniform(x0, x1), rng.uniform(y0, y1))
+            want = min((math.dist(p, n) + d for n, d in zip(walk.nodes, walk.dist)
+                        if math.isfinite(d) and old_clear(walk.leg, p, n)), default=math.inf)
+            assert walk(p) == want
+
+
+def test_the_farthest_shared_point_is_the_old_ones():
+    """Two passes (the greatest first, by each pair's bound; then the first meeting reaching it, in the old order):
+    the same distance, point and pieces as the old single loop, on real unions of tied routes and on made-up ones
+    full of equal distances (the first of them kept, as ever)."""
+    from model_measurement.routes.paths import Tied
+    from model_measurement.routes.stops import Stop
+    two_exits = description([room("c", rect(0, 0, 40, 6))],
+                            [door("a", (-0.25, 3), (0, 1), ("c", "outside"), exit_id="A"),
+                             door("b", (40.25, 3), (0, 1), ("c", "outside"), exit_id="B")])
+    rng, seen = random.Random(31), 0
+    for desc in (two_exits, column_room(north_exit=True)):
+        got = routes(desc)
+        x0, y0, x1, y1 = unary_union([r.outline for r in got.story.rooms.values() if r is not None]).bounds
+        for _ in range(30):
+            p = (rng.uniform(x0, x1), rng.uniform(y0, y1))
+            try:
+                unions = [common_path.tied(got, p, e) for e in sorted(got.exits)]
+            except Stop:
+                continue
+            for a in unions:
+                for b in unions:
+                    assert common_path.farthest_shared(a, b) == old_farthest_shared(a, b)
+                    seen += 1
+    assert seen > 20
+    for _ in range(60):                                   # made-up unions: lines on a grid, many equal distances
+        def union():
+            pieces = []
+            for _ in range(rng.randint(0, 12)):
+                a = (float(rng.randint(0, 6)), float(rng.randint(0, 6)))
+                b = (a[0] + rng.choice([-2.0, 0.0, 2.0]), a[1] + rng.choice([-2.0, 2.0]))
+                pieces.append((("line", a, b), float(rng.randint(0, 4))))
+                if rng.random() < 0.2:
+                    pieces.append((("arc", a, 2.0, 0.0, rng.choice([1.0, -1.0])), float(rng.randint(0, 4))))
+            return Tied(0.0, pieces, None)
+        a, b = union(), union()
+        assert common_path.farthest_shared(a, b) == old_farthest_shared(a, b)
+
+
+def test_equal_bounds_pop_in_the_order_pushed_never_by_address():
+    """farthest()'s heap breaks a tie between equal bounds by the order the triangles were pushed (0, 1, 2 ... in
+    each room), never by their id(): that was their place in memory, so the same model could give a sample count
+    one apart from one run to the next (seen on the Odyssey's rooms, 1323 or 1324 samples, every figure the same)."""
+    import heapq
+    pushed = []
+
+    class Spy:
+        heappop, heapify = staticmethod(heapq.heappop), staticmethod(heapq.heapify)
+
+        @staticmethod
+        def heappush(heap, entry):
+            pushed.append(entry[1])
+            heapq.heappush(heap, entry)
+
+    old, remote.heapq = remote.heapq, Spy
+    try:
+        want = farthest_of(column_room)
+    finally:
+        remote.heapq = old
+    assert pushed and all(type(k) is int for k in pushed)
+    assert all(b == a + 1 or b == 0 for a, b in zip(pushed, pushed[1:])) and pushed[0] == 0
+    assert farthest_of(column_room) == want
+
+
+def farthest_of(layout):
+    got = remote.farthest(routes(layout()))
+    return got.samples, got.figure, got.greatest, got.at
 
 
 # --- the apartment, timed --------------------------------------------------------------------------------------------
