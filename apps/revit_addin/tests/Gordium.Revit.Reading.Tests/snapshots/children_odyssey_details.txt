@@ -2065,7 +2065,7 @@ THE LAW'S WORDS:
   The checker sent no quote with this row.
 
 [178 of 190] needs review · Interior drawing
-WHY: The interior drawing: the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)
+WHY: The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
@@ -2081,7 +2081,7 @@ THE LAW'S WORDS:
   The checker sent no quote with this row.
 
 [180 of 190] needs review · Interior drawing
-WHY: The interior drawing: the guards weren't read: the model doesn't say which are all of the house's guards (or that it has none)
+WHY: The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Check again once it's changed: only the check changes a verdict. [CheckAgain]

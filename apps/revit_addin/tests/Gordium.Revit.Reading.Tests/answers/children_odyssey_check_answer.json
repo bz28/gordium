@@ -20535,11 +20535,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "The interior drawing: the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)",
+     "reason": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "The interior drawing: the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)",
+      "line": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
       "quotes": [],
       "citation": "",
       "links": [],
@@ -20555,8 +20555,8 @@
      "causes": [
       {
        "kind": "mark",
-       "key": "drawing:The interior drawing: the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)",
-       "words": "The interior drawing: the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)",
+       "key": "drawing:The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+       "words": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
        "elements": [],
        "field": "stairs"
       }
@@ -20621,11 +20621,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "The interior drawing: the guards weren't read: the model doesn't say which are all of the house's guards (or that it has none)",
+     "reason": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "The interior drawing: the guards weren't read: the model doesn't say which are all of the house's guards (or that it has none)",
+      "line": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
       "quotes": [],
       "citation": "",
       "links": [],
@@ -20641,8 +20641,8 @@
      "causes": [
       {
        "kind": "mark",
-       "key": "drawing:The interior drawing: the guards weren't read: the model doesn't say which are all of the house's guards (or that it has none)",
-       "words": "The interior drawing: the guards weren't read: the model doesn't say which are all of the house's guards (or that it has none)",
+       "key": "drawing:The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
+       "words": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
        "elements": [],
        "field": "guards"
       }
@@ -22542,7 +22542,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "The interior drawing: the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)",
+       "title": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
        "mark": "?",
        "name": "Interior drawing"
       },
@@ -22568,7 +22568,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "The interior drawing: the guards weren't read: the model doesn't say which are all of the house's guards (or that it has none)",
+       "title": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
        "mark": "?",
        "name": "Interior drawing"
       }
@@ -22848,9 +22848,9 @@
        "field": "openings[].escape"
       },
       {
-       "key": "drawing:The interior drawing: the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)",
+       "key": "drawing:The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
        "kind": "mark",
-       "words": "The interior drawing: the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)",
+       "words": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
        "elements": [],
        "items": [
         "egress.interior#2"
@@ -22870,9 +22870,9 @@
        "field": "doors[].exit"
       },
       {
-       "key": "drawing:The interior drawing: the guards weren't read: the model doesn't say which are all of the house's guards (or that it has none)",
+       "key": "drawing:The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
        "kind": "mark",
-       "words": "The interior drawing: the guards weren't read: the model doesn't say which are all of the house's guards (or that it has none)",
+       "words": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
        "elements": [],
        "items": [
         "egress.interior#4"
@@ -23200,7 +23200,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "d29c12a82617614597b56b35c2bfbd66632fa18a44cb68ce71cea10b7fa4f858",
+  "worker_fingerprint": "ab0974741844b9830df18bb88252cbc98d4ffdf72d279c4bb715bf5f43093a27",
   "rulebook": {
    "new_york/ithaca_city": "069367164b3bf20570f38681fdf923538fe72a75bda98635265b2d2e2e98cb70"
   }

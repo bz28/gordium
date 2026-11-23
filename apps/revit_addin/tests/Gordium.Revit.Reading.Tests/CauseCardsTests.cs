@@ -193,7 +193,7 @@ public sealed class CauseCardsTests
         var items = new JsonArray(Item("a"), Item("b"), Item("c"), Item("d"), Item("e"));
         var r = Parse(Result(items, Group("x:review", ["a", "b", "c", "d", "e"],
             With(Card("drawing:door", "mark", "door D01 doesn't say whether it is the required exit door (yes or no)", ["a"], ["uid-d1"]), "doors[].exit"),
-            With(Card("drawing:stairs", "mark", "the stairs weren't read: the model doesn't say which are all of the house's stairs", ["b"]), "stairs"),
+            With(Card("drawing:stairs", "mark", "the stairs weren't read: the model doesn't say these are all the stairs", ["b"]), "stairs"),
             With(Card("fact:use", "mark", "use: not stated for the project", ["c"]), "facts.use"),
             With(Card("facts:stories,zone", "mark", "the stories and the zone", ["d"]), "facts.stories", "facts.zone"),
             With(Card("fact:x", "mark", "x: set Gordium: Exit door", ["e"]), "facts.not_a_mark"))));
