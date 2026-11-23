@@ -256,12 +256,18 @@ class _Leg:
 
     def clear_from(self, a, ends) -> list:
         """`clear(a, b)` for each b of ends, the floor's covers test on every line in one shapely call."""
-        got = [math.dist(a, b) <= EPS for b in ends]
-        lines = [i for i, short in enumerate(got) if not short]
-        if lines:
-            held = shapely.covers(self.cover, shapely.linestrings([[a, ends[i]] for i in lines]))
-            for i, ok in zip(lines, held):
-                got[i] = bool(ok) and (not len(self.rings) or _seg_dist(self.rings, a, ends[i]).min() >= self.r - EPS)
+        return self.clear_lines([(a, b) for b in ends])
+
+    def clear_lines(self, lines) -> list:
+        """`clear(a, b)` for each (a, b) of lines, as `clear` works it: the same ends, the floor's covers test on every
+        line longer than EPS in one shapely call, then the ring test on each line the floor holds."""
+        got = [math.dist(a, b) <= EPS for a, b in lines]
+        long = [i for i, short in enumerate(got) if not short]
+        if long:
+            held = shapely.covers(self.cover, shapely.linestrings([[lines[i][0], lines[i][1]] for i in long]))
+            for i, ok in zip(long, held):
+                a, b = lines[i]
+                got[i] = bool(ok) and (not len(self.rings) or _seg_dist(self.rings, a, b).min() >= self.r - EPS)
         return got
 
     def _graph(self, points):
@@ -281,20 +287,24 @@ class _Leg:
 
         ids = [node(q) for q in points]
         on = [[] for _ in range(len(rings))]
+        # each test of a line below is `clear`'s, many in one shapely call (clear_from, tangents_to, clear_lines),
+        # and the nodes and links are made in the same order as ever
         for i, a in enumerate(ids):
-            for b in ids[i + 1:]:
-                if self.clear(xy[a], xy[b]):
+            rest = ids[i + 1:]
+            for b, ok in zip(rest, self.clear_from(xy[a], [xy[b] for b in rest])):
+                if ok:
                     link(a, b, ("line", xy[a], xy[b]))
-        for k, c in enumerate(rings):
-            c = (float(c[0]), float(c[1]))
-            for a in ids:
-                for ang, q, _ in self._tangents(xy[a], k, c):
+        touching = [self.tangents_to(xy[a], range(len(rings))) for a in ids]
+        for k in range(len(rings)):
+            for m, a in enumerate(ids):
+                for ang, q, _ in touching[m][k]:
                     if q is None:
                         on[k].append((ang, a))
                     else:
                         n = node(q)
                         on[k].append((ang, n))
                         link(a, n, ("line", xy[a], q))
+        common = []                                  # the four lines common to each pair of rings, in order
         for i in range(len(rings)):
             ci = (float(rings[i][0]), float(rings[i][1]))
             for j in range(i + 1, len(rings)):
@@ -310,11 +320,13 @@ class _Leg:
                 for ai, aj in pairs:
                     qi = (ci[0] + r * math.cos(ai), ci[1] + r * math.sin(ai))
                     qj = (cj[0] + r * math.cos(aj), cj[1] + r * math.sin(aj))
-                    if self.clear(qi, qj):
-                        ni, nj = node(qi), node(qj)
-                        on[i].append((ai % (2 * math.pi), ni))
-                        on[j].append((aj % (2 * math.pi), nj))
-                        link(ni, nj, ("line", qi, qj))
+                    common.append((i, j, ai, aj, qi, qj))
+        for (i, j, ai, aj, qi, qj), ok in zip(common, self.clear_lines([(x[4], x[5]) for x in common])):
+            if ok:
+                ni, nj = node(qi), node(qj)
+                on[i].append((ai % (2 * math.pi), ni))
+                on[j].append((aj % (2 * math.pi), nj))
+                link(ni, nj, ("line", qi, qj))
         for k in range(len(rings)):
             c = (float(rings[k][0]), float(rings[k][1]))
             on[k].sort()

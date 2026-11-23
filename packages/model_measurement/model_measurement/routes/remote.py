@@ -334,8 +334,11 @@ class _Walk:
         self.dist = [dist[n] for n in ids]
 
     def __call__(self, p) -> float:
-        return min((math.dist(p, n) + d for n, d in zip(self.nodes, self.dist)
-                    if math.isfinite(d) and self.leg.clear(p, n)), default=math.inf)
+        """The least of (straight to a node, clear) + that node's walk on: each node's line tested as `clear` tests
+        it, all of them in one shapely call (`clear_from`)."""
+        reach = [(n, d) for n, d in zip(self.nodes, self.dist) if math.isfinite(d)]
+        clear = self.leg.clear_from(p, [n for n, _ in reach])
+        return min((math.dist(p, n) + d for (n, d), ok in zip(reach, clear) if ok), default=math.inf)
 
 
 def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:

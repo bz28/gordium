@@ -190,14 +190,48 @@ def farthest_shared(a: Tied, b: Tied) -> tuple:
     shares the walk to such a point, and a pair's last shared point is one, so this is the greatest shared walk over
     every pair, found without listing a route. The start itself is shared (0). Of the two travel distances to the
     point (equal, within float, both routes being shortest there) the greater is taken (the cautious side)."""
-    best = (0.0, None, None, None)
-    for i, j in _touching(a.pieces, b.pieces):          # pieces apart share nothing: skipped
+    # Worked as one loop over the pairs (a's pieces, then b's, each pair's meetings in turn) keeping a meeting only
+    # when it beats the best so far, so the answer is the FIRST meeting, in that order, whose distance is the
+    # greatest, M. Found here in two passes with the same answer: M first, the pairs taken greatest bound first,
+    # stopping at a bound that can't beat it; then that first meeting, in the old order, among the pairs whose bound
+    # reaches M. A pair's bound is max(op + U(p), oq + U(q)), U a piece's greatest `_along` (its length, by the very
+    # expressions `_along` caps at), never under a distance its meetings give (adding op rounds the same way).
+    pairs = list(_touching(a.pieces, b.pieces))           # pieces apart share nothing: skipped
+    if not pairs:
+        return (0.0, None, None, None)
+    ends_a = [op + _most_along(p) for p, op in a.pieces]
+    ends_b = [oq + _most_along(q) for q, oq in b.pieces]
+    bounds = [max(ends_a[i], ends_b[j]) for i, j in pairs]
+
+    def meetings(i, j):
         (p, op), (q, oq) = a.pieces[i], b.pieces[j]
         for x in _meetings(p, q):
             u, v = _along(p, x), _along(q, x)
-            if u is not None and v is not None and max(op + u, oq + v) > best[0]:
-                best = (max(op + u, oq + v), x, (p, op), (q, oq))
-    return best
+            if u is not None and v is not None:
+                yield max(op + u, oq + v), x, (p, op), (q, oq)
+
+    most = 0.0
+    for k in sorted(range(len(pairs)), key=lambda k: -bounds[k]):
+        if bounds[k] <= most:
+            break
+        for got in meetings(*pairs[k]):
+            most = max(most, got[0])
+    if not most > 0.0:
+        return (0.0, None, None, None)
+    for k, (i, j) in enumerate(pairs):
+        if bounds[k] >= most:
+            for got in meetings(i, j):
+                if got[0] == most:
+                    return got
+    raise RuntimeError("the greatest meeting not found again")       # never: the same meetings, worked the same
+
+
+def _most_along(piece) -> float:
+    """The greatest `_along` a piece can give: a line's length and an arc's, by the same expressions it caps at."""
+    if piece[0] == "line":
+        _, a, b = piece
+        return math.hypot(*(b[0] - a[0], b[1] - a[1]))
+    return abs(piece[4]) * piece[2]
 
 
 CELLS = 1 << 20                 # box pairs set against each other in one numpy step, at most
