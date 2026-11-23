@@ -43,10 +43,10 @@ def test_the_base_layout_reads_with_nothing_to_review():
 # --- each key left out ------------------------------------------------------------------------------------------------
 
 @pytest.mark.parametrize("path, words", [
-    (("levels",), "no `levels`"),
+    (("levels",), "no levels"),
     (("rooms", 0, "level"), "doesn't say which story"),
     (("doors", 0, "level"), "doesn't say which story"),
-    (("passages",), "`passages` isn't in the description"),
+    (("passages",), "the model doesn't give its passages"),
 ])
 def test_a_key_left_out_leaves_every_story_not_measured(path, words):
     floor = read(_without(room_on_corridor(), *path))
@@ -80,12 +80,12 @@ def test_an_unknown_space_with_no_level_leaves_every_story_not_measured():
 
 
 @pytest.mark.parametrize("path, words", [
-    (("rooms", 0, "holes"), "`holes`"),
-    (("rooms", 0, "obstructions"), "`obstructions`"),
+    (("rooms", 0, "holes"), "its holes (an empty list for none)"),
+    (("rooms", 0, "obstructions"), "what stands on its floor"),
     (("rooms", 0, "floor"), "no floor outline"),
-    (("doors", 0, "plan"), "`plan`"),
-    (("doors", 0, "sides"), "`sides`"),
-    (("doors", 1, "exit_id"), "`exit_id`"),
+    (("doors", 0, "plan"), "the door's plan"),
+    (("doors", 0, "sides"), "the door's sides"),
+    (("doors", 1, "exit_id"), "which exit the exit door leads into"),
 ])
 def test_a_key_left_out_leaves_its_story_not_measured(path, words):
     floor = read(_without(room_on_corridor(), *path))
@@ -105,12 +105,12 @@ def test_an_obstruction_key_left_out_leaves_its_story_not_measured(key):
 
 def test_an_exit_id_with_no_exit_kind_isnt_read():
     s = story(_without(room_on_corridor(), "doors", 1, "exit_kind"))
-    assert any("`exit_kind`" in r for r in s.stops)
+    assert any("the kind of exit the door is" in r for r in s.stops)
 
 
 def test_no_story_outlines_leaves_the_diagonal_and_areas_not_measured_but_routes_are():
     s = story(_without(room_on_corridor(), "story_outlines"))
-    assert s.stops == [] and "story_outlines" in s.outline_stop
+    assert s.stops == [] and "story outlines" in s.outline_stop
 
 
 @pytest.mark.parametrize("key", ["use", "lockable", "pass_through"])
@@ -151,7 +151,7 @@ def test_pass_through_on_an_end_only_room_is_refused_and_its_story_needs_review(
     d = room_on_corridor()
     d["rooms"][1].update(changes, pass_through=True)
     s = story(d)
-    assert any("is marked `pass_through: true`" in r and why in r for r in s.stops), s.stops
+    assert any("is marked as a room an exit route may pass through" in r and why in r for r in s.stops), s.stops
     assert s.rooms["c"] is None
 
 

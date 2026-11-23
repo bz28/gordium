@@ -250,7 +250,7 @@ def _list(description, key, words, stops, required):
     got = description.get(key)
     if got is None:
         if required:
-            stops.append(Stop("key_left_out", key=key, words=words).reason)
+            stops.append(Stop("key_left_out", key=key.replace("_", " "), words=words).reason)
         return None
     if not isinstance(got, list) or not all(isinstance(i, dict) for i in got):
         stops.append(Stop("description", reason=f"`{key}` isn't a list of mappings").reason)
@@ -285,9 +285,9 @@ def _levels(description, reader, stops):
             if not isinstance(item, dict):
                 raise InteriorStop("not_a_mapping", what="level", n=n)
             if not isinstance(item.get("id"), str) or not item["id"].strip():
-                raise InteriorStop("missing", what="its text `id`")
+                raise InteriorStop("missing", what="its id")
             if not isinstance(item.get("name"), str):
-                raise InteriorStop("missing", what="its `name`")
+                raise InteriorStop("missing", what="its name")
             reader.length(item.get("elevation"), "its elevation")
         except InteriorStop as s:
             stops.append(Stop("level_entry", n=n, reason=s.reason).reason)
@@ -304,13 +304,13 @@ def _flag(item, key):
     got = item.get(key)
     if got is None or isinstance(got, bool):
         return got
-    raise InteriorStop("choice", what=f"`{key}`", got=got, choices="true, false")
+    raise InteriorStop("choice", what=f"its {key.replace('_', ' ')}", got=got, choices="yes, no")
 
 
 def _room(item, reader, level) -> Room:
     name = name_of(item)
     if item.get("floor") is None:
-        raise Stop("room_no_floor", name=name, reason="no `floor`")
+        raise Stop("room_no_floor", name=name, reason="no floor is given")
     try:
         sleeping = item.get("sleeping")
         if not isinstance(sleeping, bool):
@@ -318,23 +318,23 @@ def _room(item, reader, level) -> Room:
         outline = reader.outline(item["floor"], "the room's floor outline")
         use = item.get("use")
         if use is not None:
-            choice(use, USES, "the room's `use`")
+            choice(use, USES, "the room's use")
         lockable, through = _flag(item, "lockable"), _flag(item, "pass_through")
         not_occupied = _flag(item, "not_occupied") is True       # decision 1b: only true leaves it out
         holes = _outlines_of(item, "holes", reader, "a hole")
         obstructions = []
         got = item.get("obstructions")
         if got is None:
-            raise InteriorStop("missing", what="`obstructions` (say `obstructions: []` for none)")
+            raise InteriorStop("missing", what="what stands on its floor (an empty list for nothing)")
         if not isinstance(got, list):
             raise InteriorStop("not_a_list", key="obstructions")
         for n, ob in enumerate(got, 1):
             if not isinstance(ob, dict):
                 raise InteriorStop("not_a_mapping", what="obstruction", n=n)
             obstructions.append(reader.outline(ob.get("outline"), f"obstruction #{n}'s outline"))
-            choice(ob.get("kind"), OBSTRUCTION_KINDS, f"obstruction #{n}'s `kind`")
+            choice(ob.get("kind"), OBSTRUCTION_KINDS, f"obstruction #{n}'s kind")
             if not isinstance(ob.get("fixed"), bool):
-                raise InteriorStop("missing", what=f"obstruction #{n}'s `fixed` (true or false)")
+                raise InteriorStop("missing", what=f"whether obstruction #{n} is fixed (yes or no)")
     except InteriorStop as s:
         raise Stop("room_not_read", name=name, reason=s.reason) from None
     # decision 1b: a room whose own use is occupancy (sleeping, the day care's rooms) is never one nobody occupies
@@ -343,14 +343,15 @@ def _room(item, reader, level) -> Room:
         raise Stop("not_occupied_refused", name=name, why=occupied_by_use)
     # decision 1a: end-only always wins
     end_only = ("a sleeping room" if sleeping else f"a {use} room" if use in END_ONLY_USES
-                else "it can be locked (`lockable: true`)" if lockable is True else "")
+                else "it can be locked" if lockable is True else "")
     if through is True and end_only:
         raise Stop("pass_through_refused", name=name, why=f"it is {end_only}" if not end_only.startswith("it")
                    else end_only)
-    why = (end_only or ("no `use` is given" if use is None else
-                        "whether it can be locked isn't given (`lockable`)" if lockable is None else
-                        "`pass_through` isn't given" if through is None else
-                        "it isn't a corridor, nor marked `pass_through: true`" if not (use == "corridor" or through)
+    why = (end_only or ("no use is given" if use is None else
+                        "whether it can be locked isn't given" if lockable is None else
+                        "whether an exit route may pass through it isn't given" if through is None else
+                        "it isn't a corridor, nor marked as a room an exit route may pass through"
+                        if not (use == "corridor" or through)
                         else ""))
     return Room(item["id"], name, level, outline, holes, obstructions, crossable=not why, end_only_why=why, use=use,
                 lockable=lockable, not_occupied=not_occupied)
@@ -359,7 +360,7 @@ def _room(item, reader, level) -> Room:
 def _outlines_of(item, key, reader, what) -> list:
     got = item.get(key)
     if got is None:
-        raise InteriorStop("missing", what=f"`{key}` (say `{key}: []` for none)")
+        raise InteriorStop("missing", what=f"its {key.replace('_', ' ')} (an empty list for none)")
     if not isinstance(got, list):
         raise InteriorStop("not_a_list", key=key)
     return [reader.outline(h, f"{what} #{n}") for n, h in enumerate(got, 1)]
@@ -370,31 +371,31 @@ def _door(item, reader, story, unknown_ids, stories) -> Door:
     plan, sides = item.get("plan"), item.get("sides")
     try:
         if plan is None:
-            raise InteriorStop("missing", what="the door's `plan` (where its clear opening is)")
+            raise InteriorStop("missing", what="the door's plan (where its clear opening is)")
         if sides is None:
-            raise InteriorStop("missing", what="the door's `sides` (what it joins)")
+            raise InteriorStop("missing", what="the door's sides (what it joins)")
         if not isinstance(plan, dict):
             raise InteriorStop("not_a_mapping", what="the door's plan", n=1)
         centre = reader.point(plan.get("centre"), 2, "the door's centre")
         along = plan.get("along")
         if not isinstance(along, (list, tuple)) or len(along) != 2:
-            raise InteriorStop("not_a_point", what="the door's `along`", n=2)
-        ax, ay = (number(v, "the door's `along`") for v in along)
+            raise InteriorStop("not_a_point", what="the door's direction along its wall", n=2)
+        ax, ay = (number(v, "the door's direction along its wall") for v in along)
         size = math.hypot(ax, ay)
         if not (size > 0 and math.isfinite(size)):
-            raise InteriorStop("not_positive", what="the length of the door's `along`", value=size)
+            raise InteriorStop("not_positive", what="the length of the door's direction along its wall", value=size)
         width = reader.size(plan.get("clear_width"), "the door's clear width")
         thickness = reader.size(plan.get("wall_thickness"), "the door's wall thickness")
         if not isinstance(sides, list) or len(sides) != 2 or not all(isinstance(s, str) for s in sides):
-            raise InteriorStop("choice", what="the door's `sides`", got=sides,
+            raise InteriorStop("choice", what="the door's sides", got=sides,
                                choices="two room ids, or a room id and 'outside'")
         kind, exit_id = item.get("exit_kind"), item.get("exit_id")
         if kind is not None:
-            choice(kind, EXIT_KINDS, "the door's `exit_kind`")
+            choice(kind, EXIT_KINDS, "the kind of exit the door is")
             if not isinstance(exit_id, str) or not exit_id.strip():
-                raise InteriorStop("missing", what="the exit's `exit_id` (which exit the door enters)")
+                raise InteriorStop("missing", what="which exit the exit door leads into")
         elif exit_id is not None:
-            raise InteriorStop("missing", what="the door's `exit_kind` (it gives an `exit_id`)")
+            raise InteriorStop("missing", what="the kind of exit the door is (it says which exit it leads into)")
     except InteriorStop as s:
         raise Stop("door_not_read", name=name, reason=s.reason) from None
     if width < NARROWEST:
@@ -448,7 +449,7 @@ def _passage(n, item, reader, stories) -> None:
     try:
         if not isinstance(rooms, list) or len(rooms) != 2 or not all(isinstance(r, str) for r in rooms) \
                 or rooms[0] == rooms[1]:
-            raise InteriorStop("choice", what="the passage's `rooms`", got=rooms, choices="two room ids")
+            raise InteriorStop("choice", what="the passage's rooms", got=rooms, choices="two rooms")
         points = reader.points(line, 2, "the passage's line", 2)
         if len(points) != 2 or math.dist(*points) <= SAME:
             raise InteriorStop("not_a_polyline", what="the passage's line (two points apart)")
@@ -471,7 +472,7 @@ def _passage(n, item, reader, stories) -> None:
 def _outlines(outlines, reader, stories) -> None:
     if outlines is None:
         for story in stories.values():
-            story.outline_stop = Stop("key_left_out", key="story_outlines", words="the diagonal and the story's "
+            story.outline_stop = Stop("key_left_out", key="story outlines", words="the diagonal and the story's "
                                       "area aren't measured").reason
         return
     given = {}
@@ -565,9 +566,9 @@ def _served(story: Story) -> None:
             continue
         if host.use is None or host.lockable is not False:
             story.not_served[rid] = (f"opens only into {host.name}, which "
-                                     + ("doesn't give its `use`" if host.use is None else
-                                        "can be locked (`lockable: true`)" if host.lockable else
-                                        "doesn't say whether it can be locked (`lockable`)")
+                                     + ("doesn't give its use" if host.use is None else
+                                        "can be locked" if host.lockable else
+                                        "doesn't say whether it can be locked")
                                      + ", so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)")
             continue
         story.served_by[rid] = host.id

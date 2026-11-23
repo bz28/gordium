@@ -45,7 +45,7 @@ def clear_width(d: dict, reader) -> float:
     side = choice(d.get("hinge_side"), ("left", "right"), "the door's hinge side")
     stops = d.get("stops")
     if not isinstance(stops, dict):
-        raise Stop("missing", what="the door's stops (`stops`: hinge, latch)")
+        raise Stop("missing", what="the door's stops (hinge side and latch side)")
     hinge = reader.length(stops.get("hinge"), "the hinge-side stop")
     latch = reader.length(stops.get("latch"), "the latch-side stop")
     if (latch <= hinge) if side == "left" else (latch >= hinge):

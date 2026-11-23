@@ -48,8 +48,8 @@ def drawn_clear(o: dict, reader, operation: str):
     if operation in HINGED:
         h = o.get("hinged")
         if not isinstance(h, dict):
-            raise Stop("missing", what="the hinged sash (`hinged`: side, open_angle, sash_width, sash_thickness, "
-                                     "hinge_offset)")
+            raise Stop("missing", what="the hinged sash (its side, open angle, width, thickness and hinge "
+                                     "offset)")
         side = choice(h.get("side"), ("left", "right"), "the hinged sash's side")
         angle = number(h.get("open_angle"), "the hinged sash's open angle")
         if not 0 < angle <= 180:
@@ -87,7 +87,7 @@ def drawn_clear(o: dict, reader, operation: str):
 def stated(o: dict, reader):
     s = o.get("stated_clear")
     if not isinstance(s, dict):
-        raise Stop("missing", what="the maker's clear opening (`stated_clear`: width, height, bottom)")
+        raise Stop("missing", what="the maker's clear opening (its width, height and bottom)")
     width = reader.size(s.get("width"), "the maker's clear width")
     height = reader.size(s.get("height"), "the maker's clear height")
     bottom = reader.length(s.get("bottom"), "the maker's clear opening's bottom")

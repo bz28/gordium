@@ -46,12 +46,12 @@ LISTED = {"sleeping_room": "rooms", "emergency_escape_opening": "openings", "sta
           "egress_door": "doors", "guard": "guards"}
 # the kinds that are spaces: an enclosed space whose use isn't known (`unknown_spaces`) could be one of them
 SPACES = ("basement", "habitable_attic", "sleeping_loft")
-SAID = "the description says the house has no {words}"
+SAID = "the model says the house has no {words}"
 ENTRY_KEYS = {"kind", "source", "reading"}
 
 
 def words(kind: str) -> str:
-    """"the description says the house has no ramps"."""
+    """"the model says the house has no ramps"."""
     return SAID.format(words=KINDS[kind]["words"])
 
 

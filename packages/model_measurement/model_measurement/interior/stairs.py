@@ -151,7 +151,7 @@ def side_lines(st: dict, flight: Flight, reader) -> dict:
     start, end = flight.span()
     sides = st.get("sides")
     if not isinstance(sides, dict):
-        raise Stop("missing", what="the stair's sides (`sides`: left and right)")
+        raise Stop("missing", what="the stair's sides (left and right)")
     out = {}
     for side in ("left", "right"):
         given = sides.get(side)
@@ -200,7 +200,7 @@ def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int |
     handrails, why = {"left": [], "right": []}, None
     given = st.get("handrails")
     if not isinstance(given, list):
-        why = Stop("missing", what="the stair's handrails (`handrails`: a list, empty for none)").reason
+        why = Stop("missing", what="the stair's handrails (an empty list for none)").reason
     else:
         for n, h in enumerate(given, 1):
             if not isinstance(h, dict):
@@ -257,7 +257,7 @@ def headroom(st: dict, flight: Flight, reader) -> float:
     width from its first nosing to its top one (R318.7.2)."""
     given = st.get("overhead")
     if given is None:
-        raise Stop("missing", what="what is above the flight (`overhead`)")
+        raise Stop("missing", what="what is above the flight")
     if not isinstance(given, list):
         raise Stop("not_a_list", key="overhead")
     if not given:

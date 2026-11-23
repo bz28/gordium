@@ -291,7 +291,7 @@ def test_stated_clear_problems():
     assert "can't be less than zero" in stopped["opening_net_clear_area"]
     d["openings"][0]["stated_clear"] = "big"
     _, stopped, _ = opening_measures(d)
-    assert "stated_clear" in stopped["opening_net_clear_area"]
+    assert "the maker's clear opening" in stopped["opening_net_clear_area"]
 
 
 @pytest.mark.parametrize("key", ["sash_width", "sash_thickness", "hinge_offset"])
@@ -546,9 +546,9 @@ def test_headroom_problems():
     _, stopped, _ = stair(changed(("stairs", 0, "overhead"), []))
     assert "nothing above" in stopped["stair_headroom"]
     _, stopped, _ = stair(changed(("stairs", 0, "overhead"), _DELETE))
-    assert "overhead" in stopped["stair_headroom"]
+    assert "what is above the flight isn't given" in stopped["stair_headroom"]
     _, stopped, _ = stair(changed(("stairs", 0, "overhead"), {"a": 1}))
-    assert "isn't a list" in stopped["stair_headroom"]
+    assert "aren't a list" in stopped["stair_headroom"]
 
 
 def test_handrails_narrow_the_width_below_them():
@@ -1667,12 +1667,12 @@ def test_a_sliding_door_has_no_clear_width_even_stated():
 
 
 @pytest.mark.parametrize("stated, words", [
-    ("34 x 80", "isn't a mapping"),
+    ("34 x 80", "isn't a width, a height and a source"),
     ({"width": 34, "height": 80}, "doesn't say where it comes from"),
     ({"width": 34, "height": 80, "source": "  "}, "doesn't say where it comes from"),
     ({"width": 34, "height": 80, "source": 4}, "doesn't say where it comes from"),
-    ({"width": 34, "height": 80, "source": SRC, "bottom": 0}, "keys it doesn't know (bottom;"),
-    ({"widht": 34, "height": 80, "source": SRC}, "keys it doesn't know (widht;"),
+    ({"width": 34, "height": 80, "source": SRC, "bottom": 0}, "values it doesn't know (bottom;"),
+    ({"widht": 34, "height": 80, "source": SRC}, "values it doesn't know (widht;"),
     ({"height": 80, "source": SRC}, "the maker's stated clear width isn't given"),
     ({"width": 34, "source": SRC}, "the maker's stated clear height isn't given"),
     ({"width": "wide", "height": 80, "source": SRC}, "the maker's stated clear width isn't a length"),
@@ -1760,10 +1760,10 @@ def test_a_list_not_given_is_not_read(key, kind):
     d = base()
     del d[key]
     got = measure(d)
-    assert got["parts"][kind] is None and any(f"no `{key}`" in p for p in got["problems"])
+    assert got["parts"][kind] is None and any(f"the {key} weren't read" in p for p in got["problems"])
     d[key] = "lots"
     got = measure(d)
-    assert got["parts"][kind] is None and any("isn't a list" in p for p in got["problems"])
+    assert got["parts"][kind] is None and any("aren't a list" in p for p in got["problems"])
     d[key] = [3]
     assert measure(d)["parts"][kind] is None
 
@@ -1775,7 +1775,9 @@ def test_a_flag_not_given_reads_none_of_that_kind(key, flag, kind):
     d = base()
     del d[key][0][flag]
     got = measure(d)
-    assert got["parts"][kind] is None and any(f"(`{flag}`: true or false)" in p for p in got["problems"])
+    assert got["parts"][kind] is None and any(p.endswith("(yes or no)") for p in got["problems"])
+    from model_measurement.interior import asked_field
+    assert [asked_field(p) for p in got["problems"]] == [f"{key}[].{flag}"]           # the field, as data
 
 
 def test_rooms_not_read_still_measures_the_openings_but_not_their_sills():
@@ -2129,23 +2131,23 @@ def test_each_claim_empties_its_kinds_or_gives_its_measures():
     assert s["measures"]["stair_serves_sleeping_loft"] is False and "stair_serves_sleeping_loft" not in s["not_measured"]
     assert got["has_none"]["ramp"]["source"] == "A-2" and got["has_none"]["ramp"]["reading"] is False
     assert got["has_none"]["patio_cover"]["reading"] is True
-    assert got["has_none"]["ramp"]["words"] == "the description says the house has no ramps"
+    assert got["has_none"]["ramp"]["words"] == "the model says the house has no ramps"
 
 
 @pytest.mark.parametrize("entries, lists, words", [
-    ([{"kind": "ramp", "source": "A-2"}], {"ramps": [{"id": "r1"}]}, "yet it also gives `ramps`, which isn't an empty list"),
-    ([{"kind": "ramp", "source": "A-2"}], {"ramps": "a ramp"}, "yet it also gives `ramps`, which isn't an empty list"),
+    ([{"kind": "ramp", "source": "A-2"}], {"ramps": [{"id": "r1"}]}, "yet it also gives ramps, and not an empty list"),
+    ([{"kind": "ramp", "source": "A-2"}], {"ramps": "a ramp"}, "yet it also gives ramps, and not an empty list"),
     ([{"kind": "ramp"}], {}, "not where that comes from"),
     ([{"kind": "ramp", "source": ""}], {}, "not where that comes from"),
-    ([{"kind": "ramp", "source": "A-2"}], {"ramps": None}, "yet it also gives `ramps`, which isn't an empty list"),
-    ([{"kind": "ramp", "source": "A-2", "reading": 1}], {}, "`reading` isn't true or false"),
-    ([{"kind": "ramp", "source": "A-2", "reding": True}], {}, "keys it doesn't know (reding;"),
+    ([{"kind": "ramp", "source": "A-2"}], {"ramps": None}, "yet it also gives ramps, and not an empty list"),
+    ([{"kind": "ramp", "source": "A-2", "reading": 1}], {}, "its reading isn't yes or no"),
+    ([{"kind": "ramp", "source": "A-2", "reding": True}], {}, "entries it doesn't know (reding;"),
     ([{"kind": "ramp", "source": "A-2"}, {"kind": "ramp", "source": "A-2", "reding": True}], {}, "2 times"),
     ([{"kind": "ramp", "source": "A-2"}, {"kind": "ramp", "source": "A-4"}], {}, "2 times"),
     ([{"kind": "ramp", "source": "A-2"}, {"kind": "ramp"}], {}, "2 times"),
     ([{"kind": "ramps", "source": "A-2"}], {}, "not a kind it can say"),
-    ([{"kind": "stair", "source": "A-2"}], {}, "an empty list (`stairs: []`)"),
-    ([{"kind": "sleeping_room", "source": "A-2"}], {}, "(`sleeping: false`)"),
+    ([{"kind": "stair", "source": "A-2"}], {}, "an empty list of stairs"),
+    ([{"kind": "sleeping_room", "source": "A-2"}], {}, "(sleeping room: no)"),
     (["ramp"], {}, "entry #1"),
 ])
 def test_a_claim_that_cant_be_trusted_is_a_problem_and_its_kind_stays_not_read(entries, lists, words):

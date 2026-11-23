@@ -29,7 +29,7 @@ from model_measurement.interior.openings import measure_opening
 from model_measurement.interior.read import FORMAT, INCHES, Reader, name_of
 from model_measurement.interior.rooms import floor_elevation, measure_room
 from model_measurement.interior.stairs import measure_stair
-from model_measurement.interior.stops import Stop
+from model_measurement.interior.stops import STOPS, Stop
 
 MEASURED_FORMAT = "gordium.interior_measured/1"
 # kind → (the description's key, the words for a list of them, the flag each must carry, what the flag asks)
@@ -40,6 +40,25 @@ KINDS = {
     "egress_door": ("doors", "doors", "exit", "the required exit door"),
     "guard": ("guards", "guards", None, None),
 }
+
+
+def asked_field(problem: str) -> str | None:
+    """The interior description's field a problem of the description's (`problems`) asks the architect to state, read
+    back from its words exactly as `_given` makes them: a flag one of a kind's entries doesn't give ("door D01 doesn't
+    say whether it is the required exit door (yes or no)": "doors[].exit"), or a kind's list the description doesn't
+    give at all ("the stairs weren't read: ...": "stairs"). None for any other words (never a guess): a host names
+    its own mark from the field (the Revit add-in's Marks.cs `Feeds`)."""
+    if not isinstance(problem, str):
+        return None
+    for key, words, flag, question in KINDS.values():
+        if problem == Stop("not_read", what=words, key=key).reason:
+            return key
+        if flag:
+            before, after = STOPS["flag_missing"].split("{name}")
+            before, after = before.format(what=key[:-1]), after.format(question=question, key=flag)
+            if problem.startswith(before) and problem.endswith(after) and len(problem) > len(before) + len(after):
+                return f"{key}[].{flag}"
+    return None
 
 
 def _given(description: dict, kind: str, problems: list):
