@@ -20,7 +20,7 @@ from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
 from model_measurement.interior.read import FORMAT, INCHES, Reader, choice, name_of, number, tidy, yes_no
-from model_measurement.interior.stops import Stop as InteriorStop, counted, given_text
+from model_measurement.interior.stops import Stop as InteriorStop, counted, given_text, items
 from model_measurement.routes.stops import Stop
 
 CLEARANCE = 12.0        # in: NFPA 101 7.6.1(2) "with a 12 in. (305 mm) clearance therefrom", both books (decision 1)
@@ -388,8 +388,10 @@ def _door(item, reader, story, unknown_ids, stories) -> Door:
             raise InteriorStop("not_positive", what="the length of the door's direction along its wall", value=size)
         width = reader.size(plan.get("clear_width"), "the door's clear width")
         thickness = reader.size(plan.get("wall_thickness"), "the door's wall thickness")
-        if not isinstance(sides, list) or len(sides) != 2 or not all(isinstance(s, str) and s.strip() for s in sides):
+        if not isinstance(sides, list) or len(sides) != 2:
             raise Stop("door_sides", got=counted(sides, "side", "sides"))
+        if not all(isinstance(s, str) and s.strip() for s in sides):
+            raise Stop("door_side_items", items=items(sides))
         kind, exit_id = item.get("exit_kind"), item.get("exit_id")
         if kind is not None:
             choice(kind, EXIT_KINDS, "the kind of exit the door is")
@@ -448,8 +450,10 @@ def _passage(n, item, reader, stories) -> None:
             holder = story
             break
     try:
-        if not isinstance(rooms, list) or len(rooms) != 2 or not all(isinstance(r, str) and r.strip() for r in rooms):
+        if not isinstance(rooms, list) or len(rooms) != 2:
             raise Stop("passage_rooms", got=counted(rooms, "room", "rooms"))
+        if not all(isinstance(r, str) and r.strip() for r in rooms):
+            raise Stop("passage_room_items", items=items(rooms))
         if rooms[0] == rooms[1]:
             raise Stop("passage_to_itself", room=rooms[0])
         points = reader.points(line, 2, "the passage's line", 2)

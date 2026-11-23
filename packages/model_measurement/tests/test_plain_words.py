@@ -348,7 +348,7 @@ def test_a_list_of_the_right_shape_is_said_by_its_ids_and_blank_text_as_not_give
     assert any("gives its sizes in no unit named, not in" in w for w in said), said
     assert any("(' gordium.interior/1 ', not gordium.interior/1)" in w for w in said), said    # the stray spaces
     assert any("passage #1 isn't read: the passage joins the room r to itself" in w for w in passage), passage
-    assert any("the door d isn't read: the door gives 1 side: r, not 2 (two rooms, or a room and outside)" in w
+    assert any("the door d isn't read: the door gives 1 side: r, not 2 sides (two rooms, or a room and outside)" in w
                for w in door), door
 
 
@@ -358,5 +358,121 @@ def test_a_list_where_text_belongs_is_said_to_be_a_list():
     why = measure(d)["parts"]["emergency_escape_opening"][0]["not_measured"]["opening_net_clear_area"]
     assert "the opening's operation is a list, not one of" in why
     from model_measurement.interior.stops import said
-    assert said(["r", "r"]) == "r and r" and said(["a", 2, "c"]) == "a, 2 and c" and said([]) == "an empty list"
-    assert said([["x"]]) == "a list" and said(list("abcdefg")) == "a list"
+    from model_measurement.interior.stops import counted, items
+    assert said(["r", "r"]) == "a list" and said([]) == "an empty list" and said([["x"]]) == "a list"
+    assert counted(["r"], "side", "sides") == "1 side: r" and counted(list("abcdefg"), "room", "rooms") == "7 rooms"
+    assert items(["", 3, None]) == "a blank name, a number and nothing"
+
+
+
+# ---- review round 5: the grid. Every slot a value comes from the model in, fed every kind of wrong value, through
+# both readers; every reason it gives checked for gaps, Python's own words, self-contradiction, case and naming ----
+
+GRID_VALUES = [None, "", "  ", [], ["x"], "RIGHT_IN_A_LIST", ["a", "b"], ["", "r"], 1, True, {}]
+
+
+def _set(d, path, value):
+    node = d
+    for k in path[:-1]:
+        node = node[k]
+    node[path[-1]] = value
+
+
+def _handrail(side):
+    return [{"side": side, "inner_edge": [[0, 32.5], [30, 32.5]]}]
+
+
+def _passage(rooms):
+    return [{"rooms": rooms, "line": [[0, 15], [5, 15]]}]
+
+
+# slot: (reader, path, the right value, how the reason names the slot, how the value is set)
+GRID = {
+    "format": ("both", ("format",), "gordium.interior/1", "form", None),
+    "units": ("both", ("units",), "in", "sizes", None),
+    "sleeping": ("both", ("rooms", 0, "sleeping"), False, "sleeping room", None),
+    "escape": ("interior", ("openings", 0, "escape"), True, "escape", None),
+    "exit": ("interior", ("doors", 0, "exit"), True, "exit door", None),
+    "spiral": ("interior", ("stairs", 0, "spiral"), False, "spiral", None),
+    "handrail side": ("interior", ("stairs", 0, "handrails"), "left", "handrail", _handrail),
+    "window operation": ("interior", ("openings", 0, "operation"), "casement", "operation", None),
+    "door operation": ("interior", ("doors", 0, "operation"), "side_hinged", "operation", None),
+    "has-none reading": ("interior", ("has_none",), False, "reading",
+                         lambda v: [{"kind": "ramp", "source": "A-2", "reading": v}]),
+    "room name": ("both", ("rooms", 0, "name"), "Bedroom", "room", None),
+    "lockable": ("routes", ("rooms", 0, "lockable"), False, "locked", None),
+    "pass through": ("routes", ("rooms", 0, "pass_through"), False, "pass through", None),
+    "not occupied": ("routes", ("rooms", 0, "not_occupied"), False, "occupied", None),
+    "use": ("routes", ("rooms", 0, "use"), "day_care", "use", None),
+    "door sides": ("routes", ("doors", 0, "sides"), ["r", "c"], "side", None),
+    "passage rooms": ("routes", ("passages",), ["r", "c"], "passage", _passage),
+    "levels": ("routes", ("levels",), [{"id": "L1", "name": "Level 1", "elevation": 0}], "level", None),
+    "exit kind": ("routes", ("doors", 1, "exit_kind"), "exterior_at_discharge", "exit", None),
+}
+
+
+def _interior_reasons(d):
+    got = measure(d)
+    return set(got["problems"]) | {w for parts in got["parts"].values() for p in parts or []
+                                   for w in (p.get("not_measured") or {}).values() if isinstance(w, str)}
+
+
+def _route_reasons(d):
+    from model_measurement.routes.floor import read
+    try:
+        floor = read(d)
+    except Exception as e:
+        return {getattr(e, "reason", str(e))}
+    return set(floor.stops) | {r for st in floor.stories.values() for r in st.stops} | \
+        {st.outline_stop for st in floor.stories.values() if st.outline_stop}
+
+
+def _grid_reasons():
+    from routes_layouts import room_on_corridor
+    readers = {"interior": (base, _interior_reasons), "routes": (room_on_corridor, _route_reasons)}
+    out = []
+    for slot, (which, path, right, naming, wrap) in GRID.items():
+        for name, (make, reasons) in readers.items():
+            if which not in (name, "both"):
+                continue
+            plain = reasons(make())
+            for value in GRID_VALUES:
+                v = [right] if value == "RIGHT_IN_A_LIST" else value
+                d = make()
+                _set(d, path, wrap(v) if wrap else v)
+                for r in reasons(d) - plain:
+                    out.append((slot, name, value, naming, r))
+    return out
+
+
+SELF_CONTRADICTION = re.compile(r"(?:^|[(: ])([\w'./ -]+?), not \1(?:[):;,]|$)")
+
+
+def test_every_wrong_value_in_every_slot_is_said_plainly_and_truly():
+    found = _grid_reasons()
+    assert len(found) > 100, len(found)
+    bad = []
+    for slot, reader, value, naming, r in found:
+        problems = []
+        if "(, " in r or " , not" in r or "in , not" in r or ": ," in r:
+            problems.append("an empty gap")
+        if re.search(r"\b(None|True|False)\b", r) or "[" in r or "{" in r:
+            problems.append("Python's own words")
+        if SELF_CONTRADICTION.search(r):
+            problems.append("X, not X")
+        m = re.search(r"gives (\d+) \w+.*?not (\d+)\b", r)
+        if m and m.group(1) == m.group(2):
+            problems.append("gives N, not N")
+        if not (r[:1].islower() or PROPER.match(r)):
+            problems.append("not lower case")
+        if problems:
+            bad.append((slot, reader, value, problems, r))
+    # each wrong value is named by its slot in one reason at least (others may follow from it: "the door d opens
+    # on 'r', which is a room that isn't read")
+    groups = {}
+    for slot, reader, value, naming, r in found:
+        groups.setdefault((slot, reader, repr(value), naming), []).append(r)
+    for (slot, reader, value, naming), rs in groups.items():
+        if not any(naming in r.lower() for r in rs):
+            bad.append((slot, reader, value, [f"no reason names the {naming}"], rs))
+    assert not bad, "\n".join(map(repr, bad[:40])) + f"\n({len(bad)} in all)"

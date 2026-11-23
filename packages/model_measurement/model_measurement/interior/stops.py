@@ -175,17 +175,27 @@ class Words(str):
 LISTED_MOST = 6                     # a list of more is said by its length, never item by item
 
 
+def _item(x) -> str:
+    """One item of a list as `counted` says it: text as itself (blank text "a blank name"), a number "a number",
+    nothing "nothing", anything else as `said` says it."""
+    if isinstance(x, str):
+        return x if x.strip() else "a blank name"
+    if isinstance(x, (int, float)) and not isinstance(x, bool):
+        return "a number"
+    return "nothing" if x is None else str(said(x))
+
+
 def _in_words(items: list) -> str:
-    words = [str(x) if not isinstance(x, str) else (x if x.strip() else "a blank name") for x in items]
+    words = [_item(x) for x in items]
     return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
 
 
 def said(value, missing: str = "nothing"):
     """A value as a reason shows it, the one way every reason does: text as itself (quoted where the reason quotes
     it), a number as itself, and anything else in words, never Python's own (None, True, False, a list's brackets):
-    nothing given is `missing` ("no form named", "no unit named"), a yes/no value "a yes/no value", a short list of
-    text or numbers its items in words ("r and r"), any other list "a list", a mapping "a set of entries". Where a
-    list is the wrong shape (text belongs there), the caller says "a list" itself (read.choice)."""
+    nothing given is `missing` ("no form named", "no unit named"), a yes/no value "a yes/no value", any list "a list"
+    (or "an empty list"), a mapping "a set of entries". Only `counted`, where a list is the right shape, says a list's
+    items."""
     if isinstance(value, Words):
         return value
     if value is None:
@@ -195,10 +205,7 @@ def said(value, missing: str = "nothing"):
     if isinstance(value, (str, int, float)):
         return value
     if isinstance(value, (list, tuple)):
-        if value and len(value) <= LISTED_MOST and all(isinstance(x, (str, int, float)) and not isinstance(x, bool)
-                                                       for x in value):
-            return Words(_in_words(list(value)))
-        return Words("an empty list" if not value else "a list")
+        return Words("a list" if value else "an empty list")
     if isinstance(value, dict):
         return Words("a set of entries")
     return Words("a value Gordium can't read")
@@ -216,13 +223,20 @@ def given_text(value, missing: str):
 
 
 def counted(value, one: str, many: str):
-    """A list given where a set number belongs, as how many and which: "1 side: r", "3 rooms: a, b and c"; anything
-    else as `said` shows it (the text 'x', a set of entries)."""
+    """A list given where a set number belongs (the one place a list is the right shape), as how many and which: "1
+    side: r", "3 rooms: a, b and c" (more than LISTED_MOST: how many alone); anything else as `given_as` shows it
+    (the text 'x', a set of entries)."""
     if isinstance(value, (list, tuple)):
         n = len(value)
-        listed = said(list(value))
-        return Words(f"{n} {one if n == 1 else many}" + (f": {listed}" if n and listed != "a list" else ""))
+        head = f"{n} {one if n == 1 else many}"
+        return Words(head + f": {_in_words(list(value))}" if 0 < n <= LISTED_MOST else head)
     return given_as(value)
+
+
+def items(value) -> str:
+    """A list's items in words ("a blank name and r", "a number and nothing"): its items, where its length is right
+    and an item isn't."""
+    return Words(_in_words(list(value)))
 
 
 def given_as(value):

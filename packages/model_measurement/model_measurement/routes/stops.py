@@ -33,9 +33,10 @@ STOPS = {
                      "route (open question 4)",
     "unknown_space_not_read": "the enclosed space #{n} isn't read: {reason}",
     "door_not_read": "the door {name} isn't read: {reason}",
-    "door_sides": "the door gives {got}, not 2 (two rooms, or a room and outside)",
+    "door_sides": "the door gives {got}, not 2 sides (two rooms, or a room and outside)",
+    "door_side_items": "the door's sides are {items}: each must be a room id or 'outside'",
     "door_narrow": "the door {name} is {width} in clear, under 24 in: its centre is inside its jambs' 12-in rings",
-    "door_side": "the door {name} opens on {side!r}, which is {what}",
+    "door_side": "a side of the door {name} is {side!r}, which is {what}",
     "door_not_in_wall": "the door {name}'s opening doesn't sit in a wall of the room {room} (its face, at half the "
                         "wall's thickness from its centre, isn't on that room's outline within 1/16 in)",
     "door_same_side": "the door {name} has both its rooms on the same side of its wall",
@@ -44,7 +45,8 @@ STOPS = {
     "exit_stair_or_ramp": "the door {name} is an exit to an exterior stair or ramp: travel along it isn't measured "
                           "yet (decision 4)",
     "passage_not_read": "passage #{n} isn't read: {reason}",
-    "passage_rooms": "the passage gives {got}, not 2",
+    "passage_rooms": "the passage gives {got}, not 2 rooms",
+    "passage_room_items": "the passage's rooms are {items}: each must be a room id",
     "passage_to_itself": "the passage joins the room {room} to itself",
     "passage_off": "passage #{n}'s line isn't on the outline of the room {room} (within 1/16 in)",
     "zone_in_pieces": "the rooms {rooms}, joined by passages, don't make one floor (they come apart in {count} "

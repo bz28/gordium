@@ -8,7 +8,7 @@ import math
 
 from shapely.geometry import Polygon
 
-from model_measurement.interior.stops import Stop, Words, given_as
+from model_measurement.interior.stops import Stop, given_as
 
 FORMAT = "gordium.interior/1"
 INCHES = {"in": (1, 1), "ft": (12, 1), "mm": (1, 25.4), "m": (1000, 25.4)}   # (times, divided by)
@@ -53,8 +53,7 @@ def choice(value, choices, what: str):
     if value is None:
         raise Stop("missing", what=what)
     if not isinstance(value, str) or value not in choices:
-        raise Stop("choice", what=what, choices=", ".join(choices),     # a list where text belongs: "a list"
-                   got=Words("a list") if isinstance(value, (list, tuple)) else value)
+        raise Stop("choice", what=what, got=value, choices=", ".join(choices))
     return value
 
 
