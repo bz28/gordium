@@ -788,9 +788,10 @@ CI restores in locked mode.
 Each button has a one-line tooltip and up to three lines more on a longer hover (Revit's `LongDescription`), and an
 icon at 16 and 32 px in Revit's light and dark themes: simple strokes drawn to PNG by `RibbonIcons` from the panel's
 colour tokens (the outline in `text`, the mark in `accent`), swapped on `ThemeChanged` (Revit doesn't switch an
-add-in's images by theme itself). No Settings button: there is nothing to set yet. `install_trial_addin.ps1` builds
-a trial build (`-p:GordiumTrial=true`, the Trial panel always there); `-Architect` installs the build an architect
-gets. Revit names an add-in button's Quick Access Toolbar copy and keyboard shortcut by tab, panel and name, so the
+add-in's images by theme itself). No Settings button: there is nothing to set yet. `install_trial_addin.ps1` installs
+the build an architect gets by default (no Trial panel: Ben, 2026-11-23, for demos to architects); `-Dev` installs a
+trial build (`-p:GordiumTrial=true`, the Trial panel always there), and `GORDIUM_TRIAL=1` in Revit's environment turns
+it on in any build. Revit names an add-in button's Quick Access Toolbar copy and keyboard shortcut by tab, panel and name, so the
 four buttons that moved panels in this pass (Mark facts, About, Read inside, Record houses) lose an existing copy or
 shortcut once: add them again. The request files the trial runs by (read in `App`'s Idling handler) never use a button, so they work in both.
 How we know: `RibbonTests.cs` (which buttons exist with the switch off and on, the tooltips' length, every icon a

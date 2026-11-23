@@ -7,17 +7,20 @@
 # trusts the publisher, and doesn't ask.
 # -Python names the Python to run for a clone with no venv of its own (a git worktree): written beside the build
 # (gordium_python.txt); the add-in then points it at this clone's packages (PYTHONPATH), so the code run is this clone's.
-# The build is a trial build (-p:GordiumTrial=true): the Gordium tab has its Trial panel (Check box house, Record scenes,
-# Read inside, Record houses). -Architect installs the build an architect gets: Check, Results and Help only (the Trial
-# panel then only with GORDIUM_TRIAL=1 in Revit's environment). The request files work in both.
-param([string]$Revit = "2027", [string]$Python = "", [switch]$Architect)
+# By default it installs the build an architect gets (Ben, 2026-11-23, for demos to architects): the Gordium tab shows
+# Check, Results and Help only. The developer tools (the Trial panel: Check box house, Record scenes, Read inside,
+# Record houses) come back with -Dev (a trial build, -p:GordiumTrial=true: the Trial panel always), or in any build
+# with GORDIUM_TRIAL=1 set in the environment Revit starts in. -Architect is the default, kept so older notes work.
+# The request files (run_request.json and the others) work in both.
+param([string]$Revit = "2027", [string]$Python = "", [switch]$Dev, [switch]$Architect)
 $ErrorActionPreference = "Stop"
 $tfm = @{ "2027" = "net10.0-windows"; "2026" = "net8.0-windows" }[$Revit]
 if (-not $tfm) { throw "Revit $Revit is not one the add-in is built for (2026, 2027)" }
 if (Get-Process Revit -ErrorAction SilentlyContinue) { throw "Revit is running: close it first (it locks the add-in's files)" }
 $project = Join-Path $PSScriptRoot "src\Gordium.Revit.Addin"
 $clone = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
-$trialBuild = if ($Architect) { "false" } else { "true" }
+if ($Dev -and $Architect) { throw "-Dev and -Architect: choose one (-Dev adds the Trial panel's developer tools)" }
+$trialBuild = if ($Dev) { "true" } else { "false" }
 # -t:Rebuild: the trial switch is compiled in, so a build left by the other kind is never reused
 dotnet build $project -c Release -f $tfm -v q -t:Rebuild "-p:GordiumTrial=$trialBuild"
 if ($LASTEXITCODE -ne 0) { throw "build failed" }

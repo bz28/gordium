@@ -50,6 +50,22 @@ public sealed class RibbonTests
     public void The_trial_switch_is_a_trial_build_or_GORDIUM_TRIAL_1(bool build, string? variable, bool on) =>
         Assert.Equal(on, RibbonPlan.TrialOn(build, variable));
 
+    /// <summary>The install script's default is the build an architect gets, with no Trial panel (Ben, 2026-11-23: the
+    /// add-in is demoed to architects); only -Dev builds a trial build, and the script and the runbook both say how to
+    /// turn the developer tools back on (-Dev, or GORDIUM_TRIAL=1).</summary>
+    [Fact]
+    public void The_install_hides_the_developer_tools_unless_asked()
+    {
+        var script = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "install_trial_addin.ps1"));
+        Assert.Contains("$trialBuild = if ($Dev) { \"true\" } else { \"false\" }", script, StringComparison.Ordinal);
+        Assert.Contains("\"-p:GordiumTrial=$trialBuild\"", script, StringComparison.Ordinal);
+        Assert.Contains("GORDIUM_TRIAL=1", script, StringComparison.Ordinal);
+        var runbook = File.ReadAllText(Path.Combine(Env.Repo, "docs", "revit", "windows_trial_runbook.md"));
+        Assert.Contains("install with `-Dev`", runbook, StringComparison.Ordinal);
+        Assert.Contains("`GORDIUM_TRIAL=1`", runbook, StringComparison.Ordinal);
+        Assert.False(RibbonPlan.TrialOn(trialBuild: false, null));                       // the default: no Trial panel
+    }
+
     [Fact]
     public void Every_button_has_a_one_line_tooltip_and_at_most_three_short_lines_more()
     {
