@@ -1,0 +1,53 @@
+# New York's Building Code egress for every occupancy group: the plan (2026-11-23)
+
+**Purpose:** how Gordium turns Chapter 10 (Means of Egress) of the 2025 Building Code of New York State into checkable rules for every occupancy group, not only Group I-4: which sections, which table rows, what is a rule and what a flag, the building facts they read, and the order of work.\
+**For:** engineers extending `new_york_state_building/`; Ben (scope, order); reviewers of each section group's commits.\
+**Kept current by:** the engineer who drafts a section group, in that same branch (the group's status line below).
+
+Follows [the Building Code's first step](2026-11-21_ny_building_code.md) (Group I-4 only) and [which New York code](2026-11-22_which_ny_code.md). Ben, 2026-11-23: every occupancy, starting with the four-unit apartment (Group R-2), offices (B), shops (M), assembly (A) and schools (E).
+
+## What the existing measures can already check, for any occupancy
+
+The route measuring (`model_measurement/routes`) gives, per story: exit count, exit access travel distance, the remoteness ratio and the story's areas; per space (each room not a corridor): its exit access doorways, its common path, the remoteness of its doorways, the rooms its path crosses; per corridor: width and dead ends. Facts the model can't show are the architect's, in the interior description's `building` block (occupancy groups, sprinkler system). What that supports with no new measure:
+
+| Requirement | Measures | New measure needed |
+|---|---|---|
+| 1006.2.1 and Table 1006.2.1, every row: a space's second exit by occupant load and common path | `space_exit_count`, `space_common_path`, `space_occupant_load` | none (the occupant load is stated or, from step 2, computed) |
+| 1017.2 and Table 1017.2, every row: travel distance | `egress_travel_distance` | none |
+| 1020.5 and its exceptions, every group: dead ends | `corridor_dead_end_length`, `corridor_dead_end_least_width` | none |
+| 1007.1 exit separation, every group, where two are required | `exit_remoteness_ratio`, `space_exit_remoteness_ratio` | none (needs the "how many are required" of 1006.2.1 and 1006.3 per group) |
+| 1006.3.3 and 1006.3.4, Tables 1006.3.4(1) and (2): a story's exits | `story_exit_count`, `story_occupant_load`, `egress_travel_distance`, `story_first_above_or_below_grade` | the story's number above grade plane; Group R-2's dwelling units per story (stated) |
+| 1020.3 and Table 1020.3: corridor width | `corridor_width`, `corridor_occupant_load` | none (the occupant load stated, later computed) |
+| 1004.5 and Table 1004.5: occupant load | none today | each room's function (Table 1004.5's list, stated) and its floor area (gross and net readings) |
+| 1005.3 egress capacity | none today | each exit's and door's clear width along the route, the load it serves |
+| 1010 doors, 1011 stairs, 1014 handrails, 1015 guards | the house measuring's door, stair, handrail and guard parts (`model_measurement/interior`) | the Building Code check must read those parts too (today it reads only the routes) |
+| 1031 emergency escape and rescue (Group R-2, R-3, R-4, I-1) | the house measuring's escape openings | as above |
+
+Note: in this book Section 1030 is **Assembly** and **1031 is Emergency Escape and Rescue** (pp.353, 359).
+
+## Decisions
+
+1. **One building fact, `occupancy_group`: the building's one group, or `mixed`.** From the `building` block's `occupancy_groups` (code_scope.building_measures): one group stated gives that group (`R-2`); two or more give `mixed`; none stated, left out (every rule that reads it needs review). A text measure with its list of values in `proposed_measures.yaml` (`values:`). `occupancy_group_i4` and `other_occupancy_present` stay, so the I-4 rules read as before.
+2. **A rule per printed table row**, its id naming the table (`general.bc_table_1017_2_b`), its quote the row's own line, `applies_when: occupancy_group in [the row's groups]`. Each row is chart-matched by a test: every column passes at its limit and fails just past it, page cited. The I-4 rows stay the existing I-4 rules (no verdict of theirs changes).
+3. **A mixed building is a person's check** (1004.4: each portion by its own occupancy; a shared component meets the most stringent): the row rules are not applicable to `mixed`, and one flag per table says so. Per-room occupancy marks would let a mixed building be checked by portion: a later step.
+4. **Footnotes:** a footnote that tightens a cell is in the check; one that loosens it under a condition the model can't show is a `review_when` (never a pass on it) or a flag. A condition the architect can state (the sprinkler system) is a fact; one not stated needs review. Fact added: `assembly_fixed_seating` (Table 1006.2.1 note c: 1030.8; Table 1017.2 note a: 1030.7), stated in the `building` block. An NFPA 13D system (903.3.1.3) is neither 903.3.1.1 nor 903.3.1.2, so it gets the columns without a sprinkler system (Table 1017.2 note e says the same for R-3 and R-4); where Table 1006.2.1 note g sends it elsewhere (1006.2.2.6), the R-3 and R-4 row needs review.
+5. **The "other occupancies" flags are narrowed** to `occupancy_group == "mixed"` (or to their own group: 1017.2.2 to F-1 and S-1, 1017.2.3 to H-5) as each table's rows are drafted, so only what is not drafted falls back to needs review.
+6. **What the law leaves open never passes**, as for I-4: Table 1006.2.1's common path over the row's value in a space with two exits needs review (README open question 1, now for every row).
+
+## Section groups, in order
+
+Each group: its pieces brought in (`sources.yaml`, extracted, labeled, definitions by italics, every number read a second time from the page images), its rules and flags, the chart-match tests, worked examples per occupancy, the coverage report regenerated, the four-unit apartment's check run before and after.
+
+1. **Rows of the tables already brought in** (no new pieces): Table 1006.2.1 (every row: common path and a space's one exit), Table 1017.2 (every row: travel distance), 1020.5 (dead ends, exceptions 1 to 4 for every group). Status: drafted 2026-11-23: 23 rules (10 rows of Table 1017.2, 12 of Table 1006.2.1, 1020.5 for every group but I-4) and 2 flags (Table 1017.2 note a's other sections, always shown; Group H's sprinkler system), five other-occupancy flags narrowed; a space that is itself an exit (`space_is_exit`, a stair enclosure entered by its exit door) is not one Table 1006.2.1 counts; chart-matched in `packages/rule_format/tests/test_ny_building_egress_all_occupancies.py`. The Building Code check now reads an unstated fact as unknown, as the rules' worked examples do (`design_checker/egress.py` `_law_values`), so a travel distance within every limit isn't held for an increase it doesn't need. The four-unit apartment (R-2, no sprinkler system): travel 53.95 ft passes (200 ft), no dead end, each apartment's one door fails (R-2 row: Not Permitted without a sprinkler system).
+2. **1006.3 and 1007 for every group:** Table 1006.3.4(1) (Group R-2 dwelling units) brought in; 1006.3.3's single-exit allowance and 1007.1's "where two are required" read every row of Tables 1006.3.4(1) and (2).
+3. **1004 occupant load:** 1004 and Table 1004.5 brought in; a room's function (stated) and floor area (two readings, inside its walls and to their outer faces) give a computed occupant load, never less than Table 1004.5's (1004.5), used where none is stated.
+4. **1020 corridors:** 1020.1 to 1020.7, Tables 1020.2 and 1020.3 brought in: width by occupancy and occupant load (a rule), fire-resistance rating (stated rating against the table), continuity and air movement (flags).
+5. **1005 egress width:** 1005.3.1 and 1005.3.2 capacity factors (0.3 and 0.2 inch per occupant; 0.2 and 0.15 with a sprinkler system and an emergency voice/alarm system, a stated fact), 1005.5 distribution, 1005.7 encroachment.
+6. **1010 doors:** size (1010.1.1), swing (1010.1.2.1), landings, hardware and panic hardware by occupant load; the Building Code check reads the interior measuring's door parts.
+7. **1011 stairs, 1014 handrails, 1015 guards:** width, risers and treads, headroom, handrail and guard heights and openings, by occupancy (the dwelling-unit exceptions included).
+8. **1031 emergency escape and rescue:** where required (Groups R-2 per 1006.3.4, R-3, R-4, I-1), size and operation, from the escape-opening parts.
+9. **The rest of Chapter 10** (1003 general, 1008 illumination, 1009 accessible egress, 1012 ramps, 1013 signs, 1016, 1018 aisles, 1019, 1021 to 1030): rules where measured, flags otherwise.
+
+## Order and why
+
+Group 1 first: the measures exist, the tables are already read twice, and it gives the apartment its first real verdicts (travel distance, a dwelling unit's one exit, dead ends). Then group 2 (the apartment's story exits and separation), then the occupant load (group 3), which every load-based limit waits on. The rest follow the parts the measuring gives.
