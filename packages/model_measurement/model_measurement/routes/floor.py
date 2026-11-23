@@ -20,7 +20,7 @@ from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
 from model_measurement.interior.read import FORMAT, INCHES, Reader, choice, name_of, number, tidy, yes_no
-from model_measurement.interior.stops import Stop as InteriorStop, said
+from model_measurement.interior.stops import Stop as InteriorStop, counted, given_text
 from model_measurement.routes.stops import Stop
 
 CLEARANCE = 12.0        # in: NFPA 101 7.6.1(2) "with a 12 in. (305 mm) clearance therefrom", both books (decision 1)
@@ -239,11 +239,11 @@ def _reader(description) -> Reader:
     if not isinstance(description, dict):
         raise Stop("description", reason="it isn't a set of named entries")
     if description.get("format") != FORMAT:
-        raise Stop("description", reason=f"it is in a form Gordium doesn't read ({said(description.get('format'), 'no form named')}, "
-                                               f"not {FORMAT})")
+        raise Stop("description", reason=f"it is in a form Gordium doesn't read "
+                                               f"({given_text(description.get('format'), 'no form named')}, not {FORMAT})")
     units = description.get("units")
     if not isinstance(units, str) or units not in INCHES:
-        raise Stop("description", reason=f"it gives its sizes in {said(units, 'no unit named')}, not in "
+        raise Stop("description", reason=f"it gives its sizes in {given_text(units, 'no unit named')}, not in "
                                                "inches, feet, millimetres or metres")
     return Reader(units)
 
@@ -388,9 +388,8 @@ def _door(item, reader, story, unknown_ids, stories) -> Door:
             raise InteriorStop("not_positive", what="the length of the door's direction along its wall", value=size)
         width = reader.size(plan.get("clear_width"), "the door's clear width")
         thickness = reader.size(plan.get("wall_thickness"), "the door's wall thickness")
-        if not isinstance(sides, list) or len(sides) != 2 or not all(isinstance(s, str) for s in sides):
-            raise InteriorStop("choice", what="the door's sides", got=sides,
-                               choices="two room ids, or a room id and 'outside'")
+        if not isinstance(sides, list) or len(sides) != 2 or not all(isinstance(s, str) and s.strip() for s in sides):
+            raise Stop("door_sides", got=counted(sides, "side", "sides"))
         kind, exit_id = item.get("exit_kind"), item.get("exit_id")
         if kind is not None:
             choice(kind, EXIT_KINDS, "the kind of exit the door is")
@@ -398,7 +397,7 @@ def _door(item, reader, story, unknown_ids, stories) -> Door:
                 raise InteriorStop("missing", what="which exit the exit door leads into")
         elif exit_id is not None:
             raise InteriorStop("missing", what="the kind of exit the door is (it says which exit it leads into)")
-    except InteriorStop as s:
+    except (InteriorStop, Stop) as s:                  # (Stop: the door's sides, door_sides)
         raise Stop("door_not_read", name=name, reason=s.reason) from None
     if width < NARROWEST:
         raise Stop("door_narrow", name=name, width=tidy(width))
@@ -449,15 +448,16 @@ def _passage(n, item, reader, stories) -> None:
             holder = story
             break
     try:
-        if not isinstance(rooms, list) or len(rooms) != 2 or not all(isinstance(r, str) for r in rooms) \
-                or rooms[0] == rooms[1]:
-            raise InteriorStop("choice", what="the passage's rooms", got=rooms, choices="two rooms")
+        if not isinstance(rooms, list) or len(rooms) != 2 or not all(isinstance(r, str) and r.strip() for r in rooms):
+            raise Stop("passage_rooms", got=counted(rooms, "room", "rooms"))
+        if rooms[0] == rooms[1]:
+            raise Stop("passage_to_itself", room=rooms[0])
         points = reader.points(line, 2, "the passage's line", 2)
         if len(points) != 2 or math.dist(*points) <= SAME:
             raise InteriorStop("not_a_polyline", what="the passage's line (two points apart)")
         if holder is None or not all(r in holder.rooms for r in rooms):
             raise InteriorStop("missing", what="one of the passage's rooms on its story")
-    except InteriorStop as s:
+    except (InteriorStop, Stop) as s:                  # (Stop: the passage's rooms)
         for story in ([holder] if holder else stories.values()):
             story.stops.append(Stop("passage_not_read", n=n, reason=s.reason).reason)
         return

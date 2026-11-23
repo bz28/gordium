@@ -172,11 +172,20 @@ class Words(str):
         return str(self)
 
 
+LISTED_MOST = 6                     # a list of more is said by its length, never item by item
+
+
+def _in_words(items: list) -> str:
+    words = [str(x) if not isinstance(x, str) else (x if x.strip() else "a blank name") for x in items]
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
+
+
 def said(value, missing: str = "nothing"):
     """A value as a reason shows it, the one way every reason does: text as itself (quoted where the reason quotes
     it), a number as itself, and anything else in words, never Python's own (None, True, False, a list's brackets):
-    nothing given is `missing` ("no form named", "no unit named"), a yes/no value "a yes/no value", a list "a list",
-    a mapping "a set of entries"."""
+    nothing given is `missing` ("no form named", "no unit named"), a yes/no value "a yes/no value", a short list of
+    text or numbers its items in words ("r and r"), any other list "a list", a mapping "a set of entries". Where a
+    list is the wrong shape (text belongs there), the caller says "a list" itself (read.choice)."""
     if isinstance(value, Words):
         return value
     if value is None:
@@ -186,10 +195,34 @@ def said(value, missing: str = "nothing"):
     if isinstance(value, (str, int, float)):
         return value
     if isinstance(value, (list, tuple)):
-        return Words("a list")
+        if value and len(value) <= LISTED_MOST and all(isinstance(x, (str, int, float)) and not isinstance(x, bool)
+                                                       for x in value):
+            return Words(_in_words(list(value)))
+        return Words("an empty list" if not value else "a list")
     if isinstance(value, dict):
         return Words("a set of entries")
     return Words("a value Gordium can't read")
+
+
+def given_text(value, missing: str):
+    """Text the model gave where a word of Gordium's belongs (the interior's format, its units), quoted so stray
+    spaces show (' gordium.interior/1 '); nothing given, or blank text, is `missing` ("no form named"), never an
+    empty gap; anything else as `said` shows it. One helper for the interior's reading and the route reading's."""
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return Words(missing)
+    if isinstance(value, str):
+        return Words(repr(value))
+    return said(value, missing)
+
+
+def counted(value, one: str, many: str):
+    """A list given where a set number belongs, as how many and which: "1 side: r", "3 rooms: a, b and c"; anything
+    else as `said` shows it (the text 'x', a set of entries)."""
+    if isinstance(value, (list, tuple)):
+        n = len(value)
+        listed = said(list(value))
+        return Words(f"{n} {one if n == 1 else many}" + (f": {listed}" if n and listed != "a list" else ""))
+    return given_as(value)
 
 
 def given_as(value):

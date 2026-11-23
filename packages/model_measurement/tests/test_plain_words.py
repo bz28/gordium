@@ -313,3 +313,50 @@ def test_reasons_are_lower_case_mid_sentence():
         for piece in [w] + re.split(r"(?:: |; |\()", w)[1:]:
             if piece[:1].isupper():
                 assert PROPER.match(piece), (piece, w)
+
+
+
+# ---- review round 4: a list said by what is in it where its shape is right; blank text as not given ------------
+
+def _route_stops(d):
+    from model_measurement.routes.floor import read
+    try:
+        floor = read(d)
+    except Exception as e:
+        return [getattr(e, "reason", str(e))]
+    return list(floor.stops) + [r for s in floor.stories.values() for r in s.stops]
+
+
+def test_a_list_of_the_right_shape_is_said_by_its_ids_and_blank_text_as_not_given():
+    from routes_layouts import room_on_corridor
+    said = []
+    for fmt, units in (("", "in"), ("gordium.interior/1", ""), (" gordium.interior/1 ", "in"),
+                       ("gordium.interior/1", "  ")):
+        said += measure({"format": fmt, "units": units, "rooms": []})["problems"]
+        said += _route_stops(dict(room_on_corridor(), format=fmt, units=units))
+    d = room_on_corridor()
+    d["passages"] = [{"rooms": ["r", "r"], "line": [[0, 15], [5, 15]]}]
+    passage = _route_stops(d)
+    d = room_on_corridor()
+    d["doors"][0]["sides"] = ["r"]
+    door = _route_stops(d)
+    said += passage + door
+    for w in said:
+        assert "(, not" not in w and "in , not" not in w and "in   , not" not in w, w
+        assert "is a list, not one of" not in w, w
+    assert any("(no form named, not gordium.interior/1)" in w for w in said), said
+    assert any("gives its sizes in no unit named, not in" in w for w in said), said
+    assert any("(' gordium.interior/1 ', not gordium.interior/1)" in w for w in said), said    # the stray spaces
+    assert any("passage #1 isn't read: the passage joins the room r to itself" in w for w in passage), passage
+    assert any("the door d isn't read: the door gives 1 side: r, not 2 (two rooms, or a room and outside)" in w
+               for w in door), door
+
+
+def test_a_list_where_text_belongs_is_said_to_be_a_list():
+    d = base()
+    d["openings"][0]["operation"] = ["casement"]
+    why = measure(d)["parts"]["emergency_escape_opening"][0]["not_measured"]["opening_net_clear_area"]
+    assert "the opening's operation is a list, not one of" in why
+    from model_measurement.interior.stops import said
+    assert said(["r", "r"]) == "r and r" and said(["a", 2, "c"]) == "a, 2 and c" and said([]) == "an empty list"
+    assert said([["x"]]) == "a list" and said(list("abcdefg")) == "a list"

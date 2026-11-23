@@ -29,7 +29,7 @@ from model_measurement.interior.openings import measure_opening
 from model_measurement.interior.read import FORMAT, INCHES, Reader, name_of, yes_no
 from model_measurement.interior.rooms import floor_elevation, measure_room
 from model_measurement.interior.stairs import measure_stair
-from model_measurement.interior.stops import STOPS, Stop, said
+from model_measurement.interior.stops import STOPS, Stop, given_text
 
 MEASURED_FORMAT = "gordium.interior_measured/1"
 # kind → (the description's key, the words for a list of them, the flag each must carry, what the flag asks)
@@ -143,11 +143,11 @@ def measure(description) -> dict:
         problems.append(Stop("not_a_description").reason)
         return out
     if description.get("format") != FORMAT:
-        problems.append(Stop("wrong_format", got=said(description.get("format"), "no form named")).reason)
+        problems.append(Stop("wrong_format", got=given_text(description.get("format"), "no form named")).reason)
         return out
     units = description.get("units")
     if not isinstance(units, str) or units not in INCHES:
-        problems.append(Stop("units", units=said(units, "no unit named")).reason)
+        problems.append(Stop("units", units=given_text(units, "no unit named")).reason)
         return out
     reader = Reader(units)
     parts = out["parts"]
