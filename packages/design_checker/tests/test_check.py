@@ -164,8 +164,9 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     assert replies[0]["result"]["summary"]["text"] == replies[0]["result"]["view"]["summary"] == (
         "Zoning: 1 does not comply · 9 need review · 11 comply · 1 not checked in this release · 2 use details to "
         "answer · Egress waiting: no rooms drawn yet")                    # no interior drawn: egress waits
-    assert replies[3]["result"]["zones"] == ["B-1a", "B-1b", "B-2a", "B-2d", "B-4", "B-5", "R-1a", "R-1b", "R-2a",
-                                             "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b", "RU"]   # every hand-drafted rulebook
+    assert replies[3]["result"]["zones"] == ["B-1a", "B-1b", "B-2a", "B-2d", "B-4", "B-5", "CBD-100", "CBD-120", "CBD-140",
+                                             "CBD-50", "CBD-60", "CBD-85", "R-1a", "R-1b", "R-2a", "R-2b", "R-2c",
+                                             "R-3a", "R-3aa", "R-3b", "RU"]   # every hand-drafted rulebook
 
 
 def test_the_quickstart_names_every_district_the_start_box_offers(facts):
@@ -4750,8 +4751,8 @@ def test_a_district_with_no_rules_is_said_plainly(tmp_path):
     from design_checker.check import check_site, no_rules_for, start
     # B-2b: on the City's map and in §325-4, in no chart column, so no rulebook (B-1a has one since 2026-11-22)
     facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "B-2b"}
-    want = ("Gordium doesn't have rules for district B-2b yet. It has rules for B-1a, B-1b, B-2a, B-2d, B-4, B-5, R-1a, "
-            "R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b and RU.")
+    want = ("Gordium doesn't have rules for district B-2b yet. It has rules for B-1a, B-1b, B-2a, B-2d, B-4, B-5, CBD-50, "
+            "CBD-60, CBD-85, CBD-100, CBD-120, CBD-140, R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b and RU.")
     assert no_rules_for(facts) == want
     assert no_rules_for({**facts, "zone": "R-1b"}) is None
     site = {"units": "ft", "lot": {"id": "lot", "edges": []}, "buildings": [], "problems": []}
