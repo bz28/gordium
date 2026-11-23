@@ -56,10 +56,6 @@ rules:
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 4
-    lines: [5, 5]
-    quote: B-1 B-2 CBD [fn1] Additional
-  - file: zoning_charts_2026-04.pdf
-    page: 4
     lines: [6, 6]
     quote: CBD-50, -60, -85,
     not_limits: {50: a district name (CBD-50), 60: a district name (CBD-60), 85: a district name (CBD-85)}
