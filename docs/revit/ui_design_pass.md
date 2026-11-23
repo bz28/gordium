@@ -542,3 +542,11 @@ in Mark facts, the seven fields sit under "The lot and the house", each tooltip 
 20 ft No, Accessory dwelling unit No, Owner-occupied Yes, Functional family unit No, 0 unrelated people and 2 garage cars
 and pressing Save 6 facts, then Check again, gave What changed: the stream setback, one-family occupancy and private
 garage now comply, and fix 1 became the two lists alone.
+
+Review round 1 (3 confirmed, all fixed and pinned): every number a mark takes now says what it is before it is typed,
+in the Setup form's label ("Distance from stream (ft)", "Garage cars (count)") and in the tooltip's first words ("In
+feet:", "A count:"; `Marks.Unit`), so 200 meant as inches is never saved as 200 ft; an opened Project Information fix
+says "The 6 causes asking 9 facts" (`Fix.MembersWords`), never a second number of facts; and every passage a mark's
+tooltip quotes is the law's words exactly (§325-26 now quoted with its exception), checked against the City's extracted
+text, the rulebooks' quotes and the code decision's cites. Also fixed: What changed's hover now lists every changed
+verdict (`PaneWords.ChangesAll`), where it gave the worker's one line with a different "and N more" count than the pane's.
