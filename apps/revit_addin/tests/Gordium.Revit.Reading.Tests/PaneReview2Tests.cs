@@ -34,7 +34,28 @@ public sealed class PaneReview2Tests
             var text = File.ReadAllText(file);
             Assert.DoesNotContain("before the model changed", text, StringComparison.Ordinal);
             Assert.DoesNotContain("before the check you cancelled", text, StringComparison.Ordinal);
+            // PR #168's stale wordings (the ribbon badge, the selection strip, the summary's refusal) too
+            Assert.DoesNotContain("The model changed after the check at", text, StringComparison.Ordinal);
+            Assert.DoesNotContain("the model changed since, so check again", text, StringComparison.Ordinal);
         }
+    }
+
+    /// <summary>PR #168's stale wordings say why too: a cancelled check's badge tooltip, selection strip and summary
+    /// refusal never say the model changed; a model that changed keeps its words.</summary>
+    [Fact]
+    public void The_badge_strip_and_summary_say_why()
+    {
+        var at = new DateTime(2026, 11, 22, 14, 32, 0);
+        var cancelled = ResultRows.Stale(House(), at, CheckWords.CancelledStale(at), StaleReason.Cancelled);
+        var changed = ResultRows.Stale(House(), at);
+        Assert.Contains("before the check you cancelled", RibbonBadge.Of(cancelled, at).ToolTip, StringComparison.Ordinal);
+        Assert.StartsWith("The model changed after the check at 14:32", RibbonBadge.Of(changed, at).ToolTip, StringComparison.Ordinal);
+        var row = ResultList.Place(cancelled).First(r => r.Row.Elements.Count > 0);
+        var uid = row.Row.Elements[0];
+        Assert.Contains("before the check you cancelled", SelectionMap.Of(cancelled, at).Answer([uid], _ => "it").Line, StringComparison.Ordinal);
+        Assert.Contains("the model changed since", SelectionMap.Of(changed, at).Answer([uid], _ => "it").Line, StringComparison.Ordinal);
+        Assert.Contains("before the check you cancelled", ComplianceSummary.Refusal(cancelled, at), StringComparison.Ordinal);
+        Assert.StartsWith("The model changed after the check at 14:32", ComplianceSummary.Refusal(changed, at), StringComparison.Ordinal);
     }
 
     /// <summary>A cancelled check's earlier results say so everywhere: the state line, a copied row, a result's

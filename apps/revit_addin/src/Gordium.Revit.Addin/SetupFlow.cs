@@ -31,7 +31,7 @@ internal static class SetupRun
     /// again for the same facts missing (a fact newly missing shows it again).</summary>
     private static readonly Dictionary<string, HashSet<string>> Anyway = new(StringComparer.Ordinal);
 
-    private static string Key(Document doc) => doc.PathName is { Length: > 0 } p ? p : doc.Title;
+    private static string Key(Document doc) => DocKeys.Of(doc);       // identity, never a title or path (a Save As changes them)
 
     /// <summary>The form's screen for <paramref name="doc"/>, read now (Revit's thread): its marks, and the openings'
     /// sides once per project shown.</summary>

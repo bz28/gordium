@@ -24,10 +24,12 @@ internal sealed record CardRequest(CauseCard Card, CardAction Action, IReadOnlyL
 /// <param name="Ids">Each element's Revit id by UniqueId (a result's detail shows it in Show's tooltip, for Select by ID).</param>
 /// <param name="NotStated">A check sent anyway (the Setup form's "Check now anyway"): each fact left out, in words
 /// (SetupWords.SentWithout), shown first, with Set up the facts.</param>
+/// <param name="Key">The document checked by identity (DocKeys.Of), never its title (a Save As changes it): what a
+/// check is compared with and its ticks carried by; null for the Setup form (UI changes 13-15, review round 2).</param>
 internal sealed record PanelContent(string Project, DateTime When, ResultModel? Model, IReadOnlyList<string> Missing,
                                     int MarksAdded, IReadOnlyDictionary<string, string> Labels, string Files,
                                     string ClearWords, IReadOnlyDictionary<string, long>? Ids = null,
-                                    IReadOnlyList<string>? NotStated = null);
+                                    IReadOnlyList<string>? NotStated = null, string? Key = null);
 
 /// <summary>
 /// The results panel itself (a WPF view in Revit's dockable pane, beside Properties), matching the agreed mockup
@@ -65,7 +67,18 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private readonly C.TextBlock _searchHint = Small("Search rules, sections, elements (Ctrl+F)");
     private readonly C.TextBlock _shown = Small("");
     private readonly C.ListBox _list = new();
-    private PanelContent? _content;
+    // UI changes 13-15: every write of _content goes through this one setter, which raises Shown (PaneExtras follows
+    // it for the ribbon badge, the selection strip and the summary); never write _contentValue but here
+    private PanelContent? _contentValue;
+    private PanelContent? _content
+    {
+        get => _contentValue;
+        set
+        {
+            _contentValue = value;
+            Shown?.Invoke(this, value);
+        }
+    }
 
     // the list's state, kept across every redraw (a stale redraw, a new check): the filter, the folds, what is open
     private IReadOnlyList<ListRow> _placed = [];
@@ -164,6 +177,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var all = new C.DockPanel();
         C.DockPanel.SetDock(head, C.Dock.Top);
         all.Children.Add(head);
+        C.DockPanel.SetDock(SelectionSlot, C.Dock.Top);         // the selection strip's slot (UI change 14: PaneExtras)
+        all.Children.Add(SelectionSlot);
         all.Children.Add(_bodyHost);
         Content = all;
         _bodyHost.Child = _missingScroll;
@@ -326,9 +341,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     /// (LookedAt.Carry: only to what is still the same). A check with no rows (a fact missing) has neither.</summary>
     private void NewCheck(PanelContent content)
     {
-        if (_shownCheck == (content.Project, content.When))
+        if (_shownCheck == (content.Key ?? content.Project, content.When))
             return;
-        _shownCheck = (content.Project, content.When);
+        _shownCheck = (content.Key ?? content.Project, content.When);
         _openCards.Clear();
         _allCards = false;
         _groups = null;
@@ -338,13 +353,17 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             _looked = new LookedAt();
             return;
         }
-        var key = content.Project;
-        _change = _compared.TryGetValue(key, out var before) ? CheckChanges.Between(before.Model, before.When, model) : null;
-        if (model.Stale is null)
+        // by the document's identity, never its title (a Save As renames it); none known: nothing compared or carried
+        var key = content.Key;
+        _change = key is not null && _compared.TryGetValue(key, out var before) ? CheckChanges.Between(before.Model, before.When, model) : null;
+        if (key is not null && model.Stale is null)
             _compared[key] = (content.When, model);
-        // the fixes' ticks too (by fix key, made with each check's own element names), where the fix is the same
-        _looked = _ticked.TryGetValue(key, out var t) ? LookedAt.Carry(t.Looked, t.Model, model, t.Labels, content.Labels) : new LookedAt();
-        _ticked[key] = (model, _looked, content.Labels);
+        // the fixes' ticks too (by fix key, made with each check's own element names), where the fix is the same;
+        // by the document's identity (none known: nothing carried)
+        _looked = key is not null && _ticked.TryGetValue(key, out var t)
+            ? LookedAt.Carry(t.Looked, t.Model, model, t.Labels, content.Labels) : new LookedAt();
+        if (key is not null)
+            _ticked[key] = (model, _looked, content.Labels);
     }
 
     /// <summary>The list's first entry: the stale notice (when stale), the worker's state (grey once stale, never
@@ -1264,6 +1283,28 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     public void ShowRoom(CauseCard card, CauseRoom room) => _card(new CardRequest(card, CardAction.Show, [room.Id], room.Name));
 
     public void OpenRow(string id) => OpenDetail(id);
+
+    /// <summary>Every write of the pane's content (its one setter): a check's (stale once the model changed), the
+    /// Setup form's (no rows, nothing to set), or null when its rows are taken down (UI changes 13 to 15: PaneExtras).</summary>
+    internal static event Action<ResultsView, PanelContent?>? Shown;
+
+    /// <summary>The selection strip's place, under the header (UI change 14: PaneExtras fills it).</summary>
+    internal C.Border SelectionSlot { get; } = new();
+
+    /// <summary>A result opened from the selection strip (UI change 14): its detail, after clearing a filter, a search
+    /// or the fold that hides it in the list.</summary>
+    internal void OpenResult(string id)
+    {
+        if (!_entries.OfType<ListRowEntry>().Any(e => e.Row.Row.Id == id))
+        {
+            _filter = ListFilter.All;
+            _opened.Add(ListSection.Complies);
+            _search.Text = "";
+            Chips(_content?.Model?.Stale is not null);
+            Relayout();
+        }
+        OpenDetail(id);
+    }
 
     public IReadOnlyDictionary<string, string>? Labels => _content?.Labels;
 

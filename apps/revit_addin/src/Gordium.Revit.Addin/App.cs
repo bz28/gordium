@@ -31,6 +31,7 @@ public sealed class App : IExternalApplication
         application.ThemeChanged += Ribbon.OnThemeChanged;
         ResultsPane.Register(application);
         PanelActions.Start();
+        PaneExtras.Start(application);        // UI changes 13-15: the badge, the selection strip (after the ribbon's theme swap)
         // the results greyed when the checked project changes, taken down when it closes: never a stale pass
         application.ControlledApplication.DocumentChanged += ResultsPane.OnDocumentChanged;
         application.ControlledApplication.DocumentClosing += ResultsPane.OnDocumentClosing;
@@ -180,6 +181,7 @@ public sealed class App : IExternalApplication
         application.ControlledApplication.DocumentClosing -= ResultsPane.OnDocumentClosing;
         application.ThemeChanged -= ResultsPane.OnThemeChanged;
         application.ThemeChanged -= Ribbon.OnThemeChanged;
+        PaneExtras.Stop(application);
         var worker = Trial.StopWorker();
         if (worker is not null)
         {

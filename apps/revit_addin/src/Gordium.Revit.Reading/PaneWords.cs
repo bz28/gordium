@@ -255,6 +255,28 @@ public static class PaneWords
         _ => "Check again: the model changed after this check.",
     };
 
+    /// <summary>The ribbon badge's tooltip once stale (PR #168), by why.</summary>
+    public static string StaleBadgeTip(StaleReason reason, string at) => reason switch
+    {
+        StaleReason.Cancelled => $"These results are from the check at {at}, {StaleBefore(reason)}: they may not hold. Click to check again.",
+        _ => $"The model changed after the check at {at}: its results may not hold. Click to check again.",
+    };
+
+    /// <summary>The selection strip's line once stale (PR #168), by why: "2 results mentioned it at the check at
+    /// 14:32; the model changed since, so check again."</summary>
+    public static string StaleSelection(string mentioned, string at, StaleReason reason) => reason switch
+    {
+        StaleReason.Cancelled => $"{mentioned} at the check at {at}, {StaleBefore(reason)}, so check again.",
+        _ => $"{mentioned} at the check at {at}; the model changed since, so check again.",
+    };
+
+    /// <summary>Why no compliance summary is made of stale results (PR #168), by why.</summary>
+    public static string StaleSummaryRefusal(string at, StaleReason reason) => reason switch
+    {
+        StaleReason.Cancelled => $"These results are from the check at {at}, {StaleBefore(reason)}, so they may not hold: click Check project, then save the summary.",
+        _ => $"The model changed after the check at {at}, so its results may not hold: click Check project, then save the summary.",
+    };
+
     /// <summary>The stale banner's title, from why: "The model changed after this check (14:32)", or for a cancelled
     /// check "These results are from 14:32, before the check you cancelled".</summary>
     public static string StaleTitle(StaleReason reason, DateTime when) => reason switch

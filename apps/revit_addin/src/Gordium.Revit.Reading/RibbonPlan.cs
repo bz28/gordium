@@ -26,7 +26,7 @@ public sealed record RibbonPanel(string Name, IReadOnlyList<RibbonButton> Button
 
 /// <summary>
 /// The Gordium tab as data (docs/revit/ui_design_pass.md section 2.2): which panels and buttons exist, their words and
-/// icons. An architect sees <b>Check</b> (Check project, Mark facts), <b>Results</b> (Panel) and <b>Help</b> (About);
+/// icons. An architect sees <b>Check</b> (Check project, Mark facts), <b>Results</b> (Panel, Summary) and <b>Help</b> (About);
 /// the trial's test tools are in a <b>Trial</b> panel made only in a trial build or with <c>GORDIUM_TRIAL=1</c>. The
 /// add-in builds the ribbon from this list (App.OnStartup), so what it shows is what is tested here. No Settings
 /// button yet: there is nothing to set.
@@ -46,6 +46,7 @@ public static class RibbonPlan
     public const string MarkFacts = "gordium_mark_for_egress";
     public const string Panel = "gordium_results_panel";
     public const string About = "gordium_about";
+    public const string Summary = "gordium_summary";
     public const string CheckBoxHouse = "gordium_check_box_house";
     public const string RecordScenes = "gordium_record_scenes";
     public const string ReadInside = "gordium_read_interior";
@@ -75,6 +76,11 @@ public static class RibbonPlan
             ["The panel keeps the last check's results; a result goes grey when the model changes after it.",
              "It docks beside Properties; Revit remembers where you put it."],
             RibbonIcons.Panel, AnyTime: true),
+        new(Summary, "Summary", "Save the last check's results as a printable page: not a permit or an approval",
+            ["Every result: proposed, required, its verdict and the law's exact words, as the checker said them.",
+             "Opens in your browser to print or save as PDF; every needs review is for you to resolve.",
+             "Only for results that still stand: after a change to the model, check again first."],
+            RibbonIcons.Summary),
     ]);
 
     private static readonly RibbonPanel Help = new("Help",

@@ -9,7 +9,7 @@ namespace Gordium.Revit.Reading.Tests;
 /// one-line tooltip and at most three short lines more; every icon is a real PNG at 16 and 32 px in both themes.</summary>
 public sealed class RibbonTests
 {
-    private static readonly string[] Architect = ["Check project", "Mark facts", "Panel", "About"];
+    private static readonly string[] Architect = ["Check project", "Mark facts", "Panel", "Summary", "About"];
     private static readonly string[] TestTools = ["Check box house", "Record scenes", "Read inside", "Record houses"];
 
     [Fact]
@@ -18,7 +18,7 @@ public sealed class RibbonTests
         Assert.Equal(["Check", "Results", "Help"], RibbonPlan.Panels(trial: false).Select(p => p.Name));
         Assert.Equal(Architect, RibbonPlan.Buttons(trial: false).Select(b => b.Name));
         Assert.Equal(["Check project", "Mark facts"], RibbonPlan.Panels(false)[0].Buttons.Select(b => b.Name));
-        Assert.Equal(["Panel"], RibbonPlan.Panels(false)[1].Buttons.Select(b => b.Name));
+        Assert.Equal(["Panel", "Summary"], RibbonPlan.Panels(false)[1].Buttons.Select(b => b.Name));
         Assert.Equal(["About"], RibbonPlan.Panels(false)[2].Buttons.Select(b => b.Name));
         Assert.DoesNotContain(RibbonPlan.Buttons(false), b => TestTools.Contains(b.Name) || b.ToolTip.StartsWith("Trial", StringComparison.Ordinal));
     }
@@ -32,7 +32,7 @@ public sealed class RibbonTests
         Assert.Equal([.. Architect, .. TestTools], RibbonPlan.Buttons(true).Select(b => b.Name));
         // the ids stay stable (Revit names a Quick Access Toolbar copy or shortcut by tab, panel and name, so a button
         // that moves panel loses those once: The_panel_of_every_button_is_pinned)
-        Assert.Equal(["gordium_check_project", "gordium_mark_for_egress", "gordium_results_panel", "gordium_about",
+        Assert.Equal(["gordium_check_project", "gordium_mark_for_egress", "gordium_results_panel", "gordium_summary", "gordium_about",
                       "gordium_check_box_house", "gordium_record_scenes", "gordium_read_interior", "gordium_record_houses"],
                      RibbonPlan.Buttons(true).Select(b => b.Id));
     }
@@ -107,6 +107,7 @@ public sealed class RibbonTests
         Assert.Equal(new Dictionary<string, string>
         {
             ["gordium_check_project"] = "Check", ["gordium_mark_for_egress"] = "Check", ["gordium_results_panel"] = "Results",
+            ["gordium_summary"] = "Results",
             ["gordium_about"] = "Help", ["gordium_check_box_house"] = "Trial", ["gordium_record_scenes"] = "Trial",
             ["gordium_read_interior"] = "Trial", ["gordium_record_houses"] = "Trial",
         }, panelOf);
