@@ -19,6 +19,19 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent / "tests"))
 
 
+@pytest.fixture(autouse=True)
+def _fresh_egress_validation():
+    """Every test starts and ends with egress's kept book validations cleared (design_checker/egress.py
+    _VALIDATED), so a reader one test patches can never answer for another (review round 8)."""
+    egress = sys.modules.get("design_checker.egress")
+    if egress is not None:
+        egress._VALIDATED.clear()
+    yield
+    egress = sys.modules.get("design_checker.egress")
+    if egress is not None:
+        egress._VALIDATED.clear()
+
+
 def pytest_addoption(parser):
     parser.addoption("--runslow", action="store_true", default=False,
                      help="also run full-size samples marked slow (the architect stress test)")

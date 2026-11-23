@@ -403,22 +403,79 @@ def test_a_saved_report_names_the_interior_it_was_checked_against(tmp_path):
     assert f"Interior: sha256 {egress.fingerprint(empty)} (no rooms drawn yet, egress not checked)" in cells
 
 
-def test_the_laws_are_worked_out_once_until_a_file_they_are_read_from_changes(monkeypatch):
-    """Two of New York's books read and validated took a third of each check (2026-11-23): worked out once, each
-    caller its own copy, worked out again when any file they are read from changes."""
+@pytest.fixture
+def validations(monkeypatch):
+    """Counts each book's validation as it is worked out (egress._validate), the kept ones cleared first."""
+    real, calls = egress._validate, []
+    monkeypatch.setattr(egress, "_validate", lambda folder, book: calls.append(folder.name) or real(folder, book))
+    egress._VALIDATED.clear()
+    return calls
+
+
+def _touched(path, step=1_000_000):
     import os
-    real, calls = egress._laws, []
-    monkeypatch.setattr(egress, "_laws", lambda j: calls.append(j) or real(j))
-    egress._LAWS.clear()
+    st = path.stat()
+    os.utime(path, ns=(st.st_atime_ns, st.st_mtime_ns + step))
+    return lambda: os.utime(path, ns=(st.st_atime_ns, st.st_mtime_ns))
+
+
+def test_each_books_validation_is_kept_and_each_caller_gets_its_own_copy(validations):
+    """Two of New York's books read and validated took a third of each check (2026-11-23): each book's validation
+    is worked out once, the rest of laws at every call, every caller its own copy."""
     first, second = egress.laws(ITHACA), egress.laws(ITHACA)
-    assert len(calls) == 1 and first == second and first is not second
+    plain = lambda found: [{k: v for k, v in law.items() if k != "section_of"} for law in found["laws"]]
+    assert validations == ["new_york_state", "new_york_state_building"] and plain(first) == plain(second)
+    assert first["laws"][0]["rules"] is not second["laws"][0]["rules"]     # (section_of: a function made per call)
     second["laws"][0]["rules"].clear()                                  # a caller's copy is its own
-    assert egress.laws(ITHACA)["laws"][0]["rules"] and len(calls) == 1
-    state = STATE / "state.yaml"
-    st = state.stat()
+    assert egress.laws(ITHACA)["laws"][0]["rules"] and len(validations) == 2
+
+
+@pytest.mark.parametrize("shared", ["regulations/reviewers.yaml", "regulations/document_extraction_guide/vocabulary.yaml",
+                                    "regulations/jurisdictions/new_york/new_york_state/state.yaml",
+                                    "packages/rule_format/rule_format/measures.yaml"])
+def test_a_file_the_validation_read_changing_works_it_out_again(validations, shared):
+    """Review round 8: the files are the ones the validation read, recorded as it ran, never a hand-kept list (the
+    reviewers and the vocabulary were missing from one)."""
+    egress.laws(ITHACA)
+    undo = _touched(REPO / shared)
     try:
-        os.utime(state, ns=(st.st_atime_ns, st.st_mtime_ns + 1_000_000))
         egress.laws(ITHACA)
-        assert len(calls) == 2                                          # a file changed: worked out again
     finally:
-        os.utime(state, ns=(st.st_atime_ns, st.st_mtime_ns))
+        undo()
+    assert len(validations) > 2, f"{shared} changed, but nothing was worked out again"
+
+
+def test_the_recorded_reads_hold_every_file_the_validation_opens(monkeypatch):
+    """An independent witness (Python's own audit hook for every open, on only while a book is validated) against
+    what _Recorded keeps it by: every file the validation opens is among them, the reviewers and the vocabulary too."""
+    import os
+    opened, on = set(), []
+
+    def hook(event, args):
+        if on and event == "open" and isinstance(args[0], (str, bytes, os.PathLike)):
+            opened.add(str(Path(os.fsdecode(args[0])).resolve()))
+    sys.addaudithook(hook)                       # (an audit hook stays; it records only while `on`)
+    real = egress._validate
+
+    def watched(folder, book):
+        on.append(True)
+        try:
+            return real(folder, book)
+        finally:
+            on.clear()
+    monkeypatch.setattr(egress, "_validate", watched)
+    egress._VALIDATED.clear()
+    egress.laws(ITHACA)
+    kept = {str(Path(k).resolve()) for paths, _, _ in egress._VALIDATED.values() for k in paths}
+    from rule_format.rulebook import REVIEWERS_FILE, VOCABULARY_FILE
+    assert opened and opened <= kept, sorted(opened - kept)
+    assert {str(REVIEWERS_FILE.resolve()), str(VOCABULARY_FILE.resolve())} <= opened
+
+
+def test_a_reader_patched_then_restored_gives_the_true_answer_again(monkeypatch):
+    """Review round 8: a patched result never outlives the patch."""
+    assert egress.laws(ITHACA)["laws"][0]["problems"] == []
+    monkeypatch.setattr(egress, "rulebook_file_problems", lambda path, ctx: ["a quote isn't at its lines"])
+    assert egress.laws(ITHACA)["laws"][0]["problems"] == ["a quote isn't at its lines"]
+    monkeypatch.undo()
+    assert egress.laws(ITHACA)["laws"][0]["problems"] == []
