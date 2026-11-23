@@ -1020,9 +1020,9 @@
     "sections": "4f88edd52091d781be40c25a8c7545f99e582cbf0385af430c0c7cd730df23c1",
     "statuses": "62134564fab41fe8abb53df724280eb3d837cdfa86a80656de312199810f18c7",
     "summary": "e284727fe5a8ab3158b2ad2d20b5eb6b37c0ff7cf8f0d5825a176533ef464fb0",
-    "view": "280a64779925955bf731bcd655f8b8044d2729cc1ee47b47c7fc50c53f306751"
+    "view": "2b5d81a172d7acf915a5ef7faf0e76466088101e776233670e495dfb10eea2f6"
    },
-   "sha256": "bbab6f92b5f826ee4a0c773a9099637ba8c173e03884e9fb7768dfd28b1169a6"
+   "sha256": "52431ea18fb86de867bdab5299f081857b42a0121848aeabad83b862e82ff703"
   },
   "scenarios/17_cbd60_six_story_office_over_the_height/start": {
    "parts": {
@@ -1899,11 +1899,11 @@
   },
   "stress/design_102": {
    "parts": {
-    "check": "0c3c863cdcfc6bbeef0942fbb6bd5a1b4fede60202e087dd3ea592ef13d2a85e",
+    "check": "7f7885a2389882e65f736e93d6bcb2517c4af10b0274504ac493269553c92ddc",
     "edits": "004371ed3570bb068380381d6a0b422bf1f222e96bf485d48dceb17e729bdbb1",
     "lot": "1276ca0f8fbead5773fc3ac1e8340e10088211431477cde840ec36f78708c20e"
    },
-   "sha256": "fc966f505cb929b6ee4a548d6f18bd39142acf39ffebeb0f7a698b9739c130f0"
+   "sha256": "89f3e2ccb5172a47a5c9ced49d2354f3a421de16f081f83b27aaec60c40aa505"
   },
   "stress/design_103": {
    "parts": {

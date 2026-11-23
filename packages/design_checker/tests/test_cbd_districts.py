@@ -116,3 +116,16 @@ def test_a_cbd_building_over_its_height_is_drawn_red_above_the_plane():
     plan = check_site(s, f, extras=extras)["plan"]
     red = [e for e in plan["encroach"] if e["why"] == "height"]
     assert red and all(e["base"] == 60 and e["status"] == present.FAILS for e in red)
+
+
+def test_a_failing_eaves_row_shows_the_eave_that_fails_not_one_that_holds():
+    """Review of the CBD branch, P2: CBD-60's eaves rule nests an `or` ("building_height <= 60 or (front_yard_eaves >=
+    building_height - 60 - 2 and ...)"), and the failing row showed the rear eave, which holds (40 ft against 12), with
+    no reason, and the plan coloured the rear yard red. Now the front eave: 0'-0" proposed, 2'-0" required, 2 ft short."""
+    sc = scenarios.load(scenarios.FOLDER / "17_cbd60_six_story_office_over_the_height.yaml")
+    s, f, extras = scenarios.site(sc)
+    result = check_site(s, f, extras=extras)
+    eaves = next(i for i in result["view"]["items"] if i.get("rule") == "CBD-60.yard_projections")
+    assert eaves["status"] == present.FAILS and eaves["measure"] == "front_yard_eaves"
+    assert (eaves["proposed"], eaves["required"]) == ("0'-0\"", "2'-0\"") and eaves["margin"].startswith("−")
+    assert {e["why"] for e in result["plan"]["encroach"]} == {"height"}          # no red on the rear yard

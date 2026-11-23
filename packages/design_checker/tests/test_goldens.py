@@ -181,3 +181,49 @@ def test_a_line_drawn_the_other_way_round_or_doubling_back_or_a_list_that_is_not
     # pairs of numbers under any other key are not a shape: exact, even a point between two others
     assert not goldens.same_shape({"ranges": [[0, 0], [10, 0]]}, {"ranges": [[0, 0], [5, 0], [10, 0]]})
     assert goldens.same_shape({"footprint": [square]}, {"footprint": [square[:1] + [[5, 0]] + square[1:]]})
+
+
+def _rows_with_margins(x, path=""):
+    """Every row (a dict with a status, a measure and a worked-out margin) anywhere in an answer, with its path."""
+    if isinstance(x, dict):
+        if {"status", "measure", "margin"} <= set(x) and isinstance(x["margin"], str) and x["margin"]:
+            yield path, x
+        for k, v in x.items():
+            yield from _rows_with_margins(v, f"{path}/{k}")
+    elif isinstance(x, list):
+        for n, v in enumerate(x):
+            yield from _rows_with_margins(v, f"{path}[{n}]")
+
+
+def _nested_rules() -> set:
+    """Every rule, in every rulebook, whose check nests an and inside an or (or the reverse): the height bonus, the
+    accessory buildings, the CBD eaves, R-2c's lot sizes, R-1's occupancy (the sweep of the CBD branch's review, P2)."""
+    import ast
+    import yaml
+    from rule_format import formula
+    out = set()
+    for f in (REPO / "regulations/jurisdictions").rglob("5_*rules/*.yaml"):
+        for rule in (yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("rules") or []:
+            body = formula.parse(rule["check"]).body if rule.get("check") else None
+            if isinstance(body, ast.BoolOp) and any(isinstance(n, ast.BoolOp) for v in body.values for n in ast.walk(v)):
+                out.add(rule["id"])
+    return out
+
+
+def test_every_golden_row_shows_a_limit_its_verdict_agrees_with():
+    """In every stored answer (the scenarios, the sites, the 200 stress designs): a row of a rule whose check nests
+    and/or never fails while showing a limit it meets, and any row whose verdict and shown limit disagree (a yard with
+    room on a lot the building crosses) says why in its reason. Review of the CBD branch, P2: a failing CBD-60 eaves
+    row showed its rear eave's +28'-0" with no reason, and an R-1b accessory building its front yard's room."""
+    nested = _nested_rules()
+    assert {"CBD-60.yard_projections", "R-1b.height", "R-1b.accessory_buildings"} <= nested
+    _, answers = goldens.stored()
+    wrong = []
+    for case, answer in answers.items():
+        for path, row in _rows_with_margins(answer):
+            if row["status"] not in ("does_not_comply", "complies"):
+                continue
+            short = row["margin"].lstrip().startswith(("−", "-"))
+            if (row["status"] == "does_not_comply") != short and (not row.get("reason") or row.get("rule") in nested):
+                wrong.append((case + path, row.get("rule"), row["status"], row["margin"]))
+    assert wrong == []
