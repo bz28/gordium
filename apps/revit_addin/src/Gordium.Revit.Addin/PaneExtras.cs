@@ -28,7 +28,7 @@ internal static class PaneExtras
 
     // the selection the strip answers (in the project shown), and whether it is showing
     private static IReadOnlyList<string> _selected = [];
-    private static string? _selectedIn;                   // the project they were selected in
+    private static string? _selectedIn;                   // the document they were selected in (DocKeys: identity)
     private static Dictionary<string, string?> _names = new(StringComparer.Ordinal);
     private static bool _stripOn;
     private static bool _all;
@@ -88,7 +88,7 @@ internal static class PaneExtras
             }
             var before = Followed.Check;
             Followed.Shown(content is null ? null : new FollowedCheck(content.Project, content.When, content.Model, content.Missing.Count,
-                                                                      content.NotStated, content.ClearWords, content.MarksAdded));
+                                                                      content.NotStated, content.ClearWords, content.MarksAdded, content.Key));
             if (!ReferenceEquals(before, Followed.Check))
                 _labels = content?.Labels ?? new Dictionary<string, string>();
             Follow();
@@ -105,7 +105,7 @@ internal static class PaneExtras
         ShowBadge();
         var check = Followed.Check;
         _map = check?.Model is { } model ? SelectionMap.Of(model, check.When) : null;
-        if (_map is null || check?.Project != _selectedIn)
+        if (_map is null || check?.Key is null || check.Key != _selectedIn)
             Hide();                                       // nothing to answer from, or another project's results
         else if (_stripOn)
             Draw();                                       // the same selection, from this answer (stale: the clocks)
@@ -119,7 +119,7 @@ internal static class PaneExtras
         {
             if (ResultRows.ChangesTheCheck(e.GetTransactionNames().ToList(),
                                            committed: e.Operation == Autodesk.Revit.DB.Events.UndoOperation.TransactionCommitted)
-                && Followed.Changed(e.GetDocument().Title))
+                && Followed.Changed(DocKeys.Of(e.GetDocument())))
                 Follow();
         }
         catch (Exception x)       // never out of Revit's event
@@ -133,7 +133,7 @@ internal static class PaneExtras
     {
         try
         {
-            if (Followed.Closed(e.Document.Title))
+            if (Followed.Closed(DocKeys.Of(e.Document)))
                 Follow();
         }
         catch (Exception x)       // never out of Revit's event
@@ -198,7 +198,7 @@ internal static class PaneExtras
                 _own = null;
                 return;                                   // the pane's own: the strip stays as it was
             }
-            if (doc is null || doc.Title != check.Project || ids.Count == 0 || ids.Count > 5000)
+            if (doc is null || check.Key is null || DocKeys.Of(doc) != check.Key || ids.Count == 0 || ids.Count > 5000)
             {
                 Hide();
                 return;
@@ -218,7 +218,7 @@ internal static class PaneExtras
                 return;
             }
             _selected = uids;
-            _selectedIn = doc.Title;
+            _selectedIn = DocKeys.Of(doc);
             _names = names;
             _all = false;
             _folded = false;

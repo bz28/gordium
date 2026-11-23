@@ -11,8 +11,9 @@ public sealed class FollowedStateTests
 {
     private static readonly DateTime At = new(2026, 11, 23, 14, 32, 0);
 
-    private static FollowedCheck Complying(string project) => new(project, At,
-        UxAnswers.Model(UxAnswers.Answer("complies", UxAnswers.Item("a", "complies"), UxAnswers.Item("b", "complies"))));
+    /// <summary>A complying check of the document keyed "K-" + <paramref name="project"/> (DocKeys), titled <paramref name="title"/>.</summary>
+    private static FollowedCheck Complying(string project, string? title = null) => new(title ?? project, At,
+        UxAnswers.Model(UxAnswers.Answer("complies", UxAnswers.Item("a", "complies"), UxAnswers.Item("b", "complies"))), Key: "K-" + project);
 
     /// <summary>The Setup form's content (ResultsView.ShowSetup): no rows, nothing to set.</summary>
     private static FollowedCheck Setup(string project) => new(project, At.AddMinutes(1), null);
@@ -27,7 +28,7 @@ public sealed class FollowedStateTests
         Assert.Equal(BadgeKind.Complies, state.Badge.Kind);
         Assert.Null(state.SummaryRefusal);
         state.Shown(Setup("A"));
-        Assert.True(state.Changed("A"));
+        Assert.True(state.Changed("K-A"));
         Assert.NotEqual(BadgeKind.Complies, state.Badge.Kind);
         Assert.Equal(BadgeKind.Stale, state.Badge.Kind);
         Assert.NotNull(state.SummaryRefusal);
@@ -41,9 +42,9 @@ public sealed class FollowedStateTests
         var state = new FollowedState();
         state.Shown(Complying("A"));
         state.Shown(Setup("B"));
-        Assert.False(state.Changed("B"));
+        Assert.False(state.Changed("K-B"));
         Assert.Equal(BadgeKind.Complies, state.Badge.Kind);           // B's edits don't touch A's check
-        Assert.True(state.Changed("A"));
+        Assert.True(state.Changed("K-A"));
         Assert.Equal(BadgeKind.Stale, state.Badge.Kind);
         Assert.Equal("A", state.Check!.Project);
     }
@@ -55,12 +56,78 @@ public sealed class FollowedStateTests
         var state = new FollowedState();
         state.Shown(Complying("A"));
         state.Shown(Setup("B"));
-        Assert.False(state.Closed("B"));
+        Assert.False(state.Closed("K-B"));
         Assert.Equal(BadgeKind.Complies, state.Badge.Kind);
-        Assert.True(state.Closed("A"));
+        Assert.True(state.Closed("K-A"));
         Assert.Null(state.Check);
         Assert.Equal(BadgeKind.NotChecked, state.Badge.Kind);
         Assert.NotNull(state.SummaryRefusal);
+    }
+
+    /// <summary>The pin of review round 2: a check of document K1 titled "Project1", then its Setup form after a Save As
+    /// titled it "House": a change to K1 still makes the check stale and the summary is refused; its closing clears it.
+    /// The title is for display only.</summary>
+    [Fact]
+    public void A_check_follows_its_document_through_a_save_as_never_its_title()
+    {
+        var state = new FollowedState();
+        state.Shown(new FollowedCheck("Project1", At, Complying("x").Model, Key: "K1"));
+        state.Shown(Setup("House"));
+        Assert.False(state.Changed("K2"));                         // another document, even one titled the same
+        Assert.True(state.Changed("K1"));
+        Assert.Equal(BadgeKind.Stale, state.Badge.Kind);
+        Assert.NotNull(state.SummaryRefusal);
+        Assert.True(state.Closed("K1"));
+        Assert.Null(state.Check);
+        Assert.Equal(BadgeKind.NotChecked, state.Badge.Kind);
+    }
+
+    /// <summary>A check whose document isn't known: any change makes it stale and any closing takes it down (fail closed).</summary>
+    [Fact]
+    public void A_check_of_no_known_document_fails_closed()
+    {
+        var state = new FollowedState();
+        state.Shown(new FollowedCheck("P", At, Complying("x").Model));
+        Assert.True(state.Changed("K-anything"));
+        Assert.Equal(BadgeKind.Stale, state.Badge.Kind);
+        state.Shown(new FollowedCheck("P", At, Complying("x").Model));
+        Assert.True(state.Closed("K-other"));
+        Assert.Null(state.Check);
+    }
+
+    /// <summary>The sweep of review round 2: no document is matched by its title or path in the add-in (the followed
+    /// check, the selection, the Setup form's "checked anyway", what changed and the ticks): each by DocKeys.</summary>
+    [Fact]
+    public void The_add_in_matches_documents_by_identity_never_by_name()
+    {
+        string Read(string f) => File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", f));
+        var setup = Read("SetupFlow.cs");
+        Assert.Contains("private static string Key(Document doc) => DocKeys.Of(doc);", setup, StringComparison.Ordinal);
+        Assert.DoesNotContain("PathName", setup, StringComparison.Ordinal);
+        var extras = Read("PaneExtras.cs");
+        Assert.DoesNotContain(".Title", extras, StringComparison.Ordinal);
+        Assert.Contains("Followed.Changed(DocKeys.Of(e.GetDocument()))", extras, StringComparison.Ordinal);
+        Assert.Contains("Followed.Closed(DocKeys.Of(e.Document))", extras, StringComparison.Ordinal);
+        var view = Read("ResultsView.cs");
+        Assert.Contains("var key = content.Key;", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("var key = content.Project;", view, StringComparison.Ordinal);
+        Assert.Contains("Key: DocKeys.Of(doc)", Read("CheckProject.cs"), StringComparison.Ordinal);
+    }
+
+    /// <summary>The pin of review round 2's P3: the which_code line's cites (section, document, page and quote), as the
+    /// pane's tooltip shows them, are in the summary.</summary>
+    [Fact]
+    public void The_summary_prints_the_which_code_cites()
+    {
+        var code = new WhichCode("rcnys_2025", "2025 Residential Code of New York State", "a one-family house", null,
+                                 [new CodeCite("R101.2", "34", "The provisions of this code shall apply to detached one- and two-family dwellings", "RCNYS 2025")]);
+        var model = UxAnswers.Model(UxAnswers.Answer("needs_review", UxAnswers.Item("a", "needs_review"))) with { Code = code };
+        var html = ComplianceSummary.Html(model, "P", At, At);
+        Assert.Contains("R101.2", html, StringComparison.Ordinal);
+        Assert.Contains("p.34", html, StringComparison.Ordinal);
+        Assert.Contains("RCNYS 2025", html, StringComparison.Ordinal);
+        Assert.Contains("“The provisions of this code shall apply to detached one- and two-family dwellings”", html, StringComparison.Ordinal);
+        Assert.Contains("<div id=\"which-code-cites\" class=\"law verbatim\">" + System.Net.WebUtility.HtmlEncode(code.Tooltip!) + "</div>", html, StringComparison.Ordinal);
     }
 
     [Fact]

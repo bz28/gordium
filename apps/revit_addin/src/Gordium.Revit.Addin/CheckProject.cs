@@ -370,7 +370,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             files = $"Logged to {Trial.LogPath()}";
         ResultsPane.Show(ui, doc, new PanelContent(doc.Title, when, model,
                                                    StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files,
-                                                   ClearWords: clear, Ids: ids,
+                                                   ClearWords: clear, Ids: ids, Key: DocKeys.Of(doc),
                                                    NotStated: run.Prepared.NotStated.Select(m => SetupWords.SentWithout(m, SetupWords.Noun(
                                                        run.Prepared.Request?.Facts["use"]?.GetValue<string>()))).ToList()));
     }

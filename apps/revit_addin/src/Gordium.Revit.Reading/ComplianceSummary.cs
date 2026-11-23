@@ -117,7 +117,12 @@ public static class ComplianceSummary
             h.Append("</ul></div>\n");
         }
         if (model.Code is { } code)
+        {
             h.Append("<p id=\"which-code\">").Append(E(code.Words)).Append("</p>\n");
+            // its cited sections, documents and pages with the law's words, as the pane's tooltip says them (review round 2)
+            if (code.Tooltip is { } cites)
+                h.Append("<div id=\"which-code-cites\" class=\"law verbatim\">").Append(E(cites)).Append("</div>\n");
+        }
         if (drafts is { Length: > 0 })
             h.Append("<p id=\"drafts\" class=\"verbatim\">").Append(E(drafts)).Append("</p>\n");
         if (model.Inside.Length > 0)

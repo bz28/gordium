@@ -24,10 +24,12 @@ internal sealed record CardRequest(CauseCard Card, CardAction Action, IReadOnlyL
 /// <param name="Ids">Each element's Revit id by UniqueId (a result's detail shows it in Show's tooltip, for Select by ID).</param>
 /// <param name="NotStated">A check sent anyway (the Setup form's "Check now anyway"): each fact left out, in words
 /// (SetupWords.SentWithout), shown first, with Set up the facts.</param>
+/// <param name="Key">The document checked by identity (DocKeys.Of), never its title (a Save As changes it): what a
+/// check is compared with and its ticks carried by; null for the Setup form (UI changes 13-15, review round 2).</param>
 internal sealed record PanelContent(string Project, DateTime When, ResultModel? Model, IReadOnlyList<string> Missing,
                                     int MarksAdded, IReadOnlyDictionary<string, string> Labels, string Files,
                                     string ClearWords, IReadOnlyDictionary<string, long>? Ids = null,
-                                    IReadOnlyList<string>? NotStated = null);
+                                    IReadOnlyList<string>? NotStated = null, string? Key = null);
 
 /// <summary>
 /// The results panel itself (a WPF view in Revit's dockable pane, beside Properties), matching the agreed mockup
@@ -272,9 +274,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     /// (LookedAt.Carry: only to what is still the same). A check with no rows (a fact missing) has neither.</summary>
     private void NewCheck(PanelContent content)
     {
-        if (_shownCheck == (content.Project, content.When))
+        if (_shownCheck == (content.Key ?? content.Project, content.When))
             return;
-        _shownCheck = (content.Project, content.When);
+        _shownCheck = (content.Key ?? content.Project, content.When);
         _openCards.Clear();
         _allCards = false;
         if (content.Model is not { } model)
@@ -283,12 +285,14 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             _looked = new LookedAt();
             return;
         }
-        var key = content.Project;
-        _change = _compared.TryGetValue(key, out var before) ? CheckChanges.Between(before.Model, before.When, model) : null;
-        if (model.Stale is null)
+        // by the document's identity, never its title (a Save As renames it); none known: nothing compared or carried
+        var key = content.Key;
+        _change = key is not null && _compared.TryGetValue(key, out var before) ? CheckChanges.Between(before.Model, before.When, model) : null;
+        if (key is not null && model.Stale is null)
             _compared[key] = (content.When, model);
-        _looked = _ticked.TryGetValue(key, out var t) ? LookedAt.Carry(t.Looked, t.Model, model) : new LookedAt();
-        _ticked[key] = (model, _looked);
+        _looked = key is not null && _ticked.TryGetValue(key, out var t) ? LookedAt.Carry(t.Looked, t.Model, model) : new LookedAt();
+        if (key is not null)
+            _ticked[key] = (model, _looked);
     }
 
     /// <summary>The list's first entry: the stale notice (when stale), the worker's state (grey once stale, never
