@@ -11,7 +11,7 @@ ELEMENTS:
   Element 1
 
 [2 of 190] needs review · Level 1 · Occupant load at least net area / 35 (IBC 1004.1.1) · 1004.1.1
-WHY: story occupant load not measured: stated by the architect (the story's design occupant load), and the description has no mark for it yet; story other use area not measured: Gordium doesn't measure this yet
+WHY: story occupant load not measured: stated by the architect (the story's design occupant load), and Gordium has no mark for it in the model yet; story other use area not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -23,7 +23,7 @@ ELEMENTS:
   Element 1
 
 [3 of 190] needs review · Level 1 · Common path of egress travel at most 75 ft (IBC 1014.3) · 1014.3
-WHY: common path of travel not measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)
+WHY: common path of travel not measured: part of the floor has no route to the exit door Gordium double door 72 x 84 in (LS1.0): Door 72" x 84" (LS1.0) (D02) (a path 12 in clear of every corner, through door centres and rooms it may cross)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -62,7 +62,7 @@ ELEMENTS:
   Element 1
 
 [6 of 190] needs review · Level 1 · Exit access travel at most 200 ft, I-4 sprinklered (IBC 1016.1) · 1016.1
-WHY: egress travel distance not measured: the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)
+WHY: egress travel distance not measured: the room STORAGE (13) has no route to any exit: it opens only into STORAGE (14), which can be locked, so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -75,7 +75,7 @@ ELEMENTS:
   Element 1
 
 [7 of 190] needs review · Level 1 · Occupant load at least net area / 35 (NFPA 16.1.7.1) · 16.1.7.1
-WHY: existing change of use not measured (or not usable); story occupant load not measured: stated by the architect (the story's design occupant load), and the description has no mark for it yet; story other use area not measured: Gordium doesn't measure this yet
+WHY: existing change of use not measured (or not usable); story occupant load not measured: stated by the architect (the story's design occupant load), and Gordium has no mark for it in the model yet; story other use area not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -87,7 +87,7 @@ ELEMENTS:
   Element 1
 
 [8 of 190] needs review · Level 1 · Common path 100 ft, sprinklered (NFPA 16.2.5.3.1) · 16.2.5.3.1
-WHY: common path of travel occupied not measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross); existing change of use not measured (or not usable)
+WHY: common path of travel occupied not measured: part of the floor has no route to the exit door Gordium double door 72 x 84 in (LS1.0): Door 72" x 84" (LS1.0) (D02) (a path 12 in clear of every corner, through door centres and rooms it may cross); existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -110,7 +110,7 @@ ELEMENTS:
   Element 1
 
 [10 of 190] needs review · Level 1 · Travel point in room to exit at most 150 ft (NFPA 16.2.6.2(2)) · 16.2.6.2
-WHY: egress travel distance occupied not measured: the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); existing change of use not measured (or not usable)
+WHY: egress travel distance occupied not measured: the room STORAGE (13) has no route to any exit: it opens only into STORAGE (14), which can be locked, so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -122,7 +122,7 @@ ELEMENTS:
   Element 1
 
 [11 of 190] needs review · Level 1 · Travel +50 ft where sprinklered (NFPA 16.2.6.3) · 16.2.6.3
-WHY: egress travel distance occupied not measured: the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); egress travel from room door not measured: the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it; existing change of use not measured (or not usable)
+WHY: egress travel distance occupied not measured: the room STORAGE (13) has no route to any exit: it opens only into STORAGE (14), which can be locked, so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); egress travel from room door not measured: the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
@@ -158,7 +158,7 @@ ELEMENTS:
   Element 1
 
 [14 of 190] needs review · Level 1 › VESTIBULE (31) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 2 in the model. [ShowElements]
@@ -171,7 +171,7 @@ ELEMENTS:
   Element 2
 
 [15 of 190] needs review · Level 1 › VESTIBULE (31) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 2 in the model. [ShowElements]
@@ -183,7 +183,7 @@ ELEMENTS:
   Element 2
 
 [16 of 190] needs review · Level 1 › SPRINKLERED ABANDONED SPACE (32) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space common path not measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross); space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space common path not measured: part of the floor has no route to the exit door Gordium double door 72 x 84 in (LS1.0): Door 72" x 84" (LS1.0) (D02) (a path 12 in clear of every corner, through door centres and rooms it may cross); space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -196,7 +196,7 @@ ELEMENTS:
   Element 3
 
 [17 of 190] needs review · Level 1 › SPRINKLERED ABANDONED SPACE (32) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 3 in the model. [ShowElements]
@@ -208,7 +208,7 @@ ELEMENTS:
   Element 3
 
 [18 of 190] needs review · Level 1 › SPRINKLERED ABANDONED SPACE (33) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space common path not measured: the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross); space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space common path not measured: part of the floor has no route to the exit door Gordium double door 72 x 84 in (LS1.0): Door 72" x 84" (LS1.0) (D02) (a path 12 in clear of every corner, through door centres and rooms it may cross); space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 4 in the model. [ShowElements]
@@ -221,7 +221,7 @@ ELEMENTS:
   Element 4
 
 [19 of 190] needs review · Level 1 › SPRINKLERED ABANDONED SPACE (33) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 4 in the model. [ShowElements]
@@ -233,7 +233,7 @@ ELEMENTS:
   Element 4
 
 [20 of 190] needs review · Level 1 › TOILET (34) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 5 in the model. [ShowElements]
@@ -246,7 +246,7 @@ ELEMENTS:
   Element 5
 
 [21 of 190] needs review · Level 1 › TOILET (34) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 5 in the model. [ShowElements]
@@ -258,7 +258,7 @@ ELEMENTS:
   Element 5
 
 [22 of 190] needs review · Level 1 › TOILET (35) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 6 in the model. [ShowElements]
@@ -271,7 +271,7 @@ ELEMENTS:
   Element 6
 
 [23 of 190] needs review · Level 1 › TOILET (35) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 6 in the model. [ShowElements]
@@ -283,7 +283,7 @@ ELEMENTS:
   Element 6
 
 [24 of 190] needs review · Level 1 › TOILET (36) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 7 in the model. [ShowElements]
@@ -296,7 +296,7 @@ ELEMENTS:
   Element 7
 
 [25 of 190] needs review · Level 1 › TOILET (36) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 7 in the model. [ShowElements]
@@ -308,7 +308,7 @@ ELEMENTS:
   Element 7
 
 [26 of 190] needs review · Level 1 › TOILET (37) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 8 in the model. [ShowElements]
@@ -321,7 +321,7 @@ ELEMENTS:
   Element 8
 
 [27 of 190] needs review · Level 1 › TOILET (37) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 8 in the model. [ShowElements]
@@ -333,7 +333,7 @@ ELEMENTS:
   Element 8
 
 [28 of 190] needs review · Level 1 › TOILET (38) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 9 in the model. [ShowElements]
@@ -346,7 +346,7 @@ ELEMENTS:
   Element 9
 
 [29 of 190] needs review · Level 1 › TOILET (38) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 9 in the model. [ShowElements]
@@ -358,7 +358,7 @@ ELEMENTS:
   Element 9
 
 [30 of 190] needs review · Level 1 › TOILET (39) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 10 in the model. [ShowElements]
@@ -371,7 +371,7 @@ ELEMENTS:
   Element 10
 
 [31 of 190] needs review · Level 1 › TOILET (39) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 10 in the model. [ShowElements]
@@ -383,7 +383,7 @@ ELEMENTS:
   Element 10
 
 [32 of 190] needs review · Level 1 › CLOSET (40) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space common path not measured: the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space common path not measured: the room CLOSET (40) has no route to the exit door Gordium double door 72 x 84 in (LS1.0): Door 72" x 84" (LS1.0) (D02): it opens only into KITCHEN (10), which can be locked, so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 11 in the model. [ShowElements]
@@ -396,7 +396,7 @@ ELEMENTS:
   Element 11
 
 [33 of 190] needs review · Level 1 › CLOSET (40) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 11 in the model. [ShowElements]
@@ -408,7 +408,7 @@ ELEMENTS:
   Element 11
 
 [34 of 190] needs review · Level 1 › CLOSET (41) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 12 in the model. [ShowElements]
@@ -421,7 +421,7 @@ ELEMENTS:
   Element 12
 
 [35 of 190] needs review · Level 1 › CLOSET (41) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 12 in the model. [ShowElements]
@@ -433,7 +433,7 @@ ELEMENTS:
   Element 12
 
 [36 of 190] needs review · Level 1 › CLOSET (42) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 13 in the model. [ShowElements]
@@ -446,7 +446,7 @@ ELEMENTS:
   Element 13
 
 [37 of 190] needs review · Level 1 › CLOSET (42) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 13 in the model. [ShowElements]
@@ -458,7 +458,7 @@ ELEMENTS:
   Element 13
 
 [38 of 190] needs review · Level 1 › CLOSET (43) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 14 in the model. [ShowElements]
@@ -471,7 +471,7 @@ ELEMENTS:
   Element 14
 
 [39 of 190] needs review · Level 1 › CLOSET (43) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 14 in the model. [ShowElements]
@@ -483,7 +483,7 @@ ELEMENTS:
   Element 14
 
 [40 of 190] needs review · Level 1 › CLOSET (44) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 15 in the model. [ShowElements]
@@ -496,7 +496,7 @@ ELEMENTS:
   Element 15
 
 [41 of 190] needs review · Level 1 › CLOSET (44) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 15 in the model. [ShowElements]
@@ -508,7 +508,7 @@ ELEMENTS:
   Element 15
 
 [42 of 190] needs review · Level 1 › CLASSROOM (2) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 16 in the model. [ShowElements]
@@ -521,7 +521,7 @@ ELEMENTS:
   Element 16
 
 [43 of 190] needs review · Level 1 › CLASSROOM (2) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 16 in the model. [ShowElements]
@@ -533,7 +533,7 @@ ELEMENTS:
   Element 16
 
 [44 of 190] needs review · Level 1 › MOUNTAIN CLASSROOM (3) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 17 in the model. [ShowElements]
@@ -546,7 +546,7 @@ ELEMENTS:
   Element 17
 
 [45 of 190] needs review · Level 1 › MOUNTAIN CLASSROOM (3) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 17 in the model. [ShowElements]
@@ -558,7 +558,7 @@ ELEMENTS:
   Element 17
 
 [46 of 190] needs review · Level 1 › OCEAN CLASSROOM (4) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 18 in the model. [ShowElements]
@@ -571,7 +571,7 @@ ELEMENTS:
   Element 18
 
 [47 of 190] needs review · Level 1 › OCEAN CLASSROOM (4) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 18 in the model. [ShowElements]
@@ -583,7 +583,7 @@ ELEMENTS:
   Element 18
 
 [48 of 190] needs review · Level 1 › INFANT/TODDLER CLASSROOM (5) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 19 in the model. [ShowElements]
@@ -596,7 +596,7 @@ ELEMENTS:
   Element 19
 
 [49 of 190] needs review · Level 1 › INFANT/TODDLER CLASSROOM (5) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 19 in the model. [ShowElements]
@@ -608,7 +608,7 @@ ELEMENTS:
   Element 19
 
 [50 of 190] needs review · Level 1 › SAFARI CLASSROOM (6) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 20 in the model. [ShowElements]
@@ -621,7 +621,7 @@ ELEMENTS:
   Element 20
 
 [51 of 190] needs review · Level 1 › SAFARI CLASSROOM (6) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 20 in the model. [ShowElements]
@@ -633,7 +633,7 @@ ELEMENTS:
   Element 20
 
 [52 of 190] needs review · Level 1 › FOREST CLASSROOM (7) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 21 in the model. [ShowElements]
@@ -646,7 +646,7 @@ ELEMENTS:
   Element 21
 
 [53 of 190] needs review · Level 1 › FOREST CLASSROOM (7) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 21 in the model. [ShowElements]
@@ -658,7 +658,7 @@ ELEMENTS:
   Element 21
 
 [54 of 190] needs review · Level 1 › CLASSROOM (8) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 22 in the model. [ShowElements]
@@ -671,7 +671,7 @@ ELEMENTS:
   Element 22
 
 [55 of 190] needs review · Level 1 › CLASSROOM (8) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 22 in the model. [ShowElements]
@@ -683,7 +683,7 @@ ELEMENTS:
   Element 22
 
 [56 of 190] needs review · Level 1 › BOOK STORAGE/STAFF LOUNGE (9) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 23 in the model. [ShowElements]
@@ -696,7 +696,7 @@ ELEMENTS:
   Element 23
 
 [57 of 190] needs review · Level 1 › BOOK STORAGE/STAFF LOUNGE (9) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 23 in the model. [ShowElements]
@@ -708,7 +708,7 @@ ELEMENTS:
   Element 23
 
 [58 of 190] needs review · Level 1 › KITCHEN (10) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 24 in the model. [ShowElements]
@@ -721,7 +721,7 @@ ELEMENTS:
   Element 24
 
 [59 of 190] needs review · Level 1 › KITCHEN (10) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 24 in the model. [ShowElements]
@@ -733,7 +733,7 @@ ELEMENTS:
   Element 24
 
 [60 of 190] needs review · Level 1 › STORAGE (11) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 25 in the model. [ShowElements]
@@ -746,7 +746,7 @@ ELEMENTS:
   Element 25
 
 [61 of 190] needs review · Level 1 › STORAGE (11) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 25 in the model. [ShowElements]
@@ -758,7 +758,7 @@ ELEMENTS:
   Element 25
 
 [62 of 190] needs review · Level 1 › LIFE SPACE (12) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 26 in the model. [ShowElements]
@@ -771,7 +771,7 @@ ELEMENTS:
   Element 26
 
 [63 of 190] needs review · Level 1 › LIFE SPACE (12) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 26 in the model. [ShowElements]
@@ -783,7 +783,7 @@ ELEMENTS:
   Element 26
 
 [64 of 190] needs review · Level 1 › STORAGE (13) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space common path not measured: the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space common path not measured: the room STORAGE (13) has no route to the exit door Gordium double door 72 x 84 in (LS1.0): Door 72" x 84" (LS1.0) (D02): it opens only into STORAGE (14), which can be locked, so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 27 in the model. [ShowElements]
@@ -796,7 +796,7 @@ ELEMENTS:
   Element 27
 
 [65 of 190] needs review · Level 1 › STORAGE (13) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 27 in the model. [ShowElements]
@@ -808,7 +808,7 @@ ELEMENTS:
   Element 27
 
 [66 of 190] needs review · Level 1 › STORAGE (14) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 28 in the model. [ShowElements]
@@ -821,7 +821,7 @@ ELEMENTS:
   Element 28
 
 [67 of 190] needs review · Level 1 › STORAGE (14) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 28 in the model. [ShowElements]
@@ -833,7 +833,7 @@ ELEMENTS:
   Element 28
 
 [68 of 190] needs review · Level 1 › FAMILY LOUNGE (15) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 29 in the model. [ShowElements]
@@ -846,7 +846,7 @@ ELEMENTS:
   Element 29
 
 [69 of 190] needs review · Level 1 › FAMILY LOUNGE (15) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 29 in the model. [ShowElements]
@@ -858,7 +858,7 @@ ELEMENTS:
   Element 29
 
 [70 of 190] needs review · Level 1 › STAFF TOILET (16) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 30 in the model. [ShowElements]
@@ -871,7 +871,7 @@ ELEMENTS:
   Element 30
 
 [71 of 190] needs review · Level 1 › STAFF TOILET (16) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 30 in the model. [ShowElements]
@@ -883,7 +883,7 @@ ELEMENTS:
   Element 30
 
 [72 of 190] needs review · Level 1 › PLAYROOM (17) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 31 in the model. [ShowElements]
@@ -896,7 +896,7 @@ ELEMENTS:
   Element 31
 
 [73 of 190] needs review · Level 1 › PLAYROOM (17) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 31 in the model. [ShowElements]
@@ -908,7 +908,7 @@ ELEMENTS:
   Element 31
 
 [74 of 190] needs review · Level 1 › ADMINISTRATION (18) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 32 in the model. [ShowElements]
@@ -921,7 +921,7 @@ ELEMENTS:
   Element 32
 
 [75 of 190] needs review · Level 1 › ADMINISTRATION (18) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 32 in the model. [ShowElements]
@@ -933,7 +933,7 @@ ELEMENTS:
   Element 32
 
 [76 of 190] needs review · Level 1 › CONFERENCE (19) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 33 in the model. [ShowElements]
@@ -946,7 +946,7 @@ ELEMENTS:
   Element 33
 
 [77 of 190] needs review · Level 1 › CONFERENCE (19) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 33 in the model. [ShowElements]
@@ -958,7 +958,7 @@ ELEMENTS:
   Element 33
 
 [78 of 190] needs review · Level 1 › ELEC. (21) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space common path not measured: the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross); space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space common path not measured: part of the floor has no route to the exit door Gordium double door 72 x 84 in (LS1.0): Door 72" x 84" (LS1.0) (D02) (a path 12 in clear of every corner, through door centres and rooms it may cross); space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 34 in the model. [ShowElements]
@@ -971,7 +971,7 @@ ELEMENTS:
   Element 34
 
 [79 of 190] needs review · Level 1 › ELEC. (21) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 34 in the model. [ShowElements]
@@ -983,7 +983,7 @@ ELEMENTS:
   Element 34
 
 [80 of 190] needs review · Level 1 › LIFE SPACE (22) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 35 in the model. [ShowElements]
@@ -996,7 +996,7 @@ ELEMENTS:
   Element 35
 
 [81 of 190] needs review · Level 1 › LIFE SPACE (22) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 35 in the model. [ShowElements]
@@ -1008,7 +1008,7 @@ ELEMENTS:
   Element 35
 
 [82 of 190] needs review · Level 1 › TREATMENT (24) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 36 in the model. [ShowElements]
@@ -1021,7 +1021,7 @@ ELEMENTS:
   Element 36
 
 [83 of 190] needs review · Level 1 › TREATMENT (24) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 36 in the model. [ShowElements]
@@ -1033,7 +1033,7 @@ ELEMENTS:
   Element 36
 
 [84 of 190] needs review · Level 1 › STORAGE (28) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 37 in the model. [ShowElements]
@@ -1046,7 +1046,7 @@ ELEMENTS:
   Element 37
 
 [85 of 190] needs review · Level 1 › STORAGE (28) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 37 in the model. [ShowElements]
@@ -1058,7 +1058,7 @@ ELEMENTS:
   Element 37
 
 [86 of 190] needs review · Level 1 › STORAGE (29) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 38 in the model. [ShowElements]
@@ -1071,7 +1071,7 @@ ELEMENTS:
   Element 38
 
 [87 of 190] needs review · Level 1 › STORAGE (29) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 38 in the model. [ShowElements]
@@ -1083,7 +1083,7 @@ ELEMENTS:
   Element 38
 
 [88 of 190] needs review · Level 1 › STAFF TOILET (30) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 39 in the model. [ShowElements]
@@ -1096,7 +1096,7 @@ ELEMENTS:
   Element 39
 
 [89 of 190] needs review · Level 1 › STAFF TOILET (30) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
-WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and Gordium has no mark for it in the model yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 39 in the model. [ShowElements]
@@ -1122,7 +1122,7 @@ ELEMENTS:
   Element 40
 
 [91 of 190] needs review · Level 1 › CORRIDOR (26) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 40 in the model. [ShowElements]
@@ -1158,7 +1158,7 @@ ELEMENTS:
   Element 40
 
 [94 of 190] needs review · Level 1 › CORRIDOR (26) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 40 in the model. [ShowElements]
@@ -1185,7 +1185,7 @@ ELEMENTS:
   Element 41
 
 [96 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 2) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 41 in the model. [ShowElements]
@@ -1221,7 +1221,7 @@ ELEMENTS:
   Element 41
 
 [99 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 2) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 41 in the model. [ShowElements]
@@ -1248,7 +1248,7 @@ ELEMENTS:
   Element 42
 
 [101 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 3) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 42 in the model. [ShowElements]
@@ -1284,7 +1284,7 @@ ELEMENTS:
   Element 42
 
 [104 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 3) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 42 in the model. [ShowElements]
@@ -1311,7 +1311,7 @@ ELEMENTS:
   Element 43
 
 [106 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 4) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 43 in the model. [ShowElements]
@@ -1347,7 +1347,7 @@ ELEMENTS:
   Element 43
 
 [109 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 4) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 43 in the model. [ShowElements]
@@ -1374,7 +1374,7 @@ ELEMENTS:
   Element 44
 
 [111 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 5) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 44 in the model. [ShowElements]
@@ -1410,7 +1410,7 @@ ELEMENTS:
   Element 44
 
 [114 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 5) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 44 in the model. [ShowElements]
@@ -1437,7 +1437,7 @@ ELEMENTS:
   Element 45
 
 [116 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 6) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 45 in the model. [ShowElements]
@@ -1473,7 +1473,7 @@ ELEMENTS:
   Element 45
 
 [119 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 6) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 45 in the model. [ShowElements]
@@ -1500,7 +1500,7 @@ ELEMENTS:
   Element 46
 
 [121 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 7) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 46 in the model. [ShowElements]
@@ -1524,7 +1524,7 @@ ELEMENTS:
   Element 46
 
 [123 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 7) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 46 in the model. [ShowElements]
@@ -1551,7 +1551,7 @@ ELEMENTS:
   Element 47
 
 [125 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 8) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 47 in the model. [ShowElements]
@@ -1575,7 +1575,7 @@ ELEMENTS:
   Element 47
 
 [127 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 8) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 47 in the model. [ShowElements]
@@ -1602,7 +1602,7 @@ ELEMENTS:
   Element 48
 
 [129 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 9) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 48 in the model. [ShowElements]
@@ -1626,7 +1626,7 @@ ELEMENTS:
   Element 48
 
 [131 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 9) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 48 in the model. [ShowElements]
@@ -1653,7 +1653,7 @@ ELEMENTS:
   Element 49
 
 [133 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 10) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 49 in the model. [ShowElements]
@@ -1677,7 +1677,7 @@ ELEMENTS:
   Element 49
 
 [135 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 10) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 49 in the model. [ShowElements]
@@ -1704,7 +1704,7 @@ ELEMENTS:
   Element 50
 
 [137 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 11) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 50 in the model. [ShowElements]
@@ -1728,7 +1728,7 @@ ELEMENTS:
   Element 50
 
 [139 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 11) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 50 in the model. [ShowElements]
@@ -1754,7 +1754,7 @@ ELEMENTS:
   not in this model now (not in this model now)
 
 [141 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 12) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
-WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
@@ -1776,7 +1776,7 @@ ELEMENTS:
   not in this model now (not in this model now)
 
 [143 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 12) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
-WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet; existing change of use not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
@@ -2057,7 +2057,7 @@ THE LAW'S WORDS:
   "Table 6.1.14.4.1(b) Required Separation of Occupancies (hours) , Part 2" (Table 6.1.14.4.1(b), NFPA 101, Life Safety Code, 2012 Edition, PDF p.50)
 
 [177 of 190] needs review · Interior drawing
-WHY: The interior drawing: opening Fixed: Window 45" x 48" (LS1.0) (WN01): say whether it is an emergency escape and rescue opening (`escape`: true or false)
+WHY: The interior drawing: opening Fixed: Window 45" x 48" (LS1.0) (WN01) doesn't say whether it is an emergency escape and rescue opening (yes or no)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
@@ -2065,7 +2065,7 @@ THE LAW'S WORDS:
   The checker sent no quote with this row.
 
 [178 of 190] needs review · Interior drawing
-WHY: The interior drawing: the stairs weren't read (no `stairs` in the description)
+WHY: The interior drawing: the stairs weren't read: the model doesn't say which are all of the house's stairs (or that it has none)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
@@ -2073,7 +2073,7 @@ THE LAW'S WORDS:
   The checker sent no quote with this row.
 
 [179 of 190] needs review · Interior drawing
-WHY: The interior drawing: door Single-Flush: Door 36" x 84" (LS1.0) (D01): say whether it is the required exit door (`exit`: true or false)
+WHY: The interior drawing: door Single-Flush: Door 36" x 84" (LS1.0) (D01) doesn't say whether it is the required exit door (yes or no)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
@@ -2081,7 +2081,7 @@ THE LAW'S WORDS:
   The checker sent no quote with this row.
 
 [180 of 190] needs review · Interior drawing
-WHY: The interior drawing: the guards weren't read (no `guards` in the description)
+WHY: The interior drawing: the guards weren't read: the model doesn't say which are all of the house's guards (or that it has none)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Check again once it's changed: only the check changes a verdict. [CheckAgain]

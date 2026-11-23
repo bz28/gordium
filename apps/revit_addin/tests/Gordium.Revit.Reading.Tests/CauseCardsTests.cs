@@ -74,7 +74,12 @@ public sealed class CauseCardsTests
                      rooms.Rooms.Select(r => r.Name));
         Assert.Equal(rooms.Elements, rooms.Rooms.Select(r => r.Id));
         Assert.All(rooms.Rooms, r => Assert.NotNull(r.Why));
-        Assert.Equal([CauseKind.FixModel, CauseKind.FixModel, CauseKind.FixModel], cards.Take(3).Select(c => c.Kind));
+        Assert.Equal([CauseKind.FixModel, CauseKind.Mark, CauseKind.Mark], cards.Take(3).Select(c => c.Kind));     // the model first, then its marks
+        // the stairs not read: the project-wide tick the worker's field names, on Project Information
+        var stairs = cards.Single(c => c.Fields is ["stairs"]);
+        Assert.Equal(CauseKind.Mark, stairs.Kind);
+        Assert.Equal([Marks.AllStairs], CauseCards.MarksOf(stairs));
+        Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(stairs, null));
         Assert.Equal(CauseKind.MeasureByHand, cards[^1].Kind);
         // shown: the first three, the rest behind "+12 more causes"
         Assert.Equal(cards.Take(3), CauseCards.Shown(cards, all: false));
@@ -109,7 +114,8 @@ public sealed class CauseCardsTests
 
         var door = cards.Values.Single(c => c.Words.Contains("say whether it is the required exit door", StringComparison.Ordinal));
         Assert.Equal(CauseKind.Mark, door.Kind);
-        Assert.Equal([Marks.ExitDoor], CauseCards.MarksOf(door));                                    // `exit` feeds doors[].exit
+        Assert.Equal([Marks.ExitDoor], CauseCards.MarksOf(door));                                    // its field, doors[].exit
+        Assert.Equal(["doors[].exit"], door.Fields);
         Assert.Equal(CardAction.None, CauseCards.Action(door, labels));                                // no element id to select
         Assert.Equal("Set Gordium: Exit door in Properties, on the element the card names (the card has none to select).", CauseCards.Note(door, labels));
         var window = cards.Values.Single(c => c.Words.Contains("emergency escape and rescue opening", StringComparison.Ordinal));
@@ -167,6 +173,43 @@ public sealed class CauseCardsTests
         Assert.Equal("Set Gordium: Use on Project Information.", CauseCards.Note(cards[4], labels));
         // an element's mark with no element to select: no button, never Project Information
         Assert.Equal(CardAction.None, CauseCards.Action(cards[5], labels));
+    }
+
+    /// <summary>The worker's field picks the mark (never the card's words): doors[].exit is Gordium: Exit door though
+    /// its words name no mark and no back-quoted field; stairs is the project-wide stairs tick, on Project
+    /// Information; facts.use is Gordium: Use, on Project Information though it is also on Rooms; several fields,
+    /// every one's mark; a field no mark feeds names none, even when its words name a mark (never one guessed).</summary>
+    [Fact]
+    public void A_mark_card_names_the_mark_its_field_needs()
+    {
+        static JsonObject With(JsonObject card, params string[] fields)
+        {
+            if (fields.Length == 1)
+                card["field"] = fields[0];
+            else
+                card["fields"] = new JsonArray(fields.Select(f => (JsonNode)f).ToArray());
+            return card;
+        }
+        var items = new JsonArray(Item("a"), Item("b"), Item("c"), Item("d"), Item("e"));
+        var r = Parse(Result(items, Group("x:review", ["a", "b", "c", "d", "e"],
+            With(Card("drawing:door", "mark", "door D01 doesn't say whether it is the required exit door (yes or no)", ["a"], ["uid-d1"]), "doors[].exit"),
+            With(Card("drawing:stairs", "mark", "the stairs weren't read: the model doesn't say which are all of the house's stairs", ["b"]), "stairs"),
+            With(Card("fact:use", "mark", "use: not stated for the project", ["c"]), "facts.use"),
+            With(Card("facts:stories,zone", "mark", "the stories and the zone", ["d"]), "facts.stories", "facts.zone"),
+            With(Card("fact:x", "mark", "x: set Gordium: Exit door", ["e"]), "facts.not_a_mark"))));
+        var cards = CauseCards.Read(r);
+        var labels = new Dictionary<string, string> { ["uid-d1"] = "Door D01" };
+        Assert.Equal(["doors[].exit"], cards[0].Fields);
+        Assert.Equal([Marks.ExitDoor], CauseCards.MarksOf(cards[0]));
+        Assert.Equal(CardAction.ShowAndProperties, CauseCards.Action(cards[0], labels));
+        Assert.Equal("Set Gordium: Exit door in Properties.", CauseCards.Note(cards[0], labels));
+        Assert.Equal([Marks.AllStairs], CauseCards.MarksOf(cards[1]));
+        Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(cards[1], labels));
+        Assert.Equal("Set Gordium: These are all the stairs on Project Information.", CauseCards.Note(cards[1], labels));
+        Assert.Equal([Marks.Use], CauseCards.MarksOf(cards[2]));
+        Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(cards[2], labels));
+        Assert.Equal([Marks.Zone, Marks.Stories], CauseCards.MarksOf(cards[3]));
+        Assert.Empty(CauseCards.MarksOf(cards[4]));                                                   // not the words' mark
     }
 
     /// <summary>Only the answer's own: a card's row the answer doesn't have is left out, a card with none is left
