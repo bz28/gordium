@@ -27,6 +27,9 @@ BACK_QUOTE = re.compile(r"`")
 IDENTIFIER = re.compile(r"\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
 NAME_IS_VALUE = re.compile(r"\b[A-Za-z_]\w*\s=\s[A-Za-z_\"']")
 SECTION_TAG = re.compile(r"\(\d{3}-\d+[A-Z]?(?:#\d+)?\)")       # a law question's bare key: "(325-28C#1)"
+PYTHON_WORD = re.compile(r"\b(?:None|True|False)\b")               # a value said as code says it, not "blank", "Yes"
+# the architect's own words, quoted exactly as typed (code_scope.value_words: “nfpa_13x”): never Gordium's to change
+QUOTED = re.compile(r"“[^”]*”")
 
 # the fields of `view` and `sections` that are data, never words shown (the host keys, finds or links by them)
 DATA = {
@@ -96,9 +99,10 @@ def problems(answer: dict) -> list[str]:
         for where, text in _strings(answer.get(top), (top,)):
             if text in NOT_YET or any(p in text for p in NOT_YET_PARTS):
                 continue
+            ours = QUOTED.sub("“…”", text)
             for name, pat in (("back-quote", BACK_QUOTE), ("identifier", IDENTIFIER), ("name = value", NAME_IS_VALUE),
-                              ("section tag", SECTION_TAG)):
-                if m := pat.search(text):
+                              ("section tag", SECTION_TAG), ("code value", PYTHON_WORD)):
+                if m := pat.search(ours):
                     out.append(f"{where}: {name} {m.group(0)!r} in {text[:160]!r}")
     return out
 
@@ -168,7 +172,32 @@ def test_every_code_choice_says_itself_in_plain_words():
     found = [p for got in answers for p in problems(shown(got))]
     assert not found, f"{len(found)} problems, e.g.\n" + "\n".join(found[:10])
     assert code_scope.use_words("one_family_detached") == "a detached one-family dwelling"
-    assert "stories abvoe" in code_scope.decide({"use": "two_family"}, {"stories_abvoe": 3})["why"]
+
+
+def test_the_code_choice_quotes_the_architects_value_as_typed_and_says_blank_yes_and_no():
+    """Review round 4: a value Gordium can't read is the architect's own, quoted verbatim (the character that made it
+    unreadable kept, as the add-in quotes it); blank, Yes and No never None, True or False; the facts Gordium reads
+    named by their marks only (no host-only fact, no key); a use the facts disagree with named as the architect chose
+    it, R101.2's "two-family dwelling" kept for the verdict lines."""
+    from design_checker import code_scope
+    why = code_scope.decide({"use": "one_family_detached"}, {"sprinkler_system": "nfpa_13x"})["why"]
+    assert why == "the building's sprinkler system is “nfpa_13x”, which Gordium can't read"
+    assert "[“R_3”]" in code_scope.decide({"use": "two_family"}, {"occupancy_groups": ["R_3"]})["why"]
+    assert [code_scope.value_words(v) for v in (None, True, False, 3, ["R_3", None])] == [
+        "blank", "Yes", "No", "3", "[“R_3”, blank]"]
+    unknown = code_scope.decide({"use": "two_family"}, {"stories_abvoe": 3})["why"]
+    assert unknown.startswith("the building block sends “stories_abvoe”, which is no fact Gordium reads (it reads "
+                              "Gordium: Stories above grade plane, ")
+    assert "Gordium: Sprinkler system" in unknown and "facts not sent" not in unknown and "atrium" not in unknown
+    assert code_scope.decide({"use": "one_family_semi_detached", "dwelling_units": 2}, None)["why"] == (
+        "the use is a one-family semi-detached dwelling (one of a pair, 1 dwelling unit on the lot) but 2 dwelling "
+        "units are stated")
+    semi = code_scope.decide({"use": "one_family_semi_detached", "dwelling_units": 1, "accessory_dwelling_unit": False,
+                              "separate_means_of_egress": True, "stories": 2}, {"stories_above_grade_plane": 2})
+    assert "a two-family dwelling (two semi-detached units in one building)" in semi["why"]      # the law's term
+    for text in ("is None", "a value True here"):
+        assert problems({"view": {"items": [{"reason": text}]}}), text
+    assert not problems({"view": {"items": [{"reason": "the sprinkler system is “nfpa_13x”"}]}})
 
 
 def test_no_golden_answer_shows_an_architect_an_engineers_word():
