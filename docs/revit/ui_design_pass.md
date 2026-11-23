@@ -558,3 +558,11 @@ units the same way (`LengthUnits`, from `Units.GetFormatOptions(SpecTypeId.Lengt
 project, shown and typed in it, saved in feet so Revit shows the number typed; a project in units Gordium doesn't read
 takes feet and says so beside the field. And every passage a mark quotes is a whole sentence of the law or ends with
 "…" (Distance from stream now quotes §325-26 with its exception too).
+
+Review round 3 (3 confirmed, all fixed and pinned): a length typed in the form is converted as Revit converts it
+(typed / units per foot: 6.096 m is exactly 20 ft, where a feet-per-unit factor gave 19.999999999999996 and failed 20
+ft), and a value typed again is compared in feet, never as the shown text; the definitions that decide an answer are
+quoted whole (OWNER with who holds the property and how, FUNCTIONAL FAMILY UNIT with its criteria and presumptions,
+GARAGE, PRIVATE with its no-business proviso), the "Yes when" words no narrower or broader than the law's, and a quote
+cut short needs a reason listed in the test; and what is said beside a length (its problem, the notice, "sent
+without") is in the project's units.
