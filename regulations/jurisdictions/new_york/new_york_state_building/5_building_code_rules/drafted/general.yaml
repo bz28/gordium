@@ -519,8 +519,8 @@ rules:
 - id: general.bc_table_1006_2_1_other_occupancies
   kind: flag
   topic: means_of_egress
-  title: Table 1006.2.1's rows for other occupancies (BCNYS)
-  applies_when: other_occupancy_present
+  title: Table 1006.2.1 in a building of two or more groups (BCNYS)
+  applies_when: occupancy_group == "mixed"
   sources:
   - file: gov.ny.building.2025.pdf
     page: 315
@@ -538,15 +538,3023 @@ rules:
       NP NP 125[fna,] [fng] S[fnf] 29 100 75 100[fna] U 49 100 75 75[fna]
   examples:
   - given:
-      other_occupancy_present: true
+      occupancy_group: mixed
     expect: needs_review
-    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
-      only, so the rows and allowances for other groups need a person.'
+    note: 'A building of two or more groups (occupancy_group: mixed): 1004.4 applies the means of egress requirements to each
+      portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy
+      isn''t marked yet, so a person checks.'
   - given:
-      other_occupancy_present: false
+      occupancy_group: R-2
     expect: not_applicable
-    note: 'The architect states it doesn''t apply: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-21).
+    note: 'One group, whose rows are drafted (or not this increase''s group): not applicable.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-21). Narrowed 2026-11-23 to a building of two or more groups: the
+    rows for one group are rules (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_a_e_m
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, A, E, M (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "E", "M"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (75 if (sprinklered_903_3_1_1
+    or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30
+    else 75)))
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and space_common_path > (75 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30 else 75))
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
+      <= 49 and space_common_path <= 75
+    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
+      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
+      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
+      to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler system,
+      and where only the sprinklered column would pass, a person checks the system.'
+  - when: not space_is_exit and space_exit_count < 2 and occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5"] and assembly_fixed_seating
+    reason: 'A space with one exit in Group A where fixed seating isn''t ruled out: note c sends a space used for assembly
+      purposes with fixed seating to 1030.8 (not brought in), a person''s check.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 20
+    - 20
+    quote: OL ≤ 30 OL > 30
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 21
+    - 21
+    quote: A[fnc], E, M 49 75 75 75[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 37
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 39
+    - 39
+    quote: c. For a room or space used for assembly purposes having fixed seating, see Section 1030.8.
+  examples:
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 49
+          space_common_path: 75
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 49 occupants and 75 ft, each at most.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 50
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 49 occupants: two exits needed.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 75 ft needs two exits.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, unsprinklered, up to 30
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 30
+          space_common_path: 75
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'No sprinkler system, 30 occupants: 75 ft at most.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, unsprinklered, over 30
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 31
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'No sprinkler system, over 30 occupants: over 75 ft.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 54
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: A-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Restaurant, fixed seating not stated
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 40
+          space_common_path: 50
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group A, one exit, fixed seating not stated: note c (1030.8) is a person''s check.'
+  - given:
+      occupancy_group: A-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+    parts:
+      space:
+      - id: p1
+        name: Restaurant, no fixed seating
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 40
+          space_common_path: 50
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group A, no fixed seating (stated): 40 occupants and 50 ft, within 49 and 75.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s A, E, M row: 49 occupants; 75 ft (up to 30 occupants) and 75 ft (more) without an automatic sprinkler
+    system, 75 ft with one (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies
+    (''Automatic sprinkler systems in Group R occupancies shall be permitted to be installed throughout in accordance with
+    NFPA 13R''), and the table''s note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system
+    alone gets the column without a sprinkler system, and where only the sprinklered column would pass, a person checks the
+    system). As the I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs
+    review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
+    Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
+    in space_occupant_load. Note c: a room or space used for assembly purposes with fixed seating follows 1030.8 (not brought
+    in), so a Group A space with one exit needs review unless the architect states the building has no fixed seating (assembly_fixed_seating).
+    Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_b
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, B (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["B"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (100 if (sprinklered_903_3_1_1
+    or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30
+    else 75)))
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and space_common_path > (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30 else 75))
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
+      <= 49 and space_common_path <= 100
+    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
+      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
+      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
+      to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler system,
+      and where only the sprinklered column would pass, a person checks the system.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 20
+    - 20
+    quote: OL ≤ 30 OL > 30
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 22
+    - 22
+    quote: B 49 100 75 100[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 37
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  examples:
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 49
+          space_common_path: 100
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 49 occupants and 100 ft, each at most.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 50
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 49 occupants: two exits needed.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 100.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 100 ft needs two exits.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, unsprinklered, up to 30
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 30
+          space_common_path: 100
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'No sprinkler system, 30 occupants: 100 ft at most.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, unsprinklered, over 30
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 31
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'No sprinkler system, over 30 occupants: over 75 ft.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 100.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 54
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group M is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s B row: 49 occupants; 100 ft (up to 30 occupants) and 75 ft (more) without an automatic sprinkler
+    system, 100 ft with one (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies
+    (''Automatic sprinkler systems in Group R occupancies shall be permitted to be installed throughout in accordance with
+    NFPA 13R''), and the table''s note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system
+    alone gets the column without a sprinkler system, and where only the sprinklered column would pass, a person checks the
+    system). As the I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs
+    review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
+    Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
+    in space_occupant_load. Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_f
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, F (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["F-1", "F-2"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (100 if (sprinklered_903_3_1_1
+    or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30
+    else 75)))
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and space_common_path > (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30 else 75))
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
+      <= 49 and space_common_path <= 100
+    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
+      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
+      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
+      to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler system,
+      and where only the sprinklered column would pass, a person checks the system.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 20
+    - 20
+    quote: OL ≤ 30 OL > 30
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 23
+    - 23
+    quote: F 49 75 75 100[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 37
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  examples:
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 49
+          space_common_path: 100
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 49 occupants and 100 ft, each at most.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 50
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 49 occupants: two exits needed.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 100.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 100 ft needs two exits.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, unsprinklered, up to 30
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 30
+          space_common_path: 75
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'No sprinkler system, 30 occupants: 75 ft at most.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, unsprinklered, over 30
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 31
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'No sprinkler system, over 30 occupants: over 75 ft.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 100.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 54
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s F row: 49 occupants; 75 ft (up to 30 occupants) and 75 ft (more) without an automatic sprinkler
+    system, 100 ft with one (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies
+    (''Automatic sprinkler systems in Group R occupancies shall be permitted to be installed throughout in accordance with
+    NFPA 13R''), and the table''s note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system
+    alone gets the column without a sprinkler system, and where only the sprinklered column would pass, a person checks the
+    system). As the I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs
+    review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
+    Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
+    in space_occupant_load. Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_h1_h2_h3
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, H-1, H-2, H-3 (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["H-1", "H-2", "H-3"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 3 and sprinklered_903_3_1_1 and space_common_path
+    <= 25)
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 25 or not sprinklered_903_3_1_1)
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 24
+    - 24
+    quote: H-1, H-2, H-3 3 NP NP 25[fnb]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 38
+    - 38
+    quote: b.Group H occupancies equipped throughout with an automatic sprinkler system in accordance with Section 903.2.5.
+  examples:
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 3
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 3 occupants and 25 ft, each at most.'
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 4
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 3 occupants: two exits needed.'
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 25.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 25 ft needs two exits.'
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, no sprinkler system
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Not Permitted (NP) without an automatic sprinkler system: two exits needed.'
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 25.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 8
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s H-1, H-2, H-3 row: 3 occupants; Not Permitted (NP) without an automatic sprinkler system, 25 ft
+    with one (note b: 903.2.5, Group H''s own system, not brought in: a space with one exit can fail, never pass). As the
+    I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs review (open question
+    1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and
+    3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load.
+    Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_h4_h5
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, H-4, H-5 (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["H-4", "H-5"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and sprinklered_903_3_1_1 and space_common_path
+    <= 75)
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 75 or not sprinklered_903_3_1_1)
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 25
+    - 25
+    quote: H-4, H-5 10 NP NP 75[fnb]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 38
+    - 38
+    quote: b.Group H occupancies equipped throughout with an automatic sprinkler system in accordance with Section 903.2.5.
+  examples:
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 10
+          space_common_path: 75
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 10 occupants and 75 ft, each at most.'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 11
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 10 occupants: two exits needed.'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 75 ft needs two exits.'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, no sprinkler system
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Not Permitted (NP) without an automatic sprinkler system: two exits needed.'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 15
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s H-4, H-5 row: 10 occupants; Not Permitted (NP) without an automatic sprinkler system, 75 ft with
+    one (note b: 903.2.5, Group H''s own system, not brought in: a space with one exit can fail, never pass). As the I-4 rule
+    (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs review (open question 1);
+    a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only
+    loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load.
+    Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_i1_i2
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, I-1, I-2 (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["I-1", "I-2"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75)
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
+      <= 10 and space_common_path <= 75
+    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
+      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
+      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
+      to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler system,
+      and where only the sprinklered column would pass, a person checks the system.'
+  - when: not space_is_exit and space_exit_count < 2 and occupancy_group == "I-2" and space_occupant_load <= 10 and (sprinklered_903_3_1_1
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75
+    reason: 'A Group I-2 space with one exit, within the row: note d''s 407.4 (care suites, not brought in) limits it further,
+      a person''s check.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 26
+    - 26
+    quote: I-1, I-2[fnd], I-4 10 NP NP 75[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 37
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 40
+    - 40
+    quote: d.For the travel distance limitations in Group I-2, see Section 407.4.
+  examples:
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 10
+          space_common_path: 75
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 10 occupants and 75 ft, each at most.'
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 11
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 10 occupants: two exits needed.'
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 75 ft needs two exits.'
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, no sprinkler system
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Not Permitted (NP) without an automatic sprinkler system: two exits needed.'
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 15
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Patient room, one door
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 4
+          space_common_path: 30
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group I-2, one exit: note d''s 407.4 is a person''s check.'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s I-1, I-2 row: 10 occupants; Not Permitted (NP) without an automatic sprinkler system, 75 ft with
+    one (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler
+    systems in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
+    note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (general.bc_1006_2_1_two_exits):
+    a space with two exits and a common path over the value needs review (open question 1); a space that is itself an exit
+    (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
+    check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. The row also names I-4, whose
+    rule is general.bc_1006_2_1_two_exits (unchanged). Note d: Group I-2''s travel limits are 407.4''s (not brought in), so
+    a Group I-2 space with one exit needs review. Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_i3
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, I-3 (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["I-3"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 100)
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 100 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
+      <= 10 and space_common_path <= 100
+    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
+      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
+      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
+      to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler system,
+      and where only the sprinklered column would pass, a person checks the system.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 27
+    - 27
+    quote: I-3 10 NP NP 100[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 37
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  examples:
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 10
+          space_common_path: 100
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 10 occupants and 100 ft, each at most.'
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 11
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 10 occupants: two exits needed.'
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 100.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 100 ft needs two exits.'
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, no sprinkler system
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Not Permitted (NP) without an automatic sprinkler system: two exits needed.'
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 100.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 15
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s I-3 row: 10 occupants; Not Permitted (NP) without an automatic sprinkler system, 100 ft with one
+    (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler
+    systems in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
+    note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (general.bc_1006_2_1_two_exits):
+    a space with two exits and a common path over the value needs review (open question 1); a space that is itself an exit
+    (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
+    check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. Hand-drafted in a Claude Code
+    session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_r1
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, R-1 (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["R-1"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75)
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 28
+    - 28
+    quote: R-1 10 NP NP 75[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 37
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  examples:
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 10
+          space_common_path: 75
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 10 occupants and 75 ft, each at most.'
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 11
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 10 occupants: two exits needed.'
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 75 ft needs two exits.'
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, no sprinkler system
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Not Permitted (NP) without an automatic sprinkler system: two exits needed.'
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 15
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s R-1 row: 10 occupants; Not Permitted (NP) without an automatic sprinkler system, 75 ft with one
+    (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler
+    systems in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
+    note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (general.bc_1006_2_1_two_exits):
+    a space with two exits and a common path over the value needs review (open question 1); a space that is itself an exit
+    (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
+    check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. Hand-drafted in a Claude Code
+    session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_r2
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, R-2 (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["R-2"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 20 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 125)
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 125 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 29
+    - 29
+    quote: R-2 20 NP NP 125[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 37
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  examples:
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 20
+          space_common_path: 125
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 20 occupants and 125 ft, each at most.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 21
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 20 occupants: two exits needed.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 125.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 125 ft needs two exits.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, no sprinkler system
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Not Permitted (NP) without an automatic sprinkler system: two exits needed.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 125.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 25
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Apartment, one door, no sprinkler system
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A dwelling unit with one door in an unsprinklered Group R-2 building: Not Permitted, whatever its occupant load
+      and common path (the four-unit eval building''s apartments).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s R-2 row: 20 occupants; Not Permitted (NP) without an automatic sprinkler system, 125 ft with one
+    (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler
+    systems in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
+    note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (general.bc_1006_2_1_two_exits):
+    a space with two exits and a common path over the value needs review (open question 1); a space that is itself an exit
+    (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
+    check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. A dwelling unit is a space (1006.3.4
+    item 5.1: ''complies with Section 1006.2.1 as a space with one means of egress''). Hand-drafted in a Claude Code session
+    (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_r3_r4
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, R-3, R-4 (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["R-3", "R-4"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 20 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 125)
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 125 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  - when: not space_is_exit and space_exit_count < 2 and space_occupant_load <= 20 and not ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
+      and space_common_path <= 125)
+    reason: 'Group R-3 or R-4, one exit, at most 20 occupants, and a common path the row''s columns wouldn''t allow: note
+      e applies the common path only in a mixed occupancy building (this one is one group), and note g sends an NFPA 13D building
+      to 1006.2.2.6 (not brought in): a person''s check.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 30
+    - 30
+    quote: R-3[fne] 20 NP NP 125[fna,] [fng]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 37
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 31
+    - 31
+    quote: R-4[fne] 20 NP NP 125[fna,] [fng]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 41
+    - 41
+    quote: e.The common path of egress travel distance shall only apply in a Group R-3 occupancy located in a mixed occupancy
+      building.
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 43
+    - 44
+    quote: g.For the travel distance limitations in Groups R-3 and R-4 equipped throughout with an automatic sprinkler system
+      in accordance with Section 903.3.1.3, see Section 1006.2.2.6.
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 20
+          space_common_path: 125
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 20 occupants and 125 ft, each at most.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 21
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 20 occupants: two exits needed.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 125.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'One exit and at most 20 occupants, but the common path the columns wouldn''t allow: note e (one-group building)
+      makes it a person''s check.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, no sprinkler system
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'One exit and at most 20 occupants, but the common path the columns wouldn''t allow: note e (one-group building)
+      makes it a person''s check.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 125.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 25
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s R-3, R-4 row: 20 occupants; Not Permitted (NP) without an automatic sprinkler system, 125 ft with
+    one (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler
+    systems in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
+    note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (general.bc_1006_2_1_two_exits):
+    a space with two exits and a common path over the value needs review (open question 1); a space that is itself an exit
+    (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
+    check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. Lines 30 and 31 print the same
+    values for R-3 and R-4. Note e: the common path applies to Group R-3 only in a mixed occupancy building, and the rule
+    reads one-group buildings, so where only the common path (or its NP) would fail a space of 20 or fewer, it needs review;
+    note g (903.3.1.3 systems: 1006.2.2.6) likewise. Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_s
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, S (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["S-1", "S-2"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 29 and space_common_path <= (100 if (sprinklered_903_3_1_1
+    or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30
+    else 75)))
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and space_common_path > (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30 else 75))
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
+      <= 29 and space_common_path <= 100
+    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
+      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
+      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
+      to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler system,
+      and where only the sprinklered column would pass, a person checks the system.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 20
+    - 20
+    quote: OL ≤ 30 OL > 30
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 32
+    - 32
+    quote: S[fnf] 29 100 75 100[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 37
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 42
+    - 42
+    quote: f. The length of common path of egress travel distance in a Group S-2 open parking garage shall be not more than
+      100 feet.
+  examples:
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 29
+          space_common_path: 100
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 29 occupants and 100 ft, each at most.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 30
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 29 occupants: two exits needed.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 100.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 100 ft needs two exits.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, unsprinklered, up to 30
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 29
+          space_common_path: 100
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'No sprinkler system, 29 occupants: 100 ft at most.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 100.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 34
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s S row: 29 occupants; 100 ft (up to 30 occupants) and 75 ft (more) without an automatic sprinkler
+    system, 100 ft with one (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies
+    (''Automatic sprinkler systems in Group R occupancies shall be permitted to be installed throughout in accordance with
+    NFPA 13R''), and the table''s note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system
+    alone gets the column without a sprinkler system, and where only the sprinklered column would pass, a person checks the
+    system). As the I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs
+    review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
+    Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
+    in space_occupant_load. Note f (a Group S-2 open parking garage: a common path not more than 100 ft) is no looser than
+    the row for the loads it allows (29 or fewer). Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_u
+  kind: rule
+  topic: means_of_egress
+  title: A space's one exit, U (BCNYS Table 1006.2.1)
+  applies_when: occupancy_group in ["U"]
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (75 if (sprinklered_903_3_1_1
+    or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30
+    else 75)))
+  review_when:
+  - when: not space_is_exit and space_exit_count >= 2 and space_common_path > (75 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30 else 75))
+    reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
+      person checks.'
+  - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
+      <= 49 and space_common_path <= 75
+    reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
+      903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies
+      shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader
+      to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler system,
+      and where only the sprinklered column would pass, a person checks the system.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 20
+    - 20
+    quote: OL ≤ 30 OL > 30
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 33
+    - 33
+    quote: U 49 100 75 75[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 37
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  examples:
+  - given:
+      occupancy_group: U
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, short common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 60
+          space_common_path: 25
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits or exit access doorways, the common path within the row's value.
+  - given:
+      occupancy_group: U
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 49
+          space_common_path: 75
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Sprinklered (NFPA 13): 49 occupants and 75 ft, each at most.'
+  - given:
+      occupancy_group: U
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, one occupant too many
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 50
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 49 occupants: two exits needed.'
+  - given:
+      occupancy_group: U
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, common path just past
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 1
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Sprinklered: a common path over 75 ft needs two exits.'
+  - given:
+      occupancy_group: U
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, unsprinklered, up to 30
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 30
+          space_common_path: 100
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'No sprinkler system, 30 occupants: 100 ft at most.'
+  - given:
+      occupancy_group: U
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: One door, unsprinklered, over 30
+        measures:
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 31
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'No sprinkler system, over 30 occupants: over 75 ft.'
+  - given:
+      occupancy_group: U
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Two doors, long common path
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 1
+          space_common_path: 75.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
+  - given:
+      occupancy_group: U
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+          space_occupant_load: 54
+          space_common_path: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Another group's
+        measures:
+          space_exit_count: 1
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: U
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s U row: 49 occupants; 100 ft (up to 30 occupants) and 75 ft (more) without an automatic sprinkler
+    system, 75 ft with one (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies
+    (''Automatic sprinkler systems in Group R occupancies shall be permitted to be installed throughout in accordance with
+    NFPA 13R''), and the table''s note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system
+    alone gets the column without a sprinkler system, and where only the sprinklered column would pass, a person checks the
+    system). As the I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs
+    review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
+    Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
+    in space_occupant_load. Hand-drafted in a Claude Code session (2026-11-23).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_2_1_1_three_or_more_exits
@@ -1861,8 +4869,8 @@ rules:
 - id: general.bc_table_1017_2_other_occupancies
   kind: flag
   topic: means_of_egress
-  title: Table 1017.2's rows for other occupancies (BCNYS)
-  applies_when: other_occupancy_present
+  title: Table 1017.2 in a building of two or more groups (BCNYS)
+  applies_when: occupancy_group == "mixed"
   sources:
   - file: gov.ny.building.2025.pdf
     page: 341
@@ -1874,15 +4882,1563 @@ rules:
       200[fnc] I-2, I-3 Not Permitted 200[fnc]
   examples:
   - given:
-      other_occupancy_present: true
+      occupancy_group: mixed
     expect: needs_review
-    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
-      only, so the rows and allowances for other groups need a person.'
+    note: 'A building of two or more groups (occupancy_group: mixed): 1004.4 applies the means of egress requirements to each
+      portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy
+      isn''t marked yet, so a person checks.'
   - given:
-      other_occupancy_present: false
+      occupancy_group: R-2
     expect: not_applicable
-    note: 'The architect states it doesn''t apply: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-21).
+    note: 'One group, whose rows are drafted (or not this increase''s group): not applicable.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-21). Narrowed 2026-11-23 to a building of two or more groups: the
+    rows for one group are rules (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_a_e_f1_m_r_s1
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel distance, A, E, F-1, M, R, S-1 (BCNYS Table 1017.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "E", "F-1", "M", "R-1", "R-2", "R-3", "R-4", "S-1"]
+  check: egress_travel_distance <= (250 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1",
+    "R-2", "R-3", "R-4"])) else 200)
+  review_when:
+  - when: egress_balcony_increase_taken and egress_travel_distance > (250 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else 200) and egress_travel_distance <= (250 if (sprinklered_903_3_1_1
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else 200) + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+  - when: sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and occupancy_group not in ["R-1", "R-2", "R-3", "R-4"] and
+      egress_travel_distance <= 250 and egress_travel_distance > 200
+    reason: 'Within the sprinklered column only, with an NFPA 13R system (903.3.1.2) outside Group R: 903.3.1.2 permits an
+      NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader to Section 903 for
+      where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler system, and where only
+      the sprinklered column would pass, a person checks the system.'
+  - when: occupancy_group in ["F-1", "S-1"] and sprinklered_903_3_1_1 and egress_travel_distance > 250 and egress_travel_distance
+      <= 400
+    reason: 'Over 250 ft in Group F-1 or S-1 with NFPA 13, within 1017.2.2''s 400 ft, whose other conditions (one story; 24
+      ft to the ceiling) aren''t measured: a person''s check (general.bc_1017_2_2_f1_s1_increase).'
+  - when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5"] and assembly_fixed_seating and egress_travel_distance > (250
+      if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else 200)
+    reason: 'Over the row''s distance in Group A where fixed seating isn''t ruled out: note a''s 1030.7 (assembly seating,
+      not brought in) may allow more, a person''s check.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 28
+    - 28
+    quote: A, E, F-1, M, R, S-1 200[fne] 250[fnb]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 54
+    - 55
+    quote: b. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  - file: gov.ny.building.2025.pdf
+    page: 342
+    lines:
+    - 5
+    - 6
+    quote: '1017.2.2 Groups F-1 and S-1 increase. The maximum exit access travel distance shall be 400 feet (122 m) in Group
+      F-1 or S-1 occupancies where all of the following conditions are met:'
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 51
+    - 51
+    quote: 'Section 1030.7: For increased limitation in assembly seating.'
+  examples:
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the unsprinklered limit
+        measures:
+          egress_travel_distance: 200
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'No sprinkler system: 200 ft complies (at most).'
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past it
+        measures:
+          egress_travel_distance: 200.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'No sprinkler system: over 200 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the sprinklered limit
+        measures:
+          egress_travel_distance: 250
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13 (903.3.1.1): 250 ft complies (at most).'
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past the sprinklered limit
+        measures:
+          egress_travel_distance: 250.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13: over 250 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    parts:
+      story:
+      - id: p1
+        name: Apartment floor, NFPA 13R
+        measures:
+          egress_travel_distance: 240
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2 with an NFPA 13R system (903.3.1.2, permitted in Group R): 250 ft.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    parts:
+      story:
+      - id: p1
+        name: Shop, NFPA 13R stated
+        measures:
+          egress_travel_distance: 240
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group M with an NFPA 13R system only: 903.3.1.2 is for Group R, so the system is a person''s check.'
+  - given:
+      occupancy_group: F-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Factory floor, long run
+        measures:
+          egress_travel_distance: 300
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Over 250 ft in Group F-1 with NFPA 13: 1017.2.2''s 400 ft may apply (one story, 24 ft to the ceiling: not measured),
+      a person''s check.'
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Hall, fixed seating not stated
+        measures:
+          egress_travel_distance: 260
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Over 250 ft in Group A, fixed seating not stated: 1030.7''s assembly seating distances (note a) may apply, a person''s
+      check.'
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
+    parts:
+      story:
+      - id: p1
+        name: Hall, no fixed seating
+        measures:
+          egress_travel_distance: 260
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 250 ft, no fixed seating (stated): fails.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Balcony increase not stated
+        measures:
+          egress_travel_distance: 210
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Over 200 ft with no sprinkler system, within 1017.2.1''s 100 ft more, the balcony increase not stated: a person''s
+      check.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+    parts:
+      story:
+      - id: p1
+        name: Balcony increase not taken
+        measures:
+          egress_travel_distance: 210
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Over 200 ft with no sprinkler system, and the design takes no balcony increase (stated).
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Another group's
+        measures:
+          egress_travel_distance: 10
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s A, E, F-1, M, R, S-1 row: 200 ft without an automatic sprinkler system, 250 ft with one (note b:
+    903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems
+    in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
+    note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). Measured as 1017.3
+    says (egress_travel_distance). 1017.2.1''s balcony increase is a person''s check where taken or not stated and the distance
+    is within it; the other sections note a lists are general.bc_table_1017_2_note_a. Over its distance in Group F-1 or S-1
+    with NFPA 13, 1017.2.2''s 400 ft is a person''s check (its one-story and ceiling conditions aren''t measured); in Group
+    A, 1030.7 is, unless the architect states the space has no fixed seating (assembly_fixed_seating). Note e (R-3 and R-4
+    with an NFPA 13D system, 903.3.1.3) keeps such a building in the 200 ft column: 13D is no 903.3.1.1 or 903.3.1.2 system.
+    Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_i1
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel distance, I-1 (BCNYS Table 1017.2)
+  applies_when: occupancy_group in ["I-1"]
+  check: (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and egress_travel_distance
+    <= 250
+  review_when:
+  - when: egress_balcony_increase_taken and egress_travel_distance > 250 and egress_travel_distance <= 250 + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+  - when: sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and occupancy_group not in ["R-1", "R-2", "R-3", "R-4"] and
+      egress_travel_distance <= 250
+    reason: 'Within the sprinklered column only, with an NFPA 13R system (903.3.1.2) outside Group R: 903.3.1.2 permits an
+      NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R''), and the table''s note sends the reader to Section 903 for
+      where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler system, and where only
+      the sprinklered column would pass, a person checks the system.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 29
+    - 29
+    quote: I-1 Not Permitted 250[fnb]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 54
+    - 55
+    quote: b. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin- kler systems are permitted in accordance with Section 903.3.1.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  - file: gov.ny.building.2025.pdf
+    page: 274
+    lines:
+    - 15
+    - 16
+    quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+      to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+  examples:
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: No sprinkler system
+        measures:
+          egress_travel_distance: 20
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Not Permitted without an automatic sprinkler system, whatever the distance.
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the sprinklered limit
+        measures:
+          egress_travel_distance: 250
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13 (903.3.1.1): 250 ft complies (at most).'
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past the sprinklered limit
+        measures:
+          egress_travel_distance: 250.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13: over 250 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Another group's
+        measures:
+          egress_travel_distance: 10
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: I-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s I-1 row: Not Permitted without an automatic sprinkler system, 250 ft with one (note b: 903.3.1.1
+    or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group
+    R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends
+    the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler
+    system, and where only the sprinklered column would pass, a person checks the system). Measured as 1017.3 says (egress_travel_distance).
+    1017.2.1''s balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections
+    note a lists are general.bc_table_1017_2_note_a. Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_b
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel distance, B (BCNYS Table 1017.2)
+  applies_when: occupancy_group in ["B"]
+  check: egress_travel_distance <= (300 if sprinklered_903_3_1_1 else 200)
+  review_when:
+  - when: egress_balcony_increase_taken and egress_travel_distance > (300 if sprinklered_903_3_1_1 else 200) and egress_travel_distance
+      <= (300 if sprinklered_903_3_1_1 else 200) + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 30
+    - 30
+    quote: B 200 300[fnc]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 56
+    - 56
+    quote: c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  examples:
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the unsprinklered limit
+        measures:
+          egress_travel_distance: 200
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'No sprinkler system: 200 ft complies (at most).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past it
+        measures:
+          egress_travel_distance: 200.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'No sprinkler system: over 200 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the sprinklered limit
+        measures:
+          egress_travel_distance: 300
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13 (903.3.1.1): 300 ft complies (at most).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past the sprinklered limit
+        measures:
+          egress_travel_distance: 300.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13: over 300 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Another group's
+        measures:
+          egress_travel_distance: 10
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group M is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s B row: 200 ft without an automatic sprinkler system, 300 ft with one (note c: 903.3.1.1 only, so
+    an NFPA 13R system gets the column without one). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony
+    increase is a person''s check where taken or not stated and the distance is within it; the other sections note a lists
+    are general.bc_table_1017_2_note_a. Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_f2_s2_u
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel distance, F-2, S-2, U (BCNYS Table 1017.2)
+  applies_when: occupancy_group in ["F-2", "S-2", "U"]
+  check: egress_travel_distance <= (400 if sprinklered_903_3_1_1 else 300)
+  review_when:
+  - when: egress_balcony_increase_taken and egress_travel_distance > (400 if sprinklered_903_3_1_1 else 300) and egress_travel_distance
+      <= (400 if sprinklered_903_3_1_1 else 300) + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 31
+    - 31
+    quote: F-2, S-2, U 300 400[fnc]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 56
+    - 56
+    quote: c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  examples:
+  - given:
+      occupancy_group: F-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the unsprinklered limit
+        measures:
+          egress_travel_distance: 300
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'No sprinkler system: 300 ft complies (at most).'
+  - given:
+      occupancy_group: F-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past it
+        measures:
+          egress_travel_distance: 300.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'No sprinkler system: over 300 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: F-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the sprinklered limit
+        measures:
+          egress_travel_distance: 400
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13 (903.3.1.1): 400 ft complies (at most).'
+  - given:
+      occupancy_group: F-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past the sprinklered limit
+        measures:
+          egress_travel_distance: 400.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13: over 400 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Another group's
+        measures:
+          egress_travel_distance: 10
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: F-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s F-2, S-2, U row: 300 ft without an automatic sprinkler system, 400 ft with one (note c: 903.3.1.1
+    only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s
+    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
+    a lists are general.bc_table_1017_2_note_a. Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_h1
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel distance, H-1 (BCNYS Table 1017.2)
+  applies_when: occupancy_group in ["H-1"]
+  check: sprinklered_903_3_1_1 and egress_travel_distance <= 75
+  review_when:
+  - when: egress_balcony_increase_taken and egress_travel_distance > 75 and egress_travel_distance <= 75 + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 32
+    - 32
+    quote: H-1 Not Permitted 75[fnd]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 57
+    - 57
+    quote: d. Group H occupancies equipped throughout with an automatic sprinkler system in accordance with Section 903.2.5.1.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  examples:
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: No sprinkler system
+        measures:
+          egress_travel_distance: 20
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Not Permitted without an automatic sprinkler system, whatever the distance.
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the sprinklered limit
+        measures:
+          egress_travel_distance: 75
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13 (903.3.1.1): 75 ft complies (at most). Note d''s 903.2.5.1 is general.bc_table_1017_2_note_d_group_h''s
+      check.'
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past the sprinklered limit
+        measures:
+          egress_travel_distance: 75.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13: over 75 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Another group's
+        measures:
+          egress_travel_distance: 10
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s H-1 row: Not Permitted without an automatic sprinkler system, 75 ft with one (note d: 903.2.5.1,
+    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with general.bc_table_1017_2_note_d_group_h
+    shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
+    person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
+    Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_h2
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel distance, H-2 (BCNYS Table 1017.2)
+  applies_when: occupancy_group in ["H-2"]
+  check: sprinklered_903_3_1_1 and egress_travel_distance <= 100
+  review_when:
+  - when: egress_balcony_increase_taken and egress_travel_distance > 100 and egress_travel_distance <= 100 + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 33
+    - 33
+    quote: H-2 Not Permitted 100[fnd]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 57
+    - 57
+    quote: d. Group H occupancies equipped throughout with an automatic sprinkler system in accordance with Section 903.2.5.1.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  examples:
+  - given:
+      occupancy_group: H-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: No sprinkler system
+        measures:
+          egress_travel_distance: 20
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Not Permitted without an automatic sprinkler system, whatever the distance.
+  - given:
+      occupancy_group: H-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the sprinklered limit
+        measures:
+          egress_travel_distance: 100
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13 (903.3.1.1): 100 ft complies (at most). Note d''s 903.2.5.1 is general.bc_table_1017_2_note_d_group_h''s
+      check.'
+  - given:
+      occupancy_group: H-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past the sprinklered limit
+        measures:
+          egress_travel_distance: 100.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13: over 100 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Another group's
+        measures:
+          egress_travel_distance: 10
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: H-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s H-2 row: Not Permitted without an automatic sprinkler system, 100 ft with one (note d: 903.2.5.1,
+    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with general.bc_table_1017_2_note_d_group_h
+    shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
+    person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
+    Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_h3
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel distance, H-3 (BCNYS Table 1017.2)
+  applies_when: occupancy_group in ["H-3"]
+  check: sprinklered_903_3_1_1 and egress_travel_distance <= 150
+  review_when:
+  - when: egress_balcony_increase_taken and egress_travel_distance > 150 and egress_travel_distance <= 150 + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 34
+    - 34
+    quote: H-3 Not Permitted 150[fnd]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 57
+    - 57
+    quote: d. Group H occupancies equipped throughout with an automatic sprinkler system in accordance with Section 903.2.5.1.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  examples:
+  - given:
+      occupancy_group: H-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: No sprinkler system
+        measures:
+          egress_travel_distance: 20
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Not Permitted without an automatic sprinkler system, whatever the distance.
+  - given:
+      occupancy_group: H-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the sprinklered limit
+        measures:
+          egress_travel_distance: 150
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13 (903.3.1.1): 150 ft complies (at most). Note d''s 903.2.5.1 is general.bc_table_1017_2_note_d_group_h''s
+      check.'
+  - given:
+      occupancy_group: H-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past the sprinklered limit
+        measures:
+          egress_travel_distance: 150.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13: over 150 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Another group's
+        measures:
+          egress_travel_distance: 10
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: H-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s H-3 row: Not Permitted without an automatic sprinkler system, 150 ft with one (note d: 903.2.5.1,
+    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with general.bc_table_1017_2_note_d_group_h
+    shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
+    person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
+    Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_h4
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel distance, H-4 (BCNYS Table 1017.2)
+  applies_when: occupancy_group in ["H-4"]
+  check: sprinklered_903_3_1_1 and egress_travel_distance <= 175
+  review_when:
+  - when: egress_balcony_increase_taken and egress_travel_distance > 175 and egress_travel_distance <= 175 + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 35
+    - 35
+    quote: H-4 Not Permitted 175[fnd]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 57
+    - 57
+    quote: d. Group H occupancies equipped throughout with an automatic sprinkler system in accordance with Section 903.2.5.1.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  examples:
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: No sprinkler system
+        measures:
+          egress_travel_distance: 20
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Not Permitted without an automatic sprinkler system, whatever the distance.
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the sprinklered limit
+        measures:
+          egress_travel_distance: 175
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13 (903.3.1.1): 175 ft complies (at most). Note d''s 903.2.5.1 is general.bc_table_1017_2_note_d_group_h''s
+      check.'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past the sprinklered limit
+        measures:
+          egress_travel_distance: 175.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13: over 175 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Another group's
+        measures:
+          egress_travel_distance: 10
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s H-4 row: Not Permitted without an automatic sprinkler system, 175 ft with one (note d: 903.2.5.1,
+    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with general.bc_table_1017_2_note_d_group_h
+    shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
+    person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
+    Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_h5
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel distance, H-5 (BCNYS Table 1017.2)
+  applies_when: occupancy_group in ["H-5"]
+  check: sprinklered_903_3_1_1 and egress_travel_distance <= 200
+  review_when:
+  - when: egress_balcony_increase_taken and egress_travel_distance > 200 and egress_travel_distance <= 200 + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+  - when: sprinklered_903_3_1_1 and egress_travel_distance > 200 and egress_travel_distance <= 300
+    reason: 'Over 200 ft in Group H-5 with NFPA 13, within 1017.2.3''s 300 ft for fabrication areas, whose conditions aren''t
+      measured: a person''s check (general.bc_1017_2_3_h5_increase).'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 36
+    - 36
+    quote: H-5 Not Permitted 200[fnc]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 56
+    - 56
+    quote: c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  - file: gov.ny.building.2025.pdf
+    page: 342
+    lines:
+    - 10
+    - 11
+    quote: '1017.2.3 Group H-5 increase. The maximum exit access travel distance shall be 300 feet (91 m) in the fabrication
+      areas of Group H-5 occupancies where all of the following conditions are met:'
+  examples:
+  - given:
+      occupancy_group: H-5
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: No sprinkler system
+        measures:
+          egress_travel_distance: 20
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Not Permitted without an automatic sprinkler system, whatever the distance.
+  - given:
+      occupancy_group: H-5
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the sprinklered limit
+        measures:
+          egress_travel_distance: 200
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13 (903.3.1.1): 200 ft complies (at most).'
+  - given:
+      occupancy_group: H-5
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past the sprinklered limit
+        measures:
+          egress_travel_distance: 300.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13: over 200 ft and past 1017.2.3''s 300 ft for fabrication areas too.'
+  - given:
+      occupancy_group: H-5
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+    parts:
+      story:
+      - id: p1
+        name: Fabrication area, long run
+        measures:
+          egress_travel_distance: 250
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Over 200 ft, within 1017.2.3''s 300 ft for fabrication areas: its conditions are a person''s check.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Another group's
+        measures:
+          egress_travel_distance: 10
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: H-5
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s H-5 row: Not Permitted without an automatic sprinkler system, 200 ft with one (note c: 903.3.1.1
+    only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s
+    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
+    a lists are general.bc_table_1017_2_note_a. Over 200 ft, 1017.2.3''s 300 ft for fabrication areas is a person''s check.
+    Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_i2_i3
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel distance, I-2, I-3 (BCNYS Table 1017.2)
+  applies_when: occupancy_group in ["I-2", "I-3"]
+  check: sprinklered_903_3_1_1 and egress_travel_distance <= 200
+  review_when:
+  - when: egress_balcony_increase_taken and egress_travel_distance > 200 and egress_travel_distance <= 200 + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 37
+    - 37
+    quote: I-2, I-3 Not Permitted 200[fnc]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 56
+    - 56
+    quote: c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 42
+    - 43
+    quote: 'Section 407.4: For the distance limitation in Group I-2. Sections 408.6.1 and 408.8.1: For the distance limitations
+      in Group I-3.'
+  examples:
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: No sprinkler system
+        measures:
+          egress_travel_distance: 20
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Not Permitted without an automatic sprinkler system, whatever the distance.
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: At the sprinklered limit
+        measures:
+          egress_travel_distance: 200
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13 (903.3.1.1): 200 ft complies (at most).'
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+    parts:
+      story:
+      - id: p1
+        name: Just past the sprinklered limit
+        measures:
+          egress_travel_distance: 200.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'NFPA 13: over 200 ft (no balcony increase taken, stated).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Another group's
+        measures:
+          egress_travel_distance: 10
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s I-2, I-3 row: Not Permitted without an automatic sprinkler system, 200 ft with one (note c: 903.3.1.1
+    only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s
+    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
+    a lists are general.bc_table_1017_2_note_a. Note a''s 407.4 (I-2) and 408.6.1, 408.8.1 (I-3) change travel further and
+    aren''t brought in: general.bc_table_1017_2_note_a shows for a person to check them. Hand-drafted in a Claude Code session
+    (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_note_a
+  kind: flag
+  topic: means_of_egress
+  title: 'Table 1017.2 note a: sections that change the distance (BCNYS)'
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 40
+    - 53
+    quote: 'a. See the following sections for modifications to exit access travel distance requirements: Section 402.8: For
+      the distance limitation in malls. Section 407.4: For the distance limitation in Group I-2. Sections 408.6.1 and 408.8.1:
+      For the distance limitations in Group I-3. Section 411.2: For the distance limitation in special amusement areas. Section
+      412.6: For the distance limitations in aircraft manufacturing facilities. Section 1006.2.2.2: For the distance limitation
+      in refrigeration machinery rooms. Section 1006.2.2.3: For the distance limitation in refrigerated rooms and spaces.
+      Section 1006.3.4: For buildings with one exit. Section 1017.2.2: For increased distance limitation in Groups F-1 and
+      S-1. Section 1017.2.3: For increased distance limitation in Group H-5. Section 1030.7: For increased limitation in assembly
+      seating. Section 3103.4: For temporary structures. Section 3104.9: For pedestrian walkways.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft
+      manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure
+      or a pedestrian walkway: each has its own distance (note a), not brought in.'
+  notes: 'Note a''s sections change Table 1017.2''s distances for particular spaces the model doesn''t mark (some shorter:
+    refrigeration machinery rooms and refrigerated rooms within 150 ft where not sprinklered, 1006.2.2.2 and 1006.2.2.3),
+    so the rows'' rules may pass a building that holds one: this flag always shows. 1006.3.4 (one exit), 1017.2.2 (F-1, S-1)
+    and 1017.2.3 (H-5) are this rulebook''s own rules and flags. Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_note_d_group_h
+  kind: flag
+  topic: means_of_egress
+  title: Group H's sprinkler system, Tables 1017.2 note d and 1006.2.1 note b (BCNYS)
+  applies_when: occupancy_group in ["H-1", "H-2", "H-3", "H-4", "H-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 57
+    - 57
+    quote: d. Group H occupancies equipped throughout with an automatic sprinkler system in accordance with Section 903.2.5.1.
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 38
+    - 38
+    quote: b.Group H occupancies equipped throughout with an automatic sprinkler system in accordance with Section 903.2.5.
+  examples:
+  - given:
+      occupancy_group: H-2
+    expect: needs_review
+    note: 'Group H: the sprinklered columns ask for a system per 903.2.5 and 903.2.5.1 (Group H''s own requirement, not brought
+      in); the rows read the stated NFPA 13 system as one, a person confirms it.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Not Group H: not applicable.'
+  notes: Group H's rows of Tables 1017.2 (note d) and 1006.2.1 (note b) give their sprinklered values to a system per 903.2.5.1
+    and 903.2.5 (not brought in); 903.3.1 has every system follow 903.3.1.1 unless another section permits otherwise, so the
+    rows read the stated NFPA 13 system (sprinklered_903_3_1_1) as one, and this flag shows for a person to confirm. Hand-drafted
+    in a Claude Code session (2026-11-23).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1017_2_1_balcony_increase
@@ -1915,7 +6471,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Groups F-1 and S-1 increase to 400 ft (BCNYS 1017.2.2)
-  applies_when: other_occupancy_present
+  applies_when: occupancy_group in ["F-1", "S-1", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 342
@@ -1926,22 +6482,31 @@ rules:
       F-1 or S-1 occupancies where all of the following conditions are met:'
   examples:
   - given:
-      other_occupancy_present: true
+      occupancy_group: F-1
     expect: needs_review
-    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
-      only, so the rows and allowances for other groups need a person.'
+    note: 'The increase''s group: its conditions (not measured) are a person''s check.'
   - given:
-      other_occupancy_present: false
+      occupancy_group: mixed
+    expect: needs_review
+    note: 'A building of two or more groups (occupancy_group: mixed): 1004.4 applies the means of egress requirements to each
+      portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy
+      isn''t marked yet, so a person checks. The increase''s own conditions are a person''s check too.'
+  - given:
+      occupancy_group: R-2
     expect: not_applicable
-    note: 'The architect states it doesn''t apply: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-21).
+    note: 'One group, whose rows are drafted (or not this increase''s group): not applicable.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-21). Narrowed 2026-11-23 to a building of two or more groups or the
+    increase''s own group: the rows for one group are rules (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1017_2_3_h5_increase
   kind: flag
   topic: means_of_egress
   title: Group H-5 increase to 300 ft (BCNYS 1017.2.3)
-  applies_when: other_occupancy_present
+  applies_when: occupancy_group in ["H-5", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 342
@@ -1952,15 +6517,24 @@ rules:
       areas of Group H-5 occupancies where all of the following conditions are met:'
   examples:
   - given:
-      other_occupancy_present: true
+      occupancy_group: H-5
     expect: needs_review
-    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
-      only, so the rows and allowances for other groups need a person.'
+    note: 'The increase''s group: its conditions (not measured) are a person''s check.'
   - given:
-      other_occupancy_present: false
+      occupancy_group: mixed
+    expect: needs_review
+    note: 'A building of two or more groups (occupancy_group: mixed): 1004.4 applies the means of egress requirements to each
+      portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy
+      isn''t marked yet, so a person checks. The increase''s own conditions are a person''s check too.'
+  - given:
+      occupancy_group: R-2
     expect: not_applicable
-    note: 'The architect states it doesn''t apply: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-21).
+    note: 'One group, whose rows are drafted (or not this increase''s group): not applicable.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-21). Narrowed 2026-11-23 to a building of two or more groups or the
+    increase''s own group: the rows for one group are rules (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1017_3_2_3_atrium
@@ -2081,8 +6655,8 @@ rules:
 - id: general.bc_1020_5_other_occupancies
   kind: flag
   topic: means_of_egress
-  title: Dead ends in other occupancies (BCNYS 1020.5)
-  applies_when: other_occupancy_present
+  title: Dead ends in a building of two or more groups (BCNYS 1020.5)
+  applies_when: occupancy_group == "mixed"
   sources:
   - file: gov.ny.building.2025.pdf
     page: 344
@@ -2102,15 +6676,247 @@ rules:
       treat- ment spaces shall not exceed 30 feet (9144 mm).
   examples:
   - given:
-      other_occupancy_present: true
+      occupancy_group: mixed
     expect: needs_review
-    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
-      only, so the rows and allowances for other groups need a person. Exceptions 1, 2 and 4 (50 ft, 50 ft sprinklered, 30
-      ft) are for them.'
+    note: 'A building of two or more groups (occupancy_group: mixed): 1004.4 applies the means of egress requirements to each
+      portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy
+      isn''t marked yet, so a person checks.'
   - given:
-      other_occupancy_present: false
+      occupancy_group: R-2
     expect: not_applicable
-    note: 'The architect states it doesn''t apply: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-21).
+    note: 'One group, whose rows are drafted (or not this increase''s group): not applicable.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-21). Narrowed 2026-11-23 to a building of two or more groups: the
+    rows for one group are rules (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1020_5_dead_end_other_groups
+  kind: rule
+  topic: means_of_egress
+  title: Dead ends, every group but I-4 (BCNYS 1020.5)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2", "H-3", "H-4",
+    "H-5", "I-1", "I-2", "I-3", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"]
+  check: corridor_dead_end_length <= (50 if occupancy_group in ["B", "E", "F-1", "F-2", "I-1", "M", "R-1", "R-2", "S-1", "S-2",
+    "U"] and sprinklered_903_3_1_1 else 20) or corridor_dead_end_length < 2.5 * corridor_dead_end_least_width
+  review_when:
+  - when: occupancy_group == "I-3" and corridor_dead_end_length > 20 and corridor_dead_end_length <= 50 and corridor_dead_end_length
+      >= 2.5 * corridor_dead_end_least_width
+    reason: 'Group I-3: within exception 1''s 50 ft, which applies in Conditions 2, 3 and 4 (the condition isn''t stated):
+      a person checks.'
+  - when: occupancy_group == "I-2" and corridor_dead_end_length > 20 and corridor_dead_end_length <= 30 and corridor_dead_end_length
+      >= 2.5 * corridor_dead_end_least_width
+    reason: 'Group I-2: within exception 4''s 30 ft for Condition 2 corridors that don''t serve patient rooms or treatment
+      spaces (not stated): a person checks.'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 37
+    - 38
+    quote: 1020.5 Dead ends. Where more than one exit or exit access doorway is required, the exit access shall be arranged
+      such that dead-end corridors do not exceed 20 feet (6096 mm) in length.
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 40
+    - 43
+    quote: 1. In Group I-3, Condition 2, 3 or 4, occupancies, the dead end in a corridor shall not exceed 50 feet (15 240
+      mm). 2. In occupancies in Groups B, E, F, I-1, M, R-1, R-2, S and U, where the building is equipped throughout with
+      an automatic sprinkler system in accordance with Section 903.3.1.1, the length of the dead-end corridors shall not exceed
+      50 feet (15 240 mm).
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 44
+    - 45
+    quote: 3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5
+      times the least width of the dead-end corridor.
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 46
+    - 47
+    quote: 4. In Group I-2, Condition 2 occupancies, the length of dead-end corridors that do not serve patient rooms or patient
+      treat- ment spaces shall not exceed 30 feet (9144 mm).
+  examples:
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor, NFPA 13, at 50 ft
+        measures:
+          corridor_dead_end_length: 50
+          corridor_dead_end_least_width: 6
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Exception 2: Group B, NFPA 13 (903.3.1.1): 50 ft at most.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Just past 50 ft
+        measures:
+          corridor_dead_end_length: 50.5
+          corridor_dead_end_least_width: 6
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Over 50 ft, and not under 2.5 x 6 = 15 ft.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Apartment corridor, no sprinkler system
+        measures:
+          corridor_dead_end_length: 20
+          corridor_dead_end_least_width: 5
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'No sprinkler system: 20 ft at most.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Just past 20 ft
+        measures:
+          corridor_dead_end_length: 20.5
+          corridor_dead_end_least_width: 5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'No sprinkler system: over 20 ft and not under 12.5 ft.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Short and wide
+        measures:
+          corridor_dead_end_length: 24
+          corridor_dead_end_least_width: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Exception 3: under 2.5 x 10 = 25 ft.'
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Hall corridor, NFPA 13
+        measures:
+          corridor_dead_end_length: 30
+          corridor_dead_end_least_width: 6
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group A is not in exception 2: 20 ft even with NFPA 13.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    parts:
+      corridor:
+      - id: p1
+        name: NFPA 13R only
+        measures:
+          corridor_dead_end_length: 30
+          corridor_dead_end_least_width: 6
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Exception 2 asks for 903.3.1.1 (NFPA 13): a 13R system keeps 20 ft.'
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Detention corridor
+        measures:
+          corridor_dead_end_length: 40
+          corridor_dead_end_least_width: 6
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group I-3: exception 1''s 50 ft applies in Conditions 2, 3 and 4 (the condition is a person''s check).'
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Hospital service corridor
+        measures:
+          corridor_dead_end_length: 28
+          corridor_dead_end_least_width: 6
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group I-2: exception 4''s 30 ft for Condition 2 corridors not serving patient rooms is a person''s check.'
+  - given:
+      occupancy_group: I-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Day care corridor
+        measures:
+          corridor_dead_end_length: 30
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group I-4 is not in this row (a mixed building is general''s flag): not applicable.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: the rule''s when_none (not_applicable).'
+  notes: '1020.5 and its exceptions for every group but I-4 (general.bc_1020_5_dead_end): 20 ft; 50 ft in Groups B, E, F,
+    I-1, M, R-1, R-2, S and U with an NFPA 13 system (903.3.1.1: exception 2; a 13R system does not meet it); any length under
+    2.5 times the least width (exception 3). Exceptions 1 (Group I-3, Conditions 2 to 4: 50 ft) and 4 (Group I-2, Condition
+    2, corridors not serving patient rooms or treatment spaces: 30 ft) turn on a condition the architect doesn''t state yet,
+    so within them it needs review, never a pass. As the I-4 rule: it applies where more than one exit or exit access doorway
+    is required, and with one there is no limit, so it may only be stricter there. Hand-drafted in a Claude Code session (2026-11-23).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

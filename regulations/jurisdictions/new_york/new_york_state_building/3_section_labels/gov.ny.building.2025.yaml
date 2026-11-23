@@ -2039,8 +2039,9 @@ labels:
   Table 1006.2.1:
     label: rule
     topic: means_of_egress
-    reason: 'The values 1006.2.1 uses: for Group I-4 a space with one exit may have at most 10 occupants and a common path
-      of at most 75 feet, only in a building sprinklered throughout (903.3.1.1 or 903.3.1.2); not permitted without.'
+    reason: 'The values 1006.2.1 uses, row by row: the most occupants and the longest common path a space with one exit may
+      have in each group, without an automatic sprinkler system (by occupant load up to 30 and over 30, or not permitted)
+      and with one (note a: 903.3.1.1 or 903.3.1.2; note b: Group H''s 903.2.5).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 315
@@ -2052,8 +2053,9 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Read by position (each cell''s
       characters and their x positions) and on the page image: the I-4 row is I-1, I-2 (note d), I-4 | 10 | NP | NP | 75 (note
       a). The text runs each raised note letter into its cell (''75a''); sources.yaml brought_in.misread puts each right by
-      line. Gordium''s rules are drafted for Group I-4 (day care) first; the table''s other rows have a flag of their own
-      (a section''s rule checks only its own row).'
+      line. Every row has a rule of its own since 2026-11-23 (general.bc_table_1006_2_1_<groups>; the I-4 row''s is general.bc_1006_2_1_two_exits),
+      read by the building''s one occupancy group; a building of two or more groups is general.bc_table_1006_2_1_other_occupancies''s
+      flag.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1006.2.1.1:
@@ -2378,8 +2380,8 @@ labels:
   Table 1017.2:
     label: rule
     topic: means_of_egress
-    reason: 'The values 1017.2 uses: Group I-4 150 feet without an automatic sprinkler system, 200 feet with one per 903.3.1.1
-      (note c).'
+    reason: 'The values 1017.2 uses, row by row: each group''s longest exit access travel distance without an automatic sprinkler
+      system (or not permitted) and with one (note b: 903.3.1.1 or 903.3.1.2; note c: 903.3.1.1 only; note d: Group H''s 903.2.5.1).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 341
@@ -2392,8 +2394,10 @@ labels:
       characters and their x positions) and on the page image: I-4 | 150 | 200 (note c: 903.3.1.1 only). The text runs each
       raised note letter into its cell (''200c''); sources.yaml brought_in.misread puts each right by line. Note a lists other
       sections that modify the distance (malls, I-2, I-3, one-exit buildings 1006.3.4, 1017.2.2, 1017.2.3...), none brought
-      in but 1017.2.2 and 1017.2.3. Gordium''s rules are drafted for Group I-4 (day care) first; the table''s other rows have
-      a flag of their own (a section''s rule checks only its own row).'
+      in but 1017.2.2 and 1017.2.3. Every row has a rule of its own since 2026-11-23 (general.bc_table_1017_2_<groups>; the
+      I-4 row''s is general.bc_1017_2_travel_distance), read by the building''s one occupancy group; note a''s sections are
+      general.bc_table_1017_2_note_a''s flag, Group H''s system general.bc_table_1017_2_note_d_group_h''s, a building of two
+      or more groups general.bc_table_1017_2_other_occupancies''s.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1017.2.1:
@@ -2573,7 +2577,8 @@ labels:
       quote: 3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than
         2.5 times the least width of the dead-end corridor.
     piece_sha256: 3a8020bc52c9e2bd47f823c3c37f59c86f78c5c113ec84325a82e8dacdf2d3cc
-    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Exceptions 1 (I-3) and 4 (I-2)
-      are for other groups.
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Every group but I-4 is general.bc_1020_5_dead_end_other_groups
+      (2026-11-23); within exceptions 1 (I-3, Conditions 2 to 4) and 4 (I-2, Condition 2), whose conditions aren't stated,
+      it needs review.
     drafted_by: claude_code/claude-opus-5-5
     status: draft

@@ -60,6 +60,18 @@ pieces:
     heading: Spaces with one exit or exit access doorway
     rules:
     - general.bc_table_1006_2_1_other_occupancies
+    - general.bc_table_1006_2_1_a_e_m
+    - general.bc_table_1006_2_1_b
+    - general.bc_table_1006_2_1_f
+    - general.bc_table_1006_2_1_h1_h2_h3
+    - general.bc_table_1006_2_1_h4_h5
+    - general.bc_table_1006_2_1_i1_i2
+    - general.bc_table_1006_2_1_i3
+    - general.bc_table_1006_2_1_r1
+    - general.bc_table_1006_2_1_r2
+    - general.bc_table_1006_2_1_r3_r4
+    - general.bc_table_1006_2_1_s
+    - general.bc_table_1006_2_1_u
   1006.2.1.1:
     label: rule
     heading: Egress based on occupant load and common path of egress travel distance › Three or more exits or exit access
@@ -124,6 +136,18 @@ pieces:
     heading: Exit access travel distance
     rules:
     - general.bc_table_1017_2_other_occupancies
+    - general.bc_table_1017_2_a_e_f1_m_r_s1
+    - general.bc_table_1017_2_i1
+    - general.bc_table_1017_2_b
+    - general.bc_table_1017_2_f2_s2_u
+    - general.bc_table_1017_2_h1
+    - general.bc_table_1017_2_h2
+    - general.bc_table_1017_2_h3
+    - general.bc_table_1017_2_h4
+    - general.bc_table_1017_2_h5
+    - general.bc_table_1017_2_i2_i3
+    - general.bc_table_1017_2_note_a
+    - general.bc_table_1017_2_note_d_group_h
   1017.2.1:
     label: flag
     heading: Limitations › Exterior egress balcony increase
@@ -150,4 +174,5 @@ pieces:
     rules:
     - general.bc_1020_5_dead_end
     - general.bc_1020_5_other_occupancies
+    - general.bc_1020_5_dead_end_other_groups
 not_checked_yet: []
