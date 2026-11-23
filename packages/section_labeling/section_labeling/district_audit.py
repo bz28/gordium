@@ -1,7 +1,8 @@
 """The district coverage audit: is each district's zoning covered?
 
-One generated table (`6_coverage_report/residential_districts.md`) answers it for every piece of the law labeled
-`rule` or `flag` (3_section_labels) and every district a jurisdiction's audit lists. Each cell says one of:
+One generated table per family of districts (`6_coverage_report/residential_districts.md`, and
+`commercial_districts.md` for the B districts) answers it for every piece of the law labeled `rule` or `flag`
+(3_section_labels) and every district that family's decisions file lists (AUDITS). Each cell says one of:
 
     rulebook        the district's rulebook has a rule for it (which rule ids)
     flag            the district's rulebook flags it, so the architect sees NEEDS REVIEW (which ids)
@@ -12,7 +13,7 @@ One generated table (`6_coverage_report/residential_districts.md`) answers it fo
     missing         nothing covers it (why, how important, and whether every result already says so)
 
 What a person decides (why a piece doesn't apply, what is parked, what is missing) is written once, by hand, in
-`<jurisdiction>/residential_coverage.yaml`. Code checks what the files can show, and shows the rest for a person:
+`<jurisdiction>/residential_coverage.yaml` (and `commercial_coverage.yaml`). Code checks what the files can show, and shows the rest for a person:
 
 - a rule named as covering a piece must exist in that district's rulebook, be of the right kind (`rulebook`: a
   rule; `flag`: a flag, or a rule that sends some cases to review), and cite the piece (a source or a finding's
@@ -50,6 +51,10 @@ from rule_format.rulebook import REPO, Context, district_name, load, locate, rea
 
 DECISIONS = "residential_coverage.yaml"
 OUTPUT = "6_coverage_report/residential_districts.md"
+# Each family of districts audited: (its decisions file in the jurisdiction, the table it makes, its name in the
+# table's words). A jurisdiction is audited for each family whose decisions file it has.
+AUDITS = [(DECISIONS, OUTPUT, "residential"),
+          ("commercial_coverage.yaml", "6_coverage_report/commercial_districts.md", "commercial")]
 STATUSES = ("missing", "open_question", "parked", "flag", "rulebook", "not_applicable")    # worst first
 WORDS = {"missing": "MISSING", "open_question": "open question", "parked": "parked", "flag": "flag (needs review)",
          "rulebook": "in the rulebook", "not_applicable": "not applicable"}
@@ -165,14 +170,17 @@ def measure_sources() -> tuple[set, set]:
 class Audit:
     """Every decision resolved and checked, for one jurisdiction."""
 
-    def __init__(self, j: Path, data: dict | None = None, books: dict[str, Path] | None = None):
-        """`data`: the decisions (default: the jurisdiction's file); `books`: a rulebook file per district in
-        place of rulebook_for's (tests change one without touching the repository)."""
+    def __init__(self, j: Path, data: dict | None = None, books: dict[str, Path] | None = None,
+                 decisions: str = DECISIONS):
+        """`data`: the decisions (default: the jurisdiction's file `decisions`, one of AUDITS'); `books`: a rulebook
+        file per district in place of rulebook_for's (tests change one without touching the repository)."""
         self.j = j
+        self.decisions = decisions
+        self.family = next((f for name, _, f in AUDITS if name == decisions), "residential")
         self.law, self.chart = place(j).law_file("zoning_code"), place(j).law_file("zoning_chart")   # their file names
         self.problems: list[str] = []
         self.header, self.pieces, self.labels = _law_rows(j)
-        self.data = (load(j / DECISIONS) or {}) if data is None else data
+        self.data = (load(j / decisions) or {}) if data is None else data
         self.districts: list[str] = list(self.data.get("districts") or [])
         self.parked: dict = dict(self.data.get("parked") or {})
         self.furniture = {tuple(k) for k in self.header.get("furniture", [])}
@@ -198,7 +206,7 @@ class Audit:
     # -- reading and checking the decisions ------------------------------------------------------------------
 
     def _resolve(self):
-        self.problems += [f"{DECISIONS}: unknown key {k!r} (reused decisions start with _)" for k in self.data
+        self.problems += [f"{self.decisions}: unknown key {k!r} (reused decisions start with _)" for k in self.data
                           if k not in ("districts", "parked", "pieces") and not str(k).startswith("_")]
         self.problems += [f"parked {k}: needs `name` and `decided`" for k, v in self.parked.items()
                           if not (isinstance(v, dict) and v.get("name") and v.get("decided"))]
@@ -560,13 +568,13 @@ class Audit:
         every = lambda ok: len(everywhere(ok))
         anywhere = sum(1 for pid in self.rows if any(self.status(pid, d) == "missing" for d in ds))
         cells_by = {d: Counter(m["priority"] for m in missing for _ in m["pieces"] if d in m["districts"]) for d in ds}
-        out = ["# Residential coverage: is each district's zoning covered?", "",
+        out = [f"# {self.family.capitalize()} coverage: is each district's zoning covered?", "",
                "Generated by `python -m section_labeling audit` from the rulebooks (5_zoning_rules), the section labels, "
-               f"the term definitions, model_measurement and test_data, with the decisions in `{DECISIONS}`. Never "
+               f"the term definitions, model_measurement and test_data, with the decisions in `{self.decisions}`. Never "
                "hand-edit; CI fails if it is out of date.", "",
                "## Summary", "",
                f"Every piece of Chapter 325 labeled **rule** ({labels['rule']}) or **flag** ({labels['flag']}), "
-               f"{n} pieces, against each of the {len(ds)} residential districts ({', '.join(ds)}): {n * len(ds)} "
+               f"{n} pieces, against each of the {len(ds)} {self.family} districts ({', '.join(ds)}): {n * len(ds)} "
                "cells.", "",
                f"**In short.** {every({'rulebook', 'flag'})} pieces are in every district's rulebook (or flagged for "
                f"review): {', '.join('§' + p + (' (mapped)' if any(self.mapped_only(p, d) for d in ds) else '') for p in everywhere({'rulebook', 'flag'}))}; "
@@ -707,5 +715,11 @@ def build(j: Path, **kw) -> tuple[str | None, list[str]]:
 
 
 def places() -> list[Path]:
-    """Every jurisdiction with an audit decisions file."""
+    """Every jurisdiction with a residential audit decisions file."""
     return sorted(p.parent for p in (REPO / "regulations/jurisdictions").rglob(DECISIONS))
+
+
+def audits() -> list[tuple[Path, str, str]]:
+    """(jurisdiction, decisions file, table) for every family of districts any jurisdiction audits (AUDITS)."""
+    return sorted((p.parent, name, output) for name, output, _ in AUDITS
+                  for p in (REPO / "regulations/jurisdictions").rglob(name))

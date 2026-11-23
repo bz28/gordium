@@ -9,7 +9,8 @@
     python -m section_labeling label --limit N      # label the next N unlabeled pieces (or --all);
                                                     # prints the estimate, then needs --yes to spend money
     python -m section_labeling cost                 # what the recorded runs actually cost
-    python -m section_labeling audit [--check]      # write (or check) 6_coverage_report/residential_districts.md:
+    python -m section_labeling audit [--check]      # write (or check) 6_coverage_report/residential_districts.md
+                                                    # and commercial_districts.md:
                                                     # every rule and flag piece x district; no AI
 
 The model and its settings come from section_labeling/settings.yaml (one place; recorded in every run).
@@ -135,16 +136,16 @@ def cmd_audit(args) -> int:
     """The district coverage audit (district_audit.py): write it, or (--check) compare with a fresh build. A decision
     the files don't back stops it, with every problem listed."""
     failed = 0
-    for j in district_audit.places():
+    for j, decisions, output in district_audit.audits():
         if args.place is not None and j.relative_to(PLACES).as_posix() != args.place:
             continue
-        text, problems = district_audit.build(j)
+        text, problems = district_audit.build(j, decisions=decisions)
         for problem in problems:
-            print(f"✗ {j.relative_to(PLACES).as_posix()}: {problem}")
+            print(f"✗ {j.relative_to(PLACES).as_posix()} ({decisions}): {problem}")
         if problems:
             failed += 1
             continue
-        failed += not _write_or_check(j / district_audit.OUTPUT, text, args.check)
+        failed += not _write_or_check(j / output, text, args.check)
     return 1 if failed else 0
 
 
