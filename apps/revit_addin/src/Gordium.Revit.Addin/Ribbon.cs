@@ -33,6 +33,7 @@ internal static class Ribbon
         [RibbonPlan.CheckProject] = typeof(CheckProjectCommand),
         [RibbonPlan.MarkFacts] = typeof(MarkForEgressCommand),        // opens the Setup form in the pane
         [RibbonPlan.Panel] = typeof(TogglePanelCommand),
+        [RibbonPlan.Summary] = typeof(SaveSummaryCommand),
         [RibbonPlan.About] = typeof(AboutCommand),
         [RibbonPlan.CheckBoxHouse] = typeof(CheckBoxHouseCommand),
         [RibbonPlan.RecordScenes] = typeof(RecordScenesCommand),

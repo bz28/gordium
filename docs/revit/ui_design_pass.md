@@ -438,3 +438,41 @@ is worse than the alternative is changed, not kept.
   `TemporaryGraphicsManager` (Revit 2022 API), `DirectContext3D` (Revit 2018 API); each to confirm on Revit 2027 in
   the Windows trial (`docs/revit/windows_trial_runbook.md`).
 - Okabe, M. and Ito, K., "Color Universal Design" (2008), for the colour-blind-safe hues.
+
+## Beyond the pane: the ribbon badge, the selection strip and the summary (changes 13 to 15)
+
+Built on `feat/revit-ui-badge-selection-summary` from the design Ben agreed on 2026-11-23 (changes 13 to 15). Each is a
+Revit-free decision in `Gordium.Revit.Reading` with its tests, and a thin Revit layer in `PaneExtras.cs` that follows
+what the pane shows (`ResultsView.Shown`). Every count, status and word is the checker's rows' as the pane places them;
+nothing is written to the model.
+
+- **13. A badge on Check project** (`RibbonBadge`, `RibbonBadgeTests`): a red count of what does not comply and an
+  amber count of what needs review (to check by hand and not checked included), drawn on the 32 px icon (one dot of
+  the worst at 16 px); a clock once the model changed, never the counts as current; a pass tick only when nothing fails
+  or needs review and the checker says the project complies; the counts in words in the tooltip. Revit takes a new
+  `PushButton.LargeImage`, `Image` and `ToolTip` at runtime; the badge is drawn again after the ribbon's own theme swap.
+- **14. Select an element, see its results** (`SelectionMap`, `SelectionResultsTests`): Revit's `SelectionChanged`
+  (2023+) in the project the pane shows lists, under the pane's header, the results that mention what is selected: a
+  result whose own elements name it, or every result of a cause card that names it as one of its rooms. Each is a link
+  to its detail (a filter, search or fold hiding it is cleared first), after which the strip folds to its title and
+  line ("List them" opens it again) so the detail has the pane; eight shown, then "Show all N"; "Show every result"
+  puts the strip away. An element no result names is said not to be a pass. The pane's own selections (a
+  result's Show) leave the strip as it is.
+- **15. A printable summary** (`ComplianceSummary`, `ComplianceSummaryTests`; the Results panel's new **Summary**
+  button): every row of the check in the checker's groups and order, with the rule, proposed, required, the result
+  (glyph and word), the checker's reason when it isn't a pass, and the law's exact words with section, page and link;
+  headed with a line saying it is not a permit and that every needs review is left to the person reading it (the
+  exact words are in `ComplianceSummary.cs`). **HTML, not PDF**: the architect's browser opens and prints it (to paper or PDF, letter size, the table's head on each page) with working links to the
+  law, needs no font embedding for ≥, ≤ and §, and the add-in takes no PDF library. It is saved where the architect
+  chooses, then opened. A stale answer is never summarised: Summary asks to check again first.
+
+Confirmed in Revit 2027 (2026-11-23, 106 Ithaca Rd and the childcare model): Check project's image and tooltip change
+at runtime (a red 1 and an amber 99+ on the house, its counts in the tooltip; the clock and "the model changed" after a
+wall was nudged); selecting a wall lists the results that name it and a link opens its detail; Summary saves the page
+and opens it in the browser, and refuses once the model changed. How we know otherwise: the tests pin that the badge never shows a pass while a row needs review, that a stale answer shows the
+clock and no count, that the selection map never drops a row (every row naming an element, every row of a card naming
+a room), and that the summary holds exactly the checker's rows, each once, with its words and no figure of its own;
+each fails when its behaviour is reverted. Differences from the agreed pictures: STORAGE (13) is mentioned by 12
+results, not 11 (its own two rows count too, one of them on the rooms card); two pills that don't fit side by side
+(a count over 99) sit at the top and bottom right; the summary covers every row, egress included, grouped as the
+checker groups them, and says the checker's headline and what was checked rather than the district and use.
