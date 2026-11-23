@@ -616,7 +616,7 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         Assert.Contains("var restored = CheckFlow.Restored(had, Had);", restore, StringComparison.Ordinal);
         Assert.Contains("switch (restored)", restore, StringComparison.Ordinal);
         Assert.Contains("Say(why ?? CheckWords.Cancelled(restored));", restore, StringComparison.Ordinal);
-        Assert.Contains("case PanelHad.Results when _content is { Model: { } model } content:\n                Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When)),", restore, StringComparison.Ordinal);
+        Assert.Contains("case PanelHad.Results when _content is { Model: { } model } content:\n                Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When), StaleReason.Cancelled),", restore, StringComparison.Ordinal);
         Assert.Contains("Failed(\"\");", restore, StringComparison.Ordinal);
         Assert.Contains("_again.Content = CheckWords.Button(stage);", view, StringComparison.Ordinal);
         Assert.Contains("internal PanelHad Had => CheckFlow.Had(_content is not null, _content?.Model is not null, _failed);", view, StringComparison.Ordinal);
