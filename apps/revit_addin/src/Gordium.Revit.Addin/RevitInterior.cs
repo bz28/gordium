@@ -684,21 +684,31 @@ internal static class RevitInterior
                     }
                     areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated, point, level.UniqueId));
                 }
-                // then each one with no Room outlined, one sub-transaction each, rolled back; the circuit taken afresh
-                // from the level's topology each time (by its place in the list, its area checked), never one held
-                // across a change
-                for (var k = 0; k < listed.Count; k++)
-                    if (!areas[before + k].HasRoom)
-                    {
-                        List<string> by;
-                        using (ReadSteps.Step("inside.enclosed_areas.outline"))
-                            areas[before + k] = areas[before + k] with { Outline = OutlineOf(doc, phase, level, k, areas[before + k].Area, out by) };
-                        // an area Revit gives no point in (a sliver) is located by what bounds it, for the log
-                        if (areas[before + k].PointInside is null)
-                            diagnostics.Add($"enclosed area {k} on {level.Name} ({areas[before + k].Area:0.####} sq ft, no point inside): " +
-                                            (by.Count > 0 ? "bounded by " + string.Join(", ", by) : "Revit gave no boundary for a Room in it") +
-                                            (areas[before + k].Outline is { } o ? "; outline " + string.Join(" ", o.Select(q => $"({q.X:0.####},{q.Y:0.####})")) : ""));
-                    }
+                // then each one with no Room outlined: all of the level's at once (a Room placed in each, one
+                // regeneration, rolled back: Snowdon Towers spent 10.8 of its 11.3 s of outlines regenerating once per
+                // Room), else, when Revit refuses any of it, one sub-transaction each as before; the circuit taken
+                // afresh from the level's topology each time (by its place in the list, its area checked), never one
+                // held across a change
+                var wanted = Enumerable.Range(0, listed.Count).Where(k => !areas[before + k].HasRoom).ToList();
+                var together = wanted.Count == 0 ? null
+                    : ReadSteps.Time("inside.enclosed_areas.outlines_together",
+                                     () => OutlinesTogether(doc, phase, level, wanted.Select(k => (k, areas[before + k].Area)).ToList()));
+                if (wanted.Count > 0)
+                    ReadSteps.Count(together is null ? "inside.enclosed_areas.levels_one_by_one" : "inside.enclosed_areas.levels_together");
+                foreach (var k in wanted)
+                {
+                    List<string> by;
+                    using (ReadSteps.Step("inside.enclosed_areas.outline"))
+                        areas[before + k] = areas[before + k] with
+                        {
+                            Outline = together is not null ? Outlined(together[k], out by) : OutlineOf(doc, phase, level, k, areas[before + k].Area, out by),
+                        };
+                    // an area Revit gives no point in (a sliver) is located by what bounds it, for the log
+                    if (areas[before + k].PointInside is null)
+                        diagnostics.Add($"enclosed area {k} on {level.Name} ({areas[before + k].Area:0.####} sq ft, no point inside): " +
+                                        (by.Count > 0 ? "bounded by " + string.Join(", ", by) : "Revit gave no boundary for a Room in it") +
+                                        (areas[before + k].Outline is { } o ? "; outline " + string.Join(" ", o.Select(q => $"({q.X:0.####},{q.Y:0.####})")) : ""));
+                }
                 diagnostics.Add($"enclosed areas on {level.Name}: {areas.Count - before} " +
                                 $"({areas.Skip(before).Count(a => !a.HasRoom)} with no Room: " +
                                 string.Join(", ", areas.Skip(before).Where(a => !a.HasRoom)
@@ -717,6 +727,92 @@ internal static class RevitInterior
                 t.Dispose();
             }
         }
+    }
+
+    private static List<Xyz>? Outlined((List<Xyz>? Outline, List<string> By) one, out List<string> by)
+    {
+        by = one.By;
+        return one.Outline;
+    }
+
+    /// <summary>Each of the level's enclosed areas <paramref name="wanted"/> (its place in the level's circuits and its
+    /// area) outlined as <see cref="OutlineOf"/> does, all in one <c>SubTransaction</c> always rolled back: every
+    /// circuit checked against the topology before anything changes, a Room placed in each that passes, one
+    /// regeneration, then each Room's boundary read. A Room never bounds another, so each outline is the one its Room
+    /// alone gives. A circuit Revit refuses a Room in gets no outline, as alone. Null when the document can't be
+    /// changed for the moment or Revit refuses anything else: then each is outlined alone (<see cref="OutlineOf"/>),
+    /// as before.</summary>
+    private static Dictionary<int, (List<Xyz>? Outline, List<string> By)>? OutlinesTogether(Document doc, Phase phase, Level level,
+                                                                                         List<(int Index, double Area)> wanted)
+    {
+        if (!doc.IsModifiable)
+            return null;
+        var result = new Dictionary<int, (List<Xyz>? Outline, List<string> By)>();
+        using var st = new SubTransaction(doc);
+        try
+        {
+            var fresh = doc.get_PlanTopology(level, phase)?.Circuits?.Cast<PlanCircuit>().ToList();
+            // every check first, on the topology as it is (each OutlineOf checks it with no Room of its own placed)
+            var place = new List<(int Index, PlanCircuit Circuit)>();
+            foreach (var (index, area) in wanted)
+            {
+                if (fresh is null || index >= fresh.Count || Math.Abs(fresh[index].Area - area) > 1e-9 || fresh[index].IsRoomLocated)
+                    result[index] = (null, []);                  // not the same circuit: never outlined on a guess
+                else
+                    place.Add((index, fresh[index]));
+            }
+            if (place.Count == 0)
+                return result;
+            st.Start();
+            var rooms = new List<(int Index, Room Room)>();
+            foreach (var (index, circuit) in place)
+            {
+                var room = doc.Create.NewRoom(phase);
+                try
+                {
+                    doc.Create.NewRoom(room, circuit);
+                }
+                catch (Exception x) when (x is Autodesk.Revit.Exceptions.ArgumentException or Autodesk.Revit.Exceptions.InvalidOperationException)
+                {
+                    // Revit refuses a Room in this circuit (a sliver: "could not find a point within this circuit"; a
+                    // level with no plan view: "cannot find view for the room"), as it refuses it alone: no outline,
+                    // nothing bounding it read, as OutlineOf gives; the Room left unplaced bounds nothing
+                    result[index] = (null, []);
+                    continue;
+                }
+                rooms.Add((index, room));
+            }
+            if (rooms.Count == 0)
+                return result;
+            doc.Regenerate();
+            foreach (var (index, room) in rooms)
+            {
+                var loops = room.GetBoundarySegments(new SpatialElementBoundaryOptions { SpatialElementBoundaryLocation = SpatialElementBoundaryLocation.Finish });
+                var by = (loops ?? []).SelectMany(l => l).Select(s => doc.GetElement(s.ElementId)).OfType<Element>()
+                    .Select(e => $"{e.Category?.Name} {e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? e.Id.Value.ToString(CultureInfo.InvariantCulture)}")
+                    .Distinct().ToList();
+                result[index] = loops is null || loops.Count == 0 || loops.Any(l => l.Any(s => s.GetCurve() is not Line))
+                    ? (null, by)
+                    : (loops.OrderByDescending(LoopArea).First().Select(s => P(s.GetCurve().GetEndPoint(0))).ToList(), by);
+            }
+            return result;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return null;                                         // each outlined alone, as before
+        }
+        finally
+        {
+            if (st.HasStarted() && !st.HasEnded())
+                st.RollBack();
+        }
+    }
+
+    private static double LoopArea(IList<BoundarySegment> l)
+    {
+        var p = l.Select(s => s.GetCurve().GetEndPoint(0)).ToList();
+        return Math.Abs(p.Select((a, i) => a.X * p[(i + 1) % p.Count].Y - p[(i + 1) % p.Count].X * a.Y).Sum()) / 2;
     }
 
     /// <summary>An enclosed area's outline: a Room placed in it for the moment (<c>NewRoom(phase)</c>, then

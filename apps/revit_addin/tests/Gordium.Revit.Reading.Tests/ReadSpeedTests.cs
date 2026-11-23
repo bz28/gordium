@@ -82,6 +82,34 @@ public sealed class ReadSpeedTests
         Assert.Contains("corners.Max(c => c.Z) < bandMin.Z || corners.Min(c => c.Z) > bandMax.Z", source);
     }
 
+    [Fact]
+    public void A_levels_enclosed_areas_are_outlined_together_as_each_alone_would_be_else_one_by_one_as_before()
+    {
+        var source = Addin("RevitInterior.cs");
+        var together = source.IndexOf("OutlinesTogether(Document doc, Phase phase, Level level,", StringComparison.Ordinal);
+        var alone = source.IndexOf("private static List<Xyz>? OutlineOf(", StringComparison.Ordinal);
+        Assert.True(together >= 0 && alone > together);
+        var body = source[together..alone];
+        // every circuit checked against the topology as it is, before anything changes, with OutlineOf's own check
+        var check = body.IndexOf("Math.Abs(fresh[index].Area - area) > 1e-9 || fresh[index].IsRoomLocated", StringComparison.Ordinal);
+        var start = body.IndexOf("st.Start();", StringComparison.Ordinal);
+        Assert.True(check >= 0 && start > check, "the checks come before the sub-transaction starts");
+        Assert.Contains("fresh[index].Area - area) > 1e-9 || fresh[index].IsRoomLocated)\n                return null;", source[alone..]);
+        // one regeneration for the level, the boundary read as OutlineOf reads it, and always rolled back
+        Assert.Equal(1, Count(body, "doc.Regenerate();"));
+        Assert.Contains("SpatialElementBoundaryLocation = SpatialElementBoundaryLocation.Finish", body);
+        Assert.Contains("loops is null || loops.Count == 0 || loops.Any(l => l.Any(s => s.GetCurve() is not Line))", body);
+        Assert.Contains("if (st.HasStarted() && !st.HasEnded())\n                st.RollBack();", body);
+        // a circuit Revit refuses a Room in: no outline and nothing bounding it, as OutlineOf gives
+        Assert.Contains("result[index] = (null, []);\n                    continue;", body);
+        // anything else refused: each outlined alone, as before
+        Assert.Contains("return null;                                         // each outlined alone, as before", body);
+        Assert.Contains("Outline = together is not null ? Outlined(together[k], out by) : OutlineOf(doc, phase, level, k, areas[before + k].Area, out by),", source);
+        // it runs where the outlines always ran: inside the enclosed areas' own transaction, after the geometry kept
+        var close = source.IndexOf("}   // the geometry kept is let go here, before anything changes the model", StringComparison.Ordinal);
+        Assert.True(source.IndexOf("() => OutlinesTogether(doc, phase, level,", StringComparison.Ordinal) > close);
+    }
+
     private static int Count(string text, string what)
     {
         var n = 0;
