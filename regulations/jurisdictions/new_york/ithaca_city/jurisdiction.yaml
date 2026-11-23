@@ -24,7 +24,8 @@ time_zone:                            # the place's own day: the date a lookup w
                                       # (15 U.S.C. 260a); Rhino's Python has no time-zone database
 
 districts:
-  chart_column: 'R-\d[A-Z]*|RU'       # a zoning-chart column that is a district, as the chart prints it (R-1B, RU)
+  chart_column: 'R-\d[A-Z]*|RU|B-\d[A-Z]*'   # a zoning-chart column that is a district, as the chart prints it
+                                      # (R-1B, RU, B-2A); the CBD column ("Central Business") is read but isn't one yet
 
 law:                                  # the documents in 1_source_documents/ the code reads, by what they are
   zoning_code: chapter_325_zoning_2026-10.pdf
