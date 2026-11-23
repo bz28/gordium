@@ -91,8 +91,8 @@ public sealed class HouseFactFieldsTests
     [InlineData("unrelated_persons", "text", "holds a value that isn't a whole number")]
     [InlineData("private_garages", "zero", "is 0: type 1 or more")]
     [InlineData("garage_cars", "minus", "is -1: type 0 or more")]
-    [InlineData("stream_distance", "minus", "is -2.5 ft: type a distance of 0 ft or more")]
-    [InlineData("stream_distance", "text", "holds a value that isn't a length")]
+    [InlineData("stream_distance", "minus", "is -2.5 ft: type a length of 0 ft or more")]
+    [InlineData("stream_distance", "text", "holds a value that isn't a length: type a length in feet")]
     public void A_value_Gordium_cant_read_is_said_plainly_and_not_sent(string key, string how, string said)
     {
         var (mark, _, _, _) = Each.Single(e => e.Key == key);
@@ -205,6 +205,9 @@ public sealed class HouseFactFieldsTests
     [InlineData("autodesk.unit.unit:millimeters-1.0.1", "mm", "6858", "6000", 6000 / 304.8)]
     [InlineData("autodesk.unit.unit:meters-1.0.1", "m", "6.858", "15", 15 / 0.3048)]
     [InlineData("autodesk.unit.unit:inches-1.0.1", "in", "270", "240", 20.0)]
+    [InlineData("autodesk.unit.unit:meters-1.0.1", "m", "6.858", "6.096", 20.0)]          // exactly 20 ft, never 19.999999999999996
+    [InlineData("autodesk.unit.unit:millimeters-1.0.1", "mm", "6858", "6096", 20.0)]
+    [InlineData("autodesk.unit.unit:metersCentimeters-1.0.1", "m", "6.858", "6.096", 20.0)]
     public void The_forms_length_field_is_in_the_projects_units_and_saves_what_revit_shows(
         string units, string symbol, string shown, string typed, double savedFeet)
     {
@@ -216,10 +219,48 @@ public sealed class HouseFactFieldsTests
         var draft = new SetupDraft();
         draft.Choose(Marks.StreamDistance, typed);
         var w = Assert.Single(draft.Writes(blank).Writes);
-        Assert.Equal(savedFeet, w.Value.Number!.Value, 9);                 // feet, Revit's internal unit
+        Assert.Equal(savedFeet, w.Value.Number!.Value);                    // feet, Revit's internal unit, exactly
         // read back as Revit would show it: the number typed
         var again = SetupScreen.Build(InUnits(units, w.Value.Number), [], null, null).Fields.Single(f => f.Mark == Marks.StreamDistance);
         Assert.Equal(typed, again.Current);
+    }
+
+    /// <summary>Review round 3 (P1): a length that was saved short of what was typed (6.096 m as 19.999999999999996 ft,
+    /// which fails 20 ft) is written again when the same number is typed, as exactly 20 ft: what it holds is compared in
+    /// feet, never as the shown text (which rounds it to "6.096").</summary>
+    [Fact]
+    public void A_length_typed_again_over_one_saved_short_is_written_exactly()
+    {
+        const string Meters = "autodesk.unit.unit:meters-1.0.1";
+        var shortOf = 6.096 * (1 / 0.3048);                                 // the old conversion's 19.999999999999996
+        Assert.NotEqual(20.0, shortOf);
+        var fields = SetupScreen.Build(InUnits(Meters, shortOf), [], null, null).Fields;
+        Assert.Equal("6.096", fields.Single(f => f.Mark == Marks.StreamDistance).Current);   // looks the same
+        var draft = new SetupDraft();
+        draft.Choose(Marks.StreamDistance, "6.096");
+        Assert.Equal(20.0, Assert.Single(draft.Writes(fields).Writes).Value.Number!.Value);
+        // and a length that holds exactly what is typed is not written again
+        var exact = SetupScreen.Build(InUnits(Meters, 20.0), [], null, null).Fields;
+        Assert.Empty(draft.Writes(exact).Writes);
+    }
+
+    /// <summary>Review round 3 (P3): what is said beside a length in a project not in feet is in its units: the
+    /// problem a stored value gives, and the label in the notice and in "sent without".</summary>
+    [Fact]
+    public void A_lengths_messages_are_in_the_projects_units()
+    {
+        var model = InUnits("autodesk.unit.unit:millimeters-1.0.1", -2.5);
+        var (_, problem) = Assert.Single(ProjectFacts.HouseFacts(model));
+        Assert.Equal("is -762 mm: type a length of 0 mm or more, or leave it blank", problem);
+        var marks = Needed();
+        marks[Marks.StreamDistance.Guid] = new(true, Text: "x");
+        var (_, kind) = Assert.Single(ProjectFacts.HouseFacts(new RevitModel { Document = "h", ProjectMarks = marks, DisplayUnits = "autodesk.unit.unit:meters-1.0.1" }));
+        Assert.Equal("holds a value that isn't a length: type a length in meters, or leave it blank", kind);
+        Assert.StartsWith("Distance from stream (mm): ", SetupWords.SentWithout(Marks.StreamDistance, "house", "mm"), StringComparison.Ordinal);
+        Assert.Contains("distance from stream (mm)", SetupWords.NothingSent(StreetRefusal.None, [Marks.StreamDistance], "house", "mm"), StringComparison.Ordinal);
+        var addin = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckProject.cs"));
+        Assert.Contains("LengthUnits.Of(marks.DisplayUnits).Symbol", addin, StringComparison.Ordinal);
+        Assert.Contains(".GetFormatOptions(SpecTypeId.Length).GetUnitTypeId().TypeId).Symbol", addin, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -241,6 +282,16 @@ public sealed class HouseFactFieldsTests
     /// order), the rulebooks' and state law folders' <c>quote:</c> values (only those, never a reason or a note), and the
     /// code decision's cites (design_checker/code_scope.py CITES, each read again from its PDF page by
     /// test_every_quote_is_on_its_page_in_the_book: the state books' own text lives outside the repository).</summary>
+    /// <summary>The Code's page header and footer lines ("City of Ithaca, NY", "§ 325-3 ZONING § 325-3", "Downloaded
+    /// from https://ecode360.com/…"): not the law's words, and a definition running over a page break reads across them.</summary>
+    private static readonly System.Text.RegularExpressions.Regex PageFurniture =
+        new(@"^(City of Ithaca, NY|§ \d+-\S+ [A-Z ]+ § \d+-\S+|Downloaded from https://ecode360\.com/.*)$");
+
+    /// <summary>The passages a mark may quote cut short ("…"), each with why the rest isn't needed to answer it. Empty:
+    /// every definition and sentence a mark quotes is quoted whole (review round 3: OWNER cut before who holds the
+    /// property let a 25% co-owner answer Yes).</summary>
+    private static readonly Dictionary<string, string> CutAllowed = new(StringComparer.Ordinal);
+
     private static readonly Lazy<string> Law = new(() =>
     {
         var root = Path.Combine(Env.Repo, "regulations", "jurisdictions", "new_york");
@@ -248,8 +299,9 @@ public sealed class HouseFactFieldsTests
         foreach (var f in Directory.EnumerateFiles(root, "*.jsonl", SearchOption.AllDirectories).Where(f => f.Contains("2_extracted_text", StringComparison.Ordinal)))
         {
             foreach (var line in File.ReadLines(f))
-                if (JsonDocument.Parse(line).RootElement is { ValueKind: JsonValueKind.Object } o && o.TryGetProperty("text", out var t) && t.ValueKind == JsonValueKind.String)
-                    sb.Append(t.GetString()).Append(' ');
+                if (JsonDocument.Parse(line).RootElement is { ValueKind: JsonValueKind.Object } o && o.TryGetProperty("text", out var t)
+                    && t.GetString() is { } text && !PageFurniture.IsMatch(text))
+                    sb.Append(text).Append(' ');
             sb.Append(" ¦ ");
         }
         const string Quotes = "import json, pathlib, sys, yaml\n"
@@ -281,6 +333,7 @@ public sealed class HouseFactFieldsTests
         foreach (var (name, text) in quoted)
         {
             var cut = text.EndsWith('…');
+            Assert.True(!cut || CutAllowed.ContainsKey(text), $"{name} cuts a quote short without a reason listed in CutAllowed: \"{text}\"");
             var words = Plain(cut ? text[..^1] : text);
             Assert.True(Law.Value.Contains(words, StringComparison.Ordinal), $"{name} quotes words not in the law: \"{text}\"");
             Assert.True(cut || words.EndsWith('.') || words.EndsWith('?') || words.EndsWith('!'),
@@ -289,6 +342,12 @@ public sealed class HouseFactFieldsTests
             if (!cut)
                 Assert.True(Law.Value.Contains(words + " ", StringComparison.Ordinal), $"{name}: \"{text}\" isn't followed in the law by a new sentence");
         }
+        // the definitions that decide an answer, whole (review round 3)
+        Assert.Contains("(3) A tenant in common of at least a 50% interest in the property", Marks.OwnerOccupied.Description, StringComparison.Ordinal);
+        Assert.Contains("(b) By descent or devise following the death of the former owner.\"", Marks.OwnerOccupied.Description, StringComparison.Ordinal);
+        Assert.Contains("provided that no business, occupation or service is conducted for profit therein.\"", Marks.GarageCars.Description, StringComparison.Ordinal);
+        Assert.Contains("(4) The presumptions set forth in Subsections (2) and (3)", Marks.FunctionalFamilyUnit.Description, StringComparison.Ordinal);
+        Assert.DoesNotContain("…", string.Concat(Marks.All.Select(m => m.Description)), StringComparison.Ordinal);
         foreach (var m in new[] { Marks.StreamNearLot, Marks.StreamDistance })
             Assert.Contains("measured at an average water level, except for those structures directly connected with marine or public or commercial recreation activities.\"",
                             m.Description, StringComparison.Ordinal);
