@@ -403,3 +403,16 @@ def test_needed_by_is_checked_against_the_rules_that_read_each_fact(tmp_path):
     assert any("general.b" in p and "misses" in p for p in got)
     assert needed_by_problems(NY / "5_building_code_rules/drafted/records/proposed_measures.yaml",
                               [RULEBOOK]) == []
+
+
+def test_the_words_an_architect_reads_carry_no_engineer_key(ctx):
+    """Review round 2: a rule's title, notes, review reasons and worked examples' notes are shown to the architect,
+    so `python -m rule_format` refuses a snake_case key or a rule id in them where the law asks for plain words
+    (state.yaml plain_words: true, this folder's); a file path stays a reference."""
+    from rule_format.rulebook import plain_words_problems, rulebook_file_problems
+    assert load(NY / "state.yaml")["plain_words"] is True
+    assert rulebook_file_problems(RULEBOOK, ctx) == []
+    bad = {"rules": [{"id": "general.x", "title": "T", "notes": "Shown while other_occupancy_present (see "
+                      "general.bc_1020_5_dead_end; test_data/answer_keys/a_b/hand_check.yaml)."}]}
+    [got] = plain_words_problems(bad)
+    assert "other_occupancy_present" in got and "general.bc_1020_5_dead_end" in got and "hand_check" not in got
