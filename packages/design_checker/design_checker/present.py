@@ -373,9 +373,9 @@ def link(source: dict, j: Path, documents: dict) -> str:
 # ---- the item for one rule -------------------------------------------------------------------------------
 
 def _user_text(text: str) -> str:
-    """The measuring's own words for a reader of the panel: no internal phrasing (C11), no question tags (only
-    those: "(overhangs)" stays)."""
-    text = re.sub(r"\s*\((?:" + "|".join(sorted(QUESTION_TAGS)) + r")\)", "", text or "")
+    """The measuring's own words for a reader of the panel: no internal phrasing (C11), no tags (TAG: only those,
+    "(overhangs)" stays)."""
+    text = re.sub(TAG, "", text or "")
     text = re.sub(r"(is|are) (an )?open questions? for the architects",
                   lambda m: ("aren't" if m.group(1) == "are" else "isn't") + " settled yet: confirm with the zoning office",
                   text)
@@ -453,6 +453,10 @@ QUESTION_NAMES = {
     "main_building": "which building is the main building (the starting house is assumed, not picked)",
 }
 QUESTION_TAGS = {k for k in QUESTION_NAMES if re.fullmatch(r"[a-z_]+", k)}
+# every tag the measuring writes after its words, for an engineer: an open question's ("(lot_depth)", "(325-25C)", a
+# law question's key) or the fact that answers it ("(eaves_confirmed)", "(accessory_frame)"). Never an architect's
+# words: no plain-English bracket has an underscore or is a bare section number ("(overhangs)", "(chord)" stay).
+TAG = r"\s*\((?:" + "|".join(sorted(QUESTION_TAGS)) + r"|[a-z0-9]+(?:_[a-z0-9]+)+|\d{3}-\d+[A-Z]?)\)"
 
 
 def question_name(question: str) -> str | None:
