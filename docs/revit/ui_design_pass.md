@@ -375,6 +375,8 @@ Each PR is reviewable and evaluable on its own; the first four change only the a
 a verdict. Every PR keeps the existing `ResultRowsTests` and `ResultTextTests` green (the words of every row stay the
 text file's).
 
+The checker's data for the next pane (the UI polish design of 2026-11-23, changes C1 to C9: each row's `asks`, `in_code`, `rule_name` and `limit_words`, and each law's `contents`) is in [checker_ui_data.md](checker_ui_data.md).
+
 | PR | What | How we know it is right |
 |---|---|---|
 | 1 | **Tokens and theme**: the two token dictionaries, restyled controls, status glyphs, theme following | a unit test computes every text token's contrast on its surfaces (at least 4.5:1); screenshots of the Odyssey results in both themes on Revit 2025 and 2027; the screenshots run through a deuteranopia and protanopia simulation and every status is still told apart |
