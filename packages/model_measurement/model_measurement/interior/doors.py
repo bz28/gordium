@@ -15,7 +15,7 @@ docs/interior/interior_measurements.md.
 """
 
 from model_measurement.interior.read import choice, tidy
-from model_measurement.interior.stops import Stop
+from model_measurement.interior.stops import Stop, said
 
 OPERATIONS = ("side_hinged", "sliding", "folding", "pocket", "other")
 # whether a door is side-hinged, read straight from its operation (R318.2: "a side-hinged door"); `other` doesn't say
@@ -115,7 +115,7 @@ def stated_clear(d: dict, reader):
         return None
     if not isinstance(s, dict):
         raise Stop("door_stated_shape")
-    unknown = sorted(str(k) for k in s if k not in STATED_KEYS)
+    unknown = sorted(str(said(k)) for k in s if k not in STATED_KEYS)
     if unknown:
         raise Stop("door_stated_keys", keys=", ".join(unknown))
     source = s.get("source")

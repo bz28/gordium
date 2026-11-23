@@ -8,14 +8,15 @@ docs/interior/interior_measurements.md lists each one and tests/test_interior_me
 STOPS = {
     # the description as a whole
     "not_a_description": "the interior sent from the model can't be read (it isn't a set of named entries)",
-    "wrong_format": "the interior sent from the model is in a form Gordium doesn't read (it says {got}, not "
+    "wrong_format": "the interior sent from the model is in a form Gordium doesn't read ({got}, not "
                     "gordium.interior/1)",
     "units": "the interior sent from the model gives its sizes in {units}, not in inches, feet, millimetres or "
              "metres",
     "not_read": "the {what} weren't read: the model doesn't say these are all the {what} (or that there are none)",
     "not_a_list": "the {key} sent from the model can't be read (they aren't a list)",
     "not_a_mapping": "{what} #{n} isn't a mapping",
-    "flag_missing": "{what} {name} doesn't say whether it is {question} (yes or no)",
+    "flag_missing": "{what} doesn't say whether {question} (yes or no)",
+    "flag_not_yes_no": "{what} gives whether {question} as {got}, not as a yes/no value",
     # an enclosed space the host found with no room drawn in it (`unknown_spaces`): its use isn't known
     "unknown_spaces_entry": "enclosed space #{n} with no room drawn in it can't be read (it has no id): the rooms "
                             "aren't read",
@@ -33,7 +34,8 @@ STOPS = {
                      "it isn't read",
     "has_none_no_source": "the model says the house has no {words} but not where that comes from (its source, "
                           "such as the sheet): it isn't taken, so their rules need review",
-    "has_none_reading": "the model says the house has no {words}, but its reading isn't a yes/no value: it "
+    "has_none_reading": "the model says the house has no {words}, but gives whether that rests on a reading of the law "
+                        "as {got}, not as a yes/no value: it "
                         "isn't taken, so their rules need review",
     "has_none_twice": "the model says {count} times that the house has no {words}: it isn't taken, so their "
                       "rules need review",
@@ -163,10 +165,42 @@ STOPS = {
 }
 
 
+class Words(str):
+    """Words standing in for a value in a reason, shown as they are even where the reason quotes a value (!r)."""
+
+    def __repr__(self):
+        return str(self)
+
+
+def said(value, missing: str = "nothing"):
+    """A value as a reason shows it, the one way every reason does: text as itself (quoted where the reason quotes
+    it), a number as itself, and anything else in words, never Python's own (None, True, False, a list's brackets):
+    nothing given is `missing` ("no form named", "no unit named"), a yes/no value "a yes/no value", a list "a list",
+    a mapping "a set of entries"."""
+    if isinstance(value, Words):
+        return value
+    if value is None:
+        return Words(missing)
+    if isinstance(value, bool):
+        return Words("a yes/no value")
+    if isinstance(value, (str, int, float)):
+        return value
+    if isinstance(value, (list, tuple)):
+        return Words("a list")
+    if isinstance(value, dict):
+        return Words("a set of entries")
+    return Words("a value Gordium can't read")
+
+
+def given_as(value):
+    """A value given where a yes/no one belongs, in words: "the text 'yes'", "1", "a list"."""
+    return Words(f"the text {value!r}") if isinstance(value, str) else said(value)
+
+
 class Stop(Exception):
-    """A measurement that gets no value, with its reason from the table."""
+    """A measurement that gets no value, with its reason from the table (every blank shown as `said` shows it)."""
 
     def __init__(self, which: str, /, **blanks):
         self.key = which
-        self.reason = STOPS[which].format(**blanks)
+        self.reason = STOPS[which].format(**{k: said(v) for k, v in blanks.items()})
         super().__init__(self.reason)

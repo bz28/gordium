@@ -14,7 +14,7 @@ from shapely.geometry import Polygon, box
 from shapely.ops import transform, unary_union
 
 from model_measurement.interior.geometry import Surface, least_gap, shapes
-from model_measurement.interior.read import tidy
+from model_measurement.interior.read import tidy, yes_no
 from model_measurement.interior.stops import Stop
 
 LEVEL = 1 / 16          # in: a nosing's ends may differ this much in height, or in position along the run
@@ -314,8 +314,13 @@ def _spiral(st: dict, not_straight: str | None, measures: dict, stopped: dict) -
     closed circular form (a flight that isn't measured straight may be any curved stair), and true would make the
     ordinary R318.7 rules not applicable (review round 1: a false-pass path for a curved stair). Otherwise, or not
     given, it is not measured (its rules need review)."""
-    said = st.get("spiral")
-    if not isinstance(said, bool):
+    try:
+        said = yes_no(st, "spiral", "the flight", "it is a spiral stairway", required=False)
+    except Stop as s:
+        said = s
+    if isinstance(said, Stop):
+        stopped["stair_spiral"] = said.reason
+    elif said is None:
         stopped["stair_spiral"] = Stop("spiral_not_said").reason
     elif said is False and not_straight is not None:
         stopped["stair_spiral"] = Stop("spiral_not_straight", reason=not_straight).reason

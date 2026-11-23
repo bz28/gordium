@@ -33,7 +33,7 @@ def _law(n, reason, **more):
     ("opening", "openings", "escape", "an emergency escape and rescue opening"),
     ("room", "rooms", "sleeping", "a sleeping room")])
 def test_an_entry_missing_its_flag_is_a_mark_naming_its_field(what, key, flag, question):
-    got, = present.law_causes(_law(1, _interior("flag_missing", what=what, name="D01", question=question, key=flag)))
+    got, = present.law_causes(_law(1, _interior("flag_missing", what=f"{what} D01", question=f"it is {question}")))
     assert got["kind"] == panel_data.MARK and got["field"] == f"{key}[].{flag}"
 
 
@@ -47,7 +47,7 @@ def test_any_other_drawing_problem_is_the_models_to_fix_with_no_field():
     got, = present.law_causes(_law(3, "The interior drawing: door D2 is marked twice"))
     assert got["kind"] == panel_data.FIX_MODEL and "field" not in got
     # a flag's words in a row that isn't the drawing's: never read as the drawing's mark
-    words = _interior("flag_missing", what="door", name="D01", question="the required exit door", key="exit")
+    words = _interior("flag_missing", what="door D01", question="it is the required exit door")
     got, = present.law_causes({"id": "egress.general.x", "law_short": "Egress", "reason": words})
     assert "field" not in got
 
@@ -73,7 +73,7 @@ def test_a_project_fact_not_stated_names_its_field():
 
 
 def test_a_card_carries_its_first_causes_field():
-    door = _interior("flag_missing", what="door", name="D01", question="the required exit door", key="exit")
+    door = _interior("flag_missing", what="door D01", question="it is the required exit door")
     items = [dict(_law(1, door), causes=present.law_causes(_law(1, door))),
              dict(_law(2, "x"), id="z", causes=present.zoning_causes({"needs": ["zone", "stories"]}))]
     by_key = {c["key"]: c for c in grouping.cause_cards(items)}

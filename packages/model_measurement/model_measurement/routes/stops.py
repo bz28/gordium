@@ -101,7 +101,6 @@ STOPS = {
     "passage_in_ring": "the passage from the room {name} has its middle within 12 in of a corner: whether a route "
                        "leaves by it isn't worked out",
     "no_room_doors": "the story has no room besides its corridors: no room door to measure from",
-    "flag_text": "{question} is given as {got}, not as a yes/no value",
     "no_exit_access": "the room {name} has no door from which a route reaches an exit without coming back into it",
     # areas (areas.py)
     "area_room_not_read": "the room {name} isn't read, so what it adds to the story's areas isn't known",
@@ -113,9 +112,11 @@ STOPS = {
 
 
 class Stop(Exception):
-    """A route measurement that gets no value, with its reason from the table."""
+    """A route measurement that gets no value, with its reason from the table (every blank shown as the interior's
+    reasons show it: interior.stops.said)."""
 
     def __init__(self, which: str, /, **blanks):
+        from model_measurement.interior.stops import said
         self.key = which
-        self.reason = STOPS[which].format(**blanks)
+        self.reason = STOPS[which].format(**{k: said(v) for k, v in blanks.items()})
         super().__init__(self.reason)

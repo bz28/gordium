@@ -19,8 +19,8 @@ from shapely.geometry import LineString, Point, Polygon
 from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
-from model_measurement.interior.read import FORMAT, INCHES, Reader, choice, name_of, number, tidy
-from model_measurement.interior.stops import Stop as InteriorStop
+from model_measurement.interior.read import FORMAT, INCHES, Reader, choice, name_of, number, tidy, yes_no
+from model_measurement.interior.stops import Stop as InteriorStop, said
 from model_measurement.routes.stops import Stop
 
 CLEARANCE = 12.0        # in: NFPA 101 7.6.1(2) "with a 12 in. (305 mm) clearance therefrom", both books (decision 1)
@@ -239,10 +239,11 @@ def _reader(description) -> Reader:
     if not isinstance(description, dict):
         raise Stop("description", reason="it isn't a set of named entries")
     if description.get("format") != FORMAT:
-        raise Stop("description", reason=f"it is in a form Gordium doesn't read (it says {description.get('format')}, not {FORMAT})")
+        raise Stop("description", reason=f"it is in a form Gordium doesn't read ({said(description.get('format'), 'no form named')}, "
+                                               f"not {FORMAT})")
     units = description.get("units")
     if not isinstance(units, str) or units not in INCHES:
-        raise Stop("description", reason=f"it gives its sizes in {repr(units) if units is not None else 'no unit named'}, not in "
+        raise Stop("description", reason=f"it gives its sizes in {said(units, 'no unit named')}, not in "
                                                "inches, feet, millimetres or metres")
     return Reader(units)
 
@@ -301,18 +302,14 @@ def _levels(description, reader, stops):
     return levels
 
 
-FLAG_QUESTIONS = {"lockable": "whether it can be locked", "pass_through": "whether an exit route may pass through it",
-                  "not_occupied": "whether it is not occupied"}
+FLAG_QUESTIONS = {"lockable": "it can be locked", "pass_through": "an exit route may pass through it",
+                  "not_occupied": "it is not occupied"}
 
 
 def _flag(item, key):
-    """True, False, or None (not given); anything else isn't read (said as the question it answers, never the
-    field's name)."""
-    got = item.get(key)
-    if got is None or isinstance(got, bool):
-        return got
-    raise Stop("flag_text", question=FLAG_QUESTIONS[key][0].upper() + FLAG_QUESTIONS[key][1:],
-               got=f"the text {got!r}" if isinstance(got, str) else repr(got))
+    """True, False, or None (not given); anything else isn't read (interior.read.yes_no: said as the question it
+    answers, never the field's name)."""
+    return yes_no(item, key, "it", FLAG_QUESTIONS[key], required=False)
 
 
 def _room(item, reader, level) -> Room:
@@ -320,9 +317,7 @@ def _room(item, reader, level) -> Room:
     if item.get("floor") is None:
         raise Stop("room_no_floor", name=name, reason="no floor is given")
     try:
-        sleeping = item.get("sleeping")
-        if not isinstance(sleeping, bool):
-            raise InteriorStop("flag_missing", what="room", name=name, question="a sleeping room", key="sleeping")
+        sleeping = yes_no(item, "sleeping", "it", "it is a sleeping room", required=True)
         outline = reader.outline(item["floor"], "the room's floor outline")
         use = item.get("use")
         if use is not None:
@@ -341,9 +336,8 @@ def _room(item, reader, level) -> Room:
                 raise InteriorStop("not_a_mapping", what="obstruction", n=n)
             obstructions.append(reader.outline(ob.get("outline"), f"obstruction #{n}'s outline"))
             choice(ob.get("kind"), OBSTRUCTION_KINDS, f"obstruction #{n}'s kind")
-            if not isinstance(ob.get("fixed"), bool):
-                raise InteriorStop("missing", what=f"whether obstruction #{n} is fixed (yes or no)")
-    except (InteriorStop, Stop) as s:                  # (a yes/no mark given otherwise: _flag's own reason)
+            yes_no(ob, "fixed", f"obstruction #{n}", "it is fixed", required=True)
+    except InteriorStop as s:
         raise Stop("room_not_read", name=name, reason=s.reason) from None
     # decision 1b: a room whose own use is occupancy (sleeping, the day care's rooms) is never one nobody occupies
     occupied_by_use = "a sleeping room" if sleeping else "a day_care room" if use == "day_care" else ""

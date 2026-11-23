@@ -56,16 +56,16 @@ def test_a_list_not_given_names_its_field(kind):
 @pytest.mark.parametrize("words", [
     "", "door D2 is marked twice", "the doors sent from the model can't be read (they aren't a list)",
     # a flag's words with nothing where the name is: no entry named, so no field
-    Stop("flag_missing", what="door", name="", question="the required exit door", key="exit").reason.replace("  ", " "),
+    Stop("flag_missing", what="door", question="it is the required exit door").reason,
     # a question the kind doesn't ask
-    Stop("flag_missing", what="door", name="D1", question="a sleeping room", key="sleeping").reason, None, 3])
+    Stop("flag_missing", what="door D1", question="it is a sleeping room").reason, None, 3])
 def test_any_other_words_name_no_field(words):
     assert asked_field(words) is None
 
 
 def test_the_name_may_hold_anything_the_host_names_an_element_by():
     name = 'Single-Flush: Door 36" x 84" (LS1.0) (D01)'
-    words = Stop("flag_missing", what="door", name=name, question="the required exit door", key="exit").reason
+    words = Stop("flag_missing", what=f"door {name}", question="it is the required exit door").reason
     assert words == f"door {name} doesn't say whether it is the required exit door (yes or no)"
     assert asked_field(words) == "doors[].exit"
 
@@ -107,7 +107,7 @@ def _claims(*entries, **lists):
     ([{"kind": "ramp", "source": "A-2", "reding": True}], {}, "giving more than a kind, a source and, optionally, a "
                                                              "reading (also reding)"),
     # the text "yes" is no yes/no value: said so, never "isn't yes or no" of a "yes"
-    ([{"kind": "ramp", "source": "A-2", "reading": "yes"}], {}, "its reading isn't a yes/no value"),
+    ([{"kind": "ramp", "source": "A-2", "reading": "yes"}], {}, "gives whether that rests on a reading of the law as the text 'yes', not as a yes/no value"),
 ])
 def test_a_claim_not_taken_says_why_truly_and_plainly(entries, lists, words):
     got = measure(_claims(*entries, **lists))
@@ -162,7 +162,7 @@ def test_route_reasons_as_read_have_no_back_quotes_underscored_fields_or_coordin
         assert "`" not in w and not COORDINATES.search(w), w
         assert "description" not in w, w                            # the model, never Gordium's file
         assert not re.search(r"\b[a-z]+_[a-z_]+\b", w), w            # no field name of the file format
-    assert any("Whether it is not occupied is given as the text 'yes', not as a yes/no value" in w for w in said), said
+    assert any("the room r isn't read: it gives whether it is not occupied as the text 'yes', not as a yes/no value" in w for w in said), said
     assert any("story outline #1 isn't on one of the model's levels" in w for w in said), said
 
 
@@ -175,9 +175,9 @@ def test_a_dead_ends_door_off_its_legs_is_named_without_coordinates():
     assert "at the closed end (" not in inspect.getsource(dead_ends)
 
 
-@pytest.mark.parametrize("key, question", [("lockable", "Whether it can be locked"),
-                                           ("pass_through", "Whether an exit route may pass through it"),
-                                           ("not_occupied", "Whether it is not occupied")])
+@pytest.mark.parametrize("key, question", [("lockable", "it can be locked"),
+                                           ("pass_through", "an exit route may pass through it"),
+                                           ("not_occupied", "it is not occupied")])
 def test_a_yes_no_mark_given_as_text_is_said_as_its_question(key, question):
     """"its lockable is 'no', not one of yes or no" named the field and contradicted itself: said as the question."""
     from model_measurement.routes.floor import read
@@ -185,10 +185,13 @@ def test_a_yes_no_mark_given_as_text_is_said_as_its_question(key, question):
     d = room_on_corridor()
     d["rooms"][0][key] = "no"
     said = [r for s in read(d).stories.values() for r in s.stops]
-    assert any(f"{question} is given as the text 'no', not as a yes/no value" in r for r in said), said
-    assert not any("not one of yes or no" in r or key in r for r in said), said
+    # the whole sentence, as it is said: lower case after "isn't read:", the room named once
+    room = d["rooms"][0]["name"]
+    whole = f"the room {room} isn't read: it gives whether {question} as the text 'no', not as a yes/no value"
+    assert any(whole in r for r in said), said
+    assert not any("not one of yes or no" in r or key in r or f"room {room} doesn't" in r for r in said), said
     d["rooms"][0][key] = 1
-    assert any(f"{question} is given as 1, not as a yes/no value" in r for s in read(d).stories.values()
+    assert any(f"it gives whether {question} as 1, not as a yes/no value" in r for s in read(d).stories.values()
                for r in s.stops)
 
 
@@ -197,3 +200,116 @@ def test_the_interiors_own_reasons_say_the_model_not_the_description():
         assert "description" not in Stop(key, **blanks).reason, key
     from model_measurement.routes.stops import Stop as RouteStop
     assert RouteStop("description", reason="r").reason.startswith("the model can't be read for escape routes")
+
+
+# ---- review round 3: every yes/no mark one way; reasons lower case mid-sentence; no Python value in words -----
+
+@pytest.mark.parametrize("path, value, whole", [
+    (("rooms", 0, "sleeping"), "yes", "room Bedroom gives whether it is a sleeping room as the text 'yes', not as a "
+                                      "yes/no value"),
+    (("doors", 0, "exit"), "yes", "door Door gives whether it is the required exit door as the text 'yes', not as a "
+                                  "yes/no value"),
+    (("openings", 0, "escape"), 1, "opening Window gives whether it is an emergency escape and rescue opening as 1, "
+                                   "not as a yes/no value"),
+])
+def test_a_flag_given_but_not_yes_or_no_is_said_so_never_as_not_given(path, value, whole):
+    d = base()
+    d[path[0]][path[1]][path[2]] = value
+    problems = measure(d)["problems"]
+    assert problems == [whole]
+    assert asked_field(whole) == f"{path[0]}[].{path[2]}"       # still the field to state
+
+
+def test_a_room_whose_sleeping_mark_isnt_given_is_named_once_in_the_route_reading():
+    from model_measurement.routes.floor import read
+    from routes_layouts import room_on_corridor
+    d = room_on_corridor()
+    del d["rooms"][0]["sleeping"]
+    said = [r for s in read(d).stories.values() for r in s.stops]
+    assert any("the room r isn't read: it doesn't say whether it is a sleeping room (yes or no)" in r
+               for r in said), said
+    d["rooms"][0]["sleeping"] = "no"
+    said = [r for s in read(d).stories.values() for r in s.stops]
+    assert any("the room r isn't read: it gives whether it is a sleeping room as the text 'no'" in r
+               for r in said), said
+
+
+def test_an_obstructions_fixed_and_a_flights_spiral_are_yes_no_marks_too():
+    from model_measurement.routes.floor import read
+    from routes_layouts import room_on_corridor
+    d = room_on_corridor()
+    d["rooms"][0]["obstructions"] = [{"outline": [[1, 1], [2, 1], [2, 2]], "kind": "casework", "fixed": "yes"}]
+    said = [r for s in read(d).stories.values() for r in s.stops]
+    assert any("obstruction #1 gives whether it is fixed as the text 'yes', not as a yes/no value" in r
+               for r in said), said
+    d = base()
+    d["stairs"][0]["spiral"] = "no"
+    why = measure(d)["parts"]["stair"][0]["not_measured"]["stair_spiral"]
+    assert why == "the flight gives whether it is a spiral stairway as the text 'no', not as a yes/no value"
+
+
+PROPER = re.compile(r"^(Gordium|IBC|NFPA|R\d|BF\d|Revit|Rhino)")
+
+
+def _broken_reasons():
+    """Every reason a set of broken inputs gives, as the reading gives it: interior and route."""
+    from model_measurement.routes import measure as routes_measure
+    from model_measurement.routes.floor import read
+    from routes_layouts import room_on_corridor
+    said = []
+    for bad in ([], {"format": None}, {"format": "gordium.interior/1"}, {"format": "gordium.interior/1", "units": None},
+                {"format": "gordium.interior/1", "units": True}, {"format": 3}):
+        said += measure(bad)["problems"]
+        try:
+            read(bad)
+        except Exception as e:                          # the route reading refuses the whole description
+            said.append(getattr(e, "reason", str(e)))
+    for path, value in ((("doors", 0, "exit"), None), (("doors", 0, "exit"), True),
+                        (("openings", 0, "operation"), None), (("openings", 0, "operation"), True),
+                        (("openings", 0, "operation"), [1]),
+                        (("doors", 0, "stated_clear"), {"width": 34, "height": 80, "source": "m", True: 1}),
+                        (("stairs", 0, "spiral"), [True])):
+        d = base()
+        d[path[0]][path[1]][path[2]] = value
+        got = measure(d)
+        said += got["problems"] + [w for parts in got["parts"].values() for p in parts or []
+                                   for w in (p.get("not_measured") or {}).values()]
+    d = base()
+    d["has_none"] = [{"kind": "ramp", "source": "A-2", "reading": None},
+                     {"kind": "basement", "source": "A", None: 1}, {"kind": None}]
+    said += measure(d)["problems"]
+    for path, value in ((("rooms", 0, "lockable"), None), (("rooms", 0, "lockable"), [True]),
+                        (("rooms", 0, "use"), False), (("doors", 0, "sides"), None), (("levels",), None),
+                        (("rooms", 0, "level"), True)):
+        d = room_on_corridor()
+        node = d
+        for k in path[:-1]:
+            node = node[k]
+        node[path[-1]] = value
+        floor = read(d)
+        said += list(floor.stops) + [r for s in floor.stories.values() for r in s.stops]
+        for parts in (routes_measure(d)["parts"] or {}).values():
+            for p in parts or []:
+                said += [w for w in (p.get("not_measured") or {}).values() if isinstance(w, str)]
+    return [w for w in said if isinstance(w, str)]
+
+
+def test_no_reason_shows_a_python_value():
+    said = _broken_reasons()
+    assert len(set(said)) >= 15, said
+    for w in said:
+        assert not re.search(r"\b(None|True|False)\b", w), w
+        assert "Words(" not in w and "[1]" not in w and "{" not in w, w
+    assert any("(no form named, not gordium.interior/1)" in w for w in said), said
+    assert any("gives its sizes in no unit named" in w for w in said), said
+
+
+def test_reasons_are_lower_case_mid_sentence():
+    """A reason starts lower case (the presenter capitalises where one opens a sentence): after a colon, a semicolon
+    or a parenthesis, and at its start, only a proper name (Gordium, a code section) is capitalised."""
+    from model_measurement.routes.stops import STOPS as ROUTES
+    said = _broken_reasons() + list(INTERIOR_STOPS.values()) + list(ROUTES.values())
+    for w in said:
+        for piece in [w] + re.split(r"(?:: |; |\()", w)[1:]:
+            if piece[:1].isupper():
+                assert PROPER.match(piece), (piece, w)

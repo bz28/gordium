@@ -26,10 +26,10 @@ from model_measurement.interior.doors import measure_door
 from model_measurement.interior import has_none as none_of
 from model_measurement.interior.guards import measure_guard
 from model_measurement.interior.openings import measure_opening
-from model_measurement.interior.read import FORMAT, INCHES, Reader, name_of
+from model_measurement.interior.read import FORMAT, INCHES, Reader, name_of, yes_no
 from model_measurement.interior.rooms import floor_elevation, measure_room
 from model_measurement.interior.stairs import measure_stair
-from model_measurement.interior.stops import STOPS, Stop
+from model_measurement.interior.stops import STOPS, Stop, said
 
 MEASURED_FORMAT = "gordium.interior_measured/1"
 # kind → (the description's key, the words for a list of them, the flag each must carry, what the flag asks)
@@ -54,10 +54,14 @@ def asked_field(problem: str) -> str | None:
         if problem == Stop("not_read", what=words, key=key).reason:
             return key
         if flag:
-            before, after = STOPS["flag_missing"].split("{name}")
-            before, after = before.format(what=key[:-1]), after.format(question=question, key=flag)
-            if problem.startswith(before) and problem.endswith(after) and len(problem) > len(before) + len(after):
-                return f"{key}[].{flag}"
+            for stop in ("flag_missing", "flag_not_yes_no"):
+                before, after = STOPS[stop].split("{what}")
+                before = before + key[:-1] + " "
+                head, _, tail = after.partition("{got}")
+                head = head.format(question=f"it is {question}")
+                if problem.startswith(before) and len(problem) > len(before) + len(head) and (
+                        problem.endswith(head) if not tail else head in problem and problem.endswith(tail)):
+                    return f"{key}[].{flag}"
     return None
 
 
@@ -75,9 +79,12 @@ def _given(description: dict, kind: str, problems: list):
         if not isinstance(item, dict):
             problems.append(Stop("not_a_mapping", what=key[:-1], n=n).reason)
             return None
-        if flag and not isinstance(item.get(flag), bool):
-            problems.append(Stop("flag_missing", what=key[:-1], name=name_of(item), question=question, key=flag).reason)
-            return None
+        if flag:
+            try:
+                yes_no(item, flag, f"{key[:-1]} {name_of(item)}", f"it is {question}", required=True)
+            except Stop as s:
+                problems.append(s.reason)
+                return None
     return got
 
 
@@ -136,11 +143,11 @@ def measure(description) -> dict:
         problems.append(Stop("not_a_description").reason)
         return out
     if description.get("format") != FORMAT:
-        problems.append(Stop("wrong_format", got=description.get("format")).reason)
+        problems.append(Stop("wrong_format", got=said(description.get("format"), "no form named")).reason)
         return out
     units = description.get("units")
     if not isinstance(units, str) or units not in INCHES:
-        problems.append(Stop("units", units=repr(units) if units is not None else "no unit named").reason)
+        problems.append(Stop("units", units=said(units, "no unit named")).reason)
         return out
     reader = Reader(units)
     parts = out["parts"]

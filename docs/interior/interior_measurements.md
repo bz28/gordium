@@ -117,12 +117,13 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | Key | Reason |
 |---|---|
 | `not_a_description` | the interior sent from the model can't be read (it isn't a set of named entries) |
-| `wrong_format` | the interior sent from the model is in a form Gordium doesn't read (it says {got}, not gordium.interior/1) |
+| `wrong_format` | the interior sent from the model is in a form Gordium doesn't read ({got}, not gordium.interior/1) |
 | `units` | the interior sent from the model gives its sizes in {units}, not in inches, feet, millimetres or metres |
 | `not_read` | the {what} weren't read: the model doesn't say these are all the {what} (or that there are none) |
 | `not_a_list` | the {key} sent from the model can't be read (they aren't a list) |
 | `not_a_mapping` | {what} #{n} isn't a mapping |
-| `flag_missing` | {what} {name} doesn't say whether it is {question} (yes or no) |
+| `flag_missing` | {what} doesn't say whether {question} (yes or no) |
+| `flag_not_yes_no` | {what} gives whether {question} as {got}, not as a yes/no value |
 | `unknown_spaces_entry` | enclosed space #{n} with no room drawn in it can't be read (it has no id): the rooms aren't read |
 | `unknown_space` | an enclosed space with no room drawn in it: its use isn't known, so it may be a sleeping room (draw a room in it and say whether it is a sleeping room) |
 | `has_none_not_a_list` | what the model says the house has none of can't be read (it isn't a list, each entry a kind and its source): it isn't read |
@@ -131,7 +132,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `has_none_sleeping_room` | the model says the house has no sleeping rooms: a room that isn't a sleeping room says so itself (sleeping room: no), not as something the house has none of |
 | `has_none_kind` | the model says the house has none of {kind!r}, not a kind it can say that of (one of: {kinds}): it isn't read |
 | `has_none_no_source` | the model says the house has no {words} but not where that comes from (its source, such as the sheet): it isn't taken, so their rules need review |
-| `has_none_reading` | the model says the house has no {words}, but its reading isn't a yes/no value: it isn't taken, so their rules need review |
+| `has_none_reading` | the model says the house has no {words}, but gives whether that rests on a reading of the law as {got}, not as a yes/no value: it isn't taken, so their rules need review |
 | `has_none_twice` | the model says {count} times that the house has no {words}: it isn't taken, so their rules need review |
 | `has_none_keys` | the model says the house has no {words}, giving more than a kind, a source and, optionally, a reading (also {keys}): it isn't taken, so their rules need review |
 | `has_none_below_ground` | the model says the house has no basements, yet {what}: which is right is unclear, so their rules need review |

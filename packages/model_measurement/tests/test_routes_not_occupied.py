@@ -138,7 +138,7 @@ def test_21_a_room_whose_use_is_occupancy_cant_be_marked_not_occupied(change, wo
 def test_21_a_mark_that_isnt_true_or_false_isnt_read():
     d = layout(marked="yes")
     stops = read(d).stories["L1"].stops
-    assert any("abandoned isn't read" in s and "Whether it is not occupied is given as the text 'yes'" in s for s in stops), stops
+    assert any("abandoned isn't read" in s and "isn't read: it gives whether it is not occupied as the text 'yes', not as a yes/no value" in s for s in stops), stops
 
 
 def test_21_the_mark_changes_nothing_but_the_start_points():

@@ -1745,8 +1745,8 @@ def test_units(units, scale):
 
 @pytest.mark.parametrize("desc, words", [
     ([], "isn't a set of named entries"),
-    ({"format": "gordium.site/1"}, "it says gordium.site/1, not gordium.interior/1"),
-    ({"format": "gordium.interior/1", "units": "cubits"}, "gives its sizes in 'cubits', not in inches"),
+    ({"format": "gordium.site/1"}, "(gordium.site/1, not gordium.interior/1)"),
+    ({"format": "gordium.interior/1", "units": "cubits"}, "gives its sizes in cubits, not in inches"),
     ({"format": "gordium.interior/1"}, "gives its sizes in no unit named, not in inches"),
 ])
 def test_a_description_that_cant_be_read_reads_nothing(desc, words):
@@ -1863,6 +1863,7 @@ STOP_CASES = {
     "not_a_list": _set(("doors",), "front"),
     "not_a_mapping": _set(("doors",), [1]),
     "flag_missing": _set(("doors", 0, "exit"), _DELETE),
+    "flag_not_yes_no": _set(("doors", 0, "exit"), "yes"),
     "unknown_spaces_entry": _set(("unknown_spaces",), [{"name": "no id"}]),
     "unknown_space": _set(("unknown_spaces",), [{"id": "a1", "name": "Area on L1"}]),
     "has_none_unknown_space": _with(base, lambda d: d.update(has_none=[{"kind": "habitable_attic", "source": "A-1"}],
@@ -2140,7 +2141,7 @@ def test_each_claim_empties_its_kinds_or_gives_its_measures():
     ([{"kind": "ramp"}], {}, "not where that comes from"),
     ([{"kind": "ramp", "source": ""}], {}, "not where that comes from"),
     ([{"kind": "ramp", "source": "A-2"}], {"ramps": None}, "yet it also gives ramps, and not an empty list"),
-    ([{"kind": "ramp", "source": "A-2", "reading": 1}], {}, "its reading isn't a yes/no value"),
+    ([{"kind": "ramp", "source": "A-2", "reading": 1}], {}, "gives whether that rests on a reading of the law as 1, not as a yes/no value"),
     ([{"kind": "ramp", "source": "A-2", "reding": True}], {}, "a reading (also reding)"),
     ([{"kind": "ramp", "source": "A-2"}, {"kind": "ramp", "source": "A-2", "reding": True}], {}, "2 times"),
     ([{"kind": "ramp", "source": "A-2"}, {"kind": "ramp", "source": "A-4"}], {}, "2 times"),

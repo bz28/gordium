@@ -420,8 +420,8 @@ def _interior(stop, **blanks):
 
 @pytest.mark.parametrize("item,kind", [
     ({"id": "egress.interior#1", "law_short": "Egress", "objects": ["w1"],
-      "reason": _interior("flag_missing", what="opening", name="W1", key="escape",
-                          question="an emergency escape and rescue opening")}, "mark"),
+      "reason": _interior("flag_missing", what="opening W1",
+                          question="it is an emergency escape and rescue opening")}, "mark"),
     # the stairs the drawing doesn't say it has all of: the architect's to state (a mark), its field the stairs
     ({"id": "egress.interior#2", "law_short": "Egress", "reason": _interior("not_read", what="stairs", key="stairs")},
      "mark"),

@@ -16,7 +16,7 @@ from shapely.errors import GEOSException
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
-from model_measurement.interior.stops import Stop
+from model_measurement.interior.stops import Stop, given_as, said
 
 KEY = "has_none"
 # every kind a description may say the house has none of:
@@ -230,7 +230,7 @@ def read(description: dict) -> tuple[dict, list[str]]:
             problems.append(Stop("has_none_kind", kind=kind, kinds=", ".join(k.replace("_", " ") for k in KINDS)).reason)
             continue
         if extra := sorted(set(entry) - ENTRY_KEYS, key=str):    # a mistyped `reading` must never read as settled
-            problems.append(Stop("has_none_keys", words=KINDS[kind]["words"], keys=", ".join(map(str, extra))).reason)
+            problems.append(Stop("has_none_keys", words=KINDS[kind]["words"], keys=", ".join(str(said(k)) for k in extra)).reason)
             seen.setdefault(kind, []).append(None)
             continue
         source, reading = entry.get("source"), entry.get("reading", False)
@@ -239,7 +239,7 @@ def read(description: dict) -> tuple[dict, list[str]]:
             seen.setdefault(kind, []).append(None)          # still counted: a kind said twice is refused
             continue
         if type(reading) is not bool:
-            problems.append(Stop("has_none_reading", words=KINDS[kind]["words"]).reason)
+            problems.append(Stop("has_none_reading", words=KINDS[kind]["words"], got=given_as(reading)).reason)
             seen.setdefault(kind, []).append(None)
             continue
         seen.setdefault(kind, []).append((" ".join(source.split()), reading))
