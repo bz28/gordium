@@ -25,6 +25,7 @@ sys.path.insert(0, str(REPO / "packages/design_checker/tests"))
 BACK_QUOTE = re.compile(r"`")
 IDENTIFIER = re.compile(r"\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
 NAME_IS_VALUE = re.compile(r"\b[A-Za-z_]\w*\s=\s[A-Za-z_\"']")
+SECTION_TAG = re.compile(r"\(\d{3}-\d+[A-Z]?(?:#\d+)?\)")       # a law question's bare key: "(325-28C#1)"
 
 # the fields of `view` and `sections` that are data, never words shown (the host keys, finds or links by them)
 DATA = {
@@ -95,7 +96,8 @@ def problems(answer: dict) -> list[str]:
         for where, text in _strings(answer.get(top), (top,)):
             if text in NOT_YET or any(p in text for p in NOT_YET_PARTS):
                 continue
-            for name, pat in (("back-quote", BACK_QUOTE), ("identifier", IDENTIFIER), ("name = value", NAME_IS_VALUE)):
+            for name, pat in (("back-quote", BACK_QUOTE), ("identifier", IDENTIFIER), ("name = value", NAME_IS_VALUE),
+                              ("section tag", SECTION_TAG)):
                 if m := pat.search(text):
                     out.append(f"{where}: {name} {m.group(0)!r} in {text[:160]!r}")
     return out
@@ -113,7 +115,7 @@ def _answers(value):
 
 def test_the_pin_finds_each_kind_of_engineers_word():
     for text in ("the stairs aren't in the interior drawing (no `stairs` list)", "complies if door_ends_dead_end",
-                 "if Door = with"):
+                 "if Door = with", "the primary front yard is open (325-28C#1)"):
         assert problems({"view": {"items": [{"reason": text}]}}), text
     assert not problems({"view": {"items": [{"reason": "Allowed: 25% × lot area 7,200 sf = 1,800 sf",
                                              "rule": "R-1b.lot_coverage"}]}})
@@ -123,6 +125,25 @@ def test_no_golden_answer_shows_an_architect_an_engineers_word():
     _, answers = goldens.stored()
     found = [f"{case}: {p}" for case, value in answers.items() for a in _answers(value) for p in problems(a)]
     assert not found, "\n".join(found[:40])
+
+
+def test_an_adu_on_a_corner_lot_shows_no_engineers_word():
+    """No golden has a detached ADU on a corner lot, whose primary front yard is a law question ("(325-28C#1)",
+    model_measurement's PRIMARY_QUESTION): a made-up one (test_adu_measure's corner lot), through check_site."""
+    from design_checker import present
+    from design_checker.check import check_site
+    from model_measurement.places.ithaca_city.measure import PRIMARY_QUESTION
+    from test_adu_panel import ADU_FACTS, HOUSE
+    from test_measure import RECT, box
+    assert "(325-28C#1)" in PRIMARY_QUESTION and "(325-28C#1)" not in present._user_text(PRIMARY_QUESTION)
+    corner = {"corner_lot": True, "street_line": [[[0, 0], [50, 0]], [[50, 0], [50, 100]]],
+              "street_ids": ["South St", "East St"], "address_street_line": [[[0, 0], [50, 0]]], "adu_building": "adu"}
+    adu = box(30, 70, 45, 90, 0, 18, id="adu")
+    answer = check_site({"units": "ft", "lot": RECT, "buildings": [HOUSE, adu], "problems": []},
+                        {**ADU_FACTS, **corner})
+    # the question is asked (the measuring's own record); whatever of it reaches the panel is in plain words
+    assert "(325-28C#1)" in answer["measurements"]["adu_in_primary_front_yard"]["reason"]
+    assert not problems(answer), "\n".join(problems(answer)[:20])
 
 
 def _houses():

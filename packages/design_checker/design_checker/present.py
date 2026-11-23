@@ -11,6 +11,7 @@ writes one summary used everywhere (D3).
 
 import ast
 import datetime as _dt
+import functools
 import hashlib
 import math
 import re
@@ -20,7 +21,8 @@ from pathlib import Path
 
 from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
-from rule_format.rulebook import MEASURE_KINDS, REPO, _jsonl_rows, load, outcome
+from rule_format.place import places as _places
+from rule_format.rulebook import MEASURE_KINDS, REPO, _jsonl_rows, load, open_question_tags, outcome, research_entries
 
 from design_checker import reading_set, rhino_logic, site_json
 
@@ -373,9 +375,9 @@ def link(source: dict, j: Path, documents: dict) -> str:
 # ---- the item for one rule -------------------------------------------------------------------------------
 
 def _user_text(text: str) -> str:
-    """The measuring's own words for a reader of the panel: no internal phrasing (C11), no tags (TAG: only those,
+    """The measuring's own words for a reader of the panel: no internal phrasing (C11), no tags (tag_pattern: only those,
     "(overhangs)" stays)."""
-    text = re.sub(TAG, "", text or "")
+    text = tag_pattern().sub("", text or "")
     text = re.sub(r"(is|are) (an )?open questions? for the architects",
                   lambda m: ("aren't" if m.group(1) == "are" else "isn't") + " settled yet: confirm with the zoning office",
                   text)
@@ -453,10 +455,30 @@ QUESTION_NAMES = {
     "main_building": "which building is the main building (the starting house is assumed, not picked)",
 }
 QUESTION_TAGS = {k for k in QUESTION_NAMES if re.fullmatch(r"[a-z_]+", k)}
-# every tag the measuring writes after its words, for an engineer: an open question's ("(lot_depth)", "(325-25C)", a
-# law question's key) or the fact that answers it ("(eaves_confirmed)", "(accessory_frame)"). Never an architect's
-# words: no plain-English bracket has an underscore or is a bare section number ("(overhangs)", "(chord)" stay).
-TAG = r"\s*\((?:" + "|".join(sorted(QUESTION_TAGS)) + r"|[a-z0-9]+(?:_[a-z0-9]+)+|\d{3}-\d+[A-Z]?)\)"
+# every tag the measuring writes after its words, for an engineer: an open question's ("(lot_depth)", a law
+# question's own key: "(325-25C)", "(325-28C#1)") or the fact that answers it ("(eaves_confirmed)",
+# "(accessory_frame)"). Never an architect's words: no plain-English bracket is a law question's key, has an
+# underscore or is a bare section number ("(overhangs)", "(chord)" stay).
+SECTION_TAG = r"\d{3}-\d+[A-Z]?(?:#\d+)?"      # a law question's key's shape, for one no place's files list
+
+
+@functools.lru_cache(maxsize=1)
+def law_question_keys() -> frozenset:
+    """Every law question's own key in every place's files: each open question's tag ("325-28C#1") and its entry's
+    id ("325-25C"), as the measuring names them (model_measurement.interpretations.question). Only keys no word
+    could be: a definition's own name ("lot", "basement") is left out, so "(basement)" in a sentence stays."""
+    keys = set()
+    for p in _places():
+        for tag, (where, _q, _r) in open_question_tags(research_entries(p.folder)).items():
+            keys |= {tag, where.rsplit(" ", 1)[-1]}
+    return frozenset(k for k in keys if not re.fullmatch(r"[a-z]+", k))
+
+
+@functools.lru_cache(maxsize=1)
+def tag_pattern() -> re.Pattern:
+    keys = sorted(QUESTION_TAGS | law_question_keys(), key=lambda k: (-len(k), k))
+    return re.compile(r"\s*\((?:" + "|".join(map(re.escape, keys)) + r"|[a-z0-9]+(?:_[a-z0-9]+)+|" + SECTION_TAG
+                      + r")\)")
 
 
 def question_name(question: str) -> str | None:
