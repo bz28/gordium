@@ -1,0 +1,71 @@
+title: "CBD-60: a five-story building, shops below and apartments above, built to the street and side lines"
+what: >-
+  A surveyed 60 ft × 120 ft lot in CBD-60 (Central Business; 7,200 sf) with a five-story mixed-use building the full
+  60 ft wide and 105 ft deep, stated as a retail store (the street-level use; apartments above, both permitted in the
+  CBD column, chart p.4). A 14 ft ground floor and four 11 ft floors to a 58 ft flat roof, on the street line and both
+  side lines, 15 ft from the rear line. The CBD column (chart p.5) sets no lot size and no front or side yard ("-"), a
+  10 ft lot width, a 10 ft rear yard, 100% coverage "except as required for rear yard or side yard" (note 8), at least
+  2 stories and 25 ft; CBD-60's height is its suffix, 60 ft (note 5), with no story limit (note 4 is CBD-140's). Every
+  limit is met. Needs review on every CBD lot: the active street-level use (§325-8D(3): is the storefront on the
+  Commons or in the overlay zone?), the transition yards (§325-19: a residential neighbour?) and the parking (chart
+  p.15: "-"). No loading flag: §325-21C.
+district: CBD-60
+use: retail_store_or_service_commercial
+lot: {points: [[0, 0], [60, 0], [60, 120], [0, 120]], surveyed: true}
+buildings:
+  - id: shops_and_apartments
+    outline: [[0, 0], [60, 0], [60, 105], [0, 105]]
+    base: 0
+    floors: [14, 11, 11, 11, 11]
+grade: {elevation: 0}
+expected:
+  CBD-60.use:
+    status: complies
+    at_limit: false
+    working: "retail store or service commercial facility: marked • in the CBD column (chart p.4)"
+    cites: "§325-8A(2); chart p.4, CBD (CBD-50, -60, -85, -100, -120, -140), Retail store or service commercial facility: •"
+  CBD-60.lot_width:
+    status: complies
+    at_limit: false
+    working: "frontage 60 ft; required ≥ 10 ft"
+    cites: "§325-8A(7); chart p.5, CBD, Minimum Lot Width, other use: 10 ft"
+  CBD-60.height:
+    status: complies
+    at_limit: false
+    working: "flat roof at 14 + 4 × 11 = 58 ft above the flat grade; limit 60 ft, CBD-60's suffix (no bonus used)"
+    cites: "§325-8A(9); chart p.5, CBD, Height in feet: see note 5 (\"corresponds with its suffix\")"
+  CBD-60.min_stories:
+    status: complies
+    at_limit: false
+    working: "5 floor blocks, each one story = 5; at least 2"
+    cites: "§325-16G (CBD-60); chart p.5, CBD, Minimum Building Height, Number of stories: 2"
+  CBD-60.min_height:
+    status: complies
+    at_limit: false
+    working: "58 ft; at least 25 ft"
+    cites: "§325-8A(15); chart p.5, CBD, Minimum Building Height, Height in feet: 25 ft"
+  CBD-60.lot_coverage:
+    status: complies
+    at_limit: false
+    working: "footprint = 60 × 105 = 6,300 sf; 6,300 / 7,200 = 87.5%; allowed 100% (note 8: but the rear yard stays open)"
+    cites: "§325-8A(10); chart p.5, CBD, Percent of lot area: 100% [fn8]"
+    measured: {building_area: 6300}
+  CBD-60.rear_yard:
+    status: complies
+    at_limit: false
+    working: "rear line y = 120 to the rear wall at y = 105: 15 ft; required ≥ 10 ft"
+    cites: "§325-8A(14); chart p.5, CBD, Rear: 10 ft"
+  CBD-60.active_street_level_use:
+    status: needs_review
+    working: "a flag on every CBD lot: a storefront on the Primary Commons or in the overlay zone must hold an active use at street level; Gordium knows neither"
+    cites: "§325-8D(3)"
+  CBD-60.transition_yards:
+    status: needs_review
+    working: "a flag on every CBD lot: whether a neighbouring lot is in a residential district isn't known to Gordium"
+    cites: "§325-19A, §325-19B"
+  CBD-60.parking:
+    status: needs_review
+    working: "a flag: the CBD column of chart p.15 is \"-\" on every row (none required is the strongest reading, open question §5.28); Gordium doesn't count parking yet"
+    cites: "§325-8A(4); chart p.15, CBD: -; §325-20D(3)(b) note 2"
+plan:
+  encroach: 0

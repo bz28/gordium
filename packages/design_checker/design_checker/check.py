@@ -1672,7 +1672,12 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                         encroach.append({"outline": _ring(g), "base": min(zs), "top": max(zs), "why": "yard",
                                          "status": status, "building": b.get("id"), "measure": i.get("measure"),
                                          "row": i.get("name")})
-        height = statuses.get("building_height")
+        # the worst of the maximum-height rows: a district with a minimum height (B-1b, B-2d, the CBD districts) has a
+        # second building-height row ("≥"), whose "complies" must never hide the maximum's failure (only what rises
+        # above the limit plane is ever drawn)
+        height = next((s for s in (present.FAILS, present.REVIEW) if any(
+            i.get("measure") == "building_height" and i.get("sign") != "≥" and i["status"] == s for i in v["items"])),
+            statuses.get("building_height"))
         if height in (present.FAILS, present.REVIEW) and env.get("top") is not None:
             for b, own in solids:                       # only what rises above the limit: a roof's ridge, not its eaves
                 top = max(p[2] for f in b["faces"] for p in f["points"])
