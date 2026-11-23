@@ -1,0 +1,65 @@
+title: "CBD-85: a seven-story building on the 100 block of West Green Street, inside 85 ft; its stepback is a person's to check"
+what: >-
+  A surveyed 80 ft × 150 ft lot in CBD-85 fronting the 100 block of West Green Street, with a seven-story building
+  the full 80 ft wide and 130 ft deep: a 14 ft ground floor of shops (stated as a retail store) and six 11 ft floors
+  of apartments to an 80 ft flat roof, on the street line and both side lines, 20 ft from the rear. CBD-85's height
+  is 85 ft (chart note 5), so 80 ft complies; coverage 10,400 of 12,000 sf (87%) of the 100% allowed; the rear yard
+  20 ft of the 10 required. §325-8D(2): on this block the front façade "must contain a stepback of between 15 feet to
+  25 feet after the first two to four stories". The model is drawn as one block with no stepback; Gordium doesn't
+  measure a façade's stepback (nor know which block a lot fronts), so it never passes it: the stepback flag needs
+  review, as do the active street-level use (§325-8D(3)), the transition yards and parking. Drawn this way, the
+  stepback is in fact missing, which the person checking the flag finds.
+district: CBD-85
+use: retail_store_or_service_commercial
+lot: {points: [[0, 0], [80, 0], [80, 150], [0, 150]], surveyed: true}
+buildings:
+  - id: shops_and_apartments
+    outline: [[0, 0], [80, 0], [80, 130], [0, 130]]
+    base: 0
+    floors: [14, 11, 11, 11, 11, 11, 11]
+grade: {elevation: 0}
+expected:
+  CBD-85.use:
+    status: complies
+    at_limit: false
+    working: "retail store or service commercial facility: marked • in the CBD column (chart p.4)"
+    cites: "§325-8A(2); chart p.4, CBD, Retail store or service commercial facility: •"
+  CBD-85.height:
+    status: complies
+    at_limit: false
+    working: "flat roof at 14 + 6 × 11 = 80 ft; limit 85 ft, CBD-85's suffix"
+    cites: "chart p.5, CBD, Height in feet: see note 5"
+  CBD-85.min_stories:
+    status: complies
+    at_limit: false
+    working: "7 stories; at least 2"
+    cites: "§325-16G; chart p.5, CBD, Number of stories: 2"
+  CBD-85.lot_coverage:
+    status: complies
+    at_limit: false
+    working: "footprint = 80 × 130 = 10,400 sf; 10,400 / 12,000 = 87%; allowed 100%"
+    cites: "§325-8A(10); chart p.5, CBD, Percent of lot area: 100% [fn8]"
+    measured: {building_area: 10400}
+  CBD-85.rear_yard:
+    status: complies
+    at_limit: false
+    working: "rear line y = 150 to the rear wall at y = 130: 20 ft; required ≥ 10 ft"
+    cites: "§325-8A(14); chart p.5, CBD, Rear: 10 ft"
+  CBD-85.green_street_stepback:
+    status: needs_review
+    working: "a flag on every CBD-85 lot: fronting the 100 block of West Green Street, the front façade steps back 15 to 25 ft after the first two to four stories; Gordium doesn't measure it (here the model has none)"
+    cites: "§325-8D(2)"
+  CBD-85.active_street_level_use:
+    status: needs_review
+    working: "a flag on every CBD lot: shops at street level are an active use, but whether the storefront is on the Commons or in the overlay zone, and what each floor holds, is a person's to check"
+    cites: "§325-8D(3)"
+  CBD-85.transition_yards:
+    status: needs_review
+    working: "a flag on every CBD lot: a residential neighbour isn't known to Gordium"
+    cites: "§325-19A, §325-19B"
+  CBD-85.parking:
+    status: needs_review
+    working: "a flag: chart p.15's CBD column is \"-\" (open question §5.28)"
+    cites: "§325-8A(4); chart p.15, CBD: -"
+plan:
+  encroach: 0

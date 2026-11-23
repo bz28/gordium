@@ -1700,7 +1700,12 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                         encroach.append({"outline": _ring(g), "base": min(zs), "top": max(zs), "why": "yard",
                                          "status": status, "building": b.get("id"), "measure": i.get("measure"),
                                          "row": i.get("name")})
-        height = statuses.get("building_height")
+        # the worst of the maximum-height rows: a district with a minimum height (B-1b, B-2d, the CBD districts) has a
+        # second building-height row ("≥"), whose "complies" must never hide the maximum's failure (only what rises
+        # above the limit plane is ever drawn)
+        height = next((s for s in (present.FAILS, present.REVIEW) if any(
+            i.get("measure") == "building_height" and i.get("sign") != "≥" and i["status"] == s for i in v["items"])),
+            statuses.get("building_height"))
         if height in (present.FAILS, present.REVIEW) and env.get("top") is not None:
             for b, own in solids:                       # only what rises above the limit: a roof's ridge, not its eaves
                 top = max(p[2] for f in b["faces"] for p in f["points"])
@@ -2050,8 +2055,10 @@ def implied_for(rules: list, use: str | None, uses: dict, read: set | None = Non
     return {k: v for k, v in logic.implied_facts(use).items() if k in read}
 
 
-def _read_for(rules: list, use: str | None, uses: dict) -> set:
-    """Every name the district's rules read when they can apply to this use (applies_when not false for it)."""
+def _read_for(rules: list, use: str | None, uses: dict, memo: dict | None = None) -> set:
+    """Every name the district's rules read when they can apply to this use (applies_when not false for it). `memo`:
+    kept for one options answer (_options), the same `uses` throughout: each applies_when text's verdict for a use and
+    each rule's names, worked out once rather than once per district and use (21 districts × 37 uses)."""
     from rule_format import formula
     # every name described exactly as the checker's own verdict describes it (outcome: the city's measures and the
     # uses, check_site), so a condition is settled here as it is there: false for this use whatever the rest turns
@@ -2059,14 +2066,22 @@ def _read_for(rules: list, use: str | None, uses: dict) -> set:
     # checker could still find applicable (a name it can't type) is asked (review round 2: typed apart, a row
     # needed review that the box never asked about)
     kinds = MEASURE_KINDS | {"use": frozenset(uses)}
+    memo = {} if memo is None else memo
     wanted = set()
     for rule in rules:
         if rule.get("applies_when") and use is not None:
-            try:
-                if formula.evaluate(rule["applies_when"], {"use": use}, kinds) is False:
-                    continue                      # not this use's rule: nothing it reads is asked
-            except (formula.MissingMeasure, formula.EvaluationError):
-                pass                              # depends on what isn't known yet: it may apply, so asked
+            key = ("applies_when", rule["applies_when"], use)
+            if key not in memo:
+                try:
+                    memo[key] = formula.evaluate(rule["applies_when"], {"use": use}, kinds) is False
+                except (formula.MissingMeasure, formula.EvaluationError):
+                    memo[key] = False             # depends on what isn't known yet: it may apply, so asked
+            if memo[key]:
+                continue                          # not this use's rule: nothing it reads is asked
+        key = ("names", id(rule))                 # the rule dicts live as long as the memo (one _options)
+        if key in memo:
+            wanted |= memo[key]
+            continue
         names = reading_set.rule_names(rule)
         if parts.is_part_rule(rule):
             # a rule for each part: its parts' own measures come from the parts (the interior), never asked in the
@@ -2076,6 +2091,7 @@ def _read_for(rules: list, use: str | None, uses: dict) -> set:
                 names -= parts.all_measures()
             except (ValueError, OSError):     # parts.yaml broken (python -m rule_format says so): every name kept
                 pass
+        memo[key] = frozenset(names)
         wanted |= names
     return wanted
 
@@ -2150,12 +2166,14 @@ def _options(j: Path, files: dict) -> dict:
                     and rulebook_for(j, Path(name).stem, there)})
     uses = (read(j / USES_FILE) or {}) if files.get(USES_FILE) is not None else {}
     names = {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}
-    district_uses, follow_ups, implied = {}, {}, {}
+    district_uses, follow_ups, implied, memo = {}, {}, {}, {}
+    books = []                                    # every rulebook kept alive with the memo, which keys rules by id
     for zone in zones:
         rules = read(rulebook_for(j, zone, there))["rules"]
+        books.append(rules)
         district_uses[zone] = use_choices(rules, names, zone)
         every = list(dict.fromkeys([u["id"] for u in district_uses[zone]] + list(names)))   # a saved use the
-        read_for = {u: _read_for(rules, u, names) for u in every}                           # district doesn't list
+        read_for = {u: _read_for(rules, u, names, memo) for u in every}                     # district doesn't list
         follow_ups[zone] = {u: follow_up_facts(rules, u, names, read_for[u]) for u in every}   # is asked its own
         implied[zone] = {u: implied_for(rules, u, names, read_for[u]) for u in every}          # too
     return {"zones": zones, "uses": names, "district_uses": district_uses, "follow_ups": follow_ups,

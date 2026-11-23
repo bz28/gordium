@@ -69,7 +69,7 @@ def test_every_district_and_use_is_the_same_kept_as_worked_out_afresh():
     first = check.options(CITY)
     second = check.options(CITY)
     fresh = _fresh(REPO / CITY)
-    assert len(fresh["zones"]) == 15 and len(fresh["uses"]) >= 37       # every district, every city use
+    assert len(fresh["zones"]) == 21 and len(fresh["uses"]) >= 37       # every district, every city use
     assert json.dumps(first, sort_keys=False) == json.dumps(second) == json.dumps(fresh)
     for zone in fresh["zones"]:                                          # said district by district, use by use
         for use in fresh["follow_ups"][zone]:
@@ -319,6 +319,17 @@ def test_options_is_quick():
     again = time.perf_counter() - t
     assert kept < 0.05, kept
     assert again < 1.0, again
+
+
+def test_the_memo_kept_for_one_answer_gives_the_answer_worked_out_rule_by_rule(monkeypatch):
+    """_options keeps each applies_when verdict and each rule's names for one answer (21 districts × 37 uses took
+    ~0.27 s worked out again on Windows, 2026-11-23; ~0.05 s kept). The same answer as a fresh memo for every call."""
+    _clear()
+    kept = check.options(CITY)
+    original = check._read_for
+    monkeypatch.setattr(check, "_read_for", lambda rules, use, uses, memo=None: original(rules, use, uses, None))
+    check._OPTIONS.clear()
+    assert check.options(CITY) == kept
 
 
 def test_a_uses_file_that_cannot_be_read_is_an_error_as_before(tmp_path):

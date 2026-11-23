@@ -1,7 +1,7 @@
 """The district coverage audit: is each district's zoning covered?
 
 One generated table per family of districts (`6_coverage_report/residential_districts.md`, and
-`commercial_districts.md` for the B districts) answers it for every piece of the law labeled `rule` or `flag`
+`commercial_districts.md` for the B districts, `central_business_districts.md` for the CBD districts) answers it for every piece of the law labeled `rule` or `flag`
 (3_section_labels) and every district that family's decisions file lists (AUDITS). Each cell says one of:
 
     rulebook        the district's rulebook has a rule for it (which rule ids)
@@ -47,14 +47,15 @@ from document_extraction.sections import piece_keys
 from rule_format import formula
 from rule_format.labels import load_pieces
 from rule_format.place import place
-from rule_format.rulebook import REPO, Context, district_name, load, locate, read_jsonl, rulebook_for, tokenize
+from rule_format.rulebook import REPO, Context, column_districts, load, locate, read_jsonl, rulebook_for, tokenize
 
 DECISIONS = "residential_coverage.yaml"
 OUTPUT = "6_coverage_report/residential_districts.md"
 # Each family of districts audited: (its decisions file in the jurisdiction, the table it makes, its name in the
 # table's words). A jurisdiction is audited for each family whose decisions file it has.
 AUDITS = [(DECISIONS, OUTPUT, "residential"),
-          ("commercial_coverage.yaml", "6_coverage_report/commercial_districts.md", "commercial")]
+          ("commercial_coverage.yaml", "6_coverage_report/commercial_districts.md", "commercial"),
+          ("central_business_coverage.yaml", "6_coverage_report/central_business_districts.md", "central business")]
 STATUSES = ("missing", "open_question", "parked", "flag", "rulebook", "not_applicable")    # worst first
 WORDS = {"missing": "MISSING", "open_question": "open question", "parked": "parked", "flag": "flag (needs review)",
          "rulebook": "in the rulebook", "not_applicable": "not applicable"}
@@ -369,7 +370,7 @@ class Audit:
         """The district's own chart cell for the decision's row, as the chart reader read it (None if it has none)."""
         c = dec["cell"]
         column = next((col for (pg, sec, row, col) in self.ctx.cells.get(self.chart, {})
-                       if district_name(col) == d), None)
+                       if d in column_districts(col, self.ctx.shared_columns)), None)
         return self.ctx.cells.get(self.chart, {}).get((dec.get("page", 2), c.get("section"), c.get("row"), column))
 
     def _cell(self, d: str, dec: dict):

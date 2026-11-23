@@ -1,0 +1,66 @@
+title: "CBD-60: a six-story office building 4 ft over CBD-60's 60 ft, on the street line, so the bonus can't help"
+what: >-
+  A surveyed 60 ft × 120 ft lot in CBD-60 (7,200 sf) with a six-story professional office building 50 ft wide and
+  80 ft deep: a 14 ft ground floor and five 10 ft floors to a 64 ft flat roof, on the street line, 5 ft from each side
+  line, 40 ft from the rear. CBD-60's height is 60 ft (chart note 5: the suffix). §325-16C lets a building rise up to
+  10% more (6 ft, so 66 ft) only if each required front, side and rear yard grows 1 ft per extra foot: at 64 ft the
+  front and side yards must be 4 ft (Gordium's cautious reading where the chart requires none, open question §5.25)
+  and the rear 10 + 4 = 14 ft. The side (5 ft) and rear (40 ft) yards would do, but the building stands on the street
+  line (front yard 0): does not comply. For the same reason the eaves rule fails: at 64 ft each yard's outermost part
+  may come within 2 ft of the yard the bonus asks (§325-18B), so the front wall, with no eave, must stand 4 - 2 = 2 ft
+  back from the street line, and stands at 0. Every other limit is met (no story limit in CBD-60; two stories and
+  25 ft at least; 4,000 sf of 7,200 = 56% coverage of the 100% allowed; the side walls 5 ft and the rear 40 ft back,
+  more than the 2 ft and 12 ft their eaves need).
+district: CBD-60
+use: business_or_professional_office
+lot: {points: [[0, 0], [60, 0], [60, 120], [0, 120]], surveyed: true}
+buildings:
+  - id: office
+    outline: [[5, 0], [55, 0], [55, 80], [5, 80]]
+    base: 0
+    floors: [14, 10, 10, 10, 10, 10]
+grade: {elevation: 0}
+expected:
+  CBD-60.use:
+    status: complies
+    at_limit: false
+    working: "business or professional office: marked • in the CBD column (chart p.4)"
+    cites: "§325-8A(2); chart p.4, CBD, Business or professional office: •"
+  CBD-60.height:
+    status: does_not_comply
+    at_limit: false
+    working: "flat roof at 14 + 5 × 10 = 64 ft; limit 60 ft. The bonus (at most 60 + 6 = 66 ft) needs a front yard of 64 − 60 = 4 ft; the front yard is 0"
+    cites: "chart p.5, CBD, Height in feet: see note 5; §325-16C(1), (3)"
+  CBD-60.yard_projections:
+    status: does_not_comply
+    at_limit: false
+    working: "64 ft is 4 ft over 60 ft: the front yard the bonus asks is 4 ft, which an eave may enter by 2 ft, so the outermost part of the front must be ≥ 4 − 2 = 2 ft from the street line; it is at 0 ft (−2 ft). Sides 5 ≥ 2, rear 40 ≥ 10 + 4 − 2 = 12"
+    cites: "§325-18B; §325-16C(1); chart p.5, CBD, Rear: 10 ft"
+  CBD-60.min_stories:
+    status: complies
+    at_limit: false
+    working: "6 stories; at least 2"
+    cites: "§325-16G; chart p.5, CBD, Minimum Building Height, Number of stories: 2"
+  CBD-60.min_height:
+    status: complies
+    at_limit: false
+    working: "64 ft; at least 25 ft"
+    cites: "§325-8A(15); chart p.5, CBD, Height in feet: 25 ft"
+  CBD-60.lot_coverage:
+    status: complies
+    at_limit: false
+    working: "footprint = 50 × 80 = 4,000 sf; 4,000 / 7,200 = 56%; allowed 100%"
+    cites: "§325-8A(10); chart p.5, CBD, Percent of lot area: 100% [fn8]"
+    measured: {building_area: 4000}
+  CBD-60.rear_yard:
+    status: complies
+    at_limit: false
+    working: "rear line y = 120 to the rear wall at y = 80: 40 ft; required ≥ 10 ft"
+    cites: "§325-8A(14); chart p.5, CBD, Rear: 10 ft"
+  CBD-60.active_street_level_use:
+    status: needs_review
+    working: "a flag on every CBD lot (§325-8D(3)): an office isn't one of the listed active uses, so on the Commons or in the overlay zone its street-level storefront would need the Planning Board's approval"
+    cites: "§325-8D(3)(a), (b)"
+plan:
+  encroach: 1      # the floors over the 60 ft plane, drawn red
+  encroach_why: [height]

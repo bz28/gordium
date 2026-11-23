@@ -408,6 +408,8 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     if unknown:
         escalate(z, "needs_review", f"The City's zoning map gives {' and '.join(unknown)}, which isn't one of the "
                                     "districts Gordium has rules for: choose the district.")
+    for c in (c for c in zones if district(c)[1] == "unresolved"):
+        escalate(z, "needs_review", " ".join(NAMES["districts"]["unresolved"][c]["why"].split()))
     if len(zones) > 1:
         asks.append(f"This lot is in {' and '.join(zones)}: pick the zone that applies.")
         escalate(z, "ask", asks[-1])

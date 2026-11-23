@@ -10,10 +10,24 @@ districts:
   residential: [R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU]
   # The commercial districts that have a rulebook, as the commercial chart's columns (p.5) and the rulebook files
   # write them; the City's map writes them the same way (looked up 2026-11-22). Not here: B-2b (on the map and in
-  # §325-4, but in no chart column), the CBD districts and the special-purpose, waterfront, West End, Southwest and
-  # Collegetown districts (no rulebook yet): shown as the map gives them, needs review
-  # (docs/decisions/2026-11-22_commercial_districts.md).
+  # §325-4, but in no chart column) and the special-purpose, waterfront, West End, Southwest and Collegetown districts
+  # (no rulebook yet): shown as the map gives them, needs review (docs/decisions/2026-11-22_commercial_districts.md).
   commercial: [B-1a, B-1b, B-2a, B-2d, B-4, B-5]
+  # The central business districts, as the chart's one CBD column names them ("CBD-50, -60, -85, -100, -120, -140",
+  # p.4 and p.5) and the City's map writes them (its distinct CBD codes, looked up 2026-11-23)
+  # (docs/decisions/2026-11-23_central_business_districts.md).
+  central_business: [CBD-50, CBD-60, CBD-85, CBD-100, CBD-120, CBD-140]
+  # A code the City's map gives that no chart column, no §325-4 entry and no rulebook has: never read as a nearby
+  # district (CBD-52 isn't CBD-50, nor a 52 ft CBD), always needs review with why (an open question for the City).
+  unresolved:
+    CBD-52:
+      why: >-
+        The City's online zoning map codes six blocks of West State Street (the 300 and 400 blocks, N Meadow St to
+        N Albany St) CBD-52, looked up 2026-11-23. CBD-52 is in neither Chapter 325's list of districts (§325-4, p.22)
+        nor the zoning charts (April 2026, p.4-5: "CBD-50, -60, -85, -100, -120, -140"), and the printed zoning map
+        (May 2026, p.5) has no CBD-52 in its legend. A 2019 proposal would have zoned these blocks CBD-52 (a 2019 news
+        report); whether it was adopted, and what its rules are, is an open question for the City zoning office
+        (docs/questions_for_architects.md §5.30). Gordium has no rules for it: choose the district with the City.
   aliases:
     R-U:
       district: RU

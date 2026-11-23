@@ -676,10 +676,11 @@ def test_the_city_maps_r_u_is_the_rulebooks_ru():
     assert "R-U" not in json.dumps(r["snapshot"]) and "RU" not in json.dumps(r["snapshot"]["facts"]["zone"])
 
 
-@pytest.mark.parametrize("code", ["B-2b", "CBD-60", "R-1A", "B-1A", "RU ", "R U"])
+@pytest.mark.parametrize("code", ["B-2b", "I-1", "R-1A", "B-1A", "CBD-60 ", "CBD60", "RU ", "R U"])
 def test_a_district_code_gordium_doesnt_know_needs_review(code):
-    """Another district (B-2b, CBD-60, both on the City's map, with no rulebook) or a code that only looks like one
-    Gordium has (R-1A, B-1A, 'RU ', 'R U'): never matched by likeness, shown as the map gives it, needs review."""
+    """Another district (B-2b, I-1, both on the City's map, with no rulebook) or a code that only looks like one
+    Gordium has (R-1A, B-1A, 'CBD-60 ', 'CBD60', 'RU ', 'R U'): never matched by likeness, shown as the map gives it,
+    needs review."""
     r, _ = run("106_ithaca_rd", zones=[Fake.square(None, code)])
     z = both(r)["zone"]
     assert z["value"] == code and z["status"] == "needs_review" and "isn't one of the districts Gordium has rules" in z["reason"]
@@ -687,7 +688,7 @@ def test_a_district_code_gordium_doesnt_know_needs_review(code):
 
 def test_every_district_with_a_rulebook_as_written_is_used_as_is():
     for code in ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b", "B-1a", "B-1b", "B-2a", "B-2d", "B-4",
-                 "B-5"]:
+                 "B-5", "CBD-50", "CBD-60", "CBD-85", "CBD-100", "CBD-120", "CBD-140"]:
         r, _ = run("106_ithaca_rd", zones=[Fake.square(None, code)])
         z = both(r)["zone"]
         assert z["value"] == code and z["status"] == "suggested" and "map writes" not in (z.get("note") or ""), code
@@ -732,6 +733,30 @@ def test_the_commercial_districts_are_the_rulebooks_and_the_bulk_charts_columns(
     assert all((j / f"5_zoning_rules/{n}.yaml").is_file() for n in d["commercial"])
 
 
+def test_the_central_business_districts_are_the_cbd_columns_heading_and_each_has_a_rulebook():
+    """names.yaml's central business districts are the ones the chart's one CBD column names ("CBD-50, -60, -85, -100,
+    -120, -140", p.5), as jurisdiction.yaml's shared column spells them, each with its rulebook."""
+    from rule_format.place import place
+    from site_lookup.adapters.ithaca_city.sources import NAMES
+    j = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    assert NAMES["districts"]["central_business"] == place(j).shared_columns["Central Business"]
+    assert all((j / f"5_zoning_rules/{n}.yaml").is_file() for n in NAMES["districts"]["central_business"])
+
+
+def test_cbd_52_on_the_citys_map_is_never_read_as_another_district_and_says_why():
+    """The City's online map codes six West State Street blocks CBD-52, which no chart column and no §325-4 entry
+    has: shown as the map gives it, needs review, with the reason (an open question for the City), never CBD-50 or a
+    52 ft CBD."""
+    from site_lookup.adapters.ithaca_city.sources import NAMES, district
+    assert district("CBD-52") == ("CBD-52", "unresolved")
+    assert not (REPO / "regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/CBD-52.yaml").exists()
+    r, _ = run("106_ithaca_rd", zones=[Fake.square(None, "CBD-52")])
+    z = both(r)["zone"]
+    assert z["value"] == "CBD-52" and z["status"] == "needs_review"
+    assert "§325-4" in z["reason"] and "open question for the City zoning office" in z["reason"]
+    assert "CBD-52" not in NAMES["districts"]["central_business"]
+
+
 @pytest.mark.parametrize("first", [True, False])
 def test_an_overlay_drawn_over_a_district_goes_to_the_overlays_and_needs_review(first):
     """The City's map draws the South Hill Overlay District over R-2a (and others) and returns the two in no set
@@ -753,12 +778,12 @@ def test_a_lot_under_an_overlay_only_isnt_on_the_map():
 
 
 def test_two_base_districts_drawn_over_each_other_ask():
-    """B-1a and CBD-60 overlap on the City's map: both count, so Gordium asks (and CBD-60 has no rulebook: needs
+    """B-1a and B-2b overlap on the City's map: both count, so Gordium asks (and B-2b has no rulebook: needs
     review too)."""
-    r, _ = run("106_ithaca_rd", zones=[Fake.square(None, "B-1a"), Fake.square(None, "CBD-60")])
+    r, _ = run("106_ithaca_rd", zones=[Fake.square(None, "B-1a"), Fake.square(None, "B-2b")])
     z = both(r)["zone"]
-    assert z["status"] == "ask" and set(z["value"]) == {"B-1a", "CBD-60"}
-    assert "gives CBD-60, which isn't one of the districts Gordium has rules" in z["reason"]
+    assert z["status"] == "ask" and set(z["value"]) == {"B-1a", "B-2b"}
+    assert "gives B-2b, which isn't one of the districts Gordium has rules" in z["reason"]
 
 
 def test_a_city_road_named_for_two_streets_is_the_addresss_street():

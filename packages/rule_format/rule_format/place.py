@@ -81,6 +81,12 @@ class Place:
         """A zoning-chart column that is a district, as the chart prints it."""
         return _compiled(self.settings["districts"]["chart_column"])
 
+    @property
+    def shared_columns(self) -> dict[str, list[str]]:
+        """A zoning-chart column that holds several districts (as the chart prints its heading) -> those districts, as
+        the city writes them (Ithaca: "Central Business" -> CBD-50 ... CBD-140, chart p.4-5)."""
+        return {str(k): [str(d) for d in v] for k, v in (self.settings["districts"].get("shared_columns") or {}).items()}
+
     def law_file(self, role: str) -> str:
         """A document in 1_source_documents/ by what it is (zoning_code, zoning_chart)."""
         name = (self.settings.get("law") or {}).get(role)
@@ -205,6 +211,11 @@ def settings_problems(settings) -> list[str]:
             out.append("districts.chart_column matches an empty heading (it must match only district names)")
     except re.error as e:
         out.append(f"districts.chart_column isn't a pattern ({e})")
+    shared = settings["districts"].get("shared_columns")
+    if shared is not None and not (isinstance(shared, dict) and shared and all(
+            isinstance(k, str) and k.strip() and isinstance(v, list) and v and len(set(v)) == len(v)
+            and all(isinstance(d, str) and d.strip() for d in v) for k, v in shared.items())):
+        out.append("districts.shared_columns must map a chart column's heading to its list of districts")
     if not settings["law"].get("zoning_code"):
         out.append("law names no zoning_code")
     out += [f"law.{k} must name a file" for k, v in settings["law"].items() if not (isinstance(v, str) and v.strip())]

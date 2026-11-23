@@ -35,13 +35,17 @@ def road_name(name: str) -> str:
 
 def district(code: str | None) -> tuple[str | None, str]:
     """(the district as Gordium's rulebooks write it, how it was matched) for a City zoning-map code: 'district'
-    when it is one of the districts that have a rulebook as written (residential or commercial), 'alias' when names.yaml's
-    exact table renames it (R-U -> RU), 'unknown' otherwise (shown as the map gives it; the zone then needs review)."""
+    when it is one of the districts that have a rulebook as written (residential, commercial or central business),
+    'alias' when names.yaml's exact table renames it (R-U -> RU), 'unresolved' when names.yaml says why the code can't
+    be used (CBD-52: in no chart and not in §325-4), 'unknown' otherwise (shown as the map gives it; the zone then needs
+    review)."""
     d = NAMES["districts"]
-    if code in d["residential"] or code in d.get("commercial", []):
+    if any(code in d.get(family, []) for family in ("residential", "commercial", "central_business")):
         return code, "district"
     if code in d["aliases"]:
         return d["aliases"][code]["district"], "alias"
+    if code in (d.get("unresolved") or {}):
+        return code, "unresolved"
     return code, "unknown"
 
 

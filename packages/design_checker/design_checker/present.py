@@ -159,6 +159,33 @@ def _compares(check: str) -> list[ast.Compare]:
     return sorted(out, key=lambda n: (n.lineno, n.col_offset))
 
 
+def _blame(body, fails, compares: list[ast.Compare]) -> ast.Compare | None:
+    """A limit of `compares` (the rule's, _compares) that makes `body` (the same check, parsed) fail, found down its
+    own and/or shape, or None: `fails(c)` says a limit fails (as drawn, whatever its unknown part, or under every
+    reading). An `and` fails by its first part that fails. An `or` fails only if every way fails: of the ways' own
+    failing limits, the one on the rule's subject (the measure its first limit is on: a height rule's own height),
+    else one on a measure no limit takes as an input (in the eaves rule "building_height <= 60 or (front_yard_eaves
+    >= ... - 2 ...)" the height only says whether the bonus's eaves apply: the eave is shown), else the first. A
+    flat `and` of limits gives the first that fails, as it always did."""
+    at = {(c.lineno, c.col_offset): c for c in compares}
+    subject = compares[0].left.id if compares else None
+    inputs = {n for c in compares for n in formula.names(ast.unparse(c.comparators[0]))}
+
+    def walk(node):
+        if isinstance(node, ast.Compare):
+            c = at.get((node.lineno, node.col_offset))
+            return c if c is not None and fails(c) else None
+        if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.And):
+            return next((b for b in (walk(v) for v in node.values) if b is not None), None)
+        if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.Or):
+            found = [b for b in (walk(v) for v in node.values) if b is not None]
+            return (next((b for b in found if b.left.id == subject), None)
+                    or next((b for b in found if b.left.id not in inputs), None) or (found[0] if found else None))
+        return None
+    return walk(body)
+
+
+
 # A "Lot facts disagree" row offers to re-enter the counts that disagree (r2 round 6): project.fact_conflict_rows.
 
 
@@ -1200,13 +1227,16 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     names = formula.names(check) if check else set()
     primary = compares[0] if compares else None
     body = formula.parse(check).body if check else None
-    if (_status(row) == FAILS and isinstance(body, ast.BoolOp) and isinstance(body.op, ast.And)
-            and all(isinstance(v, ast.Compare) for v in body.values)):
-        # a rule that is several limits at once (the eaves into every yard): name and show the one that fails
-        unknown = row.get("Unknown")        # not measured: a limit that fails at every value they could take
-        primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False
-                        or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)
-                        or _fails_every_reading(ast.unparse(c), values, measured, facts)), primary)
+    unknown = row.get("Unknown")            # not measured: a limit that fails at every value they could take
+
+    def fails(c):
+        return (_evaluate(ast.unparse(c), values) is False or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)
+                or _fails_every_reading(ast.unparse(c), values, measured, facts))
+    if _status(row) == FAILS and isinstance(body, ast.BoolOp):
+        # a rule that is several limits at once (the eaves into every yard, and/or nested): name and show one that
+        # fails, found down the rule's own and/or shape (_blame), never a limit that holds (review of the CBD branch,
+        # P2: "Eaves into rear yard … does not comply" showed the passing rear eave)
+        primary = _blame(body, fails, compares) or primary
     elif (_status(row) == REVIEW and rule.get("review_when") and isinstance(body, ast.BoolOp)
           and isinstance(body.op, ast.And) and all(isinstance(v, ast.Compare) for v in body.values)):
         # a several-limit rule held back by its own review_when (its reason is the row's): name the limit that

@@ -206,6 +206,8 @@ def test_extracted_text_and_chart_cells_match_a_reading_without_the_cache():
                 for r in rows[1:]:
                     if "columns" in r:
                         districts |= {district_name(c["name"]) for c in r["columns"] if place(j).district_column.fullmatch(c["name"])}
+                        # a column holding several districts (Ithaca's "Central Business": CBD-50 ... CBD-140)
+                        districts |= {d for c in r["columns"] for d in place(j).shared_columns.get(c["name"], [])}
                     elif "value" in r and not r.get("heading"):
                         cells[(r["page"], r["section"], r["row"].strip(), r["column"])] = r
                 assert ctx.cells[name] == cells
