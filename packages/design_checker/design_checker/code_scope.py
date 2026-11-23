@@ -285,8 +285,9 @@ def decide(values: dict, building: dict | None) -> dict:
                        "lodgers and five bedrooms for them)", ["R101.2 item 4", "R202 BED AND BREAKFAST DWELLING"],
                        used, by_hand)
     if use not in HOUSES and use != ATTACHED:
-        return _answer(BUILDING, f"its use ({use}) is none of the dwellings R101.2 lists (101.2: every other building)",
-                       ["R101.2", "101.2"], used)
+        named = use.replace("_", " ")            # the use in words ("retail store or service commercial")
+        return _answer(BUILDING, f"its use ({named}) is none of the dwellings R101.2 lists (101.2: every other "
+                       "building)", ["R101.2", "101.2"], used)
     # a dwelling R101.2 can cover: each condition it sets, and how many dwelling units the building holds
     if values.get("care_facility") is True or facts.get("care_facility") is True:
         used["care_facility"] = True
