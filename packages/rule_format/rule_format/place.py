@@ -272,8 +272,12 @@ def inherit_problems(folder: Path, settings: dict) -> list[str]:
 
 def stand_in(folder, name: str, inherits=()) -> Place:
     """A place with no jurisdiction.yaml (a tool's or a test's: the Children's Odyssey eval inherits Maine's state law
-    alone), as the real Place, so it has every field and property a place has, a new one included: never a class of
-    its own that copies a few. `inherits`: <state>/<name> of each state law folder, as jurisdiction.yaml lists them."""
+    alone), as the real Place, never a class of its own that copies a few. Its name, folder and the values worked out
+    from them (key, jurisdiction, inherits, inherited_rulebooks, test_sites) work; the values read from
+    jurisdiction.yaml's settings (boundary, coordinates, districts, time zone, law files, addresses, adapters) are
+    absent and raise. A test that runs the caller through it (test_the_odyssey_answer_maker_loads_maines_law_...)
+    is what catches a caller that starts reading one. `inherits`: <state>/<name> of each state law folder, as
+    jurisdiction.yaml lists them."""
     return Place(Path(folder), {"name": name, "inherits": list(inherits)})
 
 

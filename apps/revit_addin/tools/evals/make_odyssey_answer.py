@@ -32,8 +32,9 @@ import make_eval_comparison as evalc  # noqa: E402
 MAINE = REPO / "regulations/jurisdictions/maine/maine_state"
 
 
-# a place that inherits only Maine's state law: the real Place (rule_format.place.stand_in), so every field egress
-# reads from a place is there, a new one too
+# a place that inherits only Maine's state law: the real Place (rule_format.place.stand_in). egress.laws reads its
+# name, folder and inherited law, which a stand-in has; settings it lacks (time zone, boundary...) raise, and
+# test_panel_data's un-skipped test of this script catches a new read in CI
 PLACE = stand_in(MAINE, "Portland, ME (the eval)", ["maine/maine_state"])
 
 
