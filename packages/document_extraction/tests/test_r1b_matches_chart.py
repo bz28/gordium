@@ -392,7 +392,8 @@ def test_use_list_matches_the_chart_marks(district):
                    and any(s.get("page") == 2 and str(s.get("quote", "")).startswith(f"({n})") for s in r["sources"])
                    for r in rules), f"{use}'s note {n} (chart p.2) has no flag of its own"
     assert set(marks.values()) <= {"•", "SP", "-"}
-    assert set(marks) == set(uses)                                            # every use has a mark
+    # every use of the residential chart has a mark (the commercial chart's uses, p.4, are test_b_districts_match_chart's)
+    assert set(marks) == {k for k, v in uses.items() if any(s["page"] == 2 for s in v["sources"])}
     if use_rule["kind"] == "rule":
         allowed = formula.strings(use_rule["check"])
         flagged = set().union(*(formula.strings(w["when"]) for w in use_rule.get("review_when", [])))

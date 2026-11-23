@@ -228,10 +228,13 @@ def test_tested_on_a_model_comes_from_test_sites():
 
 def test_the_cli_refuses_to_write_when_a_decision_isnt_backed(monkeypatch, capsys):
     written = []
-    monkeypatch.setattr(audit, "build", lambda j: (None, ["a problem"]))
+    monkeypatch.setattr(audit, "build", lambda j, decisions: (None, ["a problem"]))
     monkeypatch.setattr(cli, "_write_or_check", lambda *a: written.append(a) or True)
     assert cli.main(["audit"]) == 1
-    assert "✗ new_york/ithaca_city: a problem" in capsys.readouterr().out and written == []
+    out = capsys.readouterr().out
+    assert written == []                       # neither family's table is written
+    for decisions in ("residential_coverage.yaml", "commercial_coverage.yaml"):
+        assert f"✗ new_york/ithaca_city ({decisions}): a problem" in out
 
 
 # Review round 1 (cold reviewer + 2 sceptics each): every confirmed finding pinned.

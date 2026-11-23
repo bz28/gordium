@@ -21,6 +21,9 @@ from rule_format.rulebook import tokenize
 
 REPO = Path(__file__).resolve().parents[3]
 TEXT = REPO / "regulations/jurisdictions/new_york/ithaca_city/2_extracted_text"
+CONFECTIONERY = "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales"
+THEATER = "Theater, bowling alley, auditorium, or other similar place of public assembly"
+SHOP = "Printing, heating, welding, air conditioning, plumbing, or similar shop"
 NOT_COMPARABLE = {   # (page, row): why. Each is read by hand from the PDF in BY_HAND below.
     (2, "Tower for the receipt or transmission of electronic signals or generation of electricity"):
         "label wraps onto 3 lines around its values",
@@ -29,6 +32,12 @@ NOT_COMPARABLE = {   # (page, row): why. Each is read by hand from the PDF in BY
     (3, "Rear (minimum, % of depth or feet, whichever is less)"): "label and every value wrap onto a 2nd line",
     (14, "First three bed or sleeping rooms per dwelling unit"): "label wraps around the merged value",
     (14, "Dormitory"): "the R-3A and R-3B values wrap onto 4 lines",
+    (4, CONFECTIONERY): "label wraps onto 3 lines around its values",
+    (4, THEATER): "label wraps onto 3 lines around its values",
+    (4, SHOP): "label wraps onto 3 lines around its values",
+    (4, "Tower for the receipt or transmission of electronic signals or generation of electricity"):
+        "label wraps onto 3 lines around its values",
+    (5, "Rear (minimum, % of depth or feet, whichever is less)"): "label and every value wrap onto 3 lines",
 }
 
 
@@ -76,6 +85,7 @@ def test_rows_that_cant_be_compared_are_exactly_the_listed_ones():
 # on the cited lines against the drawn column edges (p.2: R-1A 259–302 … RU 605–672, Additional
 # Regulations 672–756; p.3: R-1A 256–310 … RU 693–755; p.14: R-1A 236–285 … RU 596–756), top line first.
 REAR = "25%/ 50 ft [fn16]"
+B4 = ["B-1A", "B-1B", "B-2A", "B-2C", "B-2D", "B-4", "B-5", "Central Business", "Additional Regulations"]
 BY_HAND = {
     # p.2 lines 35-37: "SP" at x 275, 318, 361, 405, 448, 491, 534, 577, 632 on line 36; "§325-9B(1)(j)" at 680
     (2, "Tower for the receipt or transmission of electronic signals or generation of electricity"):
@@ -105,6 +115,23 @@ BY_HAND = {
     (14, "Dormitory"): {"R-1A": "-", "R-1B": "-", "R-2A": "-", "R-2B": "-", "R-2C": "-",
                         "R-3A": "1 space per 4 persons housed", "R-3AA": "-",
                         "R-3B": "1 space per 4 persons housed", "RU": "1 space per 4 persons housed"},
+    # p.4 (commercial uses; B-1A 302-344, B-1B -386, B-2A -428, B-2C -469, B-2D -511, B-4 -548, B-5 -584, Central
+    # Business -676, Additional Regulations -756), each mark on the middle line of three:
+    # line 36 "-" @322, 363, "•" @401, 443, 485, 524, 560, 624
+    (4, CONFECTIONERY): dict(zip(B4, ["-", "-", "•", "•", "•", "•", "•", "•", ""])),
+    # line 39 "-" @322, 363, "•" @401, 443, "-" @489, "•" @524, 560, 624
+    (4, THEATER): dict(zip(B4, ["-", "-", "•", "•", "-", "•", "•", "•", ""])),
+    # line 47 "-" @322, 363, 405, 447, 489, "•" @524, 560, "-" @628
+    (4, SHOP): dict(zip(B4, ["-", "-", "-", "-", "-", "•", "•", "-", ""])),
+    # line 56 "SP" @318, 360, 401, 443, 485, 524, 561, 625; "§325-9B(1)(j)" @685
+    (4, "Tower for the receipt or transmission of electronic signals or generation of electricity"):
+        dict(zip(B4, ["SP"] * 8 + ["§325-9B(1)(j)"])),
+    # p.5 lines 32-34 (B-1A 269-325, B-1B -379, B-2A -439, B-2D -493, B-4 -547, B-5 -601, Central Business -756):
+    # "15%/" @283, "10%/" @338, "15%/" @395, 452, 506, 560 on line 32; "10 ft" @668 on line 33; "20 ft [fn9]"
+    # @283, "15 ft [fn9]" @338, "20 ft [fn9]" @395, 452, 506, 560 on line 34
+    (5, "Rear (minimum, % of depth or feet, whichever is less)"):
+        {"B-1A": "15%/ 20 ft [fn9]", "B-1B": "10%/ 15 ft [fn9]", "B-2A": "15%/ 20 ft [fn9]", "B-2D": "15%/ 20 ft [fn9]",
+         "B-4": "15%/ 20 ft [fn9]", "B-5": "15%/ 20 ft [fn9]", "Central Business": "10 ft"},
 }
 
 

@@ -1,0 +1,1271 @@
+# B-2a (City of Ithaca, General Business): rules drafted by Claude by reading the zoning charts (April 2026: p.4 uses, p.5
+# dimensions, p.15 parking and loading) and Chapter 325, 2026-11-22. Draft (architect approval is deferred for now,
+# decided 2026-10-19). Every chart value was read by hand and is checked against the chart reader's B-2A cells
+# (packages/document_extraction/tests/test_b_districts_match_chart.py); every quote is verified against the PDF text by
+# `python -m rule_format`. Written under regulations/document_extraction_guide/drafting_rules.md, the way the residential
+# rulebooks were (R-3a is the closest: the same multi-family lot-size note), laid out with a small script of Claude's
+# own so the six B columns are written alike. The plan, and what isn't covered yet: docs/decisions/2026-11-22_commercial_districts.md.
+#
+# Flags here (needs review on every lot they apply to): the transition yards next to residential lots (§325-19),
+# parking and loading, accessory dwelling units, motels' and gasoline stations' extra standards.
+# Not covered yet: height exceptions (§325-16A, B), signs (Chapter 272), design review (Chapter 160), site plan review,
+# the performance standards (§325-23).
+
+district: B-2a
+rules:
+- id: B-2a.use
+  kind: rule
+  topic: uses
+  title: Permitted primary uses (chart p.4)
+  check: >-
+    use in ["one_family_detached", "one_family_semi_detached", "one_family_attached", "two_family", "multiple_family", "dormitory",
+    "church", "public_park_or_playground", "library_or_fire_station", "nursery_school_or_child_day_care", "adult_day_care_facility",
+    "nursing_home", "funeral_home", "business_or_professional_office", "bank", "office_of_government", "school", "retail_store_or_service_commercial",
+    "restaurant_or_tavern", "club_or_lodge", "light_hand_fabrication", "place_of_public_assembly", "hotel_motel", "urban_beverage_producer"]
+  review_when:
+  - when: use == "cemetery"
+    reason: >-
+      Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(b)
+      lists cemeteries in all districts.
+  - when: use == "public_utility_structure"
+    reason: >-
+      Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(c)
+      lists public utility facilities in all districts.
+  - when: use == "neighborhood_commercial_facility"
+    reason: >-
+      Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(f)
+      lists neighborhood retail or service commercial facilities only in R-2, R-3, CR-2, CR-3 and CR-4, so the chart's SP
+      has no matching entry in the law's list; either way it isn't permitted by right here.
+  - when: use == "hospital_or_sanitarium"
+    reason: >-
+      Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(g)
+      lists hospitals or sanatoriums only in R-3, CR-3 and CR-4, so the chart's SP has no matching entry in the law's list;
+      either way it isn't permitted by right here.
+  - when: use == "bed_and_breakfast_inn"
+    reason: >-
+      Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(p)
+      lists bed-and-breakfast inns in all districts.
+  - when: use == "redemption_center"
+    reason: >-
+      Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(o)
+      lists redemption centers in B-2 Districts.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [7, 7]
+    quote: B-1A B-1B B-2A B-2C B-2D
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [15, 16]
+    quote: >-
+      (2) Column 2: Permitted Primary Uses. Uses which are permitted in each use district are listed, subject to the further
+      regulations in this section and of Article V.
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'One-family dwelling, detached', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'One-family dwelling, semi-detached', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'One-family dwelling, attached', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Two-family dwelling, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Multiple family dwelling, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Dormitory, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Church or related building, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Public park or playground, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Library or fire station, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Cemetery or related building, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Public utility structure except office, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Nursery school, child day care center', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Adult day care facility, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Neighborhood commercial facility, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Nursing, convalescent or rest home', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Hospital or sanitarium, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Bed-and-breakfast inn, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Funeral home or mortuary, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Business or professional office, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Bank or monetary institution, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Office of government, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: School and related buildings, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Retail store or service commercial facility, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Restaurant, fast food establishment, tavern', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Club, lodge, or private social center', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: "Confectionery, millinery, dressmaking or other activities involving light hand fabrication\
+        \ as well as sales", column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Theater, bowling alley, auditorium, or other similar place of public assembly',
+      column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Hotel, motel', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Urban beverage producer, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Parking garage, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Gasoline station, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Motor vehicle sales and service, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Printing, heating, welding, air conditioning, plumbing, or similar shop', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Redemption center, column: B-2A}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 30
+    lines: [22, 23]
+    quote: >-
+      (1) The uses listed under the district regulations in § 325-8, District regulations, which require a special permit
+      from the Planning and Development Board, are as follows:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 30
+    lines: [25, 25]
+    quote: (b) Cemeteries in all districts.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 30
+    lines: [26, 26]
+    quote: (c) Public utility facilities in all districts.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 30
+    lines: [29, 30]
+    quote: >-
+      (f) Neighborhood retail or service commercial facilities in R-2, R-3, CR-2, CR-3, and CR-4 Districts.
+    not_limits: {2: 'district names (R-2, CR-2), not numbers', 3: 'district names (R-3, CR-3), not numbers', 4: 'a district
+        name (CR-4), not a number'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 30
+    lines: [31, 31]
+    quote: (g) Hospitals or sanatoriums in R-3, CR-3, and CR-4 Districts.
+    not_limits: {3: 'district names (R-3, CR-3), not numbers', 4: 'a district name (CR-4), not a number'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 31
+    lines: [35, 35]
+    quote: (o) Redemption centers in B-2 Districts.
+    not_limits: {2: 'the district name B-2, not a number'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 31
+    lines: [36, 36]
+    quote: (p) Bed-and-breakfast inns in all districts.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 26
+    lines: [19, 20]
+    quote: >-
+      (3) Regulations, standards and permitted uses are generally cumulative, except for the P-1 and MH-1 Districts and
+      except where otherwise indicated by specific prohibition or omission.
+    not_limits: {1: 'the district names P-1 and MH-1, not numbers'}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [22, 22]
+    quote: Adult day care facility
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [29, 29]
+    quote: Bank or monetary institution
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [28, 28]
+    quote: Bed-and-breakfast inn - - - - -
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [28, 28]
+    quote: Business or professional office
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [20, 20]
+    quote: Cemetery or related building
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [17, 17]
+    quote: Church or related building
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [34, 34]
+    quote: Club, lodge, or private social center
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [16, 16]
+    quote: Dormitory - - - - - • - • •[fn5]
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [27, 27]
+    quote: Funeral home or mortuary
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [27, 27]
+    quote: Hospital or sanitarium - - - - -
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [41, 41]
+    quote: Hotel, motel
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [19, 19]
+    quote: Library or fire station
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [35, 35]
+    quote: Confectionery, millinery, dressmaking or other activities
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [14, 14]
+    quote: Multiple family dwelling [fn4]
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [25, 25]
+    quote: Neighborhood commercial facility
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [23, 23]
+    quote: Nursery school, child day care center
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [26, 26]
+    quote: Nursing, convalescent or rest home
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [30, 30]
+    quote: Office of government
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [12, 12]
+    quote: One-family dwelling, attached [fn4]
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [9, 9]
+    quote: One-family dwelling, detached [fn4] • • •
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [11, 11]
+    quote: One-family dwelling, semi-detached [fn4]
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [38, 38]
+    quote: Theater, bowling alley, auditorium, or other similar place of
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [18, 18]
+    quote: Public park or playground
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [21, 21]
+    quote: Public utility structure except office
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [49, 49]
+    quote: Redemption center - - SP SP SP SP SP SP
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [33, 33]
+    quote: Restaurant, fast food establishment, tavern
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [32, 32]
+    quote: Retail store or service commercial facility
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [22, 22]
+    quote: School and related buildings
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [13, 13]
+    quote: Two-family dwelling [fn4] - - • •
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [42, 42]
+    quote: Urban beverage producer
+  examples:
+  - given: {use: business_or_professional_office}
+    expect: pass
+  - given: {use: multiple_family}
+    expect: pass
+    note: marked • for every B district
+  - given: {use: retail_store_or_service_commercial}
+    expect: pass
+  - given: {use: gasoline_station}
+    expect: fail
+  - given: {use: bed_and_breakfast_inn}
+    expect: needs_review
+  - given: {use: hospital_or_sanitarium}
+    expect: needs_review
+    note: chart SP, though §325-9B(1)(g) doesn't list B districts
+  - given: {use: fraternity_sorority_group_house}
+    expect: fail
+    note: on the residential chart (p.2) only; the commercial chart (p.4) omits it
+  notes: >-
+    Chart p.4, B-2A's column: • permitted (24 uses), SP a special permit (6), - not permitted (4). The chart has no legend;
+    • and SP are read as for the residential chart (R-1b.use's finding chart_marks). A use the commercial chart doesn't
+    list at all (a fraternity, a zero-lot-line house, an adult day care home) fails: §325-8B(3) makes permitted uses cumulative
+    "except where otherwise indicated by specific prohibition or omission", and the chart omits them (Gordium's reading,
+    the same as the residential districts').
+  drafted_by: claude
+  status: draft
+- id: B-2a.lot_area
+  kind: rule
+  topic: dimensions
+  title: Minimum lot size, every use but a motel (chart p.5)
+  applies_when: use != "hotel_motel"
+  check: lot_area >= 3000
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: 'One-family dwelling, detached', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: 'One-family dwelling, semi-detached', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: 'One-family dwelling, attached, by conversion', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: 'One-family dwelling, attached, new construction', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: Two-family dwelling, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: 'Multiple family dwelling, by conversion', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: 'Multiple family dwelling, new construction', column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: Other use, column: B-2A}
+  - &id001
+    file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [27, 30]
+    quote: >-
+      (6) Column 6: Minimum Lot Size, Area in Square Feet. Lots hereafter used for a permitted use in each use district
+      shall be of a size equal to or greater than the total square feet indicated in this column, subject to the further
+      regulations of Column 7 of the District Regulations Chart and of Article V.
+  examples:
+  - given: {use: retail_store_or_service_commercial, lot_area: 3000}
+    expect: pass
+    note: exactly the minimum
+  - given: {use: multiple_family, lot_area: 2999.99}
+    expect: fail
+  - given: {use: hotel_motel, lot_area: 1}
+    expect: not_applicable
+    note: held to the motel row (lot_area_hotel_motel)
+  notes: >-
+    Every row but the motel's is 3,000 sf in B-2A, conversion or new construction alike, with no note (chart p.5); a lot's
+    area does not grow with its units here.
+  drafted_by: claude
+  status: draft
+- id: B-2a.lot_area_hotel_motel
+  kind: rule
+  topic: dimensions
+  title: Motel lot size and frontage (chart p.5, §325-22A)
+  applies_when: use == "hotel_motel"
+  check: lot_area >= 20000 and lot_width >= 100
+  review_when:
+  - when: lot_area >= 3000 and lot_width >= 40 and (lot_area < 20000 or lot_width < 100)
+    reason: >-
+      Enough for the other-use row (3,000 sf, 40 ft), not for a motel's 20,000 sf and 100 ft (§325-22A). The chart's use
+      row is "Hotel, motel" but its size rows are for a motel; a hotel that isn't a motel is held to the other-use row.
+      Say which it is.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: Motel, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: Other use, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Width, row: Motel, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Width, row: Other use, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Hotel, motel', column: B-2A}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [12, 13]
+    quote: >-
+      A. Lot size and frontage. Motels shall maintain a minimum lot size of 20,000 square feet and a minimum frontage of
+      100 feet on a public right-of-way.
+  - *id001
+  - &id002
+    file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [31, 34]
+    quote: >-
+      (7) Column 7: Minimum Lot Size, Width in Feet at Street Line. Lots hereafter used for a permitted use in each use
+      district shall have frontage measured on a public right-of-way equal to or greater than the width specified in this
+      column, subject to the further regulations of Column 6 of the District Regulations Chart and of Article V.
+  examples:
+  - given: {use: hotel_motel, lot_area: 20000, lot_width: 100}
+    expect: pass
+    note: a motel's 20,000 sf and 100 ft (§325-22A)
+  - given: {use: hotel_motel, lot_area: 2999.99, lot_width: 100}
+    expect: fail
+    note: short even of the other-use figure
+  - given: {use: hotel_motel, lot_area: 20000, lot_width: 39.99}
+    expect: fail
+  - given: {use: hotel_motel, lot_area: 3000, lot_width: 100}
+    expect: needs_review
+    note: enough for a hotel (other use), not for a motel
+  - given: {use: hotel_motel, lot_area: 20000, lot_width: 40}
+    expect: needs_review
+    note: a hotel's frontage, not a motel's
+  - given: {use: retail_store_or_service_commercial, lot_area: 1, lot_width: 1}
+    expect: not_applicable
+  notes: B-2A's chart cells for a motel (20,000 sf, 100 ft) match §325-22A.
+  drafted_by: claude
+  status: draft
+- id: B-2a.lot_width
+  kind: rule
+  topic: dimensions
+  title: Minimum lot width (chart p.5, §325-8A(7))
+  applies_when: use != "hotel_motel"
+  check: lot_width >= 40
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Width, row: Other use, column: B-2A}
+  - *id002
+  examples:
+  - given: {use: business_or_professional_office, lot_width: 40}
+    expect: pass
+  - given: {use: multiple_family, lot_width: 39.99}
+    expect: fail
+  - given: {use: hotel_motel, lot_width: 1}
+    expect: not_applicable
+  notes: The chart's width rows are a motel's and every other use's; a motel's width is with its lot size.
+  drafted_by: claude
+  status: draft
+- id: B-2a.stories
+  kind: rule
+  topic: dimensions
+  title: Maximum number of stories (chart p.5)
+  check: stories <= 4
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: 'Maximum Building Height [fn3]', row: Number of stories, column: B-2A}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [35, 36]
+    quote: >-
+      (8) Column 8: Maximum Height of Building, Number of Stories. Buildings hereafter erected shall be limited to the number
+      of stories herein specified, computed at the main entrance side.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines: [10, 10]
+    quote: (2) In all districts, the number of stories permitted may not be exceeded.
+  examples:
+  - given: {stories: 4}
+    expect: pass
+    note: exactly at the limit
+  - given: {stories: 5}
+    expect: fail
+  notes: The number of stories is not raised by the height bonus (§325-16C(2)).
+  drafted_by: claude
+  status: draft
+- id: B-2a.height
+  kind: rule
+  topic: dimensions
+  title: Maximum building height, with the §325-16C bonus
+  check: >-
+    building_height <= 40 or building_height <= 40 + 0.1 * 40 and front_yard >= building_height - 40 and side_yard_smaller
+    >= 5 + (building_height - 40) and side_yard_larger >= 10 + (building_height - 40) and rear_yard >= max(min(0.15 * lot_depth,
+    20), 10) + (building_height - 40)
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: 'Maximum Building Height [fn3]', row: Height in feet, column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [37, 37]
+    quote: (3) See §325-16.
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Front (minimum), column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Side (one side minimum), column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Side (other side minimum), column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: 'Rear (minimum, % of depth or feet, whichever is less)', column: B-2A}
+  - &id003
+    file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [45, 45]
+    quote: (9) But not less than 10 ft.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines: [6, 7]
+    quote: >-
+      In any district, any main building may be erected to a height in excess of that specified for the district, provided
+      that:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines: &id004 [8, 9]
+    quote: >-
+      (1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional
+      height.
+    not_limits: {1: 'one foot per foot: the formula adds (building_height - 40) to each yard, one to one'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines: [11, 12]
+    quote: >-
+      (3) In each district, the number of additional feet may not exceed 10% of the maximum building height allowed in that
+      district.
+  examples:
+  - given: {building_height: 40, front_yard: 0, side_yard_smaller: 5, side_yard_larger: 10, rear_yard: 15.0, lot_depth: 100}
+    expect: pass
+    note: 'exactly 40 ft with every yard at its minimum (rear: 15% of 100 ft, at least 10)'
+  - given: {building_height: 40.01, front_yard: 0, side_yard_smaller: 5, side_yard_larger: 10, rear_yard: 15.0, lot_depth: 100}
+    expect: fail
+    note: over the limit, so every yard must grow by the extra height
+  - given: {building_height: 44.0, front_yard: 4.0, side_yard_smaller: 9.0, side_yard_larger: 14.0, rear_yard: 19.0, lot_depth: 100}
+    expect: pass
+    note: the most the bonus allows (10% of 40 = 4 ft), each yard 4 ft larger
+  - given: {building_height: 44.01, front_yard: 60, side_yard_smaller: 60, side_yard_larger: 60, rear_yard: 90, lot_depth: 100}
+    expect: fail
+    note: past the bonus, however large the yards
+  - given: {building_height: 42, front_yard: 1.99, side_yard_smaller: 7, side_yard_larger: 12, rear_yard: 17.0, lot_depth: 100}
+    expect: fail
+    note: the front yard must be 0 + 2
+  - given: {building_height: 42, front_yard: 2, side_yard_smaller: 6.99, side_yard_larger: 12, rear_yard: 17.0, lot_depth: 100}
+    expect: fail
+    note: the narrower side yard must be 5 + 2
+  - given: {building_height: 42, front_yard: 2, side_yard_smaller: 7, side_yard_larger: 11.99, rear_yard: 17.0, lot_depth: 100}
+    expect: fail
+    note: the wider side yard must be 10 + 2
+  - given: {building_height: 42, front_yard: 2, side_yard_smaller: 7, side_yard_larger: 12, rear_yard: 16.99, lot_depth: 100}
+    expect: fail
+    note: the rear yard must be 15 + 2
+  notes: >-
+    The bonus: 10% of 40 ft = 4 ft, so at most 44 ft, with every required yard 1 ft larger per extra foot (B-2A: front none,
+    sides 10 and 5, rear 15% of the lot depth, at most 20 ft, at least 10). B-2A requires no front yard ("-"): Gordium still
+    asks a building using the bonus for a front yard of the extra height (a front yard of 0 increased one foot per foot),
+    the cautious reading of §325-16C(1); see the open question.
+  open_questions:
+  - >-
+    §325-16C(1): B-2A requires no front yard. Does a building using the height bonus need a front yard of the extra height,
+    or none?
+  research:
+  - question: >-
+      §325-16C(1): B-2A requires no front yard. Does a building using the height bonus need a front yard of the extra height,
+      or none?
+    searched:
+    - 325-16C
+    - 325-8A
+    - 325-3B:front_yard
+    sources: []
+    why_open: >-
+      "Each required front, side and rear yard is increased": with no front yard required, there may be no required front
+      yard to increase, or a zero-foot one that grows. Neither the law nor a City decision found says which. Gordium uses
+      the stricter reading (a front yard of the extra height).
+  drafted_by: claude
+  status: draft
+- id: B-2a.lot_coverage
+  kind: rule
+  topic: dimensions
+  title: Maximum lot coverage by buildings (chart p.5, §325-8A(10))
+  check: building_area <= 0.75 * lot_area
+  review_when:
+  - when: building_area > 0.5 * lot_area and building_area <= 0.75 * lot_area
+    reason: >-
+      Over 50% but within 75%: chart note 7 allows 75% when adequate off-street parking is available within 500 ft (§325-20).
+      Gordium doesn't know the parking: check it.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Maximum Lot Coverage by Buildings, row: Percent of lot area, column: B-2A}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [5, 7]
+    quote: >-
+      On a lot hereafter used, no greater percentage of total lot area may be covered by principal and accessory buildings
+      above ground.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [7, 9]
+    quote: >-
+      For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding
+      decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings.
+    not_limits: {2: "what building_area counts (balconies projecting more than two feet): a measuring rule, not this formula's\
+        \ limit"}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [9, 10]
+    quote: >-
+      This sum, divided by the total lot area, shall not exceed the maximum allowed percentage of lot coverage specified
+      in this column.
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [43, 43]
+    quote: (7) 75% when adequate off-street parking is available within 500 ft, see §325-20.
+    not_limits: {500: 'a distance about the parking, which this rule doesn''t measure: between 50% and 75% it needs review'}
+  examples:
+  - given: {building_area: 5000, lot_area: 10000}
+    expect: pass
+    note: exactly 50%
+  - given: {building_area: 5000.01, lot_area: 10000}
+    expect: needs_review
+  - given: {building_area: 7500, lot_area: 10000}
+    expect: needs_review
+    note: 75% is allowed only with adequate off-street parking within 500 ft (note 7)
+  - given: {building_area: 7500.01, lot_area: 10000}
+    expect: fail
+  drafted_by: claude
+  status: draft
+- id: B-2a.side_yards
+  kind: rule
+  topic: dimensions
+  title: 'Side yards minimum: one side 10 ft, the other 5 ft (chart p.5)'
+  check: side_yard_smaller >= 5 and side_yard_larger >= 10
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Side (one side minimum), column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Side (other side minimum), column: B-2A}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [15, 17]
+    quote: >-
+      (12) Column 12: Yard Dimensions, Side, One Side at Least. Buildings hereafter altered or erected in each district
+      must be located so that one side yard will be at least as wide as specified in this column, subject to the further
+      regulations of Column 13.
+    not_limits: {1: 'one side yard: which yard this column''s number is for, not a limit'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [18, 20]
+    quote: >-
+      (13) Column 13: Yard Dimensions, Side, Other at Least. Buildings hereafter erected in each use district must have
+      two side yards as specified in this column and Column 12. One side yard shall be at least as wide as specified in
+      this column, subject to the further regulations of Column 12.
+    not_limits: {1: 'one side yard: which yard this column''s number is for, not a limit', 2: 'two side yards: how many
+        side yards there are, not a limit'}
+  examples:
+  - given: {side_yard_smaller: 5, side_yard_larger: 10}
+    expect: pass
+  - given: {side_yard_smaller: 4.99, side_yard_larger: 10}
+    expect: fail
+  - given: {side_yard_smaller: 5, side_yard_larger: 9.99}
+    expect: fail
+  drafted_by: claude
+  status: draft
+- id: B-2a.rear_yard
+  kind: rule
+  topic: dimensions
+  title: Rear yard minimum (chart p.5, note 9; lot depth §325-8A(14))
+  check: rear_yard >= max(min(0.15 * lot_depth, 20), 10)
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: 'Rear (minimum, % of depth or feet, whichever is less)', column: B-2A}
+  - *id003
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [22, 26]
+    quote: >-
+      (a) Subject to the provisions of the following Subsection A(14)(b), buildings hereafter erected in each district must
+      have a rear yard of at least the depth which is the percentage figure listed in this column. Such percentage shall
+      be taken of the lot depth. If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken
+      of the average of the two lengths.
+    not_limits: {2: 'the two side lot lines: how lot depth is measured (measures.yaml lot_depth), not a limit'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [27, 30]
+    quote: >-
+      (b) In applying the lot depth percentage of this column [see previous Subsection A(14)(a)], no rear yard shall be
+      required which is a greater number of feet in depth than the maximum footage figure listed in this column. However,
+      rear yards of a greater depth shall not be prohibited.
+  examples:
+  - given: {rear_yard: 15.0, lot_depth: 100}
+    expect: pass
+    note: 15% of 100 ft
+  - given: {rear_yard: 14.99, lot_depth: 100}
+    expect: fail
+  - given: {rear_yard: 20, lot_depth: 400}
+    expect: pass
+    note: 15% would be 60 ft; the chart caps it at 20 ft
+  - given: {rear_yard: 19.99, lot_depth: 400}
+    expect: fail
+  - given: {rear_yard: 10, lot_depth: 50}
+    expect: pass
+    note: 15% would be 7.5 ft; note 9 sets the floor at 10 ft
+  - given: {rear_yard: 9.99, lot_depth: 50}
+    expect: fail
+  drafted_by: claude
+  status: draft
+- id: B-2a.yard_projections
+  kind: rule
+  topic: dimensions
+  title: Eaves into required yards, at most 2 ft (§325-18B)
+  check: >-
+    front_yard_eaves >= max(building_height - 40, 0) - 2 and side_yard_smaller_eaves >= 5 + max(building_height - 40, 0)
+    - 2 and side_yard_larger_eaves >= 10 + max(building_height - 40, 0) - 2 and rear_yard_eaves >= max(min(0.15 * lot_depth,
+    20), 10) + max(building_height - 40, 0) - 2
+  review_when:
+  - when: >-
+      (side_yard_smaller >= 10 + max(building_height - 40, 0) or side_yard_larger < 10 + max(building_height - 40, 0)) and
+      side_yard_smaller_eaves >= 10 + max(building_height - 40, 0) - 2 and side_yard_larger_eaves >= 5 + max(building_height
+      - 40, 0) - 2 and side_yard_larger_eaves < 10 + max(building_height - 40, 0) - 2 and front_yard_eaves >= max(building_height
+      - 40, 0) - 2 and rear_yard_eaves >= max(min(0.15 * lot_depth, 20), 10) + max(building_height - 40, 0) - 2
+    reason: >-
+      Which side yard is the 10 ft one is open: the walls are at least that far from both side lot lines, or from neither,
+      so either side may be. The eaves fit only if the side whose walls are farther from its line is the 5 ft one. Say which
+      side is meant to be the 10 ft one.
+  - when: >-
+      (side_yard_smaller >= 10 + max(building_height - 40, 0) or side_yard_larger < 10 + max(building_height - 40, 0)) and
+      side_yard_larger_eaves >= 10 + max(building_height - 40, 0) - 2 and side_yard_smaller_eaves >= 5 + max(building_height
+      - 40, 0) - 2 and side_yard_smaller_eaves < 10 + max(building_height - 40, 0) - 2 and front_yard_eaves >= max(building_height
+      - 40, 0) - 2 and rear_yard_eaves >= max(min(0.15 * lot_depth, 20), 10) + max(building_height - 40, 0) - 2
+    reason: >-
+      Which side yard is the 10 ft one is open: the walls are at least that far from both side lot lines, or from neither,
+      so either side may be. The eaves fit only if the side whose walls are nearer to its line is the 5 ft one. Say which
+      side is meant to be the 10 ft one.
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines: [13, 16]
+    quote: >-
+      B. Projecting architectural features. The space in any required yard shall be open and unobstructed except for ordinary
+      projections of windowsills, belt courses, cornices, eaves and other architectural features; provided, however, that
+      such features shall not project more than two feet into any required yard.
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Front (minimum), column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Side (one side minimum), column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Side (other side minimum), column: B-2A}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: 'Rear (minimum, % of depth or feet, whichever is less)', column: B-2A}
+  - *id003
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines: *id004
+    quote: >-
+      (1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional
+      height.
+    not_limits: {1: 'one foot per foot: the formula adds (building_height - 40) to each yard, one to one'}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: 'Maximum Building Height [fn3]', row: Height in feet, column: B-2A}
+  examples:
+  - given: {side_yard_smaller: 6, side_yard_larger: 14, front_yard_eaves: 0, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8,
+      rear_yard_eaves: 13.0, lot_depth: 100, building_height: 38}
+    expect: pass
+    note: 'eaves exactly 2 ft into each required yard (rear: 15 − 2)'
+  - given: {side_yard_smaller: 6, side_yard_larger: 14, front_yard_eaves: 0, side_yard_smaller_eaves: 2.99, side_yard_larger_eaves: 8,
+      rear_yard_eaves: 13.0, lot_depth: 100, building_height: 38}
+    expect: fail
+    note: an eave just over 2 ft into the 5 ft side yard
+  - given: {side_yard_smaller: 6, side_yard_larger: 14, front_yard_eaves: 0, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8,
+      rear_yard_eaves: 12.99, lot_depth: 100, building_height: 38}
+    expect: fail
+  - given: {side_yard_smaller: 6, side_yard_larger: 14, front_yard_eaves: 0, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 7.99,
+      rear_yard_eaves: 13.0, lot_depth: 100, building_height: 38}
+    expect: fail
+  - given: {side_yard_smaller: 12, side_yard_larger: 15, front_yard_eaves: 5, side_yard_smaller_eaves: 4, side_yard_larger_eaves: 15,
+      rear_yard_eaves: 20.0, lot_depth: 100, building_height: 38}
+    expect: needs_review
+    note: >-
+      walls 12 and 15 ft: either side may be the 10 ft one; the narrower side's eave fits only if it is the 5 ft one
+  - given: {side_yard_smaller: 12, side_yard_larger: 15, front_yard_eaves: 5, side_yard_smaller_eaves: 10, side_yard_larger_eaves: 10,
+      rear_yard_eaves: 20.0, lot_depth: 100, building_height: 38}
+    expect: pass
+    note: both eaves fit whichever side is the larger one
+  - given: {side_yard_smaller: 9.5, side_yard_larger: 10, front_yard_eaves: 5, side_yard_smaller_eaves: 9, side_yard_larger_eaves: 5,
+      rear_yard_eaves: 20.0, lot_depth: 100, building_height: 38}
+    expect: fail
+    note: only the wider side can be the 10 ft one, and its eave is 5 ft into it
+  notes: >-
+    The yards themselves are measured to the walls; this rule measures the same yards to the outermost part, eaves included,
+    and lets that be up to 2 ft less. Which side carries the 10 ft minimum follows the walls: only a side whose walls are
+    at least 10 ft from its line can; where both can, or neither, the eaves must fit both ways, else needs review (as R-3a.yard_projections).
+  drafted_by: claude
+  status: draft
+- id: B-2a.accessory_buildings
+  kind: rule
+  topic: dimensions
+  title: 'Accessory buildings: 3 ft side and rear (§325-25)'
+  applies_when: accessory_buildings > 0
+  check: (not accessory_distances_apply or accessory_side_yard >= 3 and accessory_rear_yard >= 3)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 66
+    lines: [34, 36]
+    quote: >-
+      Accessory structures, including private garages, storage sheds, toolhouses, garden houses, playhouses or similar structures,
+      shall be exempt from side yard requirements contained in the District Regulations Chart in § 325-8[fn22] and shall
+      be governed by the requirements below:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 66
+    lines: [37, 40]
+    quote: >-
+      A. Accessory structures wholly or partially above grade. Accessory structures which are wholly or partially above
+      finished grade are permitted in any side or rear yard but not in a required front yard, except as permitted under
+      the further provisions of this section. Corner lots shall be considered to have two front yards.
+    not_limits: {2: "two front yards on a corner lot: which yards are front yards (the accessory front yard is measured\
+        \ to every street line), not a limit"}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines: [6, 9]
+    quote: >-
+      C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from any side lot line
+      or rear lot line in all districts, except in R-1 Districts, where accessory buildings may not be placed less than
+      six feet from any side lot line nor less than three feet from any rear lot line, subject to further provisions of
+      this section.
+    not_limits: {1: 'the district name R-1, not a number of feet', 6: six feet applies in R-1 districts only; in a B district
+        it is three feet (accessory_side_yard >= 3)}
+  examples:
+  - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 3,
+      accessory_rear_yard: 3}
+    expect: pass
+    note: exactly 3 ft from the side and rear lot lines
+  - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 2.99,
+      accessory_rear_yard: 3}
+    expect: fail
+  - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 3,
+      accessory_rear_yard: 2.99}
+    expect: fail
+  - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: false, accessory_side_yard: 1,
+      accessory_rear_yard: 1}
+    expect: pass
+    note: not frame, under the readings that give it no distance
+  - given: {accessory_buildings: 0}
+    expect: not_applicable
+  notes: >-
+    B-2A is not an R-1 District, so §325-25C's 3 ft applies. B-2A requires no front yard, so §325-25A keeps an accessory
+    building out of none.
+  drafted_by: claude
+  status: draft
+- id: B-2a.transition_yards
+  kind: flag
+  topic: dimensions
+  title: 'Next to a residential lot: that district''s yards (§325-19A, B)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines: [23, 25]
+    quote: >-
+      A. [fn12]Side yard and rear yard transition. Where a lot in a business or industrial district abuts a lot in a residential
+      district, there shall be provided along such abutting lines a yard equal in width or depth to that required in the
+      residential district. (See illustration below.)
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 50
+    lines: [3, 6]
+    quote: >-
+      B. Front yard transition. Where frontage is partly in a residential and partly in a business or industrial district,
+      the front yard depth in the business or industrial district shall be equal to 1/2 the required front yard depth of
+      the residential district for a distance of at least 50 feet into the business or industrial district. (See illustration
+      below.)
+  notes: >-
+    Gordium doesn't know yet whether a lot next to this one is in a residential district, so every B-2A lot gets this flag:
+    where it abuts a residential lot, the yard along that line must be the residential district's; where the street frontage
+    is partly residential, the front yard is half the residential one for at least 50 ft. Check by hand (the City's zoning
+    map shows the neighbours).
+  drafted_by: claude
+  status: draft
+- id: B-2a.stream_setback
+  kind: rule
+  topic: dimensions
+  title: New structures at least 20 ft from an inlet wall or stream bank (§325-26)
+  check: not stream_near_lot or stream_distance >= 20
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines: [15, 19]
+    quote: >-
+      No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream,
+      measured at an average water level, except for those structures directly connected with marine or public or commercial
+      recreation activities. (See illustration below.) Properties located within the Cherry Street District, the Market
+      District, the Newman District, and the West End/Waterfront District are exempt from this requirement.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 19
+    lines: [19, 20]
+    quote: >-
+      STRUCTURE — Anything constructed or erected on the ground or which is attached to another structure or building. Structures
+      shall not include patios or terraces.
+  examples:
+  - given: {stream_near_lot: false}
+    expect: pass
+  - given: {stream_near_lot: true, stream_distance: 20}
+    expect: pass
+  - given: {stream_near_lot: true, stream_distance: 19.99}
+    expect: fail
+  notes: >-
+    B-2A is none of the four districts §325-26 exempts. Structures for marine or public or commercial recreation are excepted;
+    Gordium doesn't ask, so such a structure nearer than 20 ft says does not comply and needs a person's look.
+  drafted_by: claude
+  status: draft
+- id: B-2a.yards_not_shared
+  kind: flag
+  topic: dimensions
+  title: A yard required for one building can't count for another (§325-7B)
+  applies_when: primary_buildings > 1
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [8, 10]
+    quote: >-
+      B. Use of yard for another building. No part of a yard or other open space about any building required for the purposes
+      of complying with the provisions of this chapter shall be included as a part of a yard or other open space similarly
+      required for another building.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 14
+    lines: [37, 38]
+    quote: >-
+      LOT, BUILDING — A parcel of land occupied or to be occupied by one or more buildings and any accessory buildings,
+      together with such open spaces as are required
+  drafted_by: claude
+  status: draft
+- id: B-2a.occupancy_one_family
+  kind: rule
+  topic: density_and_occupancy
+  title: 'One-family occupancy (§325-3B: family + 1 unrelated)'
+  applies_when: use in ["one_family_detached", "one_family_semi_detached", "one_family_attached"]
+  check: unrelated_persons_with_children <= 1
+  review_when:
+  - when: unrelated_persons_with_children > 1 and functional_family_unit
+    reason: >-
+      A functional family unit may occupy a one-family dwelling whatever its size (§325-3B DWELLING, ONE-FAMILY); whether
+      this household is one is the City's finding.
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines: [36, 37]
+    quote: >-
+      DWELLING, ONE-FAMILY — A dwelling unit occupied exclusively for residential purposes by an individual or family and
+      not more than one unrelated individual or a functional family unit.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines: [37, 40]
+    quote: >-
+      In the R-1 Zones, occupancy by an individual or a family and not more than two unrelated individuals is permitted
+      if the dwelling is owner-occupied. In the R-2 and R-3 Zones, occupancy by an individual or a family and not more than
+      two unrelated individuals is permitted.
+    not_limits: {1: 'the district name R-1, not a number', 2: 'the district name R-2; and the R-1, R-2 and R-3 allowance
+        of two, which isn''t this district''s', 3: 'the district name R-3, not a number'}
+  - &id005
+    file: chapter_325_zoning_2026-10.pdf
+    page: 9
+    lines: [27, 28]
+    quote: >-
+      FAMILY — One or more persons occupying a dwelling unit, all of whom are related by blood, marriage or adoption.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 10
+    lines: [11, 13]
+    quote: >-
+      FUNCTIONAL FAMILY UNIT — A group of individuals living together in a single dwelling unit and functioning as a family
+      with respect to those characteristics that are consistent with the purposes of zoning restrictions in residential
+      neighborhoods.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 26
+    lines: [28, 28]
+    quote: >-
+      (6) [fn3]In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall be
+    not_limits: {1: 'the district name R-1, not a number', 2: 'the district name R-2, not a number'}
+  examples:
+  - given: {use: one_family_detached, unrelated_persons_with_children: 1}
+    expect: pass
+  - given: {use: one_family_detached, unrelated_persons_with_children: 2, functional_family_unit: false}
+    expect: fail
+    note: 'two unrelated: allowed in R-2 and R-3, not here'
+  - given: {use: one_family_detached, unrelated_persons_with_children: 2, functional_family_unit: true}
+    expect: needs_review
+  - given: {use: two_family, unrelated_persons_with_children: 5}
+    expect: not_applicable
+  notes: >-
+    B-2A is none of the R-1, R-2 and R-3 Zones whose sentences raise the limit, so the definition's first sentence holds:
+    an individual or a family and not more than one unrelated individual. Minor dependent children are left out only in
+    R-1 and R-2 Districts (§325-8B(6)), so here they count.
+  drafted_by: claude
+  status: draft
+- id: B-2a.occupancy_two_family
+  kind: flag
+  topic: density_and_occupancy
+  title: 'Two-family occupancy (§325-3B: unrelated people may make a multiple dwelling)'
+  applies_when: use == "two_family" and unrelated_persons > 1
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 9
+    lines: [3, 4]
+    quote: >-
+      DWELLING, TWO-FAMILY — A building containing two dwelling units occupied exclusively for residential purposes.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines: [25, 26]
+    quote: >-
+      (2) A dwelling unit, occupied by a group of four or more unrelated persons, exclusive of minor dependent children
+      in the care of a parent or relative.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines: [27, 29]
+    quote: >-
+      (3) A building containing living, sanitary and sleeping facilities occupied by one or two families and more than two
+      roomers or boarders, exclusive of minor dependent children in the care of a parent or relative, residing with either
+      one of such families.
+  - *id005
+  notes: >-
+    Four or more unrelated persons in a unit, or more than two roomers, make the building a multiple dwelling (§325-3B),
+    which is permitted here but held to its own lot size; check by hand.
+  drafted_by: claude
+  status: draft
+- id: B-2a.home_occupation_size
+  kind: rule
+  topic: uses
+  title: 'Home occupation size (§325-3B: at most 25% of its unit and 500 sq ft)'
+  applies_when: >-
+    use in ["one_family_detached", "one_family_semi_detached", "one_family_attached", "two_family", "multiple_family"] and
+    home_occupation
+  check: home_occupation_area <= 500 and home_occupation_area <= 0.25 * home_occupation_unit_area
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 12
+    lines: [26, 28]
+    quote: >-
+      HOME OCCUPATION — (1) A subordinate use of a nonresidential nature which is conducted within a dwelling unit or a
+      building accessory thereto by a resident of the dwelling unit, who maintains the dwelling unit as
+    not_limits: {1: the paragraph's number}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 13
+    lines: [18, 19]
+    quote: >-
+      (f) The occupation occupies no more than 25% of the dwelling unit and no more than a total of 500 indoor square feet,
+      including accessory structures.
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Accessory Uses, row: Home occupation, column: B-2A}
+  examples:
+  - given: {use: multiple_family, home_occupation: true, home_occupation_area: 500, home_occupation_unit_area: 2000}
+    expect: pass
+  - given: {use: multiple_family, home_occupation: true, home_occupation_area: 500.01, home_occupation_unit_area: 2400}
+    expect: fail
+  - given: {use: multiple_family, home_occupation: true, home_occupation_area: 300, home_occupation_unit_area: 1199}
+    expect: fail
+    note: over 25% of its unit
+  - given: {use: multiple_family, home_occupation: false}
+    expect: not_applicable
+  notes: >-
+    Chart p.4 marks a home occupation • (permitted) in B-2A; §325-9B(1)(i)'s special permit is for residential districts
+    only.
+  drafted_by: claude
+  status: draft
+- id: B-2a.accessory_dwelling_unit
+  kind: flag
+  topic: density_and_occupancy
+  title: 'Accessory dwelling unit: §325-28''s limits, checked by hand'
+  applies_when: accessory_dwelling_unit
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Accessory Uses, row: Accessory Dwelling Unit, column: B-2A}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 4
+    lines: [7, 11]
+    quote: >-
+      ACCESSORY DWELLING UNIT (ADU) — A smaller, secondary dwelling unit located on the same lot as a primary residential,
+      commercial, or mixed-use structure. An ADU must have a separate entrance from the outside of the building or through
+      a common hall and must provide living, cooking, sanitary, and sleeping facilities. All ADUs must adhere to building
+      code regulations for residential use.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines: [8, 8]
+    quote: (1) A maximum of one ADU is allowed per parcel.
+  notes: >-
+    Chart p.4 permits an accessory dwelling unit in B-2A. §325-28C's limits (one per parcel, two bedrooms, size, setbacks)
+    are checked by rule in the residential districts; here they are a flag until the same rules are carried over.
+  drafted_by: claude
+  status: draft
+- id: B-2a.parking
+  kind: flag
+  topic: parking_and_loading
+  title: Off-street parking (chart p.15, §325-20)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [19, 21]
+    quote: >-
+      (4) Column 4: Off-Street Parking Requirement. The off-street parking spaces listed in this column shall be provided
+      for each building hereafter erected or altered. In addition, see Article IV and § 325-20.
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [7, 8]
+    quote: B-4 B-5 CBD B-1A B-1B B-2A B-2D [fn1]
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [9, 9]
+    quote: Minimum Parking Requirement (# spaces) [fn2]
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [29, 29]
+    quote: Business or professional office - - - - -
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [61, 61]
+    quote: (2) For all other uses see §325-20.
+  notes: >-
+    B-2A's column on chart p.15 sets spaces by use (per dwelling unit, per 250 sf of office floor, per 500 sf of retail
+    floor, ...). Gordium doesn't count parking yet (the interior is on hold), so every lot gets this flag: count the spaces
+    by hand.
+  drafted_by: claude
+  status: draft
+- id: B-2a.loading
+  kind: flag
+  topic: parking_and_loading
+  title: Off-street loading (chart p.15, §325-21)
+  applies_when: use not in ["one_family_detached", "one_family_semi_detached", "one_family_attached", "two_family"]
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [22, 24]
+    quote: >-
+      (5) Column 5: Off-Street Loading Requirement. The off-street loading spaces listed in this column shall be provided
+      for each building hereafter erected or altered, except for properties located in any CBD district. In addition, see
+      Article IV and § 325-21.
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [40, 40]
+    quote: Minimum Loading Requirement
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [47, 47]
+    quote: Office building 1 space 1 space 1 space 1 space 1 space 1 space -
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [55, 55]
+    quote: Other use See §325-21 See §325-21 See §325-21 See §325-21 See §325-21 See §325-21 -
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [62, 62]
+    quote: (3) Plus 1 space for each additional 15,000 sf of floor space or major fraction thereof.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 63
+    lines: [41, 42]
+    quote: >-
+      A. Size requirements. An off-street loading space shall have a minimum of 450 square feet plus necessary additional
+      space for entrance, exit and aisle space.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 63
+    lines: [43, 43]
+    quote: >-
+      B. Space requirements. The following off-street loading space requirements shall apply to all business
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [5, 8]
+    quote: >-
+      (1) One space shall be made available for each use having 3,000 to 10,000 feet of floor space, plus one additional
+      space for each additional 15,000 square feet or major fraction thereof of floor space in a single occupancy over and
+      above 10,000 square feet. In no case shall more than four spaces be required for any use of a single occupancy.
+  examples:
+  - given: {use: funeral_home}
+    expect: needs_review
+    note: 'a business land use (§325-21B); the chart''s Other use row: See §325-21'
+  - given: {use: hotel_motel}
+    expect: needs_review
+  - given: {use: multiple_family}
+    expect: needs_review
+    note: more than 25 units need loading
+  - given: {use: two_family}
+    expect: not_applicable
+    note: a dwelling of two units, no business use
+  notes: >-
+    §325-21B applies to "all business and industrial land uses and multiple dwelling structures having more than 25 units",
+    and the chart's "Other use" row sends every other use to §325-21: every use but a one- or two-family dwelling gets this
+    flag (a church, a school or a club too, where whether it is a business use is for a person to say). Never dropped for
+    a use the chart doesn't name.
+  drafted_by: claude
+  status: draft
+- id: B-2a.motel_standards
+  kind: flag
+  topic: uses
+  title: 'Motels: parking, paving, driveways, landscaping, uses (§325-22)'
+  applies_when: use == "hotel_motel"
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [14, 14]
+    quote: B. Parking. One car space per sleeping unit shall be provided.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [17, 19]
+    quote: >-
+      D. Driveway width. A minimum width of 22 feet for a driveway shall be provided for two-way traffic movement or two
+      driveways of 12 feet minimum width each shall be provided for one-way traffic into and out from the guest parking
+      area.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [21, 22]
+    quote: >-
+      F. Landscaping. All rear and side yards must be planted to a minimum of two feet in width with dense shrubbery or
+      a combination of a decorative fence and shrubbery.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [25, 26]
+    quote: >-
+      H. Uses. Motels constructed must be limited to guest accommodation and management offices and uses accessory thereto.
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Hotel, motel', column: B-2A}
+  drafted_by: claude
+  status: draft

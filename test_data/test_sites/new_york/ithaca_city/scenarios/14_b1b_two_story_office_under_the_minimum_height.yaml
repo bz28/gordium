@@ -1,0 +1,81 @@
+title: "B-1b: a two-story office building one foot under B-1b's 25 ft minimum height"
+what: >-
+  A surveyed 50 ft × 100 ft lot in B-1b (Restricted Business; 5,000 sf) with a two-story professional office
+  building 40 ft wide and 50 ft deep: two 12 ft stories to a 24 ft flat roof, 5 ft from the street, 5 ft from each
+  side line, 45 ft from the rear. B-1b sets a minimum as well as a maximum height: at least 2 stories (chart p.5,
+  §325-16G) and at least 25 ft (chart p.5, §325-8A(15)); the footprint, 2,000 sf, is over note 6's 500 sf, so the
+  minimum applies. Two stories meet the story minimum; 24 ft is 1 ft short of 25 ft: does not comply. Everything
+  else is inside B-1b's limits (5 ft front yard, 5 ft side yards, rear 10% of the depth but at least 10 ft, 90%
+  coverage, 6 stories and 50 ft). An office isn't permitted in R-1b at all.
+district: B-1b
+use: business_or_professional_office
+lot: {points: [[0, 0], [50, 0], [50, 100], [0, 100]], surveyed: true}
+buildings:
+  - id: office
+    outline: [[5, 5], [45, 5], [45, 55], [5, 55]]
+    base: 0
+    floors: [12, 12]
+grade: {elevation: 0}
+expected:
+  B-1b.use:
+    status: complies
+    at_limit: false
+    working: "business or professional office: marked • for B-1B (chart p.4)"
+    cites: "§325-8A(2); chart p.4, B-1B, Business or professional office: •"
+  B-1b.lot_area_other_use:
+    status: complies
+    at_limit: false
+    working: "lot area = 50 × 100 = 5,000 sf; an office is an other use: required ≥ 3,000 sf"
+    cites: "§325-8A(6); chart p.5, B-1B, Minimum Lot Size, other use: 3,000 sf"
+  B-1b.lot_width:
+    status: complies
+    at_limit: false
+    working: "frontage 50 ft; required ≥ 30 ft"
+    cites: "§325-8A(7); chart p.5, B-1B, Minimum Lot Width, other use: 30 ft"
+  B-1b.stories:
+    status: complies
+    at_limit: false
+    working: "2 stories; limit 6"
+    cites: "chart p.5, B-1B, Maximum Building Height, Number of stories: 6"
+  B-1b.height:
+    status: complies
+    at_limit: false
+    working: "flat roof at 12 + 12 = 24 ft; limit 50 ft"
+    cites: "§325-3 HEIGHT OF BUILDING; chart p.5, B-1B, Height in feet: 50 ft"
+  B-1b.min_stories:
+    status: complies
+    at_limit: true
+    working: "2 floor blocks = 2 stories; at least 2 required"
+    cites: "§325-16G; chart p.5, B-1B, Minimum Building Height, Number of stories: 2"
+  B-1b.min_height:
+    status: does_not_comply
+    at_limit: false
+    working: "24 ft; at least 25 ft required, and the footprint, 40 × 50 = 2,000 sf, is over note 6's 500 sf"
+    cites: "§325-8A(15); chart p.5, B-1B, Minimum Building Height, Height in feet: 25 ft; note 6"
+  B-1b.lot_coverage:
+    status: complies
+    at_limit: false
+    working: "footprint 2,000 sf of 5,000 = 40%; allowed 90%"
+    cites: "§325-8A(10); chart p.5, B-1B, Percent of lot area: 90%"
+    measured: {building_area: 2000}
+  B-1b.front_yard:
+    status: complies
+    at_limit: true
+    working: "street line y = 0 to the front wall at y = 5: 5 ft; required 5 ft"
+    cites: "§325-8A(11); chart p.5, B-1B, Front (minimum): 5 ft"
+  B-1b.side_yards:
+    status: complies
+    at_limit: true
+    working: "west 5 ft, east 50 − 45 = 5 ft; both sides at least 5 ft"
+    cites: "§325-8A(12), (13); chart p.5, B-1B, Side (one side minimum) 5 ft, (other side minimum) 5 ft"
+  B-1b.rear_yard:
+    status: complies
+    at_limit: false
+    working: "rear line y = 100 to the rear wall at y = 55: 45 ft; required max(min(10% × 100, 15), 10) = 10 ft"
+    cites: "§325-8A(14); chart p.5, B-1B, Rear 10%/ 15 ft, note 9"
+  B-1b.transition_yards:
+    status: needs_review
+    working: "a flag on every B-1b lot (§325-19)"
+    cites: "§325-19A, §325-19B"
+plan:
+  encroach: 0

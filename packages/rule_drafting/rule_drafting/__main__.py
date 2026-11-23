@@ -84,8 +84,9 @@ class Inputs:
         self.law["requires"] = {pid for pid, label in self.labels.items() if label.get("label") in DRAFTED_LABELS}
         self.uses = load(j / "4_term_definitions/uses.yaml")
         self.definitions = load(j / "4_term_definitions/definitions.yaml")
-        # Every section of every chart page the reader read; the use lists are built by code, not the AI.
-        pages = sorted({t["page"] for t in self.tables})
+        # Every section of every chart page the reader read that has these districts' columns (the residential pages:
+        # the commercial pages, 4 and 5, are drafted by hand for now); the use lists are built by code, not the AI.
+        pages = sorted({t["page"] for t in self.tables if any(c["name"] in self.columns for c in t["columns"])})
         self.chart_sections = [s for s in chart_values.sections(cells, pages) if s not in CODE_SECTIONS]
 
     def context(self, unit: dict) -> dict:

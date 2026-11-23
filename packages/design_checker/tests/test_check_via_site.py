@@ -372,16 +372,16 @@ def test_a_district_with_no_rules_is_refused_on_every_path_before_any_file_is_to
     doc = site_json.read_model(path, facts, inventory_complete=True)
     check_description(site_json.through_json(doc), _facts(facts), report)
     before = {p.name: p.read_bytes() for p in tmp_path.iterdir()}
-    no_rules = "Gordium doesn't have rules for district B-1a yet"
+    no_rules = "Gordium doesn't have rules for district B-2b yet"
     with pytest.raises(ValueError, match=no_rules):
-        check_description(site_json.through_json(doc), {**_facts(facts), "zone": "B-1a"}, report)
+        check_description(site_json.through_json(doc), {**_facts(facts), "zone": "B-2b"}, report)
     with pytest.raises(ValueError, match=no_rules):
-        check(path, {**facts, "zone": "B-1a"}, report)
+        check(path, {**facts, "zone": "B-2b"}, report)
     assert {p.name: p.read_bytes() for p in tmp_path.iterdir()} == before
     with pytest.raises(ValueError, match=no_rules):
-        start(path, {**facts, "zone": "B-1a"})
+        start(path, {**facts, "zone": "B-2b"})
     with pytest.raises(ValueError, match=no_rules):
-        start_description(site_json.through_json(doc), {**_facts(facts), "zone": "B-1a"})
+        start_description(site_json.through_json(doc), {**_facts(facts), "zone": "B-2b"})
 
 
 def test_a_description_with_no_buildings_whose_lot_wasnt_all_looked_at_leaves_no_building_measure_complying():
