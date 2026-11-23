@@ -383,3 +383,22 @@ def test_a_typed_count_over_a_house_and_a_garage_is_still_said_to_be_the_archite
     assert record.get("stated") is True and record["how"] == "the stories of the building, read over its candidate buildings"
     why = got["which_code"]["why"]
     assert "as the architect states it" in why and "read from the drawn floors" not in why
+
+
+# ---- review round 4 (2026-11-22) --------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("values, building", [
+    ({"use": "one_family_detached", "dwelling_units": 1, "accessory_dwelling_unit": True, "adu_detached": False,
+      "adus_on_parcel": 2, "stories": 2}, {"separate_means_of_egress": True}),
+    ({"use": "two_family", "accessory_dwelling_unit": True, "adu_detached": True, "adus_on_parcel": 2,
+      "stories": 2}, {"separate_means_of_egress": True})])
+def test_more_than_one_adu_whose_kinds_arent_all_known_needs_review(values, building):
+    c, cites, got = code(values, building)
+    assert c is None and "BCNYS 310.3" in cites and "whether each is detached" in got["ask"]
+    assert code({**values, "adus_on_parcel": 1}, building)[0] == code_scope.RESIDENTIAL      # one ADU: its kind known
+
+
+def test_a_set_aside_adu_count_is_never_read_as_unstated():
+    got = code_scope.decide({**DRAWN, "use": "one_family_detached", "stories": 2,
+                             code_scope.SET_ASIDE: {"adus_on_parcel": "the counts disagree"}}, None)
+    assert got["code"] is None and "adus on parcel: the counts disagree" in got["why"]

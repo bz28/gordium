@@ -128,7 +128,7 @@ STORIES_HOW = "stories_how"
 SET_ASIDE = "facts_set_aside"
 # the facts of the lot the decision reads (its use, units, ADU, uses beyond the dwelling, stories)
 READS = ("use", "dwelling_units", "attached_units_in_building", "accessory_dwelling_unit", "adu_detached",
-         "home_occupation", "rooms_let_for_profit", "stories")
+         "adus_on_parcel", "home_occupation", "rooms_let_for_profit", "stories")
 
 # Ithaca's use words (4_term_definitions/uses.yaml) that name a dwelling R101.2 lists: its words, R101.2's item, units
 HOUSES = {"one_family_detached": ("a detached one-family dwelling", "R101.2 item 1", 1),
@@ -299,6 +299,17 @@ def decide(values: dict, building: dict | None) -> dict:
                        "on the building it is one more of its dwelling units (R202 DWELLING: one or two)",
                        ["R202 DWELLING", "R101.2 item 2"], used,
                        f"say whether the accessory dwelling unit is detached ({MARK['adu_detached']})")
+    # more than one ADU on the parcel (Ithaca's adus_on_parcel, asked once an ADU is stated): ADU detached describes
+    # one, and any other may be in or on the building, one more of its units each (review round 4): needs review
+    many = values.get("adus_on_parcel")
+    if adu is True and type(many) in (int, float) and many > 1:
+        used["adus_on_parcel"] = many
+        return _answer(None, f"{many:g} accessory dwelling units are on the parcel, and whether each is detached isn't "
+                       "known (ADU detached describes one): each in or on the building is one more of its dwelling "
+                       "units, and more than two in one building is Group R-2 (R202 DWELLING, 310.3)",
+                       ["R202 DWELLING", "310.3"], used,
+                       "say how many accessory dwelling units are on the parcel and whether each is detached (or "
+                       "correct the count: Ithaca allows one per parcel, §325-28C(1))")
     attached_adu = adu is True and values.get("adu_detached") is False
     used["attached_adu"] = attached_adu
     if use == ATTACHED:
