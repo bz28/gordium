@@ -522,6 +522,12 @@ rules:
     page: 5
     lines: [37, 37]
     quote: (3) See §325-16.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [38, 39]
+    quote: >-
+      (9) Column 9: Maximum Height of Building, Height in Feet. Buildings hereafter erected shall be limited in height as
+      specified herein.
   - file: zoning_charts_2026-04.pdf
     page: 5
     cell: {section: Yard Dimensions, row: Front (minimum), column: Central Business}

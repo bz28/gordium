@@ -523,6 +523,12 @@ rules:
     page: 5
     lines: [37, 37]
     quote: (3) See §325-16.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [38, 39]
+    quote: >-
+      (9) Column 9: Maximum Height of Building, Height in Feet. Buildings hereafter erected shall be limited in height as
+      specified herein.
   - file: zoning_charts_2026-04.pdf
     page: 5
     cell: {section: Yard Dimensions, row: Front (minimum), column: Central Business}
@@ -620,10 +626,6 @@ rules:
       (6) Minimum building height requirement shall not apply to development, including additions and/or expansions of existing
       development where the new development or addition or expansion of the existing development does not exceed a footprint
       of 500 square feet.
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 24
-    lines: [12, 12]
-    quote: A. The District Regulations Chart is hereby made a part of this chapter.
   - file: chapter_325_zoning_2026-10.pdf
     page: 48
     lines: [13, 15]
@@ -1305,9 +1307,10 @@ rules:
     not_limits: {50: a district name (CBD-50)}
   notes: >-
     §325-8D(1) says the CBD-50 Zone is within the DeWitt Park Historic District, and new construction in a designated local
-    historic district needs the Ithaca Landmarks Preservation Commission's review and approval (§228-5B and C). Not every
-    block the City's map shows as CBD-50 is inside DeWitt Park (the West State Street blocks, May 2026 map p.5), so check
-    whether this lot is in a local historic district (the address lookup shows the ones it finds); in one, the design needs
-    the Commission's approval, which Gordium can't give.
+    historic district needs the Ithaca Landmarks Preservation Commission's review and approval (§228-5B and C). The City's
+    online map draws CBD-50 by DeWitt Park only, but the printed map (May 2026, p.5) colours the West State Street blocks
+    (online: CBD-52) like CBD-50, so check whether this lot is in a local historic district (the address lookup shows the
+    ones it finds); in one, the design needs the Commission's approval, which Gordium can't give. New construction anywhere
+    in a CBD district inside a local historic district needs the same review (the address lookup's historic district).
   drafted_by: claude
   status: draft
