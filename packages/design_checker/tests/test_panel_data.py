@@ -130,7 +130,7 @@ def test_a_room_with_no_route_is_a_cause_naming_its_room_by_id(maine):
         first = i["causes"][0]
         assert first["kind"] == panel_data.FIX_MODEL and first["elements"] == ["s2"] and first["key"] == "rooms:s2"
         assert first["words"] == "1 room has no route to an exit: s2"
-        assert first["rooms"][0]["why"].startswith("the point")
+        assert first["rooms"][0]["why"].startswith("the room s2 has no route")     # by its name, never a point
     cards = grouping.cause_cards(rows)
     assert len(cards) == 1 and cards[0]["items"] == [i["id"] for i in rows] and cards[0]["elements"] == ["s2"]
 
@@ -163,7 +163,7 @@ def test_a_fact_the_project_states_is_a_mark(maine):
     got = panel_data.causes(rule, row, {}, None, {}, {}, {"day_care_existing": True}, maine[1], ())
     assert got == [{"kind": "mark", "key": "fact:existing_change_of_use",
                     "words": "existing change of use: not stated for the project", "elements": [],
-                    "measure": "existing_change_of_use"}]
+                    "measure": "existing_change_of_use", "field": "facts.existing_change_of_use"}]
 
 
 def test_every_row_in_review_has_a_cause_and_no_other_row_has_one(maine):

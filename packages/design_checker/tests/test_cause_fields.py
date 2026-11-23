@@ -105,6 +105,14 @@ def test_no_word_the_panel_shows_names_a_file_field_a_coordinate_or_an_id():
 def test_the_odysseys_mark_cards_name_their_fields():
     view = json.loads(ANSWER.read_text(encoding="utf-8"))["result"]["view"]
     cards = [c for g in view["groups"] for c in g.get("causes") or []]
-    fields = {c["field"] for c in cards if c.get("field")}
-    assert {"doors[].exit", "openings[].escape", "stairs", "guards", "facts.existing_change_of_use"} <= fields
-    assert all(c["kind"] == panel_data.MARK for c in cards if c.get("field"))
+    assert {"doors[].exit", "openings[].escape", "stairs", "guards"} <= {c["field"] for c in cards if c.get("field")}
+    causes = [c for i in view["items"] for c in i.get("causes") or []]
+    assert "facts.existing_change_of_use" in {c.get("field") for c in causes}       # a row's later cause
+    assert all(c["kind"] == panel_data.MARK for c in cards + causes if c.get("field"))
+
+
+def test_a_drawing_problems_line_says_its_name_once():
+    """"Interior drawing: The interior drawing: the stairs weren't read…" was its line's title; now said once."""
+    item = {"name": "Interior drawing", "reason": "The interior drawing: the stairs weren't read"}
+    assert grouping._own_title(item) == "The interior drawing: the stairs weren't read"
+    assert grouping._own_title({"name": "Ramps", "reason": "x"}) == "Ramps: x"
