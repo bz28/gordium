@@ -146,7 +146,7 @@ public static class RibbonIcons
     }
 
     /// <summary>Paints <paramref name="ink"/> at coverage <paramref name="a"/> over the pixel (straight alpha).</summary>
-    private static void Over(byte[] px, int at, Rgb ink, double a)
+    internal static void Over(byte[] px, int at, Rgb ink, double a)
     {
         var da = px[at + 3] / 255.0;
         var oa = a + da * (1 - a);
@@ -157,7 +157,7 @@ public static class RibbonIcons
         px[at + 3] = (byte)Math.Round(oa * 255);
     }
 
-    private static byte[] EncodePng(byte[] rgba, int size)
+    internal static byte[] EncodePng(byte[] rgba, int size)
     {
         using var file = new MemoryStream();
         file.Write([0x89, (byte)'P', (byte)'N', (byte)'G', 0x0D, 0x0A, 0x1A, 0x0A]);
