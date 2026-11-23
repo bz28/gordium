@@ -263,6 +263,31 @@ public sealed class HouseFactFieldsTests
         Assert.Contains(".GetFormatOptions(SpecTypeId.Length).GetUnitTypeId().TypeId).Symbol", addin, StringComparison.Ordinal);
     }
 
+    /// <summary>Review round 4: Save's count, "not saved yet" and what Save writes are one rule (SetupDraft.Changes): 6.096
+    /// typed over a length saved short counts and is written; "20.0" typed over 20 ft neither counts nor is written.</summary>
+    [Fact]
+    public void Saves_count_and_its_writes_agree_for_a_length()
+    {
+        const string Meters = "autodesk.unit.unit:meters-1.0.1";
+        var shortScreen = SetupScreen.Build(InUnits(Meters, 6.096 * (1 / 0.3048)), [], null, null);
+        var draft = new SetupDraft();
+        draft.Choose(Marks.StreamDistance, "6.096");
+        Assert.True(draft.Changes(shortScreen.Fields.Single(f => f.Mark == Marks.StreamDistance)));
+        Assert.Equal(1, PaneWords.Unsaved(shortScreen, draft));
+        Assert.Equal(PaneWords.Unsaved(shortScreen, draft), draft.Writes(shortScreen.Fields).Writes.Count);
+
+        var feetScreen = SetupScreen.Build(InUnits("autodesk.unit.unit:feet-1.0.1", 20.0), [], null, null);
+        var same = new SetupDraft();
+        same.Choose(Marks.StreamDistance, "20.0");
+        Assert.False(same.Changes(feetScreen.Fields.Single(f => f.Mark == Marks.StreamDistance)));
+        Assert.Equal(0, PaneWords.Unsaved(feetScreen, same));
+        Assert.Equal(PaneWords.Unsaved(feetScreen, same), same.Writes(feetScreen.Fields).Writes.Count);
+        // the view's "not saved yet" and the footer's count use the same rule
+        var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "SetupView.cs"));
+        Assert.Contains("if (_draft.Changes(f))", view, StringComparison.Ordinal);
+        Assert.Contains("screen.Fields.Count(draft.Changes)", File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Reading", "PaneWords.cs")), StringComparison.Ordinal);
+    }
+
     [Fact]
     public void A_project_in_units_gordium_doesnt_read_takes_feet_and_says_so()
     {
@@ -278,10 +303,6 @@ public sealed class HouseFactFieldsTests
         System.Text.RegularExpressions.Regex.Replace(text.Replace('\u201c', '"').Replace('\u201d', '"').Replace('\u2019', '\'')
                                                          .Replace('\u2014', '-').Replace('\u2013', '-'), @"\s+", " ");
 
-    /// <summary>The law's words for New York, each passage kept apart: the City's extracted text (each document's lines in
-    /// order), the rulebooks' and state law folders' <c>quote:</c> values (only those, never a reason or a note), and the
-    /// code decision's cites (design_checker/code_scope.py CITES, each read again from its PDF page by
-    /// test_every_quote_is_on_its_page_in_the_book: the state books' own text lives outside the repository).</summary>
     /// <summary>The Code's page header and footer lines ("City of Ithaca, NY", "§ 325-3 ZONING § 325-3", "Downloaded
     /// from https://ecode360.com/…"): not the law's words, and a definition running over a page break reads across them.</summary>
     private static readonly System.Text.RegularExpressions.Regex PageFurniture =
@@ -292,6 +313,10 @@ public sealed class HouseFactFieldsTests
     /// property let a 25% co-owner answer Yes).</summary>
     private static readonly Dictionary<string, string> CutAllowed = new(StringComparer.Ordinal);
 
+    /// <summary>The law's words for New York, each passage kept apart: the City's extracted text (each document's lines in
+    /// order), the rulebooks' and state law folders' <c>quote:</c> values (only those, never a reason or a note), and the
+    /// code decision's cites (design_checker/code_scope.py CITES, each read again from its PDF page by
+    /// test_every_quote_is_on_its_page_in_the_book: the state books' own text lives outside the repository).</summary>
     private static readonly Lazy<string> Law = new(() =>
     {
         var root = Path.Combine(Env.Repo, "regulations", "jurisdictions", "new_york");

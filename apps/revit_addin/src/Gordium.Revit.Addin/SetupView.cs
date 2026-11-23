@@ -166,7 +166,7 @@ internal sealed class SetupView : C.StackPanel
         title.Children.Add(Words(f.Label, Body, semibold: true));
         if (f.Required && !f.IsSet && chosen is null)
             title.Children.Add(Ink(Words("  needed", Caption), PanelTokens.StatusReview));
-        if (chosen is not null && chosen != f.Current)
+        if (_draft.Changes(f))                                         // the one rule Save's count and its writes use
             title.Children.Add(Ink(Words("  not saved yet", Caption), PanelTokens.Accent));
         box.Children.Add(title);
         switch (f.Kind)

@@ -123,7 +123,7 @@ public static class PaneWords
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(draft);
-        return screen.Fields.Count(f => draft.Chosen(f.Mark) is { } c && c != f.Current);
+        return screen.Fields.Count(draft.Changes);
     }
 
     /// <summary>Check now anyway, as a link beside Save.</summary>

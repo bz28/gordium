@@ -421,6 +421,16 @@ public sealed class SetupDraft
 
     public void Clear() => _chosen.Clear();
 
+    /// <summary>Whether the draft changes <paramref name="f"/>: something is chosen, and it isn't what the mark holds
+    /// already (<see cref="Holds"/>: a length by its feet, never its text), or the field holds a problem (a Save writes
+    /// over it). The one rule Save's count, "not saved yet" and <see cref="Writes"/> all use, so the button never
+    /// counts a fact Save won't write, or greys out over one it will (review round 4 of change 20).</summary>
+    public bool Changes(SetupField f)
+    {
+        ArgumentNullException.ThrowIfNull(f);
+        return Chosen(f.Mark) is { } raw && raw.Trim() is { Length: > 0 } chosen && !(f.Problem is null && Holds(f, chosen));
+    }
+
     /// <summary>The writes a Save makes: each field the architect chose a value for that differs from what the mark
     /// holds, as Revit stores it; a choice that isn't an allowed value is refused with why (and not written). A field
     /// not touched is never written: a blank stays blank.</summary>
@@ -431,11 +441,9 @@ public sealed class SetupDraft
         var problems = new List<string>();
         foreach (var f in fields)
         {
-            if (Chosen(f.Mark) is not { } raw)
-                continue;
-            var chosen = raw.Trim();
-            if (chosen.Length == 0 || f.Problem is null && Holds(f, chosen))
+            if (!Changes(f))
                 continue;                                   // nothing chosen, or what it holds already
+            var chosen = Chosen(f.Mark)!.Trim();
             MarkValue? value = f.Kind switch
             {
                 FieldKind.YesNo when chosen is "Yes" or "No" => new MarkValue(true, chosen == "Yes" ? 1 : 0),
