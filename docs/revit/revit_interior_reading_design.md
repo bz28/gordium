@@ -158,6 +158,7 @@ exactly:
 | `Gordium: Rooms let for profit` | Project Information (instance) | a whole number 0 or more / unset | `facts.rooms_let_for_profit`: any puts which code governs at a person's check (R101.2 item 6); unset is assumed none, said as a reading |
 | `Gordium: Accessory dwelling unit` | Project Information (instance) | Yes / No / unset | `facts.accessory_dwelling_unit`: Yes asks whether it is detached; unset is assumed none, said as a reading |
 | `Gordium: ADU detached` | Project Information (instance) | Yes / No / unset | `facts.adu_detached`: No makes the ADU one more of the building's units (R202 DWELLING) |
+| `Gordium: ADUs on parcel` | Project Information (instance) | a whole number 1 or more / unset | `facts.adus_on_parcel`: more than one keeps which code governs at needs review; unset beside a stated ADU is assumed one, said as a reading |
 | `Gordium: Exit` | Doors (instance) | Exterior door at discharge, Exit stair enclosure, Exit passageway, Horizontal exit, Exterior exit stair or ramp / unset | `doors[].exit_kind`, and from it `exit_id` (section 10). Unset: not an exit (exits are marked, never guessed) |
 
 Why shared parameters: architects already fill parameters, in bulk, in schedules ("select all bedroom windows, tick

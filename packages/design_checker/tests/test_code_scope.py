@@ -296,11 +296,12 @@ def test_what_isnt_stated_about_a_house_is_assumed_out_loud_and_a_stated_one_dec
     c, _, got = code({"use": "one_family_detached", "stories": 2})
     assert c == code_scope.RESIDENTIAL
     assert got["assumes"] == ["no one outside the household receives care here", "no home occupation",
-                              "no rooms let for profit", "no accessory dwelling unit"]
+                              "no rooms let for profit", "no accessory dwelling unit",
+                              "the use's own dwelling units on the lot"]
     assert "Gordium assumes no one outside the household receives care here" in got["why"]
     assert "Gordium: Care facility" in got["why"] and "Gordium: Accessory dwelling unit" in got["why"]
     stated = {"use": "one_family_detached", "stories": 2, "home_occupation": False, "rooms_let_for_profit": 0,
-              "accessory_dwelling_unit": False}
+              "accessory_dwelling_unit": False, "dwelling_units": 1}
     _, _, got = code(stated, {"care_facility": False})
     assert got["assumes"] == [] and "assumes" not in got["why"]
     for more, building in (({"home_occupation": True}, None), ({"rooms_let_for_profit": 1}, None),
