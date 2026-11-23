@@ -69,7 +69,7 @@ def test_every_district_and_use_is_the_same_kept_as_worked_out_afresh():
     first = check.options(CITY)
     second = check.options(CITY)
     fresh = _fresh(REPO / CITY)
-    assert len(fresh["zones"]) == 9 and len(fresh["uses"]) >= 20        # every district, every city use
+    assert len(fresh["zones"]) == 15 and len(fresh["uses"]) >= 37       # every district, every city use
     assert json.dumps(first, sort_keys=False) == json.dumps(second) == json.dumps(fresh)
     for zone in fresh["zones"]:                                          # said district by district, use by use
         for use in fresh["follow_ups"][zone]:

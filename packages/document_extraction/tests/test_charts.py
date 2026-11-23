@@ -89,7 +89,7 @@ def test_every_row_has_one_value_for_every_column(cells):
         if "row" in r:
             rows.setdefault((r["page"], r["top"]), []).append(r["column"])
     assert all(names == columns[page] for (page, _), names in rows.items())
-    assert len(rows) == 72
+    assert len(rows) == 145                 # 72 on the residential pages, 73 on the commercial ones (p.4, p.5)
 
 
 def test_every_word_of_a_row_is_in_its_label_or_one_cell(cells):
