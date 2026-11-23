@@ -429,7 +429,7 @@ public sealed class ResultListTests
                         "                                           _summary is not null && AllCards.Count > 0, _filter, _search.Text);\n" +
                         "        _entries = _summary is null ? layout : ResultList.WithSummary(layout);", view, StringComparison.Ordinal);
         Assert.Contains("FocusEntry(ResultList.Next(_entries, _list.SelectedIndex, e.Key == I.Key.Down ? 1 : -1));", view, StringComparison.Ordinal);
-        Assert.Contains("ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When)", view, StringComparison.Ordinal);
+        Assert.Contains("ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When,", view, StringComparison.Ordinal);
         // each row's glyph and bar are its placed status (stale: the clock and the hatch), never a tone of the view's
         Assert.Contains("var glyph = PanelLook.Glyph(p.Status, 14);", entries, StringComparison.Ordinal);
         Assert.Contains("p.Status == PanelStatus.Stale ? PanelLook.StaleHatch : StatusLook.Colour(p.Status)", entries, StringComparison.Ordinal);

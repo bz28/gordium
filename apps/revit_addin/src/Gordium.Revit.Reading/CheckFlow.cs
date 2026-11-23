@@ -297,7 +297,7 @@ public static class CheckWords
 
     /// <summary>The stale notice on the earlier results after Cancel (made at <paramref name="checkedAt"/>).</summary>
     public static string CancelledStale(DateTime checkedAt) =>
-        $"These results are from {checkedAt:HH:mm}, before the check you cancelled; the model may have changed since: click Check again";
+        $"These results are from {checkedAt:HH:mm}, {PaneWords.StaleBefore(StaleReason.Cancelled)}; the model may have changed since: click Check again";
 
     /// <summary>The stale notice on an answer whose model was edited while the checker worked (read at
     /// <paramref name="readAt"/>).</summary>

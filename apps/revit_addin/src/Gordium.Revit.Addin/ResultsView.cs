@@ -416,9 +416,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     var state = StatusLook.Of(model.StateTone, stale);
                     summary.Children.Add(WithGlyph(state, Ink(Typed(new C.TextBlock
                     {
-                        Text = ResultText.StateWords(model.State) + (model.Stale is null ? "" : " (before the model changed)"),
+                        Text = model.Stale is null ? ResultText.StateWords(model.State)
+                            : PaneWords.StaleState(ResultText.StateWords(model.State), model.StaleKind ?? StaleReason.ModelChanged),
                         TextWrapping = W.TextWrapping.Wrap,
-                    }, stale ? "type.title" : "type.state"), StatusLook.Colour(state)), size: stale ? 16 : 18));   // stale: smaller, its "(before the model changed)" on one line
+                    }, stale ? "type.title" : "type.state"), StatusLook.Colour(state)), size: stale ? 16 : 18));   // stale: smaller, its "(before ...)" on one line
                     break;
                 case PanelPart.Counts:
                     // the compact count bar (CountBar): one line per law, its short name and its most important
@@ -1011,7 +1012,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
 
     private void Copy(ListRow row)
     {
-        var text = ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When);
+        var text = ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When,
+                                       _content?.Model?.StaleKind ?? StaleReason.ModelChanged);
         try
         {
             W.Clipboard.SetText(text);
@@ -1106,7 +1108,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _detailId = id;
         _selectedId = id;
         var stale = _content?.Model?.Stale is not null ? _content.When : (DateTime?)null;
-        var detail = Details.Of(rows[index], index, rows.Count, _content?.Labels, stale, _content?.Ids);
+        var detail = Details.Of(rows[index], index, rows.Count, _content?.Labels, stale, _content?.Ids, _content?.Model?.StaleKind ?? StaleReason.ModelChanged);
         _detail = DetailView.Build(detail, this, canStepBack: index > 0, canStepOn: index < rows.Count - 1);
         _bodyHost.Child = _detail;
         _detail.Focus();

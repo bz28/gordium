@@ -118,20 +118,18 @@ public static class Details
     /// <paramref name="staleSince"/>: when the check was made, once the model changed after it; <paramref name="ids"/>:
     /// each element's Revit id by UniqueId (its Show tooltip says it, for Select by ID).</summary>
     public static ResultDetail Of(ListRow row, int index, int count, IReadOnlyDictionary<string, string>? labels, DateTime? staleSince,
-                                  IReadOnlyDictionary<string, long>? ids = null)
+                                  IReadOnlyDictionary<string, long>? ids = null, StaleReason staleReason = StaleReason.ModelChanged)
     {
         ArgumentNullException.ThrowIfNull(row);
         var r = row.Row;
-        var stale = staleSince is { } at
-            ? $"The model changed after this check ({at:HH:mm}): this verdict may no longer hold. Check again before acting on it."
-            : null;
+        var stale = staleSince is { } at ? PaneWords.StaleDetail(at, staleReason) : null;
         var elements = r.Elements.Select(uid => labels?.GetValueOrDefault(uid) is { } name
             ? new DetailElement(uid, name, true, ids is not null && ids.TryGetValue(uid, out var id) ? id : null)
             : new DetailElement(uid, NotInModel, false)).ToList();
         var why = r.Reason is null || r.ReasonIsFigures || r.Reason == r.Hint ? null : r.Reason;
         return new ResultDetail(
             string.Create(CultureInfo.InvariantCulture, $"{index + 1} of {count}"), row.Status, r.VerdictWords, r.Name, r.Section,
-            stale, why, Steps(row, elements, stale is not null), r.FigureLines, r.HowFar, r.Quotes,
+            stale, why, Steps(row, elements, stale is not null, staleReason), r.FigureLines, r.HowFar, r.Quotes,
             r.Quotes.Count == 0 ? "The checker sent no quote with this row" + (r.Section is null ? "." : $": see {r.Section}.") : null,
             r.Links, elements)
         {
@@ -143,7 +141,8 @@ public static class Details
     /// failure is changed in the design; a needs review is resolved as its reason says, or decided by hand; a row to
     /// check by hand is checked against the law's words; then show its elements, open the law, and Check again. A row
     /// that complies or doesn't apply has nothing to do, unless the model changed since (then: Check again).</summary>
-    public static IReadOnlyList<DetailStep> Steps(ListRow row, IReadOnlyList<DetailElement> elements, bool stale)
+    public static IReadOnlyList<DetailStep> Steps(ListRow row, IReadOnlyList<DetailElement> elements, bool stale,
+                                                  StaleReason staleReason = StaleReason.ModelChanged)
     {
         ArgumentNullException.ThrowIfNull(row);
         ArgumentNullException.ThrowIfNull(elements);
@@ -152,7 +151,7 @@ public static class Details
         if (row.Section == ListSection.Complies)
         {
             if (stale)
-                steps.Add(new("Check again: the model changed after this check.", DetailAction.CheckAgain));
+                steps.Add(new(PaneWords.StaleStep(staleReason), DetailAction.CheckAgain));
             return steps;
         }
         if (r.Hint is not null)

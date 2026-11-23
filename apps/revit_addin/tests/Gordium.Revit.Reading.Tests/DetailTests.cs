@@ -220,7 +220,7 @@ public sealed class DetailTests(RealWorker worker) : IClassFixture<RealWorker>
         var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "DetailView.cs"));
         Assert.Contains("var show = Button(\"Show\", e.ShowTip, () => host.ShowElements(e.Uid));", view, StringComparison.Ordinal);
         var results = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
-        Assert.Contains("Details.Of(rows[index], index, rows.Count, _content?.Labels, stale, _content?.Ids);", results, StringComparison.Ordinal);
+        Assert.Contains("Details.Of(rows[index], index, rows.Count, _content?.Labels, stale, _content?.Ids, _content?.Model?.StaleKind ?? StaleReason.ModelChanged);", results, StringComparison.Ordinal);
     }
 
     [Fact]

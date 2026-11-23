@@ -140,7 +140,7 @@ internal sealed class SetupView : C.StackPanel
         return foot;
     }
 
-    private int Changes() => _screen.Fields.Count(f => _draft.Chosen(f.Mark) is { } c && c != f.Current);
+    private int Changes() => PaneWords.Unsaved(_screen, _draft);      // the footer's count too
 
     /// <summary>The Save button's words and whether it can be clicked, from the draft now (a box typed in updates it
     /// without the form being drawn again, so the click on Save is never lost to a redraw).</summary>

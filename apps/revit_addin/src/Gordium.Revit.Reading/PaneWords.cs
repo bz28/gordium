@@ -79,6 +79,7 @@ public static class PaneWords
     {
         if (needed == 0)                                         // the form opened with everything set (Mark facts)
             return chosen == 0 ? "Every fact the check needs is set." : $"Every fact the check needs is set; {chosen} chosen, not saved yet.";
+        // "chosen" is what Save writes (Unsaved), never only the needed ones: the footer and the button agree
         var words = $"{needed} {(needed == 1 ? "fact" : "facts")} needed; " + (chosen == 0 ? "none chosen yet" : $"{chosen} chosen, not saved yet");
         return words + (streetToPick ? ". The street edge is picked on the plan (Pick on plan, above)." : ".");
     }
@@ -106,14 +107,23 @@ public static class PaneWords
         return screen.Needed.Where(n => !screen.Fields.Any(f => f.Mark.Name == n && draft.Chosen(f.Mark) is not null)).ToList();
     }
 
-    /// <summary>The footer's words for a form and its draft: the needed facts, how many of them are chosen, and the
-    /// street edge's way when it is one of those still needed (each from the form's own Needed list).</summary>
+    /// <summary>The footer's words for a form and its draft: how many facts are needed (the form's Needed list), how
+    /// many are chosen and not saved yet (<see cref="Unsaved"/>: the same count Save writes, so the footer and the
+    /// button never disagree), and the street edge's way when it is still needed and not picked.</summary>
     public static string SetupFooter(SetupScreen screen, SetupDraft draft)
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(draft);
-        var still = StillNeeded(screen, draft);
-        return SetupFooter(screen.Needed.Count, screen.Needed.Count - still.Count, still.Contains(Marks.StreetEdge.Name));
+        return SetupFooter(screen.Needed.Count, Unsaved(screen, draft), StillNeeded(screen, draft).Contains(Marks.StreetEdge.Name));
+    }
+
+    /// <summary>The fields the draft changes (a choice that differs from what the model holds): what Save writes and
+    /// counts ("Save 3 facts"), and what the footer calls chosen, not saved yet.</summary>
+    public static int Unsaved(SetupScreen screen, SetupDraft draft)
+    {
+        ArgumentNullException.ThrowIfNull(screen);
+        ArgumentNullException.ThrowIfNull(draft);
+        return screen.Fields.Count(f => draft.Chosen(f.Mark) is { } c && c != f.Current);
     }
 
     /// <summary>Check now anyway, as a link beside Save.</summary>
@@ -217,11 +227,39 @@ public static class PaneWords
 
     public const string CopyDetails = "Copy details for support";
 
+    /// <summary>When stale results are from, by why: "before the model changed", "before the check you cancelled".
+    /// Every stale wording of the pane (the banner, the state line, a copied row, a result's detail) says it from here.</summary>
+    public static string StaleBefore(StaleReason reason) => reason switch
+    {
+        StaleReason.Cancelled => "before the check you cancelled",
+        _ => "before the model changed",
+    };
+
+    /// <summary>The state line's words once stale: "Does not comply (before the model changed)".</summary>
+    public static string StaleState(string state, StaleReason reason) => $"{state} ({StaleBefore(reason)})";
+
+    /// <summary>A copied row once stale: "... (checked 14:32, before the check you cancelled)".</summary>
+    public static string StaleCopy(string line, DateTime checkedAt, StaleReason reason) =>
+        $"{line} (checked {checkedAt:HH:mm}, {StaleBefore(reason)})";
+
+    /// <summary>A result's detail once stale: what it says first, and its Check again step's words.</summary>
+    public static string StaleDetail(DateTime checkedAt, StaleReason reason) => reason switch
+    {
+        StaleReason.Cancelled => $"These results are from {checkedAt:HH:mm}, {StaleBefore(reason)}: this verdict may no longer hold. Check again before acting on it.",
+        _ => $"The model changed after this check ({checkedAt:HH:mm}): this verdict may no longer hold. Check again before acting on it.",
+    };
+
+    public static string StaleStep(StaleReason reason) => reason switch
+    {
+        StaleReason.Cancelled => $"Check again: these results are from {StaleBefore(reason)}.",
+        _ => "Check again: the model changed after this check.",
+    };
+
     /// <summary>The stale banner's title, from why: "The model changed after this check (14:32)", or for a cancelled
     /// check "These results are from 14:32, before the check you cancelled".</summary>
     public static string StaleTitle(StaleReason reason, DateTime when) => reason switch
     {
-        StaleReason.Cancelled => $"These results are from {when:HH:mm}, before the check you cancelled",
+        StaleReason.Cancelled => $"These results are from {when:HH:mm}, {StaleBefore(reason)}",
         _ => $"The model changed after this check ({when:HH:mm})",
     };
 
