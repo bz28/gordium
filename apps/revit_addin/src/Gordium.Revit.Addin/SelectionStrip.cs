@@ -17,14 +17,17 @@ internal static class SelectionStrip
     internal const string Tag = "pane.selection";
 
     /// <summary>The strip for <paramref name="answer"/>: <paramref name="open"/> opens a result's detail,
-    /// <paramref name="close"/> puts the strip away; <paramref name="all"/> lists every result, not the first eight.</summary>
-    internal static W.FrameworkElement Build(SelectionAnswer answer, Action<string> open, Action close, bool all, Action showAll)
+    /// <paramref name="close"/> puts the strip away; <paramref name="all"/> lists every result, not the first eight;
+    /// <paramref name="folded"/> (once a result is opened from it, so the detail has the pane) only its title, its line
+    /// and "List them" (<paramref name="unfold"/>).</summary>
+    internal static W.FrameworkElement Build(SelectionAnswer answer, Action<string> open, Action close, bool all, Action showAll,
+                                             bool folded = false, Action? unfold = null)
     {
         var inner = new C.StackPanel();
         inner.Children.Add(Words("SELECTED IN REVIT", "type.caption", PanelTokens.TextMuted, semi: true));
         inner.Children.Add(Words(answer.Title, "type.body", PanelTokens.Text, semi: true, top: 2));
         inner.Children.Add(Words(answer.Line, "type.body", PanelTokens.Text, top: 2));
-        var shown = all ? answer.Rows : answer.Rows.Take(SelectionMap.Shown).ToList();
+        var shown = folded ? [] : all ? answer.Rows : answer.Rows.Take(SelectionMap.Shown).ToList();
         foreach (var row in shown)
         {
             var line = new C.DockPanel { Margin = new W.Thickness(0, 5, 0, 0), LastChildFill = true };
@@ -38,7 +41,13 @@ internal static class SelectionStrip
             inner.Children.Add(line);
         }
         var foot = new C.WrapPanel { Margin = new W.Thickness(0, 8, 0, 0) };
-        if (shown.Count < answer.Rows.Count)
+        if (folded && answer.Rows.Count > 0 && unfold is not null)
+        {
+            var list = Link("List them", "List the results that mention it here again", unfold);
+            list.Margin = new W.Thickness(0, 0, 14, 4);
+            foot.Children.Add(list);
+        }
+        else if (shown.Count < answer.Rows.Count)
         {
             var more = Link($"Show all {answer.Rows.Count}", "List every result that mentions it here", showAll);
             more.Margin = new W.Thickness(0, 0, 14, 4);
@@ -64,7 +73,7 @@ internal static class SelectionStrip
         // never more than about half the docked pane (~430 px): the list keeps the rest; the strip scrolls
         return new C.ScrollViewer
         {
-            Content = box, MaxHeight = 260, Margin = new W.Thickness(12, 4, 12, 4),
+            Content = box, MaxHeight = 220, Margin = new W.Thickness(12, 4, 12, 4),
             VerticalScrollBarVisibility = C.ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = C.ScrollBarVisibility.Disabled,
         };
     }

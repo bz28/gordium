@@ -31,6 +31,7 @@ internal static class PaneExtras
     private static Dictionary<string, string?> _names = new(StringComparer.Ordinal);
     private static bool _stripOn;
     private static bool _all;
+    private static bool _folded;                          // a result opened from it: only its title and line
 
     // a selection the pane made itself (a result's Show): never answered by the strip
     private static (HashSet<long> Ids, DateTime At)? _own;
@@ -177,6 +178,7 @@ internal static class PaneExtras
             _selectedIn = doc.Title;
             _names = names;
             _all = false;
+            _folded = false;
             _stripOn = true;
             Draw();
         }
@@ -191,9 +193,18 @@ internal static class PaneExtras
         if (_view is not { } view || _map is null || view.ShowsSetup)
             return;
         var answer = _map.Answer(_selected, uid => _names.TryGetValue(uid, out var n) ? n : null);
-        view.SelectionSlot.Child = SelectionStrip.Build(answer, view.OpenResult, Hide, _all, () =>
+        view.SelectionSlot.Child = SelectionStrip.Build(answer, id =>
+        {
+            _folded = true;                               // the detail gets the pane; "List them" brings the list back
+            Draw();
+            view.OpenResult(id);
+        }, Hide, _all, () =>
         {
             _all = true;
+            Draw();
+        }, _folded, () =>
+        {
+            _folded = false;
             Draw();
         });
     }
