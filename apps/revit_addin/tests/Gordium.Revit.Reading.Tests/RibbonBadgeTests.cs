@@ -185,7 +185,7 @@ public sealed class RibbonBadgeTests
     }
 
     [Fact]
-    public void Counts_over_99_say_99_plus_and_pills_that_do_not_fit_side_by_side_stack()
+    public void Counts_over_99_say_99_plus_and_pills_that_do_not_fit_side_by_side_go_top_and_bottom()
     {
         Assert.Equal("7", RibbonBadge.Pill(7));
         Assert.Equal("99", RibbonBadge.Pill(99));
@@ -198,9 +198,10 @@ public sealed class RibbonBadgeTests
         var fail = Token(PanelTokens.StatusFail);
         var review = Token(PanelTokens.StatusReview);
         Assert.True(RowHas(near, 5, fail) && RowHas(near, 5, review));
-        Assert.False(RowHas(near, 17, review));
+        Assert.False(RowHas(near, 26, review));
         Assert.True(RowHas(far, 5, fail) && !RowHas(far, 5, review));
-        Assert.True(RowHas(far, 17, review));
+        Assert.True(RowHas(far, 26, review));
+        Assert.False(RowHas(far, 15, review) || RowHas(far, 15, fail));          // the icon's middle left clear
     }
 
     [Fact]

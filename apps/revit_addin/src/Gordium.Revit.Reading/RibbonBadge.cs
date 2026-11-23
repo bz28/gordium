@@ -125,8 +125,9 @@ public static class RibbonBadge
 
     /// <summary>Check project's icon with its badge, at <paramref name="size"/> px (16 or 32) in a theme: straight
     /// RGBA, row by row, top first (as <see cref="RibbonIcons.Pixels"/>). At 32 px: the counts as pills at the top
-    /// right (red for what fails, amber for what needs review, side by side, or one under the other when both don't
-    /// fit), a pass tick, an amber "?" or a clock; at 16 px one dot of the worst. No badge: the plain icon.</summary>
+    /// right (red for what fails, amber for what needs review, side by side, or when both don't fit the red at the
+    /// top right and the amber at the bottom right, in the plan outline's notch), a pass tick, an amber "?" or a
+    /// clock; at 16 px one dot of the worst. No badge: the plain icon.</summary>
     public static byte[] Pixels(BadgeState badge, int size, PanelTheme theme)
     {
         ArgumentNullException.ThrowIfNull(badge);
@@ -157,7 +158,7 @@ public static class RibbonBadge
                 for (var i = pills.Count - 1; i >= 0; i--)
                 {
                     var left = sideBySide ? right - widths[i] : size - widths[i];
-                    var y = sideBySide ? 0 : i * (PillHeight + 1);
+                    var y = sideBySide || i == 0 ? 0 : size - PillHeight;      // stacked: the second in the plan's notch, bottom right
                     DrawPill(px, size, left, y, pills[i].Text, pills[i].Ink, ring);
                     right = left - 1;
                 }
