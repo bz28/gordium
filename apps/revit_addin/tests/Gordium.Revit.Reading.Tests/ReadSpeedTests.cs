@@ -129,6 +129,26 @@ public sealed class ReadSpeedTests
             .Split("private sealed record BandBoxes")[0]);
     }
 
+    [Fact]
+    public void An_elements_nearby_record_is_made_once_per_read_and_the_box_it_is_found_in_still_decides()
+    {
+        var source = Addin("RevitInterior.cs");
+        var near = source.IndexOf("private static List<NearbyElement>? Near(", StringComparison.Ordinal);
+        var body = source[near..source.IndexOf("private static string Category(", near, StringComparison.Ordinal)];
+        // the element being looked round from, and the categories asked for, are still told apart per look round
+        var skip = body.IndexOf("if (e.Id == skip)\n                    continue;", StringComparison.Ordinal);
+        var model = body.IndexOf("var model = ModelKept.Get(key.Element, () => e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model } c", StringComparison.Ordinal);
+        var categories = body.IndexOf("if (categories is not null && !categories.Contains(cat))", StringComparison.Ordinal);
+        var record = body.IndexOf("var near = NearKept.Get(key, () =>", StringComparison.Ordinal);
+        Assert.True(skip >= 0 && model > skip && categories > model && record > categories);
+        // the record made as before: every field from the element, its faces through the faces memo
+        Assert.Contains("return new NearbyElement(e.UniqueId, cat.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,\n" +
+                        "                                             faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id));", body);
+        // the band is still cut per box, on the record kept
+        Assert.Contains("near = near with { Banded = banded, BandFailed = bandFailed, OpenShells = openShells };", body);
+        Assert.Contains("ReadMemo<GeometryKey, NearbyElement> NearKept = new();", source);
+    }
+
     private static int Count(string text, string what)
     {
         var n = 0;

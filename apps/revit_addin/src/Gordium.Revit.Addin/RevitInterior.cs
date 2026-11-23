@@ -46,6 +46,8 @@ internal static class RevitInterior
         // is what would be read again
         using (FacesKept.Open(Hits("inside.cache.faces")))
         using (BandPiecesKept.Open(Hits("inside.cache.band_pieces")))
+        using (NearKept.Open(Hits("inside.cache.near")))
+        using (ModelKept.Open())
         {
             // each step timed and counted for the log's read_steps (never part of the records)
             rooms = ReadSteps.Time("inside.rooms", () => new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms)
@@ -1215,13 +1217,23 @@ internal static class RevitInterior
             BandBoxes? bandBoxes = null;
             foreach (var e in found)
             {
-                if (e.Id == skip || e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model } cat)
+                if (e.Id == skip)
                     continue;
-                if (categories is not null && !categories.Contains(cat.BuiltInCategory))
+                // what doesn't depend on the box looked round (whether it is a model element, its category, its
+                // record with its faces): worked out once per read, as each look round worked it out before
+                var key = GeometryKey.Of(e, options);
+                var model = ModelKept.Get(key.Element, () => e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model } c
+                    ? null : c.BuiltInCategory);
+                if (model is not { } cat)
                     continue;
-                var (faces, failed) = ReadSteps.Time(step + ".faces", () => Faces(e, options));
-                var near = new NearbyElement(e.UniqueId, cat.BuiltInCategory.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
+                if (categories is not null && !categories.Contains(cat))
+                    continue;
+                var near = NearKept.Get(key, () =>
+                {
+                    var (faces, failed) = ReadSteps.Time(step + ".faces", () => Faces(e, options));
+                    return new NearbyElement(e.UniqueId, cat.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
                                              faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id));
+                });
                 if (band is not null)
                 {
                     // the band's box worked out at the first element that needs it, where each InBand worked it out
@@ -1241,6 +1253,13 @@ internal static class RevitInterior
             return null;
         }
     }
+
+    /// <summary>Each element's <see cref="NearbyElement"/> as <see cref="Near"/> makes it before its band (the same for
+    /// every box it is found in), kept by element and geometry options while <see cref="Read"/>'s scope is open, as
+    /// <see cref="FacesKept"/>; and whether it is a model element, with its category (null when it isn't).</summary>
+    private static readonly ReadMemo<GeometryKey, NearbyElement> NearKept = new();
+
+    private static readonly ReadMemo<long, BuiltInCategory?> ModelKept = new();
 
     private static string Category(Element e) => e.Category is { } c ? c.BuiltInCategory.ToString() : "";
 

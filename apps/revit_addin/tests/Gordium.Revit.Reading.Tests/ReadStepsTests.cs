@@ -355,8 +355,10 @@ public sealed class ReadStepsTests
                         "                                       or Autodesk.Revit.Exceptions.ArgumentException)\n        {\n            return ([], true, 0);",
                         source[inBand..pieces]);
         // the scope: opened before the rooms, closed after the railings, before anything that changes the model
-        Assert.Equal(2, Count(source, "Kept.Open("));
-        var open = source.IndexOf("using (FacesKept.Open(Hits(\"inside.cache.faces\")))\n        using (BandPiecesKept.Open(Hits(\"inside.cache.band_pieces\")))\n        {", StringComparison.Ordinal);
+        Assert.Equal(4, Count(source, "Kept.Open("));
+        var open = source.IndexOf("using (FacesKept.Open(Hits(\"inside.cache.faces\")))\n        using (BandPiecesKept.Open(Hits(\"inside.cache.band_pieces\")))\n" +
+                                  "        using (NearKept.Open(Hits(\"inside.cache.near\")))\n        using (ModelKept.Open())\n        {",
+                                  StringComparison.Ordinal);
         var rooms = source.IndexOf("ReadSteps.Time(\"inside.rooms\", ", StringComparison.Ordinal);
         var railings = source.IndexOf("ReadSteps.Time(\"inside.railings\", ", StringComparison.Ordinal);
         var close = source.IndexOf("}   // the geometry kept is let go here, before anything changes the model", StringComparison.Ordinal);
