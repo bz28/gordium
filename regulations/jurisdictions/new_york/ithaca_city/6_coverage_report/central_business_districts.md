@@ -1337,7 +1337,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 | `CBD-50.active_street_level_use` | flag | §325-8D | — | **none** |
 | `CBD-50.historic_review` | flag | §325-8D | — | **none** |
 
-### CBD-60: 13 rules, 7 flags; 10 checked on a model
+### CBD-60: 13 rules, 7 flags; 11 checked on a model
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
@@ -1349,7 +1349,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 | `CBD-60.min_height` | rule | §325-3B:building_area (via definition), §325-3B:height_of_building (via definition), §325-8A | building_area (model), building_height (model) | scenario 16, scenario 17 |
 | `CBD-60.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A | building_area (model), lot_area (model) | scenario 16, scenario 17 |
 | `CBD-60.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | rear_yard (model) | scenario 16, scenario 17 |
-| `CBD-60.yard_projections` | rule | §325-3B:height_of_building (via definition), §325-16C, §325-18B | building_height (model), front_yard_eaves (model), rear_yard_eaves (model), side_yard_larger_eaves (model), side_yard_smaller_eaves (model) | **none** |
+| `CBD-60.yard_projections` | rule | §325-3B:height_of_building (via definition), §325-16C, §325-18B | building_height (model), front_yard_eaves (model), rear_yard_eaves (model), side_yard_larger_eaves (model), side_yard_smaller_eaves (model) | scenario 17 |
 | `CBD-60.accessory_buildings` | rule | §325-25, §325-25A, §325-25C | accessory_buildings (model), accessory_distances_apply (model), accessory_rear_yard (model), accessory_side_yard (model) | **none** |
 | `CBD-60.transition_yards` | flag | §325-19A, §325-19B | — | scenario 16 |
 | `CBD-60.stream_setback` | rule | §325-3B:structure, §325-26 | stream_distance (stated), stream_near_lot (stated) | **none** |
