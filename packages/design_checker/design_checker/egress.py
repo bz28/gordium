@@ -109,8 +109,9 @@ def _folder(jurisdiction) -> Path:
 
 
 def laws(jurisdiction) -> dict:
-    """The place and every state law it inherits, ready to check: {"place": its name, "laws": [{key, title, short,
-    folder, rulebook, rules, problems, section_of, documents}]}. A rulebook that doesn't pass the rule checks gives
+    """The place and every state law it inherits, ready to check: {"place": its name, "folder": its folder (the code
+    choice reads its uses.yaml names), "laws": [{key, title, short, folder, rulebook, rules, problems, section_of,
+    documents}]}. A rulebook that doesn't pass the rule checks gives
     no rules and its problems (needs review, never a row)."""
     refuse_state_alone(jurisdiction)
     p = place_of(_folder(jurisdiction))
