@@ -27,6 +27,7 @@ internal static class PaneExtras
 
     // the selection the strip answers (in the project shown), and whether it is showing
     private static IReadOnlyList<string> _selected = [];
+    private static string? _selectedIn;                   // the project they were selected in
     private static Dictionary<string, string?> _names = new(StringComparer.Ordinal);
     private static bool _stripOn;
     private static bool _all;
@@ -87,8 +88,8 @@ internal static class PaneExtras
             };
             ShowBadge();
             _map = content?.Model is { } model ? SelectionMap.Of(model, content.When) : null;
-            if (_map is null)
-                Hide();
+            if (_map is null || content?.Project != _selectedIn)
+                Hide();                                   // nothing to answer from, or another project's results
             else if (_stripOn)
                 Draw();                                   // the same selection, from this answer (stale: the clocks)
         }
@@ -173,6 +174,7 @@ internal static class PaneExtras
                 return;
             }
             _selected = uids;
+            _selectedIn = doc.Title;
             _names = names;
             _all = false;
             _stripOn = true;
