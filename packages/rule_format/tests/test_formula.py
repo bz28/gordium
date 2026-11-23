@@ -29,7 +29,7 @@ def test_evaluate(text, values, expected):
 @pytest.mark.parametrize("text", [
     "__import__('os')", "lot_area.real", "lot_area[0]", "lambda: 1", "open('x')",
     "max(lot_area, key=1)", "max(lot_area)", "min()", "True", "None", "x if", "a ** 2",
-    "[i for i in x]", 'use in "one_family_detached"', "", "1" + "+1" * 300,
+    "[i for i in x]", 'use in "one_family_detached"', "", "1" + "+1" * 600,          # longer than MAX_LENGTH (1,000)
     "-" * 100_000 + "1", "not " * 5_000 + "x",
     "rear_yard <= 1e999",                                       # infinity written as a number
     "rear_yard <= 1" + "0" * 400,                               # integer too large to be real
