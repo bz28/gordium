@@ -273,7 +273,7 @@ public sealed class ReadStepsTests
                      "ReadSteps.Count(step + \".candidates\", found.Count);",
                      "ReadSteps.Max(step + \".candidates_per_call\", found.Count);",
                      "ReadSteps.Time(step + \".faces\", () => Faces(e, options))",
-                     "ReadSteps.Time(step + \".band\", () => InBand(e, band, options))",
+                     "ReadSteps.Time(step + \".band\", () => InBand(e, band, bandBoxes, options))",
                      "ReadSteps.Count(step + \".read\", list.Count);",
                      "ReadSteps.Max(step + \".read_per_call\", list.Count);",
                      "ReadSteps.Count(\"inside.boolean_ops\");",
@@ -300,10 +300,16 @@ public sealed class ReadStepsTests
         // Snowdon Towers: 300 of 408 s went to the solid test run on every element, per room (read_steps, 2026-11-22).
         // The padded box of the room's solid comes first, and the exact solid test still decides: same list, faster.
         var source = Addin("RevitInterior.cs");
-        var box = source.IndexOf(".WherePasses(new BoundingBoxIntersectsFilter(Padded(solid, 1.0)))", StringComparison.Ordinal);
-        var exact = source.IndexOf(".WherePasses(new ElementIntersectsSolidFilter(solid))", StringComparison.Ordinal);
-        Assert.True(box >= 0, "the quick box filter is gone");
-        Assert.True(exact > box, "the exact solid test must still run, after the box");
+        // (Collect runs Revit's box filter on the box index's candidates, then the solid test, as on the whole model)
+        Assert.Contains("var hits = Collect(doc, Padded(solid, 1.0), new ElementIntersectsSolidFilter(solid))", source);
+        var collect = source[source.IndexOf("private static List<Element> Collect(", StringComparison.Ordinal)..];
+        foreach (var chain in new[] { "some.WherePasses(then)", "all.WherePasses(then)" })
+        {
+            var box = collect.IndexOf(".WherePasses(new BoundingBoxIntersectsFilter(box))", StringComparison.Ordinal);
+            var exact = collect.IndexOf(chain, StringComparison.Ordinal);
+            Assert.True(box >= 0, "the quick box filter is gone");
+            Assert.True(exact > box, "the exact solid test must still run, after the box");
+        }
         // the box is in model coordinates: all 8 corners through the solid box's own transform, padded on every side
         Assert.Contains("select box.Transform.OfPoint(new XYZ(x, y, z))", source);
         Assert.Contains("corners.Min(p => p.Z) - pad", source);
@@ -347,7 +353,7 @@ public sealed class ReadStepsTests
         // FacesRead only through the memo; one walk of the geometry for the band, never in InBand itself
         Assert.Equal(1, Count(source, "() => FacesRead(e, options)"));
         Assert.Equal(1, Count(source, "() => BandPieces(e, options)"));
-        var inBand = source.IndexOf("InBand(Element e, Solid band, Options options)", StringComparison.Ordinal);
+        var inBand = source.IndexOf("InBand(Element e, Solid band, BandBoxes boxes, Options options)", StringComparison.Ordinal);
         var pieces = source.IndexOf("private abstract record BandPiece", StringComparison.Ordinal);
         Assert.DoesNotContain("get_Geometry", source[inBand..pieces]);
         // the band's catch is the walk's own (Revit's three refusals), and the walk keeps every throw for it
@@ -355,8 +361,10 @@ public sealed class ReadStepsTests
                         "                                       or Autodesk.Revit.Exceptions.ArgumentException)\n        {\n            return ([], true, 0);",
                         source[inBand..pieces]);
         // the scope: opened before the rooms, closed after the railings, before anything that changes the model
-        Assert.Equal(2, Count(source, "Kept.Open("));
-        var open = source.IndexOf("using (FacesKept.Open(Hits(\"inside.cache.faces\")))\n        using (BandPiecesKept.Open(Hits(\"inside.cache.band_pieces\")))\n        {", StringComparison.Ordinal);
+        Assert.Equal(5, Count(source, "Kept.Open("));
+        var open = source.IndexOf("using (FacesKept.Open(Hits(\"inside.cache.faces\")))\n        using (BandPiecesKept.Open(Hits(\"inside.cache.band_pieces\")))\n" +
+                                  "        using (NearKept.Open(Hits(\"inside.cache.near\")))\n        using (ModelKept.Open())\n        using (IndexKept.Open())\n        {",
+                                  StringComparison.Ordinal);
         var rooms = source.IndexOf("ReadSteps.Time(\"inside.rooms\", ", StringComparison.Ordinal);
         var railings = source.IndexOf("ReadSteps.Time(\"inside.railings\", ", StringComparison.Ordinal);
         var close = source.IndexOf("}   // the geometry kept is let go here, before anything changes the model", StringComparison.Ordinal);
