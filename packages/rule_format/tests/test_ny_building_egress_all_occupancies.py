@@ -15,9 +15,10 @@ RULEBOOK = NY / "5_building_code_rules/drafted/general.yaml"
 A = ["A-1", "A-2", "A-3", "A-4", "A-5"]
 R = ["R-1", "R-2", "R-3", "R-4"]
 S1, S2 = "sprinklered_903_3_1_1", "sprinklered_903_3_1_2"
-NFPA13 = {S1: True, S2: False}
-NONE = {S1: False, S2: False}
-STATED = {"egress_balcony_increase_taken": False, "assembly_fixed_seating": False}
+NFPA13 = {S1: True, S2: False, "sprinklered_903_3_1_3": False}
+NONE = {S1: False, S2: False, "sprinklered_903_3_1_3": False}
+STATED = {"egress_balcony_increase_taken": False, "assembly_fixed_seating": False, "special_egress_spaces": False,
+          "building_has_atrium": False, "merchandise_pads": False}
 
 # Table 1017.2, p.341: line -> (groups, without a sprinkler system (None: Not Permitted), with one, the rule)
 TABLE_1017_2 = {
@@ -66,6 +67,11 @@ def _one(rule, kind, measures, given, ctx):
     return row["outcome"]
 
 
+def _travel(feet):
+    """A story's travel, its sleeping rooms' within 407.4.2's 50 ft (Group I-2)."""
+    return {"egress_travel_distance": feet, "egress_travel_in_sleeping_room": 50}
+
+
 def _cites(rule, page, line):
     return any(s.get("page") == page and s["lines"][0] <= line <= s["lines"][1] for s in rule["sources"])
 
@@ -77,14 +83,16 @@ def test_table_1017_2_each_row_at_its_limit_and_just_past(ctx, rules, line):
     assert _cites(rule, 341, line)
     for g in groups:
         given = {"occupancy_group": g} | STATED
-        assert _one(rule, "story", {"egress_travel_distance": with_}, given | NFPA13, ctx) == "pass", (g, with_)
+        at = "needs_review" if g == "I-3" else "pass"            # 408.6.1's smoke-barrier distances (review round 1)
+        over = "needs_review" if g == "S-2" else "fail"          # 1017.3 exception 1: an open parking garage
+        assert _one(rule, "story", _travel(with_), given | NFPA13, ctx) == at, (g, with_)
         past = with_ + 0.01 + (100 if g == "H-5" else 150 if g in ("F-1", "S-1") else 0)  # past 1017.2.3, 1017.2.2
-        assert _one(rule, "story", {"egress_travel_distance": past}, given | NFPA13, ctx) == "fail", (g, past)
+        assert _one(rule, "story", _travel(past), given | NFPA13, ctx) == over, (g, past)
         if without is None:          # Not Permitted without a sprinkler system, whatever the distance
-            assert _one(rule, "story", {"egress_travel_distance": 1}, given | NONE, ctx) == "fail", g
+            assert _one(rule, "story", _travel(1), given | NONE, ctx) == "fail", g
         else:
-            assert _one(rule, "story", {"egress_travel_distance": without}, given | NONE, ctx) == "pass", g
-            assert _one(rule, "story", {"egress_travel_distance": without + 0.01}, given | NONE, ctx) == "fail", g
+            assert _one(rule, "story", _travel(without), given | NONE, ctx) == "pass", g
+            assert _one(rule, "story", _travel(without + 0.01), given | NONE, ctx) == over, g
     other = next(g for g in ("B", "M") if g not in groups)
     assert _one(rule, "story", {"egress_travel_distance": 10}, {"occupancy_group": other} | NFPA13, ctx) == \
         "not_applicable"
@@ -110,7 +118,7 @@ def test_an_allowance_not_ruled_out_never_fails_within_it(ctx, rules):
     assert _one(row, "story", {"egress_travel_distance": 300}, r2 | {"assembly_fixed_seating": False}, ctx) == \
         "needs_review"                                                       # the balcony increase not stated
     assert _one(row, "story", {"egress_travel_distance": 300}, r2 | STATED, ctx) == "fail"
-    assert _one(row, "story", {"egress_travel_distance": 300.01}, r2 | {"egress_balcony_increase_taken": True},
+    assert _one(row, "story", {"egress_travel_distance": 300.01}, r2 | STATED | {"egress_balcony_increase_taken": True},
                 ctx) == "fail"                                               # past the 100 ft more too
     assert _one(row, "story", {"egress_travel_distance": 390}, {"occupancy_group": "S-1"} | NFPA13 | STATED, ctx) == \
         "needs_review"
@@ -253,3 +261,211 @@ def test_intervening_spaces_for_every_group_but_i4(ctx, rules):
         "fail"
     assert _one(rule, "space", clear, {"occupancy_group": "I-4"}, ctx) == "not_applicable"
     assert _one(rule, "space", clear, {"occupancy_group": "mixed"}, ctx) == "not_applicable"
+
+
+# ---- review round 1 (2026-11-23): every cross-reference of a drafted table has a handler -----------------------------
+
+import json
+import re
+
+# Each drafted piece's lines (the sections file) that must all be quoted somewhere in the rulebook, so a reference
+# in them can't go unseen; and each section a reference names -> (the rule that handles it, a word its text holds)
+SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2.1": (315, 3, 13),
+         "1017.2": (341, 23, 23), "1020.5": (344, 37, 47)}
+ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
+HANDLERS = {
+    # Table 1017.2 note a's sections, and its notes b to e
+    "402.8": (ROWS_1017, "402.8"), "407.4": ("general.bc_table_1017_2_i2_i3", "407.4.2"),
+    "408.6.1": ("general.bc_table_1017_2_i2_i3", "408.6.1"), "408.8.1": ("general.bc_table_1017_2_i2_i3", "408.6.1"),
+    "411.2": (ROWS_1017, "411.2"), "412.6": (ROWS_1017, "412.6"), "1006.2.2.2": (ROWS_1017, "1006.2.2.2"),
+    "1006.2.2.3": (ROWS_1017, "1006.2.2.3"), "1006.3.4": ("general.bc_1006_3_3_story_exits", "1006.3.4"),
+    "407.4.2": ("general.bc_407_4_2_sleeping_room_travel", "407.4.2"),
+    "1017.2.2": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "1017.2.2"),
+    "1017.2.3": ("general.bc_table_1017_2_h5", "1017.2.3"),
+    "1030.7": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "1030.7"), "3103.4": (ROWS_1017, "3103.4"),
+    "3104.9": (ROWS_1017, "3104.9"), "903.3.1.1": (ROWS_1017, "sprinklered_903_3_1_1"),
+    "903.3.1.2": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "903.3.1.2"),
+    "903.2.5.1": ("general.bc_table_1017_2_note_d_group_h", "903.2.5.1"),
+    "903.3.1.3": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "sprinklered_903_3_1_3"),
+    "903.2.8": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "1006.2.2.6"),
+    # Table 1006.2.1's notes, and 1006.2.1's own
+    "903.2.5": ("general.bc_table_1017_2_note_d_group_h", "903.2.5"),
+    "1030.8": ("general.bc_table_1006_2_1_a_e_m", "1030.8"), "1006.2.2.1": ("general.bc_table_1006_2_1_b", "1006.2.2"), "1006.2.2.6": ("general.bc_table_1006_2_1_r3_r4", "1006.2.2.6"),
+    "1004.2": ("general.bc_1006_2_1_two_exits", "1004.2"),
+}
+NO_LIMIT = {"1006.2.1", "1017.2", "1020.5"}          # the piece naming itself
+# lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
+# 'Exceptions:' (1020.5)
+UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39)}
+
+
+def _quoted(book, page, a, b):
+    lines = set()
+    text = []
+    for r in book["rules"]:
+        for s in r.get("sources") or []:
+            if s.get("page") == page and s["lines"][1] >= a and s["lines"][0] <= b:
+                lines |= set(range(s["lines"][0], s["lines"][1] + 1))
+                text.append(s["quote"])
+    return lines, " ".join(text)
+
+
+def test_every_cross_reference_in_a_drafted_piece_has_a_handler(rules):
+    """A section a drafted table's notes (or its section) name may tighten its limit for some condition: each has a
+    rule or a review that handles it, named here, so a reference added without one fails."""
+    book = load(RULEBOOK)
+    for piece, (page, a, b) in SCOPE.items():
+        lines, text = _quoted(book, page, a, b)
+        missing = [n for n in range(a, b + 1) if n not in lines and (page, n) not in UNQUOTED]
+        assert not missing, (piece, missing)            # every line quoted (but those that name no section)
+        refs = set(re.findall(r"\b\d{3,4}(?:\.\d+)+\b|(?<=Section )\d{3}\b", text)) - NO_LIMIT
+        refs = {x for x in refs if not re.fullmatch(r"\d+\.\d", x) or x.count(".") > 1 or len(x) > 4}
+        for ref in sorted(refs):
+            if ref in ("903", "304.8", "1.0", "0.5"):
+                continue
+            assert ref in HANDLERS, (piece, ref)
+    for ref, (rids, word) in HANDLERS.items():
+        for rid in [rids] if isinstance(rids, str) else rids:
+            assert word in json.dumps(rules[rid]), (ref, rid, word)
+
+
+def test_a_fixed_seat_assembly_space_never_passes_on_the_tables_common_path(ctx, rules):
+    """Review round 1, P0: Table 1006.2.1 note c sends an assembly space with fixed seating to 1030.8 (p.355): 30 ft
+    from any seat (75 ft under 50 occupants), whatever the number of exits; with fixed seating stated or not ruled out,
+    a space over it needs review, never a pass on the table's 75 ft."""
+    r = rules["general.bc_table_1006_2_1_a_e_m"]
+    two = {"space_is_exit": False, "space_exit_count": 2, "space_occupant_load": 300, "space_common_path": 60}
+    base = {"occupancy_group": "A-1", "special_egress_spaces": False, "merchandise_pads": False} | NFPA13
+    assert _one(r, "space", two, base | {"assembly_fixed_seating": True}, ctx) == "needs_review"
+    assert _one(r, "space", two, base, ctx) == "needs_review"                       # not stated
+    assert _one(r, "space", two | {"space_common_path": 30}, base | {"assembly_fixed_seating": True}, ctx) == "pass"
+    assert _one(r, "space", two | {"space_occupant_load": 49, "space_common_path": 75},
+                base | {"assembly_fixed_seating": True}, ctx) == "pass"
+    assert _one(r, "space", two, base | {"assembly_fixed_seating": False}, ctx) == "pass"
+    store = two | {"space_common_path": 40}                                         # 1018.4: merchandise pads
+    m = {"occupancy_group": "M", "special_egress_spaces": False, "assembly_fixed_seating": False} | NFPA13
+    assert _one(r, "space", store, m, ctx) == "needs_review"
+    assert _one(r, "space", store, m | {"merchandise_pads": False}, ctx) == "pass"
+
+
+def test_an_nfpa_13d_group_r3_or_r4_is_held_to_1006_2_2_6(ctx, rules):
+    """Review round 1, P0: Table 1017.2 note e's NFPA 13D building (903.3.1.3) gets the column without a sprinkler
+    system, but 1006.2.2.6 (p.316) caps Group R-3 at 125 ft and R-4 at 75 ft; the sprinkler system not stated, over
+    either needs review."""
+    r = rules["general.bc_table_1017_2_a_e_f1_m_r_s1"]
+    d13 = {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False, "sprinklered_903_3_1_3": True} | STATED
+    assert _one(r, "story", _travel(125), {"occupancy_group": "R-3"} | d13, ctx) == "pass"
+    assert _one(r, "story", _travel(125.01), {"occupancy_group": "R-3"} | d13, ctx) == "fail"
+    assert _one(r, "story", _travel(75), {"occupancy_group": "R-4"} | d13, ctx) == "pass"
+    assert _one(r, "story", _travel(75.01), {"occupancy_group": "R-4"} | d13, ctx) == "fail"
+    assert _one(r, "story", _travel(150), {"occupancy_group": "R-3"} | STATED, ctx) == "needs_review"
+    assert _one(r, "story", _travel(150), {"occupancy_group": "R-2"} | d13, ctx) == "pass"    # R-2: 1006.2.2.6 not
+
+
+def test_a_space_with_its_own_limit_stated_or_not_ruled_out_never_passes_a_travel_row(ctx, rules):
+    """Review round 1: note a's spaces (a mall, a temporary structure's 100 ft, a refrigeration room's 150 ft ...)
+    and 1017.3.2.3's atrium can hold a building to less than its row: stated or not ruled out, the row needs review."""
+    r = rules["general.bc_table_1017_2_b"]
+    b = {"occupancy_group": "B"} | NFPA13 | STATED
+    assert _one(r, "story", _travel(60), b, ctx) == "pass"
+    assert _one(r, "story", _travel(60), b | {"special_egress_spaces": True}, ctx) == "needs_review"
+    assert _one(r, "story", _travel(60), {k: v for k, v in b.items() if k != "special_egress_spaces"}, ctx) == \
+        "needs_review"
+    assert _one(r, "story", _travel(250), b | {"building_has_atrium": True}, ctx) == "needs_review"
+    assert _one(r, "story", _travel(150), b | {"building_has_atrium": True}, ctx) == "pass"
+    i2 = rules["general.bc_table_1017_2_i2_i3"]
+    g = {"occupancy_group": "I-2"} | NFPA13 | STATED
+    assert _one(i2, "story", _travel(150), g, ctx) == "pass"                          # 50 ft in the room
+    assert _one(i2, "story", {"egress_travel_distance": 150, "egress_travel_in_sleeping_room": 50.01}, g, ctx) == \
+        "needs_review"                                                                 # over 407.4.2's 50 ft
+
+
+# ---- section group 2 (2026-11-23): a story's exits and exit separation for every group -----------------------------
+
+FIRST, SECOND, FOURTH = ("story_first_above_or_below_grade", "story_second_above_grade_plane",
+                         "story_fourth_or_higher_above_grade_plane")
+# Table 1006.3.4(2), p.317 lines 39-43: (groups, the story, most occupants, travel without / with NFPA 13 per note b)
+TABLE_1006_3_4_2 = [
+    (A + ["E", "M", "U"], FIRST, 49, 75, 75), (["B", "F-1", "F-2"], FIRST, 49, 75, 100),
+    (["H-2", "H-3"], FIRST, 3, 25, 25), (["H-4", "H-5", "I-1", "I-2", "I-3", "R-1"], FIRST, 10, 75, 75),
+    (["S-1"], FIRST, 29, 75, 100), (["M"], SECOND, 29, 75, 75), (["B", "F-1", "F-2", "S-1"], SECOND, 29, 75, 100)]
+STORY_FACTS = {"emergency_escape_openings_1031": True, "r2_sleeping_units": False}
+
+
+def _story_rule(rules, g):
+    fam = ("a_b_e_f_m_u" if g in A + ["B", "E", "F-1", "F-2", "M", "U"] else "s" if g.startswith("S") else "h_i_r")
+    return rules[f"general.bc_table_1006_3_4_2__{fam}"]
+
+
+def _story(where, load, travel, exits=1, **more):
+    return {"story_exit_count": exits, "story_occupant_load": load, "egress_travel_distance": travel,
+            FIRST: where == FIRST, SECOND: where == SECOND, FOURTH: False, "story_rooms_exit_directly_outside": False,
+            **more}
+
+
+def test_table_1006_3_4_2_each_row_at_its_limits_and_just_past(ctx, rules):
+    for groups, where, most, without, with_ in TABLE_1006_3_4_2:
+        for g in groups:
+            r = _story_rule(rules, g)
+            given = {"occupancy_group": g} | STORY_FACTS
+            assert _one(r, "story", _story(where, most, with_), given | NFPA13, ctx) == "pass", (g, where)
+            assert _one(r, "story", _story(where, most + 0.5, 10), given | NFPA13, ctx) == "fail", (g, where)
+            assert _one(r, "story", _story(where, 1, with_ + 0.01), given | NFPA13, ctx) == "fail", (g, where)
+            assert _one(r, "story", _story(where, most, without), given | NONE, ctx) == "pass", (g, where)
+            assert _one(r, "story", _story(where, most, without + 0.01), given | NONE, ctx) == "fail", (g, where)
+    for g in ("A-2", "E", "U", "H-4", "I-1", "R-1"):                         # not in the second-story row
+        r = _story_rule(rules, g)
+        assert _one(r, "story", _story(SECOND, 1, 10), {"occupancy_group": g} | STORY_FACTS | NFPA13, ctx) == "fail", g
+    third = _story(None, 1, 10)
+    assert _one(_story_rule(rules, "B"), "story", third, {"occupancy_group": "B"} | NFPA13, ctx) == "fail"  # NP
+
+
+def test_two_exits_by_table_1006_3_3_and_r3_r4_with_one(ctx, rules):
+    r = _story_rule(rules, "B")
+    b = {"occupancy_group": "B"} | NFPA13
+    assert _one(r, "story", _story(FIRST, 500, 300, exits=2), b, ctx) == "pass"
+    assert _one(r, "story", _story(FIRST, 500.5, 300, exits=2), b, ctx) == "fail"           # 501-1,000: three
+    assert _one(r, "story", _story(FIRST, 1000, 300, exits=3), b, ctx) == "pass"
+    assert _one(r, "story", _story(FIRST, 1000.5, 300, exits=3), b, ctx) == "fail"          # more: four
+    h = rules["general.bc_table_1006_3_4_2__h_i_r"]
+    assert _one(h, "story", _story(SECOND, 40, 200), {"occupancy_group": "R-3"} | NFPA13, ctx) == "pass"
+    assert _one(h, "story", _story(FIRST, 2, 10), {"occupancy_group": "H-1"} | NFPA13, ctx) == "fail"  # no H-1 row
+
+
+def test_table_1006_3_4_1_group_r2_of_dwelling_units(ctx, rules):
+    """p.317 lines 21-24: a basement or first to third story, 4 dwelling units, 125 ft, only with note a's system
+    and escape openings; the fourth story and higher NP. Sleeping units are Table 1006.3.4(2)'s (note b)."""
+    r = rules["general.bc_table_1006_3_4_1__r2_dwelling_units"]
+    du = {"occupancy_group": "R-2", "r2_sleeping_units": False, "emergency_escape_openings_1031": True}
+    one = {"story_exit_count": 1, "story_occupant_load": 16, "egress_travel_distance": 125, FOURTH: False,
+           "story_dwelling_units": 4, "story_rooms_exit_directly_outside": False}
+    assert _one(r, "story", one, du | NFPA13, ctx) == "pass"
+    assert _one(r, "story", one, du | {S1: False, S2: True}, ctx) == "pass"                 # NFPA 13R
+    assert _one(r, "story", one | {"story_dwelling_units": 5}, du | NFPA13, ctx) == "fail"
+    assert _one(r, "story", one | {"egress_travel_distance": 125.01}, du | NFPA13, ctx) == "fail"
+    assert _one(r, "story", one | {FOURTH: True}, du | NFPA13, ctx) == "fail"
+    assert _one(r, "story", one, du | NONE, ctx) == "fail"                                   # note a: sprinklered
+    assert _one(r, "story", one, du | NFPA13 | {"emergency_escape_openings_1031": False}, ctx) == "fail"
+    assert _one(r, "story", one, {"occupancy_group": "R-2"} | NFPA13, ctx) == "needs_review"  # units not stated
+    two = one | {"story_exit_count": 2, "story_dwelling_units": 9}
+    assert _one(r, "story", two, du | NONE, ctx) == "pass"
+    sleeping = rules["general.bc_table_1006_3_4_2__h_i_r"]
+    su = du | {"r2_sleeping_units": True}
+    assert _one(sleeping, "story", _story(FIRST, 10, 75), su | NFPA13, ctx) == "pass"
+    assert _one(sleeping, "story", _story(FIRST, 10, 75), su | NONE, ctx) == "fail"          # note a
+
+
+def test_a_close_pair_fails_in_another_group_where_two_are_required(ctx, rules):
+    """1007.1.1 for every group (group 2): a close pair fails where the group's own row can't allow one exit, and
+    needs review where it could (read loosely), never failing a story or space one exit would serve."""
+    story = rules["general.bc_1007_1_1_remoteness"]
+    b = {"occupancy_group": "B", "occupancy_group_i4": False, "other_occupancy_present": True} | NFPA13
+    close = {"exit_remoteness_ratio": 0.2, "story_exit_count": 2, "story_dwelling_units": 0}
+    assert _one(story, "story", close | _story(FIRST, 120, 90, exits=2), b, ctx) == "fail"
+    assert _one(story, "story", close | _story(FIRST, 40, 90, exits=2), b, ctx) == "needs_review"
+    space = rules["general.bc_1007_1_1_space_remoteness"]
+    room = {"space_exit_count": 2, "space_exit_remoteness_ratio": 0.2, "space_common_path": 40}
+    assert _one(space, "space", room | {"space_occupant_load": 60}, b, ctx) == "fail"
+    assert _one(space, "space", room | {"space_occupant_load": 30}, b, ctx) == "needs_review"
+    mixed = b | {"occupancy_group": "mixed"}
+    assert _one(space, "space", room | {"space_occupant_load": 60}, mixed, ctx) == "needs_review"

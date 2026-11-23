@@ -78,12 +78,12 @@ def test_the_real_workers_answer_compares_as_worked_out(tmp_path):
     (tmp_path / "a.json").write_text(json.dumps(got), encoding="utf-8")
     made = compare.compare_apartment(compare.result_of(tmp_path / "a.json"))
     assert made["ok"], made["summary"]
-    assert made["summary"]["as_worked_out"] == 59          # every rule of the rulebook (2026-11-23: 59)
+    assert made["summary"]["as_worked_out"] == 72          # every rule of the rulebook (2026-11-23: 72)
     # and a kinder verdict than the hand-work is named a false pass, never ok
-    got["result"]["egress"]["results"]["general.bc_1006_3_3_story_exits"] = "pass"
+    got["result"]["egress"]["results"]["general.bc_table_1006_3_4_1__r2_dwelling_units"] = "pass"
     (tmp_path / "b.json").write_text(json.dumps(got), encoding="utf-8")
     worse = compare.compare_apartment(compare.result_of(tmp_path / "b.json"))
-    assert not worse["ok"] and worse["summary"]["false_passes"] == ["general.bc_1006_3_3_story_exits"]
+    assert not worse["ok"] and worse["summary"]["false_passes"] == ["general.bc_table_1006_3_4_1__r2_dwelling_units"]
 
 
 def test_every_door_has_its_types_clear_opening_stamped_as_the_description_reads_it():

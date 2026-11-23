@@ -29,6 +29,11 @@ pieces:
     heading: Institutional Group I-4, day care facilities › Five or fewer persons receiving care in a dwelling unit
     rules:
     - general.bc_308_5_4_dwelling_unit
+  407.4.2:
+    label: rule
+    heading: Distance of travel
+    rules:
+    - general.bc_407_4_2_sleeping_room_travel
   508.2.1:
     label: flag
     heading: Accessory occupancies › Occupancy classification
@@ -78,16 +83,54 @@ pieces:
       doorways
     rules:
     - general.bc_1006_2_1_1_three_or_more_exits
+  1006.2.2.1:
+    label: flag
+    heading: Egress based on use › Boiler, incinerator and furnace rooms
+    rules:
+    - general.bc_1006_2_2_1_boiler_rooms
+  1006.2.2.2:
+    label: flag
+    heading: Egress based on use › Refrigeration machinery rooms
+    rules:
+    - general.bc_1006_2_2_2_refrigeration_machinery_rooms
+  1006.2.2.3:
+    label: flag
+    heading: Egress based on use › Refrigerated rooms or spaces
+    rules:
+    - general.bc_1006_2_2_3_refrigerated_rooms
+  1006.2.2.4:
+    label: flag
+    heading: Egress based on use › Electrical rooms
+    rules:
+    - general.bc_1006_2_2_4_electrical_rooms
+  1006.2.2.5:
+    label: flag
+    heading: Egress based on use › Vehicular ramps
+    rules:
+    - general.bc_1006_2_2_5_vehicular_ramps
+  1006.2.2.6:
+    label: rule
+    heading: Egress based on use › Groups R-3 and R-4
+    rules:
+    - general.bc_1006_2_2_6_r3_r4_nfpa_13d
   1006.3.3:
     label: rule
     heading: Egress based on occupant load
     rules:
     - general.bc_1006_3_3_story_exits
+  Table 1006.3.4(1):
+    label: rule
+    heading: Stories and occupiable roofs with one exit or access to one exit for r-2 occupancies
+    rules:
+    - general.bc_table_1006_3_4_1__r2_dwelling_units
   Table 1006.3.4(2):
     label: rule
     heading: Stories and occupiable roofs with one exit or access to one exit for other occupancies
     rules:
     - general.bc_table_1006_3_4_2__other_occupancies
+    - general.bc_table_1006_3_4_2__a_b_e_f_m_u
+    - general.bc_table_1006_3_4_2__h_i_r
+    - general.bc_table_1006_3_4_2__s
   1006.3.4.1:
     label: flag
     heading: Single exits › Mixed occupancies
@@ -169,6 +212,11 @@ pieces:
     heading: Atriums › Exit access travel distance at other than the level of exit discharge
     rules:
     - general.bc_1017_3_2_3_atrium
+  '1018.4':
+    label: flag
+    heading: Aisle accessways in Group M
+    rules:
+    - general.bc_1018_4_merchandise_pads
   '1020.5':
     label: rule
     heading: Dead ends
@@ -176,4 +224,9 @@ pieces:
     - general.bc_1020_5_dead_end
     - general.bc_1020_5_other_occupancies
     - general.bc_1020_5_dead_end_other_groups
+  '1030.8':
+    label: flag
+    heading: Common path of egress travel
+    rules:
+    - general.bc_1030_8_fixed_seating_common_path
 not_checked_yet: []

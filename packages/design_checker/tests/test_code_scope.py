@@ -119,12 +119,13 @@ def test_a_building_fact_gordium_cant_read_is_said_never_used():
 def test_the_building_measures_follow_the_groups_and_the_sprinkler_system():
     assert code_scope.building_measures({"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r"}) == {
         "occupancy_group_i4": False, "other_occupancy_present": True, "occupancy_group": "R-2",
-        "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True}
+        "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True, "sprinklered_903_3_1_3": False}
     assert code_scope.building_measures({"occupancy_groups": ["I-4"], "sprinkler_system": "nfpa_13"}) == {
         "occupancy_group_i4": True, "other_occupancy_present": False, "occupancy_group": "I-4",
-        "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False}
+        "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False, "sprinklered_903_3_1_3": False}
     assert code_scope.building_measures({"sprinkler_system": "nfpa_13d"}) == {
-        "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False}       # 903.3.1.3: neither limit's system
+        "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False,      # 903.3.1.3: neither limit's system,
+        "sprinklered_903_3_1_3": True}                                       # but 1006.2.2.6's (review round 1)
 
 
 def test_the_one_occupancy_group_or_mixed_for_two_and_the_seating_fact():
@@ -194,11 +195,11 @@ def test_a_building_code_flag_for_the_whole_building_is_its_own_needs_review_lin
     bcnys = next(law for law in found["laws"] if law["scope"] == code_scope.BUILDING)
     flag = next(r for r in bcnys["rules"] if r["id"] == "general.bc_table_1006_3_4_2__other_occupancies")
     out = {}
-    item = egress._flag_item(bcnys, flag, flag["id"], {"other_occupancy_present": True}, bcnys["kinds"], out)
+    item = egress._flag_item(bcnys, flag, flag["id"], {"occupancy_group": "mixed"}, bcnys["kinds"], out)
     assert item["status"] == present.REVIEW and item["reason"].startswith("A person checks this")
     assert item["code"]["section"] and out[flag["id"]] == "needs_review"
-    item = egress._flag_item(bcnys, flag, flag["id"], {"other_occupancy_present": False}, bcnys["kinds"], {})
-    assert item["status"] == present.NOT_APPLICABLE and "other_occupancy_present: False" in item["reason"]
+    item = egress._flag_item(bcnys, flag, flag["id"], {"occupancy_group": "B"}, bcnys["kinds"], {})
+    assert item["status"] == present.NOT_APPLICABLE and "occupancy_group: B" in item["reason"]
 
 
 # ---- the quotes are the books' own words -------------------------------------------------------------------------------

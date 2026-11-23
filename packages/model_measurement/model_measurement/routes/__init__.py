@@ -452,18 +452,24 @@ def _in_room(story, routes, rid, doors) -> float:
     return farthest(_Within).figure
 
 
+ENTERED_EXITS = ("exit_enclosure", "exit_passageway")    # the exits a door enters as a room (IBC 1016.1's list)
+
+
 def _is_exit(story, rid) -> bool:
-    """Whether the room is itself an exit (a stair enclosure, an exit passageway: IBC 1016.1's exits), not a space the
-    exits serve: a door of it marked an exit enters it (its `exit_id` is this room, as the format gives an
-    enclosure's doors, docs/interior/interior_description_format.md). No exit door of it, or each one entering the
-    room on its other side or leading outside (an exterior exit door at discharge), and it is a space. An exit door
-    whose exit is neither room it joins (a stair's own id) leaves it unknown (Stop)."""
-    for d in sorted((d for d in story.doors.values() if rid in d.sides and d.exit_kind), key=lambda d: d.id):
-        if d.exit_id == rid:
-            return True
-    for d in sorted((d for d in story.doors.values() if rid in d.sides and d.exit_kind), key=lambda d: d.id):
+    """Whether the room is itself an exit (an exit stair's enclosure, an exit passageway: exits entered as rooms), not a
+    space the exits serve: a door of it marked `exit_enclosure` or `exit_passageway` enters it (its `exit_id` is this
+    room, as the format gives an enclosure's doors, docs/interior/interior_description_format.md). A horizontal exit
+    leaves the rooms on both its sides spaces (each is a refuge area the other side's exit access reaches, 1026), as
+    an exterior exit door at discharge or onto an exterior stair or ramp leaves its room one. No such door of it, or
+    each one entering the room on its other side, and it is a space; one whose exit is neither room it joins (a
+    stair's own id) leaves it unknown (Stop)."""
+    entered = sorted((d for d in story.doors.values() if rid in d.sides and d.exit_kind in ENTERED_EXITS),
+                     key=lambda d: d.id)
+    if any(d.exit_id == rid for d in entered):
+        return True
+    for d in entered:
         other = next((s for s in d.sides if s != rid), None)
-        if d.exit_kind != "exterior_at_discharge" and d.exit_id != other:
+        if d.exit_id != other:
             raise Stop("exit_side_unclear", name=story.rooms[rid].name if story.rooms.get(rid) else rid,
                        door=d.name, exit_id=d.exit_id)
     return False

@@ -57,3 +57,17 @@ def test_an_exit_whose_id_is_no_room_it_joins_leaves_it_unknown():
     assert got["st"]["not_measured"]["space_is_exit"].startswith(words)
     assert "stair-1" in got["st"]["not_measured"]["space_is_exit"]
     assert got["r"]["measures"]["space_is_exit"] is False
+
+
+def test_a_horizontal_exit_leaves_both_rooms_spaces():
+    """Review round 1 (2026-11-23): a horizontal exit (1026) is entered from either side and leads to a refuge area,
+    a room people occupy, never an exit enclosure: the room it "enters" (its exit_id) is still a space Table
+    1006.2.1 counts. Only exit_enclosure and exit_passageway doors make the room they enter an exit."""
+    d = stair_off_corridor()
+    door_e = next(x for x in d["doors"] if x["id"] == "e")
+    door_e["exit_kind"] = "horizontal_exit"
+    got = _spaces(d)
+    assert got["st"]["measures"]["space_is_exit"] is False
+    assert got["r"]["measures"]["space_is_exit"] is False
+    door_e["exit_kind"] = "exit_passageway"
+    assert _spaces(d)["st"]["measures"]["space_is_exit"] is True

@@ -197,6 +197,10 @@ building:
   assembly_fixed_seating: false        # rooms used for assembly with fixed seating (BCNYS Table 1006.2.1 note c)
   r2_sleeping_units: false             # a Group R-2 of sleeping units, not dwelling units (Table 1006.3.4(1) note b)
   emergency_escape_openings_1031: true # emergency escape and rescue openings per BCNYS 1031 (Table 1006.3.4 note a)
+  special_egress_spaces: false         # a mall, special amusement area, temporary structure, pedestrian walkway,
+                                       # aircraft manufacturing, boiler, refrigeration or electrical room (BCNYS
+                                       # 1006.2.2, Table 1017.2 note a): each has its own exits or travel limit
+  merchandise_pads: false              # Group M merchandise pads (BCNYS 1018.4: their own common path)
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 
