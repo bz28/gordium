@@ -726,7 +726,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         p.Children.Add(Typed(new C.TextBlock
         {
             Text = $"{screen.Needed.Count} {(screen.Needed.Count == 1 ? "fact" : "facts")} needed" + (changes > 0 ? $"; {changes} chosen, not saved yet" : "; none chosen yet") +
-                   (street ? ". You pick the street edge on the plan when the check starts." : "."),
+                   (street ? ". The street edge is picked on the plan (Pick on plan, above)." : "."),
             TextWrapping = W.TextWrapping.Wrap,
         }, Caption));
         var line = new C.DockPanel { Margin = new W.Thickness(0, 6, 0, 0), LastChildFill = false };

@@ -104,6 +104,8 @@ internal static class Program
                         continue;                       // dark: the house only
                     var (setupTitle, model, sides) = Fixture(Path.Combine(fix, setupFile));
                     var blank = SetupScreen.Build(model, sides, options, new SetupDraft());
+                    if (!dark && args.Length > 4 && args[4] == "needed")
+                        Console.WriteLine($"needed {tag}: " + string.Join(" | ", blank.Needed) + " || required fields: " + string.Join(", ", blank.Fields.Where(f => f.Required).Select(f => $"{f.Label} ({f.Kind})")));
                     // b: Check project with facts missing: the Setup form
                     Step(make(theme, []), $"02_setup_{tag}", 430, dark, p => p.Setup(title, blank, new SetupDraft()));
                     // c: the form filled in, then the check running
