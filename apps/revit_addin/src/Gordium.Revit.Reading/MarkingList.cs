@@ -446,8 +446,12 @@ public static class MarkingList
     ];
 
     private static string? SuggestUse(MarkedElement e) =>
-        e.Name is { } n && UseNames.FirstOrDefault(u => u.Name.IsMatch(n)) is { Name: not null } hit
-            ? $"suggested: {RoomUses.Table.WordFor(hit.Use)} (named \"{n.Trim()}\"); set it yourself to accept" : null;
+        UseFromName(e.Name) is { } word ? $"suggested: {word} (named \"{e.Name!.Trim()}\"); set it yourself to accept" : null;
+
+    /// <summary>The room use word a room's name suggests (the first of <see cref="UseNames"/> that matches), or null:
+    /// the one table both the marking list and the Setup checklist suggest from.</summary>
+    internal static string? UseFromName(string? name) =>
+        name is { } n && UseNames.FirstOrDefault(u => u.Name.IsMatch(n)) is { Name: not null } hit ? RoomUses.Table.WordFor(hit.Use) : null;
 
     /// <summary>A word mark read through its table: given, not a word Gordium reads (to mark), or blank, whose meaning
     /// is said (nothing to mark: a house never needs it).</summary>

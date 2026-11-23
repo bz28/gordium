@@ -133,6 +133,66 @@ internal static class RevitMarks
         return (filled.ToList(), failed);
     }
 
+    /// <summary>Writes <paramref name="writes"/> in ONE transaction named <paramref name="name"/> (one Ctrl+Z takes it
+    /// all back): each on its element (or type; <see cref="SetupFacts.ProjectInformation"/> is Project Information), as
+    /// Revit stores its kind. The one writer of the request files' marks (SetMarks) and the Setup form's Save and
+    /// accepts. A write Revit refuses (no such parameter, read-only, Set false) is listed refused, never counted as
+    /// written; with every write refused nothing is committed. Returns what was written, what was refused, and how the
+    /// transaction ended (only "Committed" means the model holds them).</summary>
+    internal static (List<string> Applied, List<string> Refused, string Status) Write(Document doc, string name, IReadOnlyList<MarkWrite> writes)
+    {
+        var applied = new List<string>();
+        var refused = new List<string>();
+        if (writes.Count == 0)
+            return (applied, refused, "Nothing");
+        using var t = new Transaction(doc, name);
+        t.Start();
+        foreach (var w in writes)
+        {
+            var e = w.Element == SetupFacts.ProjectInformation ? doc.ProjectInformation : doc.GetElement(w.Element);
+            var p = e?.get_Parameter(w.Mark.Guid);
+            var done = p is { IsReadOnly: false } && (w.Mark.Kind switch
+            {
+                MarkValueKind.YesNo or MarkValueKind.Integer => p.Set(w.Value.Integer!.Value),
+                MarkValueKind.Length => p.Set(w.Value.Number!.Value),
+                _ => p.Set(w.Value.Text!),
+            });
+            (done ? applied : refused).Add($"{w.Label}: {w.Mark.Name} = {w.Value.Text ?? w.Value.Integer?.ToString(CultureInfo.InvariantCulture) ?? w.Value.Number?.ToString(CultureInfo.InvariantCulture)}" +
+                                           (done ? "" : p is null ? " (the element has no such parameter)" : " (Revit refused it)"));
+        }
+        if (applied.Count == 0)
+        {
+            t.RollBack();
+            return (applied, refused, "RolledBack");
+        }
+        return (applied, refused, t.Commit().ToString());
+    }
+
+    /// <summary>Each window's and door's rooms on its two sides in the last phase (<c>FromRoom</c>, <c>ToRoom</c>) and
+    /// its level: what the Setup checklist's escape-opening and exit-door suggestions are based on (never sent).</summary>
+    internal static List<OpeningSides> Sides(Document doc)
+    {
+        var last = doc.Phases.Cast<Phase>().LastOrDefault();
+        var sides = new List<OpeningSides>();
+        foreach (var c in new[] { BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors })
+            foreach (var fi in new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().OfType<FamilyInstance>())
+            {
+                Room? from = null, to = null;
+                if (last is not null)
+                {
+                    try
+                    {
+                        from = fi.get_FromRoom(last);
+                        to = fi.get_ToRoom(last);
+                    }
+                    catch (Autodesk.Revit.Exceptions.ApplicationException) { }     // no rooms read: no suggestion for it
+                }
+                var level = doc.GetElement(fi.LevelId) as Level;
+                sides.Add(new OpeningSides(fi.UniqueId, from?.UniqueId, to?.UniqueId, level?.UniqueId, level?.Name, level?.ProjectElevation));
+            }
+        return sides;
+    }
+
     /// <summary>Revit's own three states of a room that isn't on the plan: no <c>Location</c> (unplaced); placed
     /// with no area and no boundary loop (not enclosed); placed with a boundary but no area (redundant: another room
     /// holds the area). To check on real models.</summary>
@@ -248,9 +308,9 @@ internal static class RevitMarks
         id is null || id == ElementId.InvalidElementId ? null : id.Value.ToString(CultureInfo.InvariantCulture);
 }
 
-/// <summary>"Mark for egress": adds Gordium's marks to the project if they aren't there (design note, section 3:
-/// on first use), then shows the marking list, anything unset first. A minimal first view (a dialog and the log);
-/// the dockable list is the later UI pass.</summary>
+/// <summary>"Mark facts": adds Gordium's marks to the project if they aren't there (design note, section 3: on first
+/// use), fills the makers' clear openings as drafts, logs the marking list, and opens the Setup form in the Gordium
+/// pane (docs/decisions/2026-11-22_setup_form.md), where the architect states the facts.</summary>
 [Transaction(TransactionMode.Manual)]
 public sealed class MarkForEgressCommand : IExternalCommand
 {
@@ -304,13 +364,11 @@ public sealed class MarkForEgressCommand : IExternalCommand
                 }),
             }).ToList();
             Trial.Log("mark_for_egress", log);
-            var head = (added.Count == 0 ? "" : $"Added {added.Count} Gordium marks to this project.\n\n") + ClearPrefills.Head(filled.Count, failed);
-            var dialog = new TaskDialog("Gordium: mark facts")
-            {
-                MainInstruction = list.Headline,
-                MainContent = head + MarkingList.Text(list, maxRows: 25) + $"\n\nLogged to {Trial.LogPath()}",
-            };
-            dialog.Show();
+            // the Setup form in the pane (design pass pieces 7 and 9, built): the facts to set, the checklist with its
+            // counts and suggestions, in place of the dialog's text (the list above stays in the log)
+            if (added.Count > 0 || filled.Count > 0 || failed is not null)
+                ResultsPane.Say(ClearPrefills.StatusLine(added.Count, ClearPrefills.Head(filled.Count, failed)));
+            SetupRun.Show(commandData.Application, doc);
             return Result.Succeeded;
         }
         catch (Exception e)

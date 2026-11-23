@@ -58,8 +58,10 @@ public sealed class WhichCodeMarksTests(RealWorker worker) : IClassFixture<RealW
         };
         Mark(house, mark, v);
         var read = BuildingFacts.Read(house.Model());
-        Assert.Null(read.Building);
-        Assert.StartsWith(mark.Name + " is ", Assert.Single(read.Missing), StringComparison.Ordinal);
+        Assert.StartsWith(mark.Name + " is ", Assert.Single(read.Missing), StringComparison.Ordinal);   // asked again
+        Assert.Equal([mark], read.NotRead);
+        // kept as typed for a check sent anyway (the Setup form), where the code decision says it can't read it
+        Assert.Single(read.Building!);
     }
 
     [Fact]
@@ -110,6 +112,23 @@ public sealed class WhichCodeMarksTests(RealWorker worker) : IClassFixture<RealW
         var undecided = await WhichCode(house, outside);
         Assert.Equal(JsonValueKind.Null, undecided.GetProperty("code").ValueKind);
         Assert.Contains("Gordium: Separate means of egress", undecided.GetProperty("ask").GetString(), StringComparison.Ordinal);
+    }
+
+    /// <summary>The Setup form's "Check now anyway" (merged 2026-11-22): a building fact Gordium can't read is sent as
+    /// typed and listed as left out, so the code decision says it can't read it: needs review, never "not stated".</summary>
+    [Fact]
+    public async Task Sent_anyway_an_unreadable_building_fact_keeps_the_code_at_needs_review()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        Mark(house, Marks.OccupancyGroups, new(true, Text: "office"));
+        var client = await worker.RunningAsync();
+        Assert.Null((await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client))).Request);
+        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client), anyway: true);
+        Assert.Contains(Marks.OccupancyGroups, prepared.NotStated);
+        Assert.Equal("office", prepared.Request!.Interior["building"]!["occupancy_groups"]!.GetValue<string>());
+        var which = (await ProjectCheck.SendAsync(client, prepared.Request!)).Raw.GetProperty("which_code");
+        Assert.Equal(JsonValueKind.Null, which.GetProperty("code").ValueKind);
+        Assert.Contains("can't read", which.GetProperty("why").GetString(), StringComparison.Ordinal);
     }
 
     private static (FakeHouse, RevitModel) Project(string house)

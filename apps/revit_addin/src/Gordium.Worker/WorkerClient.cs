@@ -181,6 +181,19 @@ public sealed class WorkerClient : IDisposable
         return Guard(() => CheckResult.Parse(answer));
     }
 
+    /// <summary>The older <c>options {jurisdiction}</c> (answered exactly as before protocol 1, with no <c>about</c>):
+    /// the place's districts that have a rulebook, the city's use words and their names, and each district's uses, read
+    /// from the rulebooks themselves (design_checker check.options). The Revit add-in's Setup form offers these as its
+    /// Zone and Use choices (docs/decisions/2026-11-22_setup_form.md); a typed method, so its answer is read strictly:
+    /// anything else in it, or a field of the wrong kind, stops the worker, as for every answer.</summary>
+    public async Task<PlaceOptions> OptionsAsync(string jurisdiction, CancellationToken cancel = default)
+    {
+        ArgumentNullException.ThrowIfNull(jurisdiction);
+        var result = await ExchangeAsync("options", new JsonObject { ["jurisdiction"] = jurisdiction }, _options.RequestTimeout,
+                                         cancel, legacy: true).ConfigureAwait(false);
+        return Guard(() => PlaceOptions.Parse(result.Result));
+    }
+
     /// <summary><c>start_site {site, facts, floor_to_floor?, design_buffer?, larger_side?}</c>: the largest legal
     /// starting building on the description's lot. A null argument is not sent (the worker's default).</summary>
     public Task<WorkerAnswer> StartSiteAsync(JsonNode site, JsonNode facts, double? floorToFloor = null,
@@ -288,7 +301,7 @@ public sealed class WorkerClient : IDisposable
     }
 
     private async Task<WorkerAnswer> ExchangeAsync(string command, JsonObject fields, TimeSpan timeout,
-                                                   CancellationToken cancel, bool checkedFields = false)
+                                                   CancellationToken cancel, bool checkedFields = false, bool legacy = false)
     {
         var body = checkedFields ? fields : Fields(fields);
         await _one.WaitAsync(cancel).ConfigureAwait(false);
@@ -297,7 +310,9 @@ public sealed class WorkerClient : IDisposable
             if (_stopped is not null)
                 throw new WorkerStoppedException($"The Gordium checker was stopped ({_stopped}); start it again");
             var id = ++_nextId;
-            var request = new JsonObject { ["id"] = id, ["cmd"] = command, ["protocol"] = Protocol.Version };
+            // an older command names no protocol (it is answered as before protocol 1, without about)
+            var request = legacy ? new JsonObject { ["id"] = id, ["cmd"] = command }
+                                 : new JsonObject { ["id"] = id, ["cmd"] = command, ["protocol"] = Protocol.Version };
             foreach (var (k, v) in body.ToList())
             {
                 body.Remove(k);
@@ -317,7 +332,7 @@ public sealed class WorkerClient : IDisposable
             await WriteAsync(line, command, timeout, timeout, cancel).ConfigureAwait(false);
             var left = timeout - clock.Elapsed;
             var text = await ReadAsync(command, left > TimeSpan.Zero ? left : TimeSpan.Zero, timeout, cancel).ConfigureAwait(false);
-            return Answer(command, id, text);
+            return Answer(command, id, text, legacy);
         }
         finally
         {
@@ -383,7 +398,7 @@ public sealed class WorkerClient : IDisposable
         }
     }
 
-    private WorkerAnswer Answer(string command, long id, string text)
+    private WorkerAnswer Answer(string command, long id, string text, bool legacy = false)
     {
         JsonElement answer;
         try
@@ -416,7 +431,8 @@ public sealed class WorkerClient : IDisposable
         return Guard(() =>
         {
             var result = StrictJson.Object(answer, "result", "the answer");
-            var about = WorkerAbout.Parse(StrictJson.Object(answer, "about", "the answer"), "about");
+            // an older command's answer has no about: this client's own hello's stands for it
+            var about = legacy ? About : WorkerAbout.Parse(StrictJson.Object(answer, "about", "the answer"), "about");
             return new WorkerAnswer(result, about);
         });
     }

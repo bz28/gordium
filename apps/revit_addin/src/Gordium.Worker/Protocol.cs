@@ -23,7 +23,8 @@ public static class Protocol
     /// <c>check</c> and <c>start</c> only, which this client doesn't send.</summary>
     internal static readonly string[] Envelope = ["id", "cmd", "protocol", "progress", "want"];
 
-    /// <summary>The older commands, answered without <c>about</c>: this client doesn't send them (Rhino does).</summary>
+    /// <summary>The older commands, answered without <c>about</c>: this client doesn't send them (Rhino does), but for
+    /// <c>options</c> through its own typed method (<see cref="WorkerClient.OptionsAsync"/>, read strictly).</summary>
     internal static readonly string[] Legacy = ["check", "start", "facts", "options", "sample_site"];
 
     /// <summary>The model commands (worker_protocol_v1.md, hello and the model commands).</summary>

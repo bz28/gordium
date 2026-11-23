@@ -1,0 +1,784 @@
+using System.Globalization;
+using System.Text.RegularExpressions;
+using Gordium.Worker;
+
+namespace Gordium.Revit.Reading;
+
+// The Setup form (docs/decisions/2026-11-22_setup_form.md; design pass pieces 7 and 9 merged): when Check project finds
+// facts the check needs missing, the panel shows one form where the architect states them, instead of "Nothing was
+// checked: fill these in first" and the Mark facts dialog. Every decision is here, without Revit: which facts the form
+// lists (whatever Marks.All binds to Project Information: data, so a mark added there appears with no change here),
+// each field's kind and its allowed values (the rulebooks' districts, Gordium's use words), the interior facts as a
+// checklist with counts, the suggestions and what each is based on, which facts are needed before the check runs by
+// itself, and the words by building type. The Revit layer only reads the marks, shows this, and writes what the
+// architect chose (one transaction per Save or accept). Nothing here writes, and nothing is ever written that the
+// architect didn't choose: a suggestion is data until the architect's click accepts it, a blank stays blank.
+
+/// <summary>How a project fact is entered in the form.</summary>
+public enum FieldKind
+{
+    /// <summary>One of a known list (a dropdown): the zone, the use, the ground's markers.</summary>
+    Choice,
+
+    /// <summary>Yes or No (two toggles; neither pressed is not stated).</summary>
+    YesNo,
+
+    /// <summary>A whole number (the stories).</summary>
+    Number,
+
+    /// <summary>The street edge: picked on the plan by a click (the check's own street pick), never typed.</summary>
+    StreetPick,
+
+    /// <summary>Text with no known list (a mark whose words Gordium doesn't list yet).</summary>
+    Text,
+}
+
+/// <summary>One choice of a <see cref="FieldKind.Choice"/> field: the word written to the mark, and its label.</summary>
+public sealed record FieldChoice(string Value, string Label);
+
+/// <summary>One project fact in the form: a mark on Project Information, how it is entered, its allowed values, what it
+/// holds now, and the law it answers (the mark's own tooltip, in the building's words).</summary>
+/// <param name="Mark">The mark it reads and writes.</param>
+/// <param name="Label">Its name in the form ("Zone", "This building has no stairs").</param>
+/// <param name="Kind">How it is entered.</param>
+/// <param name="Group">The form's heading it sits under.</param>
+/// <param name="Required">The check sends nothing without it (host_core.facts.REQUIRED; ProjectFacts.Read).</param>
+/// <param name="Choices">The allowed values (Choice fields; Yes/No for YesNo), else empty.</param>
+/// <param name="Current">What the mark holds now, as the form writes it (the word, "Yes" or "No", the number), or null
+/// when not stated.</param>
+/// <param name="Law">The law it answers: the mark's description, in the building's words.</param>
+/// <param name="Problem">Why what it holds can't be used (a word not in the list, a count under 1), or null.</param>
+public sealed record SetupField(MarkDefinition Mark, string Label, FieldKind Kind, string Group, bool Required,
+                                IReadOnlyList<FieldChoice> Choices, string? Current, string Law, string? Problem)
+{
+    /// <summary>Stated, and usable.</summary>
+    public bool IsSet => Current is not null && Problem is null;
+
+    /// <summary>The label of what it holds now (a use's name, not its word), or null.</summary>
+    public string? CurrentLabel => Current is null ? null : CurrentChoice?.Label ?? Current;
+
+    /// <summary>The choice the check reads what the mark holds as (SetupFacts.Reads, the one matcher: a ground word in
+    /// any case, a zone or use word for word), or null: what the form shows selected.</summary>
+    public FieldChoice? CurrentChoice => Current is null ? null : Choices.FirstOrDefault(c => SetupFacts.Reads(Mark, Current, [c]));
+}
+
+/// <summary>A window's or door's rooms on each side and its level (FamilyInstance.FromRoom / ToRoom in the last phase,
+/// its LevelId): what the escape-opening and exit-door suggestions are based on. Read by the Revit layer; never sent.</summary>
+public sealed record OpeningSides(string Id, string? FromRoom, string? ToRoom, string? LevelId, string? LevelName, double? LevelElevation);
+
+/// <summary>One suggestion: a value Gordium proposes for one mark on one element (or type), and what it is based on.
+/// Only shown; written only when the architect accepts it (<see cref="SetupWrites.Accept"/>).</summary>
+/// <param name="Element">The element's UniqueId, or its type's when <paramref name="OnType"/>.</param>
+/// <param name="OnType">A type mark: set once on the type.</param>
+/// <param name="Mark">Which mark.</param>
+/// <param name="Value">The value proposed, as Revit stores it.</param>
+/// <param name="Words">The value in words ("Yes", "Casement").</param>
+/// <param name="Label">The element (or type) in the architect's words.</param>
+/// <param name="Basis">What the suggestion is based on, in plain words.</param>
+public sealed record Suggestion(string Element, bool OnType, MarkDefinition Mark, MarkValue Value, string Words,
+                                string Label, string Basis)
+{
+    /// <summary>The write accepting it makes.</summary>
+    public MarkWrite Write => new(Element, OnType, Mark, Value, Label);
+}
+
+/// <summary>One fact inside the building, as one line of the checklist: how many of its elements (or types) are set,
+/// the unset ones to select, why Gordium can't read it from the model, what a blank leaves, and the suggestions.</summary>
+/// <param name="Key">Its id (what "Check now anyway" remembers).</param>
+/// <param name="Mark">The mark it sets.</param>
+/// <param name="Title">"Escape opening".</param>
+/// <param name="Noun">What is counted ("windows and doors", "window and door types").</param>
+/// <param name="Set">How many are set to something Gordium reads.</param>
+/// <param name="Total">How many there are.</param>
+/// <param name="Unset">The elements to select for it (an unset type's every instance), by UniqueId.</param>
+/// <param name="PerType">Set once on each type (Edit Type in Properties), not on each element.</param>
+/// <param name="Needed">The check runs by itself only once it is done (a blank one leaves a whole kind unread).</param>
+/// <param name="WhyAsked">Why Gordium can't read it from the model.</param>
+/// <param name="IfBlank">What a blank one leaves.</param>
+/// <param name="Suggestions">What Gordium proposes, each with its basis (only for unset ones).</param>
+/// <param name="Notes">More the architect should know (the makers' clear openings Gordium holds).</param>
+public sealed record ChecklistLine(string Key, MarkDefinition Mark, string Title, string Noun, int Set, int Total,
+                                   IReadOnlyList<string> Unset, bool PerType, bool Needed, string WhyAsked, string IfBlank,
+                                   IReadOnlyList<Suggestion> Suggestions, IReadOnlyList<string> Notes)
+{
+    /// <summary>Nothing left to set (nothing of the kind drawn counts as done: there is nothing to set).</summary>
+    public bool Done => DoneWhen ?? Set >= Total;
+
+    /// <summary>A line whose blank has its own meaning says when it is done itself (the exits: once one is marked).</summary>
+    public bool? DoneWhen { get; init; }
+
+    /// <summary>"Escape opening: 0 of 119 set" (or the line's own words).</summary>
+    public string Count => CountWords ?? (Total == 0 ? $"{Title}: no {Noun} drawn" : $"{Title}: {Set} of {Total} {Noun} set");
+
+    /// <summary>The line's own count words, or null.</summary>
+    public string? CountWords { get; init; }
+}
+
+/// <summary>Everything the Setup form shows, made from the model's marks alone.</summary>
+/// <param name="Noun">The building in words ("house", "building").</param>
+/// <param name="Fields">The project facts, in the form's order.</param>
+/// <param name="Lines">The checklist, needed ones first.</param>
+/// <param name="FixFirst">What stops facts being read at all (Rooms not placed), each a line.</param>
+/// <param name="Needed">What is still needed before the check runs by itself: each field's mark name or line's key.</param>
+public sealed record SetupScreen(string Noun, IReadOnlyList<SetupField> Fields, IReadOnlyList<ChecklistLine> Lines,
+                                 IReadOnlyList<string> FixFirst, IReadOnlyList<string> Needed)
+{
+    /// <summary>Every needed fact is set: the check runs by itself.</summary>
+    public bool Ready => Needed.Count == 0;
+
+    /// <summary>The form's headline.</summary>
+    public string Headline => Ready
+        ? "Everything the check needs is set"
+        : $"Before checking: {Needed.Count} {(Needed.Count == 1 ? "fact" : "facts")} to set";
+
+    /// <summary>Made from the model's marks, the openings' sides, the place's options (null while the worker hasn't
+    /// answered: the zone and use are then typed), and what the architect has chosen but not saved.</summary>
+    public static SetupScreen Build(RevitModel model, IReadOnlyList<OpeningSides>? sides, PlaceOptions? options,
+                                    SetupDraft? draft = null)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        var use = draft?.Chosen(Marks.Use) ?? Marks.Text(SetupFacts.Get(model, Marks.Use));
+        var noun = SetupWords.Noun(use);
+        var fields = SetupFacts.Fields(model, options, draft, noun);
+        var routes = !SetupWords.IsDwelling(use) && use is not null || SetupChecklist.AnyRouteMark(model);
+        var lines = SetupChecklist.Build(model, sides ?? [], noun, routes);
+        var fixFirst = MarkReading.RoomBlockers(model).Select(e =>
+            $"{ElementNames.Of("Rooms", e.Name, e.Number, null, 0)}: " + (e.Placement switch
+            {
+                RoomPlacement.Unplaced => "not placed: place it in a closed area or delete it",
+                RoomPlacement.NotEnclosed => "not enclosed: close its walls or room separation lines, or delete it",
+                RoomPlacement.Redundant => "redundant (another room is in the same area): delete one",
+                _ => "its placement couldn't be read",
+            }) + " (no room is read for egress until each is fixed)").ToList();
+        var needed = SetupGate.Needed(model, fields, lines);
+        return new SetupScreen(noun, fields, lines, fixFirst, needed);
+    }
+}
+
+/// <summary>The project facts: every mark Marks.All binds to Project Information, as a form field.</summary>
+public static class SetupFacts
+{
+    /// <summary>Stands for Project Information's own UniqueId in a <see cref="MarkWrite"/> (the Revit layer writes it to
+    /// <c>Document.ProjectInformation</c>).</summary>
+    public const string ProjectInformation = "gordium:project-information";
+
+    /// <summary>The facts the check sends nothing without (ProjectFacts.Read; host_core.facts.REQUIRED).</summary>
+    public static IReadOnlyList<MarkDefinition> Required { get; } = [Marks.Zone, Marks.Use, Marks.LotSurveyed, Marks.StreetEdge];
+
+    /// <summary>The headings, in the form's order.</summary>
+    public const string NeededGroup = "Needed to check";
+    public const string LotGroup = "The lot and the {0}";
+    public const string CodeGroup = "Which building code";
+    public const string DrawnGroup = "What is drawn";
+    public const string NoneGroup = "What the {0} has none of";
+    public const string OtherGroup = "Other facts";
+
+    /// <summary>The choices of a Text mark whose words Gordium lists (by GUID). The zone and use come from the place's
+    /// options; a text mark not here is typed (and checked by the worker). A mark added to Marks.cs with its own word
+    /// list adds one line here.</summary>
+    private static readonly Dictionary<Guid, Func<IReadOnlyList<FieldChoice>>> Listed = new()
+    {
+        [Marks.GroundFrom.Guid] = () => Marks.GroundWords.Select(w => new FieldChoice(w.Word, w.Word)).ToList(),
+    };
+
+    internal static MarkValue? Get(RevitModel model, MarkDefinition m) =>
+        model.ProjectMarks.TryGetValue(m.Guid, out var v) ? v : null;
+
+    /// <summary>The heading a mark sits under, from what it feeds (data: a new mark finds its heading by its Feeds).</summary>
+    public static string Group(MarkDefinition m, string noun)
+    {
+        if (Required.Contains(m))
+            return NeededGroup;
+        if (m == Marks.AllStairs || m == Marks.AllGuards)
+            return DrawnGroup;
+        if (m.Feeds.StartsWith("building.", StringComparison.Ordinal))
+            return CodeGroup;
+        if (m.Feeds.Contains("has_none", StringComparison.Ordinal) || m.Feeds.EndsWith(": []", StringComparison.Ordinal))
+            return string.Format(CultureInfo.InvariantCulture, NoneGroup, noun);
+        if (m.Feeds.StartsWith("facts.", StringComparison.Ordinal))
+            return string.Format(CultureInfo.InvariantCulture, LotGroup, noun);
+        return OtherGroup;
+    }
+
+    private static int Order(string group) => group switch
+    {
+        NeededGroup => 0,
+        DrawnGroup => 2,
+        CodeGroup => 3,
+        OtherGroup => 5,
+        _ when group.StartsWith("The lot", StringComparison.Ordinal) => 1,
+        _ => 4,
+    };
+
+    /// <summary>The facts a check sent anyway leaves out (ProjectFacts.Read gave none for them): a required one not
+    /// set, the street edge not picked (or not one Gordium wrote), and an optional one holding what Gordium can't read.</summary>
+    public static IReadOnlyList<MarkDefinition> NotSent(RevitModel model, ProjectFactsRead read)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        ArgumentNullException.ThrowIfNull(read);
+        var left = new List<MarkDefinition>();
+        foreach (var (m, key) in new[] { (Marks.Zone, "zone"), (Marks.Use, "use"), (Marks.LotSurveyed, "lot_surveyed") })
+            if (read.Facts[key] is null)
+                left.Add(m);
+        if (read.StreetEdges is null)
+            left.Add(Marks.StreetEdge);
+        if (Marks.Text(Get(model, Marks.GroundFrom)) is not null && read.Facts["grade_from"] is null)
+            left.Add(Marks.GroundFrom);
+        if (Marks.Count(Get(model, Marks.Stories)) is not null && read.Facts["stories"] is null)
+            left.Add(Marks.Stories);
+        // the dwelling's own counts (which New York code governs reads them): one set under its least isn't sent
+        foreach (var (m, key) in new[] { (Marks.DwellingUnits, "dwelling_units"), (Marks.UnitsInAttachedBuilding, "attached_units_in_building"),
+                     (Marks.RoomsLetForProfit, "rooms_let_for_profit") })
+            if (Marks.Count(Get(model, m)) is not null && read.Facts[key] is null)
+                left.Add(m);
+        return left;
+    }
+
+    /// <summary>The least a whole-number mark takes: 1 for one whose words say "1 or more" (the stories), else 0.</summary>
+    public static int Least(MarkDefinition m) => m.Description.Contains("1 or more", StringComparison.Ordinal) ? 1 : 0;
+
+    public static IReadOnlyList<SetupField> Fields(RevitModel model, PlaceOptions? options, SetupDraft? draft, string noun)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        var zone = draft?.Chosen(Marks.Zone) ?? Marks.Text(Get(model, Marks.Zone));
+        var fields = new List<SetupField>();
+        foreach (var m in Marks.All.Where(m => m.Categories.Contains(Marks.ProjectInformation)))
+        {
+            var v = Get(model, m);
+            var group = Group(m, noun);
+            var label = SetupWords.Label(m, noun);
+            var law = SetupWords.InBuildingWords(m.Description, noun);
+            var required = Required.Contains(m);
+            switch (m.Kind)
+            {
+                case MarkValueKind.YesNo:
+                {
+                    var yes = Marks.YesNo(v);
+                    fields.Add(new(m, label, FieldKind.YesNo, group, required, [new("Yes", "Yes"), new("No", "No")],
+                                   yes is null ? null : yes.Value ? "Yes" : "No", law, null));
+                    break;
+                }
+                case MarkValueKind.Integer:
+                {
+                    var n = Marks.Count(v);
+                    var least = Least(m);
+                    fields.Add(new(m, label, FieldKind.Number, group, required, [],
+                                   n?.ToString(CultureInfo.InvariantCulture), law,
+                                   n is { } k && k < least ? $"{k} isn't a count Gordium reads: {least} or more" : null));
+                    break;
+                }
+                case MarkValueKind.Text when m == Marks.StreetEdge:
+                {
+                    var text = Marks.Text(v);
+                    fields.Add(new(m, label, FieldKind.StreetPick, group, required, [], text, law,
+                                   text is not null && StreetEdges.Parse(text) is null
+                                       ? "it holds text Gordium didn't write: pick the edge again" : null));
+                    break;
+                }
+                case MarkValueKind.Text:
+                {
+                    var text = Marks.Text(v);
+                    var choices = Choices(m, options, zone);
+                    var kind = choices is { Count: > 0 } ? FieldKind.Choice : FieldKind.Text;
+                    string? problem = null;
+                    // set exactly when the check reads it (Reads: the zone and use exactly, as the checker matches them;
+                    // the ground's words in any case, as ProjectFacts.Read does); a zone or use in another case is a
+                    // problem (choose it from the list), kept as typed so a Save writes it over
+                    if (text is not null && kind == FieldKind.Choice && !Reads(m, text, choices!))
+                        problem = choices!.Any(c => string.Equals(c.Value, text, StringComparison.OrdinalIgnoreCase))
+                                  ? $"\"{text}\" is typed in another case: choose it from the list (Gordium reads the words exactly)"
+                                  : m == Marks.Zone ? $"\"{text}\" isn't a district Gordium has rules for: choose one"
+                                  : m == Marks.Use ? $"\"{text}\" isn't one of the City's uses Gordium knows: choose one"
+                                  : $"\"{text}\" isn't one of Gordium's words: choose one";
+                    fields.Add(new(m, label, kind, group, required, choices ?? [], text, Plain.TryGetValue(m.Guid, out var plain) ? plain : law, problem));
+                    break;
+                }
+                default:
+                    break;                                  // no length mark on Project Information
+            }
+        }
+        return fields.OrderBy(f => Order(f.Group)).ToList();      // stable: Marks.All's order within each heading
+    }
+
+    /// <summary>The marks the checker reads word for word (it chooses the rulebook by the zone and matches the use
+    /// against the chart's list exactly); every other listed word is read in any case (ProjectFacts.Read's ground).</summary>
+    public static IReadOnlyList<MarkDefinition> ReadExactly { get; } = [Marks.Zone, Marks.Use];
+
+    /// <summary>Whether the check reads <paramref name="text"/> as one of <paramref name="choices"/>: the one matcher the
+    /// form's "set" and its problems use, the same as the check's own reading of each mark.</summary>
+    public static bool Reads(MarkDefinition m, string text, IReadOnlyList<FieldChoice> choices) =>
+        choices.Any(c => string.Equals(c.Value, text.Trim(),
+                                       ReadExactly.Contains(m) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>The form's own help for a mark whose tooltip is written in Gordium's words (the use: its tooltip names the
+    /// stored words and the room uses too). The tooltip in Revit stays as it is.</summary>
+    private static readonly Dictionary<Guid, string> Plain = new()
+    {
+        [Marks.Use.Guid] = "What the building is used for, as the City of Ithaca's zoning chart names it. A use the district's " +
+                           "chart doesn't list is still yours to state: its use row then won't comply (a special-permit use needs review), never a pass.",
+    };
+
+    /// <summary>A Text mark's allowed values, or null when Gordium lists none (typed). The zone: the districts with a
+    /// rulebook; the use: every use of the city, by its name, the district's own first (permitted first, each
+    /// special-permit one saying so), then the others "not listed for" the district (as host_core.facts.district_use_names
+    /// keeps a use the district doesn't list): the architect can always state the true use. Both null until the worker
+    /// has answered (typed meanwhile).</summary>
+    public static IReadOnlyList<FieldChoice>? Choices(MarkDefinition m, PlaceOptions? options, string? zone)
+    {
+        if (m == Marks.Zone)
+            return options?.Zones.Select(z => new FieldChoice(z, z)).ToList();
+        if (m == Marks.Use)
+        {
+            if (options is null)
+                return null;
+            var names = options.Uses.ToDictionary(u => u.Id, u => u.Name, StringComparer.Ordinal);
+            var district = zone is not null && options.DistrictUses.TryGetValue(zone, out var d) ? d : null;
+            if (district is not { Count: > 0 })
+                return options.Uses.Select(u => new FieldChoice(u.Id, u.Name)).ToList();
+            var listed = district.Select(u => new FieldChoice(u.Id, u.Permitted == false && u.Note is { } note ? $"{u.Name} ({note})" : u.Name)).ToList();
+            var ids = district.Select(u => u.Id).ToHashSet(StringComparer.Ordinal);
+            return listed.Concat(options.Uses.Where(u => !ids.Contains(u.Id))
+                .Select(u => new FieldChoice(u.Id, $"{u.Name} (not on {zone}'s list of uses: its use row won't comply)"))).ToList();
+        }
+        return Listed.TryGetValue(m.Guid, out var list) ? list() : null;
+    }
+}
+
+/// <summary>What the architect chose in the form and hasn't saved: only what they touched, nothing else.</summary>
+public sealed class SetupDraft
+{
+    private readonly Dictionary<Guid, string> _chosen = [];
+
+    /// <summary>The architect chose <paramref name="value"/> for <paramref name="mark"/> ("Yes", a word, a number as typed).</summary>
+    public void Choose(MarkDefinition mark, string value)
+    {
+        ArgumentNullException.ThrowIfNull(mark);
+        ArgumentNullException.ThrowIfNull(value);
+        _chosen[mark.Guid] = value;
+    }
+
+    /// <summary>The choice taken back (the field shows what the mark holds again).</summary>
+    public void Forget(MarkDefinition mark) => _chosen.Remove(mark.Guid);
+
+    public string? Chosen(MarkDefinition mark) => _chosen.TryGetValue(mark.Guid, out var v) ? v : null;
+
+    /// <summary>The street edges the architect picked on the plan, kept in the draft as the Street edge mark's text
+    /// (exactly as StreetEdges.Keep writes it): nothing is written until Save, which writes it with the other facts in
+    /// the one transaction. Returns the text; none picked changes nothing.</summary>
+    public string? Pick(IReadOnlyList<PickedEdge> edges)
+    {
+        ArgumentNullException.ThrowIfNull(edges);
+        if (edges.Count == 0)
+            return null;
+        string? text = null;
+        StreetEdges.Keep(edges, t => { text = t; return true; }, new Dictionary<string, object?>());
+        Choose(Marks.StreetEdge, text!);
+        return text;
+    }
+
+    public int Count => _chosen.Count;
+
+    public void Clear() => _chosen.Clear();
+
+    /// <summary>The writes a Save makes: each field the architect chose a value for that differs from what the mark
+    /// holds, as Revit stores it; a choice that isn't an allowed value is refused with why (and not written). A field
+    /// not touched is never written: a blank stays blank.</summary>
+    public (IReadOnlyList<MarkWrite> Writes, IReadOnlyList<string> Problems) Writes(IReadOnlyList<SetupField> fields)
+    {
+        ArgumentNullException.ThrowIfNull(fields);
+        var writes = new List<MarkWrite>();
+        var problems = new List<string>();
+        foreach (var f in fields)
+        {
+            if (Chosen(f.Mark) is not { } raw)
+                continue;
+            var chosen = raw.Trim();
+            if (chosen.Length == 0 || chosen == f.Current && f.Problem is null)
+                continue;                                   // nothing chosen, or what it holds already
+            MarkValue? value = f.Kind switch
+            {
+                FieldKind.YesNo when chosen is "Yes" or "No" => new MarkValue(true, chosen == "Yes" ? 1 : 0),
+                FieldKind.Number when int.TryParse(chosen, NumberStyles.None, CultureInfo.InvariantCulture, out var n)
+                                      && n >= SetupFacts.Least(f.Mark) => new MarkValue(true, n),
+                FieldKind.Choice when f.Choices.FirstOrDefault(c => c.Value == chosen) is { } c => new MarkValue(true, Text: c.Value),
+                FieldKind.Text => new MarkValue(true, Text: chosen),
+                // the street edge: only edges Gordium's pick kept (never typed text)
+                FieldKind.StreetPick when StreetEdges.Parse(chosen) is not null => new MarkValue(true, Text: chosen),
+                _ => null,
+            };
+            if (value is null)
+            {
+                problems.Add(f.Kind switch
+                {
+                    FieldKind.Number => $"{f.Label}: \"{chosen}\" isn't a whole number {SetupFacts.Least(f.Mark)} or more: not saved",
+                    FieldKind.StreetPick => $"{f.Label}: pick it on the plan",
+                    _ => $"{f.Label}: \"{chosen}\" isn't one of its choices: not saved",
+                });
+                continue;
+            }
+            writes.Add(new MarkWrite(SetupFacts.ProjectInformation, false, f.Mark, value, "Project Information"));
+        }
+        return (writes, problems);
+    }
+}
+
+/// <summary>The writes the form makes, each one Revit transaction (one Ctrl+Z), named for Gordium: both names are not
+/// the check's own (ResultRows.ChangesTheCheck), so results shown go stale after either.</summary>
+public static class SetupWrites
+{
+    /// <summary>The Save of the project facts.</summary>
+    public const string FactsTransaction = "Gordium: project facts";
+
+    /// <summary>The architect's accept of one or more suggestions.</summary>
+    public const string SuggestionsTransaction = "Gordium: suggestions accepted";
+
+    /// <summary>The writes accepting <paramref name="accepted"/> makes: exactly those, never another of the line's.</summary>
+    public static IReadOnlyList<MarkWrite> Accept(IEnumerable<Suggestion> accepted) =>
+        accepted.Select(s => s.Write).DistinctBy(w => (w.Element, w.Mark.Guid)).ToList();
+}
+
+/// <summary>What Check project does with what is missing (<see cref="SetupGate.Decide"/>).</summary>
+public enum SetupStep
+{
+    /// <summary>The Setup form, nothing sent.</summary>
+    Show,
+
+    /// <summary>Sent as Check now anyway sends: what is missing was already checked anyway for.</summary>
+    SendAnyway,
+
+    /// <summary>Nothing needed is missing: the check as before.</summary>
+    Send,
+}
+
+/// <summary>Whether the form shows, and whether the check runs by itself.</summary>
+public static class SetupGate
+{
+    /// <summary>What is still needed: each required project fact not set (or holding something unusable), any other
+    /// project fact holding something unusable (the check would refuse it), and each needed checklist line not done.</summary>
+    public static IReadOnlyList<string> Needed(RevitModel model, IReadOnlyList<SetupField> fields, IReadOnlyList<ChecklistLine> lines)
+    {
+        ArgumentNullException.ThrowIfNull(fields);
+        ArgumentNullException.ThrowIfNull(lines);
+        return fields.Where(f => f.Required && !f.IsSet || f.Problem is not null).Select(f => f.Mark.Name)
+            .Concat(lines.Where(l => l.Needed && !l.Done).Select(l => l.Key)).ToList();
+    }
+
+    /// <summary>What Check project does: shows the form (something needed missing), sends anyway (missing only what the
+    /// architect already chose Check now anyway for this session: sent as Check now anyway sends, each fact left out
+    /// said, never a pick first), or sends.</summary>
+    public static SetupStep Decide(IReadOnlyCollection<string> needed, IReadOnlyCollection<string>? anywayFor) =>
+        needed.Count == 0 ? SetupStep.Send : ShowSetup(needed, anywayFor) ? SetupStep.Show : SetupStep.SendAnyway;
+
+    /// <summary>Whether Check project shows the form: something needed is missing, unless the architect already chose
+    /// "Check now anyway" for exactly what is missing (or more) in this session: a fact newly missing shows it again.</summary>
+    public static bool ShowSetup(IReadOnlyCollection<string> needed, IReadOnlyCollection<string>? anywayFor) =>
+        needed.Count > 0 && !(anywayFor is not null && needed.All(anywayFor.Contains));
+
+    /// <summary>After a write or an edit (a Save, an accept, a value set in Properties, an undo): the check runs by
+    /// itself only when the form was waiting for something needed and now nothing needed is missing; never on an edit
+    /// to a form that had nothing to wait for (Mark facts opened on a project already set).</summary>
+    public static bool RunsByItself(SetupScreen before, SetupScreen after)
+    {
+        ArgumentNullException.ThrowIfNull(before);
+        ArgumentNullException.ThrowIfNull(after);
+        return !before.Ready && after.Ready;
+    }
+}
+
+/// <summary>The form's words by building type.</summary>
+public static class SetupWords
+{
+    /// <summary>Whether a use word is a dwelling the residential code calls a house (one- or two-family).</summary>
+    public static bool IsDwelling(string? use) =>
+        use is { } u && (u.StartsWith("one_family", StringComparison.Ordinal) || u.StartsWith("two_family", StringComparison.Ordinal));
+
+    /// <summary>"house" for a one- or two-family dwelling; "building" for any other use or none stated (never "house"
+    /// on a building that isn't one).</summary>
+    public static string Noun(string? use) => IsDwelling(use) ? "house" : "building";
+
+    private static readonly Regex House = new(@"\bhouse\b", RegexOptions.CultureInvariant);
+    private static readonly Regex HouseCap = new(@"\bHouse\b", RegexOptions.CultureInvariant);
+
+    /// <summary>Words written for a house, said for this building ("This house has no stairs" → "This building has no
+    /// stairs" on a day care).</summary>
+    public static string InBuildingWords(string words, string noun)
+    {
+        ArgumentNullException.ThrowIfNull(words);
+        if (noun == "house")
+            return words;
+        return HouseCap.Replace(House.Replace(words, noun), char.ToUpperInvariant(noun[0]) + noun[1..]);
+    }
+
+    /// <summary>A mark's name in the form: without "Gordium: ", in the building's words.</summary>
+    public static string Label(MarkDefinition m, string noun)
+    {
+        var name = m.Name.StartsWith("Gordium: ", StringComparison.Ordinal) ? m.Name["Gordium: ".Length..] : m.Name;
+        return InBuildingWords(name, noun);
+    }
+
+    /// <summary>The form's notice when a check sent nothing, in plain words from what is missing (never the marks'
+    /// typing instructions): the street edge kept no longer on the lot (or matching two edges), or the facts not set.</summary>
+    public static string NothingSent(StreetRefusal refused, IReadOnlyList<MarkDefinition> notSet, string noun)
+    {
+        ArgumentNullException.ThrowIfNull(notSet);
+        if (refused == StreetRefusal.NoLongerAnEdge)
+            return "Nothing was checked: the street edge kept is no longer an edge of the lot (the property line changed). " +
+                   "Pick it again on the plan, then Save.";
+        if (refused == StreetRefusal.Ambiguous)
+            return "Nothing was checked: the street edge kept matches two edges of the lot (an arc and its chord). " +
+                   "Pick it again on the plan, then Save.";
+        var names = notSet.Select(m => Label(m, noun).ToLowerInvariant()).ToList();
+        if (notSet.Contains(Marks.Zone))
+            return "Nothing was checked: the zone chooses the rules, so nothing can be checked without it. Choose it above" +
+                   (names.Count > 1 ? $"; also not set: {string.Join(", ", names.Where(n => n != "zone"))}." : ".");
+        return names.Count == 0 ? "Nothing was checked: set the facts above, then Save."
+            : $"Nothing was checked: not set: {string.Join(", ", names)}. Set them above, then Save.";
+    }
+
+    /// <summary>What a fact not set leaves when the architect checks anyway: each is needs review, never a pass.</summary>
+    public static string SentWithout(MarkDefinition m, string noun) =>
+        m == Marks.Use ? "Use not set: every rule that turns on the use needs review."
+        : m == Marks.LotSurveyed ? "Lot surveyed not set: the property line is read as traced from the tax map (its 2 ft accuracy), never as surveyed."
+        : m == Marks.StreetEdge ? "Street edge not picked: the front yard, the yards measured from it and the lot width need review."
+        : m == Marks.Zone ? "Zone not set: the district chooses the rules, so nothing can be checked without it."
+        : m == Marks.Stories ? "Stories holds a count under 1 (a count is 1 or more), so it wasn't sent: height and stories need review."
+        : $"{Label(m, noun)}: what it holds isn't one of Gordium's words, so it wasn't sent: the rows it decides need review.";
+}
+
+/// <summary>The facts inside the building, as the checklist's lines.</summary>
+public static class SetupChecklist
+{
+    /// <summary>Room names a sleeping room is suggested from (never from a room's area alone).</summary>
+    private static readonly Regex Sleeping = new(@"\b(bed\s*room|bedrm|bdrm|bed|br\s*\d*|sleeping(\s*room)?|bunk\s*room)\b",
+                                                 RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    /// <summary>A family or type name to the operation it says, the first that matches (windows, then doors).</summary>
+    private static readonly (Regex Name, string Word)[] WindowOperations =
+    [
+        (Rx(@"\bcasement"), "Casement"), (Rx(@"\bdouble[\s_-]*hung"), "Double hung"), (Rx(@"\bsingle[\s_-]*hung"), "Single hung"),
+        (Rx(@"\bawning"), "Awning"), (Rx(@"\bhopper"), "Hopper"), (Rx(@"\btilt[\s_-]*(and[\s_-]*)?turn"), "Tilt-turn"),
+        (Rx(@"\bpivot"), "Pivot"), (Rx(@"\b(slider|sliding|glider)"), "Horizontal slider"), (Rx(@"\b(fixed|picture)\b"), "Fixed"),
+    ];
+
+    private static readonly (Regex Name, string Word)[] DoorOperations =
+    [
+        (Rx(@"\bpocket"), "Pocket door"), (Rx(@"\b(bi[\s_-]*fold|folding)"), "Folding door"),
+        (Rx(@"\b(slid(ing|er)|glider)"), "Sliding door"),
+        (Rx(@"\b(single|double)[\s_-]*(flush|panel|glass|glazed)|\b(flush|panel|hinged|swing|french)\b"), "Side-hinged door"),
+    ];
+
+    private static Regex Rx(string p) => new(p, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    /// <summary>The operation word a type's family and name say, or null.</summary>
+    internal static string? OperationFromName(string? family, string? name, bool door)
+    {
+        var text = string.Join(" ", new[] { family, name }.Where(s => !string.IsNullOrWhiteSpace(s)));
+        return (door ? DoorOperations : WindowOperations).FirstOrDefault(o => o.Name.IsMatch(text)).Word;
+    }
+
+    /// <summary>Whether any escape-route mark (a room's use, lock or pass-through, a door's exit) is set.</summary>
+    internal static bool AnyRouteMark(RevitModel model) =>
+        MarkReading.InDesign(model).Any(e =>
+            new[] { Marks.Use, Marks.CanBeLocked, Marks.PassThrough, Marks.Exit }.Any(m =>
+                MarkReading.KindOf(e) is MarkedKind.Room or MarkedKind.Door && m.Categories.Contains(e.BuiltInCategory)
+                && MarkReading.Value(e, m) is { HasValue: true } v && (v.Text is null || !string.IsNullOrWhiteSpace(v.Text))));
+
+    private static string RoomName(MarkedElement e) => ElementNames.Of("Rooms", e.Name, e.Number, null, 0);
+
+    private static string OpeningName(MarkedElement e) =>
+        ElementNames.Of(MarkReading.KindOf(e) == MarkedKind.Door ? "Doors" : "Windows", e.Name, null, e.Number, 0);
+
+    private static string TypeName(MarkedElement e) =>
+        string.Join(": ", new[] { e.Family, e.Name }.Where(s => !string.IsNullOrWhiteSpace(s))) is { Length: > 0 } l ? l : e.TypeUniqueId ?? e.UniqueId;
+
+    private static string Feet(double? ft) => ft is { } f
+        ? $"{(int)Math.Floor(f + 1e-9)}'-{Math.Round((f - Math.Floor(f + 1e-9)) * 12, 1).ToString("0.#", CultureInfo.InvariantCulture)}\""
+        : "?";
+
+    /// <summary>The checklist: needed lines first (a blank one leaves a whole kind unread), then the others; each with
+    /// its counts, the unset elements, why Gordium asks, and its suggestions.</summary>
+    /// <param name="model">The model's marks (RevitMarks.Model).</param>
+    /// <param name="sides">Each window's and door's rooms and level.</param>
+    /// <param name="noun">The building in words.</param>
+    /// <param name="routes">Show the escape-route lines (a building that isn't a house, or one already marked).</param>
+    public static IReadOnlyList<ChecklistLine> Build(RevitModel model, IReadOnlyList<OpeningSides> sides, string noun, bool routes)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        ArgumentNullException.ThrowIfNull(sides);
+        var design = MarkReading.InDesign(model).ToList();
+        var rooms = design.Where(e => MarkReading.KindOf(e) == MarkedKind.Room && e.Placement == RoomPlacement.Placed).ToList();
+        var windows = design.Where(e => MarkReading.KindOf(e) == MarkedKind.Window).ToList();
+        var doors = design.Where(e => MarkReading.KindOf(e) == MarkedKind.Door).ToList();
+        var openings = windows.Concat(doors).ToList();
+        var side = sides.GroupBy(s => s.Id, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+        var roomById = rooms.ToDictionary(r => r.UniqueId, StringComparer.Ordinal);
+        bool? Yes(MarkedElement e, MarkDefinition m) => Marks.YesNo(MarkReading.Value(e, m));
+
+        // ---- sleeping rooms: suggested Yes from the name only; never a suggested No (it could hide a bedroom)
+        var sleepingSuggested = new HashSet<string>(StringComparer.Ordinal);
+        var sleepSuggestions = new List<Suggestion>();
+        foreach (var r in rooms.Where(r => Yes(r, Marks.SleepingRoom) is null))
+            if (r.Name is { } n && Sleeping.IsMatch(n))
+            {
+                sleepingSuggested.Add(r.UniqueId);
+                sleepSuggestions.Add(new(r.UniqueId, false, Marks.SleepingRoom, new MarkValue(true, 1), "Yes", RoomName(r),
+                                         $"named \"{n.Trim()}\""));
+            }
+        bool SleepingRoom(string? id) => id is not null && roomById.TryGetValue(id, out var r)
+                                         && (Yes(r, Marks.SleepingRoom) == true || sleepingSuggested.Contains(r.UniqueId));
+        bool NotSleeping(string? id) => id is not null && roomById.TryGetValue(id, out var r) && Yes(r, Marks.SleepingRoom) == false;
+
+        // ---- each window's operation, set or as its name says (for "operable")
+        string? OperationOf(MarkedElement e) =>
+            Marks.Text(MarkReading.Value(e, Marks.Operation)) ?? OperationFromName(e.Family, e.Name, MarkReading.KindOf(e) == MarkedKind.Door);
+
+        // ---- escape openings
+        var escapeSuggestions = new List<Suggestion>();
+        var unsetOpenings = openings.Where(o => Yes(o, Marks.EscapeOpening) is null).ToList();
+        string? RoomOf(MarkedElement o) => side.TryGetValue(o.UniqueId, out var s)
+            ? (s.FromRoom is { } f && roomById.ContainsKey(f) ? f : s.ToRoom is { } t && roomById.ContainsKey(t) ? t : null) : null;
+        foreach (var group in windows.GroupBy(RoomOf).Where(g => g.Key is not null && SleepingRoom(g.Key)))
+        {
+            var room = roomById[group.Key!];
+            var only = Yes(room, Marks.SleepingRoom) is null ? $"; {RoomName(room)} is only suggested as a sleeping room" : "";
+            var already = group.FirstOrDefault(w => Yes(w, Marks.EscapeOpening) == true);
+            // never a window the architect marked No (it isn't their escape opening), nor a fixed one
+            var operable = group.Where(w => Yes(w, Marks.EscapeOpening) != false
+                                            && !string.Equals(OperationOf(w), "Fixed", StringComparison.OrdinalIgnoreCase)).ToList();
+            var chosen = already ?? operable.OrderByDescending(w => (w.TypeWidth ?? 0) * (w.TypeHeight ?? 0))
+                                            .ThenBy(w => w.UniqueId, StringComparer.Ordinal).FirstOrDefault();
+            foreach (var w in group.Where(w => Yes(w, Marks.EscapeOpening) is null))
+            {
+                if (ReferenceEquals(w, chosen))
+                    escapeSuggestions.Add(new(w.UniqueId, false, Marks.EscapeOpening, new MarkValue(true, 1), "Yes", OpeningName(w),
+                        $"the largest operable window of {RoomName(room)}, a sleeping room, by its frame ({Feet(w.TypeWidth)} x " +
+                        $"{Feet(w.TypeHeight)}){(OperationOf(w) is null ? ", its operation not set" : "")}: the law measures its " +
+                        $"clear opening, which the check reads once set{only}. If another window is the intended one, pick it instead"));
+                else if (chosen is not null)
+                    escapeSuggestions.Add(new(w.UniqueId, false, Marks.EscapeOpening, new MarkValue(true, 0), "No", OpeningName(w),
+                        $"{RoomName(room)}'s escape opening is {(already is not null ? "marked" : "suggested")} as {OpeningName(chosen)}; " +
+                        "one per sleeping room is what the law asks (R310.1)"));
+                else if (string.Equals(OperationOf(w), "Fixed", StringComparison.OrdinalIgnoreCase))
+                    escapeSuggestions.Add(new(w.UniqueId, false, Marks.EscapeOpening, new MarkValue(true, 0), "No", OpeningName(w),
+                        "a fixed window doesn't open, so it can't be an escape opening"));
+            }
+        }
+        foreach (var o in unsetOpenings.Where(o => escapeSuggestions.All(s => s.Element != o.UniqueId)))
+        {
+            side.TryGetValue(o.UniqueId, out var s);
+            var touching = new[] { s?.FromRoom, s?.ToRoom }.Where(id => id is not null && roomById.ContainsKey(id)).ToList();
+            // No only when every room it opens to is marked not a sleeping room (a room unmarked could be one)
+            if (touching.Count > 0 && touching.All(NotSleeping))
+                escapeSuggestions.Add(new(o.UniqueId, false, Marks.EscapeOpening, new MarkValue(true, 0), "No", OpeningName(o),
+                    $"it opens only to {string.Join(" and ", touching.Select(id => RoomName(roomById[id!])))}, marked not a sleeping room"));
+        }
+
+        // ---- exit doors: a door to the outside on the entry level (the lowest level with one)
+        var exitSuggestions = new List<Suggestion>();
+        bool HasRoom(string? id) => id is not null && roomById.ContainsKey(id);
+        var outside = doors.Where(d => side.TryGetValue(d.UniqueId, out var s) && HasRoom(s.FromRoom) != HasRoom(s.ToRoom)).ToList();
+        var entry = outside.Select(d => side[d.UniqueId]).Where(s => s.LevelElevation is not null)
+                           .OrderBy(s => s.LevelElevation).FirstOrDefault();
+        foreach (var d in doors.Where(d => Yes(d, Marks.ExitDoor) is null))
+        {
+            if (!side.TryGetValue(d.UniqueId, out var s))
+                continue;
+            if (outside.Contains(d) && entry is not null && s.LevelId == entry.LevelId)
+                exitSuggestions.Add(new(d.UniqueId, false, Marks.ExitDoor, new MarkValue(true, 1), "Yes", OpeningName(d),
+                    $"a door to the outside on {entry.LevelName ?? "the lowest level"} (one side has no Room: outside, or a space " +
+                    $"with no Room such as a garage); {entry.LevelName ?? "that level"} is taken as the entry level, the lowest " +
+                    "with a door to the outside. Each dwelling unit needs one exit door (R311.1): keep Yes on its main one"));
+            else if (HasRoom(s.FromRoom) && HasRoom(s.ToRoom))
+                exitSuggestions.Add(new(d.UniqueId, false, Marks.ExitDoor, new MarkValue(true, 0), "No", OpeningName(d),
+                    $"it is between two rooms ({RoomName(roomById[s.FromRoom!])} and {RoomName(roomById[s.ToRoom!])}), not a door to the outside"));
+        }
+
+        // ---- operations, per type
+        var types = openings.Where(o => o.TypeUniqueId is not null).GroupBy(o => o.TypeUniqueId!, StringComparer.Ordinal).ToList();
+        var opSuggestions = new List<Suggestion>();
+        var opUnset = new List<string>();
+        var opSet = 0;
+        foreach (var t in types)
+        {
+            var first = t.First();
+            var door = MarkReading.KindOf(first) == MarkedKind.Door;
+            var word = Marks.Text(MarkReading.Value(first, Marks.Operation));
+            if (word is not null && Operations.ForOpening(word, door) is not null)
+            {
+                opSet++;
+                continue;
+            }
+            opUnset.AddRange(t.Select(e => e.UniqueId));
+            if (word is null && OperationFromName(first.Family, first.Name, door) is { } suggested)
+                opSuggestions.Add(new(t.Key, true, Marks.Operation, new MarkValue(true, Text: suggested), suggested, TypeName(first),
+                    $"its family and type are named \"{TypeName(first)}\" ({t.Count()} {(door ? "door" : "window")}{(t.Count() == 1 ? "" : "s")})"));
+        }
+
+        // ---- the makers' clear openings, per type: confirmed by the architect's stamp only
+        var clearSet = types.Count(t => Marks.Text(MarkReading.Value(t.First(), Marks.ClearConfirmed)) is not null);
+        var clearUnset = types.Where(t => Marks.Text(MarkReading.Value(t.First(), Marks.ClearConfirmed)) is null).SelectMany(t => t.Select(e => e.UniqueId)).ToList();
+        var clearNotes = ClearPrefills.Plan(model).Select(p => p.Line).ToList();
+
+        string Blank(MarkDefinition m) => SetupWords.InBuildingWords(m.Description, noun);
+        var lines = new List<ChecklistLine>
+        {
+            new("sleeping_room", Marks.SleepingRoom, "Sleeping room", "rooms",
+                rooms.Count(r => Yes(r, Marks.SleepingRoom) is not null), rooms.Count,
+                rooms.Where(r => Yes(r, Marks.SleepingRoom) is null).Select(r => r.UniqueId).ToList(), false, true,
+                "Revit doesn't record what a room is used for, and the law's test is the use (a room used or meant for sleeping), not its name.",
+                Blank(Marks.SleepingRoom), sleepSuggestions, []),
+            new("escape_opening", Marks.EscapeOpening, "Escape opening", "windows and doors",
+                openings.Count - unsetOpenings.Count, openings.Count, unsetOpenings.Select(o => o.UniqueId).ToList(), false, true,
+                "Which opening is a room's emergency escape and rescue opening is the design's intent; Revit doesn't record it.",
+                Blank(Marks.EscapeOpening), escapeSuggestions, []),
+            new("exit_door", Marks.ExitDoor, "Exit door", "doors",
+                doors.Count(d => Yes(d, Marks.ExitDoor) is not null), doors.Count,
+                doors.Where(d => Yes(d, Marks.ExitDoor) is null).Select(d => d.UniqueId).ToList(), false, true,
+                $"Which door is the {noun}'s required exit is the design's intent; Revit doesn't record it.",
+                Blank(Marks.ExitDoor), exitSuggestions, []),
+            new("operation", Marks.Operation, "Operation", "window and door types", opSet, types.Count, opUnset, true, false,
+                "Revit's families don't say how a window or door opens in a way Gordium can read, and the law measures each kind's opening its own way.",
+                Blank(Marks.Operation), opSuggestions, []),
+            new("clear_opening", Marks.ClearConfirmed, "Clear opening confirmed", "window and door types", clearSet, types.Count,
+                clearUnset, true, false,
+                "The law needs the clear opening; Revit stores the frame size. Gordium fills a maker's published clear opening as a " +
+                "draft only where it holds that maker's data for the exact product; otherwise take it from the maker's tables.",
+                "Not confirmed: no clear opening is sent, so the opening's size rules need review.", [], clearNotes),
+        };
+        if (routes)
+        {
+            var useSuggestions = rooms.Where(r => Marks.Text(MarkReading.Value(r, Marks.Use)) is null)
+                .Select(r => (Room: r, Word: MarkingList.UseFromName(r.Name))).Where(x => x.Word is not null)
+                .Select(x => new Suggestion(x.Room.UniqueId, false, Marks.Use, new MarkValue(true, Text: x.Word), x.Word!, RoomName(x.Room),
+                                            $"named \"{x.Room.Name!.Trim()}\"")).ToList();
+            int Given(MarkDefinition m, IEnumerable<MarkedElement> of, Func<MarkValue?, bool> ok) => of.Count(e => ok(MarkReading.Value(e, m)));
+            List<string> NotGiven(MarkDefinition m, IEnumerable<MarkedElement> of, Func<MarkValue?, bool> ok) =>
+                of.Where(e => !ok(MarkReading.Value(e, m))).Select(e => e.UniqueId).ToList();
+            bool Use(MarkValue? v) => RoomUses.Table.Of(Marks.Text(v)) is not null;
+            bool YesNoSet(MarkValue? v) => Marks.YesNo(v) is not null;
+            bool ExitSet(MarkValue? v) => ExitKinds.Table.Of(Marks.Text(v)) is not null;
+            const string route = "A route never passes through a room left blank, and a door left blank is not an exit (Gordium never guesses one).";
+            lines.Add(new("room_use", Marks.Use, "Room use (escape routes)", "rooms", Given(Marks.Use, rooms, Use), rooms.Count,
+                          NotGiven(Marks.Use, rooms, Use), false, false,
+                          "What each room is (a corridor, a kitchen, a closet) decides whether an escape route may pass through it; Revit doesn't record it.",
+                          route, useSuggestions, []));
+            lines.Add(new("can_be_locked", Marks.CanBeLocked, "Can be locked", "rooms", Given(Marks.CanBeLocked, rooms, YesNoSet), rooms.Count,
+                          NotGiven(Marks.CanBeLocked, rooms, YesNoSet), false, false,
+                          "Whether a room can be locked against those passing through is hardware and operation, not drawn in Revit.", route, [], []));
+            lines.Add(new("pass_through", Marks.PassThrough, "Pass through", "rooms", Given(Marks.PassThrough, rooms, YesNoSet), rooms.Count,
+                          NotGiven(Marks.PassThrough, rooms, YesNoSet), false, false,
+                          "Whether a room is accessory to those it serves, with a discernible path (IBC 1014.2 item 1), is the design's intent.", route, [], []));
+            // only the exits are marked: every other door stays blank (not an exit), so the line counts the exits
+            var exits = Given(Marks.Exit, doors, ExitSet);
+            lines.Add(new("exit", Marks.Exit, "Exits", "doors", exits, doors.Count,
+                          NotGiven(Marks.Exit, doors, ExitSet), false, false,
+                          "Which doors are the building's exits, and which kind (IBC 1016.1's list), is the design's intent; " +
+                          "mark only the exits (every other door stays blank).", route, [], [])
+            {
+                DoneWhen = exits > 0,
+                CountWords = $"Exits: {exits} {(exits == 1 ? "door" : "doors")} marked as {(exits == 1 ? "an exit" : "exits")}",
+            });
+        }
+        return lines;
+    }
+}

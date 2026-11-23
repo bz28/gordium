@@ -19,7 +19,12 @@ public sealed record ProjectRequest(JsonObject Site, JsonObject Facts, JsonObjec
 /// <param name="StreetRefused">Why the street edge kept wasn't sent, typed (<see cref="StreetEdges.NeedsNewPick"/>).</param>
 public sealed record ProjectPrepared(ProjectRequest? Request, IReadOnlyList<string> Missing, string? PhaseChecked,
                                      IReadOnlyList<string> OptionsChecked, InteriorReadResult? Inside, string? Street = null,
-                                     StreetRefusal StreetRefused = StreetRefusal.None);
+                                     StreetRefusal StreetRefused = StreetRefusal.None)
+{
+    /// <summary>A check sent anyway (the Setup form's "Check now anyway"): the facts not set, or holding what Gordium
+    /// can't read, that were left out, so the rules each decides need review (SetupWords.SentWithout says how).</summary>
+    public IReadOnlyList<MarkDefinition> NotStated { get; init; } = [];
+}
 
 /// <summary>
 /// "Check my project" without Revit (reading design note, section 9): the architect's own open project read outside
@@ -33,8 +38,11 @@ public static class ProjectCheck
     /// <paramref name="outside"/> is RevitRead's model (elements, lot lines), <paramref name="inside"/> RevitInterior's
     /// (marks, Project Information, the interior records). Refused (<see cref="ReadRefusedException"/>) when the two
     /// don't name the same phases and design options: the outside and the inside must be the same design.</summary>
+    /// <remarks><c>anyway</c>: the architect's "Check now anyway" (the Setup form): sent with what is stated, every
+    /// fact not set (or holding what Gordium can't read) left out and listed (<see cref="ProjectPrepared.NotStated"/>), so
+    /// each rule it decides needs review; never without the zone, which chooses the rules.</remarks>
     public static async Task<ProjectPrepared> PrepareAsync(RevitModel outside, RevitModel inside, ILeftOutAsker asker,
-                                                           CancellationToken cancel = default)
+                                                           CancellationToken cancel = default, bool anyway = false)
     {
         ArgumentNullException.ThrowIfNull(outside);
         ArgumentNullException.ThrowIfNull(inside);
@@ -44,8 +52,12 @@ public static class ProjectCheck
                                            "): nothing is sent; click Check project again");
         var read = ProjectFacts.Read(inside);
         var building = BuildingFacts.Read(inside);
-        if (read.Missing.Count > 0 || building.Missing.Count > 0)
-            return new ProjectPrepared(null, [.. read.Missing, .. building.Missing], null, [], null);
+        IReadOnlyList<string> missing = [.. read.Missing, .. building.Missing];
+        if (missing.Count > 0 && !(anyway && read.Facts["zone"] is not null))
+            return new ProjectPrepared(null, missing, null, [], null);
+        // sent anyway: a building fact Gordium can't read goes as typed, so the code decision says it can't read it
+        // (needs review), never takes it as not stated; it is listed with the facts left out
+        IReadOnlyList<MarkDefinition> notStated = missing.Count > 0 ? [.. SetupFacts.NotSent(inside, read), .. building.NotRead] : [];
 
         // everything read from the records before the first await, on the caller's thread (Revit's: a lot line's
         // points call back into the API; SiteReader reads the lot before it asks the worker anything)
@@ -53,14 +65,15 @@ public static class ProjectCheck
         if (building.Building is { } said)       // which New York code governs: the architect's statements, as given
             interior.Interior["building"] = said;
         var site = await SiteReader.DescribeAsync(outside, read.Facts, asker, cancel).ConfigureAwait(false);
-        var match = StreetEdges.Match(read.StreetEdges!, site.Site["lot"] as JsonObject, outside.InternalToShared);
-        if (match.StreetLine is not { } street)
+        var match = read.StreetEdges is { } kept ? StreetEdges.Match(kept, site.Site["lot"] as JsonObject, outside.InternalToShared) : null;
+        // a kept edge no longer on the lot is asked for again, anyway too: anyway leaves out only what isn't set
+        if (match is not null && match.StreetLine is null)
             return new ProjectPrepared(null, [match.Why!], site.PhaseChecked, site.OptionsChecked, null, StreetRefused: match.Reason);
         var facts = read.Facts.DeepClone().AsObject();
-        facts["street_line"] = street;
-        var words = match.Words;
+        if (match?.StreetLine is { } line)
+            facts["street_line"] = line;
         return new ProjectPrepared(new ProjectRequest(site.Site, facts, interior.Interior), [], site.PhaseChecked,
-                                   site.OptionsChecked, interior, words);
+                                   site.OptionsChecked, interior, match?.Words) { NotStated = notStated };
     }
 
     /// <summary>The one check_site: the site, the facts and the interior, together.</summary>
@@ -90,7 +103,12 @@ public static class ProjectCheck
 /// FACTS): each only when set, so an unset one is not stated. <see cref="Building"/> is null when none is set (the
 /// description is then exactly as before). A word that isn't one of a mark's words, or a count under 1, is listed in
 /// <see cref="Missing"/> and nothing is sent: never sent as something near it.</summary>
-public sealed record BuildingFactsRead(JsonObject? Building, IReadOnlyList<string> Missing);
+public sealed record BuildingFactsRead(JsonObject? Building, IReadOnlyList<string> Missing)
+{
+    /// <summary>The marks holding what Gordium can't read (each also in <see cref="Missing"/>, and in
+    /// <see cref="Building"/> as typed, so a check sent anyway says it can't read it).</summary>
+    public IReadOnlyList<MarkDefinition> NotRead { get; init; } = [];
+}
 
 /// <summary>Reads <see cref="BuildingFactsRead"/> from the marks.</summary>
 public static class BuildingFacts
@@ -101,6 +119,7 @@ public static class BuildingFacts
     {
         ArgumentNullException.ThrowIfNull(model);
         var missing = new List<string>();
+        var notRead = new List<MarkDefinition>();
         var b = new JsonObject();
         MarkValue? Get(MarkDefinition m) => model.ProjectMarks.TryGetValue(m.Guid, out var v) ? v : null;
         foreach (var (mark, key) in new[] { (Marks.FollowsBuildingCode, "follows_building_code"),
@@ -111,28 +130,38 @@ public static class BuildingFacts
         if (Marks.Count(Get(Marks.StoriesAboveGradePlane)) is { } stories)
         {
             if (stories < 1)
+            {
                 missing.Add($"{Marks.StoriesAboveGradePlane.Name} is {stories.ToString(CultureInfo.InvariantCulture)}: type " +
                             $"the stories above grade plane, 1 or more, or leave it blank{Where}.");
-            else
-                b["stories_above_grade_plane"] = stories;
+                notRead.Add(Marks.StoriesAboveGradePlane);
+            }
+            b["stories_above_grade_plane"] = stories;
         }
         if (Marks.Text(Get(Marks.OccupancyGroups)) is { } groups)
         {
             if (OccupancyGroupWords.Parse(groups) is { } parsed)
                 b["occupancy_groups"] = new JsonArray([.. parsed.Select(g => (JsonNode)g)]);
             else
+            {
+                b["occupancy_groups"] = groups;
+                notRead.Add(Marks.OccupancyGroups);
                 missing.Add($"{Marks.OccupancyGroups.Name} is \"{groups}\": type the Building Code's groups separated by " +
                             $"commas ({OccupancyGroupWords.Listed}), or leave it blank{Where}.");
+            }
         }
         if (Marks.Text(Get(Marks.SprinklerSystem)) is { } system)
         {
             if (SprinklerWords.Table.Of(system) is { } word)
                 b["sprinkler_system"] = word;
             else
+            {
+                b["sprinkler_system"] = system;
+                notRead.Add(Marks.SprinklerSystem);
                 missing.Add($"{Marks.SprinklerSystem.Name} is \"{system}\": type one of {SprinklerWords.Table.Listed}, or " +
                             $"leave it blank{Where}.");
+            }
         }
-        return new BuildingFactsRead(b.Count > 0 ? b : null, missing);
+        return new BuildingFactsRead(b.Count > 0 ? b : null, missing) { NotRead = notRead };
     }
 }
 
