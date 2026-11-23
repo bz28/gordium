@@ -136,7 +136,7 @@ public sealed class HouseFactFieldsTests
             draft.Choose(Marks.StreamDistance, bad);
             var (writes, problems) = draft.Writes(fields);
             Assert.Empty(writes);
-            Assert.Contains("isn't a distance in feet, 0 or more", Assert.Single(problems), StringComparison.Ordinal);
+            Assert.Contains("isn't a length in feet, 0 or more", Assert.Single(problems), StringComparison.Ordinal);
         }
         // a distance the mark holds shows as Revit gives it (feet)
         var marks = Needed();
@@ -156,62 +156,142 @@ public sealed class HouseFactFieldsTests
 
     // ---- review round 1: units before typing, and the law's words exactly ----------------------------------------
 
-    /// <summary>Every number a mark takes says what it is before it is typed: the Setup form's label names it ("Distance
-    /// from stream (ft)", "Garage cars (count)") and the tooltip's first words do ("In feet:", "A count:"), so 200 meant
-    /// as inches is never saved as 200 ft (§325-26 would pass).</summary>
+    /// <summary>Every number a mark takes says what it is before it is typed, and the words are true wherever they are
+    /// read: a count says "A count:"; a length's tooltip (which Revit's own Project Information and Type Properties
+    /// dialogs show, where a number is read in the project's length units) opens "A length, in this project's length
+    /// units" and never names one unit (review round 2: "In feet" let 15 typed in a meters project be 15 m, 49 ft).</summary>
     [Fact]
-    public void Every_numeric_mark_names_its_unit_or_says_it_is_a_count_before_it_is_typed()
+    public void Every_numeric_mark_says_what_its_number_is_and_it_is_true_in_revits_dialogs_too()
     {
         var numeric = Marks.All.Where(m => m.Kind is MarkValueKind.Length or MarkValueKind.Integer).ToList();
         Assert.True(numeric.Count >= 13);
         foreach (var m in numeric)
         {
-            var (unit, first) = m.Kind == MarkValueKind.Length ? ("ft", "In feet: ") : ("count", "A count: ");
-            Assert.Equal(unit, Marks.Unit(m));
-            Assert.StartsWith(first, m.Description, StringComparison.Ordinal);
-            Assert.EndsWith($" ({unit})", SetupWords.Label(m, "house"), StringComparison.Ordinal);
+            if (m.Kind == MarkValueKind.Length)
+            {
+                Assert.Equal("length", Marks.Unit(m));
+                Assert.StartsWith(Marks.LengthWords, m.Description, StringComparison.Ordinal);
+                foreach (var claim in new[] { "In feet", "in feet", "(ft)", "In inches", "in inches" })
+                    Assert.DoesNotContain(claim, m.Description, StringComparison.Ordinal);
+                Assert.EndsWith(" (ft)", SetupWords.Label(m, "house"), StringComparison.Ordinal);      // the form's default, a feet project
+                Assert.EndsWith(" (mm)", SetupWords.Label(m, "house", "mm"), StringComparison.Ordinal);
+            }
+            else
+            {
+                Assert.Equal("count", Marks.Unit(m));
+                Assert.StartsWith("A count: ", m.Description, StringComparison.Ordinal);
+                Assert.EndsWith(" (count)", SetupWords.Label(m, "house"), StringComparison.Ordinal);
+            }
         }
         Assert.All(Marks.All.Where(m => !numeric.Contains(m)), m => Assert.Null(Marks.Unit(m)));
-        // the form's fields carry it: what the architect reads above the box
         var fields = SetupScreen.Build(Model(Needed()), [], null, null).Fields;
-        Assert.Equal("Distance from stream (ft)", fields.Single(f => f.Mark == Marks.StreamDistance).Label);
         Assert.Equal("Garage cars (count)", fields.Single(f => f.Mark == Marks.GarageCars).Label);
     }
 
-    private static string Plain(string text) =>
-        System.Text.RegularExpressions.Regex.Replace(text.Replace('“', '"').Replace('”', '"').Replace('’', '\'')
-                                                         .Replace('—', '-').Replace('–', '-'), @"\s+", " ");
+    private static RevitModel InUnits(string displayUnits, double? streamFeet = null)
+    {
+        var marks = Needed();
+        if (streamFeet is { } f)
+            marks[Marks.StreamDistance.Guid] = new(true, Number: f);
+        return new() { Document = "house.rvt", ProjectMarks = marks, DisplayUnits = displayUnits };
+    }
 
-    /// <summary>The law's words for New York: the City's extracted text (each document's lines in order), every quote
-    /// the rulebooks and state law folders keep, and the code decision's cites (design_checker/code_scope.py CITES,
-    /// each read again from its PDF page by test_every_quote_is_on_its_page_in_the_book: the state books' own text
-    /// lives outside the repository).</summary>
+    /// <summary>The Setup form's length field follows the project's length units, as Revit's dialogs do: labelled with
+    /// the unit, shown in it, and a number typed there saved so Revit shows that same number (a feet project and a
+    /// millimeters project); a project in units Gordium doesn't read takes feet and says so beside the field.</summary>
+    [Theory]
+    [InlineData("autodesk.unit.unit:feetFractionalInches-1.0.1", "ft", "22.5", "18.25", 18.25)]
+    [InlineData("autodesk.unit.unit:feet-1.0.1", "ft", "22.5", "18.25", 18.25)]
+    [InlineData("autodesk.unit.unit:millimeters-1.0.1", "mm", "6858", "6000", 6000 / 304.8)]
+    [InlineData("autodesk.unit.unit:meters-1.0.1", "m", "6.858", "15", 15 / 0.3048)]
+    [InlineData("autodesk.unit.unit:inches-1.0.1", "in", "270", "240", 20.0)]
+    public void The_forms_length_field_is_in_the_projects_units_and_saves_what_revit_shows(
+        string units, string symbol, string shown, string typed, double savedFeet)
+    {
+        var field = SetupScreen.Build(InUnits(units, 22.5), [], null, null).Fields.Single(f => f.Mark == Marks.StreamDistance);
+        Assert.Equal($"Distance from stream ({symbol})", field.Label);
+        Assert.Equal(shown, field.Current);                                // 22.5 ft as Revit shows it in this project
+        Assert.DoesNotContain("type feet here", field.Law, StringComparison.Ordinal);
+        var blank = SetupScreen.Build(InUnits(units), [], null, null).Fields;
+        var draft = new SetupDraft();
+        draft.Choose(Marks.StreamDistance, typed);
+        var w = Assert.Single(draft.Writes(blank).Writes);
+        Assert.Equal(savedFeet, w.Value.Number!.Value, 9);                 // feet, Revit's internal unit
+        // read back as Revit would show it: the number typed
+        var again = SetupScreen.Build(InUnits(units, w.Value.Number), [], null, null).Fields.Single(f => f.Mark == Marks.StreamDistance);
+        Assert.Equal(typed, again.Current);
+    }
+
+    [Fact]
+    public void A_project_in_units_gordium_doesnt_read_takes_feet_and_says_so()
+    {
+        var field = SetupScreen.Build(InUnits("autodesk.unit.unit:usSurveyFeet-1.0.0", 10), [], null, null).Fields.Single(f => f.Mark == Marks.StreamDistance);
+        Assert.Equal("Distance from stream (ft)", field.Label);
+        Assert.Equal("10", field.Current);
+        Assert.Contains("aren't ones Gordium reads: type feet here", field.Law, StringComparison.Ordinal);
+        Assert.Contains("DisplayUnits = doc.GetUnits().GetFormatOptions(SpecTypeId.Length).GetUnitTypeId().TypeId",
+                        File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "RevitMarks.cs")), StringComparison.Ordinal);
+    }
+
+    private static string Plain(string text) =>
+        System.Text.RegularExpressions.Regex.Replace(text.Replace('\u201c', '"').Replace('\u201d', '"').Replace('\u2019', '\'')
+                                                         .Replace('\u2014', '-').Replace('\u2013', '-'), @"\s+", " ");
+
+    /// <summary>The law's words for New York, each passage kept apart: the City's extracted text (each document's lines in
+    /// order), the rulebooks' and state law folders' <c>quote:</c> values (only those, never a reason or a note), and the
+    /// code decision's cites (design_checker/code_scope.py CITES, each read again from its PDF page by
+    /// test_every_quote_is_on_its_page_in_the_book: the state books' own text lives outside the repository).</summary>
     private static readonly Lazy<string> Law = new(() =>
     {
         var root = Path.Combine(Env.Repo, "regulations", "jurisdictions", "new_york");
         var sb = new StringBuilder();
         foreach (var f in Directory.EnumerateFiles(root, "*.jsonl", SearchOption.AllDirectories).Where(f => f.Contains("2_extracted_text", StringComparison.Ordinal)))
+        {
             foreach (var line in File.ReadLines(f))
                 if (JsonDocument.Parse(line).RootElement is { ValueKind: JsonValueKind.Object } o && o.TryGetProperty("text", out var t) && t.ValueKind == JsonValueKind.String)
                     sb.Append(t.GetString()).Append(' ');
-        foreach (var f in Directory.EnumerateFiles(root, "*.yaml", SearchOption.AllDirectories))
-            sb.Append(File.ReadAllText(f).Replace("\\\"", "\"")).Append(' ');
-        sb.Append(Env.RunCode("import json; from design_checker import code_scope; print(json.dumps([q for _, _, q in code_scope.CITES.values()]))"));
+            sb.Append(" ¦ ");
+        }
+        const string Quotes = "import json, pathlib, sys, yaml\n"
+            + "from design_checker import code_scope\n"
+            + "out = [q for _, _, q in code_scope.CITES.values()]\n"
+            + "def walk(o):\n"
+            + "    if isinstance(o, dict):\n"
+            + "        for k, v in o.items():\n"
+            + "            if k == 'quote' and isinstance(v, str): out.append(v)\n"
+            + "            else: walk(v)\n"
+            + "    elif isinstance(o, list):\n"
+            + "        for v in o: walk(v)\n"
+            + "for p in sorted(pathlib.Path(sys.argv[1]).rglob('*.yaml')): walk(yaml.safe_load(p.read_text(encoding='utf-8')))\n"
+            + "sys.stdout.buffer.write(json.dumps(out, ensure_ascii=True).encode())\n";
+        foreach (var q in JsonDocument.Parse(Env.RunCode(Quotes, root)).RootElement.EnumerateArray())
+            sb.Append(q.GetString()).Append(" ¦ ");
         return Plain(sb.ToString());
     });
 
-    /// <summary>Every passage a mark's tooltip quotes is the law's words character for character: a quote that ends a
-    /// sentence the law goes on with (§325-26's exception) or changes a word is caught. A passage cut short ends where
-    /// the law's own words do, with no full stop of Gordium's.</summary>
+    /// <summary>Every passage a mark's tooltip quotes is the law's words character for character, and is a whole
+    /// sentence or says it is cut short: it ends with a full stop (or ? or !) of the law's own, or with "…" (review
+    /// rounds 1 and 2: §325-26 quoted to "average water level" left out its exception; a cut quote now must say so).</summary>
     [Fact]
-    public void Every_passage_a_mark_quotes_is_the_laws_words_exactly()
+    public void Every_passage_a_mark_quotes_is_the_laws_words_exactly_and_whole_or_marked_cut()
     {
         var quoted = Marks.All.SelectMany(m => System.Text.RegularExpressions.Regex.Matches(m.Description, "\"([^\"]{12,})\"")
             .Select(q => (m.Name, Text: q.Groups[1].Value))).ToList();
         Assert.True(quoted.Count >= 12);
-        Assert.All(quoted, q => Assert.True(Law.Value.Contains(Plain(q.Text), StringComparison.Ordinal), $"{q.Name} quotes words not in the law: \"{q.Text}\""));
-        Assert.Contains("measured at an average water level, except for those structures directly connected with marine or public or commercial recreation activities.",
-                        Marks.StreamNearLot.Description, StringComparison.Ordinal);
+        foreach (var (name, text) in quoted)
+        {
+            var cut = text.EndsWith('…');
+            var words = Plain(cut ? text[..^1] : text);
+            Assert.True(Law.Value.Contains(words, StringComparison.Ordinal), $"{name} quotes words not in the law: \"{text}\"");
+            Assert.True(cut || words.EndsWith('.') || words.EndsWith('?') || words.EndsWith('!'),
+                        $"{name} quotes part of a sentence without saying so (end it with …): \"{text}\"");
+            // a whole sentence ends where the law's does: its full stop is the law's own (". " or the passage's end)
+            if (!cut)
+                Assert.True(Law.Value.Contains(words + " ", StringComparison.Ordinal), $"{name}: \"{text}\" isn't followed in the law by a new sentence");
+        }
+        foreach (var m in new[] { Marks.StreamNearLot, Marks.StreamDistance })
+            Assert.Contains("measured at an average water level, except for those structures directly connected with marine or public or commercial recreation activities.\"",
+                            m.Description, StringComparison.Ordinal);
     }
 
     // ---- the house's fix cards now have their button -----------------------------------------------------------

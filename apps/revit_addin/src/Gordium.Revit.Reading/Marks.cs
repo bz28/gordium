@@ -61,19 +61,19 @@ public static class Marks
     public static readonly MarkDefinition ClearWidth = new(
         "Gordium: Clear width", new("8cb5d70c-116d-4621-9876-fd15c4c55f5c"), MarkValueKind.Length, MarkBinding.Type,
         [Windows, Doors], "openings[].stated_clear.width, doors[].stated_clear.width",
-        "In feet: the maker's net clear opening width, as the maker publishes it for egress. For a door, measured as R318.2 " +
+        "A length, in this project's length units (Manage > Project Units: 3 typed is 3 ft in a feet project, 3 mm in a millimeter one): the maker's net clear opening width, as the maker publishes it for egress. For a door, measured as R318.2 " +
         "measures it: between the face of the door open 90 degrees and the stop (never the door's size or its rough opening).");
 
     public static readonly MarkDefinition ClearHeight = new(
         "Gordium: Clear height", new("8a8a2307-84a5-4a36-9121-c21453707702"), MarkValueKind.Length, MarkBinding.Type,
         [Windows, Doors], "openings[].stated_clear.height, doors[].stated_clear.height",
-        "In feet: the maker's net clear opening height, as the maker publishes it for egress. For a door, measured as R318.2 " +
+        "A length, in this project's length units (Manage > Project Units: 3 typed is 3 ft in a feet project, 3 mm in a millimeter one): the maker's net clear opening height, as the maker publishes it for egress. For a door, measured as R318.2 " +
         "measures it: from the top of the threshold to the bottom of the stop.");
 
     public static readonly MarkDefinition ClearOffset = new(
         "Gordium: Clear offset", new("07f4d517-54a6-4e39-ba85-90c299137a28"), MarkValueKind.Length, MarkBinding.Type,
         [Windows], "openings[].stated_clear.bottom",
-        "In feet: the height of the clear opening's bottom above the window's sill line (where Sill Height places it). Blank is not 0: no clear opening is sent.");
+        "A length, in this project's length units (Manage > Project Units: 3 typed is 3 ft in a feet project, 3 mm in a millimeter one): the height of the clear opening's bottom above the window's sill line (where Sill Height places it). Blank is not 0: no clear opening is sent.");
 
     public static readonly MarkDefinition ClearSource = new(
         "Gordium: Clear source", new("2bc7eaef-1770-4077-870b-450ed224adde"), MarkValueKind.Text, MarkBinding.Type,
@@ -306,8 +306,8 @@ public static class Marks
     public static readonly MarkDefinition StreamDistance = new(
         "Gordium: Distance from stream", new("6b203698-192c-4814-b27c-4e5968fa8111"), MarkValueKind.Length,
         MarkBinding.Instance, [ProjectInformation], "facts.stream_distance",
-        "In feet: with a stream or inlet within 20 ft of the lot, the least horizontal distance from any new structure (house, addition, garage, deck, fence; not a patio) to the inlet wall or the stream's bank, at average water level, as typed (never rounded). " +
-        "§325-26: \"No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level\"; §325-3B: \"Structures shall not include patios or terraces.\" A length, 0 or more. Blank: the rule needs review.");
+        "A length, in this project's length units (Manage > Project Units: 3 typed is 3 ft in a feet project, 3 mm in a millimeter one): with a stream or inlet within 20 ft of the lot, the least horizontal distance from any new structure (house, addition, garage, deck, fence; not a patio) to the inlet wall or the stream's bank, at average water level, as typed (never rounded). " +
+        "§325-26: \"No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level, except for those structures directly connected with marine or public or commercial recreation activities.\" §325-3B: \"Structures shall not include patios or terraces.\" 0 or more. Blank: the rule needs review.");
 
     /// <summary>The most people in any one dwelling unit not related to its family (<c>facts.unrelated_persons</c>).</summary>
     public static readonly MarkDefinition UnrelatedPersons = new(
@@ -322,7 +322,7 @@ public static class Marks
         "Gordium: Owner-occupied", new("489c2902-38ec-430f-aa5e-47675cb48eff"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "facts.owner_occupied",
         "Yes when the owner lives in the one-family dwelling itself, not only in an accessory dwelling unit on the lot. " +
-        "§325-3B: \"In the R-1 Zones, occupancy by an individual or a family and not more than two unrelated individuals is permitted if the dwelling is owner-occupied.\" OWNER: \"A person who maintains his/her principal residence in property for more than six months of each calendar year\". " +
+        "§325-3B: \"In the R-1 Zones, occupancy by an individual or a family and not more than two unrelated individuals is permitted if the dwelling is owner-occupied.\" OWNER: \"A person who maintains his/her principal residence in property for more than six months of each calendar year…\". " +
         "No: not owner-occupied. Blank: the occupancy rule needs review where it matters.");
 
     /// <summary>Whether the household is to be shown to the City to be a functional family unit (<c>facts.functional_family_unit</c>).</summary>
@@ -338,7 +338,7 @@ public static class Marks
         "Gordium: Garage cars", new("08e37847-735e-417a-85fa-fb945a28276f"), MarkValueKind.Integer,
         MarkBinding.Instance, [ProjectInformation], "facts.garage_cars",
         "A count: the cars the lot's private garages hold, all together: every enclosed garage, attached or detached; 0 if there is none (a carport isn't enclosed). " +
-        "Zoning chart, Private garage, note 6: \"For not more than three cars.\" §325-3B GARAGE, PRIVATE: \"An enclosed space for the storage of one or more motor vehicles\". " +
+        "Zoning chart, Private garage, note 6: \"For not more than three cars.\" §325-3B GARAGE, PRIVATE: \"An enclosed space for the storage of one or more motor vehicles…\". " +
         "A whole number, 0 or more. Blank: the garage rule needs review.");
 
     /// <summary>The private garages on the lot (<c>facts.private_garages</c>), asked only once the cars are over three.</summary>
@@ -467,15 +467,20 @@ public static class Marks
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
     ];
 
-    /// <summary>What a number typed in a mark means, said before it is typed (the Setup form's label: "Distance from
-    /// stream (ft)"; the tooltip's first words: "In feet:" or "A count:"): feet for a length (Revit's internal unit, what
-    /// the reader sends), a count for a whole number; null for a mark that takes no number.</summary>
+    /// <summary>What a number typed in a mark means, said before it is typed, true wherever it is read: "count" for a
+    /// whole number; "length" for a length, typed in the project's length units in Revit's dialogs and the Setup form
+    /// alike (the form's label names the unit: <see cref="LengthUnits"/>); null for a mark that takes no number.</summary>
     public static string? Unit(MarkDefinition m) => m.Kind switch
     {
-        MarkValueKind.Length => "ft",
+        MarkValueKind.Length => "length",
         MarkValueKind.Integer => "count",
         _ => null,
     };
+
+    /// <summary>The words every length mark's tooltip opens with: in Revit's own dialogs a number is read in the
+    /// project's length units, so the tooltip never names one unit (review round 2 of change 20: "In feet" was false in
+    /// a meters project, where 15 typed is 15 m).</summary>
+    public const string LengthWords = "A length, in this project's length units";
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------
 
