@@ -13,6 +13,8 @@ from rule_format.rulebook import REPO, load, outcome
 ITHACA = "regulations/jurisdictions/new_york/ithaca_city"
 CBD = ["CBD-50", "CBD-60", "CBD-85", "CBD-100", "CBD-120", "CBD-140"]
 DWELLINGS = {"one_family_detached", "one_family_semi_detached", "one_family_attached", "two_family"}
+# B-district wording carried over: "a B district", "every B lot", "on a B-district lot", "in B-2a, B-4 and B-5"
+B_WORDING = re.compile(r"\bB(?:-\d[a-z]?)? (?:district|lot)s?\b|\bB-district\b|\bB-2a, B-4 and B-5\b")
 
 
 def _rules(d):
@@ -93,8 +95,13 @@ def test_the_central_business_audit_cites_the_cbd_columns_own_marks_never_the_re
     j = REPO / ITHACA
     text = (j / "central_business_coverage.yaml").read_text(encoding="utf-8")
     assert not re.findall(r"chart p\.(?:2|3|14)\b|\(p\.(?:2|3|14)\)", text)
-    assert not re.findall(r"\bB(?:-\d[a-z]?)? (?:district|lot)|B-district lot|every B district", text)
     data = load(j / "central_business_coverage.yaml")
+    # our own words in each decision (why, mapped, note), never the law's quotes nor a piece's description of the law
+    # (§325-16G's "Two-story minimum in CBD and B districts" is what the law says): none may speak of a B district's
+    # lots as if they were this one's, as text copied from the B districts' decisions did
+    own = [dec[k] for items in data["pieces"].values() for item in items for d, dec in item.items()
+           if isinstance(dec, dict) for k in ("why", "mapped", "note") if isinstance(dec.get(k), str)]
+    assert own and not [t for t in own if B_WORDING.search(t)], [t for t in own if B_WORDING.search(t)]
     gas = data["pieces"]["325-15F"][0]["all"]
     assert gas["status"] == "not_applicable" and gas["cell"] == {"section": "Primary Uses", "row": "Gasoline station"}
     assert data["pieces"]["325-21C"][0]["all"]["status"] == "not_applicable"
