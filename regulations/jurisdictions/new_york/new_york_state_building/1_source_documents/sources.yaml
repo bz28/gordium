@@ -64,12 +64,13 @@ documents:
       # 1006.2.2.6 caps Group R-3 and R-4 travel with an NFPA 13D system), 1018.4 (Group M merchandise pads'
       # common path, p.342, with 1018.5 after on p.343, read to show where it ends) and 1030.8 alone (an assembly space's fixed-seat common path, p.355,
       # with 1030.8.1 after), and 407.4.2 alone (a Group I-2 sleeping room's 50 ft to its exit access door,
-      # p.99, with 407.4.3 after).
-      pages: 32-68, 79, 99, 147, 273-274, 315-318, 340-344, 355
+      # p.99, with 407.4.3 after). Review round 2: 1030.7 alone (assembly seating's travel, measured along the
+      # aisles, pp.354-355, with 1030.8 after).
+      pages: 32-68, 79, 99, 147, 273-274, 315-318, 340-344, 354-355
       sections: ['308.5', '508.2', '1006.2.1', Table 1006.2.1, '1006.2.2', '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(1),
                  Table 1006.3.4(2),
                  '1007.1', '1016.2', '1017', Table 1017.2, '1018.4', '1020.5']
-      alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
+      alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
           the rule measures the story's floor area by both of the book's own measures of floor area (README).
@@ -78,6 +79,7 @@ documents:
                    # table on the pages read is named, brought in or not
         Table 903.2.11.6: p.273 lines 14-36
         Table 1006.2.1: p.315 lines 14-44
+        Table 1030.6.2: p.354 lines 10-22
         Table 1006.3.3: p.316 lines 52-57
         Table 1006.3.4(1): p.317 lines 17-32
         Table 1006.3.4(2): p.317 lines 33-53

@@ -433,6 +433,18 @@ rules:
     reason: 'Two exits or more, and a common path over 75 ft (or a building not sprinklered throughout, where the table gives
       Group I-4 no common path): whether Table 1006.2.1 caps the common path or only decides when a second exit is needed
       is open (open_questions); a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and space_common_path
+      <= 75))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
+  - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and ((space_occupant_load <= 10 and (sprinklered_903_3_1_1
+      or sprinklered_903_3_1_2) and space_common_path <= 75))
+    reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use, stated or not
+      ruled out (special_egress_spaces): a person checks.'
   for_each: space
   when_none: needs_review
   sources:
@@ -468,11 +480,60 @@ rules:
     - 36
     quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
       See Section 903 for occupancies where automatic sprin-
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 48
+    - 56
+    quote: 1006.2.2 Egress based on use. The numbers, configuration and types of components of exits or access to exits shall
+      be provided in the uses described in Sections 1006.2.2.1 through 1006.2.2.6. 1006.2.2.1 Boiler, incinerator and furnace
+      rooms. Two exit access doorways are required in boiler, incinerator and furnace rooms where the area is over 500 square
+      feet (46 m[fn2]) and any fuel-fired equipment exceeds 400,000 British thermal units (Btu) (422 000 KJ) input capacity.
+      Where two exit access doorways are required, one is permitted to be a fixed ladder or an alternating tread device. Exit
+      access doorways shall be separated by a horizontal distance equal to one-half the length of the maximum overall diagonal
+      dimension of the room. 1006.2.2.2 Refrigeration machinery rooms. Machinery rooms larger than 1,000 square feet (93 m[fn2])
+      shall have not less than two exits or exit access doorways. Where two exit access doorways are required, one such doorway
+      is permitted to be served by
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 3
+    - 24
+    quote: 'a fixed ladder or an alternating tread device. Exit access doorways shall be separated by a horizontal distance
+      equal to one-half the maximum horizontal dimension of the room. Exit access travel distance shall be determined as specified
+      in Section 1017.1, but all portions of a refrigeration machinery room shall be within 150 feet (45 720 mm) of an exit
+      or exit access doorway where such rooms are not protected by an approved automatic sprinkler system. Egress is allowed
+      through adjoining refrigeration machinery rooms or adjoining refriger- ated rooms or spaces. Exit and exit access doorways
+      shall swing in the direction of egress travel and shall be equipped with panic hardware, regardless of the occupant
+      load served. Exit and exit access doorways shall be tight fitting and self-closing. 1006.2.2.3 Refrigerated rooms or
+      spaces. Rooms or spaces having a floor area larger than 1,000 square feet (93 m[fn2]), contain- ing a refrigerant evaporator
+      and maintained at a temperature below 68°F (20°C), shall have access to not less than two exits or exit access doorways.
+      Exit access travel distance shall be determined as specified in Section 1017.1, but all portions of a refrigerated room
+      or space shall be within 150 feet (45 720 mm) of an exit or exit access doorway where such rooms are not protected by
+      an approved auto- matic sprinkler system. Egress is allowed through adjoining refrigerated rooms or spaces. Exception:
+      Where using refrigerants in quantities limited to the amounts based on the volume set forth in the Mechanical Code of
+      New York State. 1006.2.2.4 Electrical rooms. The location and number of exit or exit access doorways shall be provided
+      for electrical rooms in accordance with Section 110.26 of NFPA 70 for electrical equipment rated 1,000 volts or less,
+      and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
+      required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
+      as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       space:
       - id: p1
@@ -481,6 +542,7 @@ rules:
           space_exit_count: 2
           space_occupant_load: 30
           space_common_path: 48.5
+          space_is_exit: false
     rows:
     - part: p1
       outcome: pass
@@ -491,6 +553,8 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       space:
       - id: p6
@@ -499,6 +563,7 @@ rules:
           space_exit_count: 2
           space_occupant_load: 30
           space_common_path: 80
+          space_is_exit: false
     rows:
     - part: p6
       outcome: needs_review
@@ -509,6 +574,8 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       space:
       - id: p2
@@ -517,6 +584,7 @@ rules:
           space_exit_count: 1
           space_occupant_load: 30
           space_common_path: 40
+          space_is_exit: false
     rows:
     - part: p2
       outcome: fail
@@ -526,6 +594,8 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       space:
       - id: p3
@@ -534,6 +604,7 @@ rules:
           space_exit_count: 1
           space_occupant_load: 4
           space_common_path: 30
+          space_is_exit: false
     rows:
     - part: p3
       outcome: pass
@@ -542,6 +613,8 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       space:
       - id: p4
@@ -550,6 +623,7 @@ rules:
           space_exit_count: 1
           space_occupant_load: 4
           space_common_path: 80
+          space_is_exit: false
     rows:
     - part: p4
       outcome: fail
@@ -559,6 +633,8 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       space:
       - id: p5
@@ -567,6 +643,7 @@ rules:
           space_exit_count: 1
           space_occupant_load: 4
           space_common_path: 30
+          space_is_exit: false
     rows:
     - part: p5
       outcome: fail
@@ -576,6 +653,8 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       space: []
     rows:
@@ -611,7 +690,9 @@ rules:
     through them) and exception 3 (unoccupied mechanical rooms and penthouses need not meet the common path) only loosen the
     test: a person''s check where they apply. The cumulative occupant load (1004.2, not brought in) is in the architect''s
     space_occupant_load. Most restrictive where the 2009 IBC applied (Maine): 1015.1 and Table 1015.1 set the same 10 for
-    day care. Hand-drafted in a Claude Code session (2026-11-21).'
+    day care. Hand-drafted in a Claude Code session (2026-11-21). Review round 2 (2026-11-23): a room with fixed seating,
+    in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft); a one-exit space where a 1006.2.2 room
+    is stated or not ruled out needs review (as its siblings).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_other_occupancies
@@ -682,15 +763,19 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
-  - when: not space_is_exit and occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5"] and assembly_fixed_seating and space_common_path
-      > (75 if space_occupant_load < 50 else 30)
-    reason: 'Group A with fixed seating stated or not ruled out: 1030.8 (note c) caps the common path at 30 ft from any seat,
-      75 ft for fewer than 50 occupants (50 ft for smoke-protected seating), whatever the number of exits; the space''s common
-      path is from any point, not each seat: a person checks.'
   - when: not space_is_exit and occupancy_group == "M" and merchandise_pads and space_common_path > (75 if space_occupant_load
       <= 50 else 30)
     reason: 'Group M with merchandise pads stated or not ruled out: 1018.4 caps the common path at 30 ft from any point in
       a merchandise pad (75 ft for not more than 50 occupants), which isn''t marked: a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (75 if (sprinklered_903_3_1_1
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30
+      else 75))))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -1047,6 +1132,27 @@ rules:
     expect: needs_review
     note: 'Group M, merchandise pads not ruled out: 1018.4''s 30 ft (review round 1).'
   - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      assembly_fixed_seating: true
+      special_egress_spaces: false
+      merchandise_pads: false
+    parts:
+      space:
+      - id: p1
+        name: School auditorium, two exits
+        measures:
+          space_is_exit: false
+          space_exit_count: 2
+          space_occupant_load: 300
+          space_common_path: 60
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A Group E school''s auditorium with fixed seats (303.1.3): 1030.8''s 30 ft from any seat (review round 2).'
+  - given:
       occupancy_group: B
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -1059,6 +1165,7 @@ rules:
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -1110,7 +1217,9 @@ rules:
     in), so a Group A space with one exit needs review unless the architect states the building has no fixed seating (assembly_fixed_seating).
     Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room
     is stated or not ruled out needs review; Group A with fixed seating, and Group M with merchandise pads, stated or not
-    ruled out, need review over 1030.8''s and 1018.4''s 30 ft (75 ft for fewer occupants), with any number of exits.'
+    ruled out, need review over 1030.8''s and 1018.4''s 30 ft (75 ft for fewer occupants), with any number of exits. Review
+    round 2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30
+    ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_b
@@ -1140,6 +1249,15 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (100 if (sprinklered_903_3_1_1
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <=
+      30 else 75))))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -1215,12 +1333,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: B
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1240,6 +1369,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1259,6 +1389,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1278,6 +1409,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1297,6 +1429,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1316,6 +1449,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1335,6 +1469,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1354,6 +1489,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1374,12 +1510,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -1390,6 +1528,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -1426,7 +1565,8 @@ rules:
     review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
     Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
     in space_occupant_load. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space
-    where a 1006.2.2 room is stated or not ruled out needs review.'
+    where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating,
+    in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_f
@@ -1456,6 +1596,15 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (100 if (sprinklered_903_3_1_1
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30
+      else 75))))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -1531,12 +1680,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: F-1
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1556,6 +1716,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1575,6 +1736,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1594,6 +1756,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1613,6 +1776,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1632,6 +1796,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1651,6 +1816,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1670,6 +1836,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1690,12 +1857,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -1706,6 +1875,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -1742,7 +1912,8 @@ rules:
     review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
     Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
     in space_occupant_load. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space
-    where a 1006.2.2 room is stated or not ruled out needs review.'
+    where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating,
+    in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_h1_h2_h3
@@ -1762,6 +1933,14 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 3 and sprinklered_903_3_1_1 and space_common_path
+      <= 25))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -1823,12 +2002,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: H-1
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1848,6 +2038,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1867,6 +2058,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1886,6 +2078,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1905,6 +2098,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1924,6 +2118,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1943,6 +2138,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -1963,12 +2159,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -1979,6 +2177,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -2012,7 +2211,8 @@ rules:
     1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and
     3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load.
     Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room
-    is stated or not ruled out needs review.'
+    is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating, in any group, stated
+    or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_h4_h5
@@ -2032,6 +2232,14 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and sprinklered_903_3_1_1 and space_common_path
+      <= 75))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -2093,12 +2301,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: H-4
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2118,6 +2337,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2137,6 +2357,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2156,6 +2377,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2175,6 +2397,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2194,6 +2417,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2213,6 +2437,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2233,12 +2458,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -2249,6 +2476,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -2282,7 +2510,8 @@ rules:
     a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only
     loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load.
     Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room
-    is stated or not ruled out needs review.'
+    is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating, in any group, stated
+    or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_i1_i2
@@ -2314,6 +2543,14 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -2389,12 +2626,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: I-1
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2414,6 +2662,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2433,6 +2682,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2452,6 +2702,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2471,6 +2722,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2490,6 +2742,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2509,6 +2762,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2529,12 +2783,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -2545,6 +2801,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -2556,6 +2813,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2601,7 +2859,8 @@ rules:
     check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. The row also names I-4, whose
     rule is general.bc_1006_2_1_two_exits (unchanged). Note d: Group I-2''s travel limits are 407.4''s (not brought in), so
     a Group I-2 space with one exit needs review. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
-    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review.'
+    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with
+    fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_i3
@@ -2629,6 +2888,14 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 100))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -2698,12 +2965,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: I-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2723,6 +3001,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2742,6 +3021,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2761,6 +3041,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2780,6 +3061,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2799,6 +3081,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2818,6 +3101,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2838,12 +3122,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -2854,6 +3140,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -2890,7 +3177,8 @@ rules:
     (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
     check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. Hand-drafted in a Claude Code
     session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs
-    review.'
+    review. Review round 2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over
+    1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_r1
@@ -2911,6 +3199,14 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -2973,12 +3269,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: R-1
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -2998,6 +3305,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3017,6 +3325,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3036,6 +3345,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3055,6 +3365,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3074,6 +3385,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3093,6 +3405,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3113,12 +3426,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -3129,6 +3444,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -3165,7 +3481,8 @@ rules:
     (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
     check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. Hand-drafted in a Claude Code
     session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs
-    review.'
+    review. Review round 2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over
+    1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_r2
@@ -3186,6 +3503,14 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 20 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 125))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -3248,12 +3573,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: R-2
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3273,6 +3609,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3292,6 +3629,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3311,6 +3649,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3330,6 +3669,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3349,6 +3689,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3368,6 +3709,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3388,6 +3730,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3406,12 +3749,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -3422,6 +3767,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -3458,7 +3804,9 @@ rules:
     (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
     check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. A dwelling unit is a space (1006.3.4
     item 5.1: ''complies with Section 1006.2.1 as a space with one means of egress''). Hand-drafted in a Claude Code session
-    (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs review.'
+    (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs review.
+    Review round 2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s
+    30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_r3_r4
@@ -3484,6 +3832,14 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 20 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+      and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 125))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -3566,12 +3922,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: R-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3591,6 +3958,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3610,6 +3978,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3629,6 +3998,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3649,6 +4019,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3669,6 +4040,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3688,6 +4060,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3708,12 +4081,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -3724,6 +4099,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -3762,7 +4138,8 @@ rules:
     values for R-3 and R-4. Note e: the common path applies to Group R-3 only in a mixed occupancy building, and the rule
     reads one-group buildings, so where only the common path (or its NP) would fail a space of 20 or fewer, it needs review;
     note g (903.3.1.3 systems: 1006.2.2.6) likewise. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
-    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review.'
+    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with
+    fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_s
@@ -3792,6 +4169,15 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 29 and space_common_path <= (100 if (sprinklered_903_3_1_1
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <=
+      30 else 75))))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -3874,12 +4260,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: S-1
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3899,6 +4296,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3918,6 +4316,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3937,6 +4336,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3956,6 +4356,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3975,6 +4376,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -3994,6 +4396,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -4014,12 +4417,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -4030,6 +4435,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -4067,7 +4473,8 @@ rules:
     Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
     in space_occupant_load. Note f (a Group S-2 open parking garage: a common path not more than 100 ft) is no looser than
     the row for the loads it allows (29 or fewer). Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
-    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review.'
+    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with
+    fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_u
@@ -4097,6 +4504,15 @@ rules:
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
       room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+  - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
+      (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (75 if (sprinklered_903_3_1_1
+      or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <=
+      30 else 75))))
+    reason: 'The building may have a room used for assembly purposes with fixed seating, in any group, stated or not ruled
+      out: 1030.8 caps such a room''s common path at 30 ft from any seat (75 ft under 50 occupants; 50 ft for smoke-protected
+      or open-air seating), whatever its exits; the space''s common path here is from any point, not each seat, and which
+      rooms have fixed seats isn''t marked: a person checks. (Only where the row would otherwise pass: a space that fails
+      it fails.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -4172,12 +4588,23 @@ rules:
       and Section 110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where
       required in accordance with Section 1010.2.8.2. 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered
       as an exit access ramp unless pedestrian facilities are provided.'
+  - file: gov.ny.building.2025.pdf
+    page: 355
+    lines:
+    - 13
+    - 18
+    quote: '1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+      having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of two
+      paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
+      travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
+      egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
       occupancy_group: U
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -4197,6 +4624,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -4216,6 +4644,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -4235,6 +4664,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -4254,6 +4684,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -4273,6 +4704,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -4292,6 +4724,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -4311,6 +4744,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
@@ -4331,12 +4765,14 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space:
       - id: p1
         name: Another group's
         measures:
           space_exit_count: 1
+          space_is_exit: false
     rows:
     - part: p1
       outcome: not_applicable
@@ -4347,6 +4783,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
+      assembly_fixed_seating: false
     parts:
       space: []
     rows:
@@ -4383,7 +4820,8 @@ rules:
     review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
     Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
     in space_occupant_load. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space
-    where a 1006.2.2 room is stated or not ruled out needs review.'
+    where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating,
+    in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_2_2_1_boiler_rooms
@@ -4586,12 +5024,35 @@ rules:
     quote: e. Group R-3 and R-4 buildings equipped throughout with an automatic sprinkler system in accordance with Section
       903.3.1.3. See Section 903.2.8 for occupancies where auto- matic sprinkler systems are permitted in accordance with
       Section 903.3.1.3.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 40
+    - 53
+    quote: 'a. See the following sections for modifications to exit access travel distance requirements: Section 402.8: For
+      the distance limitation in malls. Section 407.4: For the distance limitation in Group I-2. Sections 408.6.1 and 408.8.1:
+      For the distance limitations in Group I-3. Section 411.2: For the distance limitation in special amusement areas. Section
+      412.6: For the distance limitations in aircraft manufacturing facilities. Section 1006.2.2.2: For the distance limitation
+      in refrigeration machinery rooms. Section 1006.2.2.3: For the distance limitation in refrigerated rooms and spaces.
+      Section 1006.3.4: For buildings with one exit. Section 1017.2.2: For increased distance limitation in Groups F-1 and
+      S-1. Section 1017.2.3: For increased distance limitation in Group H-5. Section 1030.7: For increased limitation in assembly
+      seating. Section 3103.4: For temporary structures. Section 3104.9: For pedestrian walkways.'
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: R-3
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -4608,6 +5069,9 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -4624,6 +5088,9 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -4640,6 +5107,9 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -4656,6 +5126,9 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -4670,6 +5143,9 @@ rules:
   - given:
       occupancy_group: R-3
       sprinklered_903_3_1_3: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -4679,9 +5155,22 @@ rules:
   notes: '1006.2.2.6, where 903.2.8 permits an NFPA 13D system (903.3.1.3) in Group R-3 or R-4: exit access travel at most
     125 ft (R-3) or 75 ft (R-4), not the 200 ft column Table 1017.2''s note e gives such a building; Table 1017.2''s row reads
     the same limits (general.bc_table_1017_2_a_e_f1_m_r_s1). Hand-drafted in a Claude Code session (2026-11-23, review round
-    1).'
+    1). Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review (1030.7); a space note
+    a sends elsewhere, stated or not ruled out, needs review (as its sibling rows).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  review_when:
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
+  - when: special_egress_spaces
+    reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
+      407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
+      1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
+      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
 - id: general.bc_1006_2_1_1_three_or_more_exits
   kind: rule
   topic: means_of_egress
@@ -7187,11 +7676,42 @@ rules:
     - 56
     - 56
     quote: c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 40
+    - 53
+    quote: 'a. See the following sections for modifications to exit access travel distance requirements: Section 402.8: For
+      the distance limitation in malls. Section 407.4: For the distance limitation in Group I-2. Sections 408.6.1 and 408.8.1:
+      For the distance limitations in Group I-3. Section 411.2: For the distance limitation in special amusement areas. Section
+      412.6: For the distance limitations in aircraft manufacturing facilities. Section 1006.2.2.2: For the distance limitation
+      in refrigeration machinery rooms. Section 1006.2.2.3: For the distance limitation in refrigerated rooms and spaces.
+      Section 1006.3.4: For buildings with one exit. Section 1017.2.2: For increased distance limitation in Groups F-1 and
+      S-1. Section 1017.2.3: For increased distance limitation in Group H-5. Section 1030.7: For increased limitation in assembly
+      seating. Section 3103.4: For temporary structures. Section 3104.9: For pedestrian walkways.'
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -7208,6 +7728,9 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p2
@@ -7223,6 +7746,9 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -7238,6 +7764,9 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p3
@@ -7253,6 +7782,9 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -7264,9 +7796,27 @@ rules:
     Measured as 1017.3 says (from the most remote point of each room, area or space, along the natural and unobstructed path,
     to the entrance to the nearest exit; stairways along their nosings, 1017.3.1): egress_travel_distance. Allowances that
     loosen it (1017.2.1''s exterior balcony; note a''s other sections) are their own flags or not brought in. Hand-drafted
-    in a Claude Code session (2026-11-21).'
+    in a Claude Code session (2026-11-21). Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
+    needs review (1030.7); a space note a sends elsewhere, stated or not ruled out, needs review (as its sibling rows); over
+    its distance within 1017.2.1''s balcony increase, taken or not stated, needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  review_when:
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
+  - when: special_egress_spaces
+    reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
+      407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
+      1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
+      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+  - when: egress_balcony_increase_taken and egress_travel_distance > (200 if sprinklered_903_3_1_1 else 150) and egress_travel_distance
+      <= (200 if sprinklered_903_3_1_1 else 150) + 100
+    reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
+      the design takes or whose taking isn''t stated: a person checks (general.bc_1017_2_1_balcony_increase).'
 - id: general.bc_table_1017_2_other_occupancies
   kind: flag
   topic: means_of_egress
@@ -7326,10 +7876,6 @@ rules:
       <= 400
     reason: 'Over 250 ft in Group F-1 or S-1 with NFPA 13, within 1017.2.2''s 400 ft, whose other conditions (one story; 24
       ft to the ceiling) aren''t measured: a person''s check (general.bc_1017_2_2_f1_s1_increase).'
-  - when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5"] and assembly_fixed_seating
-    reason: 'Group A where fixed seating isn''t ruled out: 1030.7 measures travel along the aisles and aisle accessways, never
-      over or on the seats (the routes don''t see seats), and its exceptions allow more for smoke-protected and open-air seating:
-      a person checks.'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
@@ -7339,6 +7885,12 @@ rules:
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else 200)
     reason: 'Over 200 ft, within the row, in a building with an atrium (stated or not ruled out): 1017.3.2.3 holds the part
       of the travel within the atrium (off the level of exit discharge) to 200 ft, not measured; a person checks.'
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -7428,6 +7980,13 @@ rules:
     quote: e. Group R-3 and R-4 buildings equipped throughout with an automatic sprinkler system in accordance with Section
       903.3.1.3. See Section 903.2.8 for occupancies where auto- matic sprinkler systems are permitted in accordance with
       Section 903.3.1.3.
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: A-1
@@ -7511,6 +8070,8 @@ rules:
       sprinklered_903_3_1_2: true
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -7528,6 +8089,8 @@ rules:
       sprinklered_903_3_1_2: true
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -7545,6 +8108,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -7563,6 +8128,7 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -7600,6 +8166,7 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
     parts:
       story:
       - id: p1
@@ -7619,6 +8186,7 @@ rules:
       egress_balcony_increase_taken: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
     parts:
       story:
       - id: p1
@@ -7656,6 +8224,7 @@ rules:
       special_egress_spaces: false
       building_has_atrium: false
       egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
     parts:
       story:
       - id: p1
@@ -7675,6 +8244,7 @@ rules:
       special_egress_spaces: false
       building_has_atrium: false
       egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
     parts:
       story:
       - id: p1
@@ -7692,6 +8262,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -7709,6 +8281,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -7728,7 +8302,8 @@ rules:
     Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
     stated or not ruled out, needs review; Groups R-3 and R-4 with an NFPA 13D system (903.3.1.3: note e''s 903.2.8) are held
     to 1006.2.2.6''s 125 ft and 75 ft; in Group A, any travel needs review while fixed seating isn''t ruled out (1030.7);
-    over 200 ft with an atrium stated or not ruled out needs review (1017.3.2.3).'
+    over 200 ft with an atrium stated or not ruled out needs review (1017.3.2.3). Review round 2 (2026-11-23): fixed seating
+    stated or not ruled out, in any group, needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_i1
@@ -7757,6 +8332,12 @@ rules:
   - when: building_has_atrium and egress_travel_distance > 200 and egress_travel_distance <= 250
     reason: 'Over 200 ft, within the row, in a building with an atrium (stated or not ruled out): 1017.3.2.3 holds the part
       of the travel within the atrium (off the level of exit discharge) to 200 ft, not measured; a person checks.'
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -7815,6 +8396,13 @@ rules:
     quote: 1017.3.2.3 Exit access travel distance at other than the level of exit discharge. Where the path of egress travel
       is not at the level of exit discharge from the atrium, that portion of the total permitted exit access travel distance
       that occurs within the atrium shall be not greater than 200 feet (60 960 mm).
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: I-1
@@ -7822,6 +8410,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -7876,6 +8466,8 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -7893,6 +8485,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -7910,6 +8504,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -7924,7 +8520,8 @@ rules:
     1017.2.1''s balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections
     note a lists are general.bc_table_1017_2_note_a. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
     a space note a sends elsewhere (special_egress_spaces), stated or not ruled out, needs review; over 200 ft with an atrium
-    stated or not ruled out needs review (1017.3.2.3).'
+    stated or not ruled out needs review (1017.3.2.3). Review round 2 (2026-11-23): fixed seating stated or not ruled out,
+    in any group, needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_b
@@ -7947,6 +8544,12 @@ rules:
       else 200)
     reason: 'Over 200 ft, within the row, in a building with an atrium (stated or not ruled out): 1017.3.2.3 holds the part
       of the travel within the atrium (off the level of exit discharge) to 200 ft, not measured; a person checks.'
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -7997,6 +8600,13 @@ rules:
     quote: 1017.3.2.3 Exit access travel distance at other than the level of exit discharge. Where the path of egress travel
       is not at the level of exit discharge from the atrium, that portion of the total permitted exit access travel distance
       that occurs within the atrium shall be not greater than 200 feet (60 960 mm).
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: B
@@ -8093,11 +8703,32 @@ rules:
     expect: needs_review
     note: Whether the building holds a space note a sends elsewhere isn't stated.
   - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      assembly_fixed_seating: true
+      special_egress_spaces: false
+      building_has_atrium: false
+      egress_balcony_increase_taken: false
+    parts:
+      story:
+      - id: p1
+        name: Office floor with a lecture hall
+        measures:
+          egress_travel_distance: 90
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A Group B building with a fixed-seat lecture hall (303.1.1): 1030.7 measures along the aisles (review round 2).'
+  - given:
       occupancy_group: M
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8115,6 +8746,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -8126,7 +8759,8 @@ rules:
     increase is a person''s check where taken or not stated and the distance is within it; the other sections note a lists
     are general.bc_table_1017_2_note_a. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a
     space note a sends elsewhere (special_egress_spaces), stated or not ruled out, needs review; over 200 ft with an atrium
-    stated or not ruled out needs review (1017.3.2.3).'
+    stated or not ruled out needs review (1017.3.2.3). Review round 2 (2026-11-23): fixed seating stated or not ruled out,
+    in any group, needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_f2_s2_u
@@ -8152,6 +8786,12 @@ rules:
   - when: occupancy_group == "S-2" and egress_travel_distance > (400 if sprinklered_903_3_1_1 else 300)
     reason: 'Group S-2 over the row''s distance: in an open parking garage 1017.3 exception 1 measures to the closest riser
       of an exit access stairway or slope of a ramp, not marked; a person checks.'
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -8209,6 +8849,13 @@ rules:
     - 23
     quote: 'Exceptions: 1. In open parking garages, exit access travel distance is permitted to be measured to the closest
       riser of an exit access stair- way or the closest slope of an exit access ramp.'
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: F-2
@@ -8310,6 +8957,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8327,6 +8976,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -8339,7 +8990,7 @@ rules:
     a lists are general.bc_table_1017_2_note_a. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
     a space note a sends elsewhere (special_egress_spaces), stated or not ruled out, needs review; over 200 ft with an atrium
     stated or not ruled out needs review (1017.3.2.3); Group S-2 over its distance needs review (1017.3 exception 1, open
-    parking garages).'
+    parking garages). Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_h1
@@ -8357,6 +9008,12 @@ rules:
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
       200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -8399,6 +9056,13 @@ rules:
       Section 1006.3.4: For buildings with one exit. Section 1017.2.2: For increased distance limitation in Groups F-1 and
       S-1. Section 1017.2.3: For increased distance limitation in Group H-5. Section 1030.7: For increased limitation in assembly
       seating. Section 3103.4: For temporary structures. Section 3104.9: For pedestrian walkways.'
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: H-1
@@ -8406,6 +9070,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8461,6 +9127,8 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8478,6 +9146,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8495,6 +9165,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -8506,7 +9178,8 @@ rules:
     shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
     person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
     Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review.'
+    stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
+    needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_h2
@@ -8524,6 +9197,12 @@ rules:
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
       200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -8566,6 +9245,13 @@ rules:
       Section 1006.3.4: For buildings with one exit. Section 1017.2.2: For increased distance limitation in Groups F-1 and
       S-1. Section 1017.2.3: For increased distance limitation in Group H-5. Section 1030.7: For increased limitation in assembly
       seating. Section 3103.4: For temporary structures. Section 3104.9: For pedestrian walkways.'
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: H-2
@@ -8573,6 +9259,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8628,6 +9316,8 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8645,6 +9335,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8662,6 +9354,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -8673,7 +9367,8 @@ rules:
     shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
     person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
     Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review.'
+    stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
+    needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_h3
@@ -8691,6 +9386,12 @@ rules:
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
       200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -8733,6 +9434,13 @@ rules:
       Section 1006.3.4: For buildings with one exit. Section 1017.2.2: For increased distance limitation in Groups F-1 and
       S-1. Section 1017.2.3: For increased distance limitation in Group H-5. Section 1030.7: For increased limitation in assembly
       seating. Section 3103.4: For temporary structures. Section 3104.9: For pedestrian walkways.'
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: H-3
@@ -8740,6 +9448,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8795,6 +9505,8 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8812,6 +9524,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8829,6 +9543,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -8840,7 +9556,8 @@ rules:
     shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
     person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
     Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review.'
+    stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
+    needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_h4
@@ -8858,6 +9575,12 @@ rules:
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
       200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -8900,6 +9623,13 @@ rules:
       Section 1006.3.4: For buildings with one exit. Section 1017.2.2: For increased distance limitation in Groups F-1 and
       S-1. Section 1017.2.3: For increased distance limitation in Group H-5. Section 1030.7: For increased limitation in assembly
       seating. Section 3103.4: For temporary structures. Section 3104.9: For pedestrian walkways.'
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: H-4
@@ -8907,6 +9637,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8962,6 +9694,8 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8979,6 +9713,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -8996,6 +9732,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -9007,7 +9745,8 @@ rules:
     shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
     person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
     Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review.'
+    stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
+    needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_h5
@@ -9028,6 +9767,12 @@ rules:
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
       200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -9077,6 +9822,13 @@ rules:
       Section 1006.3.4: For buildings with one exit. Section 1017.2.2: For increased distance limitation in Groups F-1 and
       S-1. Section 1017.2.3: For increased distance limitation in Group H-5. Section 1030.7: For increased limitation in assembly
       seating. Section 3103.4: For temporary structures. Section 3104.9: For pedestrian walkways.'
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: H-5
@@ -9084,6 +9836,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -9140,6 +9894,7 @@ rules:
       egress_balcony_increase_taken: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
     parts:
       story:
       - id: p1
@@ -9156,6 +9911,8 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -9173,6 +9930,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -9190,6 +9949,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -9201,7 +9962,8 @@ rules:
     balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
     a lists are general.bc_table_1017_2_note_a. Over 200 ft, 1017.2.3''s 300 ft for fabrication areas is a person''s check.
     Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review.'
+    stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
+    needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_i2_i3
@@ -9225,6 +9987,12 @@ rules:
   - when: occupancy_group == "I-3" and sprinklered_903_3_1_1 and egress_travel_distance <= 200
     reason: 'Group I-3 within 200 ft: 408.6.1 (note a) also limits travel to a door in a smoke barrier (150 ft from a room
       door, 200 ft from any point), and smoke barriers aren''t drawn: a person checks; the I-3 row never passes.'
+  - when: assembly_fixed_seating
+    reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
+      small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
+      1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
+      see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
+      exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -9281,6 +10049,13 @@ rules:
     - 49
     quote: '[BE] 407.4.2 Distance of travel. The distance of travel between any point in a Group I-2 occupancy sleeping room,
       not located in a care suite, and an exit access door in that room shall be not greater than 50 feet (15 240 mm).'
+  - file: gov.ny.building.2025.pdf
+    page: 354
+    lines:
+    - 50
+    - 51
+    quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+      for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
   examples:
   - given:
       occupancy_group: I-2
@@ -9288,6 +10063,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -9385,6 +10162,8 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -9403,6 +10182,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story:
       - id: p1
@@ -9421,6 +10202,8 @@ rules:
       sprinklered_903_3_1_2: false
       special_egress_spaces: false
       building_has_atrium: false
+      assembly_fixed_seating: false
+      egress_balcony_increase_taken: false
     parts:
       story: []
     rows:
@@ -9434,7 +10217,8 @@ rules:
     aren''t brought in: general.bc_table_1017_2_note_a shows for a person to check them. Hand-drafted in a Claude Code session
     (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces), stated or not ruled
     out, needs review; Group I-2 holds a sleeping room to 407.4.2''s 50 ft (over it, a care suite''s 100 ft may apply: review),
-    and Group I-3 never passes (408.6.1''s smoke-barrier distances aren''t measured).'
+    and Group I-3 never passes (408.6.1''s smoke-barrier distances aren''t measured). Review round 2 (2026-11-23): fixed seating
+    stated or not ruled out, in any group, needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_note_a
@@ -9677,7 +10461,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Fixed seating's common path (BCNYS 1030.8)
-  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] and assembly_fixed_seating
+  applies_when: assembly_fixed_seating
   sources:
   - file: gov.ny.building.2025.pdf
     page: 355
@@ -9691,22 +10475,21 @@ rules:
       egress travel shall not exceed 50 feet (15 240 mm).'
   examples:
   - given:
-      occupancy_group: A-1
       assembly_fixed_seating: true
     expect: needs_review
-    note: 'Fixed seating: the common path from any seat (30 ft; 75 ft under 50 occupants; 50 ft smoke-protected or open-air)
-      is a person''s check (the seats aren''t drawn).'
+    note: 'Fixed seating in any group (an E school''s auditorium, a B lecture hall): the common path from any seat (30 ft;
+      75 ft under 50 occupants; 50 ft smoke-protected or open-air) is a person''s check.'
   - given: {}
     expect: needs_review
     note: 'Not stated: a person checks.'
   - given:
-      occupancy_group: A-1
       assembly_fixed_seating: false
     expect: not_applicable
-    note: 'The architect states the building has none: not applicable.'
+    note: 'No fixed seating (stated): not applicable.'
   notes: '1030.8 for an assembly space with fixed seating, whatever its exits: shown where fixed seating is stated or not
     ruled out; Table 1006.2.1''s A, E, M row needs review over 30 ft (75 ft under 50) then. Hand-drafted in a Claude Code
-    session (2026-11-23, review round 1).'
+    session (2026-11-23, review round 1). Review round 2 (2026-11-23): applies on the fact alone, whatever the group (1030.8:
+    any room or space used for assembly purposes having fixed seating).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1020_5_dead_end

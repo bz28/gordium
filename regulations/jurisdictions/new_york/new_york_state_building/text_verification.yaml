@@ -11,21 +11,22 @@ second_reading:
     for pp.54-344, a third and a fourth for the pieces brought in on 2026-11-22 (p.47's FLOOR AREA, GROSS and NET;
     1006.3.3, 1006.3.4 and their tables), a fifth for Table 1006.3.4(1) on 2026-11-23, a sixth for the 23 pieces
     brought in by review round 1 on 2026-11-23 (1006.2.2, 1018.4, 1030.8, 407.4.2 and the 13 definitions their italics
-    name), and a helper for the comparison words)
+    name), a seventh for 1030.7 and SMOKE-PROTECTED ASSEMBLY SEATING (review round 2, 2026-11-23), and a helper
+    for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
-    labeled by its id (48 pages, 159 boxes; p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, and 14 pages, 24
-    boxes as step_5; p.47''s two and pp.42, 55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted
-    text transcribed every line of every box from the images alone (tables row by row, raised characters written
-    as sealed marks); the transcript went through document_extraction/numbers.py: 181 pieces, 415 numbers, every
-    piece agrees. The tables were also read a third way, by position: each cell''s characters with their sizes and
-    x positions (pdfplumber, pp.315-317 and p.341), which shows each raised note letter (5.04-point beside 8.4-point
-    digits) the plain text runs into its cell; sources.yaml brought_in.misread puts each right by line, and both
-    readings agree with the cells so read. A third helper that saw only each piece''s transcribed text and its numbers''
-    values (and, for a table, the sentence that uses it) marked each number''s comparison from the whole sentence
-    (second_reading_comparisons); where it differs from the recorded words, a flag says which is right. The transcript,
-    the page images and the comparison files are kept in the code cache (second_reading/step_1_*), outside the repo,
-    since they hold the book''s words.'
+    labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
+    as step_5, and 3 pages, 3 boxes as step_7; p.47''s two and pp.42, 55, 316-317''s seven on 2026-11-22); helpers
+    that never saw the extracted text transcribed every line of every box from the images alone (tables row by row,
+    raised characters written as sealed marks); the transcript went through document_extraction/numbers.py: 183
+    pieces, 429 numbers, every piece agrees. The tables were also read a third way, by position: each cell''s characters
+    with their sizes and x positions (pdfplumber, pp.315-317 and p.341), which shows each raised note letter (5.04-point
+    beside 8.4-point digits) the plain text runs into its cell; sources.yaml brought_in.misread puts each right
+    by line, and both readings agree with the cells so read. A third helper that saw only each piece''s transcribed
+    text and its numbers'' values (and, for a table, the sentence that uses it) marked each number''s comparison
+    from the whole sentence (second_reading_comparisons); where it differs from the recorded words, a flag says
+    which is right. The transcript, the page images and the comparison files are kept in the code cache (second_reading/step_1_*),
+    outside the repo, since they hold the book''s words.'
 pieces:
   '202':
     piece_sha256: d517861fa9698a910e750045fb415f0e7138ffa3e3a1ef2fd689171fda2f98b3
@@ -968,6 +969,12 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:smoke_protected_assembly_seating:
+    piece_sha256: fb68075e4b9bd65132ea95a5b3147bbf7f2b766e7e38c63146f6a1ca096c0c3e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:solid:
     piece_sha256: 2e0d9d2c5eca10b9fc5e6e668fbaeaa1fb6e9d4729fdaf08859c017a55724a9c
     numbers:
@@ -2443,6 +2450,54 @@ pieces:
     - none
     - none
     - <
+    - none
+    - <=
+    - none
+  '1030.7':
+    piece_sha256: 0dedbb8deaa95cfacfefff8ad82fb14eb63468c3e6c595eb4bc7e45d398a2fc6
+    numbers:
+    - '1030.7'
+    - '1017'
+    - not greater than 400 foot
+    - 122 m
+    - not exceed 200 foot
+    - 60 mm
+    - 960 mm
+    - one
+    - not exceed 200 foot
+    - 60 mm
+    - 960 mm
+    - one
+    - not exceed 400 foot
+    - 122 m
+    second_reading: agrees
+    second_reading_numbers:
+    - '1030.7'
+    - '1017'
+    - not greater than 400 foot
+    - 122 m
+    - not exceed 200 foot
+    - 60 mm
+    - 960 mm
+    - one
+    - not exceed 200 foot
+    - 60 mm
+    - 960 mm
+    - one
+    - not exceed 400 foot
+    - 122 m
+    second_reading_comparisons:
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - none
     - none
     - <=
     - none
