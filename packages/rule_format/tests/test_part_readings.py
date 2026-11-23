@@ -203,8 +203,10 @@ def test_a_mixed_result_says_its_open_question_in_words_never_a_tag(maine):
     rules, allowed = maine
     rule = rules["general.nfpa_16_2_5_2_dead_end"]
     # neither reading complies (one fails, one can't be told): said so, never "complies if none"
-    assert parts.reading_words([{Q7: "with_door"}, {Q7: "without_door"}], [], [{Q7: "with_door"}, {Q7: "without_door"}])         == ("whether a door into a room with another way out ends a dead end is an open question (question 7): under "
-            "either reading it doesn't comply or can't be told (the door ends the dead end; the door doesn't end it)")
+    both = [{Q7: "with_door"}, {Q7: "without_door"}]
+    assert parts.reading_words(both, [], both) == (
+        "whether a door into a room with another way out ends a dead end is an open question (question 7): under "
+        "either reading it doesn't comply or can't be told (the door ends the dead end; the door doesn't end it)")
     # a tag the list doesn't have yet is still words
     assert parts.question_words(["some_new_question"]) == "“some new question” is an open question"
     assert "_" not in parts.reading_words([{"q_x": "a_b"}, {"q_x": "c"}], [{"q_x": "a_b"}], [{"q_x": "c"}])
