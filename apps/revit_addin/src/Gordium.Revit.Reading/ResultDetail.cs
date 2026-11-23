@@ -62,6 +62,14 @@ public sealed record ResultDetail(string Position, PanelStatus Status, string Ve
     /// <summary>The worker's row id (what its tick is kept by).</summary>
     public string Id { get; init; } = "";
 
+    /// <summary>The generic "What to do" step of a row in review with no advice of its own: the pane shows the fix the
+    /// row waits on in its place (<see cref="Fixes.Step"/>), when there is one.</summary>
+    public const string ResolveStep =
+        "Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.";
+
+    /// <summary>Whether a step is the generic one (<see cref="ResolveStep"/>).</summary>
+    public static bool IsGenericStep(DetailStep step) => step?.Words == ResolveStep;
+
     /// <summary>The detail as plain text, top to bottom (the snapshot tests' form, and what a screen reader reads).</summary>
     public string Text()
     {
@@ -157,7 +165,7 @@ public static class Details
             ListSection.ByHand when r.Verdict == Gordium.Worker.Verdict.NotChecked
                 => "Give what the check needs (the reason above says what), or check it by hand against the law's words below.",
             ListSection.ByHand => "Check it by hand against the law's words below: Gordium doesn't decide this one yet.",
-            _ => "Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.",
+            _ => ResultDetail.ResolveStep,
         }, DetailAction.None));
         var shown = elements.Count(e => e.InModel);
         if (shown > 0)
