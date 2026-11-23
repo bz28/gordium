@@ -301,7 +301,7 @@ public sealed class PaneTests
     public void Error_and_stale_are_in_plain_words()
     {
         Assert.Contains("nothing here passes", PaneWords.ErrorWords, StringComparison.Ordinal);
-        Assert.Equal("The model changed after this check (14:32)", PaneWords.StaleTitle(new DateTime(2026, 11, 22, 14, 32, 0)));
+        Assert.Equal("The model changed after this check (14:32)", PaneWords.StaleTitle(StaleReason.ModelChanged, new DateTime(2026, 11, 22, 14, 32, 0)));
         var view = Read("ResultsView.cs");
         var failed = Between(view, "    internal void Failed(string words)", "\n    }\n");
         Assert.Contains("ToolTip = words", failed, StringComparison.Ordinal);

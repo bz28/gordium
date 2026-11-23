@@ -127,6 +127,15 @@ internal static class Program
                     {
                         p.Show(title, when, rows, labels);
                         p.Stale();
+                        NoComplies(p.View, "11 stale");
+                    });
+                    // stale after What changed (its list has "now complies"): every glyph the clock, never green
+                    Step(make(theme, []), "12_stale_what_changed_house", 900, dark, p =>
+                    {
+                        p.Show(title, when, rows, labels);
+                        p.Show(title, when.AddMinutes(9), ResultRows.Build(houseAfter, "New Construction", [], null), afterLabels);
+                        p.Stale();
+                        NoComplies(p.View, "12 stale after What changed");
                     });
                 }
             }
@@ -149,6 +158,17 @@ internal static class Program
                 draft.Choose(f.Mark, pick);
         }
         return draft;
+    }
+
+    /// <summary>A stale pane shows no complies colour anywhere: no shape filled or stroked in status.pass.</summary>
+    private static void NoComplies(FrameworkElement view, string what)
+    {
+        Settle(view);
+        var pass = ((SolidColorBrush)view.FindResource(PanelTokens.StatusPass)).Color;
+        bool Green(Brush? b) => b is SolidColorBrush c && c.Color == pass;
+        var green = FindAll<System.Windows.Shapes.Shape>(view).Count(s => s.IsVisible && (Green(s.Fill) || Green(s.Stroke)))
+                    + FindAll<TextBlock>(view).Count(t => t.IsVisible && Green(t.Foreground));
+        Check(green == 0, $"{what}: nothing in a complies colour ({green})");
     }
 
     internal static int Failures;
