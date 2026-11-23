@@ -34,12 +34,20 @@ district: R-3a
 rules:
 
   - id: R-3a.use
-    kind: flag
+    kind: rule
     topic: uses
-    title: "Uses by special permit (chart p.2); every other listed use is permitted"
-    applies_when: >-
-      use in ["one_family_detached_zero_lot_line", "cemetery", "public_utility_structure", "school",
-      "neighborhood_commercial_facility", "hospital_or_sanitarium", "bed_and_breakfast_inn"]
+    title: "Permitted primary uses (chart p.2); special-permit uses need review"
+    check: >-
+      use in ["one_family_detached", "one_family_semi_detached", "one_family_attached", "two_family",
+      "multiple_family", "fraternity_sorority_group_house", "dormitory", "church", "public_park_or_playground",
+      "library_or_fire_station", "nursery_school_or_child_day_care", "adult_day_care_home", "nursing_home"]
+    review_when:
+      - when: >-
+          use in ["one_family_detached_zero_lot_line", "cemetery", "public_utility_structure", "school",
+          "neighborhood_commercial_facility", "hospital_or_sanitarium", "bed_and_breakfast_inn"]
+        reason: >-
+          Marked SP for R-3A on the zoning chart (p.2): a special permit from the Planning and Development
+          Board (§325-9B(1)).
     sources:
       - file: zoning_charts_2026-04.pdf
         page: 2
@@ -150,14 +158,17 @@ rules:
       - given: {use: one_family_detached_zero_lot_line}
         expect: needs_review
       - given: {use: multiple_family}
-        expect: not_applicable
+        expect: pass
         note: marked • (permitted)
       - given: {use: dormitory}
-        expect: not_applicable
+        expect: pass
         note: marked • for R-3A (R-3AA, the next column, is -)
       - given: {use: nursery_school_or_child_day_care}
-        expect: not_applicable
+        expect: pass
         note: marked • (a special permit only in R-2, CR-2 and R-U, §325-9B(1)(e))
+      - given: {use: retail_store_or_service_commercial}
+        expect: fail
+        note: a commercial use (chart p.4), not listed on the residential chart (p.2) for R-3A
     findings:
     - id: chart_marks
       question: The chart has no legend for its marks. We read • as permitted and - as not permitted; SP matches §325-9B(1)'s
