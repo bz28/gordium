@@ -391,7 +391,7 @@ public sealed class MakerClearOpeningsTests
         Assert.Contains("            clear = ClearPrefills.Head(filled.Count, failed);", check);
         // (PR 8: what to fill in shown from the read; the answer's run, with the read's clear words, when it arrives)
         // (the Setup form, 2026-11-22: nothing sent shows the form, saying why after the clear words)
-        Assert.Contains("SetupRun.Show(ui, doc, notice: clear + \"Nothing was checked: \"", check);
+        Assert.Contains("SetupRun.Show(ui, doc, notice: clear + SetupWords.NothingSent(", check);
         Assert.Contains("check.Read(prepared, added.Count, ask, clear);", check);
         Assert.Contains("Show(ui, doc, run, check.MarksAdded, check.Ask, check.Clear, check.ReadAt, stale: use == AnswerUse.ShowStale);", check);
         Assert.Contains("File.WriteAllText(file, clear + run.FullText + \"\\n\"", check);
