@@ -6,8 +6,8 @@ What an architect sees is the answer's `view` (the panel's rows, cards, groups, 
 with its reason). Over every committed golden answer (test_data/goldens/: zoning, every scenario, the deep-run
 sites, the stress lots), and over the egress answers of every interior house, as drawn and with its stairs left out
 (the goldens have no interior). Each wording is fixed where it is made (each_part.not_sent_words,
-rule_format.parts.reading_words, present's TAG); the few made in code another branch is changing are listed in
-NOT_YET, each with its reason, and only those."""
+rule_format.parts.reading_words, present.tag_pattern); the few made in code another branch is changing are listed
+in NOT_YET, each with its reason, and only those."""
 
 import json
 import re
@@ -129,20 +129,26 @@ def test_no_golden_answer_shows_an_architect_an_engineers_word():
 
 def test_an_adu_on_a_corner_lot_shows_no_engineers_word():
     """No golden has a detached ADU on a corner lot, whose primary front yard is a law question ("(325-28C#1)",
-    model_measurement's PRIMARY_QUESTION): a made-up one (test_adu_measure's corner lot), through check_site."""
+    model_measurement's PRIMARY_QUESTION). A made-up one where the readings split: test_adu_measure's 50 x 100 ft
+    corner lot (South St along y = 0, East St along x = 50), the house 0..12 x 30..60 (38 ft from East St), the ADU
+    14..24 x 70..85: behind the house from South St (not in that front yard), nearer East St than the house (26 ft:
+    in that one, yet clear of its 25 ft required yard). So which street is primary decides it: needs review, the
+    question in its reason, in plain words."""
     from design_checker import present
     from design_checker.check import check_site
     from model_measurement.places.ithaca_city.measure import PRIMARY_QUESTION
-    from test_adu_panel import ADU_FACTS, HOUSE
+    from test_adu_panel import ADU_FACTS
     from test_measure import RECT, box
     assert "(325-28C#1)" in PRIMARY_QUESTION and "(325-28C#1)" not in present._user_text(PRIMARY_QUESTION)
     corner = {"corner_lot": True, "street_line": [[[0, 0], [50, 0]], [[50, 0], [50, 100]]],
               "street_ids": ["South St", "East St"], "address_street_line": [[[0, 0], [50, 0]]], "adu_building": "adu"}
-    adu = box(30, 70, 45, 90, 0, 18, id="adu")
-    answer = check_site({"units": "ft", "lot": RECT, "buildings": [HOUSE, adu], "problems": []},
-                        {**ADU_FACTS, **corner})
-    # the question is asked (the measuring's own record); whatever of it reaches the panel is in plain words
+    buildings = [box(0, 30, 12, 60, id="house"), box(14, 70, 24, 85, 0, 18, id="adu")]
+    answer = check_site({"units": "ft", "lot": RECT, "buildings": buildings, "problems": []}, {**ADU_FACTS, **corner})
     assert "(325-28C#1)" in answer["measurements"]["adu_in_primary_front_yard"]["reason"]
+    row, = [i for i in answer["view"]["items"] if i["name"].startswith("Detached ADU: not in the primary front yard")]
+    assert row["status"] == present.REVIEW
+    assert row["reason"] == ("the readings give different values; which front yard is the primary front yard on a "
+                             "corner lot isn't settled yet: confirm with the zoning office")
     assert not problems(answer), "\n".join(problems(answer)[:20])
 
 
