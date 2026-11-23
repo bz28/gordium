@@ -29,6 +29,7 @@ its own arcs. Lengths in inches.
 """
 
 import heapq
+import itertools
 import math
 from dataclasses import dataclass, field
 
@@ -393,6 +394,7 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
 
         # the clear floor
         heap, kept = [], []
+        pushed = itertools.count()                  # equal bounds pop in the order pushed (never by address)
 
         def push(tri):
             reached = False
@@ -413,7 +415,7 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
             values = [value(p) for p in tri]
             if any(v is None for v in values):       # in a pocket: bounded through its cluster
                 return
-            heapq.heappush(heap, (-(max(values) + own_h(tri)), id(tri), tri, values))
+            heapq.heappush(heap, (-(max(values) + own_h(tri)), next(pushed), tri, values))
 
         nonlocal_near = []
         for tri in _triangles(floor, START):
