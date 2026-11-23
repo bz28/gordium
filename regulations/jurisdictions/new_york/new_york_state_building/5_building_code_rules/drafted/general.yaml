@@ -4706,8 +4706,8 @@ rules:
 - id: general.bc_1016_2_other_occupancies
   kind: flag
   topic: means_of_egress
-  title: Intervening spaces in other occupancies (BCNYS 1016.2)
-  applies_when: other_occupancy_present
+  title: Intervening spaces in a building of two or more groups (BCNYS 1016.2)
+  applies_when: occupancy_group == "mixed"
   sources:
   - file: gov.ny.building.2025.pdf
     page: 340
@@ -4727,16 +4727,241 @@ rules:
       where all of the following are met:'
   examples:
   - given:
-      other_occupancy_present: true
+      occupancy_group: mixed
     expect: needs_review
-    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
-      only, so the rows and allowances for other groups need a person. Item 3 (Group H) and item 6''s exceptions (dwelling-unit
-      kitchens, Group M stockrooms) are for them.'
+    note: 'A building of two or more groups: item 3 (Group H''s hazard) and which room is which occupancy aren''t marked;
+      a person checks.'
   - given:
-      other_occupancy_present: false
+      occupancy_group: R-2
     expect: not_applicable
-    note: 'The architect states it doesn''t apply: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-21).
+    note: 'One group, whose rule is drafted: not applicable.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-21). Narrowed 2026-11-23 to a building of two or more groups: one
+    group''s is general.bc_1016_2_intervening_spaces_other_groups (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1016_2_intervening_spaces_other_groups
+  kind: rule
+  topic: means_of_egress
+  title: Egress through intervening spaces, every group but I-4 (BCNYS 1016.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2", "H-3", "H-4",
+    "H-5", "I-1", "I-2", "I-3", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"]
+  check: space_egress_through_locked_room == 0 and space_egress_through_kitchen_storage == 0 and space_egress_sleeping_through_sleeping_or_toilet
+    == 0
+  review_when:
+  - when: space_egress_through_other_room > 0 and space_egress_through_locked_room == 0 and space_egress_through_kitchen_storage
+      == 0 and space_egress_sleeping_through_sleeping_or_toilet == 0
+    reason: 'Egress passes through an adjoining or intervening room: allowed only where the rooms are accessory to one another
+      and give a discernible path of egress travel to an exit (item 2): a person''s judgment.'
+  - when: space_egress_through_electrically_locked_lobby > 0 and space_egress_through_locked_room == 0 and space_egress_through_kitchen_storage
+      == 0 and space_egress_sleeping_through_sleeping_or_toilet == 0
+    reason: 'Egress passes through an elevator lobby whose exit access door is electrically locked: allowed by item 4''s exception
+      only for a door complying with 1010.2.14 (not brought in): a person checks the door.'
+  - when: space_egress_through_kitchen_storage > 0 and space_egress_through_locked_room == 0 and space_egress_sleeping_through_sleeping_or_toilet
+      == 0 and occupancy_group in ["I-1", "R-1", "R-2", "R-3", "R-4"]
+    reason: 'Through a kitchen in a group with dwelling or sleeping units: item 6''s exception 1 allows a kitchen area serving
+      adjoining rooms of the same dwelling unit or sleeping unit (which unit the kitchen is in isn''t marked), a person''s
+      check.'
+  - when: space_egress_through_kitchen_storage > 0 and space_egress_through_locked_room == 0 and space_egress_sleeping_through_sleeping_or_toilet
+      == 0 and occupancy_group == "M"
+    reason: 'Through a storage room in Group M: item 6''s exception 2 allows a stockroom meeting 2.1 to 2.4 (stock of the
+      retail area''s hazard, at most 50 percent of the exit access, not lockable, a 44-inch demarcated aisle), not measured:
+      a person''s check.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 340
+    lines:
+    - 54
+    - 56
+    quote: '4. An exit access shall not pass through a room that can be locked to prevent egress. Exception: An electrically
+      locked exit access door providing egress from an elevator lobby shall be permitted in accordance with Section 1010.2.14.'
+  - file: gov.ny.building.2025.pdf
+    page: 340
+    lines:
+    - 57
+    - 59
+    quote: 5. Means of egress from dwelling units or sleeping areas shall not lead through other sleeping areas, toilet rooms
+      or bathrooms. 6. Egress shall not pass through kitchens, storage rooms, closets or spaces used for similar purposes.
+  - file: gov.ny.building.2025.pdf
+    page: 340
+    lines:
+    - 48
+    - 50
+    quote: 2. In other than Group H occupancies, egress from a room or space is allowed to pass through adjoining or intervening
+      rooms or areas provided that such adjoining rooms or areas and the area served are accessory to one or the other and
+      provide a discernible path of egress travel to an exit.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 3
+    - 5
+    quote: 'Exceptions: 1. Means of egress are not prohibited through a kitchen area serving adjoining rooms constituting
+      part of the same dwelling unit or sleeping unit.'
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 6
+    - 12
+    quote: '2. Means of egress are not prohibited through stockrooms in Group M occupancies where all of the following are
+      met: 2.1. The stock is of the same hazard classification as that found in the main retail area. 2.2. Not more than 50
+      percent of the exit access is through the stockroom. 2.3. The stockroom is not subject to locking from the egress side.
+      2.4. There is a demarcated, minimum 44-inch-wide (1118 mm) aisle defined by full- or partial-height fixed walls or similar
+      construction that will maintain the required width and lead directly from the retail area to the exit without obstructions.'
+  examples:
+  - given:
+      occupancy_group: B
+    parts:
+      space:
+      - id: p1
+        name: Office through a corridor only
+        measures:
+          space_egress_through_locked_room: 0
+          space_egress_through_kitchen_storage: 0
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 0
+          space_egress_through_electrically_locked_lobby: 0
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Nothing crossed: complies.'
+  - given:
+      occupancy_group: B
+    parts:
+      space:
+      - id: p1
+        name: Office through a lockable room
+        measures:
+          space_egress_through_locked_room: 1
+          space_egress_through_kitchen_storage: 0
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 0
+          space_egress_through_electrically_locked_lobby: 0
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Item 4: an exit access never passes through a room that can be locked.'
+  - given:
+      occupancy_group: B
+    parts:
+      space:
+      - id: p1
+        name: Office through a storeroom
+        measures:
+          space_egress_through_locked_room: 0
+          space_egress_through_kitchen_storage: 1
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 0
+          space_egress_through_electrically_locked_lobby: 0
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Item 6: not through storage rooms (Group B has no exception).'
+  - given:
+      occupancy_group: R-2
+    parts:
+      space:
+      - id: p1
+        name: Bedroom through the unit's kitchen
+        measures:
+          space_egress_through_locked_room: 0
+          space_egress_through_kitchen_storage: 1
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 0
+          space_egress_through_electrically_locked_lobby: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Item 6 exception 1: a kitchen of the same dwelling unit may be crossed; a person checks.'
+  - given:
+      occupancy_group: M
+    parts:
+      space:
+      - id: p1
+        name: Sales floor through the stockroom
+        measures:
+          space_egress_through_locked_room: 0
+          space_egress_through_kitchen_storage: 1
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 0
+          space_egress_through_electrically_locked_lobby: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Item 6 exception 2: a Group M stockroom meeting 2.1 to 2.4 may be crossed; a person checks.'
+  - given:
+      occupancy_group: R-2
+    parts:
+      space:
+      - id: p1
+        name: Bedroom through another bedroom
+        measures:
+          space_egress_through_locked_room: 0
+          space_egress_through_kitchen_storage: 0
+          space_egress_sleeping_through_sleeping_or_toilet: 1
+          space_egress_through_other_room: 0
+          space_egress_through_electrically_locked_lobby: 0
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Item 5: egress from sleeping areas never through other sleeping areas, toilets or bathrooms.'
+  - given:
+      occupancy_group: A-3
+    parts:
+      space:
+      - id: p1
+        name: Meeting room through a lobby
+        measures:
+          space_egress_through_locked_room: 0
+          space_egress_through_kitchen_storage: 0
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 1
+          space_egress_through_electrically_locked_lobby: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Items 2 and 3: an intervening room accessory to the one served, with a discernible path: a person''s judgment.'
+  - given:
+      occupancy_group: I-4
+    parts:
+      space:
+      - id: p1
+        name: Classroom
+        measures:
+          space_egress_through_locked_room: 0
+          space_egress_through_kitchen_storage: 0
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 0
+          space_egress_through_electrically_locked_lobby: 0
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Group I-4 is general.bc_1016_2_intervening_spaces: not applicable.'
+  - given:
+      occupancy_group: B
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  notes: '1016.2 for every group but I-4 (general.bc_1016_2_intervening_spaces), the same check: items 4 (a lockable room),
+    5 (dwelling units and sleeping areas through other sleeping areas or bathrooms) and 6 (kitchens, storage rooms, closets)
+    measured from the path; items 1 to 3 (an enclosed elevator lobby; an intervening room accessory to the one served, or
+    in Group H of the same or lesser hazard) and item 4''s electrically locked lobby door are a person''s check. Item 6''s
+    exceptions only loosen it: a kitchen of the same dwelling or sleeping unit (groups with such units) and a Group M stockroom
+    meeting 2.1 to 2.4 need review where they would be the only thing failing. Hand-drafted in a Claude Code session (2026-11-23).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1016_2_1_multiple_tenants

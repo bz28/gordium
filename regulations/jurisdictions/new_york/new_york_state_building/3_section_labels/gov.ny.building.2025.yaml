@@ -2310,7 +2310,8 @@ labels:
       quote: 6. Egress shall not pass through kitchens, storage rooms, closets or spaces used for similar purposes.
     piece_sha256: 75ce5120ce02dba41247b79ce0300db00da2a96dfe6066836bd5c20e9e0df752
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Item 1 (enclosed elevator lobbies,
-      Section 3006, not brought in) is a person's check.
+      Section 3006, not brought in) is a person's check. Every group but I-4 is general.bc_1016_2_intervening_spaces_other_groups
+      (2026-11-23).
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1016.2.1:

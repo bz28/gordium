@@ -63,6 +63,8 @@ results:
   general.bc_table_1006_2_1_r2: fail
   # 1020.5 for every group but I-4: the corridor runs stair door to stair door, so it has no dead end (0 ft)
   general.bc_1020_5_dead_end_other_groups: pass
+  # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
+  general.bc_1016_2_intervening_spaces_other_groups: needs_review
   # the other rows: not this building's group
   general.bc_table_1017_2_i1: not_applicable
   general.bc_table_1017_2_b: not_applicable
@@ -86,7 +88,7 @@ results:
   general.bc_table_1006_2_1_u: not_applicable
   # the flags: a person's check, each its own line (other_occupancy_present is yes: Group R-2 is not I-4; the
   # balcony and atrium flags' facts aren't stated, so they show), but those narrowed 2026-11-23 to a building of two
-  # or more groups or to another group (not applicable: R-2 is one group, its rows drafted); 19 show
+  # or more groups or to another group (not applicable: R-2 is one group, its rows drafted); 18 show
   general.bc_308_5_classification: needs_review
   general.bc_308_5_1_group_e: needs_review
   general.bc_308_5_2_religious_worship: needs_review
@@ -102,7 +104,7 @@ results:
   general.bc_1007_1_2_three_or_more_exits: needs_review
   general.bc_1007_1_3_exit_access_stairways: needs_review
   general.bc_1007_1_3_1_three_or_more_stairways: needs_review
-  general.bc_1016_2_other_occupancies: needs_review
+  general.bc_1016_2_other_occupancies: not_applicable
   general.bc_1016_2_1_multiple_tenants: needs_review
   general.bc_table_1017_2_other_occupancies: not_applicable
   general.bc_table_1017_2_note_a: needs_review          # note a's other sections: always a person's check

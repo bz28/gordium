@@ -63,10 +63,10 @@ def test_a_rule_reading_a_figure_not_measured_yet_says_so(got):
 
 
 def test_each_flag_is_its_own_line_with_its_section(got):
-    """19 of the rulebook's 25 flags show (2026-11-23): those narrowed to a building of two or more groups, or to
+    """18 of the rulebook's 25 flags show (2026-11-23): those narrowed to a building of two or more groups, or to
     another group (F-1 and S-1's increase, H-5's, Group H's sprinkler system), are not applicable to a one-group R-2."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 19 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 18 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):

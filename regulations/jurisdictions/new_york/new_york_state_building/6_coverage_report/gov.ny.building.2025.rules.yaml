@@ -121,6 +121,7 @@ pieces:
     rules:
     - general.bc_1016_2_intervening_spaces
     - general.bc_1016_2_other_occupancies
+    - general.bc_1016_2_intervening_spaces_other_groups
   1016.2.1:
     label: flag
     heading: Egress through intervening spaces › Multiple tenants

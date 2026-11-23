@@ -1,6 +1,6 @@
 """New York's Building Code egress rules for every occupancy group (section group 1 of
 docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): each printed row of Table 1017.2 (p.341) and Table
-1006.2.1 (p.315), and 1020.5's exceptions (p.344), chart-matched: every group of every row passes at its limit and
+1006.2.1 (p.315), and 1020.5's exceptions (p.344), chart-matched (and 1016.2's intervening spaces, group 2a): every group of every row passes at its limit and
 fails just past it, in each column, the values typed here from the page (never read from the rules). A building of
 two or more groups, or one whose group isn't stated, never passes. Needs no code cache (the rules' quotes are
 checked word for word by `python -m rule_format` where the cache is)."""
@@ -194,13 +194,16 @@ def test_dead_ends_for_every_group_but_i4(ctx, rules):
 
 ROW_RULES = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()] + \
             [f"general.bc_table_1006_2_1_{v[5]}" for v in TABLE_1006_2_1.values()] + \
-            ["general.bc_1020_5_dead_end_other_groups"]
+            ["general.bc_1020_5_dead_end_other_groups", "general.bc_1016_2_intervening_spaces_other_groups"]
 
 
 def test_a_mixed_or_unstated_building_never_passes_a_row_and_its_flags_show(ctx, rules):
     kinds = {"story": {"egress_travel_distance": 5}, "space": {"space_is_exit": False, "space_exit_count": 3,
                                                                "space_occupant_load": 3, "space_common_path": 5},
              "corridor": {"corridor_dead_end_length": 5, "corridor_dead_end_least_width": 5}}
+    kinds["space"] |= {"space_egress_through_locked_room": 0, "space_egress_through_kitchen_storage": 0,
+                       "space_egress_sleeping_through_sleeping_or_toilet": 0, "space_egress_through_other_room": 0,
+                       "space_egress_through_electrically_locked_lobby": 0}
     for rid in ROW_RULES:
         r = rules[rid]
         assert _one(r, r["for_each"], kinds[r["for_each"]], {"occupancy_group": "mixed"} | NFPA13, ctx) == \
@@ -208,7 +211,7 @@ def test_a_mixed_or_unstated_building_never_passes_a_row_and_its_flags_show(ctx,
         assert _one(r, r["for_each"], kinds[r["for_each"]], NFPA13, ctx) == "needs_review", rid
     from rule_format.rulebook import outcome
     for rid in ("general.bc_table_1017_2_other_occupancies", "general.bc_table_1006_2_1_other_occupancies",
-                "general.bc_1020_5_other_occupancies"):
+                "general.bc_1020_5_other_occupancies", "general.bc_1016_2_other_occupancies"):
         assert outcome(rules[rid], {"occupancy_group": "mixed"}, ctx.allowed()) == "needs_review", rid
         assert outcome(rules[rid], {"occupancy_group": "R-2"}, ctx.allowed()) == "not_applicable", rid
         assert outcome(rules[rid], {}, ctx.allowed()) == "needs_review", rid
@@ -227,3 +230,26 @@ def test_an_occupancy_group_the_list_doesnt_hold_is_refused(ctx, rules):
     bad = dict(rules["general.bc_table_1017_2_b"], applies_when='occupancy_group in ["Group B"]')
     assert any("unknown occupancy_group 'Group B'" in p for p in _rule_problems(bad, "general", ctx))
     assert not any("occupancy_group" in p for p in _rule_problems(rules["general.bc_table_1017_2_b"], "general", ctx))
+
+
+def test_intervening_spaces_for_every_group_but_i4(ctx, rules):
+    """1016.2 (pp.340-341) for every group but I-4: a lockable room, a bathroom or another sleeping area, a kitchen
+    or storage room crossed fails; item 6's exceptions (a kitchen of the same dwelling or sleeping unit; a Group M
+    stockroom) and items 2 and 3 (an accessory intervening room) need review where they are all that fails."""
+    rule = rules["general.bc_1016_2_intervening_spaces_other_groups"]
+    clear = {"space_egress_through_locked_room": 0, "space_egress_through_kitchen_storage": 0,
+             "space_egress_sleeping_through_sleeping_or_toilet": 0, "space_egress_through_other_room": 0,
+             "space_egress_through_electrically_locked_lobby": 0}
+    kitchen = clear | {"space_egress_through_kitchen_storage": 1}
+    for g in ("A-2", "B", "E", "M", "R-2", "S-1"):
+        assert _one(rule, "space", clear, {"occupancy_group": g}, ctx) == "pass", g
+        assert _one(rule, "space", clear | {"space_egress_through_locked_room": 1}, {"occupancy_group": g}, ctx) == \
+            "fail", g
+        assert _one(rule, "space", clear | {"space_egress_through_other_room": 1}, {"occupancy_group": g}, ctx) == \
+            "needs_review", g
+        want = "needs_review" if g in ("M", "R-2") else "fail"
+        assert _one(rule, "space", kitchen, {"occupancy_group": g}, ctx) == want, g
+    assert _one(rule, "space", kitchen | {"space_egress_through_locked_room": 1}, {"occupancy_group": "M"}, ctx) == \
+        "fail"
+    assert _one(rule, "space", clear, {"occupancy_group": "I-4"}, ctx) == "not_applicable"
+    assert _one(rule, "space", clear, {"occupancy_group": "mixed"}, ctx) == "not_applicable"

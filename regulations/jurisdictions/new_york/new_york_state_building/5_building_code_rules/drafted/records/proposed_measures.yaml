@@ -81,7 +81,6 @@ other_occupancy_present:
   - general.bc_1006_3_4_1_mixed_occupancies
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
-  - general.bc_1016_2_other_occupancies
   - general.bc_table_1006_3_4_2__other_occupancies
 occupancy_group:
   meaning: 'The building''s one occupancy group (2025 BCNYS Chapter 3: A-1 to U), as the architect classifies it, or mixed
@@ -117,6 +116,8 @@ occupancy_group:
   - U
   - mixed
   needed_by:
+  - general.bc_1016_2_intervening_spaces_other_groups
+  - general.bc_1016_2_other_occupancies
   - general.bc_1017_2_2_f1_s1_increase
   - general.bc_1017_2_3_h5_increase
   - general.bc_1020_5_dead_end_other_groups
@@ -144,6 +145,7 @@ occupancy_group:
   - general.bc_table_1017_2_h5
   - general.bc_table_1017_2_i1
   - general.bc_table_1017_2_i2_i3
+  - general.bc_table_1017_2_note_d_group_h
   - general.bc_table_1017_2_other_occupancies
 assembly_fixed_seating:
   meaning: The building has rooms or spaces used for assembly purposes with fixed seating (2025 BCNYS Table 1006.2.1 note

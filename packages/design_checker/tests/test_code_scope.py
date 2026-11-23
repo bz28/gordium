@@ -192,7 +192,7 @@ def test_the_answer_carries_which_code_in_the_deciders_own_words():
 def test_a_building_code_flag_for_the_whole_building_is_its_own_needs_review_line():
     found = egress.laws(ITHACA)
     bcnys = next(law for law in found["laws"] if law["scope"] == code_scope.BUILDING)
-    flag = next(r for r in bcnys["rules"] if r["id"] == "general.bc_1016_2_other_occupancies")
+    flag = next(r for r in bcnys["rules"] if r["id"] == "general.bc_table_1006_3_4_2__other_occupancies")
     out = {}
     item = egress._flag_item(bcnys, flag, flag["id"], {"other_occupancy_present": True}, bcnys["kinds"], out)
     assert item["status"] == present.REVIEW and item["reason"].startswith("A person checks this")
