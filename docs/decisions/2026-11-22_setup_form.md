@@ -15,8 +15,9 @@ architects trying the add-in.\
    opens the same form instead of its text dialog. When nothing is missing, the check runs as before.
 2. **Project facts are a real form**: a dropdown where the answer is one of a known list (Zone: the districts the
    place has rulebooks for; Use: every City use by the chart's own name, the district's permitted ones first, a
-   special-permit one saying so, then the others "not listed for" the district, so the true use can always be stated (its use
-   rule then needs review); only the list's exact word counts as set; Ground from: its two words), Yes/No toggles, a number box for the stories, and
+   special-permit one saying so, then the others "not on the district's list of uses", so the true use can always be
+   stated (its use row then doesn't comply, as the rulebook's list decides; never a pass); the zone and use count as set
+   only word for word, as the checker reads them, the ground's words in any case, as the check reads them; Ground from: its two words), Yes/No toggles, a number box for the stories, and
    **Pick on plan** for the street edge (Revit's pick on Revit's thread, each edge said back and confirmed; the edge
    picked is kept in the form as "not saved yet" and written by Save with the other facts, in the same transaction). Each field shows the law
    it answers: the mark's own tooltip. The form lists **every mark Marks.cs binds to Project Information** (data, not a

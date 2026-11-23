@@ -105,7 +105,9 @@ public sealed class SetupTests
         var use = fields[Marks.Use.Guid];
         // the district's own first, then every other city use, said not listed there (the true use can always be stated)
         Assert.Equal(["one_family_detached", "two_family_detached", "day_care"], use.Choices.Select(c => c.Value));
-        Assert.Equal("Day care center (not listed for R-1b: its use rule needs review)", use.Choices[2].Label);
+        // R2 #2: what the checker decides for a use the chart doesn't list (its use row: does not comply)
+        Assert.Equal("Day care center (not on R-1b's list of uses: its use row won't comply)", use.Choices[2].Label);
+        Assert.DoesNotContain("needs review", use.Choices[2].Label, StringComparison.Ordinal);
         Assert.DoesNotContain("one_family_detached", use.Law, StringComparison.Ordinal);   // plain help, not Gordium's words
         Assert.Equal("Two-family dwelling, detached (by special permit (zoning chart p.2))", use.Choices[1].Label);
         Assert.Equal(FieldKind.YesNo, fields[Marks.LotSurveyed.Guid].Kind);
@@ -423,7 +425,7 @@ public sealed class SetupTests
         Assert.Null(use.Problem);
         Assert.True(use.IsSet);
         Assert.DoesNotContain(Marks.Use.Name, s.Needed);
-        Assert.Contains("not listed for R-1b", use.CurrentLabel, StringComparison.Ordinal);
+        Assert.Contains("not on R-1b's list of uses", use.CurrentLabel, StringComparison.Ordinal);
         var odd = Screen(Model(new() { [Marks.Use.Guid] = new(true, Text: "casino") })).Fields.Single(f => f.Mark == Marks.Use);
         Assert.Contains("isn't one of the City's uses", odd.Problem, StringComparison.Ordinal);
     }
@@ -499,6 +501,43 @@ public sealed class SetupTests
         var draft = new SetupDraft();
         draft.Choose(Marks.Stories, "3");
         Assert.Equal([new MarkValue(true, 3)], draft.Writes(Screen(Model(), draft).Fields).Writes.Select(w => w.Value));
+    }
+
+    // ---- review round 2 -------------------------------------------------------------------------------------------
+
+    /// <summary>R2 #1: the form calls a fact set exactly when the check reads it: the ground's words in any case (as
+    /// ProjectFacts.Read sends grade_from), the zone and use word for word.</summary>
+    [Fact]
+    public void The_form_and_the_check_read_each_word_alike()
+    {
+        var project = new Dictionary<Guid, MarkValue>(AllStated()) { [Marks.GroundFrom.Guid] = new(true, Text: "spot grades") };
+        var model = Model(project);
+        var s = Screen(model);
+        Assert.Null(s.Fields.Single(f => f.Mark == Marks.GroundFrom).Problem);
+        Assert.DoesNotContain(Marks.GroundFrom.Name, s.Needed);
+        var read = ProjectFacts.Read(model);
+        Assert.Equal("spot", read.Facts["grade_from"]!.GetValue<string>());
+        Assert.DoesNotContain(read.Missing, w => w.StartsWith(Marks.GroundFrom.Name, StringComparison.Ordinal));
+        // a word the check doesn't read: a problem in the form and missing in the check, both
+        project[Marks.GroundFrom.Guid] = new(true, Text: "Toposolid");
+        Assert.NotNull(Screen(Model(project)).Fields.Single(f => f.Mark == Marks.GroundFrom).Problem);
+        Assert.Contains(ProjectFacts.Read(Model(project)).Missing, w => w.StartsWith(Marks.GroundFrom.Name, StringComparison.Ordinal));
+        Assert.Equal([Marks.Zone, Marks.Use], SetupFacts.ReadExactly);
+    }
+
+    /// <summary>R2 #3: Check project knows the place's districts and uses before its gate decides, whatever the form
+    /// was opened before (a stated zone or use is always checked against them).</summary>
+    [Fact]
+    public void The_gate_decides_with_the_places_options()
+    {
+        var check = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckProject.cs"));
+        var options = check.IndexOf("SetupRun.Options(check.Worker, log);", StringComparison.Ordinal);
+        Assert.True(options > 0 && options < check.IndexOf("SetupRun.Needs(doc)", StringComparison.Ordinal));
+        var flow = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "SetupFlow.cs"));
+        Assert.Contains("if (asked.Wait(OptionsWait))\n                _options = asked.Result;", flow, StringComparison.Ordinal);
+        // with the options known, a zone in another case is caught by the gate
+        var s = Screen(Model(new(AllStated()) { [Marks.Zone.Guid] = new(true, Text: "r-1b") }));
+        Assert.Contains(Marks.Zone.Name, s.Needed);
     }
 
     /// <summary>R1 #8: a stories count under 1 left out says so, never "not one of Gordium's words".</summary>

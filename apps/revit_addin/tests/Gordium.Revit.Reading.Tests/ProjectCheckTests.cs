@@ -208,12 +208,14 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         var before = all.Items.ToDictionary(i => i.Id);
         Assert.DoesNotContain(result.Items, i => i.Status == Verdict.Complies
                                                  && !(before.TryGetValue(i.Id, out var b) && b.Status == Verdict.Complies));
-        // the street edge's kept edge no longer on the lot: left out too, never sent
+        // R2 #4: a kept street edge no longer on the lot is set, not missing: anyway never leaves it out, it is asked
+        // for again (nothing sent, the re-pick's refusal), so a street edge is never dropped without asking
         Mark(house, Marks.Use, new(true, Text: "one_family_detached"));
         Mark(house, Marks.StreetEdge, new(true, Text: StreetEdges.Format([(new Xyz(0, 0, 0), new Xyz(30, 0, 0))])));
         var moved = await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client), anyway: true);
-        Assert.Null(moved.Request!.Facts["street_line"]);
-        Assert.Equal([Marks.StreetEdge], moved.NotStated);
+        Assert.Null(moved.Request);
+        Assert.Equal(StreetRefusal.NoLongerAnEdge, moved.StreetRefused);
+        Assert.True(StreetEdges.NeedsNewPick(moved));
     }
 
     /// <summary>The zone chooses the rules: without it nothing is sent, even anyway (the form then says why).</summary>

@@ -60,13 +60,12 @@ public static class ProjectCheck
         var interior = InteriorReader.Read(inside);
         var site = await SiteReader.DescribeAsync(outside, read.Facts, asker, cancel).ConfigureAwait(false);
         var match = read.StreetEdges is { } kept ? StreetEdges.Match(kept, site.Site["lot"] as JsonObject, outside.InternalToShared) : null;
-        if (match?.StreetLine is not { } street && !anyway)
-            return new ProjectPrepared(null, [match!.Why!], site.PhaseChecked, site.OptionsChecked, null, StreetRefused: match.Reason);
+        // a kept edge no longer on the lot is asked for again, anyway too: anyway leaves out only what isn't set
+        if (match is not null && match.StreetLine is null)
+            return new ProjectPrepared(null, [match.Why!], site.PhaseChecked, site.OptionsChecked, null, StreetRefused: match.Reason);
         var facts = read.Facts.DeepClone().AsObject();
         if (match?.StreetLine is { } line)
             facts["street_line"] = line;
-        else if (!notStated.Contains(Marks.StreetEdge))
-            notStated = [.. notStated, Marks.StreetEdge];            // anyway: a kept edge no longer on the lot, not sent
         return new ProjectPrepared(new ProjectRequest(site.Site, facts, interior.Interior), [], site.PhaseChecked,
                                    site.OptionsChecked, interior, match?.Words) { NotStated = notStated };
     }

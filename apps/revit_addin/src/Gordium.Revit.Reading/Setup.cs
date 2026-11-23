@@ -272,9 +272,10 @@ public static class SetupFacts
                     var choices = Choices(m, options, zone);
                     var kind = choices is { Count: > 0 } ? FieldKind.Choice : FieldKind.Text;
                     string? problem = null;
-                    // only the list's own word counts as set: the checker reads the words exactly, so a word typed in
-                    // another case is a problem (choose it from the list), and kept as typed so a Save writes it over
-                    if (text is not null && kind == FieldKind.Choice && !choices!.Any(c => c.Value == text))
+                    // set exactly when the check reads it (Reads: the zone and use exactly, as the checker matches them;
+                    // the ground's words in any case, as ProjectFacts.Read does); a zone or use in another case is a
+                    // problem (choose it from the list), kept as typed so a Save writes it over
+                    if (text is not null && kind == FieldKind.Choice && !Reads(m, text, choices!))
                         problem = choices!.Any(c => string.Equals(c.Value, text, StringComparison.OrdinalIgnoreCase))
                                   ? $"\"{text}\" is typed in another case: choose it from the list (Gordium reads the words exactly)"
                                   : m == Marks.Zone ? $"\"{text}\" isn't a district Gordium has rules for: choose one"
@@ -290,12 +291,22 @@ public static class SetupFacts
         return fields.OrderBy(f => Order(f.Group)).ToList();      // stable: Marks.All's order within each heading
     }
 
+    /// <summary>The marks the checker reads word for word (it chooses the rulebook by the zone and matches the use
+    /// against the chart's list exactly); every other listed word is read in any case (ProjectFacts.Read's ground).</summary>
+    public static IReadOnlyList<MarkDefinition> ReadExactly { get; } = [Marks.Zone, Marks.Use];
+
+    /// <summary>Whether the check reads <paramref name="text"/> as one of <paramref name="choices"/>: the one matcher the
+    /// form's "set" and its problems use, the same as the check's own reading of each mark.</summary>
+    public static bool Reads(MarkDefinition m, string text, IReadOnlyList<FieldChoice> choices) =>
+        choices.Any(c => string.Equals(c.Value, text.Trim(),
+                                       ReadExactly.Contains(m) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase));
+
     /// <summary>The form's own help for a mark whose tooltip is written in Gordium's words (the use: its tooltip names the
     /// stored words and the room uses too). The tooltip in Revit stays as it is.</summary>
     private static readonly Dictionary<Guid, string> Plain = new()
     {
         [Marks.Use.Guid] = "What the building is used for, as the City of Ithaca's zoning chart names it. A use the district's " +
-                           "chart doesn't list is still yours to state: its use rule then needs review (or doesn't comply), never a pass.",
+                           "chart doesn't list is still yours to state: its use row then won't comply (a special-permit use needs review), never a pass.",
     };
 
     /// <summary>A Text mark's allowed values, or null when Gordium lists none (typed). The zone: the districts with a
@@ -318,7 +329,7 @@ public static class SetupFacts
             var listed = district.Select(u => new FieldChoice(u.Id, u.Permitted == false && u.Note is { } note ? $"{u.Name} ({note})" : u.Name)).ToList();
             var ids = district.Select(u => u.Id).ToHashSet(StringComparer.Ordinal);
             return listed.Concat(options.Uses.Where(u => !ids.Contains(u.Id))
-                .Select(u => new FieldChoice(u.Id, $"{u.Name} (not listed for {zone}: its use rule needs review)"))).ToList();
+                .Select(u => new FieldChoice(u.Id, $"{u.Name} (not on {zone}'s list of uses: its use row won't comply)"))).ToList();
         }
         return Listed.TryGetValue(m.Guid, out var list) ? list() : null;
     }

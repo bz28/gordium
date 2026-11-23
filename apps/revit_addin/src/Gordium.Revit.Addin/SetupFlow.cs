@@ -94,6 +94,31 @@ internal static class SetupRun
         }, refused: () => _reading = false);
     }
 
+    /// <summary>The place's districts and uses before Check project's gate decides (Revit's thread: the worker being
+    /// started is waited for, at most <see cref="OptionsWait"/>), so the gate checks a stated zone or use against them
+    /// whether or not the form was opened before. A worker that can't answer is logged; the check then goes on and its
+    /// own answer says what is wrong (an unknown zone is refused by the checker, an unknown use needs review).</summary>
+    internal static void Options(Task<WorkerClient> worker, Dictionary<string, object?> log)
+    {
+        if (_options is not null)
+            return;
+        try
+        {
+            var asked = Task.Run(async () => await (await worker.ConfigureAwait(false)).OptionsAsync(ProjectFacts.Jurisdiction).ConfigureAwait(false));
+            if (asked.Wait(OptionsWait))
+                _options = asked.Result;
+            else
+                log["setup_options"] = $"not known after {OptionsWait.TotalSeconds:0} s: the zone and use are checked by the checker";
+        }
+        catch (AggregateException e)
+        {
+            log["setup_options"] = $"{e.GetBaseException().GetType().Name}: {e.GetBaseException().Message}";
+        }
+    }
+
+    /// <summary>How long Check project waits for the place's options (the worker's start included).</summary>
+    private static readonly TimeSpan OptionsWait = TimeSpan.FromSeconds(30);
+
     /// <summary>The place's districts and uses, asked of the worker once (off Revit's thread); until they come the
     /// zone and use are typed fields. A worker that can't answer leaves them typed, and says so in the log.</summary>
     private static void AskOptions()

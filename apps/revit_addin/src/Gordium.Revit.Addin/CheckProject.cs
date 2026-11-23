@@ -95,6 +95,14 @@ public sealed class CheckProjectCommand : IExternalCommand
             bool Active() => ui.ActiveUIDocument?.Document.Equals(doc) == true;
             // the Setup form (docs/decisions/2026-11-22_setup_form.md): a fact the check needs missing, and the form
             // shows instead of a check (unless the architect chose Check now anyway for exactly these): nothing sent
+            // the place's districts and uses known before the gate decides (a stated zone or use is checked against
+            // them whatever the form was opened before): the worker being started is waited for here, as the read does
+            if (!check.Anyway)
+            {
+                var asked = Stopwatch.GetTimestamp();
+                SetupRun.Options(check.Worker, log);
+                log["setup_options_s"] = Stopwatch.GetElapsedTime(asked).TotalSeconds;
+            }
             var (setup, step) = check.Anyway ? (null, SetupStep.SendAnyway) : SetupRun.Needs(doc);
             // sent anyway: the architect's Check now anyway, or a check whose missing facts were already checked anyway
             var anyway = step == SetupStep.SendAnyway;
@@ -136,7 +144,7 @@ public sealed class CheckProjectCommand : IExternalCommand
                 // (not read again once cancelled during that pick: Send then sends nothing)
                 if (ask == StreetAsk.Pick && Active() && check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log))
                     && CheckRun.Flow.IsCurrent(check.Ticket))
-                    prepared = ReadModel(doc, ui.Application, log, check.Worker);
+                    prepared = ReadModel(doc, ui.Application, log, check.Worker, anyway);
             }
             check.Read(prepared, added.Count, ask, clear);
             if (prepared.Request is not { } request)
