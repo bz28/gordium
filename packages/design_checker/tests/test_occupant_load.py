@@ -428,3 +428,22 @@ def test_a_storeroom_with_no_function_is_never_a_room_of_no_one():
     parts = measure(desc)["parts"]
     occupant_load.apply(parts, desc, FACTORS, {"occupant_load_increased": False})
     assert "space_occupant_load" not in _space(parts, "k")["measures"]
+
+
+def test_an_exits_reason_never_says_no_rule_asks_for_its_load(apartment, monkeypatch):
+    """Review of group 3, round 2 (P3, 2026-11-24): an exit's reason once said 'the rules for the rooms exits serve
+    ask nothing of it', yet Group I-4's 1006.2.1 reads an exit enclosure's occupant load (it has no space_is_exit
+    guard: group 1's rule): on the apartment taken as I-4, sprinklered, each stair's row needs review and its reason
+    says only what is true."""
+    routes = _routes(apartment)
+    monkeypatch.setattr(egress, "measure_routes", lambda interior: copy.deepcopy(routes))
+    desc = copy.deepcopy(apartment)
+    desc["building"] = {"occupancy_groups": ["I-4"], "sprinkler_system": "nfpa_13"}
+    got = egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), desc,
+                       {"use": "multiple_family", "dwelling_units": 4}, {"use": set()})
+    stairs = {"L1SW", "L1SE", "L2SW", "L2SE"}
+    rows = [i for i in got["items"] if i["rule"] == "general.bc_1006_2_1_two_exits" and i.get("id") in stairs]
+    if not rows:                                  # items name their part by name, not id
+        rows = [i for i in got["items"] if i["rule"] == "general.bc_1006_2_1_two_exits" and "Stair" in i["reason"]]
+    assert rows and all(i["status"] != "pass" for i in rows)
+    assert all("ask nothing" not in i["reason"] and "it is itself an exit" in i["reason"] for i in rows)

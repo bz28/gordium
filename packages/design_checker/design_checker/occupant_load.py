@@ -46,7 +46,7 @@ STORY_OPEN = "a room on the story has no occupant load worked out ({names}), so 
 EXIT_FUNCTION = ("{name} is itself an exit (a door into it is marked an exit enclosure or passageway), yet states "
                  "the function {f!r}: an exit holds no occupant load of its own, so which it is isn't known")
 IS_EXIT = ("it is itself an exit (an exit stair's enclosure, an exit passageway): it holds no occupant load of its own, "
-           "and the rules for the rooms exits serve ask nothing of it")
+           "so a rule that reads one for it is a person's check")
 NO_LOAD = ("a {use} with no function stated holds no occupant load of its own (202 FLOOR AREA, NET leaves closets and "
            "toilet rooms out); if people use it, state its function (the room mark Gordium: Function)")
 STORY_NONE = "no room on the story holds an occupant load of its own (its spaces are exits, closets or toilets)"
