@@ -310,7 +310,7 @@ def test_an_occupant_load_just_over_500_never_passes_with_two_exits(ctx, rules):
              "egress_travel_distance": 100, "story_rooms_exit_directly_outside": False}
     assert _rows(rules["general.bc_1006_3_3_story_exits"], "story", story, i4, ctx) == ["fail"]
     assert _rows(rules["general.bc_1006_3_3_story_exits"], "story", story | {"story_occupant_load": 500}, i4, ctx) == ["pass"]
-    space = {"space_exit_count": 2, "space_occupant_load": 500.5}
+    space = {"space_is_exit": False, "space_exit_count": 2, "space_occupant_load": 500.5}
     assert _rows(rules["general.bc_1006_2_1_1_three_or_more_exits"], "space", space, i4, ctx) == ["fail"]
     three = {"space_exit_count": 3, "space_occupant_load": 500.5, "space_exit_remoteness_ratio": 0.2}
     assert _rows(rules["general.bc_1007_1_2_space_three_or_more"], "space", three, i4, ctx) == ["fail"]
