@@ -399,7 +399,7 @@ TABLE_1006_3_4_2 = [
     (A + ["E", "M", "U"], FIRST, 49, 75, 75), (["B", "F-1", "F-2"], FIRST, 49, 75, 100),
     (["H-2", "H-3"], FIRST, 3, 25, 25), (["H-4", "H-5", "I-1", "I-2", "I-3", "R-1"], FIRST, 10, 75, 75),
     (["S-1"], FIRST, 29, 75, 100), (["M"], SECOND, 29, 75, 75), (["B", "F-1", "F-2", "S-1"], SECOND, 29, 75, 100)]
-STORY_FACTS = {"emergency_escape_openings_1031": True, "r2_sleeping_units": False}
+STORY_FACTS = {"emergency_escape_openings_1031": True, "r2_sleeping_units": False} | STATED
 
 
 def _story_rule(rules, g):
@@ -418,16 +418,28 @@ def test_table_1006_3_4_2_each_row_at_its_limits_and_just_past(ctx, rules):
         for g in groups:
             r = _story_rule(rules, g)
             given = {"occupancy_group": g} | STORY_FACTS
-            assert _one(r, "story", _story(where, most, with_), given | NFPA13, ctx) == "pass", (g, where)
+            ok = "needs_review" if g == "I-3" else "pass"      # 408.6.1's smoke-barrier distances aren't drawn
+            assert _one(r, "story", _story(where, most, with_), given | NFPA13, ctx) == ok, (g, where)
             assert _one(r, "story", _story(where, most + 0.5, 10), given | NFPA13, ctx) == "fail", (g, where)
             assert _one(r, "story", _story(where, 1, with_ + 0.01), given | NFPA13, ctx) == "fail", (g, where)
-            assert _one(r, "story", _story(where, most, without), given | NONE, ctx) == "pass", (g, where)
+            assert _one(r, "story", _story(where, most, without), given | NONE, ctx) == ok, (g, where)
             assert _one(r, "story", _story(where, most, without + 0.01), given | NONE, ctx) == "fail", (g, where)
     for g in ("A-2", "E", "U", "H-4", "I-1", "R-1"):                         # not in the second-story row
         r = _story_rule(rules, g)
         assert _one(r, "story", _story(SECOND, 1, 10), {"occupancy_group": g} | STORY_FACTS | NFPA13, ctx) == "fail", g
     third = _story(None, 1, 10)
     assert _one(_story_rule(rules, "B"), "story", third, {"occupancy_group": "B"} | NFPA13, ctx) == "fail"  # NP
+
+
+def test_group_i3_allowed_one_exit_by_its_travel_needs_review_and_a_measured_fail_still_fails(ctx, rules):
+    """408.6.1 (Table 1017.2 note a) also limits Group I-3's travel to a door in a smoke barrier, which isn't drawn:
+    the single-exit allowance never passes I-3 on the routes' travel (review round 5's walk, 2026-11-24)."""
+    h = rules["general.bc_table_1006_3_4_2__h_i_r"]
+    i3 = {"occupancy_group": "I-3"} | STORY_FACTS | NFPA13
+    assert _one(h, "story", _story(FIRST, 10, 75), i3, ctx) == "needs_review"
+    assert _one(h, "story", _story(FIRST, 10, 75.01), i3, ctx) == "fail"
+    assert _one(h, "story", _story(FIRST, 10, 300, exits=2), i3, ctx) == "pass"       # Table 1006.3.3's two exits
+    assert _one(h, "story", _story(FIRST, 10, 75), {"occupancy_group": "I-1"} | STORY_FACTS | NFPA13, ctx) == "pass"
 
 
 def test_two_exits_by_table_1006_3_3_and_r3_r4_with_one(ctx, rules):
@@ -438,7 +450,7 @@ def test_two_exits_by_table_1006_3_3_and_r3_r4_with_one(ctx, rules):
     assert _one(r, "story", _story(FIRST, 1000, 300, exits=3), b, ctx) == "pass"
     assert _one(r, "story", _story(FIRST, 1000.5, 300, exits=3), b, ctx) == "fail"          # more: four
     h = rules["general.bc_table_1006_3_4_2__h_i_r"]
-    assert _one(h, "story", _story(SECOND, 40, 200), {"occupancy_group": "R-3"} | NFPA13, ctx) == "pass"
+    assert _one(h, "story", _story(SECOND, 40, 200), {"occupancy_group": "R-3"} | NFPA13 | STATED, ctx) == "pass"
     assert _one(h, "story", _story(FIRST, 2, 10), {"occupancy_group": "H-1"} | NFPA13, ctx) == "fail"  # no H-1 row
 
 
@@ -446,7 +458,7 @@ def test_table_1006_3_4_1_group_r2_of_dwelling_units(ctx, rules):
     """p.317 lines 21-24: a basement or first to third story, 4 dwelling units, 125 ft, only with note a's system
     and escape openings; the fourth story and higher NP. Sleeping units are Table 1006.3.4(2)'s (note b)."""
     r = rules["general.bc_table_1006_3_4_1__r2_dwelling_units"]
-    du = {"occupancy_group": "R-2", "r2_sleeping_units": False, "emergency_escape_openings_1031": True}
+    du = {"occupancy_group": "R-2", "r2_sleeping_units": False, "emergency_escape_openings_1031": True} | STATED
     one = {"story_exit_count": 1, "story_occupant_load": 16, "egress_travel_distance": 125, FOURTH: False,
            "story_dwelling_units": 4, "story_rooms_exit_directly_outside": False}
     assert _one(r, "story", one, du | NFPA13, ctx) == "pass"
