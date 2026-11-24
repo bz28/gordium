@@ -5,7 +5,9 @@ run on the routes' stories and spaces, the occupant-load rules say they need a f
 table rows give real verdicts (2026-11-23), and every flag is its own needs-review line. Never a pass the hand-work
 doesn't give."""
 
+import copy
 import math
+import re
 import sys
 
 import pytest
@@ -21,9 +23,29 @@ VALUES = {"use": "multiple_family", "dwelling_units": 4}
 
 
 @pytest.fixture(scope="module")
-def got():
-    return egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), build.interior_of(), VALUES,
-                        {"use": set()})
+def routes():
+    """The building's routes, measured once (a room's function changes no geometry)."""
+    return egress.measure_routes(build.interior_of())
+
+
+def _check(desc, routes):
+    with pytest.MonkeyPatch.context() as m:
+        m.setattr(egress, "measure_routes", lambda interior: copy.deepcopy(routes))
+        return egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), desc, VALUES, {"use": set()})
+
+
+@pytest.fixture(scope="module")
+def got(routes):
+    return _check(build.interior_of(), routes)
+
+
+@pytest.fixture(scope="module")
+def before(routes):
+    """The same building with no room function stated: as it was before section group 3."""
+    desc = build.interior_of()
+    for r in desc["rooms"]:
+        r.pop("function", None)
+    return _check(desc, routes)
 
 
 @pytest.fixture(scope="module")
@@ -68,6 +90,27 @@ def test_the_occupant_loads_come_from_each_rooms_function(got):
             assert values == [] and "space_occupant_load" not in p["measures"]
     rows = [r for r in got["rows"] if r["rule"] == "general.bc_1006_2_1_1_three_or_more_exits"]
     assert len(rows) == 8 and {r["outcome"] for r in rows} == {"pass"}
+
+
+def test_before_and_after_the_functions_only_rules_reading_an_occupant_load_change_and_only_from_needs_review(
+        got, before):
+    """The apartment before section group 3 (no function stated: 1006.2.1.1 needs review, its reason naming the
+    missing Gordium: Function mark) and after (residential: it passes). Stating a function only settles a rule that
+    reads an occupant load and needed review for want of one; it never turns a verdict over."""
+    rule = "general.bc_1006_2_1_1_three_or_more_exits"
+    assert before["results"][rule] == present.REVIEW and got["results"][rule] == "pass"
+    rows = [i for i in before["items"] if i["rule"] == rule]
+    assert len(rows) == 8 and sum("Gordium: Function" in i["reason"] for i in rows) == 4     # each apartment's
+    assert [i["status"] for i in rows].count(present.REVIEW) == 4                            # the stairs are exits
+    rules = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+                                      / "5_building_code_rules/drafted/general.yaml")["rules"]}
+    changed = {k for k in got["results"] if got["results"][k] != before["results"].get(k)}
+    assert rule in changed
+    for k in changed:
+        r = rules[k.split(":")[0]] if k.split(":")[0] in rules else None
+        assert r is not None and re.search(r"(space|story)_occupant_load", str(
+            [r.get(f) for f in ("check", "review_when", "applies_when")])), k
+        assert before["results"][k] == present.REVIEW, (k, before["results"][k])
 
 
 def test_each_flag_is_its_own_line_with_its_section(got):
