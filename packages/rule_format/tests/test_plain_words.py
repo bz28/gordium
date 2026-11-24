@@ -95,3 +95,12 @@ def test_the_accessory_notes_say_whether_the_distances_apply_is_worked_out_not_t
             assert "distances are applied under every reading" not in (r.get("notes") or ""), r["id"]
             if r["id"].endswith(".accessory_buildings") and "325-25C#1" in (r.get("notes") or ""):
                 assert "whether the distances apply is worked out under every reading" in r["notes"], r["id"]
+
+
+def test_only_a_real_path_or_file_name_is_set_aside_not_any_word_with_a_slash():
+    """Round 2 of the review: a key joined by a slash or ending like a file name is still a key; a path from the
+    repo's top folders, a URL and a file name the repo holds are references, and a fraction or a ratio is neither."""
+    notes = ("front_yard/side_yard_smaller and R-1a.height/R-1b.height, see lot_area.md; but docs/research/"
+             "2026-10-29_private_garage.md, https://x.org/a_b, hand_check.yaml and uses.py are references; 1/2, ft/10.")
+    [got] = plain_words_problems({"rules": [{"id": "R-1a.x", "title": "T", "notes": notes}]})
+    assert got.endswith(": R-1a.height, R-1b.height, front_yard, lot_area, side_yard_smaller (say it in plain words)")
