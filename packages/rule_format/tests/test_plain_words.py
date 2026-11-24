@@ -25,7 +25,7 @@ def test_ithaca_and_maine_ask_for_plain_words(law, settings):
 
 @pytest.mark.parametrize("law", PLAIN)
 def test_every_rulebook_they_hold_is_in_plain_words(law):
-    """Each rulebook is held to it (the nearest settings file is its law's) and shows the architect no key: 310
+    """Each rulebook is held to it (the nearest settings file is its law's) and shows the architect no key: 331
     notes, reasons and examples' notes were reworded, a fact by the field the add-in shows, a rule by its title."""
     books = rulebook_paths(rules_folder(LAWS / law))
     assert books
@@ -49,7 +49,7 @@ def test_a_places_jurisdiction_yaml_turns_it_on_and_an_answer_key_is_never_held_
     (town / "jurisdiction.yaml").write_text("name: X Town\nplain_words: true\n", encoding="utf-8")
     assert _plain_words_law(book) and not _plain_words_law(key)
     [got] = plain_words_problems(load(book))
-    assert got.startswith("R-1.lot_area: ") and got.endswith("lot_area_hotel_motel, side_yards (say it in plain words)")
+    assert got.startswith("R-1.lot_area: ") and got.endswith("R-1.side_yards, lot_area_hotel_motel (say it in plain words)")
 
 
 def test_the_real_check_refuses_a_key_in_ithacas_rulebook(tmp_path, monkeypatch):
@@ -76,3 +76,22 @@ def test_a_place_can_only_ask_for_plain_words_or_leave_it_out(value):
     assert any("plain_words must be true" in p for p in settings_problems({**settings, "plain_words": value}))
     del settings["plain_words"]
     assert settings_problems(settings) == []
+
+
+def test_a_district_rules_id_is_a_key_even_with_no_underscore():
+    """Round 1 of the review: R-1a.height and RU.use are rule ids too; a section (§325-8A), a file name or a
+    sentence's end (in R-1a. The) is not."""
+    book = {"rules": [{"id": "R-1a.x", "title": "T", "notes": "When the bonus (R-1a.height) is used; RU.use fails "
+                       "it; CBD-50.use too. In R-1a. The rest is §325-8A, see README.md and general.yaml."}]}
+    [got] = plain_words_problems(book)
+    assert got.endswith(": CBD-50.use, R-1a.height, RU.use (say it in plain words)")
+
+
+def test_the_accessory_notes_say_whether_the_distances_apply_is_worked_out_not_that_they_apply():
+    """Round 1 of the review: one reading of §325-25C's open question says the distances don't reach a building that
+    isn't frame, so a note never says they are applied under every reading."""
+    for path in rulebook_paths(rules_folder(LAWS / "new_york/ithaca_city")):
+        for r in load(path)["rules"]:
+            assert "distances are applied under every reading" not in (r.get("notes") or ""), r["id"]
+            if r["id"].endswith(".accessory_buildings") and "325-25C#1" in (r.get("notes") or ""):
+                assert "whether the distances apply is worked out under every reading" in r["notes"], r["id"]

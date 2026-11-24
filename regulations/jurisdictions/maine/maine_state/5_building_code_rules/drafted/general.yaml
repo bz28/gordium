@@ -1320,7 +1320,7 @@ rules:
     R-2, R-4, S and U, not I-4; exception 1 is Group I-3. Most restrictive: NFPA 101 16.2.5.2 allows 50 ft in a building
     sprinklered throughout (approved, supervised), 20 ft otherwise; both apply, the stricter governs: here the IBC's 25
     ft (2.5 x 10 ft), as the sheet says. Maine's own Life Safety rule (16-219 CMR ch. 20) today sets a flat 20 ft limit,
-    which 21'-6" would fail: open (README).
+    which 21'-6" would fail: an open question, recorded in the Maine folder's README.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_16_1_7_1_occupant_load
@@ -1795,8 +1795,8 @@ rules:
   notes: >-
     Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1018.4 allows 20 ft, or any length under
     2.5 times the least width (exception 3), and not 50 ft for I-4 (a flag: OCR copy); both apply, the stricter governs
-    (the sheet: 25 ft by the IBC). Maine's 16-219 CMR ch. 20 today sets a flat 20 ft: open (the rule “Dead end at most
-    20 ft, or under 2.5 x its width (IBC 1018.4)”, README).
+    (the sheet: 25 ft by the IBC). Maine's 16-219 CMR ch. 20 today sets a flat 20 ft: an open question (see the rule
+    “Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4)” and the Maine folder's README).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_16_2_5_3_1_common_path_sprinklered
@@ -2922,8 +2922,8 @@ rules:
   notes: >-
     Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1018.4 allows 20 ft, or any length under
     2.5 times the least width (exception 3), and not 50 ft for I-4 (a flag: OCR copy); both apply, the stricter governs
-    (the sheet: 25 ft by the IBC). Maine's 16-219 CMR ch. 20 today sets a flat 20 ft: open (the rule “Dead end at most
-    20 ft, or under 2.5 x its width (IBC 1018.4)”, README).
+    (the sheet: 25 ft by the IBC). Maine's 16-219 CMR ch. 20 today sets a flat 20 ft: an open question (see the rule
+    “Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4)” and the Maine folder's README).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_17_2_5_3_1_common_path_sprinklered

@@ -633,9 +633,9 @@ rules:
     notes: >-
       Other uses in RU: church, park, library or fire station, cemetery, public utility, school, nursery school, adult
       day care home, bed-and-breakfast inn, dormitory; and the uses marked "-" (zero-lot-line house, neighborhood
-      commercial facility, nursing home, hospital), which fail RU.use whatever their lot, as R-2a checks them. Worked
-      by hand for a new dormitory of 12 units: 16,500 + 9 x 1,500 = 30,000 sf under the multiple-family reading, the
-      same as "Other use"; fewer units need less, more units more.
+      commercial facility, nursing home, hospital), which fail the rule “Permitted primary uses (chart p.2)” whatever
+      their lot, as R-2a checks them. Worked by hand for a new dormitory of 12 units: 16,500 + 9 x 1,500 = 30,000 sf
+      under the multiple-family reading, the same as "Other use"; fewer units need less, more units more.
     drafted_by: claude
     status: draft
 
@@ -1164,7 +1164,8 @@ rules:
         note: R-3B's 4 stories, the column before, are too many in RU
     notes: >-
       RU's value is the ninth and last, the 3 after R-3B's 4. No bonus: the 3-story limit still applies when the height
-      bonus (RU.height) is used. Stories are counted at the main entrance side (§325-8A(8)).
+      bonus (the rule “Maximum building height, with the §325-16C bonus”) is used. Stories are counted at the main
+      entrance side (§325-8A(8)).
     drafted_by: claude
     status: draft
 
@@ -1727,9 +1728,9 @@ rules:
     notes: >-
       RU is not an R-1 District (the chart heads it "Residential", apart from "Single Family Residential" R-1), so
       §325-25C's first sentence applies: frame accessory buildings 3 ft from any side or rear lot line. Whether the
-      distances apply to an accessory building that isn't frame is §325-25C's open question (325-25C#1): the distances
-      are applied under every reading, and outside R-1 the readings differ for a building not stated as frame, so that
-      gives NEEDS REVIEW until the architect says the building is frame.
+      distances apply to an accessory building that isn't frame is §325-25C's open question (325-25C#1): whether the
+      distances apply is worked out under every reading, and outside R-1 the readings differ for a building not stated
+      as frame, so that gives NEEDS REVIEW until the architect says the building is frame.
     drafted_by: claude
     status: draft
 

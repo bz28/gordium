@@ -459,7 +459,8 @@ rules:
         expect: not_applicable
     notes: >-
       R-2C is the only column with a number in this row (every other district is "-"), so unlike R-3a there is no open
-      question about the zero-lot-line lot size here. The use itself needs a special permit (R-2c.use).
+      question about the zero-lot-line lot size here. The use itself needs a special permit (the rule “Permitted primary
+      uses (chart p.2)”).
     drafted_by: claude
     status: draft
 
@@ -962,7 +963,7 @@ rules:
       (this rule's first open question: the row house's own lot with its own units, or the building's lot with at least
       three), how the stated occupants are split between units, and how note 6's 500 sf adds (the second). The 3 to 6
       units of an attached building count the whole building: the rule “Attached building: three to six dwelling units
-      (§325-3B)”. The use needs a special permit (R-2c.use).
+      (§325-3B)”. The use needs a special permit (the rule “Permitted primary uses (chart p.2)”).
     drafted_by: claude
     status: draft
 
@@ -1523,8 +1524,8 @@ rules:
         expect: fail
         note: R-3A's 4 stories is the next value, not R-2C's
     notes: >-
-      No bonus: the 3-story limit still applies when the height bonus (R-2c.height) is used. Stories are counted at
-      the main entrance side (§325-8A(8)).
+      No bonus: the 3-story limit still applies when the height bonus (the rule “Maximum building height, with the
+      §325-16C bonus”) is used. Stories are counted at the main entrance side (§325-8A(8)).
     drafted_by: claude
     status: draft
 
@@ -2422,8 +2423,8 @@ rules:
     notes: >-
       R-2c is not an R-1 District (the chart groups R-2A, R-2B and R-2C under "R-2"), so §325-25C's first sentence
       applies: frame accessory buildings 3 ft from any side or rear lot line. Whether the distances apply to an
-      accessory building that isn't frame is §325-25C's open question (325-25C#1): the distances are applied under every
-      reading, which gives NEEDS REVIEW until the architect says the building is frame.
+      accessory building that isn't frame is §325-25C's open question (325-25C#1): whether the distances apply is worked
+      out under every reading, which gives NEEDS REVIEW until the architect says the building is frame.
     drafted_by: claude
     status: draft
 
@@ -2559,8 +2560,8 @@ rules:
       - given: {use: two_family}
         expect: not_applicable
     notes: >-
-      The R-2A, R-2B and R-2C columns share one cell per row on p.14 (see R-2a.loading). Worked out by hand under
-      §325-21.
+      The R-2A, R-2B and R-2C columns share one cell per row on p.14 (see R-2a's rule “Off-street loading for a
+      neighborhood commercial facility (chart p.14, §325-21)”). Worked out by hand under §325-21.
     drafted_by: claude
     status: draft
 

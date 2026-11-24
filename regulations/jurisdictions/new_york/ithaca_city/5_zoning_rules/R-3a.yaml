@@ -1034,7 +1034,9 @@ rules:
         reading: the "Other use" rows apply (6,000 sf, 50 ft)
       - id: set_by_special_permit
         reading: the Planning and Development Board sets them with the special permit
-    notes: The use needs a special permit anyway (R-3a.use), so the result is NEEDS REVIEW whatever the answer.
+    notes: >-
+      The use needs a special permit anyway (the rule “Permitted primary uses (chart p.2); special-permit uses need
+      review”), so the result is NEEDS REVIEW whatever the answer.
     drafted_by: claude
     status: draft
 
@@ -1233,9 +1235,9 @@ rules:
       - given: {stories: 5}
         expect: fail
     notes: >-
-      No bonus: the 4-story limit still applies when the height bonus (R-3a.height) is used. Stories are counted at the
-      main entrance side (§325-8A(8)); where 40 ft would fit more than 4 stories, the stories govern (§325-8A(9)).
-      R-3A sets no minimum number of stories (only R-3AA's "3/2" does).
+      No bonus: the 4-story limit still applies when the height bonus (the rule “Maximum building height, with the
+      §325-16C bonus”) is used. Stories are counted at the main entrance side (§325-8A(8)); where 40 ft would fit more
+      than 4 stories, the stories govern (§325-8A(9)). R-3A sets no minimum number of stories (only R-3AA's "3/2" does).
     drafted_by: claude
     status: draft
 
@@ -1684,7 +1686,7 @@ rules:
         expect: fail
         note: >-
           walls 9'-6" and 10'-0": only the wider side can be the 10 ft one, and its eave, 6'-6" from the line, is 3'-6"
-          into it (#21 review round 22's false pass)
+          into it (a case that once passed wrongly)
       - given: {side_yard_smaller: 12, side_yard_larger: 15, front_yard_eaves: 12, side_yard_smaller_eaves: 7, side_yard_larger_eaves: 15, rear_yard_eaves: 48, lot_depth: 125, building_height: 38}
         expect: needs_review
         note: >-
@@ -1807,9 +1809,9 @@ rules:
     notes: >-
       R-3a is not an R-1 District, so §325-25C's first sentence applies: frame accessory buildings 3 ft from any side or
       rear lot line (the "six feet" is R-1's only). Whether the distances apply to an accessory building that isn't
-      frame is §325-25C's open question (325-25C#1): the distances are applied under every reading, and outside R-1 the
-      readings differ for a building not stated as frame, so that gives NEEDS REVIEW until the architect says the
-      building is frame.
+      frame is §325-25C's open question (325-25C#1): whether the distances apply is worked out under every reading, and
+      outside R-1 the readings differ for a building not stated as frame, so that gives NEEDS REVIEW until the architect
+      says the building is frame.
     drafted_by: claude
     status: draft
 

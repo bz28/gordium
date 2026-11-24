@@ -683,8 +683,8 @@ rules:
       - given: {stories: 4}
         expect: fail
     notes: >-
-      The 3-story limit has no bonus: it still applies when the height bonus (R-1a.height) is used. Stories are
-      counted at the main entrance side (§325-8A(8)).
+      The 3-story limit has no bonus: it still applies when the height bonus (the rule “Maximum building height, with
+      the §325-16C bonus”) is used. Stories are counted at the main entrance side (§325-8A(8)).
     drafted_by: claude
     status: draft
 
@@ -1167,10 +1167,10 @@ rules:
     notes: >-
       R-1a is an R-1 District: the chart groups R-1A and R-1B under "R-1" (p.2, p.3, p.14), and §325-4 lists R-1a as a
       residential district. So §325-25C's R-1 distances (6 ft side, 3 ft rear) apply, as in R-1b. Whether they apply to
-      an accessory building that isn't frame isn't settled (325-25C#1, in the section labels): the distances are applied
-      under every reading it lists, and the rule complies only if it passes under all of them. Below-grade accessory
-      structures (§325-25B) and garages on a common lot line by agreement (§325-25D) aren't checked; §325-25 sets no
-      height limit.
+      an accessory building that isn't frame isn't settled (325-25C#1, in the section labels): whether the distances
+      apply is worked out under every reading it lists, and the rule complies only if it passes under all of them.
+      Below-grade accessory structures (§325-25B) and garages on a common lot line by agreement (§325-25D) aren't
+      checked; §325-25 sets no height limit.
     drafted_by: claude
     status: draft
 

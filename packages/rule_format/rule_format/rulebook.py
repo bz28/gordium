@@ -1479,7 +1479,9 @@ def term_file_problems(jurisdiction, ctx: Context) -> dict[Path, list[str]]:
 # A file path or a URL is a reference, not a key, so it is set aside first. Required where the law's settings say
 # `plain_words: true` (state.yaml, or a place's jurisdiction.yaml).
 _PATHLIKE = re.compile(r"https?://\S+|[\w.-]+(?:/[\w.-]+)+/?|\b[\w-]+\.(?:py|yaml|md|json|jsonl)\b")
-_ENGINEER_KEY = re.compile(r"\bgeneral\.[a-z0-9_.]*[a-z0-9_]|\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
+# a district rule's id is one even with no underscore (R-1a.height, RU.use: round 1 of the Ithaca review, 2026-11-24)
+_ENGINEER_KEY = re.compile(r"\b(?:[A-Z]{1,4}-\d+[A-Za-z]*|[A-Z]{2,4})\.[a-z][a-z0-9_]*[a-z0-9]\b|"
+                           r"\bgeneral\.[a-z0-9_.]*[a-z0-9_]|\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
 PLACE_SETTINGS = "jurisdiction.yaml"   # a place's settings (place.py SETTINGS, which imports this module)
 
 

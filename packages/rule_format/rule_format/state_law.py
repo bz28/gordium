@@ -47,10 +47,10 @@ def state_settings_problems(folder: Path, ctx: Context) -> list[str]:
     if not isinstance(s, dict) or set(s) - {"name", "law", "results_title", "scope", "waiting_why", "plain_words"}:
         return [f"{STATE_SETTINGS} must be a mapping of name, law, results_title, scope, waiting_why and plain_words "
                 f"only"]
-    if "plain_words" in s and s["plain_words"] is not True:
-        out_ = [f"plain_words must be true (the rulebook's architect-visible words carry no engineer's key), or left out"]
-        return out_
     out = [] if isinstance(s.get("name"), str) and s["name"].strip() else ["no name"]
+    if "plain_words" in s and s["plain_words"] is not True:     # said with the file's other problems, never alone
+        out.append("plain_words must be true (the rulebook's architect-visible words carry no engineer's key), "
+                   "or left out")
     # which buildings the law covers, where a state has two books for egress (New York: the Residential Code and
     # the Building Code); a check runs a scoped law only where design_checker/code_scope.py finds it covers the building
     if "scope" in s and s["scope"] not in SCOPES:

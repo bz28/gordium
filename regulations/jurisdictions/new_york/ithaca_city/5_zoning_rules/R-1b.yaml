@@ -626,7 +626,8 @@ rules:
       - given: {stories: 4}
         expect: fail
     notes: >-
-      The 3-story limit has no bonus: it still applies when the height bonus (R-1b.height) is used.
+      The 3-story limit has no bonus: it still applies when the height bonus (the rule “Maximum building height, with
+      the §325-16C bonus”) is used.
     drafted_by: claude
     status: draft
 
@@ -1073,11 +1074,11 @@ rules:
     notes: >-
       Every solid on the Building layer standing apart from the main building is measured as an accessory building (one
       touching it, a porch, steps or an attached garage, is part of the main building). Whether the distances apply to
-      an accessory building that isn't frame (masonry, metal) isn't settled (325-25C#1, in the section labels): the
-      distances are applied under every reading it lists, and the rule complies only if it passes under all of them. A
-      frame building (as the architect states it) has them by law. Below-grade accessory structures (§325-25B) and
-      garages on a common lot line by agreement (§325-25D) aren't checked; §325-25 sets no height limit (X2 in the
-      research).
+      an accessory building that isn't frame (masonry, metal) isn't settled (325-25C#1, in the section labels): whether
+      the distances apply is worked out under every reading it lists, and the rule complies only if it passes under all
+      of them. A frame building (as the architect states it) has them by law. Below-grade accessory structures
+      (§325-25B) and garages on a common lot line by agreement (§325-25D) aren't checked; §325-25 sets no height limit
+      (X2 in the research).
     drafted_by: claude
     status: draft
 

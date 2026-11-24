@@ -590,7 +590,8 @@ rules:
         reason: >-
           A dormitory and a nursing home are multiple dwellings by §325-3's definitions, so the multiple-family row and
           its note 7 (+750 sf per unit over 3, +500 sf per room let for profit) may apply instead of "Other use": the
-          open question on this rule. (A dormitory is not permitted in R-3aa at all: R-3aa.use.)
+          open question on this rule. (A dormitory is not permitted in R-3aa at all: the rule “Permitted primary uses
+          (chart p.2)”.)
     sources:
       - file: zoning_charts_2026-04.pdf
         page: 3
@@ -656,8 +657,8 @@ rules:
     notes: >-
       Other uses in R-3aa: church, park, library or fire station, cemetery, public utility, school, nursery school,
       adult day care home, neighborhood commercial facility, nursing home, hospital, bed-and-breakfast inn (and a
-      dormitory, which fails R-3aa.use). The zero-lot-line house has its own row ("-" in R-3AA): see the rule “Lot size
-      and width, zero-lot-line house: chart shows "-" (chart p.3)”.
+      dormitory, which fails the rule “Permitted primary uses (chart p.2)”). The zero-lot-line house has its own row
+      ("-" in R-3AA): see the rule “Lot size and width, zero-lot-line house: chart shows "-" (chart p.3)”.
     drafted_by: claude
     status: draft
 
@@ -1050,7 +1051,9 @@ rules:
         reading: the "Other use" rows apply (6,000 sf, 50 ft)
       - id: set_by_special_permit
         reading: the Planning and Development Board sets them with the special permit
-    notes: The use needs a special permit anyway (R-3aa.use), so the result is NEEDS REVIEW whatever the answer.
+    notes: >-
+      The use needs a special permit anyway (the rule “Permitted primary uses (chart p.2)”), so the result is NEEDS
+      REVIEW whatever the answer.
     drafted_by: claude
     status: draft
 
@@ -1409,10 +1412,11 @@ rules:
           applies)
     notes: >-
       R-3AA's cell is "3/2 [fn11]", the seventh value of the line; note 11: the first number is the most stories, the
-      second the fewest. No bonus: the 3-story maximum still applies when the height bonus (R-3aa.height) is used.
-      Stories are counted at the main entrance side (§325-8A(8)), for the main building (the stories measure). The
-      minimum is for "buildings hereafter erected" (§325-8A(15)); the building area is everything the lot's buildings
-      cover, so 500 sf or less there means the main building's footprint is 500 sf or less too.
+      second the fewest. No bonus: the 3-story maximum still applies when the height bonus (the rule “Maximum building
+      height, with the §325-16C bonus”) is used. Stories are counted at the main entrance side (§325-8A(8)), for the
+      main building (the stories measure). The minimum is for "buildings hereafter erected" (§325-8A(15)); the building
+      area is everything the lot's buildings cover, so 500 sf or less there means the main building's footprint is 500
+      sf or less too.
     drafted_by: claude
     status: draft
 
@@ -2034,11 +2038,11 @@ rules:
     notes: >-
       R-3aa is not an R-1 District, so §325-25C's first sentence applies: frame accessory buildings 3 ft from any side
       or rear lot line (the "six feet" is R-1's only). Whether the distances apply to an accessory building that isn't
-      frame is §325-25C's open question (325-25C#1): the distances are applied under every reading, and outside R-1 the
-      readings differ for a building not stated as frame, so that gives NEEDS REVIEW until the architect says the
-      building is frame. An accessory building is not a primary structure, so note 2's footprint cap is about the main
-      building; whether the 2-story minimum reaches accessory buildings is the stories rule's open question (it sends a
-      lot with accessory buildings to review).
+      frame is §325-25C's open question (325-25C#1): whether the distances apply is worked out under every reading, and
+      outside R-1 the readings differ for a building not stated as frame, so that gives NEEDS REVIEW until the architect
+      says the building is frame. An accessory building is not a primary structure, so note 2's footprint cap is about
+      the main building; whether the 2-story minimum reaches accessory buildings is the stories rule's open question (it
+      sends a lot with accessory buildings to review).
     drafted_by: claude
     status: draft
 
@@ -2427,8 +2431,8 @@ rules:
       - given: {use: one_family_detached}
         expect: not_applicable
     notes: >-
-      R-3AA's dormitory parking cell is "-" (a dormitory is not permitted in R-3aa, R-3aa.use), so a dormitory falls
-      here with the other uses: never a pass.
+      R-3AA's dormitory parking cell is "-" (a dormitory is not permitted in R-3aa, the rule “Permitted primary uses
+      (chart p.2)”), so a dormitory falls here with the other uses: never a pass.
     drafted_by: claude
     status: draft
 
