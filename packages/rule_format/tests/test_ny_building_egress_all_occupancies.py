@@ -338,9 +338,19 @@ def test_a_fixed_seat_assembly_space_never_passes_on_the_tables_common_path(ctx,
     base = {"occupancy_group": "A-1", "special_egress_spaces": False, "merchandise_pads": False} | NFPA13
     assert _one(r, "space", two, base | {"assembly_fixed_seating": True}, ctx) == "needs_review"
     assert _one(r, "space", two, base, ctx) == "needs_review"                       # not stated
-    assert _one(r, "space", two | {"space_common_path": 30}, base | {"assembly_fixed_seating": True}, ctx) == "pass"
-    assert _one(r, "space", two | {"space_occupant_load": 49, "space_common_path": 75},
-                base | {"assembly_fixed_seating": True}, ctx) == "pass"
+    # review round 3: the common path is exit access travel (202), measured along the aisles (1030.7): with fixed
+    # seating it needs review at any length, in any group; a measured fail still fails
+    assert _one(r, "space", two | {"space_common_path": 10}, base | {"assembly_fixed_seating": True}, ctx) ==         "needs_review"
+    for g in ("E", "B", "M"):
+        rr = rules["general.bc_table_1006_2_1_b" if g == "B" else "general.bc_table_1006_2_1_a_e_m"]
+        one = {"space_is_exit": False, "space_exit_count": 1, "space_occupant_load": 20, "space_common_path": 60}
+        assert _one(rr, "space", one, base | {"occupancy_group": g, "assembly_fixed_seating": True}, ctx) ==             "needs_review", g
+        assert _one(rr, "space", one | {"space_occupant_load": 60}, base | {"occupancy_group": g,
+                                                                           "assembly_fixed_seating": True}, ctx) ==             "fail", g                                                   # over 49 occupants: fails, measured or not
+    i4 = rules["general.bc_1006_2_1_two_exits"]
+    assert _one(i4, "space", {"space_is_exit": False, "space_exit_count": 1, "space_occupant_load": 5,
+                              "space_common_path": 60}, {"occupancy_group_i4": True, "assembly_fixed_seating": True,
+                                                         "special_egress_spaces": False} | NFPA13, ctx) == "needs_review"
     assert _one(r, "space", two, base | {"assembly_fixed_seating": False}, ctx) == "pass"
     store = two | {"space_common_path": 40}                                         # 1018.4: merchandise pads
     m = {"occupancy_group": "M", "special_egress_spaces": False, "assembly_fixed_seating": False} | NFPA13
@@ -507,3 +517,23 @@ def test_the_words_an_architect_reads_carry_no_engineer_key(ctx):
                       "general.bc_1020_5_dead_end; test_data/answer_keys/a_b/hand_check.yaml)."}]}
     [got] = plain_words_problems(bad)
     assert "other_occupancy_present" in got and "general.bc_1020_5_dead_end" in got and "hand_check" not in got
+
+
+def test_no_text_calls_a_brought_in_section_not_brought_in():
+    """Review round 3 (P3): a section sources.yaml brings in (sections or alone, and the parts under a section) is
+    never called 'not brought in' in the words an architect reads, nor in sources.yaml's own notes."""
+    import re
+    brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
+    secs = [str(x) for x in brought["sections"] + brought["alone"] if not str(x).startswith("Table")]
+    pat = re.compile(r"(?:Section )?(\d{3,4}(?:\.\d+)*)(?:'s)?[^.;]{0,40}?(?:\(|, )[^()]{0,40}?not brought in")
+
+    def stale(t):
+        return [m.group(0) for m in pat.finditer(t) if any(m.group(1) == s or m.group(1).startswith(s + ".")
+                                                         for s in secs)]
+    bad = []
+    for r in load(RULEBOOK)["rules"]:
+        texts = [r.get("title"), r.get("notes")] + [w["reason"] for w in r.get("review_when") or []] + \
+                [e.get("note") for e in r.get("examples") or []]
+        bad += [(r["id"], x) for t in texts if isinstance(t, str) for x in stale(t)]
+    bad += [("sources.yaml", x) for x in stale((NY / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))]
+    assert not bad, bad

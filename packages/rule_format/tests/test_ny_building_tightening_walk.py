@@ -75,8 +75,11 @@ def tightened_story(group, sprinkler, facts, travel, in_room):
 
 
 def tightened_space(group, facts, exits, load_, common):
-    if _may(facts["assembly_fixed_seating"]) and common > (75 if load_ < 50 else 30):
-        return "1030.8: 30 ft from any seat (75 ft under 50 occupants), any group, any number of exits"
+    if _may(facts["assembly_fixed_seating"]):
+        # 202 COMMON PATH OF EGRESS TRAVEL is a portion of exit access travel, which 1030.7 measures along the
+        # aisles, never over the seats: the routes' straight-across figure can't be trusted at any length (and
+        # 1030.8 caps it at 30 ft from any seat, 75 ft under 50 occupants), in any group, with any exits
+        return "202, 1030.7, 1030.8: a fixed-seat room's common path, measured across seats, isn't its path"
     if group in ("M", UNSTATED) and _may(facts["merchandise_pads"]) and common > (75 if load_ <= 50 else 30):
         return "1018.4: 30 ft from any point in a merchandise pad (75 ft for 50 or fewer)"
     if _may(facts["special_egress_spaces"]) and exits < 2:
