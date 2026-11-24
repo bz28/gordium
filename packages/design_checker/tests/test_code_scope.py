@@ -454,3 +454,36 @@ def test_a_place_listing_no_uses_gets_no_code_for_any_use():
     assert code_scope.use_words("multiple_family", {}) == "“multiple_family”"
     assert code_scope.decide({"use": "multiple_family"}, None, None, REPO / ITHACA)["why"].startswith(
         "its use (Multiple family dwelling) is none of the dwellings R101.2 lists")
+
+
+# ---- the uses the Building Code covers whatever else is stated (the Setup form's question, UI polish 2026-11-23) -----
+
+def test_the_options_name_exactly_the_uses_decide_puts_under_the_building_code_by_use_alone():
+    """options' building_code_uses is code_scope.by_use over the place's uses, and by_use agrees with decide itself:
+    every use it lists is the Building Code with only the use stated (and with any dwelling facts added: the use
+    alone settles it), and no other use is (a dwelling R101.2 lists, a townhouse row, a bed and breakfast: decide
+    reads more). So the Setup form never asks for the Building Code's facts on a use the Residential Code can cover,
+    nor misses one the Building Code always covers."""
+    from design_checker.check import options
+    listed = options(ITHACA)["building_code_uses"]
+    uses = list(ALLOWED["use"])
+    assert set(listed) <= set(uses) and "multiple_family" in listed
+    for not_listed in ("one_family_detached", "two_family", "one_family_attached", "bed_and_breakfast_inn"):
+        assert not_listed not in listed
+    for use in uses:
+        alone = code({"use": use})[0]
+        assert (alone == code_scope.BUILDING) == (use in listed), use
+        if use in listed:     # whatever dwelling facts are stated beside it
+            assert code({"use": use, "dwelling_units": 1, "accessory_dwelling_unit": False})[0] == code_scope.BUILDING, use
+
+
+def test_only_a_place_inheriting_a_law_that_splits_buildings_lists_building_code_uses(tmp_path):
+    """A folder that is no place (a copy of a city's rulebooks alone, test_options_cache's) inherits no law, and a
+    place whose inherited laws don't split buildings between books lists no use: never a use asked for the Building
+    Code's facts where no Building Code is chosen."""
+    from design_checker.check import _options_files, building_code_uses
+    names = {"multiple_family": "Multiple family dwelling", "one_family_detached": "One-family dwelling, detached"}
+    assert building_code_uses(names, _options_files(tmp_path)) == []
+    assert building_code_uses(names, {"../y/state.yaml": b"name: Somewhere\n"}) == []
+    assert building_code_uses(names, {"../y/state.yaml": b"scope: building_code\n"}) == ["multiple_family"]
+    assert building_code_uses(names, {"../y/state.yaml": None}) == []

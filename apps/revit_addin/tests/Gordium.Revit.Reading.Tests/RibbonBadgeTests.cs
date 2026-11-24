@@ -86,8 +86,8 @@ public sealed class RibbonBadgeTests
         Assert.Equal(BadgeKind.Counts, badge.Kind);
         Assert.Equal(0, badge.Fails);
         Assert.Equal(183, badge.Review);
-        Assert.Equal("Checked 14:32: 183 need review (3 by hand or not checked), 7 comply. Click to check again; the Gordium pane shows them.",
-                     badge.ToolTip);
+        // one sentence (UI polish change 42): by hand and not checked yet are the pane's to say, not the tooltip's
+        Assert.Equal("Checked 14:32: 183 need review, 7 comply. Click to check again.", badge.ToolTip);
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public sealed class RibbonBadgeTests
         var badge = RibbonBadge.Of(Model("does_not_comply", UxAnswers.Item("a", "does_not_comply"), UxAnswers.Item("b", "needs_review"),
                                          UxAnswers.Item("c", "needs_review"), UxAnswers.Item("d", "complies")), At);
         Assert.Equal((BadgeKind.Counts, 1, 2), (badge.Kind, badge.Fails, badge.Review));
-        Assert.Equal("Checked 14:32: 1 does not comply, 2 need review, 1 complies. Click to check again; the Gordium pane shows them.", badge.ToolTip);
+        Assert.Equal("Checked 14:32: 1 fails, 2 need review, 1 complies. Click to check again.", badge.ToolTip);
         foreach (var theme in new[] { PanelTheme.Light, PanelTheme.Dark })
         {
             var px = RibbonBadge.Pixels(badge, 32, theme);
@@ -127,13 +127,22 @@ public sealed class RibbonBadgeTests
                 Assert.False(Has(RibbonBadge.Pixels(badge, size, theme), Token(PanelTokens.StatusPass, theme)));
     }
 
+    /// <summary>Never a green badge (UI polish change 42): a check the checker says complies, with nothing to review,
+    /// is the plain icon at both sizes and in both themes (a glance can't say what Gordium didn't check: "all comply"
+    /// is the pane's to say, beside it), its tooltip saying the counts.</summary>
     [Fact]
-    public void Only_a_check_the_checker_says_complies_with_nothing_to_review_shows_the_pass_tick()
+    public void A_complying_check_is_the_plain_icon_never_green()
     {
         var pass = RibbonBadge.Of(Model("complies", UxAnswers.Item("a", "complies"), UxAnswers.Item("b", "not_applicable")), At);
         Assert.Equal(BadgeKind.Complies, pass.Kind);
         Assert.Equal("Checked 14:32: 1 complies, 1 not applicable. Click to check again.", pass.ToolTip);
-        Assert.True(Has(RibbonBadge.Pixels(pass, 32, PanelTheme.Light), Token(PanelTokens.StatusPass)));
+        Assert.Null(RibbonBadge.Dot(pass));
+        foreach (var theme in new[] { PanelTheme.Light, PanelTheme.Dark })
+            foreach (var size in new[] { 16, 32 })
+            {
+                Assert.Equal(RibbonIcons.Pixels(RibbonIcons.CheckProject, size, theme), RibbonBadge.Pixels(pass, size, theme));
+                Assert.False(Has(RibbonBadge.Pixels(pass, size, theme), Token(PanelTokens.StatusPass, theme)));
+            }
         // every rule set aside, or a state that isn't "complies": an amber "?", never the pass colour
         foreach (var unclear in new[]
                  {
@@ -157,7 +166,7 @@ public sealed class RibbonBadgeTests
         Assert.Equal(BadgeKind.Counts, RibbonBadge.Of(model, At).Kind);
         var stale = RibbonBadge.Of(ResultRows.Stale(model, At), At);
         Assert.Equal((BadgeKind.Stale, 0, 0), (stale.Kind, stale.Fails, stale.Review));
-        Assert.Equal("The model changed after the check at 14:32: its results may not hold. Click to check again.", stale.ToolTip);
+        Assert.Equal("The model changed after the 14:32 check. Click to check again.", stale.ToolTip);
         var passStale = RibbonBadge.Of(ResultRows.Stale(Model("complies", UxAnswers.Item("a", "complies")), At), At);
         foreach (var theme in new[] { PanelTheme.Light, PanelTheme.Dark })
         {
@@ -177,9 +186,11 @@ public sealed class RibbonBadgeTests
         Assert.Equal((BadgeKind.NotChecked, RibbonBadge.NotCheckedTip), (none.Kind, none.ToolTip));
         Assert.Equal(RibbonBadge.NotCheckedTip, RibbonPlan.Buttons(false).Single(b => b.Id == RibbonPlan.CheckProject).ToolTip);
         var missing = RibbonBadge.Of(null, At, missing: 3);
-        Assert.Equal("Not checked yet: 3 facts to set first; the Gordium pane lists them. Click to check again.", missing.ToolTip);
+        Assert.Equal("Not checked yet: 3 things to set first. Click to set them.", missing.ToolTip);
+        Assert.Equal("Not checked yet: 1 thing to set first. Click to set it.", RibbonBadge.Of(null, At, missing: 1).ToolTip);
         var failed = RibbonBadge.Of(Model("does_not_comply", UxAnswers.Item("a", "does_not_comply")), At, failed: true);
         Assert.Equal(BadgeKind.NotChecked, failed.Kind);
+        Assert.Equal("The last check didn't finish. Click to check again.", failed.ToolTip);
         foreach (var b in new[] { none, missing, failed })
             Assert.Equal(plain, RibbonBadge.Pixels(b, 32, PanelTheme.Light));
     }

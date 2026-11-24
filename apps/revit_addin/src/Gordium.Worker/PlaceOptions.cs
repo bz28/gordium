@@ -17,6 +17,12 @@ public sealed record UseChoice(string Id, string Name, bool? Permitted, string? 
 public sealed record PlaceOptions(IReadOnlyList<string> Zones, IReadOnlyList<(string Id, string Name)> Uses,
                                   IReadOnlyDictionary<string, IReadOnlyList<UseChoice>> DistrictUses)
 {
+    /// <summary>The uses whose buildings the Building Code covers whatever else is stated (check.building_code_uses:
+    /// New York's code choice by the use alone), where the place's laws split buildings between books; empty
+    /// elsewhere, and from a worker that doesn't send them. The Setup form then requires the occupancy group and the
+    /// sprinkler system (Ben, 2026-11-23).</summary>
+    public IReadOnlyList<string> BuildingCodeUses { get; init; } = [];
+
     /// <summary>Reads the answer strictly: a field missing or of another kind is refused (the worker is then stopped
     /// by the client, as for any answer it can't read). Fields the form doesn't use (follow_ups, implied) are left.</summary>
     internal static PlaceOptions Parse(JsonElement result)
@@ -53,6 +59,15 @@ public sealed record PlaceOptions(IReadOnlyList<string> Zones, IReadOnlyList<(st
                     StrictJson.StringOrNull(u, "note", at));
             }).ToList();
         }
-        return new PlaceOptions(zoneList, uses, district);
+        // optional (an older worker sends none): a list of use words, anything else refused
+        var building = new List<string>();
+        if (result.TryGetProperty("building_code_uses", out var bc))
+        {
+            if (bc.ValueKind != JsonValueKind.Array)
+                throw new WorkerProtocolException($"{where}.building_code_uses is {StrictJson.Kind(bc)}, not a list");
+            building.AddRange(bc.EnumerateArray().Select((u, i) => u.ValueKind == JsonValueKind.String && u.GetString()!.Length > 0
+                ? u.GetString()! : throw new WorkerProtocolException($"{where}.building_code_uses[{i}] is {StrictJson.Kind(u)}, not a use")));
+        }
+        return new PlaceOptions(zoneList, uses, district) { BuildingCodeUses = building };
     }
 }

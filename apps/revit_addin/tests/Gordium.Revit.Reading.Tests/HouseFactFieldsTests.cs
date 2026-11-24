@@ -151,7 +151,9 @@ public sealed class HouseFactFieldsTests
     {
         var fields = SetupScreen.Build(Model(Needed()), [], null, null).Fields;
         foreach (var (m, _, _, _) in Each)
-            Assert.Equal("The lot and the house", fields.Single(f => f.Mark == m).Group);
+            // the lot's own facts under "The lot", the household's under "Dwellings" (UI polish change 5's sub-heads)
+            Assert.Equal(m == Marks.UnrelatedPersons || m == Marks.OwnerOccupied || m == Marks.FunctionalFamilyUnit
+                             ? SetupFacts.DwellingsGroup : SetupFacts.LotGroup, fields.Single(f => f.Mark == m).Group);
     }
 
     // ---- review round 1: units before typing, and the law's words exactly ----------------------------------------
@@ -282,9 +284,9 @@ public sealed class HouseFactFieldsTests
         Assert.False(same.Changes(feetScreen.Fields.Single(f => f.Mark == Marks.StreamDistance)));
         Assert.Equal(0, PaneWords.Unsaved(feetScreen, same));
         Assert.Equal(PaneWords.Unsaved(feetScreen, same), same.Writes(feetScreen.Fields).Writes.Count);
-        // the view's "not saved yet" and the footer's count use the same rule
+        // the view's Save count and the footer's use the same rule (Unsaved: draft.Changes)
         var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "SetupView.cs"));
-        Assert.Contains("if (_draft.Changes(f))", view, StringComparison.Ordinal);
+        Assert.Contains("private int Changes() => PaneWords.Unsaved(_screen, _draft);", view, StringComparison.Ordinal);
         Assert.Contains("screen.Fields.Count(draft.Changes)", File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Reading", "PaneWords.cs")), StringComparison.Ordinal);
     }
 

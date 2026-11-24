@@ -49,7 +49,7 @@ public sealed class PaneReview2Tests
         var cancelled = ResultRows.Stale(House(), at, CheckWords.CancelledStale(at), StaleReason.Cancelled);
         var changed = ResultRows.Stale(House(), at);
         Assert.Contains("before the check you cancelled", RibbonBadge.Of(cancelled, at).ToolTip, StringComparison.Ordinal);
-        Assert.StartsWith("The model changed after the check at 14:32", RibbonBadge.Of(changed, at).ToolTip, StringComparison.Ordinal);
+        Assert.StartsWith("The model changed after the 14:32 check", RibbonBadge.Of(changed, at).ToolTip, StringComparison.Ordinal);
         var row = ResultList.Place(cancelled).First(r => r.Row.Elements.Count > 0);
         var uid = row.Row.Elements[0];
         Assert.Contains("before the check you cancelled", SelectionMap.Of(cancelled, at).Answer([uid], _ => "it").Line, StringComparison.Ordinal);
@@ -83,8 +83,8 @@ public sealed class PaneReview2Tests
     }
 
     /// <summary>The footer and Save count the same thing, what Save writes: a ready form with Stories changed says
-    /// "1 chosen, not saved yet" beside "Save 1 fact"; a waiting form with only a field that isn't needed changed
-    /// never says "none chosen" beside "Save 1 fact".</summary>
+    /// "Saves 1 fact" beside "Save 1 and check"; a waiting form with only a field that isn't needed changed says the
+    /// one it saves and the needed one still unset, never "blank" beside a button that saves one.</summary>
     [Fact]
     public void The_footer_and_Save_count_the_same()
     {
@@ -93,14 +93,14 @@ public sealed class PaneReview2Tests
         draft.Choose(Marks.Stories, "3");
         var ready = new SetupScreen("house", [stories], [], [], []);
         Assert.Equal(1, PaneWords.Unsaved(ready, draft));
-        Assert.Equal("Every fact the check needs is set; 1 chosen, not saved yet.", PaneWords.SetupFooter(ready, draft));
-        Assert.Equal("Save 1 fact", PaneWords.SaveAndCheck(PaneWords.Unsaved(ready, draft), PaneWords.ChecksAfterSave(ready, draft)));
+        Assert.Equal("Saves 1 fact to Project Information (one undo).", PaneWords.SetupFooter(ready, draft));
+        Assert.Equal("Save 1 and check", PaneWords.SaveAndCheck(PaneWords.Unsaved(ready, draft)));
         var zone = new SetupField(Marks.Zone, "Zone", FieldKind.Choice, SetupFacts.NeededGroup, true, [], null, "law", null);
         var waiting = new SetupScreen("house", [zone, stories], [], [], [Marks.Zone.Name]);
         var footer = PaneWords.SetupFooter(waiting, draft);
-        Assert.DoesNotContain("none chosen", footer, StringComparison.Ordinal);
-        Assert.Equal("1 fact needed; 1 chosen, not saved yet.", footer);
-        Assert.Equal("Save 1 fact", PaneWords.SaveAndCheck(PaneWords.Unsaved(waiting, draft), PaneWords.ChecksAfterSave(waiting, draft)));
+        Assert.DoesNotContain(PaneWords.BlankFact, footer, StringComparison.Ordinal);
+        Assert.Equal("Saves 1 fact to Project Information (one undo). " + PaneWords.NoZone, footer);
+        Assert.Equal("Save 1 and check", PaneWords.SaveAndCheck(PaneWords.Unsaved(waiting, draft)));
         Assert.Contains("private int Changes() => PaneWords.Unsaved(_screen, _draft);",
                         File.ReadAllText(Path.Combine(Src, "Gordium.Revit.Addin", "SetupView.cs")), StringComparison.Ordinal);
     }

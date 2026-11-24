@@ -154,7 +154,16 @@ HOUSES = {"one_family_detached": ("a detached one-family dwelling", "R101.2 item
           "one_family_semi_detached": ("a two-family dwelling (two semi-detached units in one building)",
                                        "R101.2 item 2", 2)}
 ATTACHED = "one_family_attached"                  # three to six units in a row (§325-3B): a townhouse if R202's
+BED_AND_BREAKFAST = "bed_and_breakfast_inn"       # under the Residential Code only as R202's B&B dwelling
 ASK_BY_HAND = "check which code governs by hand, then tick {mark} Yes if it is the Building Code"
+
+
+def by_use(use) -> str | None:
+    """The book that covers a building of this use whatever else is stated (BUILDING: a use none of R101.2's
+    dwellings can be, 101.2 "every other building"), or None where the use alone can't tell (a dwelling R101.2 lists,
+    or a bed and breakfast, which the decision reads further). decide's own test: a host's Setup form uses it (through
+    the options answer, check.options) to ask for the facts the Building Code turns on before the first check."""
+    return None if use in HOUSES or use in (ATTACHED, BED_AND_BREAKFAST) else BUILDING
 
 
 @functools.lru_cache(maxsize=16)
@@ -417,12 +426,12 @@ def decide(values: dict, building: dict | None, uses=None, place=None) -> dict:
                            f"correct the use ({MARK['use']}) or the occupancy groups ({MARK['occupancy_groups']})")
         return _answer(BUILDING, f"a building of Group {', '.join(groups)}, none of the dwellings R101.2 lists (101.2)",
                        ["R101.2", "101.2"], used)
-    if use == "bed_and_breakfast_inn":
+    if use == BED_AND_BREAKFAST:
         return _answer(None, "a bed and breakfast is under the Residential Code only as an R202 bed and breakfast "
                        "dwelling (an owner-occupied conversion of a one-family dwelling, not more than ten transient "
                        "lodgers and five bedrooms for them)", ["R101.2 item 4", "R202 BED AND BREAKFAST DWELLING"],
                        used, by_hand)
-    if use not in HOUSES and use != ATTACHED:
+    if by_use(use) == BUILDING:
         return _answer(BUILDING, f"its use ({use_words(use, names)}) is none of the dwellings R101.2 lists (101.2: every "
                        "other building)", ["R101.2", "101.2"], used)
     # a dwelling R101.2 can cover: each condition it sets, and how many dwelling units the building holds

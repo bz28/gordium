@@ -46,6 +46,7 @@ def _fresh(j: Path) -> dict:
         every = list(dict.fromkeys([u["id"] for u in out["district_uses"][zone]] + list(names)))
         out["follow_ups"][zone] = {u: check.follow_up_facts(rules, u, names) for u in every}
         out["implied"][zone] = {u: check.implied_for(rules, u, names) for u in every}
+    out["building_code_uses"] = check.building_code_uses(names, check._options_files(j))
     return out
 
 

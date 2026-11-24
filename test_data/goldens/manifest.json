@@ -2816,13 +2816,14 @@
   },
   "worker/options": {
    "parts": {
+    "building_code_uses": "3229074d9b88f36209267fae7196ff6af9557f226ae94cae6e8dcd377a331482",
     "district_uses": "25e175d30da3fdf6edddbfc798b0bf2d66706d49feaee97c105688d9acbc116c",
     "follow_ups": "688f48ba63b6979a4d91f9d9f7e35d0c17d5f9c3f52bf54127cca16aca67cd27",
     "implied": "207ef03a039cc042fcdbe22d90a395f2a5d52472613e6f923d084b6de8e935aa",
     "uses": "d3f302fcd5e73574ae94311e9f2dd861d3c9fd0ac9751d568e660394d740fe53",
     "zones": "9f10bec325ae2dbc21e7cc4fb964da53ac9ec121d8b06b96833f8024e9d276f8"
    },
-   "sha256": "10e6a98e0b321c71bd0bd222bcf4b13dba69cc7354c19f0316639ad1f53283d3"
+   "sha256": "aa68e929e446a021fdfe16d70e1aa5b1d0c345c35f51455ec8136ece9207480a"
   },
   "worker/sample_site": {
    "parts": {

@@ -285,7 +285,7 @@ public static class CheckWords
 
     /// <summary>A second check asked for while one runs.</summary>
     public const string Refused = "A check is already running: wait for its answer, or click Cancel in the Gordium " +
-                                  "panel, then check again.";
+                                  "pane, then check again.";
 
     /// <summary>What the panel says after Cancel, by what it went back to.</summary>
     public static string Cancelled(PanelHad had) => had switch
