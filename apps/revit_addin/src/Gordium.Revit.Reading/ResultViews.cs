@@ -340,14 +340,14 @@ public static class ResultViews
                 {
                     var inSection = inChapter.Where(p => p.In!.Section == sec.Number).ToList();
                     secNodes.Add(inSection.Count == 0
-                        ? Empty(CodeLevel.Section, sec.Number, sec.Title, sec.Coverage) with { Kind = "section" }
+                        ? Empty(CodeLevel.Section, sec.Number, sec.Title, NothingIn(sec)) with { Kind = "section" }
                         : Node(CodeLevel.Section, sec.Number, sec.Title, null, Fold([.. Rules(inSection), .. Unchecked(sec)]), []) with { Kind = "section" });
                 }
                 // a row whose section the contents don't list stays in its chapter, under its own section
                 foreach (var g in inChapter.Where(p => sections.All(s => s.Number != p.In!.Section)).GroupBy(p => p.In!.Section ?? ""))
                     secNodes.Add(Node(CodeLevel.Section, g.Key.Length == 0 ? null : g.Key, g.First().In!.SectionTitle ?? "Other rules", null, Rules(g.ToList()), []) with { Kind = "section" });
                 chapters.Add((inChapter.Count == 0
-                    ? Empty(CodeLevel.Chapter, cn, ct, sections.Count == 0 ? "not_brought_in" : Coverage(sections.Select(s => s.Coverage)))
+                    ? Empty(CodeLevel.Chapter, cn, ct, sections.Count > 0 && sections.All(NothingIn))
                     : Node(CodeLevel.Chapter, cn, ct, null, Fold(secNodes), [])) with { Kind = chapter.Kind });
                 used.UnionWith(inChapter.Select(p => p.Row));
             }
@@ -380,19 +380,17 @@ public static class ResultViews
             return Node(CodeLevel.Rule, piece, g.First().RuleName, null, [], g.Select(p => p.Row).ToList());
         }).ToList();
 
-    /// <summary>The most telling coverage of a chapter's sections: any not yet checked is "not checked yet".</summary>
-    private static string Coverage(IEnumerable<string> coverages)
-    {
-        var all = coverages.ToList();
-        return all.Count > 0 && all.All(c => c == "not_for_checking") ? "not_for_checking" : "not_checked_yet";
-    }
+    /// <summary>Whether a section holds nothing to check: the contents say so (definitions, references), all of it
+    /// was brought in, and no piece of it is waiting for rules (review round 2: a definitions section only partly
+    /// brought in is not checked yet, never "nothing to check").</summary>
+    private static bool NothingIn(ContentsSection sec) =>
+        sec.Coverage == "not_for_checking" && sec.Whole && sec.Unchecked.Count == 0;
 
-    /// <summary>A chapter or section with no row: greyed; "nothing to check" only where the contents say there is
-    /// nothing in it to check (definitions, references); anything else is not checked yet by Gordium, which a parent
-    /// counts against green.</summary>
-    private static CodeNode Empty(CodeLevel level, string? number, string title, string coverage)
+    /// <summary>A chapter or section with no row: greyed; "nothing to check" only where nothing in it is to check
+    /// (<see cref="NothingIn"/>, for a chapter: every section); anything else is not checked yet by Gordium, which a
+    /// parent counts against green.</summary>
+    private static CodeNode Empty(CodeLevel level, string? number, string title, bool nothing)
     {
-        var nothing = coverage == "not_for_checking";
         return new CodeNode(level, number, title, null, nothing ? CodeState.NothingToCheck : CodeState.NotCheckedYet,
                             nothing ? "Nothing to check here" : "Not checked yet by Gordium", true, [], []);
     }
@@ -425,8 +423,9 @@ public static class ResultViews
         var shown = new List<CodeNode>();
         for (var i = 0; i < nodes.Count;)
         {
+            // a run: greyed nodes of one kind side by side (chapters, then appendices, are two runs)
             var j = i;
-            while (j < nodes.Count && nodes[j].Greyed)
+            while (j < nodes.Count && nodes[j].Greyed && (j == i || nodes[j].Kind == nodes[i].Kind))
                 j++;
             if (j - i < 2)
             {
@@ -435,10 +434,12 @@ public static class ResultViews
                 continue;
             }
             var run = nodes.GetRange(i, j - i);
-            var kind = run.Select(n => n.Kind).Distinct().Count() == 1 ? run[0].Kind : "part";
+            var kind = run[0].Kind;
             var state = run.Any(n => n.State == CodeState.NotCheckedYet) ? CodeState.NotCheckedYet : CodeState.NothingToCheck;
             var words = Plural(kind, run.Count);
-            var title = run[0].Number is { } first && run[^1].Number is { } last
+            // a range only for the document's own numbered parts listed side by side ("Articles III–IV"); a
+            // section's pieces not checked yet aren't side by side with each other in the section: counted instead
+            var title = kind != "part" && run[0].Number is { Length: > 0 } first && run[^1].Number is { Length: > 0 } last
                 ? $"{char.ToUpperInvariant(words[0])}{words[1..]} {first}–{last}"
                 : $"{run.Count} {(i == 0 ? "" : "other ")}{words}";
             shown.Add(new CodeNode(CodeLevel.Others, null, title, null, state,
@@ -451,18 +452,12 @@ public static class ResultViews
     private static CodeNode Node(CodeLevel level, string? number, string title, string? note, List<CodeNode> children, List<ResultRow> rows)
     {
         var all = AllRows(children).Concat(rows).ToList();
-        var notChecked = Greyed(children);
-        var state = StateOf(all.Select(r => r.Verdict).ToList(), notChecked > 0);
+        var state = StateOf(all.Select(r => r.Verdict).ToList(), GreyedInside(children).Any(c => c.State == CodeState.NotCheckedYet));
         return new CodeNode(level, number, title, note, state, Line(all, children), false, children, rows);
     }
 
     private static IEnumerable<ResultRow> AllRows(IEnumerable<CodeNode> nodes) =>
         nodes.SelectMany(n => n.Rows.Concat(AllRows(n.Children)));
-
-    /// <summary>How many greyed not-checked-yet nodes are inside (a fold counts each node it holds).</summary>
-    private static int Greyed(IEnumerable<CodeNode> nodes) =>
-        nodes.Sum(n => n.Level == CodeLevel.Others ? n.Children.Count(c => c.State == CodeState.NotCheckedYet)
-                       : n.Greyed ? (n.State == CodeState.NotCheckedYet ? 1 : 0) : Greyed(n.Children));
 
     /// <summary>The worst state inside (change 34): complies only when every row complies (or doesn't apply, with at
     /// least one that complies) and nothing inside is not checked yet.</summary>

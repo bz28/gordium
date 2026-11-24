@@ -166,6 +166,50 @@ public sealed class ResultViewsTests
         Assert.DoesNotContain("chapter", zoning.Line, StringComparison.Ordinal);
     }
 
+    /// <summary>A section with no rows is "nothing to check" only when all of it was brought in and none of its pieces
+    /// waits for rules (review round 2): BCNYS 903 (sprinkler systems) is a reference section only partly brought in,
+    /// so the rest of it (903.2, where sprinklers are required) is not checked yet, and so is its chapter.</summary>
+    [Fact]
+    public void A_section_only_partly_brought_in_is_not_checked_yet_even_with_no_rows()
+    {
+        // BCNYS chapter 9 as if every section in it were a whole reference section, then with 903 only partly brought in
+        static JsonNode Chapter9(bool whole903)
+        {
+            var result = Answer();
+            var bc = result["view"]!["contents"]!.AsArray().Single(d => ((string?)d!["document"])!.StartsWith("2025 Building Code", StringComparison.Ordinal))!;
+            var ch9 = bc["chapters"]!.AsArray().Single(c => (string?)c!["number"] == "9")!;
+            foreach (var sec in ch9["sections"]!.AsArray())
+            {
+                sec!["coverage"] = "not_for_checking";
+                sec["whole"] = (string?)sec["number"] != "903" || whole903;
+                sec["pieces"] = new JsonArray();
+            }
+            return result;
+        }
+        CodeNode Ch9(bool whole903) => Walk(ResultViews.Build(Parse(Chapter9(whole903))).Code[1].Children)
+                                           .Single(n => n.Level == CodeLevel.Chapter && n.Number == "9");
+        Assert.Equal(CodeState.NothingToCheck, Ch9(true).State);
+        Assert.Equal(CodeState.NotCheckedYet, Ch9(false).State);
+        Assert.Equal("Not checked yet by Gordium", Ch9(false).Line);
+    }
+
+    /// <summary>A fold's title says only what is true of every part in it (review round 2): chapters and appendices are
+    /// two folds, never "Parts 11–S"; a section's pieces not checked yet are counted, not given a range that would take
+    /// in a piece between them that is checked.</summary>
+    [Fact]
+    public void A_fold_names_one_kind_and_gives_a_range_only_for_parts_side_by_side()
+    {
+        var m = ResultViews.Build(Apartment());
+        var bcFolds = m.Code[1].Children.Where(c => c.Level == CodeLevel.Others).Select(c => c.Title).ToList();
+        Assert.Contains(bcFolds, t => t.StartsWith("Chapters ", StringComparison.Ordinal) && t.EndsWith("–35", StringComparison.Ordinal));
+        Assert.Contains(bcFolds, t => t.StartsWith("Appendices A–", StringComparison.Ordinal));
+        var folds = Walk(m.Code).Where(n => n.Level == CodeLevel.Others).ToList();
+        Assert.All(folds, f => Assert.All(f.Children, c => Assert.Equal(f.Kind, c.Kind)));
+        Assert.DoesNotContain(folds, f => f.Title.StartsWith("Parts", StringComparison.Ordinal) || f.Title.Contains(" –", StringComparison.Ordinal));
+        var s318 = Walk(m.Code).Single(n => n.Level == CodeLevel.Section && n.Number == "325-18");
+        Assert.All(s318.Children.Where(c => c.Level == CodeLevel.Others), f => Assert.DoesNotContain("–", f.Title, StringComparison.Ordinal));
+    }
+
     /// <summary>The class rule of change 34, over every node: complies only when every row inside complies or doesn't
     /// apply and nothing inside is not checked yet; fails or review whenever a row inside does.</summary>
     [Fact]
