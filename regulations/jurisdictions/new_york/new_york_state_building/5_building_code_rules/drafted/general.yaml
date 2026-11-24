@@ -5350,9 +5350,9 @@ rules:
       > 0 and occupancy_group_i4 and not other_occupancy_present and story_first_above_or_below_grade and story_occupant_load
       <= 10 and egress_travel_distance <= 75))
     reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
-      may hold a space Table 1017.2 note a or 1006.2.2 gives a shorter distance (a temporary structure''s 100 ft, a refrigeration
-      room''s 150 ft unsprinklered, a special amusement area), stated or not ruled out: a person checks. (Only where the story
-      would otherwise pass.)'
+      may hold a space whose egress Table 1017.2 note a or 1006.2.2 sends to its own section (a boiler or furnace room, a
+      refrigeration machinery room, a refrigerated room, a stage, an electrical room), stated or not ruled out: that section,
+      not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise pass.)'
   for_each: story
   when_none: needs_review
   sources:
@@ -5554,7 +5554,7 @@ rules:
     or the building is in another occupancy (its rows are the rule “Table 1006.3.4(2)''s rows for other occupancies (BCNYS)”).
     Items 3 to 5 (mechanical parking, Groups R-3 and R-4, dwelling units) are for other groups. Hand-drafted in a Claude Code
     session (2026-11-21). Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed
-    seating (1030.7) or a space with a shorter distance (Table 1017.2 note a, 1006.2.2) is stated or not ruled out.'
+    seating (1030.7) or a space with its own egress section (Table 1017.2 note a, 1006.2.2) is stated or not ruled out.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_3_4_1_mixed_occupancies
