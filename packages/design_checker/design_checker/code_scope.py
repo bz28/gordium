@@ -109,7 +109,7 @@ CITES = {
 }
 # the marks the architect answers with on Project Information (apps/revit_addin: Marks.cs; every one is a mark there,
 # test_code_scope.py), named in each `ask`; Rhino asks the same facts in its start box and rows
-MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane",
+MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stories": "Gordium: Stories",
         "separate_means_of_egress": "Gordium: Separate means of egress", "townhouse_units": "Gordium: Townhouse units",
         "follows_building_code": "Gordium: Follows the Building Code", "occupancy_groups": "Gordium: Occupancy groups",
         "use": "Gordium: Use", "attached_units_in_building": "Gordium: Units in the attached building",
@@ -358,11 +358,13 @@ def decide(values: dict, building: dict | None, uses=None, place=None) -> dict:
     # the building block's facts, and any the check's values carry (a host with no interior description may state
     # them as facts); the building block's own stand where both give one
     given = {k: values[k] for k in FACTS if k in values}
-    facts, bad = _given({**given, **building} if isinstance(building, dict) else given if building is None else building)
+    block = {**given, **building} if isinstance(building, dict) else given if building is None else building
+    facts, bad = _given(block)
     used = dict(facts)
     by_hand = BY_HAND
     if bad:
-        bad_keys = [k for k in building if k in FACTS and k not in facts] if isinstance(building, dict) else []
+        # every fact of the block that couldn't be read, whether the building block or the check's values sent it
+        bad_keys = [k for k in block if k in FACTS and k not in facts] if isinstance(block, dict) else []
         return _answer(None, "; ".join(bad), ["R101.2"], used,
                        f"correct {_marks(bad_keys)} on Project Information" if bad_keys else
                        "correct it on Project Information")
