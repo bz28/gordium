@@ -212,9 +212,19 @@ ROW_PARTS = {
     "looked_up": (MARK, "Confirm or change the looked-up fact"),
 }
 NO_ASK_PARTS = ("use_detail",)          # "Answer when you plan the interior": when to answer; the parts after it ask
-# one key for one pick, whether the row's hint or the measuring's stop asks for it
-PICK_KEYS = {"no_main_building": "pick:main_building", "no_adu_building": "pick:adu_building",
-             "adu_not_found": "pick:adu_building"}
+
+
+def _pick_keys() -> dict:
+    """{stop code: its pick's key}: one key for one pick, whether the row's hint or the measuring's stop asks for it,
+    read from present's own words for each pick (PICK_MAIN_WHY: the main building's; PICK_ADU_WHYS: the ADU's
+    building's), never a second list."""
+    from model_measurement.stops import parts_of
+    out = {c: "pick:main_building" for c, _, _ in parts_of(present.PICK_MAIN_WHY)}
+    out.update({c: "pick:adu_building" for w in present.PICK_ADU_WHYS for c, _, _ in parts_of(w)})
+    return out
+
+
+HINT_KEYS = {present.PICK_MAIN: "pick:main_building", present.PICK_ADU: "pick:adu_building"}
 # the measuring's stops that are no fault of the model: a reading Gordium can't follow yet, or the city's files
 MEASURE_STOPS = ("reading_unknown", "sloped_ground", "curved_surface", "curved_edge")
 DECIDE_STOPS = ("law_missing",)
@@ -291,7 +301,7 @@ def _part_asks(part: dict, item: dict, ctx: dict, objects: list[str], asked: set
             return [{"kind": FIX_MODEL, "key": f"stop:open_solid:{what}", "headline": f"“{what}” isn't a closed solid",
                      "why": words, "elements": ids or list(objects)}]
         if _is_pick(code):
-            return [{"kind": MARK, "key": PICK_KEYS.get(code, f"stop:{code}"), "headline": _pick_head(code),
+            return [{"kind": MARK, "key": _pick_keys().get(code, f"stop:{code}"), "headline": _pick_head(code),
                      "why": words, "elements": list(objects)}]
         kind = MEASURE if code in MEASURE_STOPS else DECIDE if code in DECIDE_STOPS else FIX_MODEL
         return [{"kind": kind, "key": f"stop:{code}:{words}", "headline": _clause_head(words), "why": words,
@@ -299,9 +309,11 @@ def _part_asks(part: dict, item: dict, ctx: dict, objects: list[str], asked: set
     if code in NO_ASK_PARTS:
         return []
     if code == "looked_up" and params.get("fact"):
+        # no field: the looked-up lot, street or ground is confirmed or changed in the site's own setup (Edit
+        # site…), no one fact the description has
         return [{"kind": MARK, "key": f"looked_up:{params['fact']}", "headline": "Confirm or change the looked-up "
                  f"{params.get('name') or str(params['fact']).replace('_', ' ')}", "why": words,
-                 "elements": list(objects), "field": f"facts.{params['fact']}"}]
+                 "elements": list(objects)}]
     kind, headline = ROW_PARTS.get(code, ROW_PARTS["words"])
     if code == "depends" and params.get("questions"):
         return [{"kind": OPEN_QUESTION, "key": f"question:{q}", "headline": _clause_head(str(q)) or headline,
@@ -329,10 +341,14 @@ def _zoning_asks(item: dict, ctx: dict) -> list[dict]:
         out.append(_fact_ask(n, mine or why, objects))
     for part in parts:
         out += _part_asks(part, item, ctx, objects, asked)
-    hint = item.get("hint")                  # after the parts: a stop asking for the same pick is that one ask
-    if hint in (present.PICK_MAIN, present.PICK_ADU):
-        out.append({"kind": MARK, "key": "pick:main_building" if hint == present.PICK_MAIN else "pick:adu_building",
-                    "headline": hint.rstrip("…"), "why": why, "elements": list(objects)})
+    hint = item.get("hint")                  # after the parts: a stop asking for the same pick is that one ask,
+    if hint in HINT_KEYS:                    # under the hint's own headline (the button the row shows)
+        same = next((a for a in out if a["key"] == HINT_KEYS[hint]), None)
+        if same is not None:
+            same["headline"] = hint.rstrip("…")
+        else:
+            out.append({"kind": MARK, "key": HINT_KEYS[hint], "headline": hint.rstrip("…"), "why": why,
+                        "elements": list(objects)})
     if not out:
         out = [_from_cause(c, None) for c in item.get("causes") or []]
     return _deduped(out)
