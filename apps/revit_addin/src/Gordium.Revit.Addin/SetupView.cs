@@ -251,6 +251,9 @@ internal sealed class SetupView : C.StackPanel
                 row.Children.Add(f.Problem is not null && chosen is null ? Ink(state, PanelTokens.StatusReview) : state);
                 return row;
             }
+            case FieldKind.Number:
+            case FieldKind.Feet:
+            case FieldKind.Text:
             default:
             {
                 var number = f.Kind is FieldKind.Number or FieldKind.Feet;

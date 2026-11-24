@@ -4,12 +4,13 @@ using Xunit;
 
 namespace Gordium.Revit.Reading.Tests;
 
-/// <summary>The Gordium tab (RibbonPlan, RibbonIcons; design pass section 2.2): an architect's build shows exactly
-/// Check project, Mark facts, Panel and About, the trial's test tools only with the trial switch; every button has a
-/// one-line tooltip and at most three short lines more; every icon is a real PNG at 16 and 32 px in both themes.</summary>
+/// <summary>The Gordium tab (RibbonPlan, RibbonIcons; design pass section 2.2; UI polish change 48): an architect's
+/// build shows exactly Check project, Set up, Results, Summary and About, the trial's test tools only with the trial
+/// switch and then in one Trial pull-down; every button has a one-line tooltip and at most three short lines more;
+/// every icon is a real PNG at 16 and 32 px in both themes.</summary>
 public sealed class RibbonTests
 {
-    private static readonly string[] Architect = ["Check project", "Mark facts", "Panel", "Summary", "About"];
+    private static readonly string[] Architect = ["Check project", "Set up", "Results", "Summary", "About"];
     private static readonly string[] TestTools = ["Check box house", "Record scenes", "Read inside", "Record houses"];
 
     [Fact]
@@ -17,18 +18,25 @@ public sealed class RibbonTests
     {
         Assert.Equal(["Check", "Results", "Help"], RibbonPlan.Panels(trial: false).Select(p => p.Name));
         Assert.Equal(Architect, RibbonPlan.Buttons(trial: false).Select(b => b.Name));
-        Assert.Equal(["Check project", "Mark facts"], RibbonPlan.Panels(false)[0].Buttons.Select(b => b.Name));
-        Assert.Equal(["Panel", "Summary"], RibbonPlan.Panels(false)[1].Buttons.Select(b => b.Name));
+        Assert.Equal(["Check project", "Set up"], RibbonPlan.Panels(false)[0].Buttons.Select(b => b.Name));
+        Assert.Equal(["Results", "Summary"], RibbonPlan.Panels(false)[1].Buttons.Select(b => b.Name));
         Assert.Equal(["About"], RibbonPlan.Panels(false)[2].Buttons.Select(b => b.Name));
+        Assert.All(RibbonPlan.Panels(false), p => Assert.Null(p.Pulldown));
         Assert.DoesNotContain(RibbonPlan.Buttons(false), b => TestTools.Contains(b.Name) || b.ToolTip.StartsWith("Trial", StringComparison.Ordinal));
     }
 
+    /// <summary>The trial's test tools are one "Trial" pull-down on the Help panel (UI polish change 48: product
+    /// buttons an architect understands; trial tools out of the way), never a panel of their own.</summary>
     [Fact]
-    public void Trial_on_adds_the_test_tools_in_a_trial_panel_last()
+    public void Trial_on_adds_the_test_tools_in_one_trial_pull_down()
     {
         var panels = RibbonPlan.Panels(trial: true);
-        Assert.Equal(["Check", "Results", "Help", "Trial"], panels.Select(p => p.Name));
-        Assert.Equal(TestTools, panels[3].Buttons.Select(b => b.Name));
+        Assert.Equal(["Check", "Results", "Help"], panels.Select(p => p.Name));
+        Assert.Equal(["About"], panels[2].Buttons.Select(b => b.Name));
+        Assert.Equal("Trial", panels[2].Pulldown!.Text);
+        Assert.Equal(RibbonPlan.TrialMenu, panels[2].Pulldown!.Id);
+        Assert.Equal(TestTools, panels[2].Pulldown!.Buttons.Select(b => b.Name));
+        Assert.All(panels.Take(2), p => Assert.Null(p.Pulldown));
         Assert.Equal([.. Architect, .. TestTools], RibbonPlan.Buttons(true).Select(b => b.Name));
         // the ids stay stable (Revit names a Quick Access Toolbar copy or shortcut by tab, panel and name, so a button
         // that moves panel loses those once: The_panel_of_every_button_is_pinned)
@@ -88,13 +96,13 @@ public sealed class RibbonTests
     }
 
     [Fact]
-    public void Check_project_s_long_description_says_what_is_read_where_results_appear_and_nothing_sent_while_a_fact_is_missing()
+    public void Check_project_s_long_description_says_what_is_read_where_results_appear_and_what_is_asked_first()
     {
         var check = RibbonPlan.Buttons(false).Single(b => b.Id == RibbonPlan.CheckProject);
-        Assert.Equal("Check this project against its zoning and egress rules", check.ToolTip);
-        Assert.Contains("reads the project", check.LongDescription[0], StringComparison.Ordinal);
-        Assert.Contains("Gordium panel", check.LongDescription[1], StringComparison.Ordinal);
-        Assert.Contains("nothing is sent", check.LongDescription[2], StringComparison.Ordinal);
+        Assert.Equal("Check this design against Ithaca zoning and NY egress", check.ToolTip);
+        Assert.Equal("Results open in the Gordium pane.", check.LongDescription[0]);
+        Assert.Contains("reads the model", check.LongDescription[1], StringComparison.Ordinal);
+        Assert.Contains("the pane asks for it first", check.LongDescription[2], StringComparison.Ordinal);
     }
 
     [Fact]
@@ -103,32 +111,30 @@ public sealed class RibbonTests
         // review round 1: a Quick Access Toolbar copy or a keyboard shortcut follows tab + panel + name, so moving a
         // button loses them; Mark facts, About, Read inside and Record houses moved once in the ribbon pass. A future
         // move must show up here (and be said in the README and the trial runbook)
-        var panelOf = RibbonPlan.Panels(trial: true).SelectMany(p => p.Buttons.Select(b => (b.Id, p.Name))).ToDictionary(x => x.Id, x => x.Name);
+        // the UI polish (change 48) moved the four trial tools into the Help panel's Trial pull-down (trial builds only)
+        var panelOf = RibbonPlan.Panels(trial: true).SelectMany(p => p.All.Select(b => (b.Id, p.Name))).ToDictionary(x => x.Id, x => x.Name);
         Assert.Equal(new Dictionary<string, string>
         {
             ["gordium_check_project"] = "Check", ["gordium_mark_for_egress"] = "Check", ["gordium_results_panel"] = "Results",
             ["gordium_summary"] = "Results",
-            ["gordium_about"] = "Help", ["gordium_check_box_house"] = "Trial", ["gordium_record_scenes"] = "Trial",
-            ["gordium_read_interior"] = "Trial", ["gordium_record_houses"] = "Trial",
+            ["gordium_about"] = "Help", ["gordium_check_box_house"] = "Help", ["gordium_record_scenes"] = "Help",
+            ["gordium_read_interior"] = "Help", ["gordium_record_houses"] = "Help",
         }, panelOf);
     }
 
     [Fact]
-    public void Mark_facts_says_what_its_list_holds_and_where_marks_are_set()
+    public void Set_up_says_what_it_asks_and_that_nothing_is_written_until_Save()
     {
-        // review rounds 1-2: MarkingList.Build lists the rooms, windows, doors and the floors outside the house (lot
-        // coverage and the yards), never the lot facts Check project asks for; the command adds every Gordium mark and
-        // fills a window's maker's clear opening as a draft (TryPrefill); some marks are on types or Project Information
-        var mark = RibbonPlan.Buttons(false).Single(b => b.Id == RibbonPlan.MarkFacts);
-        var all = mark.ToolTip + " " + mark.LongDescriptionText;
-        foreach (var listed in new[] { "rooms", "windows", "doors", "floors outside the house" })
+        // UI polish change 48 (strings.md, Ribbon): the facts Gordium can't read from the model, in the Setup form;
+        // the command adds every Gordium mark and fills a window's maker's clear opening as a draft (TryPrefill), as
+        // review rounds 1-2 of the ribbon pass required it to say
+        var setUp = RibbonPlan.Buttons(false).Single(b => b.Id == RibbonPlan.MarkFacts);
+        Assert.Equal("Set up", setUp.Name);
+        var all = setUp.ToolTip + " " + setUp.LongDescriptionText;
+        foreach (var listed in new[] { "lot", "use", "escape openings", "exits" })
             Assert.Contains(listed, all, StringComparison.Ordinal);
-        Assert.DoesNotContain("egress marks", all, StringComparison.Ordinal);
-        Assert.DoesNotContain("facts Gordium needs", all, StringComparison.Ordinal);
         Assert.Contains("clear opening as a draft", all, StringComparison.Ordinal);
-        Assert.Contains("Type Properties", all, StringComparison.Ordinal);
-        Assert.Contains("Project Information", all, StringComparison.Ordinal);
-        Assert.Contains("Check project asks for any lot fact not set", all, StringComparison.Ordinal);
+        Assert.Contains("nothing is written until you click Save", all, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -138,11 +144,9 @@ public sealed class RibbonTests
         // and asks for a missing street edge by a pick in the view (PickStreet)
         var check = RibbonPlan.Buttons(false).Single(b => b.Id == RibbonPlan.CheckProject);
         var all = check.ToolTip + " " + check.LongDescriptionText;
-        Assert.Contains("Adds Gordium's marks", all, StringComparison.Ordinal);
+        Assert.Contains("Adds Gordium's fields if missing", all, StringComparison.Ordinal);
         Assert.Contains("clear opening as a draft", all, StringComparison.Ordinal);
-        // only when it is the last fact missing and a plan shows a property line (StreetEdges.Ask, review round 4)
-        Assert.Contains("If the street edge is the last fact missing, asks you to pick it in a plan", all,
-            StringComparison.Ordinal);
+        Assert.Contains("If a fact is missing (zone, use…), the pane asks for it first.", all, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -155,7 +159,10 @@ public sealed class RibbonTests
         var pane = File.ReadAllText(Path.Combine(addin, "ResultsPane.cs"));
         var view = File.ReadAllText(Path.Combine(addin, "ResultsView.cs"));
         Assert.Contains("app.RegisterDockablePane(Id, RibbonPlan.PaneTitle, new ResultsPane());", pane, StringComparison.Ordinal);
-        Assert.Contains("new C.TextBlock { Text = RibbonPlan.PaneTitle,", view, StringComparison.Ordinal);
+        // the header shows the project's name once one is known (UI polish change 47), "Gordium" before
+        Assert.Contains("new C.TextBlock { Text = PaneWords.HeaderTitle(null),", view, StringComparison.Ordinal);
+        Assert.Equal(RibbonPlan.PaneTitle, PaneWords.HeaderTitle(null));
+        Assert.Equal("Four-unit apartment", PaneWords.HeaderTitle(" Four-unit apartment "));
         Assert.DoesNotContain("Gordium: Check my project", pane + view, StringComparison.Ordinal);
     }
 

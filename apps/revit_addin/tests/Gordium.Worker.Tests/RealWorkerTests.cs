@@ -216,6 +216,11 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
         var r1b = options.DistrictUses["R-1b"];
         Assert.Equal("one_family_detached", r1b[0].Id);
         Assert.True(r1b[0].Permitted);
+        // the uses the Building Code governs by the use alone (check.building_code_uses), for the Setup form's
+        // occupancy group and sprinkler system: a multiple-family building is one, a one-family house never
+        Assert.Contains("multiple_family", options.BuildingCodeUses);
+        Assert.DoesNotContain("one_family_detached", options.BuildingCodeUses);
+        Assert.All(options.BuildingCodeUses, u => Assert.Contains(options.Uses, x => x.Id == u));
         Assert.False(Client.IsStopped);
         Assert.Equal(Client.About.Protocol, (await Client.HelloAsync()).Protocol);
     }

@@ -49,7 +49,7 @@ public sealed class PaneReview2Tests
         var cancelled = ResultRows.Stale(House(), at, CheckWords.CancelledStale(at), StaleReason.Cancelled);
         var changed = ResultRows.Stale(House(), at);
         Assert.Contains("before the check you cancelled", RibbonBadge.Of(cancelled, at).ToolTip, StringComparison.Ordinal);
-        Assert.StartsWith("The model changed after the check at 14:32", RibbonBadge.Of(changed, at).ToolTip, StringComparison.Ordinal);
+        Assert.StartsWith("The model changed after the 14:32 check", RibbonBadge.Of(changed, at).ToolTip, StringComparison.Ordinal);
         var row = ResultList.Place(cancelled).First(r => r.Row.Elements.Count > 0);
         var uid = row.Row.Elements[0];
         Assert.Contains("before the check you cancelled", SelectionMap.Of(cancelled, at).Answer([uid], _ => "it").Line, StringComparison.Ordinal);
