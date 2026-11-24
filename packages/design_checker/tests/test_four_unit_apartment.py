@@ -87,3 +87,24 @@ def test_its_groups_rows_give_real_verdicts(got, expected):
 
 def test_the_build_data_is_made_from_the_building(tmp_path):
     assert build.main(["--check"]) == 0                      # revit_build_data.json is apartment.yaml's, current
+
+
+# ---- PR #181 review (2026-11-24): a space that is itself an exit is not one 1006.2.1 or 1007.1 counts ---------------
+
+SPACE_EXIT_RULES = ("general.bc_1006_2_1_two_exits", "general.bc_1006_2_1_1_three_or_more_exits",
+                    "general.bc_1007_1_1_space_remoteness", "general.bc_1007_1_2_space_three_or_more")
+
+
+@pytest.mark.parametrize("sprinkler_system", ["none", "nfpa_13"])
+def test_an_exit_stair_is_never_held_to_the_exits_of_the_spaces_it_serves(sprinkler_system):
+    """Group I-4's two-exit rule failed each stair enclosure (one door, no sprinkler system) and needed review with
+    one: 1006.2.1 and 1007.1 ask for the exits of the spaces exit access serves, never of an exit itself (202 EXIT;
+    the routes mark a room entered by an exit-enclosure door as space_is_exit). The same building as Group I-4."""
+    import copy
+    interior = copy.deepcopy(build.interior_of())
+    interior["building"] = {**(interior.get("building") or {}), "occupancy_groups": ["I-4"],
+                            "sprinkler_system": sprinkler_system}
+    got = egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), interior, VALUES, ALLOWED)
+    stairs = [r for r in got["rows"] if r["rule"] in SPACE_EXIT_RULES and r["name"].startswith("Stair")]
+    assert {r["rule"] for r in stairs} >= {"general.bc_1006_2_1_two_exits"}
+    assert {(r["rule"], r["outcome"]) for r in stairs} == {(r["rule"], "pass") for r in stairs}

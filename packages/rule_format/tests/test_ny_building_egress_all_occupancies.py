@@ -465,3 +465,26 @@ def test_the_single_exit_special_spaces_reason_names_exactly_the_spaces_the_fact
                 found += 1
     assert found >= 1
 
+
+
+def test_every_rule_on_a_spaces_own_exits_lets_an_exit_be():
+    """PR #181 review (2026-11-24), the class: a rule reading a space's exits, occupant load or common path is about
+    a space exit access serves (1006.2.1, 1007.1), so its check lets a space that is itself an exit be
+    (space_is_exit), and each of its reviews leaves one out, or an exit stair fails or needs review on rules not
+    its own (Group I-4's two-exit rule failed each stair of the four-unit apartment)."""
+    import yaml
+    path = (REPO / "regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/"
+            "general.yaml")
+    rules = yaml.safe_load(path.read_text(encoding="utf-8"))
+    rules = rules["rules"] if isinstance(rules, dict) else rules
+    space = ("space_exit_count", "space_occupant_load", "space_common_path")
+    checked = []
+    for r in rules:
+        check = str(r.get("check", ""))
+        if not any(m in check for m in space):
+            continue
+        checked.append(r["id"])
+        assert check.startswith("space_is_exit or "), r["id"]
+        for w in r.get("review_when") or []:
+            assert str(w["when"]).startswith("not space_is_exit and "), (r["id"], w["when"])
+    assert "general.bc_1006_2_1_two_exits" in checked and len(checked) >= 16
