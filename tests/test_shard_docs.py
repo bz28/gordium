@@ -23,11 +23,30 @@ def _conftest():
 
 def test_a_slow_test_missing_from_the_durations_list_is_found_and_a_listed_or_quick_one_is_not():
     """Review round 5 (2026-11-24): a 16-minute test the list lacked was counted at 0.2 s; a part now fails for an
-    unlisted test of TOO_SLOW or more."""
+    unlisted test whose run takes TOO_SLOW or more."""
     c = _conftest()
-    took = {"a::slow_unlisted": 960.0, "a::slow_listed": 40.0, "a::quick": 0.4, "a::edge": c.TOO_SLOW}
+    took = {"a::slow_unlisted": {"call": 960.0}, "a::slow_listed": {"call": 40.0}, "a::quick": {"call": 0.4},
+            "a::edge": {"setup": 0.1, "call": c.TOO_SLOW}}
     assert c.unlisted_slow(took, {"a::slow_listed": 38.0}) == [(960.0, "a::slow_unlisted"), (c.TOO_SLOW, "a::edge")]
     assert c.unlisted_slow(took, dict.fromkeys(took)) == []
+
+
+def test_a_test_slow_only_in_its_module_fixtures_setup_never_fails_the_part():
+    """Review round 6 (2026-11-24): a module fixture's setup lands on whichever of its tests runs first, which changes
+    with the order the workers take them, so only the run (`call`) decides."""
+    c = _conftest()
+    took = {"m::first_to_run": {"setup": 60.0, "call": 0.1, "teardown": 0.0}, "m::second": {"call": 0.1}}
+    assert c.unlisted_slow(took, {}) == []
+
+
+def test_record_lists_a_test_by_its_run_at_its_whole_time_and_never_one_slow_only_in_setup():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("check_shards", ROOT / "tests" / "check_shards.py")
+    cs = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cs)
+    seconds = {"a::run": 12.5, "a::setup_only": 30.0, "a::quick": 1.2}
+    run = {"a::run": 10.0, "a::quick": 0.6}
+    assert cs.listed(seconds, run) == {"a::run": 12.5}
 
 
 def test_every_test_listed_as_slow_is_still_a_real_test_id_shape_and_a_second_or_more():

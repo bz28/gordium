@@ -446,3 +446,22 @@ def test_no_text_calls_a_brought_in_section_not_brought_in():
         bad += [(r["id"], x) for t in texts if isinstance(t, str) for x in stale(t)]
     bad += [("sources.yaml", x) for x in stale((NY / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))]
     assert not bad, bad
+
+
+def test_the_single_exit_special_spaces_reason_names_exactly_the_spaces_the_fact_lists():
+    """Review round 6 (2026-11-24): the reason once named a stage, which neither Table 1017.2 note a nor 1006.2.2 sends
+    to its own section. Its spaces are now the special_egress_spaces fact's own list, word for word, and no reason
+    on that fact names a space outside it."""
+    meaning = load(NY / "5_building_code_rules/drafted/records/proposed_measures.yaml")["special_egress_spaces"]["meaning"]
+    spaces = meaning.split("as the architect states it: ", 1)[1].split("; left unstated", 1)[0]
+    found = 0
+    for r in load(RULEBOOK)["rules"]:
+        for w in r.get("review_when") or []:
+            if "special_egress_spaces" not in w["when"]:
+                continue
+            assert "stage" not in w["reason"].lower(), r["id"]
+            if "1006.3.4's single-exit travel limit" in w["reason"]:
+                assert f"own exits or exit access travel limit: {spaces}." in w["reason"], r["id"]
+                found += 1
+    assert found >= 1
+
