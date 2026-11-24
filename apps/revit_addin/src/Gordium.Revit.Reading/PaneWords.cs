@@ -63,7 +63,7 @@ public static class PaneWords
     [
         (PaneIcon.Page, "Every result shows the code's own words and page."),
         (PaneIcon.Review, "If Gordium can't measure something, it says Needs review. It never guesses a pass."),
-        (PaneIcon.Pencil, "Nothing is written to your model unless you click Save."),
+        (PaneIcon.Pencil, "Nothing is written to your model without your click."),
     ];
 
     // ---- picking the street edge (UI polish change 9) ---------------------------------------------------------------
@@ -118,12 +118,24 @@ public static class PaneWords
         if (chosen == 0)
             return BlankFact;
         var words = new List<string> { $"Saves {chosen} {(chosen == 1 ? "fact" : "facts")} to Project Information (one undo)." };
+        // the zoning district chooses the rules: without it nothing is checked at all (SetupWords.NothingSent), so it
+        // is never said as only its rules needing review
+        if (unsetFacts.Contains(ZoneStep))
+        {
+            words.Add(NoZone);
+            unsetFacts = unsetFacts.Where(f => f != ZoneStep).ToList();
+        }
         if (unsetFacts.Count > 0)
             words.Add($"{Capital(And(unsetFacts))} {(unsetFacts.Count == 1 ? "isn't" : "aren't")} set yet: {(unsetFacts.Count == 1 ? "its" : "their")} rules will need review.");
         if (unmarked.Count > 0)
             words.Add($"{Capital(And(unmarked))} still need marking: {(unmarked.Count == 1 ? "its" : "their")} rules will need review.");
         return string.Join(" ", words);
     }
+
+    /// <summary>The zoning district's step as the footer names it, and what the footer says while it isn't set.</summary>
+    public const string ZoneStep = "zoning district";
+
+    public const string NoZone = "Choose the zoning district: nothing can be checked without it.";
 
     /// <summary>The Setup form's one button: "Save and check" (greyed with nothing chosen) or "Save 4 and check".
     /// Save writes the facts chosen, then checks (anything still unset makes its rules need review, never a pass).</summary>

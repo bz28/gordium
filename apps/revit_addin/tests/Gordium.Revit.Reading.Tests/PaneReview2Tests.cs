@@ -99,7 +99,7 @@ public sealed class PaneReview2Tests
         var waiting = new SetupScreen("house", [zone, stories], [], [], [Marks.Zone.Name]);
         var footer = PaneWords.SetupFooter(waiting, draft);
         Assert.DoesNotContain(PaneWords.BlankFact, footer, StringComparison.Ordinal);
-        Assert.Equal("Saves 1 fact to Project Information (one undo). Zoning district isn't set yet: its rules will need review.", footer);
+        Assert.Equal("Saves 1 fact to Project Information (one undo). " + PaneWords.NoZone, footer);
         Assert.Equal("Save 1 and check", PaneWords.SaveAndCheck(PaneWords.Unsaved(waiting, draft)));
         Assert.Contains("private int Changes() => PaneWords.Unsaved(_screen, _draft);",
                         File.ReadAllText(Path.Combine(Src, "Gordium.Revit.Addin", "SetupView.cs")), StringComparison.Ordinal);

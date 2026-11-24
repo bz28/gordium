@@ -123,7 +123,7 @@ public sealed class RibbonTests
     }
 
     [Fact]
-    public void Set_up_says_what_it_asks_and_that_nothing_is_written_until_Save()
+    public void Set_up_says_what_it_asks_and_that_nothing_is_written_without_a_click()
     {
         // UI polish change 48 (strings.md, Ribbon): the facts Gordium can't read from the model, in the Setup form;
         // the command adds every Gordium mark and fills a window's maker's clear opening as a draft (TryPrefill), as
@@ -134,7 +134,7 @@ public sealed class RibbonTests
         foreach (var listed in new[] { "lot", "use", "escape openings", "exits" })
             Assert.Contains(listed, all, StringComparison.Ordinal);
         Assert.Contains("clear opening as a draft", all, StringComparison.Ordinal);
-        Assert.Contains("nothing is written until you click Save", all, StringComparison.Ordinal);
+        Assert.Contains("written when you click Save (or Accept)", all, StringComparison.Ordinal);
     }
 
     [Fact]

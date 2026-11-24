@@ -32,6 +32,10 @@ public static class SetupSteps
     /// <summary>The fold that holds every optional fact.</summary>
     public const string MoreTitle = "More facts (optional)";
 
+    /// <summary>The street edge's problem when the one kept is no longer an edge of the lot (the property line
+    /// redrawn): the check would refuse it (StreetRefusal.NoLongerAnEdge), so the form waits for a new pick.</summary>
+    public const string StreetOffLot = "The property line changed, so the street edge needs picking again.";
+
     /// <summary>The project facts the Building Code's egress rules turn on: required where it governs (Ben,
     /// 2026-11-23: occupancy group and sprinkler system are required when the Building Code governs).</summary>
     public static IReadOnlyList<MarkDefinition> BuildingCodeFacts { get; } = [Marks.OccupancyGroups, Marks.SprinklerSystem];
@@ -99,15 +103,20 @@ public static class SetupSteps
     }
 
     /// <summary>The numbered steps: the required project facts (the lot's, then the building's where the Building
-    /// Code governs), then the needed facts inside the building still to mark. A line with nothing of its kind drawn
+    /// Code governs) and any other project fact holding what Gordium can't use (the gate waits for it: SetupGate.Needed,
+    /// so a step, never only in the More facts fold), then the needed facts inside the building still to mark. The
+    /// steps are exactly what the gate waits for. A line with nothing of its kind drawn
     /// is no step (nothing to set: <see cref="NothingDrawn"/>), nor is one already set in the model (said once:
     /// <see cref="AlreadySet"/>); a project fact is always a step (its circle ✓ once set).</summary>
     public static IReadOnlyList<SetupTask> Of(SetupScreen screen, SetupDraft? draft)
     {
         ArgumentNullException.ThrowIfNull(screen);
         var steps = new List<SetupTask>();
-        foreach (var f in screen.Fields.Where(f => f.Required))
-            steps.Add(new(f.Mark.Name, Title(f.Mark, f.Label), BuildingCodeFacts.Contains(f.Mark) ? Building : Lot, f, null, Done(f, draft)));
+        foreach (var f in screen.Fields.Where(f => f.Required || f.Problem is not null)
+                                       .OrderBy(f => BuildingCodeFacts.Contains(f.Mark) || f.Mark.Feeds.StartsWith("building.", StringComparison.Ordinal)))
+            steps.Add(new(f.Mark.Name, Title(f.Mark, f.Label),
+                          BuildingCodeFacts.Contains(f.Mark) || f.Mark.Feeds.StartsWith("building.", StringComparison.Ordinal) ? Building : Lot,
+                          f, null, Done(f, draft)));
         foreach (var l in screen.Lines.Where(l => l.Needed && !NothingDrawn(l) && !l.Done))
             steps.Add(new(l.Key, Title(l), InModel, null, l, l.Done));
         return steps;
@@ -157,7 +166,7 @@ public static class SetupSteps
     public static IReadOnlyList<SetupField> MoreFields(SetupScreen screen)
     {
         ArgumentNullException.ThrowIfNull(screen);
-        return screen.Fields.Where(f => !f.Required).ToList();
+        return screen.Fields.Where(f => !f.Required && f.Problem is null).ToList();
     }
 
     /// <summary>The facts inside the building the check doesn't need first (operation, clear opening, the escape
@@ -237,7 +246,8 @@ public static class SetupSteps
     }
 
     /// <summary>The street edge's state on its step: "Not picked", the edge in words ("South edge, 100'-0\""),
-    /// "Picked — click Save" (chosen in the form, its words not known), or "The lot changed — pick again".</summary>
+    /// "Picked — click Save" (chosen in the form, its words not known), or what is wrong with the one kept (the
+    /// field's problem: typed by hand, or no longer an edge of the lot) as "… — pick again".</summary>
     public static string StreetState(SetupField f, SetupDraft? draft, string? edgeWords)
     {
         ArgumentNullException.ThrowIfNull(f);
@@ -247,7 +257,7 @@ public static class SetupSteps
         if (f.Current is null)
             return "Not picked";
         if (f.Problem is not null)
-            return "The lot changed — pick again";
+            return f.Problem == StreetOffLot ? "The lot changed — pick again" : "Typed by hand — pick again";
         return edgeWords is { } w ? PaneWords.Capital(w) : "Picked";
     }
 }

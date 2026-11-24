@@ -78,7 +78,7 @@ public static class RibbonPlan
              "If a fact is missing (zone, use…), the pane asks for it first."],
             RibbonIcons.CheckProject),
         new(MarkFacts, "Set\nup", "The facts Gordium can't read from the model: lot, use, escape openings, exits",
-            ["Opens Setup in the Gordium pane: choose each fact there; nothing is written until you click Save.",
+            ["Opens Setup in the Gordium pane: what you choose there is written when you click Save (or Accept).",
              "Adds Gordium's fields if missing (and a maker's clear opening as a draft)."],
             RibbonIcons.MarkFacts),
     ]);

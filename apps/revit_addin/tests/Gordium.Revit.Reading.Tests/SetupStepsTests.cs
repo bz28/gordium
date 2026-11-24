@@ -209,13 +209,106 @@ public sealed class SetupStepsTests
         Assert.Equal("Not picked", SetupSteps.StreetState(Screen().Fields.Single(x => x.Mark == Marks.StreetEdge), null, null));
         var typed = Screen(new Dictionary<Guid, MarkValue> { [Marks.StreetEdge.Guid] = new(true, Text: "the front") }).Fields.Single(x => x.Mark == Marks.StreetEdge);
         Assert.Equal("The street edge was typed by hand. Pick it on the plan.", typed.Problem);
-        Assert.Equal("The lot changed — pick again", SetupSteps.StreetState(typed, null, null));
+        Assert.Equal("Typed by hand — pick again", SetupSteps.StreetState(typed, null, null));     // round 1, #3
         var draft = new SetupDraft();
         draft.Pick([new PickedEdge(new Xyz(0, 0, 0), new Xyz(100, 0, 0), true, 100)]);
         draft.PickedWords = "the south edge, 100'-0\"";
         Assert.Equal("The south edge, 100'-0\"", SetupSteps.StreetState(f with { Current = null }, draft, null));
         draft.Clear();
         Assert.Null(draft.PickedWords);
+    }
+
+    // ---- review round 1 -------------------------------------------------------------------------------------------
+
+    /// <summary>Round 1, #1: the steps are exactly what the gate waits for, a problem on an optional fact included
+    /// (a sprinkler system typed "NFPA13" on a house): never "Everything the check needs is set" over a form that
+    /// Check project keeps showing; and that fact is a step, not only inside the fold.</summary>
+    [Fact]
+    public void A_fact_the_gate_waits_for_is_a_step_whatever_its_fold()
+    {
+        var kept = StreetEdges.Format([(new Xyz(0, 0, 0), new Xyz(100, 0, 0))]);
+        var project = new Dictionary<Guid, MarkValue>
+        {
+            [Marks.Zone.Guid] = new(true, Text: "R-1b"), [Marks.Use.Guid] = new(true, Text: "one_family_detached"),
+            [Marks.LotSurveyed.Guid] = new(true, 1), [Marks.StreetEdge.Guid] = new(true, Text: kept),
+            [Marks.SprinklerSystem.Guid] = new(true, Text: "NFPA13"),
+        };
+        var s = Screen(project);
+        Assert.False(s.Ready);
+        Assert.NotEqual("Everything the check needs is set", s.Headline);
+        var step = Assert.Single(s.Steps, x => x.Key == Marks.SprinklerSystem.Name);
+        Assert.False(step.Done);
+        Assert.Equal(SetupSteps.Building, step.Section);
+        Assert.DoesNotContain(SetupSteps.MoreFields(s), f => f.Mark == Marks.SprinklerSystem);
+        Assert.True(s.Steps.Where(x => !x.Done).Select(x => x.Key).ToHashSet().SetEquals(s.Needed));
+    }
+
+    /// <summary>Round 1, #3: a kept street edge no property line has any more (the lot redrawn) is a problem the form
+    /// waits for, as the check would refuse it; never ✓ "Picked".</summary>
+    [Fact]
+    public void A_kept_edge_off_the_lot_is_asked_again()
+    {
+        var kept = StreetEdges.Format([(new Xyz(0, 0, 0), new Xyz(100, 0, 0))]);
+        var project = new Dictionary<Guid, MarkValue> { [Marks.StreetEdge.Guid] = new(true, Text: kept) };
+        var off = SetupScreen.Build(Model(project), [], Options, null, null, null, streetOnLot: false);
+        var f = off.Fields.Single(x => x.Mark == Marks.StreetEdge);
+        Assert.Equal(SetupSteps.StreetOffLot, f.Problem);
+        Assert.Contains(Marks.StreetEdge.Name, off.Needed);
+        Assert.False(off.Steps.Single(x => x.Field?.Mark == Marks.StreetEdge).Done);
+        Assert.Equal("The lot changed — pick again", SetupSteps.StreetState(f, null, null));
+        var on = SetupScreen.Build(Model(project), [], Options, null, null, "the south edge, 100'-0\"", streetOnLot: true);
+        Assert.Null(on.Fields.Single(x => x.Mark == Marks.StreetEdge).Problem);
+        Assert.DoesNotContain(Marks.StreetEdge.Name, on.Needed);
+    }
+
+    /// <summary>Round 1, #4: one group typed any way the check reads it ("R-2," or "r-2") is set, never a problem that
+    /// holds the check back.</summary>
+    [Theory]
+    [InlineData("R-2,")]
+    [InlineData("r-2")]
+    [InlineData("R-2, R-2")]
+    public void One_group_typed_any_way_the_check_reads_is_set(string typed)
+    {
+        Assert.NotNull(OccupancyGroupWords.Parse(typed));
+        var s = Screen(new Dictionary<Guid, MarkValue> { [Marks.OccupancyGroups.Guid] = new(true, Text: typed) }, Use("multiple_family"));
+        var f = s.Fields.Single(x => x.Mark == Marks.OccupancyGroups);
+        Assert.Null(f.Problem);
+        Assert.True(f.IsSet);
+        Assert.DoesNotContain(Marks.OccupancyGroups.Name, s.Needed);
+    }
+
+    /// <summary>Round 1, #5: without the zoning district nothing is checked at all, so the footer never says only its
+    /// rules will need review.</summary>
+    [Fact]
+    public void Without_the_zone_the_footer_says_nothing_can_be_checked()
+    {
+        var draft = new SetupDraft();
+        draft.Choose(Marks.LotSurveyed, "Yes");
+        var words = PaneWords.SetupFooter(Screen(draft: draft), draft);
+        Assert.Contains(PaneWords.NoZone, words, StringComparison.Ordinal);
+        Assert.DoesNotContain("zoning district", words.Replace(PaneWords.NoZone, "", StringComparison.Ordinal), StringComparison.Ordinal);
+        Assert.Equal(PaneWords.ZoneStep, SetupSteps.Title(Marks.Zone, "").ToLowerInvariant());
+    }
+
+    /// <summary>Round 1, #2: the pane and the ribbon promise what is true, nothing written without a click (Accept on a
+    /// suggestion writes too), never "until you click Save" alone.</summary>
+    [Fact]
+    public void The_words_promise_nothing_without_a_click_not_only_Save()
+    {
+        var said = PaneWords.WelcomeLines.Select(l => l.Words).Concat(RibbonPlan.Buttons(true).SelectMany(b => b.LongDescription.Append(b.ToolTip))).ToList();
+        Assert.DoesNotContain(said, w => w.Contains("unless you click Save", StringComparison.Ordinal) || w.Contains("until you click Save", StringComparison.Ordinal));
+        Assert.Contains(said, w => w == "Nothing is written to your model without your click.");
+    }
+
+    /// <summary>Round 1, #6: a failed or cancelled check shows nothing of a project, so the header forgets the last
+    /// project's name.</summary>
+    [Fact]
+    public void A_failed_check_drops_the_last_project_s_name()
+    {
+        var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
+        var failed = view[view.IndexOf("    internal void Failed(string words)", StringComparison.Ordinal)..];
+        failed = failed[..failed.IndexOf("\n    }\n", StringComparison.Ordinal)];
+        Assert.Contains("_title.Text = PaneWords.HeaderTitle(null);", failed, StringComparison.Ordinal);
     }
 
     // ---- change 11: the edge in words ------------------------------------------------------------------------------
@@ -246,7 +339,7 @@ public sealed class SetupStepsTests
         Assert.Equal("the south edge, 100'-0\"", EdgeWords.Describe((0, 0), (100, 0), (50, 0), 100, ring).Words);
         Assert.Equal("the north edge, 100'-0\"", EdgeWords.Describe((100, 60), (0, 60), (50, 60), 100, ring).Words);
         Assert.Equal("the east edge, 60'-0\"", EdgeWords.Describe((100, 0), (100, 60), (100, 30), 60, ring).Words);
-        Assert.Equal("the west edge, 60'-0\"", EdgeWords.Describe((0, 60), (0, 0), (0, 30), 60, [.. ring.Reverse()]).Words);
+        Assert.Equal("the west edge, 60'-0\"", EdgeWords.Describe((0, 60), (0, 0), (0, 30), 60, [.. ring.AsEnumerable().Reverse()]).Words);
         Assert.Equal("the 100'-0\" edge", EdgeWords.Describe((0, 0), (100, 0), (50, 0), 100, null).Words);
         Assert.Equal("Gordium read your click as the south edge of the lot, 100'-0\" long.",
                      EdgeWords.Describe((0, 0), (100, 0), (50, 0), 100, ring).Sentence);

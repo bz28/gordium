@@ -629,6 +629,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     internal void Failed(string words)
     {
         _failed = true;
+        _title.Text = PaneWords.HeaderTitle(null);              // nothing of a project shown: never the last one's name
         _content = null;
         _detailId = null;
         _placed = [];

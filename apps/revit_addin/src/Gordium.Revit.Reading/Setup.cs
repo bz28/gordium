@@ -152,16 +152,21 @@ public sealed record SetupScreen(string Noun, IReadOnlyList<SetupField> Fields, 
 
     /// <summary>Made from the model's marks, the openings' sides, the place's options (null while the worker hasn't
     /// answered: the zone and use are then typed), what the architect has chosen but not saved, the code the last
-    /// check of this project said governs (null for none), and the kept street edge in words (null when not known).</summary>
+    /// check of this project said governs (null for none), the kept street edge in words (null when not known), and
+    /// whether the kept edges are still edges of the lot (false: the property line changed, so a problem the form
+    /// waits for, as the check would refuse it; null when not known).</summary>
     public static SetupScreen Build(RevitModel model, IReadOnlyList<OpeningSides>? sides, PlaceOptions? options,
-                                    SetupDraft? draft = null, string? lastCheckCode = null, string? streetWords = null)
+                                    SetupDraft? draft = null, string? lastCheckCode = null, string? streetWords = null,
+                                    bool? streetOnLot = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         var use = draft?.Chosen(Marks.Use) ?? Marks.Text(SetupFacts.Get(model, Marks.Use));
         var noun = SetupWords.Noun(use);
         var follows = draft?.Chosen(Marks.FollowsBuildingCode) is { } f ? f == "Yes" : Marks.YesNo(SetupFacts.Get(model, Marks.FollowsBuildingCode));
         var governs = SetupSteps.BuildingCodeGoverns(use, follows, options, lastCheckCode);
-        var fields = SetupFacts.Fields(model, options, draft, noun, governs);
+        var fields = SetupFacts.Fields(model, options, draft, noun, governs).Select(f =>
+            f.Mark == Marks.StreetEdge && streetOnLot == false && f.Current is not null && f.Problem is null
+                ? f with { Problem = SetupSteps.StreetOffLot } : f).ToList();
         var routes = !SetupWords.IsDwelling(use) && use is not null || SetupChecklist.AnyRouteMark(model);
         var lines = SetupChecklist.Build(model, sides ?? [], noun, routes);
         var fixFirst = MarkReading.RoomBlockers(model).Select(e =>
@@ -332,7 +337,8 @@ public static class SetupFacts
                     var choices = Choices(m, options, zone);
                     // a building of more than one group, typed on Project Information ("R-2, B"): its groups as typed
                     // are one choice (the dropdown lists one group each)
-                    if (m == Marks.OccupancyGroups && text is not null && OccupancyGroupWords.Parse(text) is { Count: > 1 } groups)
+                    if (m == Marks.OccupancyGroups && text is not null && OccupancyGroupWords.Parse(text) is { } groups
+                        && !choices!.Any(c => c.Value == text.Trim()))
                         choices = [new FieldChoice(text.Trim(), string.Join(", ", groups)), .. choices!];
                     var kind = choices is { Count: > 0 } ? FieldKind.Choice : FieldKind.Text;
                     string? problem = null;
