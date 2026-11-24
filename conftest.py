@@ -76,20 +76,25 @@ def pytest_collection_modifyitems(config, items):
 
 
 # Every slow test must be in the list, or the balancer counts it at UNLISTED and one part runs long (review round 5,
-# 2026-11-24: the tightening walk ran 16 minutes counted as 0.2 s). The list keeps every test of a second or more;
-# a part fails only for an unlisted test of TOO_SLOW or more, as CI's machines run slower or faster than the one the
-# list was recorded on and a test near a second would otherwise fail by chance.
+# 2026-11-24: the tightening walk ran 16 minutes counted as 0.2 s). The list keeps every test whose run (the `call`
+# phase) takes a second or more; a part fails only for an unlisted test whose run takes TOO_SLOW or more. Only the run
+# counts: a module fixture's setup lands on whichever of its tests runs first, which changes with the order the
+# workers take tests (review round 6), and the machines CI runs on are slower or faster than the one the list was
+# recorded on, so a test near a second would otherwise fail by chance.
 TOO_SLOW = 3.0
 _took = {}
 
 
 def unlisted_slow(took, listed, limit=TOO_SLOW):
-    """The tests that took `limit` seconds or more (setup + run + teardown) and aren't in the list, slowest first."""
-    return sorted(((round(s, 1), i) for i, s in took.items() if s >= limit and i not in listed), reverse=True)
+    """The tests whose run (`call`) took `limit` seconds or more and aren't in the list, slowest first. `took` maps
+    each test id to its phases' seconds ({"setup": .., "call": .., "teardown": ..})."""
+    return sorted(((round(t.get("call", 0.0), 1), i) for i, t in took.items()
+                   if t.get("call", 0.0) >= limit and i not in listed), reverse=True)
 
 
 def pytest_runtest_logreport(report):
-    _took[report.nodeid] = _took.get(report.nodeid, 0.0) + report.duration
+    phases = _took.setdefault(report.nodeid, {})
+    phases[report.when] = phases.get(report.when, 0.0) + report.duration
 
 
 def pytest_sessionfinish(session, exitstatus):
@@ -102,8 +107,8 @@ def pytest_sessionfinish(session, exitstatus):
         listed = {}
     slow = unlisted_slow(_took, listed)
     if slow:
-        print(f"\n{len(slow)} test(s) of {TOO_SLOW:g} s or more missing from tests/test_durations.json (record them "
-              "with `python tests/check_shards.py record`):")
+        print(f"\n{len(slow)} test(s) whose run took {TOO_SLOW:g} s or more missing from tests/test_durations.json "
+              "(record them with `python tests/check_shards.py record`):")
         for s, i in slow[:20]:
             print(f"  {s} s  {i}")
         session.exitstatus = pytest.ExitCode.TESTS_FAILED
