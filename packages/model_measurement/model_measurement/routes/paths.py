@@ -45,8 +45,8 @@ FOOT = 12.0
 TIE = 1e-6 * FOOT            # in: two route lengths this close are a tie (decision 2)
 EPS = 1e-6                   # in: touching (a tangent line on its ring, a line along a wall)
 MOST_TIES = 64
-RING_WAYS_MOST = 1 << 15      # points whose ways onto a zone's graph are remembered (ring_ways)
-LINES_MOST = 1 << 17          # lines from sampled points to targets whose clear() is remembered (clear_to)
+RING_WAYS_MOST = 1 << 16      # points whose ways onto a zone's graph are remembered (ring_ways; a childcare: 36,301)
+LINES_MOST = 1 << 19          # lines from sampled points to targets, clear() kept (clear_to; a childcare: 263,085)
 ROOMS_AT_MOST = 1 << 16       # points whose rooms are remembered (rooms_at)
 
 
@@ -623,6 +623,12 @@ def _signature(pieces) -> tuple:
 
 # --- a story's routes ------------------------------------------------------------------------------------------------
 
+def exact(point) -> tuple:
+    """A point as a memo's key: its coordinates exactly, each with its sign (0.0 and -0.0 are two keys, as a stop's
+    words or a route's pieces may show either)."""
+    return tuple((v, math.copysign(1.0, v)) for v in point)
+
+
 class StoryRoutes:
     """Every route on one story (decisions 1, 1a, 2 and 4). `clearance` is the rings' radius (12 in; 0 gives the
     no-clearance figure the eval compares a hand path with)."""
@@ -633,6 +639,7 @@ class StoryRoutes:
         self.story, self.r = story, clearance
         self._engines, self._legs, self._chains, self._regions = {}, {}, {}, {}
         self._start_cache, self._plain, self._onward_cache = {}, None, {}
+        self._travels = {}               # travel(p) to the nearest exit: every farthest() on the story shares it
         self.exits = {}
         for d in story.exits():
             self.exits.setdefault(d.exit_id, []).append(d.id)
@@ -950,8 +957,24 @@ class StoryRoutes:
 
     def travel(self, point, exit_ids=None) -> float:
         """The length (inches) of the shortest route from a point clear of every ring to the nearest exit named,
-        as `route(...).length` gives it, from each zone's graph built once (decision 3 samples with it)."""
+        as `route(...).length` gives it, from each zone's graph built once (decision 3 samples with it). To the
+        nearest of every exit (exit_ids None), worked once per point, its stop too: the story's farthest(), each
+        room's and the occupied rooms' all sample the same points."""
         p = (float(point[0]), float(point[1]))
+        if exit_ids is not None:
+            return self._travel(p, exit_ids)
+        key = exact(p)
+        got = self._travels.get(key)
+        if got is None:
+            try:
+                got = self._travels[key] = (self._travel(p, None), None)
+            except Stop as s:
+                got = self._travels[key] = (None, s)
+        if got[1] is not None:
+            raise got[1]
+        return got[0]
+
+    def _travel(self, p, exit_ids) -> float:
         at = _show(p)
         wanted = self._wanted(exit_ids)
         dist, _, _ = self._chain(wanted)
