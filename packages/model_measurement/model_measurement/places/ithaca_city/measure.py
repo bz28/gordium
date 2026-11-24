@@ -683,7 +683,7 @@ def _height(building: dict, grade: float, facts: dict) -> dict:
     try:
         return _height_of(building, grade, facts)
     except _Stop as e:
-        return _missing("building_height", str(e))
+        return _missing("building_height", e.args[0])
 
 
 def _height_of(building: dict, grade: float, facts: dict) -> dict:
