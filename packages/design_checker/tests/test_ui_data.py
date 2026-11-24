@@ -244,8 +244,25 @@ def test_the_open_walls_are_named_by_id(apartment):
 def test_no_engineer_key_in_the_apartments_words(apartment):
     text = json.dumps([[i.get("reason"), i.get("detail", {}).get("line"), [c["words"] for c in i.get("causes") or []]]
                        for i in apartment["view"]["items"]], ensure_ascii=False)
-    for key in ("occupancy group i4", "sprinklered 903", "space occupant load", "other occupancy present"):
-        assert key not in text, key
+    # every building measure, not a fixed few, so the next one added can't slip through (PR #181 review round 8)
+    from design_checker import each_part
+    keys = {*code_scope.DERIVED, "space_occupant_load", "space_is_exit"}
+    for key in sorted(keys):
+        said = key.replace("_", " ")
+        if each_part.MEASURE_NAMES.get(key, "").startswith(said):
+            continue                         # its plain name begins with the same words ("merchandise pads (...)")
+        assert said not in text, key
+    assert "sprinklered 903" not in text
+
+
+def test_every_building_measure_has_a_plain_name_and_every_asked_fact_a_headline():
+    # PR #181 review round 8: a measure added to DERIVED without a name read "sprinklered 903 3 1 3" to the architect
+    from design_checker import each_part
+    assert set(code_scope.DERIVED) <= set(each_part.MEASURE_NAMES), set(code_scope.DERIVED) - set(each_part.MEASURE_NAMES)
+    names = [each_part.MEASURE_NAMES[m] for m in code_scope.DERIVED]
+    assert all("_" not in n for n in names)
+    for field in {code_scope.field_of(m) for m in code_scope.DERIVED}:
+        assert field in ui_data.FIELD_HEADLINES, field
 
 
 def test_every_rule_row_has_its_place_in_its_document(apartment):
@@ -547,8 +564,10 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
             assert code_scope.MARK.get(k) == revit[k], (k, code_scope.MARK.get(k), revit[k])
         else:                        # no host has a mark for it: never one invented here
             assert k not in code_scope.MARK, k
-    # the facts no Revit mark states yet (the BCNYS's balcony and atrium): asked for by name, never by a mark
-    assert keys - set(revit) == {"egress_balcony_increase_taken", "building_has_atrium"}
+    # the facts no Revit mark states yet (the BCNYS's balcony, atrium, fixed seating, special egress spaces and
+    # merchandise pads): asked for by name, never by a mark
+    assert keys - set(revit) == {"egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating",
+                                 "special_egress_spaces", "merchandise_pads"}
 
 
 @pytest.mark.parametrize("key", code_scope.READS)
