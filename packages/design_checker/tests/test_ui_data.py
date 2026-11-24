@@ -309,6 +309,8 @@ def test_a_headline_from_the_measurings_words_leaves_its_figures_to_the_why():
 def _expected(part: dict, ctx: dict) -> list[tuple]:
     """(kind, field or None, why) each part of a row's reason must have an ask for, by its code."""
     code, words = part["code"], part["words"]
+    if code in ui_data.NO_ASK_PARTS:            # it says when to answer; the parts after it ask
+        return []
     if code in ui_data.SURVEY_STOPS or code == "tax_map":
         return [(ui_data.SURVEY, None, words)]
     if code in ui_data.OPEN_STOPS or code == "readings":
@@ -345,10 +347,22 @@ def class_problems(view: dict, ctx: dict) -> list[str]:
                 if not any((kind is None or a["kind"] == kind) and (field is None or a.get("field") == field)
                            and (why is None or a["why"] == why) for a in asks):
                     out.append(f"{i['id']}: {p['code']} has no {kind or 'ask'} ask ({field or why!r:.80})")
+        seen = [(a["kind"], a["headline"]) for a in asks]
+        out += [f"{i['id']}: two asks alike: {k}" for k in dict.fromkeys(seen) if seen.count(k) > 1]
+        if parts and "".join(p.get("sep", "") + p["words"] for p in parts) != str(i.get("reason") or ""):
+            out.append(f"{i['id']}: its stops aren't its reason")
+        out += [f"{i['id']}: a stop's words kept without its code: {p['words'][:80]!r}" for p in parts
+                if p["code"] == "words" and _a_stops_words(p["words"])]
         asked = {e for a in asks for e in a.get("elements") or []}
         out += [f"{i['id']}: {e} of its cause is in no ask" for c in i.get("causes") or []
                 for e in c.get("elements") or [] if e not in asked]
     return out
+
+
+def _a_stops_words(words: str) -> bool:
+    """Whether words are exactly a measuring stop's (its template, each blank any text): a stop whose code was lost."""
+    from model_measurement.stops import PATTERNS
+    return any(rx.match(words) for rx in PATTERNS.values())
 
 
 def _views(answer):
@@ -393,3 +407,44 @@ def test_every_brought_in_piece_lands_in_a_section_of_its_contents(folder):
     # the RCNYS's appendices: their pieces are in their own sections (BF101, BO103), never dropped
     if folder == "new_york_state":
         assert contents.section_of_piece("BF101.2") == "BF101" and "BF101" in listed
+
+
+def test_which_code_governs_asks_for_the_fact_its_ask_names():
+    from design_checker import goldens
+    _, answers = goldens.stored()
+    view = answers["deep_run/r2_316_e_falls_st/check_as_drawn"]["view"]
+    row = next(i for i in view["items"] if i["id"].endswith(".code_scope") and i["status"] == present.REVIEW)
+    assert row["code_scope"]["ask_facts"] == ["separate_means_of_egress"]
+    assert [(a["kind"], a.get("field")) for a in row["asks"]] == [(ui_data.MARK, "building.separate_means_of_egress")]
+
+
+def test_a_by_hand_code_choice_stays_a_persons_to_decide():
+    got = code_scope.decide({"use": "one_family_detached", "care_facility": True}, None)
+    assert got["code"] is None and got["ask_facts"] == []
+
+
+def test_a_looked_up_fact_asks_to_confirm_or_change_it():
+    from model_measurement.stops import reason_part
+    reason = reason_part("looked_up", "Complies on the looked-up lot area, which needs review: x · confirm it",
+                         fact="lot_area", name="lot area")
+    got, = ui_data.asks_of(_zoning(reason), _ctx())
+    assert (got["kind"], got["field"], got["headline"]) == (ui_data.MARK, "facts.lot_area",
+                                                          "Confirm or change the looked-up lot area")
+
+
+def test_the_pick_a_hint_and_a_stop_ask_for_is_one_ask():
+    from model_measurement.stops import stop
+    item = _zoning(stop("no_main_building"), objects=["b1"])
+    item["hint"] = present.PICK_MAIN
+    got = ui_data.asks_of(item, _ctx())
+    assert [a["headline"] for a in got] == ["Pick the main building"]
+
+
+def test_a_use_detail_rows_parts_are_still_its_reason():
+    from model_measurement.stops import stop
+    from design_checker.host_core.facts import USE_DETAILS_WHEN
+    parts = [{"code": "use_detail", "params": {}, "words": USE_DETAILS_WHEN},
+             {"code": "no_home_occupation", "params": {}, "words": stop("no_home_occupation"), "sep": ": "}]
+    item = {"id": "x", "status": present.REVIEW, "group": "building", "needs": ["home_occupation"], "objects": [],
+            "reason": f"{USE_DETAILS_WHEN}: {stop('no_home_occupation')}", "stops": parts, "causes": []}
+    assert not class_problems({"items": [dict(item, asks=ui_data.asks_of(item, _ctx()))]}, _ctx())
