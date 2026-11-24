@@ -600,3 +600,19 @@ def test_the_single_exit_special_spaces_reason_names_exactly_the_spaces_the_fact
                 found += 1
     assert found >= 1
 
+
+
+def test_every_occupant_load_factor_is_quoted_word_for_word_from_its_row():
+    """Section group 3's frozen factors (records/occupant_load_factors.yaml) sit outside the rulebook's own checks
+    (rulebook_paths leaves records/ out), so their quotes are checked here as a rule's are: each at its page and lines,
+    word for word, where the code cache is; elsewhere each one not checked is listed, never passed (review of group 3,
+    round 1, 2026-11-24)."""
+    from rule_format.rulebook import _source_problems
+    data = load(NY / "5_building_code_rules/drafted/records/occupant_load_factors.yaml")
+    sources = [e["source"] for e in data["functions"].values()] + [data["increase_cap"]["source"]]
+    assert len(sources) == len(data["functions"]) + 1 and all(isinstance(x, dict) for x in sources)
+    ctx = Context.for_jurisdiction(NY)
+    assert _source_problems(sources, ctx) == []
+    if ctx.skipped:                                    # no code cache on this machine: every quote said, none passed
+        assert len(ctx.skipped) == len(sources), ctx.skipped
+        pytest.skip(f"{len(sources)} quotes not checked here: {ctx.skipped[0]}")

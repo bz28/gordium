@@ -202,13 +202,14 @@ def test_a_room_a_loaded_closet_is_served_through_carries_it_so_its_own_load_isn
 
 
 def test_a_load_served_through_a_chain_reaches_every_room_on_it():
-    """Decision 1a's chain (test_routes_served.py: a closet off storeroom 13 off storeroom 14 off the corridor): a
-    closet stating a function (12 sq ft, exhibit gallery, 30 net) egresses through 13 and 14, so 14's own load (100 sq
-    ft, vocational shop, 50 net: 2) isn't its cumulative one, though 13 between them has no function."""
+    """Decision 1a's chain (test_routes_served.py's storeroom chain, 13 drawn here as a closet: a closet off closet 13
+    off storeroom 14 off the corridor): a closet stating a function (12 sq ft, exhibit gallery, 30 net) egresses
+    through 13 and 14, so 14's own load (100 sq ft, vocational shop, 50 net: 2) isn't its cumulative one, though 13
+    between them holds none."""
     def chain(closet_fn):
         return description([CORRIDOR, room("s14", rect(10, 6.5, 20, 16.5), use="accessory_storage", lockable=False,
                                            function="vocational_shop"),
-                            room("s13", rect(10, 17, 20, 27), use="accessory_storage", lockable=False),
+                            room("s13", rect(10, 17, 20, 27), use="closet", lockable=False),
                             room("cl", rect(13, 27.5, 17, 30.5), use="closet", lockable=True,
                                  **({"function": closet_fn} if closet_fn else {}))],
                            [EXIT, door("s14c", (15, 6.25), (1, 0), ("s14", "c")),
@@ -227,16 +228,49 @@ def test_a_load_served_through_a_chain_reaches_every_room_on_it():
     assert _space(parts, "cl")["measures"]["space_occupant_load"] == pytest.approx(12 / 30)
 
 
-def test_a_function_on_a_room_marked_a_corridor_is_said_never_dropped(apartment):
-    """A room marked a corridor is never a space, so a function stated on it would give no load: its story's load is
-    left not worked out, saying why; the other story's still is."""
-    desc = copy.deepcopy(apartment)
-    next(r for r in desc["rooms"] if r["id"] == "L1C")["function"] = "mercantile"
-    parts = _loads(desc, {"occupant_load_increased": False})
-    l1, l2 = parts["story"]
-    assert "story_occupant_load" not in l1["measures"] and not (l1.get("readings") or {}).get("story_occupant_load")
-    assert "is marked a corridor, yet states the function 'mercantile'" in l1["not_measured"]["story_occupant_load"]
-    assert _values(l2, "story_occupant_load") == pytest.approx([2 * 690 / 200, 1800 / 200])
+def test_a_function_on_a_room_marked_a_corridor_or_an_exit_is_said_never_dropped(apartment):
+    """A room marked a corridor is never a space, and a space that is itself an exit holds no load, so a function
+    stated on either would give none: its story's load is left not worked out, saying why; the other story's still is
+    (an exit's: review of group 3, round 1, 2026-11-24)."""
+    for rid, words in (("L1C", "is marked a corridor, yet states the function 'mercantile'"),
+                       ("L1SW", "is itself an exit (a door into it is marked an exit enclosure or passageway), yet "
+                                "states the function 'mercantile'")):
+        desc = copy.deepcopy(apartment)
+        next(r for r in desc["rooms"] if r["id"] == rid)["function"] = "mercantile"
+        parts = _loads(desc, {"occupant_load_increased": False})
+        l1, l2 = parts["story"]
+        assert "story_occupant_load" not in l1["measures"] and not (l1.get("readings") or {}).get(
+            "story_occupant_load"), rid
+        assert words in l1["not_measured"]["story_occupant_load"], rid
+        assert _values(l2, "story_occupant_load") == pytest.approx([2 * 690 / 200, 1800 / 200])
+
+
+def test_a_room_holding_no_load_says_why_in_words_that_are_true():
+    """Review of group 3, round 1 (P3, 2026-11-24): an exit, a closet with no function, and a story of no loaded
+    room each say why they hold none (never the routes' old 'no mark for it in the model yet': the Function mark
+    exists); a story whose rooms outgrow its gross floor area says that, not that the area isn't measured."""
+    parts = {"story": [{"id": "L1", "measures": {"story_gross_floor_area": 100}, "not_measured": {}}],
+             "space": [{"id": "x", "within": "L1", "measures": {"space_is_exit": True, "space_floor_area": 50},
+                        "not_measured": {"space_occupant_load": "Gordium has no mark for it in the model yet"}},
+                       {"id": "cl", "within": "L1", "measures": {"space_is_exit": False, "space_floor_area": 20},
+                        "not_measured": {"space_occupant_load": "Gordium has no mark for it in the model yet"}}]}
+    desc = {"rooms": [{"id": "x", "use": "other"}, {"id": "cl", "use": "closet"}]}
+    occupant_load.apply(parts, desc, FACTORS, {"occupant_load_increased": False})
+    x, cl = parts["space"]
+    assert x["not_measured"]["space_occupant_load"] == occupant_load.IS_EXIT
+    assert "a closet with no function stated holds no occupant load" in cl["not_measured"]["space_occupant_load"]
+    assert parts["story"][0]["not_measured"]["story_occupant_load"] == occupant_load.STORY_NONE
+    over = {"story": [{"id": "L1", "measures": {"story_gross_floor_area": 100}, "not_measured": {}}],
+            "space": [{"id": "b", "within": "L1", "measures": {"space_is_exit": False, "space_floor_area": 300},
+                       "not_measured": {}}]}
+    occupant_load.apply(over, {"rooms": [{"id": "b", "use": "other", "function": "business"}]}, FACTORS,
+                        {"occupant_load_increased": False})
+    assert over["space"][0]["not_measured"]["space_occupant_load"] == occupant_load.AREAS_OVER
+    over["story"][0]["measures"].pop("story_gross_floor_area")
+    over["space"][0]["not_measured"].clear()
+    occupant_load.apply(over, {"rooms": [{"id": "b", "use": "other", "function": "business"}]}, FACTORS,
+                        {"occupant_load_increased": False})
+    assert over["space"][0]["not_measured"]["space_occupant_load"] == occupant_load.GROSS_NOT_MEASURED
 
 
 # The walk over group 3's facts through the whole Building Code check: each apartment's function (net, gross, sent
@@ -292,8 +326,8 @@ def _walk_case(rng, apartment):
         if kind in APARTMENTS:
             r["function"] = rng.choice(WALK_FUNCTIONS)
             r["pass_through"] = rng.random() < 0.2
-        elif kind in ("SW", "SE") and rng.random() < 0.3:
-            r["function"] = rng.choice(WALK_FUNCTIONS[1:])      # an exit enclosure holds none, whatever it states
+        elif kind in ("SW", "SE") and rng.random() < 0.15:
+            r["function"] = rng.choice(WALK_FUNCTIONS[1:])      # an exit enclosure holds none: a function on it is said
         elif kind == "C" and rng.random() < 0.1:
             r["function"] = "mercantile"
         if r.get("function") is None:
@@ -332,7 +366,7 @@ def _check_the_laws_loads(desc, increase, parts):
         for stair in ("SW", "SE"):
             assert _values(next(q for q in parts["space"] if q["id"] == level + stair), LOADS[0]) == []
         got = _values(story, LOADS[1])
-        if not all(worked) or rooms[level + "C"].get("function"):
+        if not all(worked) or any(rooms[level + k].get("function") for k in ("C", "SW", "SE")):
             assert got == [] and story["not_measured"][LOADS[1]], level
             continue
         assert min(got) == pytest.approx(sum(690 / e["factor"] for e in entries)), level
@@ -372,3 +406,25 @@ def test_a_walk_over_group_3s_facts_never_passes_where_a_reading_or_a_load_not_w
                 if "fail" in outcomes and how in ("low", "high"):
                     assert set(other[key]) == {"fail"}, (case, key, how, other[key], desc["building"])
     assert {"pass", "fail", "needs_review"} <= seen          # the walk reaches every verdict
+
+
+def test_a_storeroom_with_no_function_is_never_a_room_of_no_one():
+    """Review of group 3, round 1 (2026-11-24): Table 1004.5 gives accessory storage its own factor (300 gross), and
+    202 NET FLOOR AREA leaves out only closets and toilet rooms, so a storeroom with no function stated is a room
+    like any other: its load, and its story's, aren't worked out. Before, it held none, and a story of net rooms only
+    (a 100 sq ft classroom, 20 net, with a 12 sq ft storeroom off it) gave the classroom's 5 as the story's."""
+    k = room("k", rect(10, 6.5, 20, 16.5), use="kitchen", lockable=False, function="classroom")
+    st = room("st", rect(10, 17, 14, 20), use="accessory_storage", lockable=True)
+    desc = description([CORRIDOR, k, st], [EXIT, door("kc", (15, 6.25), (1, 0), ("k", "c")),
+                                           door("stk", (12, 16.75), (1, 0), ("st", "k"))])
+    parts = measure(desc)["parts"]
+    occupant_load.apply(parts, desc, FACTORS, {"occupant_load_increased": False})
+    story = parts["story"][0]
+    assert "story_occupant_load" not in story["measures"] and not (story.get("readings") or {}).get(
+        "story_occupant_load")
+    assert "st" in story["not_measured"]["story_occupant_load"]
+    assert "Gordium: Function" in _space(parts, "st")["not_measured"]["space_occupant_load"]
+    st["function"] = "accessory_storage_mechanical"                    # stated: 12 / 300 = 0.04, served through k
+    parts = measure(desc)["parts"]
+    occupant_load.apply(parts, desc, FACTORS, {"occupant_load_increased": False})
+    assert "space_occupant_load" not in _space(parts, "k")["measures"]

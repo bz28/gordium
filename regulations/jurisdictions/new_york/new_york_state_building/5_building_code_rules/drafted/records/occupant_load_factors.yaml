@@ -3,7 +3,8 @@
 # (docs/interior/interior_description_format.md), its factor in square feet per occupant (note a) and whether it is
 # of the gross or the net floor area, its row quoted (page, line); a function the table sends elsewhere has no factor
 # (its occupant load is a person's). Every factor is checked against the second reading of Table 1004.5
-# (text_verification.yaml) and every quote word for word where the code cache is (rule_format tests). Section
+# (text_verification.yaml) and every quote word for word where the code cache is (rule_format's
+# test_ny_building_egress_all_occupancies.py). Section
 # group 3 of docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md; hand-written in a Claude Code session
 # (2026-11-23).
 functions:

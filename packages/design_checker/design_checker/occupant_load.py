@@ -16,20 +16,23 @@ area is the room's inside its walls (`space_floor_area`):
 1004.5.1 lets a design take more occupants, up to one per 7 sq ft: unless the building states it takes no increase
 (`occupant_load_increased: false`), the upper reading is at least the area / 7.
 
-A room that is itself an exit, a corridor, or a closet, toilet or accessory storage room with no function stated
-holds no occupant load of its own (its area is the gross rooms' support). Any other room with no function, or a
+A room that is itself an exit, a corridor, or a closet or toilet with no function stated holds no occupant load of
+its own (202 FLOOR AREA, NET leaves closets and toilet rooms out; a gross factor's own area takes them in). An
+accessory storage room is not one of them: Table 1004.5 gives it a factor of its own (300 gross), so with no function
+stated it is a room like any other (review of group 3, 2026-11-24: on a story of net rooms only, its people would
+otherwise be dropped). Any other room with no function, or a
 function the table sends elsewhere (fixed seating, 1004.6; concentrated business, 1004.8; bowling centers; malls,
 402.8.2), leaves its load, and its story's, not measured: never a guess. A room others egress through (1004.2:
 `pass_through: true`, or one a closet, storeroom or toilet is served through, the routes' `served_through`, where
 that room has an occupant load of its own or one not worked out) carries their loads too: its load is the
 cumulative one only where no other room's path is known to pass through it, so such a room's load is left not
-measured. A room the description marks a corridor is never a space; a function stated on one leaves its story's
-load not measured (said, never dropped). Stories are not added together (1004.2.3).
+measured. A room the description marks a corridor is never a space; a function stated on one, or on a space that is
+itself an exit, leaves its story's load not measured (said, never dropped). Stories are not added together (1004.2.3).
 """
 
 from rule_format.rulebook import load
 
-SUPPORT_USES = ("corridor", "closet", "toilet", "accessory_storage")   # no load of their own unless a function says
+SUPPORT_USES = ("corridor", "closet", "toilet")   # no load of their own unless a function says (202 NET FLOOR AREA)
 QUESTION = "occupant_load_area"
 LOWER, UPPER = "room_area", "grossed_up_or_increased"
 NOT_GIVEN = ("the room's function (Table 1004.5) isn't stated, so its occupant load isn't worked out "
@@ -40,6 +43,16 @@ THROUGH = ("other rooms' egress passes through it (1004.2: their occupant loads 
            "yet")
 SERVED = ("{names} egress{es} through it (1004.2: {their} occupant load adds to its own), which isn't summed yet")
 STORY_OPEN = "a room on the story has no occupant load worked out ({names}), so the story's isn't either"
+EXIT_FUNCTION = ("{name} is itself an exit (a door into it is marked an exit enclosure or passageway), yet states "
+                 "the function {f!r}: an exit holds no occupant load of its own, so which it is isn't known")
+IS_EXIT = ("it is itself an exit (an exit stair's enclosure, an exit passageway): it holds no occupant load of its own, "
+           "and the rules for the rooms exits serve ask nothing of it")
+NO_LOAD = ("a {use} with no function stated holds no occupant load of its own (202 FLOOR AREA, NET leaves closets and "
+           "toilet rooms out); if people use it, state its function (the room mark Gordium: Function)")
+STORY_NONE = "no room on the story holds an occupant load of its own (its spaces are exits, closets or toilets)"
+GROSS_NOT_MEASURED = "the story's gross floor area isn't measured, so the gross-function rooms' share of it can't be"
+AREAS_OVER = ("the story's rooms add up to more than its gross floor area (inside its exterior walls), so the "
+              "gross-function rooms' share of it can't be: a room's outline may overlap another's or the walls")
 CORRIDOR_FUNCTION = ("{name} is marked a corridor, yet states the function {f!r}: a corridor holds no occupant load of "
                      "its own (Table 1004.5 has no corridor row), so which it is isn't known")
 
@@ -70,6 +83,10 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
             fn = room.get("function")
             area = p["measures"].get("space_floor_area")
             if p["measures"].get("space_is_exit") or (fn is None and room.get("use") in SUPPORT_USES):
+                if p["measures"].get("space_is_exit") and fn is not None:      # a mark against a function: said
+                    odd.append(EXIT_FUNCTION.format(name=p.get("name") or p["id"], f=fn))
+                p["not_measured"]["space_occupant_load"] = (IS_EXIT if p["measures"].get("space_is_exit") else
+                                                            NO_LOAD.format(use=room["use"].replace("_", " ")))
                 plan.append((p, None, None))
                 continue
             entry = factors["functions"].get(fn) if isinstance(fn, str) else None
@@ -95,8 +112,14 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
                 seen.add(host)
                 served.setdefault(host, []).append(p.get("name") or p["id"])
                 host = host_of.get(host)
+        no_share = GROSS_NOT_MEASURED if gross is None else AREAS_OVER
         for p, e, a in plan:
             if e is None:
+                if p["id"] in served:                 # a closet others are served through: theirs is its load
+                    names = served[p["id"]]
+                    p["not_measured"]["space_occupant_load"] = SERVED.format(
+                        names=", ".join(names), es="" if len(names) > 1 else "es",
+                        their="their" if len(names) > 1 else "its")
                 continue
             low = a / e["factor"]
             high = (a * share / e["factor"]) if e["area"] == "gross" and share is not None else \
@@ -111,7 +134,7 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
                 loads.append((low, high))
                 continue
             loads.append((low, high))
-            _give(p, "space_occupant_load", low, high)
+            _give(p, "space_occupant_load", low, high, no_share)
         if open_ or odd:
             story["not_measured"]["story_occupant_load"] = "; ".join(
                 ([STORY_OPEN.format(names=", ".join(open_))] if open_ else []) + odd)
@@ -120,16 +143,17 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
             high = None if any(h is None for _, h in loads) else sum(h for _, h in loads)
             if high is not None and not increase_ruled_out and gross is not None:
                 high = max(high, gross / cap)
-            _give(story, "story_occupant_load", low, high)
+            _give(story, "story_occupant_load", low, high, no_share)
+        else:
+            story["not_measured"]["story_occupant_load"] = STORY_NONE
     return parts
 
 
-def _give(part: dict, name: str, low: float, high: float | None) -> None:
+def _give(part: dict, name: str, low: float, high: float | None, no_share: str) -> None:
     """One value where the readings agree; two named readings where they differ; none where the upper one can't
-    be worked out (the gross share isn't known: the story's gross floor area isn't measured)."""
+    be worked out (the gross share isn't known: `no_share` says why)."""
     if high is None:
-        part["not_measured"][name] = ("the story's gross floor area isn't measured, so the gross-function rooms' "
-                                      "share of it can't be")
+        part["not_measured"][name] = no_share
         return
     part["not_measured"].pop(name, None)
     if abs(high - low) < 1e-9:
