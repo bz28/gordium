@@ -68,14 +68,14 @@ SKIPPED_SPACES = (("basement", "basement"), ("habitable_attic", "habitable attic
 SKIPPED_ALL_CLAIMED = ("{name} is marked as an escape opening but isn't checked: {why}. The description says the house "
                        "has no basements, no habitable attics and no sleeping lofts, the other spaces R319.1 asks for "
                        "one in: check it by hand")
-NOT_PER_PART = ("this rule isn't written for each part (no for_each), and a state law's rules are checked only part "
-                "by part: it isn't checked, so check it by hand")
+NOT_PER_PART = ("this rule isn't written to be checked part by part (each room, door or stair), and a state law's "
+                "rules are checked only that way: it isn't checked, so check it by hand")
 COVERAGE = "6_coverage_report/*.rules.yaml"      # which pieces labeled rule have rules (python -m section_labeling coverage)
 NAMES = "section_names.yaml"                      # plain names for them, by hand (wording only)
 NOT_YET_ID = "not_checked_yet"
 NOT_YET_NAME = "Not checked yet by Gordium: {first}{more}: check these by hand"
 NOT_YET_WHY = ("Gordium doesn't check these sections of the {title} yet, so it never says {short} complies while any "
-               "is left. Check each by hand: {all}. (The list: {file}.)")
+               "is left. Check each by hand: {all}.")
 NOT_YET_WAITING = ". Not checked yet by Gordium, even once the rooms are drawn (check these by hand): {all}"
 NO_COVERAGE = ("Gordium can't tell which sections of the {title} it doesn't check yet ({why}): check the whole law by "
                "hand")
@@ -109,8 +109,9 @@ def _folder(jurisdiction) -> Path:
 
 
 def laws(jurisdiction) -> dict:
-    """The place and every state law it inherits, ready to check: {"place": its name, "laws": [{key, title, short,
-    folder, rulebook, rules, problems, section_of, documents}]}. A rulebook that doesn't pass the rule checks gives
+    """The place and every state law it inherits, ready to check: {"place": its name, "folder": its folder (the code
+    choice reads its uses.yaml names), "laws": [{key, title, short, folder, rulebook, rules, problems, section_of,
+    documents}]}. A rulebook that doesn't pass the rule checks gives
     no rules and its problems (needs review, never a row)."""
     refuse_state_alone(jurisdiction)
     p = place_of(_folder(jurisdiction))
@@ -136,7 +137,7 @@ def laws(jurisdiction) -> dict:
                     [f"its sources can't be read ({type(e).__name__}: {e})"], [], None
         law["not_checked_yet"], law["coverage_problem"] = _not_checked_yet(folder, law["rules"])
         out.append(law)
-    return {"place": p.name, "laws": out}
+    return {"place": p.name, "folder": p.folder, "laws": out}
 
 
 def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]:
@@ -237,7 +238,9 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
     section, so neither reads as the answer (principle 4). The decision is the result's `code_scope`."""
     waiting = _no_rooms(interior)
     building = interior.get("building") if isinstance(interior, dict) else None
-    scope = code_scope.decide(values, building) if any(law.get("scope") for law in found["laws"]) else None
+    # the place's own uses as they are (an empty set: it lists none, so every use needs review) and its own names
+    scope = code_scope.decide(values, building, (allowed or {}).get("use"), found.get("folder")) if any(
+        law.get("scope") for law in found["laws"]) else None
     run = [law for law in found["laws"]
            if scope is None or law.get("scope") is None or scope["code"] in (None, law["scope"])]
     undecided = scope is not None and scope["code"] is None
@@ -518,8 +521,7 @@ def _not_yet_items(law: dict) -> list[dict]:
     more = f" and {len(missing) - 2} more" if len(missing) > 2 else ""
     item = _own_item(law, f"{law['short'].lower()}.{NOT_YET_ID}", NOT_YET_NAME.format(first=first, more=more),
                      present.REVIEW, NOT_YET_WHY.format(title=_book(law), short=law["short"].lower(),
-                                                        all=_listed(missing),
-                                                        file=", ".join(dict.fromkeys(m["file"] for m in missing))))
+                                                        all=_listed(missing)))
     item["detail"]["citation"] = ", ".join(m["section"] for m in missing)
     item["open"] = {"gordium": SECTIONS, "sections": [m["section"] for m in missing]}   # for grouping: words only
     return [item]

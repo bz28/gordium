@@ -16,12 +16,13 @@ import pytest
 
 from design_checker import code_scope, egress, present
 from design_checker.check import check_site
-from rule_format.rulebook import REPO, code_cache, load
+from rule_format.rulebook import REPO, Context, code_cache, load
 
 sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
 from test_measure import FACTS, box, lot  # noqa: E402
 
 ITHACA = "regulations/jurisdictions/new_york/ithaca_city"
+ALLOWED = Context.for_jurisdiction(REPO / ITHACA).allowed()         # the place's own uses, as check_site passes them
 RANCH = REPO / "test_data/interior_houses/1_ranch_compliant/house.yaml"
 SITE = {"units": "ft", "lot": lot([(0, 0), (60, 0), (60, 110), (0, 110)]),
         "buildings": [box(10, 25, 40, 75, 0, 30)], "problems": []}
@@ -112,7 +113,7 @@ def test_the_exception_lets_the_architect_apply_the_building_code_to_a_house():
 
 def test_a_building_fact_gordium_cant_read_is_said_never_used():
     c, _, got = code({"use": "one_family_detached", "stories": 2}, {"stories_above_grade_plane": "three"})
-    assert c is None and "stories above grade plane is 'three'" in got["why"]
+    assert c is None and "stories above grade plane is “three”" in got["why"]
     assert code_scope.building_measures({"occupancy_groups": ["R-2", "office"]}) == {}
 
 
@@ -143,14 +144,14 @@ def test_a_house_is_checked_exactly_as_it_was_before_the_building_code_was_inher
         law["scope"] = None                                   # as the folder was: no scope, always run
     values = {"use": "one_family_detached", "stories": 1, "dwelling_units": 1, **DRAWN}
     for interior in (ranch(), None, dict(ranch(), rooms=[])):
-        old = egress.check(before, interior, values, {"use": set()})
-        new = egress.check(found, interior, values, {"use": set()})
+        old = egress.check(before, interior, values, ALLOWED)
+        new = egress.check(found, interior, values, ALLOWED)
         assert new["code_scope"]["code"] == code_scope.RESIDENTIAL
         assert {k: v for k, v in new.items() if k != "code_scope"} == old
 
 
 def test_an_apartment_building_is_checked_against_the_building_code_alone():
-    got = egress.check(egress.laws(ITHACA), None, {"use": "multiple_family"}, {"use": set()})
+    got = egress.check(egress.laws(ITHACA), None, {"use": "multiple_family"}, ALLOWED)
     assert [s["title"] for s in got["sections"]] == ["Egress (NY State Building Code 2025)"]
     assert [(i["status"], i["name"]) for i in got["items"]] == [
         (present.NOT_CHECKED, "Egress: waiting, no rooms drawn yet"),
@@ -159,7 +160,7 @@ def test_an_apartment_building_is_checked_against_the_building_code_alone():
 
 
 def test_where_it_cant_tell_both_run_each_held_at_needs_review_never_the_calm_waiting():
-    got = egress.check(egress.laws(ITHACA), None, {"use": "one_family_detached"}, {"use": set()})
+    got = egress.check(egress.laws(ITHACA), None, {"use": "one_family_detached"}, ALLOWED)
     assert [s["state"] for s in got["sections"]] == [present.REVIEW, present.REVIEW]
     scope = [i for i in got["items"] if i["name"] == egress.SCOPE_OPEN_NAME]
     assert len(scope) == 2 and all(i["status"] == present.REVIEW for i in scope)
@@ -414,3 +415,32 @@ def test_units_in_the_building_that_disagree_with_a_houses_use_need_review(use):
     own = {"one_family_semi_detached": 2, "two_family": 2, "one_family_detached": 1}[use]
     assert code({"use": use, "attached_units_in_building": own, "stories": 2},
                 {"separate_means_of_egress": True})[0] == code_scope.RESIDENTIAL
+
+
+def test_a_use_gordium_doesnt_know_never_picks_a_code():
+    """Review round 5 (a decision fixed): a misspelled or unknown use got the Building Code as "none of the dwellings
+    R101.2 lists". A use the place doesn't list can't be placed, so it needs review, quoted exactly as typed."""
+    got = code_scope.decide({"use": "one_famly_detached", "dwelling_units": 1}, None)
+    assert got["code"] is None
+    assert got["why"] == "the use “one_famly_detached” isn't one Gordium knows: correct Gordium: Use"
+    assert got["ask"] == "correct the use (Gordium: Use)"
+    # the place's own list, as egress passes it: a use outside it is unknown there, whatever another place lists
+    assert code_scope.decide({"use": "retail_store_or_service_commercial"}, None, {"one_family_detached"})["code"] \
+        is None
+    assert code_scope.decide({"use": "retail_store_or_service_commercial"}, None)["code"] == code_scope.BUILDING
+
+
+def test_a_place_listing_no_uses_gets_no_code_for_any_use():
+    """Review round 6: egress.check passes the place's own uses as they are, so a place listing none (an empty set,
+    no uses.yaml) gets needs review for every use, never a code from another place's list. Only a direct caller giving
+    no list (None) reads every place's."""
+    got = code_scope.decide({"use": "retail_store_or_service_commercial"}, None, set())
+    assert got["code"] is None and "“retail_store_or_service_commercial” isn't one Gordium knows" in got["why"]
+    found = egress.laws(ITHACA)
+    checked = egress.check(found, None, {"use": "retail_store_or_service_commercial"}, {"use": set()})
+    assert checked["code_scope"]["code"] is None
+    # the checked place's own names, never a merged dict: a place whose uses.yaml names it otherwise is said its way
+    assert code_scope.use_words("multiple_family", {"multiple_family": "Apartments"}) == "Apartments"
+    assert code_scope.use_words("multiple_family", {}) == "“multiple_family”"
+    assert code_scope.decide({"use": "multiple_family"}, None, None, REPO / ITHACA)["why"].startswith(
+        "its use (Multiple family dwelling) is none of the dwellings R101.2 lists")
