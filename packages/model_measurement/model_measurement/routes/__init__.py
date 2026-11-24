@@ -13,7 +13,9 @@ readings (decisions 6 and 8: open questions 3 and 7) is left out too, its readin
 named: {question: answer}}]}, the shape the checker's readings take (design_checker/check.py readings_of);
 rule_format.parts.rows decides such a rule under every combination of them (pass only if all pass, fail only if all
 fail, else needs review). `more` holds the
-figures behind each measure: the routes drawn, the bounds, the corridors' centre lines. `confirm`, {measure: words},
+figures behind each measure: the routes drawn, the bounds, the corridors' centre lines; a space taken as part of the
+room it serves (decision 1a) names that room (`served_through`: its egress, and so its occupant load, goes through
+it, BCNYS 1004.2). `confirm`, {measure: words},
 says a measure stands on Gordium's reading (decision 1a, a room that opens only into the room it serves: the story's
 travel and common path, and that room's own exit count and common path), for the checker to show beside each row
 that reads it; a row that would comply on it needs review until the reading is confirmed (rule_format.parts.rows).
@@ -136,6 +138,8 @@ def _story_parts(story, uses, items, unknown, parts, r) -> None:
         if routes is not None and rid in story.served_by:
             words = READING.format(rooms=f"{name} through {story.rooms[story.served_by[rid]].name}")
             parts["space"][-1]["confirm"] = {m: words for m in ("space_exit_count", "space_common_path")}
+            parts["space"][-1]["more"]["served_through"] = story.served_by[rid]   # its egress is through that room
+            # (1004.2: its occupant load adds to that room's; design_checker/occupant_load.py)
         if use is None:                                   # it may be a corridor: never "no corridors" on its say
             cp = _part(f"{rid} (as a corridor)", name, story.level)
             cp["maybe"] = Stop("area_no_use", name=name).reason

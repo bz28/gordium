@@ -20,9 +20,11 @@ A room that is itself an exit, a corridor, or a closet, toilet or accessory stor
 holds no occupant load of its own (its area is the gross rooms' support). Any other room with no function, or a
 function the table sends elsewhere (fixed seating, 1004.6; concentrated business, 1004.8; bowling centers; malls,
 402.8.2), leaves its load, and its story's, not measured: never a guess. A room others egress through (1004.2:
-`pass_through: true`, or one a closet or toilet is served through) carries their loads too: its load is the
+`pass_through: true`, or one a closet, storeroom or toilet is served through, the routes' `served_through`, where
+that room has an occupant load of its own or one not worked out) carries their loads too: its load is the
 cumulative one only where no other room's path is known to pass through it, so such a room's load is left not
-measured. Stories are not added together (1004.2.3).
+measured. A room the description marks a corridor is never a space; a function stated on one leaves its story's
+load not measured (said, never dropped). Stories are not added together (1004.2.3).
 """
 
 from rule_format.rulebook import load
@@ -36,7 +38,10 @@ UNKNOWN = "the room's function {f!r} is none of Table 1004.5's (docs/interior/in
 ELSEWHERE = "the function {f} takes its occupant load from {where}, not a factor: a person states it"
 THROUGH = ("other rooms' egress passes through it (1004.2: their occupant loads add to its own), which isn't summed "
            "yet")
+SERVED = ("{names} egress{es} through it (1004.2: {their} occupant load adds to its own), which isn't summed yet")
 STORY_OPEN = "a room on the story has no occupant load worked out ({names}), so the story's isn't either"
+CORRIDOR_FUNCTION = ("{name} is marked a corridor, yet states the function {f!r}: a corridor holds no occupant load of "
+                     "its own (Table 1004.5 has no corridor row), so which it is isn't known")
 
 
 def factors_of(path) -> dict:
@@ -51,11 +56,15 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
     increase_ruled_out = isinstance(building, dict) and building.get("occupant_load_increased") is False
     cap = factors["increase_cap"]
     spaces = parts.get("space") or []
+    corridors = {c["id"]: c for c in parts.get("corridor") or [] if isinstance(c, dict) and "id" in c}
     for story in parts.get("story") or []:
         mine = [p for p in spaces if p.get("within") == story["id"]]
         gross = story["measures"].get("story_gross_floor_area")
         loads, open_ = [], []
         plan = []
+        odd = [CORRIDOR_FUNCTION.format(name=c.get("name") or cid, f=rooms[cid]["function"])   # never dropped
+               for cid, c in corridors.items() if c.get("within") == story["id"]
+               and (rooms.get(cid) or {}).get("function") is not None]
         for p in mine:
             room = rooms.get(p["id"]) or {}
             fn = room.get("function")
@@ -75,6 +84,17 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
         gross_area = sum(a for _, e, a in plan if e and e["area"] == "gross")
         share = ((gross - net_area) / gross_area) if (gross is not None and gross_area > 0 and gross >= net_area +
                                                      gross_area) else None
+        no_load = {id(p) for p, e, _ in plan if e is None}          # exits, and support rooms with no function
+        host_of = {p["id"]: (p.get("more") or {}).get("served_through") for p in mine}
+        served = {}     # room id -> the rooms served through it, or through a room served through it (a chain: a
+        for p in mine:  # closet off a storeroom off a kitchen), each with a load or one not worked out
+            if id(p) in no_load:
+                continue
+            host, seen = host_of.get(p["id"]), set()
+            while host is not None and host not in seen:
+                seen.add(host)
+                served.setdefault(host, []).append(p.get("name") or p["id"])
+                host = host_of.get(host)
         for p, e, a in plan:
             if e is None:
                 continue
@@ -84,14 +104,17 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
             if high is not None and not increase_ruled_out:
                 high = max(high, a / cap)
             room = rooms.get(p["id"]) or {}
-            if room.get("pass_through"):
-                p["not_measured"]["space_occupant_load"] = THROUGH
+            if room.get("pass_through") or p["id"] in served:
+                names = served.get(p["id"]) or []
+                p["not_measured"]["space_occupant_load"] = THROUGH if room.get("pass_through") else SERVED.format(
+                    names=", ".join(names), es="" if len(names) > 1 else "es", their="their" if len(names) > 1 else "its")
                 loads.append((low, high))
                 continue
             loads.append((low, high))
             _give(p, "space_occupant_load", low, high)
-        if open_:
-            story["not_measured"]["story_occupant_load"] = STORY_OPEN.format(names=", ".join(open_))
+        if open_ or odd:
+            story["not_measured"]["story_occupant_load"] = "; ".join(
+                ([STORY_OPEN.format(names=", ".join(open_))] if open_ else []) + odd)
         elif loads:
             low = sum(x for x, _ in loads)
             high = None if any(h is None for _, h in loads) else sum(h for _, h in loads)
