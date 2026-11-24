@@ -559,7 +559,11 @@ public sealed class FakeWorkerTests
     [Fact]
     public async Task One_time_limit_covers_sending_a_request_and_its_answer()
     {
-        // the stand-in takes 1.5 s to start reading the request, then 1.5 s to answer: 3 s in all, over the 2 s limit
+        // the stand-in reads the request's first byte as it arrives, then waits 1.5 s before reading the rest (the
+        // request is more than a pipe holds, so sending it takes that long), then 1.5 s to answer: at least 3 s from
+        // the start of the send, over the 2 s limit, though each part alone is under it. The 1.5 s is counted from
+        // the request arriving, not from the hello: a slow machine that took 1.5 s to build the request used up the
+        // wait before the send began, so the check answered inside the limit (CI, main, 2026-11-20)
         using var client = await Start("slow", TimeSpan.FromSeconds(2));
         var big = new JsonObject { ["schema"] = new string('x', 20_000_000) };     // more than a pipe holds
         await Assert.ThrowsAsync<WorkerTimeoutException>(() => client.CheckSiteAsync(big, Facts));
