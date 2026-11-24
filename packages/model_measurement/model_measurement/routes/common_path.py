@@ -23,11 +23,12 @@ margins): the law's figure changes no faster than you walk, and Gordium's routes
 its figure at a sample is never less than the law's. Lengths in inches.
 """
 
-import bisect
 import heapq
 import math
 from dataclasses import dataclass, field
 from itertools import combinations
+
+import numpy as np
 
 from model_measurement.routes.paths import (EPS, TIE, Route, StoryRoutes, Tied, Tight, _down, _piece_length, _show,
                                             _tidy)
@@ -189,18 +190,68 @@ def farthest_shared(a: Tied, b: Tied) -> tuple:
     shares the walk to such a point, and a pair's last shared point is one, so this is the greatest shared walk over
     every pair, found without listing a route. The start itself is shared (0). Of the two travel distances to the
     point (equal, within float, both routes being shortest there) the greater is taken (the cautious side)."""
-    best = (0.0, None, None, None)
-    boxes = [_box(q) for q, _ in b.pieces]
-    for p, op in a.pieces:
-        bp = _box(p)
-        for (q, oq), bq in zip(b.pieces, boxes):
-            if bp[0] > bq[2] + TOL or bq[0] > bp[2] + TOL or bp[1] > bq[3] + TOL or bq[1] > bp[3] + TOL:
-                continue                                 # pieces apart: nothing shared
-            for x in _meetings(p, q):
-                u, v = _along(p, x), _along(q, x)
-                if u is not None and v is not None and max(op + u, oq + v) > best[0]:
-                    best = (max(op + u, oq + v), x, (p, op), (q, oq))
-    return best
+    # Worked as one loop over the pairs (a's pieces, then b's, each pair's meetings in turn) keeping a meeting only
+    # when it beats the best so far, so the answer is the FIRST meeting, in that order, whose distance is the
+    # greatest, M. Found here in two passes with the same answer: M first, the pairs taken greatest bound first,
+    # stopping at a bound that can't beat it; then that first meeting, in the old order, among the pairs whose bound
+    # reaches M. A pair's bound is max(op + U(p), oq + U(q)), U a piece's greatest `_along` (its length, by the very
+    # expressions `_along` caps at), never under a distance its meetings give (adding op rounds the same way).
+    pairs = list(_touching(a.pieces, b.pieces))           # pieces apart share nothing: skipped
+    if not pairs:
+        return (0.0, None, None, None)
+    ends_a = [op + _most_along(p) for p, op in a.pieces]
+    ends_b = [oq + _most_along(q) for q, oq in b.pieces]
+    bounds = [max(ends_a[i], ends_b[j]) for i, j in pairs]
+
+    def meetings(i, j):
+        (p, op), (q, oq) = a.pieces[i], b.pieces[j]
+        for x in _meetings(p, q):
+            u, v = _along(p, x), _along(q, x)
+            if u is not None and v is not None:
+                yield max(op + u, oq + v), x, (p, op), (q, oq)
+
+    most = 0.0
+    for k in sorted(range(len(pairs)), key=lambda k: -bounds[k]):
+        if bounds[k] <= most:
+            break
+        for got in meetings(*pairs[k]):
+            most = max(most, got[0])
+    if not most > 0.0:
+        return (0.0, None, None, None)
+    for k, (i, j) in enumerate(pairs):
+        if bounds[k] >= most:
+            for got in meetings(i, j):
+                if got[0] == most:
+                    return got
+    raise RuntimeError("the greatest meeting not found again")       # never: the same meetings, worked the same
+
+
+def _most_along(piece) -> float:
+    """The greatest `_along` a piece can give: a line's length and an arc's, by the same expressions it caps at."""
+    if piece[0] == "line":
+        _, a, b = piece
+        return math.hypot(*(b[0] - a[0], b[1] - a[1]))
+    return abs(piece[4]) * piece[2]
+
+
+CELLS = 1 << 20                 # box pairs set against each other in one numpy step, at most
+
+
+def _touching(a, b):
+    """Each pair (i, j) of a's piece i and b's piece j whose boxes (`_box`, grown by TOL) meet, in the order of the
+    two loops over a then b: the same box test, `p0 > q2 + TOL or ...`, each float sum and comparison worked by numpy
+    exactly as Python works it (IEEE doubles, one rounding each), a block of a's pieces at a time."""
+    if not a or not b:
+        return
+    boxes_b = np.array([_box(q) for q, _ in b], dtype=float).reshape(-1, 4)
+    rows = max(1, CELLS // len(b))
+    for start in range(0, len(a), rows):
+        boxes_a = np.array([_box(p) for p, _ in a[start:start + rows]], dtype=float).reshape(-1, 4)
+        pa, pb = boxes_a[:, None, :], boxes_b[None, :, :]
+        apart = ((pa[..., 0] > pb[..., 2] + TOL) | (pb[..., 0] > pa[..., 2] + TOL) |
+                 (pa[..., 1] > pb[..., 3] + TOL) | (pb[..., 1] > pa[..., 3] + TOL))
+        for i, j in zip(*np.nonzero(~apart)):
+            yield start + int(i), int(j)
 
 
 SLACK = 1e-4                   # in: how far apart two pieces' meeting ends, and their offsets, may be (float error)
@@ -252,21 +303,10 @@ class _Prepared:
             return self._last[1]
         e, r = self.engine, self.engine.r
         out = []
-        for k in range(len(e.rings)):
-            ring = self.on[k]
-            if not ring:
-                continue
+        for length, n1, k, q, ang, sweep in e.ring_ways(p, self.on):
             c = (float(e.rings[k][0]), float(e.rings[k][1]))
-            angles = [a for a, _ in ring]
-            for ang, q, length in e._tangents(p, k, c):
-                i = bisect.bisect_left(angles, ang)
-                after, before = ring[i % len(ring)], ring[(i - 1) % len(ring)]
-                lead = [("line", p, q)] if q is not None else []
-                up, down = (after[0] - ang) % (2 * math.pi), (ang - before[0]) % (2 * math.pi)
-                for n1, a0, sweep, piece in ((after[1], ang, up, ("arc", c, r, ang, up)),
-                                             (before[1], before[0], down, ("arc", c, r, ang, -down))):
-                    if e._arc_clear(k, c, a0, sweep):
-                        out.append((length + r * sweep, lead + [piece], n1))
+            lead = [("line", p, q)] if q is not None else []
+            out.append((length, lead + [("arc", c, r, ang, sweep)], n1))
         self._last = (p, out)
         return out
 
@@ -277,7 +317,7 @@ class _Prepared:
         for every node, adds up to the shortest), so a point costs what its tied curves hold, never the graph."""
         D, goal = self.dist[t], self.ids[t]
         cands = [(lead_len + D[n], lead_len, lead, n) for lead_len, lead, n in self.firsts(p) if math.isfinite(D[n])]
-        straight = math.dist(p, t) if self.engine.clear(p, t) else math.inf
+        straight = math.dist(p, t) if self.engine.clear_to(p, t) else math.inf
         length = min([c[0] for c in cands] + [straight])
         if not math.isfinite(length):
             return None
@@ -357,6 +397,12 @@ def tied(routes: StoryRoutes, point, exit_id) -> Tied:
 def at_point(routes: StoryRoutes, point) -> CommonPath:
     """The common path from a point clear of every ring (decision 5): for each pair of distinct exits, the farthest
     point the unions of their tied routes share; the least over the pairs."""
+    return _at_point(routes, point, drawn=True)
+
+
+def _at_point(routes: StoryRoutes, point, drawn: bool) -> CommonPath:
+    """`at_point`; with drawn False, without the two routes through the point where they part (`routes` left
+    empty), for the story's figure, which reads the length alone: the same length, worked the same way."""
     p = (float(point[0]), float(point[1]))
     unions, first = {}, None
     for e in sorted(routes.exits):
@@ -377,6 +423,8 @@ def at_point(routes: StoryRoutes, point) -> CommonPath:
         if best is None or length < best[0]:
             best = (length, (e1, e2), x, a, b)
     length, pair, x, a, b = best
+    if not drawn:
+        return CommonPath(0.0 if x is None else length, pair, [], p if x is None else x)
     if x is None:                                        # they share only the start
         return CommonPath(0.0, pair, [unions[pair[0]].one, unions[pair[1]].one], p)
     return CommonPath(length, pair, [_through(unions[pair[0]], a[0], a[1], p),
@@ -410,7 +458,7 @@ class _CommonPathSampler:
         cache = self._routes.__dict__.setdefault("_common_values", {})
         key = (round(point[0], 9), round(point[1], 9))
         if key not in cache:
-            cache[key] = at_point(self._routes, point).length
+            cache[key] = _at_point(self._routes, point, drawn=False).length
         return cache[key]
 
 

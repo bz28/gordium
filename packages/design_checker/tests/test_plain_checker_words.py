@@ -144,8 +144,21 @@ def test_the_egress_law_s_own_rows_are_in_plain_words():
 def test_which_code_says_the_use_in_words():
     from design_checker import code_scope
     assert code_scope.decide({"use": "retail_store_or_service_commercial"}, None)["why"] == (
-        "its use (retail store or service commercial) is none of the dwellings R101.2 lists (101.2: every other "
-        "building)")
+        "its use (Retail store or service commercial facility) is none of the dwellings R101.2 lists (101.2: every "
+        "other building)")                                                     # Ithaca's own words, uses.yaml
+
+
+def test_every_value_the_architect_typed_is_shown_exactly_as_typed():
+    """Review round 5: a number with every digit (never rounded by a format, never in e-notation), not-a-number and
+    infinity in words, a use the place lists in its own words and any other quoted as typed."""
+    from design_checker import code_scope
+    v = code_scope.value_words
+    assert [v(2.0), v(2.0000001), v(-1234567), v(float("nan")), v(float("inf")), v(-float("inf"))] == [
+        "2.0", "2.0000001", "-1234567", "not a number", "infinity", "minus infinity"]
+    assert "2.0000001 dwelling units are stated" in code_scope.decide(
+        {"use": "one_family_detached", "dwelling_units": 2.0000001}, None)["why"]
+    assert code_scope.use_words("one_family_detached") == "One-family dwelling, detached"
+    assert code_scope.use_words("one_famly_detached") == "“one_famly_detached”"
 
 
 def test_every_code_choice_says_itself_in_plain_words():
@@ -178,7 +191,6 @@ def test_every_code_choice_says_itself_in_plain_words():
     assert len(answers) > 3000 and len(shapes) > 50
     found = [p for got in answers for p in problems(shown(got))]
     assert not found, f"{len(found)} problems, e.g.\n" + "\n".join(found[:10])
-    assert code_scope.use_words("one_family_detached") == "a detached one-family dwelling"
 
 
 def test_the_code_choice_quotes_the_architects_value_as_typed_and_says_blank_yes_and_no():

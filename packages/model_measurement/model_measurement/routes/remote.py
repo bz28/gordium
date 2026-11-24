@@ -29,6 +29,7 @@ its own arcs. Lengths in inches.
 """
 
 import heapq
+import itertools
 import math
 from dataclasses import dataclass, field
 
@@ -77,29 +78,146 @@ def _longest(tri) -> float:
     return max(math.dist(a, b), math.dist(b, c), math.dist(c, a))
 
 
+_H_MOST = 1 << 17     # own_h's remembered triangles (a story's farthest() calls meet the same ones again)
+_H_SEEN: dict = {}
+
+
 def own_h(tri) -> float:
     """The greatest distance from any point of the triangle to its nearest corner. It is reached at the circumcentre
-    (when that is inside) or where a side's perpendicular bisector meets another side."""
+    (when that is inside) or where a side's perpendicular bisector meets another side.
+
+    Worked once per triangle (by its corners, exactly) and remembered: farthest() asks for a triangle's h when it is
+    pushed, popped and kept, and every room's farthest() on a story cuts the same triangles."""
+    key = tuple((float(p[0]), float(p[1])) for p in tri)
+    got = _H_SEEN.get(key)
+    if got is None:
+        if len(_H_SEEN) >= _H_MOST:
+            _H_SEEN.clear()
+        got = _H_SEEN[key] = _own_h(key)
+    return got
+
+
+def _inside_by_far(tri, x, y):
+    """Whether (x, y) is inside the triangle by more than 1e-6 in (True), outside it by more than 1e-6 in (False),
+    or too near its edge to say (None). Each side's signed distance is worked to far better than 1e-6 in (its float
+    error is about 1e-16 of the coordinates' size): a point more than 1e-6 in outside one side's line is more than
+    1e-6 in from the triangle, so never in its 1e-9-in buffer; one more than 1e-6 in inside every side is in it."""
+    (ax, ay), (bx, by), (cx, cy) = tri
+    area2 = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax)
+    if not area2 or not all(map(math.isfinite, (area2, x, y))):
+        return None
+    sign, least = (1.0 if area2 > 0 else -1.0), math.inf
+    for (px, py), (qx, qy) in (((ax, ay), (bx, by)), ((bx, by), (cx, cy)), ((cx, cy), (ax, ay))):
+        n = math.hypot(qx - px, qy - py)
+        if not n:
+            return None
+        least = min(least, sign * ((qx - px) * (y - py) - (qy - py) * (x - px)) / n)
+    if least > 1e-6:
+        return True
+    if least < -1e-6:
+        return False
+    return None
+
+
+def _own_h(tri) -> float:
+    """own_h, worked: the same float operations as ever (the circumcentre; each perpendicular bisector against each
+    side, its 2x2 determinant and solve through numpy's LAPACK, all nine in one call, which works each matrix exactly
+    as one call per matrix does), so the same h to the last bit (test_routes_speed pins it on many triangles against
+    the old one-at-a-time code). The circumcentre's buffer test is shapely's only near the triangle's edges."""
     a, b, c = (np.array(p, dtype=float) for p in tri)
     corners = (a, b, c)
     candidates = list(corners)
     d = 2 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]))
-    poly = Polygon(tri)
     if abs(d) > 0:
         ux = ((a @ a) * (b[1] - c[1]) + (b @ b) * (c[1] - a[1]) + (c @ c) * (a[1] - b[1])) / d
         uy = ((a @ a) * (c[0] - b[0]) + (b @ b) * (a[0] - c[0]) + (c @ c) * (b[0] - a[0])) / d
-        if poly.buffer(1e-9).covers(Point(ux, uy)):
+        inside = _inside_by_far(tri, float(ux), float(uy))
+        if inside is None:
+            inside = Polygon(tri).buffer(1e-9).covers(Point(ux, uy))
+        if inside:
             candidates.append(np.array([ux, uy]))
-    for p, q in ((a, b), (b, c), (c, a)):              # each perpendicular bisector against each side
+    sides = ((a, b), (b, c), (c, a))
+    m = np.empty((9, 2, 2))
+    rhs = np.empty((9, 2))
+    for i, (p, q) in enumerate(sides):                 # each perpendicular bisector against each side
         mid, n = (p + q) / 2, np.array([-(q - p)[1], (q - p)[0]])
-        for s, e in ((a, b), (b, c), (c, a)):
-            m = np.array([e - s, -n]).T
-            if abs(np.linalg.det(m)) < 1e-12:
-                continue
-            u, _ = np.linalg.solve(m, mid - s)
+        for j, (s, e) in enumerate(sides):
+            m[3 * i + j] = np.array([e - s, -n]).T
+            rhs[3 * i + j] = mid - s
+    solvable = np.flatnonzero(~(np.abs(np.linalg.det(m)) < 1e-12))
+    if len(solvable):
+        us = np.linalg.solve(m[solvable], rhs[solvable][:, :, None])[:, 0, 0]
+        for k, u in zip(solvable, us):
             if -1e-12 <= u <= 1 + 1e-12:
+                s, e = sides[k % 3]
                 candidates.append(s + u * (e - s))
     return max(min(np.hypot(*(x - k)) for k in corners) for x in candidates)
+
+
+FAR = 1e-6           # in: a distance this far from the reach test's line is sure (its float error is ~1e-12 in)
+
+
+def _seg_far(px, py, ax, ay, bx, by) -> float:
+    """The distance from (px, py) to the segment ab, in plain floats (within ~1e-12 in of the true one)."""
+    dx, dy = bx - ax, by - ay
+    wx, wy = px - ax, py - ay
+    length2 = dx * dx + dy * dy
+    t = 0.0 if length2 == 0 else min(1.0, max(0.0, (wx * dx + wy * dy) / length2))
+    return math.hypot(wx - t * dx, wy - t * dy)
+
+
+def _tri_dist(tri, x, y) -> float:
+    """(x, y)'s distance to the closed triangle, worked here in floats: 0 inside it, else the least distance to its
+    three sides. Not shapely's figure to the bit, but within ~1e-12 in of the true distance (coordinates of a few
+    thousand inches), so far within FAR."""
+    (ax, ay), (bx, by), (cx, cy) = tri
+    s1 = (bx - ax) * (y - ay) - (by - ay) * (x - ax)
+    s2 = (cx - bx) * (y - by) - (cy - by) * (x - bx)
+    s3 = (ax - cx) * (y - cy) - (ay - cy) * (x - cx)
+    if (s1 > 0 and s2 > 0 and s3 > 0) or (s1 < 0 and s2 < 0 and s3 < 0):
+        return 0.0
+    return min(_seg_far(x, y, ax, ay, bx, by), _seg_far(x, y, bx, by, cx, cy), _seg_far(x, y, cx, cy, ax, ay))
+
+
+def _reached(tri, centres, ring_points, r) -> bool:
+    """Whether a ring reaches the triangle: some centre closer than r - EPS to it by shapely's distance, exactly as
+    ever, with shapely asked only where its answer could differ from a sure one. A centre farther than R + r - EPS
+    + FAR from the triangle's centroid (R: its farthest corner from it) is surely farther than r - EPS from the
+    triangle. Each other centre's distance is worked here to within ~1e-12 in (`_tri_dist`): one more than FAR under
+    r - EPS is surely under it by shapely's figure too (the triangle reached); with none, those more than FAR over
+    it surely aren't, and only the centres within FAR of the line are measured by shapely (test_routes_speed sets
+    this against shapely's distance on every centre)."""
+    (ax, ay), (bx, by), (cx, cy) = tri
+    gx, gy = (ax + bx + cx) / 3, (ay + by + cy) / 3
+    big = max(math.hypot(ax - gx, ay - gy), math.hypot(bx - gx, by - gy), math.hypot(cx - gx, cy - gy))
+    line = r - EPS
+    near = np.flatnonzero(np.hypot(centres[:, 0] - gx, centres[:, 1] - gy) <= big + line + FAR)
+    unsure = []
+    for k in near:
+        d = _tri_dist(tri, float(centres[k, 0]), float(centres[k, 1]))
+        if d < line - FAR:
+            return True
+        if abs(d - line) <= FAR:
+            unsure.append(k)
+    if not unsure:
+        return False
+    return bool((shapely.distance(Polygon(tri), ring_points[unsure]) < line).any())
+
+
+_REACH_MOST = 1 << 17   # triangles whose ring reach is remembered, per set of rings
+_REACH: dict = {}
+
+
+def _reach_memo(centres, r) -> dict:
+    """The reach answers remembered for these rings (by their centres, exactly, and r): every farthest() over a
+    story's rooms cuts the same triangles against the same rings."""
+    key = (centres.tobytes(), r)
+    got = _REACH.get(key)
+    if got is None or len(got) >= _REACH_MOST:
+        if len(_REACH) >= 64:
+            _REACH.clear()
+        got = _REACH[key] = {}
+    return got
 
 
 def droppable(tri, values, best) -> bool:
@@ -217,8 +335,11 @@ class _Walk:
         self.dist = [dist[n] for n in ids]
 
     def __call__(self, p) -> float:
-        return min((math.dist(p, n) + d for n, d in zip(self.nodes, self.dist)
-                    if math.isfinite(d) and self.leg.clear(p, n)), default=math.inf)
+        """The least of (straight to a node, clear) + that node's walk on: each node's line tested as `clear` tests
+        it, all of them in one shapely call (`clear_from`)."""
+        reach = [(n, d) for n, d in zip(self.nodes, self.dist) if math.isfinite(d)]
+        clear = self.leg.clear_from(p, [n for n, _ in reach])
+        return min((math.dist(p, n) + d for (n, d), ok in zip(reach, clear) if ok), default=math.inf)
 
 
 def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
@@ -254,6 +375,8 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
             continue
         rings = [tuple(map(float, c)) for c in routes.rings_for(room)] if r > 0 else []
         centres = np.array(rings, dtype=float).reshape(-1, 2)
+        ring_points = shapely.points(centres) if len(centres) else None       # made once per room, not per triangle
+        reach = _reach_memo(centres, r)
         walls = _walls(floor)
         arcs = _clear_arcs(floor, rings, r, walls) if rings else []
         edge = {k: [] for k in range(len(rings))}
@@ -271,10 +394,14 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
 
         # the clear floor
         heap, kept = [], []
+        pushed = itertools.count()                  # equal bounds pop in the order pushed (never by address)
 
         def push(tri):
-            poly = Polygon(tri)
-            reached = bool(len(centres)) and bool((shapely.distance(poly, shapely.points(centres)) < r - EPS).any())
+            reached = False
+            if len(centres):
+                reached = reach.get(tri)
+                if reached is None:
+                    reached = reach[tri] = _reached(tri, centres, ring_points, r)
             if reached:
                 if _longest(tri) > FINE:
                     for t in _split(tri):
@@ -288,7 +415,7 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
             values = [value(p) for p in tri]
             if any(v is None for v in values):       # in a pocket: bounded through its cluster
                 return
-            heapq.heappush(heap, (-(max(values) + own_h(tri)), id(tri), tri, values))
+            heapq.heappush(heap, (-(max(values) + own_h(tri)), next(pushed), tri, values))
 
         nonlocal_near = []
         for tri in _triangles(floor, START):

@@ -46,7 +46,7 @@ GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies",
 
 from model_measurement.project import fact_conflict_rows  # noqa: E402  (lot facts that disagree: shown)
 from model_measurement.plugin_measuring import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
-from model_measurement.stops import Said, joined, mapped, parts_of, said  # noqa: E402  (a reason's parts, kept as data)
+from model_measurement.stops import Said, joined, mapped, parts_of, reason_part  # noqa: E402  (a reason's parts, kept as data)
 LOT_LENGTHS = reading_set.LOT_LENGTHS
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
 EIGHTH = 1 / 96                           # 1/8 in, in feet
@@ -519,7 +519,7 @@ def _depends(row: dict, status: str, measured: dict) -> str | None:
         return None
     word = "Complies" if row["Provisional"].startswith("passes") else "Does not comply"
     which = "an open question" if len(asked) == 1 else "open questions"
-    return said("depends", f"{word} under every reading, but it depends on {which}: {'; '.join(asked)}; confirm with "
+    return reason_part("depends", f"{word} under every reading, but it depends on {which}: {'; '.join(asked)}; confirm with "
                 "the zoning office", questions=asked)
 
 
@@ -530,12 +530,12 @@ def _reason(row: dict) -> str | None:
     if _status(row) != REVIEW:
         return None
     if named:
-        return said("named", _user_text("Needs review: " + named["text"] + " · confirm with the zoning office"))
+        return reason_part("named", _user_text("Needs review: " + named["text"] + " · confirm with the zoning office"))
     if row.get("Provisional") and "confirm the survey" in row["Provisional"]:
         word = "Complies" if row["Provisional"].startswith("passes") else "Does not comply"
-        return said("tax_map", f"{word} with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…")
+        return reason_part("tax_map", f"{word} with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…")
     if row.get("Provisional"):
-        return said("readings", _user_text(("Complies " if row["Provisional"].startswith("passes") else "Fails ") +
+        return reason_part("readings", _user_text(("Complies " if row["Provisional"].startswith("passes") else "Fails ") +
                                            row["Provisional"].split(" ", 1)[1] +
                                            " the law allows; confirm with the zoning office"))
     return _user_text(row.get("Why") or "")
@@ -1166,7 +1166,7 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
         holds = {r["holds"] for r in rs}
         if i["status"] == COMPLIES and holds != {True}:      # short under some reading: never a pass (only
             # ever more cautious: the checker alone decides a row complies or fails)
-            i.update(status=REVIEW, mark=MARK[REVIEW], reason=said("tax_map",
+            i.update(status=REVIEW, mark=MARK[REVIEW], reason=reason_part("tax_map",
                 f"Complies as drawn, but not under every reading of {_which(lot, open_)} · Pick survey lot lines…"))
         i.update(delta=delta_words(i["status"], span, unit, approx, _is_maximum(node)), approx=approx)
         # the readings with the lot lines as drawn (a survey's): the margin as drawn, said first on a tax-map lot
@@ -1375,7 +1375,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 w = _numbers(bad, worst, measured, label)
                 what = "" if bad.left.id == node.left.id else NAMES.get(bad.left.id, bad.left.id.replace("_", " ")) + " "
                 st = REVIEW
-                why = said("tax_map", f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst "
+                why = reason_part("tax_map", f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst "
                        f"{what}{_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
         own_named = (side_row or row).get("Named")
         if st == REVIEW and tax and node is not None and (own_named or {}).get("result") == "pass" and \
@@ -1385,7 +1385,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             worst = _worst_case(expr, values, formula.names(expr), measured, facts)
             if worst is not None:
                 w = _numbers(node, worst, measured, label)
-                why = said("tax_map", f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it complies under "
+                why = reason_part("tax_map", f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it complies under "
                        f"every reading; at worst {_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
         tol = (measured.get("lot_area") or {}).get("tolerance")
         every = reading_set.rule_names(rule)
@@ -1401,11 +1401,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 pass
             elif _evaluate(expr, values) is False and _best_case(expr, values, names, measured, facts) is not None:
                 w = _numbers(node, _best_case(expr, values, names, measured, facts), measured, label)
-                why = said("tax_map", f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it does not comply, "
+                why = reason_part("tax_map", f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it does not comply, "
                        f"but at best {_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
             else:
                 w = _numbers(node, bad, measured, label)
-                why = said("tax_map", f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst {_display(*w)[0]} "
+                why = reason_part("tax_map", f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst {_display(*w)[0]} "
                        f"against {_display(*w)[1]} · Pick survey lot lines…")
         as_drawn_fails = (drawn is False and clean) or (not side_row and (row.get("Readings") or {}).get("result") == "fail")
         if st == REVIEW and as_drawn_fails and tax and node is not None and (names & LOT_LENGTHS or tol):
@@ -1417,7 +1417,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     could = f"at best {_display(*w)[0]} against {_display(*w)[1]}"
                 else:                                               # it holds the rule's other way at best
                     could = "it could comply the rule's other way if the lines are off in its favour"
-                why = said("tax_map", f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it does not comply, "
+                why = reason_part("tax_map", f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it does not comply, "
                        f"but {could} · Pick survey lot lines…")
         own = side_row or row                               # a side yard: its own words, never the pair's
         if st == FAILS and own.get("Provisional") and (side_row or not row.get("Error") == "FAIL") and \
@@ -1461,9 +1461,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 # (the overhang question in coverage is settled in PR 18: coverage_seen_from_above, so
                 # term-index's "both ways" words for it have nothing left to say)
                 if worst is not None:                   # say the bad one first: "probably fine" it isn't
-                    head = said("readings", f"At worst {worst[0]} against {worst[1]}: does not comply under that "
+                    head = reason_part("readings", f"At worst {worst[0]} against {worst[1]}: does not comply under that "
                                 "reading.")
-                    why = joined([head, why], " ") if why else said("readings", str(head) + " ")
+                    why = joined([head, why], " ") if why else reason_part("readings", str(head) + " ")
         bound = ((measured.get("stories") or {}).get("reason") or "") if measure == "stories" else ""
         if st == REVIEW and "could hold up to" in bound:     # the drawing allows a range: say why, plainly,
             # every open question kept (the main building's, the accessory one), the bad reading first
@@ -1471,7 +1471,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             worst = why.split(": does not comply under that reading.")[0] + ": does not comply under that reading. " \
                 if (why or "").startswith("At worst") else ""
             said_ = "; ".join(dict.fromkeys(q[0].upper() + q[1:] if i == 0 else q for i, q in enumerate(qs)))
-            why = said("readings", worst + said_ + ".")
+            why = reason_part("readings", worst + said_ + ".")
             if not (measured.get("stories") or {}).get("count_settles") and PICK_MAIN_WHY not in why:
                 hint = PICK_MAIN if (measured.get("stories") or {}).get("main_assumed") else hint
         span_ft = None                   # a limit read two ways (the lot depth open), in feet: its range
@@ -1507,7 +1507,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 elif limit_q and not complying and not (why or "").startswith("Lot lines are from the tax map") and \
                         not ((side_row or row).get("Provisional") or "").startswith("passes"):
                     # (the tax map's own sentence, and "complies under every reading, but it depends on …", say more)
-                    why = said("depends", f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): "
+                    why = reason_part("depends", f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): "
                                "ask the zoning office" + (f"; also open: {'; '.join(rest)}" if rest else ""),
                                questions=limit_q + rest)
         if spanned and not line:      # a span: the detail says it whole, with its limit (a narrow panel cuts the cell)
@@ -1544,13 +1544,13 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                          "the height is measured from existing grade only; the bonus needs it from finished grade"
                          if as_is else "the height isn't measured yet")
                 more = f"more if the §325-16C height bonus applies; {waits}"
-                why = joined([why, said("height_bonus", f"({more})")], " ") if why else \
-                    said("height_bonus", f"{_bonus_waits(st, False)} ({more})")
+                why = joined([why, reason_part("height_bonus", f"({more})")], " ") if why else \
+                    reason_part("height_bonus", f"{_bonus_waits(st, False)} ({more})")
                 line = f"{proposed} proposed · {required} required before the §325-16C height bonus"
                 base_calc = f"Required: {required} before the §325-16C height bonus ({waits})"
         applied = _applied(names, measured)
         if applied["note"]:                     # Gordium's reading, applied: always said, never hidden
-            note = said("reading_applied", applied["note"])
+            note = reason_part("reading_applied", applied["note"])
             why = joined([why, note], " · ") if why else note
         if row.get("Crossing"):                 # a building partly on another lot: fails, whatever else
             # the row's own verdict, the crossing set aside: its only failing fact? Never on a distance row (a yard,
@@ -2041,7 +2041,7 @@ def _raise_yards(items, measured, values, facts):
                 t["_expr"] = f"({t['_expr']}) and ({expr})" if t.get("_expr") else expr
                 if worst is not None:                    # the raised minimum fails at the tax-map worst case
                     w = _display(*_numbers(c, worst, measured, t["name"]))
-                    t.update(status=REVIEW, mark=MARK[REVIEW], reason=said("tax_map",
+                    t.update(status=REVIEW, mark=MARK[REVIEW], reason=reason_part("tax_map",
                         f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst {w[0]} against "
                         f"{w[1]}, the minimum {i['name'].lower()}'s other way needs · Pick survey lot lines…"))
                 elif t["status"] == COMPLIES:
@@ -2106,7 +2106,7 @@ def _cautious_for_left_out(items, left_out, touching, rules_by_id=None, apart=No
                    "no other structure may stand in a required yard (§325-3B YARD)")
         else:
             continue
-        i.update(status=REVIEW, mark=MARK[REVIEW], hint="Add to check…", reason=said("scope", why + " · Add to check…"))
+        i.update(status=REVIEW, mark=MARK[REVIEW], hint="Add to check…", reason=reason_part("scope", why + " · Add to check…"))
 
 
 SLAB_YARDS = BUILDING_MEASURES[:4] + EAVE_YARDS     # the required yards, to the walls and to the eaves
@@ -2150,7 +2150,7 @@ def _cautious_for_site_slabs(items, slabs, rules_by_id=None):
                    "measured yet")
         else:
             continue
-        i.update(status=REVIEW, mark=MARK[REVIEW], hint=None, reason=said("scope", why))
+        i.update(status=REVIEW, mark=MARK[REVIEW], hint=None, reason=reason_part("scope", why))
 
 
 # What each looked-up fact decides (facts["unsettled"]): every measurement worked out from it. The lot outline decides
@@ -2251,7 +2251,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     settle(items, values, measured, facts)          # Delta, colours, approx: from each row's readings, last
     for i in items:                                  # a row that needs review always says why (stress F12, F13)
         if i["status"] == REVIEW and not (i.get("reason") or "").strip():
-            i["reason"] = said("unsettled", "Needs review: the checker can't settle it from the drawing as it is" +
+            i["reason"] = reason_part("unsettled", "Needs review: the checker can't settle it from the drawing as it is" +
                                (f" ({i['delta']})" if i.get("delta") else ""))
     for i in items:                                  # waiting on the main building: the row says how to pick it
         if PICK_MAIN_WHY in (i.get("reason") or "") and not i.get("hint"):
@@ -2272,7 +2272,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "status": REVIEW, "mark": MARK[REVIEW], "proposed": "", "required": "", "margin": "", "sign": "",
                       "zoom": None, "measure": None, "objects": [], "points": None,
                       # the same "Enter …" button as a row waiting on these counts, to correct either one
-                      "hint": rhino_logic.enter_words(needs), "reason": said("facts_conflict", conflict),
+                      "hint": rhino_logic.enter_words(needs), "reason": reason_part("facts_conflict", conflict),
                       "needs": list(needs),
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
                                  "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
@@ -2283,7 +2283,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "margin": "", "sign": "", "zoom": "top", "measure": None, "objects": list(left_out),
                       "points": None, "hint": "Add to check…",
                       "ground_like": [o for o in extras.get("ground_like") or [] if o in left_out],
-                      "reason": said("scope", f"{n} object{'s' if n != 1 else ''} on the lot {'aren' if n != 1 else 'isn'}'t "
+                      "reason": reason_part("scope", f"{n} object{'s' if n != 1 else ''} on the lot {'aren' if n != 1 else 'isn'}'t "
                                 "measured (not on the Building layer) · Add to check…" + _on_context(extras) + (
                                     f" (" + str(len(extras.get("ground_like") or [])) + " looks like the ground: if it is, "
                                     "This is the ground)" if extras.get("ground_like") else "") + _advice(extras, left_out)

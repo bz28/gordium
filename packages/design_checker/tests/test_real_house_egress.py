@@ -68,7 +68,7 @@ def load_yaml(name, file):
 
 def run(found, name):
     house, hand = load_yaml(name, "house.yaml"), load_yaml(name, "hand_check.yaml")
-    return egress.check(found, house, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()}), hand
+    return egress.check(found, house, {"dwelling_units": 1, **egress_house.HOUSE}, egress_house.ALLOWED), hand
 
 
 def test_the_houses_with_a_hand_check():

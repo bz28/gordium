@@ -159,7 +159,7 @@ public sealed class CheckProjectCommand : IExternalCommand
                     var marks = RevitMarks.Model(doc);
                     var notSet = SetupFacts.NotSent(marks, ProjectFacts.Read(marks));
                     SetupRun.Show(ui, doc, notice: clear + SetupWords.NothingSent(prepared.StreetRefused, notSet,
-                        SetupWords.Noun(Marks.Text(marks.ProjectMarks.GetValueOrDefault(Marks.Use.Guid)))));
+                        SetupWords.Noun(Marks.Text(marks.ProjectMarks.GetValueOrDefault(Marks.Use.Guid))), LengthUnits.Of(marks.DisplayUnits).Symbol));
                 }
                 Blocked();
                 check.End(shown ? "nothing_sent" : "cancelled");
@@ -372,7 +372,8 @@ public sealed class CheckProjectCommand : IExternalCommand
                                                    StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files,
                                                    ClearWords: clear, Ids: ids, Key: DocKeys.Of(doc),
                                                    NotStated: run.Prepared.NotStated.Select(m => SetupWords.SentWithout(m, SetupWords.Noun(
-                                                       run.Prepared.Request?.Facts["use"]?.GetValue<string>()))).ToList()));
+                                                       run.Prepared.Request?.Facts["use"]?.GetValue<string>()), LengthUnits.Of(doc.GetUnits()
+                                                       .GetFormatOptions(SpecTypeId.Length).GetUnitTypeId().TypeId).Symbol)).ToList()));
     }
 
     /// <summary>Whether the active view is a plan (a site plan or floor plan) with a property line visible in it:

@@ -53,3 +53,17 @@ def test_the_design_tools_own_words_are_never_read_back_from_words():
     with pytest.raises(ValueError, match="no measuring reason gives"):
         code_of("a block (Garage)")
     assert stops.TOOL_WORDS not in stops.PATTERNS
+
+
+# ---- words_of: THE one way a problem becomes words (stops.py) ---------------------------------------------------
+
+def test_words_of_says_every_kind_of_problem_in_words_and_never_raises():
+    from model_measurement.stops import said, words_of
+    assert words_of("no lot outline") == "no lot outline"
+    assert words_of({"code": "no_lot_outline", "args": {"layer": "Site"}}) == stop("no_lot_outline", layer="Site")
+    assert words_of({"code": "tool_words", "args": {"words": "a block (Garage)"}}) == "a block (Garage)"
+    for bad in ({"code": "not_a_reason", "args": {}}, {"code": "no_lot_outline", "args": {}},
+                {"code": "no_lot_outline", "args": {"layer": "Site", "more": 1}}, {"code": "no_lot_outline"},
+                {"code": "no_lot_outline", "args": {"layer": ["Site"]}}, 42, None, ["no lot"], {1, 2}):
+        assert words_of(bad).startswith("a problem sent with the drawing can't be read ("), bad
+    assert said(["no lot outline", {"code": "no_lot", "args": {}}]) == "no lot outline; no lot outline"

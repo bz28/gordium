@@ -100,16 +100,16 @@ def test_a_stop_with_a_semicolon_of_its_own_is_one_ask():
 
 
 def test_each_open_question_a_row_depends_on_is_one_ask_with_the_whole_question():
-    from model_measurement.stops import said
-    reason = said("depends", "Complies under every reading, but it depends on open questions: a; b, with c; confirm "
+    from model_measurement.stops import reason_part
+    reason = reason_part("depends", "Complies under every reading, but it depends on open questions: a; b, with c; confirm "
                   "with the zoning office", questions=["a", "b, with c"])
     got = ui_data.asks_of(_zoning(reason), _ctx())
     assert [(a["kind"], a["why"]) for a in got] == [(ui_data.OPEN_QUESTION, "a"), (ui_data.OPEN_QUESTION, "b, with c")]
 
 
 def test_a_scope_reason_is_one_fix_of_the_model_with_the_rows_objects():
-    from model_measurement.stops import said
-    reason = said("scope", "Complies for the buildings measured; 2 objects touching the building aren't measured "
+    from model_measurement.stops import reason_part
+    reason = reason_part("scope", "Complies for the buildings measured; 2 objects touching the building aren't measured "
                   "(a porch or deck is part of the building, §325-18A) · Add to check…")
     got = ui_data.asks_of(_zoning(reason, objects=["o1", "o2"]), _ctx())
     assert [(a["kind"], a["elements"]) for a in got] == [(ui_data.FIX_MODEL, ["o1", "o2"])]
@@ -125,8 +125,8 @@ def test_each_fact_a_row_waits_on_is_its_own_ask():
 
 
 def test_a_rows_own_reason_is_by_its_code():
-    from model_measurement.stops import said
-    got = ui_data.asks_of(_zoning(said("flag", "A judgment call: a person decides (this rule is a flag).")), _ctx())
+    from model_measurement.stops import reason_part
+    got = ui_data.asks_of(_zoning(reason_part("flag", "A judgment call: a person decides (this rule is a flag).")), _ctx())
     assert [(a["kind"], a["headline"]) for a in got] == [(ui_data.DECIDE, ui_data.JUDGMENT)]
     got = ui_data.asks_of(_zoning("something no part was kept for"), _ctx())
     assert got[0]["kind"] == ui_data.DECIDE and got[0]["why"] == "something no part was kept for"
@@ -290,8 +290,8 @@ def test_a_pick_is_the_architects_to_state_and_a_tax_map_row_needs_a_survey():
     from model_measurement.stops import stop
     got, = ui_data.asks_of(_zoning(stop("no_main_building"), objects=["b1", "b2"]), _ctx())
     assert (got["kind"], got["headline"], got["elements"]) == (ui_data.MARK, "Pick the main building", ["b1", "b2"])
-    from model_measurement.stops import said
-    item = _zoning(said("tax_map", "Lot lines are from the tax map (±2'-0\"): at worst 35'-0\" against 35'-0\" · Pick "
+    from model_measurement.stops import reason_part
+    item = _zoning(reason_part("tax_map", "Lot lines are from the tax map (±2'-0\"): at worst 35'-0\" against 35'-0\" · Pick "
                         "survey lot lines…"), objects=["lot"])
     got, = ui_data.asks_of(item, _ctx())
     assert (got["kind"], got["elements"]) == (ui_data.SURVEY, ["lot"])

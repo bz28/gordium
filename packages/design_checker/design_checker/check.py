@@ -34,8 +34,9 @@ from envelope_builder.envelope import envelope
 from model_measurement.places import measuring
 from model_measurement.plugin_measuring import TAX_MAP_TOLERANCE
 from model_measurement.project import fact_problems, load_facts, working
-from model_measurement.stops import joined, said
+from model_measurement.stops import joined, reason_part
 from model_measurement.read_3dm import read_site
+from model_measurement.stops import in_words
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
 from rule_format import formula, parts
 from rule_format.place import plugin_place
@@ -128,13 +129,13 @@ def _why(row: dict, rules: dict, measured: dict, allowed: dict | None = None, fa
                 continue        # an optional fact that can't change this row isn't why it needs review (r2 round 2)
             if (measured.get(name) or {}).get("value") is None and reason and reason not in reasons:
                 reasons.append(reason)
-        reasons = [said("review_when", r) for r in own] + reasons
+        reasons = [reason_part("review_when", r) for r in own] + reasons
     if reasons:
         return {**row, "Why": joined(reasons)}
     # the report's own reason, under what it is (a flag: a person decides; else the rule's review)
     flag = (rules.get(row["Rule id"]) or {}).get("kind") == "flag"
     why = row["Why it needs review"]
-    return {**row, "Why": said("flag" if flag else "review", why) if why else why}
+    return {**row, "Why": reason_part("flag" if flag else "review", why) if why else why}
 
 
 def _review_reasons(rule: dict, measured: dict, allowed: dict, facts: dict | None) -> list[str]:
@@ -992,6 +993,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     give each law's own state; its state and summary are over both."""
     today = present.checked_today(today)
     _refuse_bad_facts(facts)
+    site = in_words(site)           # problems as words, coded ones too ({code, args}): the report says them plainly
     model_path = Path(name)
     say = step or _quiet
     say(STEPS["measure"])

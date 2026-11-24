@@ -109,8 +109,9 @@ def _folder(jurisdiction) -> Path:
 
 
 def laws(jurisdiction) -> dict:
-    """The place and every state law it inherits, ready to check: {"place": its name, "laws": [{key, title, short,
-    folder, rulebook, rules, problems, section_of, documents}]}. A rulebook that doesn't pass the rule checks gives
+    """The place and every state law it inherits, ready to check: {"place": its name, "folder": its folder (the code
+    choice reads its uses.yaml names), "laws": [{key, title, short, folder, rulebook, rules, problems, section_of,
+    documents}]}. A rulebook that doesn't pass the rule checks gives
     no rules and its problems (needs review, never a row)."""
     refuse_state_alone(jurisdiction)
     p = place_of(_folder(jurisdiction))
@@ -136,7 +137,7 @@ def laws(jurisdiction) -> dict:
                     [f"its sources can't be read ({type(e).__name__}: {e})"], [], None
         law["not_checked_yet"], law["coverage_problem"] = _not_checked_yet(folder, law["rules"])
         out.append(law)
-    return {"place": p.name, "laws": out}
+    return {"place": p.name, "folder": p.folder, "laws": out}
 
 
 def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]:
@@ -237,7 +238,9 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
     section, so neither reads as the answer (principle 4). The decision is the result's `code_scope`."""
     waiting = _no_rooms(interior)
     building = interior.get("building") if isinstance(interior, dict) else None
-    scope = code_scope.decide(values, building) if any(law.get("scope") for law in found["laws"]) else None
+    # the place's own uses as they are (an empty set: it lists none, so every use needs review) and its own names
+    scope = code_scope.decide(values, building, (allowed or {}).get("use"), found.get("folder")) if any(
+        law.get("scope") for law in found["laws"]) else None
     run = [law for law in found["laws"]
            if scope is None or law.get("scope") is None or scope["code"] in (None, law["scope"])]
     undecided = scope is not None and scope["code"] is None
