@@ -60,6 +60,10 @@ FIELD_HEADLINES = {
     "facts.ground_is_flat": "Say whether the ground is flat",
     "facts.accessory_dwelling_unit": "Is there an ADU on the lot?",
     "facts.home_occupation": "Is a home business planned? (§325-3B)",
+    "building.separate_means_of_egress": "Does each unit have a separate means of egress?",
+    "building.townhouse_units": "Are the units townhouse units?",
+    "building.stories_above_grade_plane": "Set the stories above grade plane",
+    "facts.use": "Set the building's use",
     "facts.abuts_r1_district": "Does the lot abut R-1a or R-1b land? (§325-19E)",
     "facts.stream_near_lot": "Is a stream or inlet within 20 ft of the lot? (§325-26)",
     "facts.adu_detached": "Is the ADU detached (its own building)?",
@@ -205,7 +209,12 @@ ROW_PARTS = {
     "review": (DECIDE, "A person decides this: see why"),
     "facts_conflict": (MARK, "Correct the facts that disagree"),
     "words": (DECIDE, "A person decides this: see why"),
+    "looked_up": (MARK, "Confirm or change the looked-up fact"),
 }
+NO_ASK_PARTS = ("use_detail",)          # "Answer when you plan the interior": when to answer; the parts after it ask
+# one key for one pick, whether the row's hint or the measuring's stop asks for it
+PICK_KEYS = {"no_main_building": "pick:main_building", "no_adu_building": "pick:adu_building",
+             "adu_not_found": "pick:adu_building"}
 # the measuring's stops that are no fault of the model: a reading Gordium can't follow yet, or the city's files
 MEASURE_STOPS = ("reading_unknown", "sloped_ground", "curved_surface", "curved_edge")
 DECIDE_STOPS = ("law_missing",)
@@ -274,24 +283,29 @@ def _part_asks(part: dict, item: dict, ctx: dict, objects: list[str], asked: set
             return [{"kind": SURVEY, "key": f"stop:{code}", "headline": "The lot area needs a lot outline from a survey",
                      "why": words, "elements": list(objects)}]
         if code in OPEN_STOPS:
-            return [{"kind": OPEN_QUESTION, "key": f"stop:{code}:{words}",
-                     "headline": "An open question about the law decides this", "why": words,
-                     "elements": list(objects)}]
+            return [{"kind": OPEN_QUESTION, "key": f"stop:{code}:{words}", "headline": _clause_head(words),
+                     "why": words, "elements": list(objects)}]
         if code == "open_solid":
             what = str(params.get("what") or "")
             ids = _named(ctx.get("site"), what, ctx.get("open_ids") or [])
             return [{"kind": FIX_MODEL, "key": f"stop:open_solid:{what}", "headline": f"“{what}” isn't a closed solid",
                      "why": words, "elements": ids or list(objects)}]
         if _is_pick(code):
-            return [{"kind": MARK, "key": f"stop:{code}", "headline": _pick_head(code), "why": words,
-                     "elements": list(objects)}]
+            return [{"kind": MARK, "key": PICK_KEYS.get(code, f"stop:{code}"), "headline": _pick_head(code),
+                     "why": words, "elements": list(objects)}]
         kind = MEASURE if code in MEASURE_STOPS else DECIDE if code in DECIDE_STOPS else FIX_MODEL
         return [{"kind": kind, "key": f"stop:{code}:{words}", "headline": _clause_head(words), "why": words,
                  "elements": list(objects)}]
+    if code in NO_ASK_PARTS:
+        return []
+    if code == "looked_up" and params.get("fact"):
+        return [{"kind": MARK, "key": f"looked_up:{params['fact']}", "headline": "Confirm or change the looked-up "
+                 f"{params.get('name') or str(params['fact']).replace('_', ' ')}", "why": words,
+                 "elements": list(objects), "field": f"facts.{params['fact']}"}]
     kind, headline = ROW_PARTS.get(code, ROW_PARTS["words"])
     if code == "depends" and params.get("questions"):
-        return [{"kind": OPEN_QUESTION, "key": f"question:{q}", "headline": headline, "why": str(q),
-                 "elements": list(objects)} for q in params["questions"]]
+        return [{"kind": OPEN_QUESTION, "key": f"question:{q}", "headline": _clause_head(str(q)) or headline,
+                 "why": str(q), "elements": list(objects)} for q in params["questions"]]
     out = {"kind": kind, "key": f"{code}:{item.get('id')}:{words}" if kind == DECIDE else f"{code}:{words}",
            "headline": headline, "why": words, "elements": list(objects)}
     if code == "facts_conflict":
@@ -313,12 +327,12 @@ def _zoning_asks(item: dict, ctx: dict) -> list[dict]:
         asked.add(n)
         mine = next((p["words"] for p in parts if n in _stop_facts(p["code"], ctx)), None)
         out.append(_fact_ask(n, mine or why, objects))
-    hint = item.get("hint")
-    if hint in (present.PICK_MAIN, present.PICK_ADU):
-        out.append({"kind": MARK, "key": f"pick:{hint}", "headline": hint.rstrip("…"), "why": why,
-                    "elements": list(objects)})
     for part in parts:
         out += _part_asks(part, item, ctx, objects, asked)
+    hint = item.get("hint")                  # after the parts: a stop asking for the same pick is that one ask
+    if hint in (present.PICK_MAIN, present.PICK_ADU):
+        out.append({"kind": MARK, "key": "pick:main_building" if hint == present.PICK_MAIN else "pick:adu_building",
+                    "headline": hint.rstrip("…"), "why": why, "elements": list(objects)})
     if not out:
         out = [_from_cause(c, None) for c in item.get("causes") or []]
     return _deduped(out)
@@ -337,11 +351,25 @@ def _deduped(asks: list[dict]) -> list[dict]:
     return out
 
 
+def _scope_field(fact: str) -> str:
+    """The description's field for a fact the code choice reads: the `building` block's (code_scope.FACTS), else the
+    lot facts'."""
+    return f"building.{fact}" if fact in code_scope.FACTS else f"facts.{fact}"
+
+
+def _scope_headline(fact: str) -> str:
+    return FIELD_HEADLINES.get(_scope_field(fact)) or "Set " + code_scope.fact_words(fact)
+
+
 def asks_of(item: dict, ctx: dict) -> list[dict] | None:
     """A row's asks (the module's note), or None for a row not in review."""
     if item.get("status") != present.REVIEW:
         return None
     if item.get("group") == present.LAW_GROUP:
+        facts = (item.get("code_scope") or {}).get("ask_facts") if isinstance(item.get("code_scope"), dict) else None
+        if facts:                    # which code governs: the facts its ask names, as data (code_scope.ask_facts)
+            return [{"kind": MARK, "key": f"field:{_scope_field(f)}", "headline": _scope_headline(f),
+                     "why": str(item.get("reason") or ""), "elements": [], "field": _scope_field(f)} for f in facts]
         kind = (ctx.get("rule_kinds") or {}).get(item.get("rule"))
         return _deduped([_from_cause(c, kind) for c in item.get("causes") or []])
     return _zoning_asks(item, ctx)
