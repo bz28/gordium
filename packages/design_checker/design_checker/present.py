@@ -2188,8 +2188,9 @@ def _cautious_for_unsettled(items, unsettled, rules_by_id=None):
             if i["status"] != COMPLIES or not (_formula_names(i, rules_by_id) & decides):
                 continue
             i.update(status=REVIEW, mark=MARK[REVIEW], hint="Edit site…",
-                     reason=f"Complies on the looked-up {UNSETTLED_NAMES[key]}, which needs review: {why} · "
-                            "confirm it (I checked this) or change it in Edit site…")
+                     reason=reason_part("looked_up", f"Complies on the looked-up {UNSETTLED_NAMES[key]}, which needs "
+                                        f"review: {why} · confirm it (I checked this) or change it in Edit site…",
+                                        fact=key, name=UNSETTLED_NAMES[key]))
 
 
 def _on_context(extras):
@@ -2338,6 +2339,11 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
         if i["use_detail"]:                          # when to answer, in the row (the group's title is short)
             i["reason"] = f"{rhino_logic.USE_DETAILS_WHEN}: {i['reason']}" if i.get("reason") else \
                 rhino_logic.USE_DETAILS_WHEN
+            if "stops" in i:                         # its own part, so the parts are still the reason
+                rest = [dict(p) for p in i["stops"]]
+                if rest:
+                    rest[0]["sep"] = ": "
+                i["stops"] = [{"code": "use_detail", "params": {}, "words": rhino_logic.USE_DETAILS_WHEN}] + rest
     return {"items": items, "summary": summary(items), "state": state(items),
             "header": header(facts, dict(extras, waiting_main=any(
                 PICK_MAIN_WHY in (m.get("reason") or "") for m in measured.values()),
@@ -2359,11 +2365,14 @@ def _plain_value(v):
 
 
 def reason_parts(reason) -> list[dict]:
-    """A row's reason as data: [{code, params, words}], one per part (model_measurement.stops.Said: a measuring's
-    stop by its key and blanks, or the row's own reason by what it is: "depends", "tax_map", "scope" …); words
-    with no parts kept are one part, "words". Each part's words are its whole words as the row shows them."""
-    return [{"code": c, "params": {k: _plain_value(v) for k, v in (b or {}).items()}, "words": str(w)}
-            for c, b, w in parts_of(reason)]
+    """A row's reason as data: [{code, params, words, sep?}], one per part (model_measurement.stops.Said: a
+    measuring's stop by its key and blanks, or the row's own reason by what it is: "depends", "tax_map", "scope" …);
+    words with no parts kept are one part, "words". Each part's words are its whole words as the row shows them, and
+    `sep` the words before it (none on the first), so the parts joined in order are the reason exactly."""
+    parts = parts_of(reason)
+    seps = ("",) + tuple(reason.seps) if isinstance(reason, Said) else ("",) * len(parts)
+    return [{"code": c, "params": {k: _plain_value(v) for k, v in (b or {}).items()}, "words": str(w),
+             **({"sep": sep} if sep else {})} for (c, b, w), sep in zip(parts, seps)]
 
 
 def how_far_of(item: dict) -> str | None:
