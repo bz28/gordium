@@ -394,11 +394,12 @@ def test_a_space_with_its_own_limit_stated_or_not_ruled_out_never_passes_a_trave
 
 FIRST, SECOND, FOURTH = ("story_first_above_or_below_grade", "story_second_above_grade_plane",
                          "story_fourth_or_higher_above_grade_plane")
-# Table 1006.3.4(2), p.317 lines 39-43: (groups, the story, most occupants, travel without / with NFPA 13 per note b)
+# Table 1006.3.4(2), p.317 lines 39-43: (groups, the story, most occupants, travel without / with NFPA 13 per note b,
+# which is printed on the first story's B, F and S only: group 2's review round 1, 2026-11-24)
 TABLE_1006_3_4_2 = [
     (A + ["E", "M", "U"], FIRST, 49, 75, 75), (["B", "F-1", "F-2"], FIRST, 49, 75, 100),
     (["H-2", "H-3"], FIRST, 3, 25, 25), (["H-4", "H-5", "I-1", "I-2", "I-3", "R-1"], FIRST, 10, 75, 75),
-    (["S-1"], FIRST, 29, 75, 100), (["M"], SECOND, 29, 75, 75), (["B", "F-1", "F-2", "S-1"], SECOND, 29, 75, 100)]
+    (["S-1"], FIRST, 29, 75, 100), (["M"], SECOND, 29, 75, 75), (["B", "F-1", "F-2", "S-1"], SECOND, 29, 75, 75)]
 STORY_FACTS = {"emergency_escape_openings_1031": True, "r2_sleeping_units": False} | STATED
 
 
@@ -427,6 +428,10 @@ def test_table_1006_3_4_2_each_row_at_its_limits_and_just_past(ctx, rules):
     for g in ("A-2", "E", "U", "H-4", "I-1", "R-1"):                         # not in the second-story row
         r = _story_rule(rules, g)
         assert _one(r, "story", _story(SECOND, 1, 10), {"occupancy_group": g} | STORY_FACTS | NFPA13, ctx) == "fail", g
+    for g in ("B", "F-1", "F-2", "S-1"):            # note b's 100 ft never reaches the second story (p.317 line 43)
+        r = _story_rule(rules, g)
+        assert _one(r, "story", _story(SECOND, 29, 90), {"occupancy_group": g} | STORY_FACTS | NFPA13, ctx) == "fail", g
+        assert _one(r, "story", _story(FIRST, 29, 90), {"occupancy_group": g} | STORY_FACTS | NFPA13, ctx) == "pass", g
     third = _story(None, 1, 10)
     assert _one(_story_rule(rules, "B"), "story", third, {"occupancy_group": "B"} | NFPA13, ctx) == "fail"  # NP
 
@@ -491,6 +496,16 @@ def test_a_close_pair_fails_in_another_group_where_two_are_required(ctx, rules):
     assert _one(space, "space", room | {"space_occupant_load": 30}, b, ctx) == "needs_review"
     mixed = b | {"occupancy_group": "mixed"}
     assert _one(space, "space", room | {"space_occupant_load": 60}, mixed, ctx) == "needs_review"
+    # group 2's review round 1 (2026-11-24): an S-2 story may have one exit at any load (1006.3.4 item 3, a
+    # mechanically parked garage), and a one-group R-3 or R-4 space of 20 or fewer at any common path (Table 1006.2.1
+    # note e): a close pair needs review there, never a fail; S-1 and R-2 past their rows still fail
+    s2, s1 = b | {"occupancy_group": "S-2"}, b | {"occupancy_group": "S-1"}
+    assert _one(story, "story", close | _story(FIRST, 120, 90, exits=2), s2, ctx) == "needs_review"
+    assert _one(story, "story", close | _story(FIRST, 120, 90, exits=2), s1, ctx) == "fail"
+    far = room | {"space_common_path": 150, "space_occupant_load": 15}
+    for g in ("R-3", "R-4"):
+        assert _one(space, "space", far, b | {"occupancy_group": g}, ctx) == "needs_review", g
+    assert _one(space, "space", far, b | {"occupancy_group": "R-2"}, ctx) == "fail"
 
 
 def test_the_readme_counts_the_pieces_and_numbers_the_second_reading_holds():
