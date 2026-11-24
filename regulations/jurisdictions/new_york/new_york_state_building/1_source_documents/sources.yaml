@@ -189,7 +189,7 @@ documents:
         '1017.3':
           smoke protected seating: The book prints "smoke protected seating" in italics; the defined term is
             SMOKE-PROTECTED ASSEMBLY SEATING, which the phrase does not name whole, so it is not brought in. Exception
-            2 is for assembly seating (Section 1030.7, not brought in), not Group I-4.
+            2 is for assembly seating (Section 1030.7, brought in alone since review round 2), not Group I-4.
         202:load_factor:
           load: 'LOAD FACTOR is a structural term (Chapter 16, load and resistance factor design), brought in because
             Table 1004.5 prints "OCCUPANT LOAD FACTOR"; its italic "load" names the structural loads, which Section
