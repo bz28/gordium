@@ -407,9 +407,9 @@ rules:
       Note 8 in full, encoded (as R-3a encodes its note 7): the chart's base for the first 1-3 units (3,500 sf new
       construction, 4,000 sf by conversion, §325-3B CONVERSION), + 500 sf for each unit past 3, + 300 sf per room let
       for profit. Note 8 is R-3B's own (R-3A and R-3AA have note 7: 750 sf and 500 sf; RU note 9). The units, the rooms
-      let and whether it is a conversion are stated by the architect (dwelling_units, rooms_let_for_profit,
-      conversion); any of them not given and the rule needs review, never a pass. An attached building has 3 to 6
-      dwellings (§325-3B): a new row of 5 needs 3,500 + 2 x 500 = 4,500 sf.
+      let and whether it is a conversion are stated by the architect (“Gordium: Dwelling units”, “Gordium: Rooms let for
+      profit”, and “New or converted” in Setup); any of them not given and the rule needs review, never a pass. An
+      attached building has 3 to 6 dwellings (§325-3B): a new row of 5 needs 3,500 + 2 x 500 = 4,500 sf.
     drafted_by: claude
     status: draft
 
@@ -451,14 +451,14 @@ rules:
       - given: {use: two_family, attached_units_in_building: 2}
         expect: not_applicable
     notes: >-
-      Counted over the whole building, every lot it stands on together (attached_units_in_building), not the units on
-      this lot (dwelling_units): a row house on its own lot is one unit of a building of three to six. Gordium's
-      massing model shows the building on this lot only, so the architect states the count. A building of seven or
-      more joined one-family dwelling units is past the definition's maximum ("A maximum of six"), so it does not
-      comply as this use. Whether such a row may instead be built as a multiple dwelling (§325-3B MULTIPLE DWELLING
-      (5): row house, townhouse) is not settled by the code: the definitions point both ways, as in the architects'
-      question §5.6; Gordium doesn't decide it, and doesn't check a row house's own limits (§325-3B ROW HOUSE) yet.
-      Two joined units are a one-family semi-detached dwelling (§325-3B (3)).
+      Counted over the whole building, every lot it stands on together (“Gordium: Units in the attached building”), not
+      the units on this lot (“Gordium: Dwelling units”): a row house on its own lot is one unit of a building of three
+      to six. Gordium's massing model shows the building on this lot only, so the architect states the count. A building
+      of seven or more joined one-family dwelling units is past the definition's maximum ("A maximum of six"), so it
+      does not comply as this use. Whether such a row may instead be built as a multiple dwelling (§325-3B MULTIPLE
+      DWELLING (5): row house, townhouse) is not settled by the code: the definitions point both ways, as in the
+      architects' question §5.6; Gordium doesn't decide it, and doesn't check a row house's own limits (§325-3B ROW
+      HOUSE) yet. Two joined units are a one-family semi-detached dwelling (§325-3B (3)).
     drafted_by: claude
     status: draft
 
@@ -665,11 +665,11 @@ rules:
       - id: other_use_row
         reading: '"Other use" applies (4,000 sf)'
     notes: >-
-      Other uses in R-3b: church, park, library or fire station, cemetery, public utility, school, nursery school,
-      adult day care home, neighborhood commercial facility, nursing home, hospital, bed-and-breakfast inn, dormitory.
-      The zero-lot-line house has its own row ("-" in R-3B): see R-3b.lot_size_zero_lot_line. Worked by hand for a
-      new dormitory of 6 units: 3,500 + 3 x 500 = 5,000 sf under the multiple-family reading, 4,000 sf under "Other
-      use": a 4,500 sf lot passes one reading and fails the other.
+      Other uses in R-3b: church, park, library or fire station, cemetery, public utility, school, nursery school, adult
+      day care home, neighborhood commercial facility, nursing home, hospital, bed-and-breakfast inn, dormitory. The
+      zero-lot-line house has its own row ("-" in R-3B): see the rule “Lot size and width, zero-lot-line house: chart
+      shows "-" (chart p.3)”. Worked by hand for a new dormitory of 6 units: 3,500 + 3 x 500 = 5,000 sf under the
+      multiple-family reading, 4,000 sf under "Other use": a 4,500 sf lot passes one reading and fails the other.
     drafted_by: claude
     status: draft
 
@@ -834,12 +834,11 @@ rules:
       §325-8B(1): every residential district's lot-size figure applies again to each further primary use in a separate
       building on the lot (the code's own example: in R-2b, 3,000 sf for a house and 3,000 sf more for each further
       house). With one primary building this rule doesn't apply: the use's own lot-area rule (R-3b.lot_area_*) checks
-      it. With two or more, the lot needs the figure once per building, when every building holds the lot's use
-      (primary_buildings_same_use); otherwise each building's own figure, added by hand. Gordium counts the primary
-      buildings from the drawing where it can (one building, or none standing apart that could hold a home); a
-      building standing apart that could (a large garage, a second house) is read both ways until the architect states
-      the count. An accessory building (a garage, a shed, an accessory dwelling unit, §325-3B) isn't a primary
-      building.
+      it. With two or more, the lot needs the figure once per building, when every building holds the lot's use (as the
+      architect states it); otherwise each building's own figure, added by hand. Gordium counts the primary buildings
+      from the drawing where it can (one building, or none standing apart that could hold a home); a building standing
+      apart that could (a large garage, a second house) is read both ways until the architect states the count. An
+      accessory building (a garage, a shed, an accessory dwelling unit, §325-3B) isn't a primary building.
     drafted_by: claude
     status: draft
 
@@ -933,11 +932,10 @@ rules:
       still_open: []
       report: docs/research/2026-10-27_audit_gaps.md §5
     notes: >-
-      With one primary building on the lot (garages, sheds and an accessory dwelling unit are accessory buildings,
-      not primary ones) nothing on the lot can share its yards: not applicable. With two or more, this needs review
-      until the open question is answered: check by hand that no building stands in another's required yard, and
-      how the space between them is divided. The primary buildings are counted as for §325-8B(1)
-      (primary_buildings).
+      With one primary building on the lot (garages, sheds and an accessory dwelling unit are accessory buildings, not
+      primary ones) nothing on the lot can share its yards: not applicable. With two or more, this needs review until
+      the open question is answered: check by hand that no building stands in another's required yard, and how the space
+      between them is divided. The primary buildings are counted as for §325-8B(1).
     drafted_by: claude
     status: draft
 
@@ -999,13 +997,13 @@ rules:
       report: docs/research/2026-10-27_audit_gaps.md §7
     notes: >-
       Gordium's model doesn't show the water, so the architect states whether any inlet wall or stream bank (at average
-      water level) is within 20 ft of the lot (stream_near_lot) and, if so, the least distance from any new structure
-      to it (stream_distance, measured across, level, as the section's illustration shows). Both blank by default: a
-      blank needs review, never a pass. An addition counts as new construction (Gordium asks the cautious way). Not
-      applied: the exception for structures "directly connected with marine or public or commercial recreation
-      activities" (a dock or boathouse): Gordium shows such a structure nearer than 20 ft as not complying; ask the
-      zoning office. The districts exempted by name (Cherry Street, Market, Newman, West End/Waterfront) aren't
-      residential districts.
+      water level) is within 20 ft of the lot (“Gordium: Stream within 20 ft”) and, if so, the least distance from any
+      new structure to it (“Gordium: Distance from stream”, measured across, level, as the section's illustration
+      shows). Both blank by default: a blank needs review, never a pass. An addition counts as new construction (Gordium
+      asks the cautious way). Not applied: the exception for structures "directly connected with marine or public or
+      commercial recreation activities" (a dock or boathouse): Gordium shows such a structure nearer than 20 ft as not
+      complying; ask the zoning office. The districts exempted by name (Cherry Street, Market, Newman, West
+      End/Waterfront) aren't residential districts.
     drafted_by: claude
     status: draft
 
@@ -1421,9 +1419,9 @@ rules:
       report: docs/research/2026-10-20_architect_questions.md §4.5
     notes: >-
       R-3B's 40 ft is the eighth value of the line. Arithmetic for the bonus: 10% of the 40 ft maximum = 4 ft, so at
-      most 44 ft, with every required yard 1 ft larger per extra foot (R-3B's yards: front 10, sides 10 and 5, rear
-      20% of the lot depth, at most 50 ft, at least 20 ft). Where the lot abuts R-1 land, §325-19E lowers the height
-      to R-1's 35 ft for most uses (R-3b.abutting_r1).
+      most 44 ft, with every required yard 1 ft larger per extra foot (R-3B's yards: front 10, sides 10 and 5, rear 20%
+      of the lot depth, at most 50 ft, at least 20 ft). Where the lot abuts R-1 land, §325-19E lowers the height to
+      R-1's 35 ft for most uses (the rule “Lots abutting R-1a or R-1b land: stricter limits (§325-19E)”).
     drafted_by: claude
     status: draft
 
@@ -1500,7 +1498,7 @@ rules:
       printed on the lines above and below. So the values are R-1A 20, R-1B 25, R-2A 30, R-2B 35, R-3A 35, R-3AA 35,
       R-3B 40, RU 25; the chart reader's R-3B cell agrees (40%), and §325-11B(3)(d)'s cluster table says "R-3b 40" too.
       Note 13 belongs to RU. Where the lot abuts R-1 land, §325-19E lowers coverage to 75% of 40% = 30% for most uses
-      (R-3b.abutting_r1).
+      (the rule “Lots abutting R-1a or R-1b land: stricter limits (§325-19E)”).
     drafted_by: claude
     status: draft
 
@@ -1747,7 +1745,9 @@ rules:
         note: the narrower side's eave is over 2 ft into even a 5 ft yard
       - given: {side_yard_smaller: 7, side_yard_larger: 9, front_yard_eaves: 12, side_yard_smaller_eaves: 7, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 38}
         expect: needs_review
-        note: neither side's walls are 10 ft from its line (R-3b.side_yards fails); which side's eave the 10 ft limit is for is open
+        note: >-
+          neither side's walls are 10 ft from its line (the rule “Side yards minimum: one side 10 ft, the other 5 ft
+          (chart p.3)” fails); which side's eave the 10 ft limit is for is open
       # the height bonus moves which side can carry the 10 ft minimum (45 ft tall: 5 ft more, 15 and 10)
       - given: {side_yard_smaller: 13, side_yard_larger: 14, front_yard_eaves: 20, side_yard_smaller_eaves: 13, side_yard_larger_eaves: 9, rear_yard_eaves: 48, lot_depth: 125, building_height: 45}
         expect: needs_review
@@ -1805,16 +1805,15 @@ rules:
         expect: needs_review
         note: 'neither wall is 13 ft from its line at 43 ft; the eaves fit only with the wider side the 8 ft one'
     notes: >-
-      The yards themselves (R-3b.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
-      its eaves left out; this rule measures the same yards to the outermost part, eaves included, and lets that be up
-      to 2 ft less. Each side's eaves are measured to that side's own lot line (#18's measuring, c613837, which
-      reaches this branch with the stack): side_yard_smaller_eaves to the line of
-      the narrower side yard to the walls, side_yard_larger_eaves to the other's, so each eave is held to the minimum its
-      side carries. Which side carries the 10 ft minimum is the walls' to say: only the side whose walls are at least
-      10 ft from its line can. Where both can, or neither, either side may be, and the eaves must fit both ways,
-      else needs review (review_when: Gordium's cautious reading, to confirm with the architects; the
-      chart says only that one side yard is at least 10 ft and the other at least 5 ft), as R-3a's eaves rule after
-      #18's P0 (06fea9c, c0e6d3c; with the stack), whose yards and height R-3b shares. On a corner lot every yard facing a street is a front yard (§325-19C).
+      The yards themselves (front, side and rear) are measured to the nearest part of the building, its eaves left out;
+      this rule measures the same yards to the outermost part, eaves included, and lets that be up to 2 ft less. Each
+      side's eaves are measured to that side's own lot line: the eaves of the side whose yard to the walls is narrower
+      to that side's line, the other side's eaves to the other's, so each eave is held to the minimum its side carries.
+      Which side carries the 10 ft minimum is the walls' to say: only the side whose walls are at least 10 ft from its
+      line can. Where both can, or neither, either side may be, and the eaves must fit both ways, else needs review (a
+      review case: Gordium's cautious reading, to confirm with the architects; the chart says only that one side yard is
+      at least 10 ft and the other at least 5 ft), as in R-3a's eaves rule, whose yards and height R-3b shares. On a
+      corner lot every yard facing a street is a front yard (§325-19C).
     drafted_by: claude
     status: draft
 
@@ -1864,11 +1863,11 @@ rules:
       - given: {accessory_buildings: 0}
         expect: not_applicable
     notes: >-
-      R-3b is not an R-1 District, so §325-25C's first sentence applies: frame accessory buildings 3 ft from any side
-      or rear lot line (the "six feet" is R-1's only). Whether the distances apply to an accessory building that isn't
-      frame is §325-25C's open question (325-25C#1): accessory_distances_apply is measured under every reading, and
-      outside R-1 its readings differ for a building not stated as frame, so that gives NEEDS REVIEW until the
-      architect says the building is frame (accessory_frame).
+      R-3b is not an R-1 District, so §325-25C's first sentence applies: frame accessory buildings 3 ft from any side or
+      rear lot line (the "six feet" is R-1's only). Whether the distances apply to an accessory building that isn't
+      frame is §325-25C's open question (325-25C#1): the rule is worked out under every reading, and outside R-1 its
+      readings differ for a building not stated as frame, so that gives NEEDS REVIEW until the architect says the
+      building is frame.
     drafted_by: claude
     status: draft
 
@@ -2093,16 +2092,16 @@ rules:
       - id: attached_is_covered
         reading: it is a multiple dwelling, so §325-19E applies
     notes: >-
-      A flag: whether the lot abuts R-1a or R-1b land is stated by the architect (abuts_r1_district, asked the cautious
-      way: any R-1a or R-1b land touching the lot, even at a corner, or across a street, alley, creek or other
-      waterway, railroad or other right-of-way from it). Unknown or yes sends the lot to review for every use
-      §325-19E covers; no means §325-19E does not apply. Worked by hand for R-3b, if the lot abuts R-1 land: lot size
-      150% of the chart's (multiple dwelling, new construction, 1-3 units: 1.5 × 3,500 = 5,250 sf; by conversion 1.5 ×
-      4,000 = 6,000 sf; other use 6,000 sf; fraternity 37,500 sf); height R-1a's or R-1b's 35 ft instead of 40 ft (both
-      R-1 columns say 35 ft, so the bonus would be 3.5 ft, not 4), and, since the chart's "Maximum Building Height"
-      covers both its rows, likely R-1's 3 stories instead of 4; coverage 75% × 40% = 30%; a side or rear yard that
-      abuts R-1 land 150% of the chart's: side 15 ft and 7.5 ft, rear 150% of 20% of the lot depth (at most 50, at
-      least 20 ft) — 39.6 ft on a 132 ft deep lot. The front yard is unchanged.
+      A flag: whether the lot abuts R-1a or R-1b land is stated by the architect (“Next to R-1 land” in Setup, asked the
+      cautious way: any R-1a or R-1b land touching the lot, even at a corner, or across a street, alley, creek or other
+      waterway, railroad or other right-of-way from it). Unknown or yes sends the lot to review for every use §325-19E
+      covers; no means §325-19E does not apply. Worked by hand for R-3b, if the lot abuts R-1 land: lot size 150% of the
+      chart's (multiple dwelling, new construction, 1-3 units: 1.5 × 3,500 = 5,250 sf; by conversion 1.5 × 4,000 = 6,000
+      sf; other use 6,000 sf; fraternity 37,500 sf); height R-1a's or R-1b's 35 ft instead of 40 ft (both R-1 columns
+      say 35 ft, so the bonus would be 3.5 ft, not 4), and, since the chart's "Maximum Building Height" covers both its
+      rows, likely R-1's 3 stories instead of 4; coverage 75% × 40% = 30%; a side or rear yard that abuts R-1 land 150%
+      of the chart's: side 15 ft and 7.5 ft, rear 150% of 20% of the lot depth (at most 50, at least 20 ft) — 39.6 ft on
+      a 132 ft deep lot. The front yard is unchanged.
     drafted_by: claude
     status: draft
 
@@ -2148,7 +2147,7 @@ rules:
         expect: fail
       - given: {use: two_family, sleeping_rooms: 3, parking_spaces: 0}
         expect: not_applicable
-        note: two dwelling units, see R-3b.parking_dwelling_units
+        note: "two dwelling units, see the rule “Parking per dwelling unit for buildings of several units (chart p.14)”"
     findings:
     - id: adu_needs_no_parking
       question: 'The requirement is per dwelling unit. R-3b allows an accessory dwelling unit (chart p.2): does a house
@@ -2163,11 +2162,11 @@ rules:
       strength: strong
       report: docs/research/2026-10-20_architect_questions.md §5.4
     notes: >-
-      The residential parking rows span every residential district's column, so the numbers are R-1b's. The
-      sleeping_rooms measure counts one dwelling unit's rooms, so this rule is for the uses with exactly one
-      dwelling unit: a one-family detached house, and the zero-lot-line house, which §325-3B also calls a building of
-      "not more than one dwelling unit". Bedrooms and parking spaces are inside the building, so the panel lists this row as "not checked
-      yet: interior" until both are entered (parking is on hold).
+      The residential parking rows span every residential district's column, so the numbers are R-1b's. Gordium counts
+      the sleeping rooms of one dwelling unit, so this rule is for the uses with exactly one dwelling unit: a one-family
+      detached house, and the zero-lot-line house, which §325-3B also calls a building of "not more than one dwelling
+      unit". Bedrooms and parking spaces are inside the building, so the panel lists this row as "not checked yet:
+      interior" until both are entered (parking is on hold).
     drafted_by: claude
     status: draft
 
@@ -2203,8 +2202,7 @@ rules:
     notes: >-
       The requirement is worked out for each dwelling unit and added up: worked by hand, a two-family house with a
       3-bedroom and a 5-bedroom unit needs 1 + 2 = 3 spaces; ten 2-bedroom apartments need 10. Gordium measures the
-      sleeping rooms of one dwelling unit only (sleeping_rooms), so it can't add them up yet: NEEDS REVIEW, added up by
-      hand.
+      sleeping rooms of one dwelling unit only, so it can't add them up yet: NEEDS REVIEW, added up by hand.
     drafted_by: claude
     status: draft
 
@@ -2391,7 +2389,11 @@ rules:
         quote: "the following criteria must be present"
       strength: strong
       report: docs/research/2026-10-27_occupancy_and_home_occupation.md §5
-    notes: "Counts unrelated_persons_with_children: the most such people in any one dwelling unit (each semi-detached or attached dwelling is a one-family dwelling of its own). The limits are the definition's own (§325-3B); a person's say that the household is a functional family unit sends it to review. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md"
+    notes: >-
+      Counts the people not related to the household, minor dependent children counted too: the most such people in any
+      one dwelling unit (each semi-detached or attached dwelling is a one-family dwelling of its own). The limits are
+      the definition's own (§325-3B); a person's say that the household is a functional family unit sends it to review.
+      Research: docs/research/2026-10-27_occupancy_and_home_occupation.md
     drafted_by: claude
     status: draft
 
@@ -2559,7 +2561,10 @@ rules:
       strength: strong
       confirm_with: the architects
       report: docs/research/2026-10-27_occupancy_and_home_occupation.md §8
-    notes: "Over either limit it is no home occupation at all (§325-3B). Its special permit is R-3b.home_occupation. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md"
+    notes: >-
+      Over either limit it is no home occupation at all (§325-3B). Its special permit is the rule “Home occupation
+      (chart p.2: special permit unless §325-9B(1)(i) is met)”. Research:
+      docs/research/2026-10-27_occupancy_and_home_occupation.md
     drafted_by: claude
     status: draft
 
@@ -2604,7 +2609,10 @@ rules:
         quote: "(i) Home occupations in all residential districts"
       strength: strong
       report: docs/research/2026-10-27_occupancy_and_home_occupation.md §7
-    notes: "Always needs review once one is planned: whether it needs the special permit (§325-9B(1)(i)) and §325-3B's conditions on how it runs are a person's to check. Its size is R-3b.home_occupation_size. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md"
+    notes: >-
+      Always needs review once one is planned: whether it needs the special permit (§325-9B(1)(i)) and §325-3B's
+      conditions on how it runs are a person's to check. Its size is the rule “Home occupation size (§325-3B: at most
+      25% of its unit and 500 sq ft)”. Research: docs/research/2026-10-27_occupancy_and_home_occupation.md
     drafted_by: claude
     status: draft
 
@@ -2640,12 +2648,12 @@ rules:
         expect: needs_review
         note: whether an ADU is planned, not said
     notes: >-
-      Chart p.2 permits an accessory dwelling unit in R-3b; §325-28C sets its requirements. The architect states
-      whether an ADU is planned (accessory_dwelling_unit) and how many the parcel will have, any already there
-      included (adus_on_parcel). A blank needs review, never a pass. No off-street parking is required for an ADU
-      (§325-28C(2), the parking rule's finding adu_needs_no_parking). Not checked: that it may be leased but not
-      sold separately, and that the parcel may not be subdivided to separate it (§325-28C(5), (6)): ownership, not
-      design. Research: docs/research/2026-10-29_accessory_dwelling_units.md.
+      Chart p.2 permits an accessory dwelling unit in R-3b; §325-28C sets its requirements. The architect states whether
+      an ADU is planned (“Gordium: Accessory dwelling unit”) and how many the parcel will have, any already there
+      included (“Gordium: ADUs on parcel”). A blank needs review, never a pass. No off-street parking is required for an
+      ADU (§325-28C(2), the parking rule's finding on ADUs). Not checked: that it may be leased but not sold separately,
+      and that the parcel may not be subdivided to separate it (§325-28C(5), (6)): ownership, not design. Research:
+      docs/research/2026-10-29_accessory_dwelling_units.md.
     drafted_by: claude
     status: draft
 
@@ -2676,9 +2684,9 @@ rules:
       - given: {accessory_dwelling_unit: false, adu_bedrooms: 5}
         expect: not_applicable
     notes: >-
-      The ADU's bedrooms are stated by the architect (adu_bedrooms): the model doesn't show which rooms are
-      bedrooms. Chapter 325 doesn't define a bedroom; the parking chart's "bed or sleeping rooms" is the nearest
-      wording. Research: docs/research/2026-10-29_accessory_dwelling_units.md.
+      The ADU's bedrooms are stated by the architect: the model doesn't show which rooms are bedrooms. Chapter 325
+      doesn't define a bedroom; the parking chart's "bed or sleeping rooms" is the nearest wording. Research:
+      docs/research/2026-10-29_accessory_dwelling_units.md.
     drafted_by: claude
     status: draft
 
@@ -2794,13 +2802,13 @@ rules:
         expect: not_applicable
         note: an attached ADU is part of the house, which is never in its own front yard
     notes: >-
-      Measured from the detached ADU's building, the solid the architect picks (adu_building).
-      adu_in_primary_front_yard: some part of it, seen from above, nearer the street lot line than the front of the
-      main building is (§325-3B FRONT YARD); adu_front_yard: its least distance to a street lot line (on a corner lot
-      the nearer street, so the secondary front yard is checked too). On a corner lot, which front yard is the
-      primary one is open (325-28C#1, in the section labels): both streets are read as primary, and the rule
-      complies only if it does under both. An attached ADU is part of the house, whose own front yard rule applies
-      ("same as primary structure", §325-28C(8)(a)). Research: docs/research/2026-10-29_accessory_dwelling_units.md.
+      Measured from the detached ADU's building, the solid the architect picks. Whether it is in the main building's
+      front yard: some part of it, seen from above, nearer the street lot line than the front of the main building is
+      (§325-3B FRONT YARD); how far it is from the street: its least distance to a street lot line (on a corner lot the
+      nearer street, so the secondary front yard is checked too). On a corner lot, which front yard is the primary one
+      is open (325-28C#1, in the section labels): both streets are read as primary, and the rule complies only if it
+      does under both. An attached ADU is part of the house, whose own front yard rule applies ("same as primary
+      structure", §325-28C(8)(a)). Research: docs/research/2026-10-29_accessory_dwelling_units.md.
     drafted_by: claude
     status: draft
 
@@ -2881,10 +2889,10 @@ rules:
         reading: 40% of the floor area of the rest of the primary structure, the ADU left out
       report: docs/research/2026-10-29_accessory_dwelling_units.md §5
     notes: >-
-      The floor areas are stated by the architect (adu_floor_area; primary_floor_area, the whole primary structure
-      the ADU is in, the ADU included): Chapter 325 doesn't define floor area, and the model's solids don't show
-      floors. An attached ADU's setbacks are the primary structure's (§325-28C(8)(a)): the house's own yard rules
-      measure it as part of the house. Research: docs/research/2026-10-29_accessory_dwelling_units.md.
+      The floor areas are stated by the architect (the ADU's own, and that of the whole primary structure it is in, the
+      ADU included): Chapter 325 doesn't define floor area, and the model's solids don't show floors. An attached ADU's
+      setbacks are the primary structure's (§325-28C(8)(a)): the house's own yard rules measure it as part of the house.
+      Research: docs/research/2026-10-29_accessory_dwelling_units.md.
     drafted_by: claude
     status: draft
 
@@ -2940,11 +2948,11 @@ rules:
       - given: {accessory_dwelling_unit: true, adu_detached: false}
         expect: not_applicable
     notes: >-
-      Measured from the detached ADU's building, the solid the architect picks (adu_building), on its own: its
-      footprint seen from above (eaves read both ways: "footprint" isn't defined), its height as building height is
-      measured, from the grade plane at its own walls, and its stories (a plain solid under 21 ft tall, 7 ft a story, holds at
-      most two, read as two; a taller one needs its floors drawn). The height bonus of §325-16C is for the main
-      building, not for this. Research: docs/research/2026-10-29_accessory_dwelling_units.md.
+      Measured from the detached ADU's building, the solid the architect picks, on its own: its footprint seen from
+      above (eaves read both ways: "footprint" isn't defined), its height as building height is measured, from the grade
+      plane at its own walls, and its stories (a plain solid under 21 ft tall, 7 ft a story, holds at most two, read as
+      two; a taller one needs its floors drawn). The height bonus of §325-16C is for the main building, not for this.
+      Research: docs/research/2026-10-29_accessory_dwelling_units.md.
     drafted_by: claude
     status: draft
 
@@ -3002,13 +3010,12 @@ rules:
       - given: {accessory_dwelling_unit: true, adu_detached: false}
         expect: not_applicable
     notes: >-
-      "5' or setback required for primary structure, whichever is less": the house's required yards (chart
-      p.3, Yard Dimensions, R-3B: side, one side 10 ft, other side 5 ft; rear 20%/50 ft, not less than 20 ft
-      (note 16)) are all 5 ft or more, so the lesser is 5 ft. The chart's cells are named here, not cited as the
-      formula's inputs: in R-3b they never change the 5 ft. Measured
-      from the detached ADU's building, the solid the architect picks (adu_building): its least distance, seen from
-      above, to a side lot line and to the rear lot line, every reading of which lines are side and rear. The
-      ADU's building is measured here, not as an ordinary accessory building (§325-25C's 3 ft are less than 5
+      "5' or setback required for primary structure, whichever is less": the house's required yards (chart p.3, Yard
+      Dimensions, R-3B: side, one side 10 ft, other side 5 ft; rear 20%/50 ft, not less than 20 ft (note 16)) are all 5
+      ft or more, so the lesser is 5 ft. The chart's cells are named here, not cited as the formula's inputs: in R-3b
+      they never change the 5 ft. Measured from the detached ADU's building, the solid the architect picks: its least
+      distance, seen from above, to a side lot line and to the rear lot line, every reading of which lines are side and
+      rear. The ADU's building is measured here, not as an ordinary accessory building (§325-25C's 3 ft are less than 5
       ft). Research: docs/research/2026-10-29_accessory_dwelling_units.md.
     drafted_by: claude
     status: draft
