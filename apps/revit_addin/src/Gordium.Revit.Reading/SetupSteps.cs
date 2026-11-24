@@ -50,6 +50,28 @@ public static class SetupSteps
         || followsBuildingCode == true
         || lastCheckCode == WhichCodeWords.BuildingCode;
 
+    /// <summary>The line under "The building": that the Building Code governs, only when the form knows it does and
+    /// both its facts are steps (never on a house whose one building fact holds a problem); null otherwise.</summary>
+    public static string? BuildingNote(SetupScreen screen)
+    {
+        ArgumentNullException.ThrowIfNull(screen);
+        return screen.BuildingCode && BuildingCodeFacts.All(m => screen.Steps.Any(s => s.Field?.Mark == m))
+            ? "The NY Building Code governs this building: these two facts decide most of its egress limits."
+            : null;
+    }
+
+    /// <summary>The open steps whose absence stops the whole check, never only their rules (said so in the footer):
+    /// the zoning district not chosen (it chooses the rules), or a kept street edge no longer on the lot (a check
+    /// refuses it). Each with the footer's sentence.</summary>
+    public static IReadOnlyList<(SetupTask Step, string Words)> Blockers(IReadOnlyList<SetupTask> open)
+    {
+        ArgumentNullException.ThrowIfNull(open);
+        return open.Select(s => (Step: s, Words: s.Field?.Mark == Marks.Zone ? PaneWords.NoZone
+                                           : s.Field is { } f && f.Mark == Marks.StreetEdge && f.Problem == StreetOffLot ? PaneWords.NoStreet
+                                           : null))
+                   .Where(x => x.Words is not null).Select(x => (x.Step, x.Words!)).ToList();
+    }
+
     /// <summary>A step's title: the architect's name for the fact.</summary>
     public static string Title(MarkDefinition m, string fallback) =>
         m == Marks.Zone ? "Zoning district"

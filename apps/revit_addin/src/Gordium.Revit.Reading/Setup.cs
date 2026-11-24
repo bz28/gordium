@@ -337,9 +337,9 @@ public static class SetupFacts
                     var choices = Choices(m, options, zone);
                     // a building of more than one group, typed on Project Information ("R-2, B"): its groups as typed
                     // are one choice (the dropdown lists one group each)
-                    if (m == Marks.OccupancyGroups && text is not null && OccupancyGroupWords.Parse(text) is { } groups
-                        && !choices!.Any(c => c.Value == text.Trim()))
-                        choices = [new FieldChoice(text.Trim(), string.Join(", ", groups)), .. choices!];
+                    if (m == Marks.OccupancyGroups && text is not null && OccupancyGroupWords.Parse(text) is not null
+                        && !Reads(m, text, choices!))
+                        choices = [new FieldChoice(text.Trim(), text.Trim()), .. choices!];
                     var kind = choices is { Count: > 0 } ? FieldKind.Choice : FieldKind.Text;
                     string? problem = null;
                     // set exactly when the check reads it (Reads: the zone and use exactly, as the checker matches them;

@@ -106,8 +106,8 @@ internal sealed class SetupView : C.StackPanel
         foreach (var section in _screen.Steps.GroupBy(s => s.Section))
         {
             Children.Add(Overline(section.Key, top: 14));
-            if (section.Key == SetupSteps.Building)
-                Children.Add(Muted("The NY Building Code governs this building: these two facts decide most of its egress limits.", top: 0, bottom: 2));
+            if (section.Key == SetupSteps.Building && SetupSteps.BuildingNote(_screen) is { } note)
+                Children.Add(Muted(note, top: 0, bottom: 2));
             foreach (var step in section)
                 Children.Add(Step(++n, step));
         }

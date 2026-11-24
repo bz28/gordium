@@ -111,20 +111,16 @@ public static class PaneWords
     /// ("Saves 4 facts to Project Information (one undo).") and what stays unset, by name, with what that leaves
     /// ("Escape openings and exit doors still need marking: their rules will need review."). <paramref name="chosen"/>
     /// is what Save writes (<see cref="Unsaved"/>), so the footer and the button never disagree.</summary>
-    public static string SetupFooter(int chosen, IReadOnlyList<string> unsetFacts, IReadOnlyList<string> unmarked)
+    public static string SetupFooter(int chosen, IReadOnlyList<string> unsetFacts, IReadOnlyList<string> unmarked,
+                                     IReadOnlyList<string>? blockers = null)
     {
+        blockers ??= [];
         ArgumentNullException.ThrowIfNull(unsetFacts);
         ArgumentNullException.ThrowIfNull(unmarked);
         if (chosen == 0)
             return BlankFact;
         var words = new List<string> { $"Saves {chosen} {(chosen == 1 ? "fact" : "facts")} to Project Information (one undo)." };
-        // the zoning district chooses the rules: without it nothing is checked at all (SetupWords.NothingSent), so it
-        // is never said as only its rules needing review
-        if (unsetFacts.Contains(ZoneStep))
-        {
-            words.Add(NoZone);
-            unsetFacts = unsetFacts.Where(f => f != ZoneStep).ToList();
-        }
+        words.AddRange(blockers);
         if (unsetFacts.Count > 0)
             words.Add($"{Capital(And(unsetFacts))} {(unsetFacts.Count == 1 ? "isn't" : "aren't")} set yet: {(unsetFacts.Count == 1 ? "its" : "their")} rules will need review.");
         if (unmarked.Count > 0)
@@ -136,6 +132,9 @@ public static class PaneWords
     public const string ZoneStep = "zoning district";
 
     public const string NoZone = "Choose the zoning district: nothing can be checked without it.";
+
+    /// <summary>What the footer says while the street edge kept is no longer an edge of the lot.</summary>
+    public const string NoStreet = "Pick the street edge again: nothing can be checked until then.";
 
     /// <summary>The Setup form's one button: "Save and check" (greyed with nothing chosen) or "Save 4 and check".
     /// Save writes the facts chosen, then checks (anything still unset makes its rules need review, never a pass).</summary>
@@ -149,9 +148,14 @@ public static class PaneWords
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(draft);
         var open = SetupSteps.Of(screen, draft).Where(s => !s.Done).ToList();
+        // a step whose absence stops the whole check (the zoning district, a street edge off the lot) says so, never
+        // that only its rules will need review (review rounds 1 and 2)
+        var blockers = SetupSteps.Blockers(open);
+        open = open.Where(s => blockers.All(b => b.Step != s)).ToList();
         return SetupFooter(Unsaved(screen, draft),
                            open.Where(s => s.Field is not null).Select(s => s.Title.ToLowerInvariant()).ToList(),
-                           open.Where(s => s.Line is not null).Select(s => s.Title.ToLowerInvariant()).ToList());
+                           open.Where(s => s.Line is not null).Select(s => s.Title.ToLowerInvariant()).ToList(),
+                           blockers.Select(b => b.Words).ToList());
     }
 
     /// <summary>The fields the draft changes (a choice that differs from what the model holds): what Save writes and

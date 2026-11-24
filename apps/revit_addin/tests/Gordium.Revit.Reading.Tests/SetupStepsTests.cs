@@ -241,6 +241,13 @@ public sealed class SetupStepsTests
         Assert.Equal(SetupSteps.Building, step.Section);
         Assert.DoesNotContain(SetupSteps.MoreFields(s), f => f.Mark == Marks.SprinklerSystem);
         Assert.True(s.Steps.Where(x => !x.Done).Select(x => x.Key).ToHashSet().SetEquals(s.Needed));
+        // round 2, #1: the house is under the Residential Code: never told the Building Code governs it
+        Assert.False(s.BuildingCode);
+        Assert.Null(SetupSteps.BuildingNote(s));
+        Assert.NotNull(SetupSteps.BuildingNote(Screen(draft: Use("multiple_family"))));
+        var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "SetupView.cs"));
+        Assert.Contains("SetupSteps.BuildingNote(_screen) is { } note", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"The NY Building Code governs", view, StringComparison.Ordinal);
     }
 
     /// <summary>Round 1, #3: a kept street edge no property line has any more (the lot redrawn) is a problem the form
@@ -256,6 +263,12 @@ public sealed class SetupStepsTests
         Assert.Contains(Marks.StreetEdge.Name, off.Needed);
         Assert.False(off.Steps.Single(x => x.Field?.Mark == Marks.StreetEdge).Done);
         Assert.Equal("The lot changed — pick again", SetupSteps.StreetState(f, null, null));
+        // round 2, #2: a check refuses it, so the footer never says only its rules will need review
+        var draft = new SetupDraft();
+        draft.Choose(Marks.Zone, "R-1b");
+        var footer = PaneWords.SetupFooter(SetupScreen.Build(Model(project), [], Options, draft, null, null, streetOnLot: false), draft);
+        Assert.Contains(PaneWords.NoStreet, footer, StringComparison.Ordinal);
+        Assert.DoesNotContain("street edge isn't set yet", footer, StringComparison.OrdinalIgnoreCase);
         var on = SetupScreen.Build(Model(project), [], Options, null, null, "the south edge, 100'-0\"", streetOnLot: true);
         Assert.Null(on.Fields.Single(x => x.Mark == Marks.StreetEdge).Problem);
         Assert.DoesNotContain(Marks.StreetEdge.Name, on.Needed);
@@ -275,6 +288,8 @@ public sealed class SetupStepsTests
         Assert.Null(f.Problem);
         Assert.True(f.IsSet);
         Assert.DoesNotContain(Marks.OccupancyGroups.Name, s.Needed);
+        // round 2: never a group listed twice ("r-2" is R-2's choice, read in any case)
+        Assert.Equal(f.Choices.Count, f.Choices.Select(c => c.Label.ToUpperInvariant()).Distinct().Count());
     }
 
     /// <summary>Round 1, #5: without the zoning district nothing is checked at all, so the footer never says only its
