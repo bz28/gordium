@@ -5435,9 +5435,12 @@ rules:
       > 0 and occupancy_group_i4 and not other_occupancy_present and story_first_above_or_below_grade and story_occupant_load
       <= 10 and egress_travel_distance <= 75))
     reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
-      may hold a space whose egress Table 1017.2 note a or 1006.2.2 sends to its own section (a boiler or furnace room, a
-      refrigeration machinery room, a refrigerated room, a stage, an electrical room), stated or not ruled out: that section,
-      not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise pass.)'
+      may hold, stated or not ruled out, a space the code gives its own exits or exit access travel limit: a covered or open
+      mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6),
+      a boiler, incinerator or furnace room, refrigeration machinery room, refrigerated room or electrical room (1006.2.2.1
+      to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
+      space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
+      pass.)'
   for_each: story
   when_none: needs_review
   sources:
@@ -5648,8 +5651,8 @@ rules:
     in a Claude Code session (2026-11-21). Since 2026-11-23 it applies to Group I-4 and a building of two or more groups (or
     one whose groups aren''t stated: needs review); every other group is the rules for its rows or, Group R-2 of dwelling
     units, the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”. Review round 4 (2026-11-23): a story
-    allowed one exit only by its travel needs review while fixed seating (1030.7) or a space with its own egress section (Table
-    1017.2 note a, 1006.2.2) is stated or not ruled out.'
+    allowed one exit only by its travel needs review while fixed seating (1030.7) or a space the code gives its own exits
+    or travel limit is stated or not ruled out.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   applies_when: occupancy_group_i4 or occupancy_group == "mixed"
@@ -5749,9 +5752,12 @@ rules:
       "F-1", "F-2", "M"] and story_occupant_load <= 29 and egress_travel_distance <= (100 if occupancy_group in ["B", "F-1",
       "F-2"] and sprinklered_903_3_1_1 else 75)))
     reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
-      may hold a space whose egress Table 1017.2 note a or 1006.2.2 sends to its own section (a boiler or furnace room, a
-      refrigeration machinery room, a refrigerated room, a stage, an electrical room), stated or not ruled out: that section,
-      not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise pass.)'
+      may hold, stated or not ruled out, a space the code gives its own exits or exit access travel limit: a covered or open
+      mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6),
+      a boiler, incinerator or furnace room, refrigeration machinery room, refrigerated room or electrical room (1006.2.2.1
+      to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
+      space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
+      pass.)'
   for_each: story
   when_none: needs_review
   sources:
@@ -6047,8 +6053,8 @@ rules:
     where they could allow one exit. Item 5 (a dwelling unit''s own single exit) is a unit''s, not a story''s. Occupiable
     roofs are not measured. The story''s place (first, second, fourth or higher above grade plane) and its occupant load are
     the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23). Review round 4 (2026-11-23): a story
-    allowed one exit only by its travel needs review while fixed seating (1030.7) or a space with its own egress section (Table
-    1017.2 note a, 1006.2.2) is stated or not ruled out.'
+    allowed one exit only by its travel needs review while fixed seating (1030.7) or a space the code gives its own exits
+    or travel limit is stated or not ruled out.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_3_4_2__h_i_r
@@ -6084,9 +6090,12 @@ rules:
       "R-1", "R-2"] and story_occupant_load <= 10 and egress_travel_distance <= 75) and (occupancy_group != "R-2" or (sprinklered_903_3_1_1
       or sprinklered_903_3_1_2) and emergency_escape_openings_1031)))
     reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
-      may hold a space whose egress Table 1017.2 note a or 1006.2.2 sends to its own section (a boiler or furnace room, a
-      refrigeration machinery room, a refrigerated room, a stage, an electrical room), stated or not ruled out: that section,
-      not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise pass.)'
+      may hold, stated or not ruled out, a space the code gives its own exits or exit access travel limit: a covered or open
+      mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6),
+      a boiler, incinerator or furnace room, refrigeration machinery room, refrigerated room or electrical room (1006.2.2.1
+      to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
+      space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
+      pass.)'
   - when: occupancy_group == "I-3" and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
       1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
       or story_exit_count > 0 and (occupancy_group in ["R-3", "R-4"] or story_first_above_or_below_grade and (occupancy_group
@@ -6266,9 +6275,9 @@ rules:
     where they could allow one exit. Item 5 (a dwelling unit''s own single exit) is a unit''s, not a story''s. Occupiable
     roofs are not measured. The story''s place (first, second, fourth or higher above grade plane) and its occupant load are
     the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23). Review round 4 (2026-11-23): a story
-    allowed one exit only by its travel needs review while fixed seating (1030.7) or a space with its own egress section (Table
-    1017.2 note a, 1006.2.2) is stated or not ruled out. Review round 5 (2026-11-24): Group I-3 allowed one exit by its travel
-    needs review (408.6.1''s smoke-barrier distances aren''t drawn).'
+    allowed one exit only by its travel needs review while fixed seating (1030.7) or a space the code gives its own exits
+    or travel limit is stated or not ruled out. Review round 5 (2026-11-24): Group I-3 allowed one exit by its travel needs
+    review (408.6.1''s smoke-barrier distances aren''t drawn).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_3_4_2__s
@@ -6301,9 +6310,12 @@ rules:
       > 0 and ((story_first_above_or_below_grade or story_second_above_grade_plane) and story_occupant_load <= 29 and egress_travel_distance
       <= (100 if sprinklered_903_3_1_1 else 75)))
     reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
-      may hold a space whose egress Table 1017.2 note a or 1006.2.2 sends to its own section (a boiler or furnace room, a
-      refrigeration machinery room, a refrigerated room, a stage, an electrical room), stated or not ruled out: that section,
-      not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise pass.)'
+      may hold, stated or not ruled out, a space the code gives its own exits or exit access travel limit: a covered or open
+      mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6),
+      a boiler, incinerator or furnace room, refrigeration machinery room, refrigerated room or electrical room (1006.2.2.1
+      to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
+      space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
+      pass.)'
   for_each: story
   when_none: needs_review
   sources:
@@ -6497,8 +6509,8 @@ rules:
     where they could allow one exit. Item 5 (a dwelling unit''s own single exit) is a unit''s, not a story''s. Occupiable
     roofs are not measured. The story''s place (first, second, fourth or higher above grade plane) and its occupant load are
     the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23). Review round 4 (2026-11-23): a story
-    allowed one exit only by its travel needs review while fixed seating (1030.7) or a space with its own egress section (Table
-    1017.2 note a, 1006.2.2) is stated or not ruled out.'
+    allowed one exit only by its travel needs review while fixed seating (1030.7) or a space the code gives its own exits
+    or travel limit is stated or not ruled out.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_3_4_1__r2_dwelling_units
@@ -6527,9 +6539,12 @@ rules:
       > 0 and not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance <= 125
       and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)
     reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
-      may hold a space whose egress Table 1017.2 note a or 1006.2.2 sends to its own section (a boiler or furnace room, a
-      refrigeration machinery room, a refrigerated room, a stage, an electrical room), stated or not ruled out: that section,
-      not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise pass.)'
+      may hold, stated or not ruled out, a space the code gives its own exits or exit access travel limit: a covered or open
+      mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6),
+      a boiler, incinerator or furnace room, refrigeration machinery room, refrigerated room or electrical room (1006.2.2.1
+      to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
+      space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
+      pass.)'
   for_each: story
   when_none: needs_review
   sources:
@@ -6762,7 +6777,7 @@ rules:
     1031 (note a, the row''s R-2[a]); the fourth story and higher NP. Otherwise Table 1006.3.3''s two, three or four. Item
     2 as in the other rows. Note c''s occupiable roofs are not measured. Hand-drafted in a Claude Code session (2026-11-23).
     Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed seating (1030.7) or
-    a space with its own egress section (Table 1017.2 note a, 1006.2.2) is stated or not ruled out.'
+    a space the code gives its own exits or travel limit is stated or not ruled out.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_1_remoteness
