@@ -56,6 +56,36 @@ MEASURE_KINDS = {name: UNIT_KINDS.get(m["unit"], "number") for name, m in yaml.s
 PROPOSED_MEASURES = "drafted/records/proposed_measures.yaml"   # under the folder's rulebooks (rules_folder)
 
 
+def needed_by_problems(proposed: Path, rulebooks: list) -> list[str]:
+    """A proposed measure's `needed_by` must name exactly the rules whose applies_when, check or review_when read it
+    (worked out from their formulas), so the list can't drift from the rules (review round 2, 2026-11-23)."""
+    listed = load(proposed) or {}
+    reads: dict[str, set] = {}
+    for path in rulebooks:
+        for r in (load(path) or {}).get("rules") or []:
+            if not isinstance(r, dict):
+                continue
+            texts = [r.get("applies_when"), r.get("check")] + [w.get("when") for w in r.get("review_when") or []
+                                                                if isinstance(w, dict)]
+            for t in texts:
+                if isinstance(t, str):
+                    try:
+                        names = formula.names(t)
+                    except formula.FormulaError:
+                        continue
+                    for n in names & set(listed):
+                        reads.setdefault(n, set()).add(r.get("id"))
+    out = []
+    for name, m in listed.items():
+        got = set(m.get("needed_by") or []) if isinstance(m, dict) else set()
+        want = reads.get(name, set())
+        if got - want:
+            out.append(f"{name}: needed_by names {sorted(got - want)}, which don't read it")
+        if want - got:
+            out.append(f"{name}: needed_by misses {sorted(want - got)}, which read it")
+    return out
+
+
 def _listed_values(record: dict) -> set:
     """The text values a proposed text measure's record lists (`values:`, each a text), else none."""
     values = record.get("values")
@@ -1483,6 +1513,42 @@ def term_file_problems(jurisdiction, ctx: Context) -> dict[Path, list[str]]:
     return found
 
 
+# The words an architect reads (a rule's title, notes, review reasons, worked examples' notes: the checker shows
+# them) carry no engineer's key: no snake_case name of a measure or fact, no rule id (review round 2, 2026-11-23).
+# A file path or a URL is a reference, not a key, so it is set aside first. Required where the law's settings say
+# `plain_words: true` (state.yaml).
+_PATHLIKE = re.compile(r"https?://\S+|[\w.-]+(?:/[\w.-]+)+/?|\b[\w-]+\.(?:py|yaml|md|json|jsonl)\b")
+_ENGINEER_KEY = re.compile(r"\bgeneral\.[a-z0-9_.]*[a-z0-9_]|\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
+
+
+def plain_words_problems(book: dict) -> list[str]:
+    out = []
+    for r in book.get("rules") or []:
+        if not isinstance(r, dict):
+            continue
+        texts = [("title", r.get("title")), ("notes", r.get("notes"))]
+        texts += [(f"review_when {n} reason", w.get("reason")) for n, w in enumerate(r.get("review_when") or [], 1)
+                  if isinstance(w, dict)]
+        texts += [(f"example {n} note", e.get("note")) for n, e in enumerate(r.get("examples") or [], 1)
+                  if isinstance(e, dict)]
+        for where, t in texts:
+            if isinstance(t, str):
+                keys = sorted(set(_ENGINEER_KEY.findall(_PATHLIKE.sub(" ", t))))
+                if keys:
+                    out.append(f"{r.get('id')}: its {where} shows an engineer's key to the architect: {', '.join(keys)} "
+                               f"(say it in plain words)")
+    return out
+
+
+def _plain_words_law(path: Path) -> bool:
+    """Whether the law folder the rulebook is in asks for plain words (state.yaml `plain_words: true`)."""
+    for folder in path.parents:
+        settings = folder / STATE_SETTINGS
+        if settings.is_file():
+            return (load(settings) or {}).get("plain_words") is True
+    return False
+
+
 def rulebook_file_problems(path, ctx: Context) -> list[str]:
     """Everything wrong with one rulebook file: it can be read, passes `validate`, and its district is its
     file name."""
@@ -1492,6 +1558,8 @@ def rulebook_file_problems(path, ctx: Context) -> list[str]:
         problems = validate(book, ctx)
         if isinstance(book, dict) and book.get("district") != path.stem:
             problems.append(f"district {book.get('district')!r} doesn't match the file name {path.stem!r}")
+        if isinstance(book, dict) and _plain_words_law(path):
+            problems += plain_words_problems(book)
         return problems
     except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
         return [f"can't read file ({type(e).__name__}: {e})"]

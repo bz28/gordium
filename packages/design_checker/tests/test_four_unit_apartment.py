@@ -56,18 +56,27 @@ def test_the_story_figures_are_the_hand_worked_ones(got, expected):
                for p in got["interior"]["parts"]["space"])
 
 
-def test_a_rule_reading_a_figure_not_measured_yet_says_so(got):
-    rows = [i for i in got["items"] if i["rule"] == "general.bc_1006_2_1_1_three_or_more_exits"]
-    assert len(rows) == 8 and all(i["status"] == present.REVIEW for i in rows)
-    assert all("space occupant load not measured" in i["reason"] for i in rows)
+def test_the_occupant_loads_come_from_each_rooms_function(got):
+    """Section group 3 (2026-11-23): each apartment's stated function (residential, 200 gross) gives its occupant
+    load as two readings, 690 / 200 from its own area and 690 / 7 while 1004.5.1's increase isn't ruled out; both at
+    most 500, so 1006.2.1.1 needs no third exit; the stair enclosures are exits and hold no load."""
+    for p in got["interior"]["parts"]["space"]:
+        values = [r["value"] for r in (p.get("readings") or {}).get("space_occupant_load") or []]
+        if p["name"].startswith("Apartment"):
+            assert values == pytest.approx([690 / 200, 690 / 7])
+        else:
+            assert values == [] and "space_occupant_load" not in p["measures"]
+    rows = [r for r in got["rows"] if r["rule"] == "general.bc_1006_2_1_1_three_or_more_exits"]
+    assert len(rows) == 8 and {r["outcome"] for r in rows} == {"pass"}
 
 
 def test_each_flag_is_its_own_line_with_its_section(got):
-    """21 of the rulebook's 32 flags show (2026-11-23; 1006.2.2's five rooms by use since review round 1; the
-    mixed-occupancy single-exit flags not applicable since section group 2): those narrowed to a building of two or more groups, or to
-    another group (F-1 and S-1's increase, H-5's, Group H's sprinkler system), are not applicable to a one-group R-2."""
+    """23 of the rulebook's 34 flags show (2026-11-23; 1006.2.2's five rooms by use since review round 1; the
+    mixed-occupancy single-exit flags not applicable since section group 2; 1030.8's on its fact alone since round
+    2): those narrowed to a building of two or more groups, or to another group (F-1 and S-1's increase, H-5's,
+    Group H's sprinkler system), are not applicable to a one-group R-2."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 21 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 23 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):

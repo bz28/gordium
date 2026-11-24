@@ -44,7 +44,11 @@ results:
   general.bc_1007_1_1_remoteness: pass                 # 0.5992 >= 1/2 on both stories (above)
   general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
   general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three
-  general.bc_1006_2_1_1_three_or_more_exits: needs_review   # reads space_occupant_load: not measured (no mark yet)
+  # 1006.2.1.1 (section group 3, 2026-11-23: occupant loads from each room's function, apartment.yaml's
+  # `function: residential`, Table 1004.5's 200 gross): each apartment 690 sq ft, 3.45 occupants from its own area,
+  # up to 690 / 7 = 98.6 while 1004.5.1's increase isn't ruled out; both readings at most 500, so no third exit is
+  # needed; the stair enclosures are exits, so it asks nothing of them
+  general.bc_1006_2_1_1_three_or_more_exits: pass
   # a story's exits (section group 2, 2026-11-23): Group I-4's rule no longer applies (Group R-2 is one other
   # group); the R-2 rows need review: whether its R-2 is of dwelling units (Table 1006.3.4(1)) or sleeping units
   # (Table 1006.3.4(2)) isn't stated (r2_sleeping_units: no Revit mark yet), and the story's occupant load isn't
@@ -98,7 +102,7 @@ results:
   general.bc_table_1006_2_1_u: not_applicable
   # the flags: a person's check, each its own line (other_occupancy_present is yes: Group R-2 is not I-4; the
   # balcony and atrium flags' facts aren't stated, so they show), but those narrowed 2026-11-23 to a building of two
-  # or more groups or to another group (not applicable: R-2 is one group, its rows drafted); 21 show
+  # or more groups or to another group (not applicable: R-2 is one group, its rows drafted); 23 show
   general.bc_308_5_classification: needs_review
   general.bc_308_5_1_group_e: needs_review
   general.bc_308_5_2_religious_worship: needs_review
@@ -127,7 +131,9 @@ results:
   general.bc_1006_2_2_6_r3_r4_nfpa_13d: not_applicable     # Group R-2, no NFPA 13D system
   general.bc_407_4_2_sleeping_room_travel: not_applicable  # not Group I-2
   general.bc_1018_4_merchandise_pads: not_applicable       # not Group M
-  general.bc_1030_8_fixed_seating_common_path: not_applicable   # not Group A
+  general.bc_1004_7_outdoor_areas: needs_review           # outdoor areas the occupants use: not stated
+  general.bc_1004_9_posting: not_applicable                # not an assembly occupancy
+  general.bc_1030_8_fixed_seating_common_path: needs_review     # fixed seating not stated (any group: round 2)
   general.bc_table_1017_2_note_d_group_h: not_applicable
   general.bc_1017_2_1_balcony_increase: needs_review
   general.bc_1017_2_2_f1_s1_increase: not_applicable

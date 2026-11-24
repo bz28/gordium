@@ -22,8 +22,14 @@ NY = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
 FACTORS = occupant_load.factors_of(NY / OCCUPANT_LOAD_FACTORS)
 
 
+_MEASURED = {}
+
+
 def _loads(desc, building=None):
-    parts = measure(desc)["parts"]
+    """The routes measured once (a room's function changes no geometry, and measuring takes half a minute)."""
+    if "parts" not in _MEASURED:
+        _MEASURED["parts"] = measure(desc)["parts"]
+    parts = copy.deepcopy(_MEASURED["parts"])
     occupant_load.apply(parts, desc, FACTORS, building)
     return parts
 
@@ -104,7 +110,40 @@ def test_every_factor_is_its_rows_number_on_the_second_reading():
         if e["factor"] is None:
             assert e["elsewhere"] and e["area"] is None, fid
             continue
-        assert str(e["factor"]) in second, fid
+        # numbers.py reads "gross" as the number's unit, "net" not: a gross cell is "300 gross", a net one "30"
+        assert (f"{e['factor']} gross" if e["area"] == "gross" else str(e["factor"])) in second, fid
         assert q.endswith(f"{e['factor']} {e['area']}"), (fid, q)
     assert data["increase_cap"]["sq_ft_per_occupant"] == 7
     assert "one occupant per 7 square feet" in data["increase_cap"]["source"]["quote"]
+
+
+def test_a_walk_over_every_function_never_gives_less_than_the_table_or_the_increase_cap(apartment):
+    """Section group 3's tightenings, walked: for every Table 1004.5 function with a factor, each room's occupant
+    load is never less than its area / factor (1004.5: 'not less than'); a gross factor's upper reading is at least
+    its grossed-up share; and unless 1004.5.1's increase is stated not taken (no, or not stated), the upper reading is
+    at least one per 7 sq ft, for the room and for the story. A function the table sends elsewhere never gives one."""
+    for fid, e in FACTORS["functions"].items():
+        for increase in (False, True, None):
+            desc = copy.deepcopy(apartment)
+            for r in desc["rooms"]:
+                if r.get("function"):
+                    r["function"] = fid
+            building = None if increase is None else {"occupant_load_increased": increase}
+            parts = _loads(desc, building)
+            for p in parts["space"]:
+                if not p["name"].startswith("Apartment"):
+                    continue
+                got = _values(p, "space_occupant_load")
+                if e["factor"] is None:
+                    assert got == [], fid
+                    continue
+                assert min(got) == pytest.approx(690 / e["factor"]), fid
+                if e["area"] == "gross":
+                    assert max(got) >= 690 * 1800 / 1380 / e["factor"] - 1e-9, fid
+                if increase is not False:
+                    assert max(got) >= 690 / 7 - 1e-9, (fid, increase)
+            story = _values(parts["story"][0], "story_occupant_load")
+            if e["factor"] is not None:
+                assert min(story) == pytest.approx(2 * 690 / e["factor"]), fid
+                if increase is not False:
+                    assert max(story) >= 1800 / 7 - 1e-9, (fid, increase)

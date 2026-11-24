@@ -9,13 +9,16 @@ name: New York State (Building Code)
 
 results_title: Egress (NY State Building Code 2025)   # how a check's results of this law are headed
 
+plain_words: true                     # the words an architect reads carry no engineer's key (rulebook.py)
+
 scope: building_code                  # which buildings it covers (101.2): every building the Residential Code
                                       # doesn't (design_checker/code_scope.py; 2026-11-22_which_ny_code.md)
 
 waiting_why: >-                       # what the waiting row says while no rooms are drawn
   Travel distance, common path, the number of exits and their separation, dead ends and accessory areas are
   measured once the rooms, doors and exits are drawn and marked (Gordium: Use, Gordium: Exit); occupant loads
-  aren't read yet, so the rules that read them will need review. Until then this is not a pass
+  are worked out from each room's Table 1004.5 function (Gordium: Function), and the rules that read them need
+  review where it isn't marked. Until then this is not a pass
 
 law:                                  # the documents in 1_source_documents/sources.yaml, by what they are
   building_code: gov.ny.building.2025.pdf    # 2025 Building Code of New York State (kept outside the repo)

@@ -198,9 +198,12 @@ building:
   assembly_fixed_seating: false        # rooms used for assembly with fixed seating (BCNYS Table 1006.2.1 note c)
   r2_sleeping_units: false             # a Group R-2 of sleeping units, not dwelling units (Table 1006.3.4(1) note b)
   emergency_escape_openings_1031: true # emergency escape and rescue openings per BCNYS 1031 (Table 1006.3.4 note a)
-  special_egress_spaces: false         # a mall, special amusement area, temporary structure, pedestrian walkway,
-                                       # aircraft manufacturing, boiler, refrigeration or electrical room (BCNYS
-                                       # 1006.2.2, Table 1017.2 note a): each has its own exits or travel limit
+  special_egress_spaces: false         # a space the BCNYS gives its own exits or travel limit: a covered or open
+                                       # mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area
+                                       # (411), an aircraft manufacturing facility (412.6), a boiler, incinerator or
+                                       # furnace room (1006.2.2.1), a refrigeration machinery room (1006.2.2.2), a
+                                       # refrigerated room (1006.2.2.3), an electrical room (1006.2.2.4), a vehicular
+                                       # ramp (1006.2.2.5), a temporary structure (3103.4), a pedestrian walkway (3104.9)
   merchandise_pads: false              # Group M merchandise pads (BCNYS 1018.4: their own common path)
   occupant_load_increased: false       # the design takes BCNYS 1004.5.1's increased occupant load (up to one per
                                        # 7 sq ft); not stated, the occupant loads' upper reading is at least that

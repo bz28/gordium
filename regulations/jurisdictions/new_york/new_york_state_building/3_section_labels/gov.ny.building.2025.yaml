@@ -1870,6 +1870,24 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:smoke_protected_assembly_seating:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKE-PROTECTED ASSEMBLY SEATING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 19
+      - 20
+      quote: '[BE] SMOKE-PROTECTED ASSEMBLY SEATING. Seating served by means of egress that is not subject to smoke accumulation
+        within or under a structure for a specified design time by means of passive design or by mechanical ventilation.'
+    piece_sha256: fb68075e4b9bd65132ea95a5b3147bbf7f2b766e7e38c63146f6a1ca096c0c3e
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 2
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): fixed seating''s travel in any
+      group.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:solid:
     label: reference
     topic: definitions
@@ -3509,6 +3527,27 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Every group but I-4 is general.bc_1020_5_dead_end_other_groups
       (2026-11-23); within exceptions 1 (I-3, Conditions 2 to 4) and 4 (I-2, Condition 2), whose conditions aren't stated,
       it needs review.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.7':
+    label: reference
+    topic: means_of_egress
+    reason: 'How exit access travel is measured where aisles serve seating: along the aisles and aisle accessways, never over
+      or on the seats; exceptions for smoke-protected and open-air seating allow more. Every travel row needs review while
+      fixed seating is stated or not ruled out (assembly_fixed_seating), since the routes don''t see the seats.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 354
+      lines:
+      - 50
+      - 52
+      quote: '1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+        for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
+        Exceptions:'
+    piece_sha256: 0dedbb8deaa95cfacfefff8ad82fb14eb63468c3e6c595eb4bc7e45d398a2fc6
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 2
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): fixed seating''s travel in any
+      group.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1030.8':
