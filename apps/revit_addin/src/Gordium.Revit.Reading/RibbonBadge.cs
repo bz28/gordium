@@ -12,7 +12,7 @@ public enum BadgeKind
     /// what needs review (by hand or not checked included).</summary>
     Counts,
     /// <summary>Every result complies or doesn't apply, the checker's overall state is "complies", and at least one
-    /// result complies: the only badge drawn in the pass colour.</summary>
+    /// result complies: the plain icon (never green: UI polish change 42), the tooltip saying the counts.</summary>
     Complies,
     /// <summary>No result fails or needs review, yet the checker doesn't say the check complies (every rule set
     /// aside, or no rows): an amber "?", never the pass colour.</summary>
@@ -33,7 +33,7 @@ public sealed record BadgeState(BadgeKind Kind, int Fails, int Review, string To
 /// <summary>
 /// The ribbon's status badge (docs/revit/ui_design_pass.md, changes 13 to 15), Revit-free so it is tested: from what
 /// the Gordium pane shows, what Check project's 32 px icon carries (a red count of what fails and an amber count of
-/// what needs review, a clock once the model changed, a pass tick only when nothing fails or needs review and the
+/// what needs review, a clock once the model changed, the plain icon (never green) when nothing fails or needs review and the
 /// checker says the project complies) and the tooltip saying it in words. The add-in swaps the button's LargeImage
 /// and ToolTip at runtime (BadgeButton). Every count is a count of the checker's rows as the pane places them
 /// (<see cref="ResultList.Place"/>); a stale answer shows only the clock, never its counts as current.
@@ -45,11 +45,10 @@ public static class RibbonBadge
     public static BadgeState Of(ResultModel? model, DateTime checkedAt, int missing = 0, bool failed = false)
     {
         if (failed)
-            return new(BadgeKind.NotChecked, 0, 0,
-                       "Nothing is checked now: the last check didn't finish, or the project checked was closed. Click to check this project.");
+            return new(BadgeKind.NotChecked, 0, 0, "The last check didn't finish. Click to check again.");
         if (model is null)
             return new(BadgeKind.NotChecked, 0, 0, missing > 0
-                ? $"Not checked yet: {Count(missing, "fact", "facts")} to set first; the Gordium pane lists {(missing == 1 ? "it" : "them")}. Click to check again."
+                ? $"Not checked yet: {Count(missing, "thing", "things")} to set first. Click to set {(missing == 1 ? "it" : "them")}."
                 : NotCheckedTip);
         var at = checkedAt.ToString("HH:mm", CultureInfo.InvariantCulture);
         if (model.Stale is not null)
@@ -57,14 +56,13 @@ public static class RibbonBadge
         var placed = ResultList.Place(model);
         var fails = placed.Count(r => r.Section == ListSection.Fails);
         var review = placed.Count(r => r.Section is ListSection.Review or ListSection.ByHand);
-        var byHand = placed.Count(r => r.Section == ListSection.ByHand);
         var complies = placed.Count(r => r.Section == ListSection.Complies && r.Row.Tone == Tone.Complies);
         var aside = placed.Count(r => r.Section == ListSection.Complies && r.Row.Tone != Tone.Complies);
         var said = new List<string>();
         if (fails > 0)
-            said.Add($"{fails} {(fails == 1 ? "does" : "do")} not comply");
+            said.Add($"{fails} fail{(fails == 1 ? "s" : "")}");
         if (review > 0)
-            said.Add($"{review} need{(review == 1 ? "s" : "")} review" + (byHand > 0 ? $" ({byHand} by hand or not checked)" : ""));
+            said.Add($"{review} need{(review == 1 ? "s" : "")} review");
         if (complies > 0)
             said.Add($"{complies} compl{(complies == 1 ? "ies" : "y")}");
         if (aside > 0)
@@ -72,15 +70,15 @@ public static class RibbonBadge
         var words = said.Count == 0 ? "no results" : string.Join(", ", said);
         if (fails > 0 || review > 0)
             return new(BadgeKind.Counts, fails, review,
-                       $"Checked {at}: {words}. Click to check again; the Gordium pane shows them.");
+                       $"Checked {at}: {words}. Click to check again.");
         if (model.State == Gordium.Worker.Verdict.Complies && complies > 0)
             return new(BadgeKind.Complies, 0, 0, $"Checked {at}: {words}. Click to check again.");
         return new(BadgeKind.Unclear, 0, 0,
-                   $"Checked {at}: {words}; the checker says {ResultText.StateWords(model.State).ToLowerInvariant()}. Open the Gordium pane.");
+                   $"Checked {at}: {words}; the checker says {ResultText.StateWords(model.State).ToLowerInvariant()}. Click to check again.");
     }
 
     /// <summary>Check project's own tooltip, before any check (RibbonPlan's).</summary>
-    public const string NotCheckedTip = "Check this project against its zoning and egress rules";
+    public static string NotCheckedTip => RibbonPlan.Buttons(false).First(b => b.Id == RibbonPlan.CheckProject).ToolTip;
 
     private static string Count(int n, string one, string many) => $"{n} {(n == 1 ? one : many)}";
 
@@ -94,7 +92,9 @@ public static class RibbonBadge
         return badge.Kind switch
         {
             BadgeKind.Counts => badge.Fails > 0 ? PanelStatus.Fails : PanelStatus.Review,
-            BadgeKind.Complies => PanelStatus.Complies,
+            // never green (UI polish change 42): a glance can't say what Gordium didn't check, so "all comply" is the
+            // pane's to say, beside it; the tooltip says the counts, the icon stays plain
+            BadgeKind.Complies => null,
             BadgeKind.Unclear => PanelStatus.Review,
             BadgeKind.Stale => PanelStatus.Stale,
             _ => null,
@@ -125,7 +125,7 @@ public static class RibbonBadge
     /// <summary>Check project's icon with its badge, at <paramref name="size"/> px (16 or 32) in a theme: straight
     /// RGBA, row by row, top first (as <see cref="RibbonIcons.Pixels"/>). At 32 px: the counts as pills at the top
     /// right (red for what fails, amber for what needs review, side by side, or when both don't fit the red at the
-    /// top right and the amber at the bottom right, in the plan outline's notch), a pass tick, an amber "?" or a
+    /// top right and the amber at the bottom right, in the plan outline's notch), an amber "?" or a
     /// clock; at 16 px one dot of the worst. No badge: the plain icon.</summary>
     public static byte[] Pixels(BadgeState badge, int size, PanelTheme theme)
     {
@@ -164,11 +164,6 @@ public static class RibbonBadge
                 break;
             case BadgeKind.Unclear:
                 DrawPill(px, size, size - PillWidth("?"), 0, "?", colours[PanelTokens.StatusReview], ring);
-                break;
-            case BadgeKind.Complies:
-                Disc(px, size, 26, 6, 6.5, ring);
-                Disc(px, size, 26, 6, 5.5, colours[PanelTokens.StatusPass]);
-                Stroke(px, size, [(23.2, 6.2), (25.2, 8.2), (28.8, 4.2)], 0.9, ring);
                 break;
             case BadgeKind.Stale:
                 Disc(px, size, 26, 6, 6.5, ring);

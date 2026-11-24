@@ -21,15 +21,28 @@ public sealed record RibbonButton(string Id, string Text, string ToolTip, IReadO
     public string LongDescriptionText => string.Join("\n", LongDescription);
 }
 
-/// <summary>One panel of the Gordium tab and its buttons, in order.</summary>
-public sealed record RibbonPanel(string Name, IReadOnlyList<RibbonButton> Buttons);
+/// <summary>A pull-down on a panel (one button that drops its own list): the trial's test tools in one "Trial"
+/// pull-down, out of the architect's way (UI polish, change 48).</summary>
+/// <param name="Id">Revit's name for the pull-down.</param>
+/// <param name="Text">Its words under the icon.</param>
+/// <param name="ToolTip">One line, shown on hover.</param>
+/// <param name="Icon">The icon's name in <see cref="RibbonIcons"/>.</param>
+/// <param name="Buttons">Its buttons, in order.</param>
+public sealed record RibbonPulldown(string Id, string Text, string ToolTip, string Icon, IReadOnlyList<RibbonButton> Buttons);
+
+/// <summary>One panel of the Gordium tab: its buttons, in order, then its pull-down (if any).</summary>
+public sealed record RibbonPanel(string Name, IReadOnlyList<RibbonButton> Buttons, RibbonPulldown? Pulldown = null)
+{
+    /// <summary>Every button the panel holds: its own, then its pull-down's.</summary>
+    public IEnumerable<RibbonButton> All => Pulldown is null ? Buttons : Buttons.Concat(Pulldown.Buttons);
+}
 
 /// <summary>
-/// The Gordium tab as data (docs/revit/ui_design_pass.md section 2.2): which panels and buttons exist, their words and
-/// icons. An architect sees <b>Check</b> (Check project, Mark facts), <b>Results</b> (Panel, Summary) and <b>Help</b> (About);
-/// the trial's test tools are in a <b>Trial</b> panel made only in a trial build or with <c>GORDIUM_TRIAL=1</c>. The
-/// add-in builds the ribbon from this list (App.OnStartup), so what it shows is what is tested here. No Settings
-/// button yet: there is nothing to set.
+/// The Gordium tab as data (docs/revit/ui_design_pass.md section 2.2; UI polish change 48, Ben 2026-11-23): which panels
+/// and buttons exist, their words and icons. An architect sees <b>Check</b> (Check project, Set up), <b>Results</b>
+/// (Results, Summary) and <b>Help</b> (About); the trial's test tools are one <b>Trial</b> pull-down on the Help panel,
+/// made only in a trial build or with <c>GORDIUM_TRIAL=1</c>. The add-in builds the ribbon from this list
+/// (App.OnStartup), so what it shows is what is tested here. No Settings button yet: there is nothing to set.
 /// </summary>
 public static class RibbonPlan
 {
@@ -51,6 +64,7 @@ public static class RibbonPlan
     public const string RecordScenes = "gordium_record_scenes";
     public const string ReadInside = "gordium_read_interior";
     public const string RecordHouses = "gordium_record_houses";
+    public const string TrialMenu = "gordium_trial";
 
     /// <summary>Whether the Trial panel is made: a trial build (install_trial_addin.ps1 builds one), or
     /// <c>GORDIUM_TRIAL</c> set to "1" in the environment Revit started with.</summary>
@@ -58,62 +72,63 @@ public static class RibbonPlan
 
     private static readonly RibbonPanel Check = new("Check",
     [
-        new(CheckProject, "Check\nproject", "Check this project against its zoning and egress rules",
-            ["Adds Gordium's marks if missing and fills a window's maker's clear opening as a draft, then reads the project.",
-             "If the street edge is the last fact missing, asks you to pick it in a plan; results open in the Gordium panel.",
-             "If another fact is missing, nothing is sent: the panel lists what to fill in."],
+        new(CheckProject, "Check\nproject", "Check this design against Ithaca zoning and NY egress",
+            ["Results open in the Gordium pane.",
+             "Adds Gordium's fields if missing (and a maker's clear opening as a draft), then reads the model.",
+             "If a fact is missing (zone, use…), the pane asks for it first."],
             RibbonIcons.CheckProject),
-        new(MarkFacts, "Mark\nfacts", "List what to mark: rooms, windows, doors, floors outside the house; unset first",
-            ["Adds Gordium's marks to this project if missing, and fills a window's maker's clear opening as a draft.",
-             "Each mark is set in Properties, Type Properties or Manage > Project Information.",
-             "Nothing is checked or sent; Check project asks for any lot fact not set (zone, use, street edge)."],
+        new(MarkFacts, "Set\nup", "The facts Gordium can't read from the model: lot, use, escape openings, exits",
+            ["Opens Setup in the Gordium pane: choose each fact there; nothing is written until you click Save.",
+             "Adds Gordium's fields if missing (and a maker's clear opening as a draft)."],
             RibbonIcons.MarkFacts),
     ]);
 
     private static readonly RibbonPanel Results = new("Results",
     [
-        new(Panel, "Panel", "Show or hide the Gordium results panel",
-            ["The panel keeps the last check's results; a result goes grey when the model changes after it.",
+        new(Panel, "Results", "Show or hide the Gordium pane",
+            ["Results go grey when the model changes after a check.",
              "It docks beside Properties; Revit remembers where you put it."],
             RibbonIcons.Panel, AnyTime: true),
-        new(Summary, "Summary", "Save the last check's results as a printable page: not a permit or an approval",
-            ["Every result: proposed, required, its verdict and the law's exact words, as the checker said them.",
+        new(Summary, "Summary", "A printable summary of the last check (not a permit or approval)",
+            ["Every result: proposed, required, its verdict and the code's exact words, as the checker said them.",
              "Opens in your browser to print or save as PDF; every needs review is for you to resolve.",
              "Only for results that still stand: after a change to the model, check again first."],
             RibbonIcons.Summary),
     ]);
 
-    private static readonly RibbonPanel Help = new("Help",
-    [
-        new(About, "About", "Which Gordium build Revit loaded, and where its log is",
-            ["Shows Revit's version, the add-in's build and the .NET runtime it runs on.",
-             "Nothing is sent anywhere."],
-            RibbonIcons.About, AnyTime: true),
-    ]);
+    private static readonly RibbonButton AboutButton = new(About, "About", "Which Gordium build Revit loaded, and where its log is",
+        ["Shows Revit's version, the add-in's build and the .NET runtime it runs on.",
+         "Nothing is sent anywhere."],
+        RibbonIcons.About, AnyTime: true);
 
-    private static readonly RibbonPanel Trial = new("Trial",
+    private static readonly RibbonPanel Help = new("Help", [AboutButton]);
+
+    /// <summary>The trial's test tools, one pull-down (shown only in a trial build or with GORDIUM_TRIAL=1).</summary>
+    private static readonly RibbonPulldown TrialTools = new(TrialMenu, "Trial", "Trial tools: test scenes and recordings (not for design work)",
+        RibbonIcons.TrialTool,
     [
-        new(CheckBoxHouse, "Check box\nhouse", "Trial: check the box house scene against its hand-worked verdicts",
+        new(CheckBoxHouse, "Check box house", "Trial: check the box house scene against its hand-worked verdicts",
             ["Starts Gordium's checker and checks conformance scene 01 (the box house).",
              "Compares every row with the scene's hand-worked verdicts; the result is logged."],
             RibbonIcons.TrialTool),
-        new(RecordScenes, "Record\nscenes", "Trial: draw and record every conformance scene",
+        new(RecordScenes, "Record scenes", "Trial: draw and record every conformance scene",
             ["Draws each scene in a new Revit model and reads it as a check would.",
              "Records it to test_data/host_conformance/recorded/revit/ and checks it by the suite's rules."],
             RibbonIcons.TrialTool),
-        new(ReadInside, "Read\ninside", "Trial: read this project's inside as a check would, and log it",
+        new(ReadInside, "Read inside", "Trial: read this project's inside as a check would, and log it",
             ["Reads the rooms, escape windows, doors and stairs, and says what is left out and why.",
              "Nothing is sent to the checker."],
             RibbonIcons.TrialTool),
-        new(RecordHouses, "Record\nhouses", "Trial: draw and record each hand-worked interior house",
+        new(RecordHouses, "Record houses", "Trial: draw and record each hand-worked interior house",
             ["Draws each house in a new Revit project and reads it.",
              "Records it to test_data/interior_houses/recorded/revit/ and checks it against the hand-worked measures."],
             RibbonIcons.TrialTool),
     ]);
 
-    /// <summary>The tab's panels in order: Check, Results, Help, then Trial when <paramref name="trial"/>.</summary>
-    public static IReadOnlyList<RibbonPanel> Panels(bool trial) => trial ? [Check, Results, Help, Trial] : [Check, Results, Help];
+    /// <summary>The tab's panels in order: Check, Results, Help (with the Trial pull-down when <paramref name="trial"/>).</summary>
+    public static IReadOnlyList<RibbonPanel> Panels(bool trial) =>
+        [Check, Results, trial ? Help with { Pulldown = TrialTools } : Help];
 
-    /// <summary>Every button on the tab, panel by panel.</summary>
-    public static IEnumerable<RibbonButton> Buttons(bool trial) => Panels(trial).SelectMany(p => p.Buttons);
+    /// <summary>Every button on the tab, panel by panel (a pull-down's buttons after its panel's own).</summary>
+    public static IEnumerable<RibbonButton> Buttons(bool trial) => Panels(trial).SelectMany(p => p.All);
 }

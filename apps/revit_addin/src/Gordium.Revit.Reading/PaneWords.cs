@@ -5,6 +5,10 @@ namespace Gordium.Revit.Reading;
 /// <summary>What the pane shows at first: the welcome (nothing checked in it yet), the Setup form, or results.</summary>
 public enum PaneShows { Welcome, Setup, Results, Error }
 
+/// <summary>The pane's small line icons (UI polish change 46): drawn by the add-in in the text's colour, never a status
+/// colour (a status has its own glyph, StatusLook).</summary>
+public enum PaneIcon { Page, Review, Pencil, Pin, Form, Map, Ruler, Scales, Question }
+
 /// <summary>
 /// The pane's one vocabulary and its plain-words states (docs/revit/ui_design_pass.md, the intuitive pane, changes 1,
 /// 2, 3, 6, 7, 9, 10, 11; Ben, 2026-11-23), Revit-free so they are tested: "results" (never "rows"), "needs review"
@@ -46,16 +50,42 @@ public static class PaneWords
 
     // ---- the first-run welcome (change 1) and the header (change 2) -------------------------------------------
 
-    /// <summary>The welcome's title.</summary>
-    public const string WelcomeTitle = "Welcome to Gordium";
+    /// <summary>The welcome's title (UI polish: what the pane is for, in one line; the dock tab already says Gordium).</summary>
+    public const string WelcomeTitle = "Check this design against the code";
 
-    /// <summary>The welcome's three lines: what Gordium does, that it never says pass without the facts, how to start.</summary>
-    public static IReadOnlyList<(string Lead, string Words)> WelcomeLines { get; } =
+    /// <summary>The welcome's one sentence on what Gordium does.</summary>
+    public const string WelcomeIntro =
+        "Gordium measures your model and checks it, rule by rule, against Ithaca zoning and the New York State egress code.";
+
+    /// <summary>The welcome's three lines, each with its icon (<see cref="PaneIcon"/>): the code's own words, never a
+    /// false pass, nothing written without a click.</summary>
+    public static IReadOnlyList<(PaneIcon Icon, string Words)> WelcomeLines { get; } =
     [
-        ("What it does. ", "Checks this project, rule by rule, against its city's zoning and the state's egress code, with the law's exact words."),
-        ("Never a false pass. ", "What Gordium can't measure or wasn't told is marked needs review, never complies."),
-        ("To start: ", "click Check project. If a fact it needs is missing, it asks for it here first."),
+        (PaneIcon.Page, "Every result shows the code's own words and page."),
+        (PaneIcon.Review, "If Gordium can't measure something, it says Needs review. It never guesses a pass."),
+        (PaneIcon.Pencil, "Nothing is written to your model unless you click Save."),
     ];
+
+    // ---- picking the street edge (UI polish change 9) ---------------------------------------------------------------
+
+    /// <summary>The picking card's title, while Revit waits for the click.</summary>
+    public const string PickTitle = "Click the lot edge along the street";
+
+    public const string PickWords = "In any plan that shows the property line. Gordium asks you to confirm the edge before it keeps it.";
+
+    public const string PickEsc = "Esc cancels.";
+
+    /// <summary>Under the card when the Setup form is behind it.</summary>
+    public const string PickFormStays = "The form stays as you left it.";
+
+    /// <summary>Under the welcome's button.</summary>
+    public const string WelcomeAlso = "Also on the ribbon: Gordium › Check project";
+
+    /// <summary>The header's title before any project is known (the project's name once it is).</summary>
+    public static string HeaderTitle(string? project) => string.IsNullOrWhiteSpace(project) ? RibbonPlan.PaneTitle : project.Trim();
+
+    /// <summary>Ribbon's Results button when the pane can't be shown (the exception goes to the log only).</summary>
+    public const string PaneWontOpen = "The Gordium pane couldn't open. Restart Revit; if it happens again, send the details to support.";
 
     /// <summary>Whether the welcome shows: only while no check's results have been shown in this pane (before the
     /// first, during the first check, after a first check failed or was cancelled), and never with results or the
@@ -74,47 +104,42 @@ public static class PaneWords
 
     // ---- the Setup footer (change 3) ---------------------------------------------------------------------------
 
-    /// <summary>"4 facts needed; 3 chosen, not saved yet." (and the street edge's way, when it is still to pick).</summary>
-    public static string SetupFooter(int needed, int chosen, bool streetToPick)
+    /// <summary>The Setup footer before anything is chosen: what a blank does.</summary>
+    public const string BlankFact = "A fact left blank makes its rules Needs review, never a pass.";
+
+    /// <summary>The Setup footer (UI polish change 7): before a choice, <see cref="BlankFact"/>; after, what Save writes
+    /// ("Saves 4 facts to Project Information (one undo).") and what stays unset, by name, with what that leaves
+    /// ("Escape openings and exit doors still need marking: their rules will need review."). <paramref name="chosen"/>
+    /// is what Save writes (<see cref="Unsaved"/>), so the footer and the button never disagree.</summary>
+    public static string SetupFooter(int chosen, IReadOnlyList<string> unsetFacts, IReadOnlyList<string> unmarked)
     {
-        if (needed == 0)                                         // the form opened with everything set (Mark facts)
-            return chosen == 0 ? "Every fact the check needs is set." : $"Every fact the check needs is set; {chosen} chosen, not saved yet.";
-        // "chosen" is what Save writes (Unsaved), never only the needed ones: the footer and the button agree
-        var words = $"{needed} {(needed == 1 ? "fact" : "facts")} needed; " + (chosen == 0 ? "none chosen yet" : $"{chosen} chosen, not saved yet");
-        return words + (streetToPick ? ". The street edge is picked on the plan (Pick on plan, above)." : ".");
+        ArgumentNullException.ThrowIfNull(unsetFacts);
+        ArgumentNullException.ThrowIfNull(unmarked);
+        if (chosen == 0)
+            return BlankFact;
+        var words = new List<string> { $"Saves {chosen} {(chosen == 1 ? "fact" : "facts")} to Project Information (one undo)." };
+        if (unsetFacts.Count > 0)
+            words.Add($"{Capital(And(unsetFacts))} {(unsetFacts.Count == 1 ? "isn't" : "aren't")} set yet: {(unsetFacts.Count == 1 ? "its" : "their")} rules will need review.");
+        if (unmarked.Count > 0)
+            words.Add($"{Capital(And(unmarked))} still need marking: {(unmarked.Count == 1 ? "its" : "their")} rules will need review.");
+        return string.Join(" ", words);
     }
 
-    /// <summary>The Setup form's one button: "Save" (greyed with nothing chosen), "Save 3 facts", or "Save 3 facts and
-    /// check" when saving them leaves nothing needed (the check then runs by itself: SetupGate.RunsByItself).</summary>
-    public static string SaveAndCheck(int chosen, bool checksAfter) =>
-        (chosen == 0 ? "Save" : $"Save {chosen} {(chosen == 1 ? "fact" : "facts")}") + (checksAfter && chosen > 0 ? " and check" : "");
+    /// <summary>The Setup form's one button: "Save and check" (greyed with nothing chosen) or "Save 4 and check".
+    /// Save writes the facts chosen, then checks (anything still unset makes its rules need review, never a pass).</summary>
+    public static string SaveAndCheck(int chosen) => chosen == 0 ? "Save and check" : $"Save {chosen} and check";
 
-    /// <summary>Whether Save runs the check: SetupGate's own rule (<see cref="SetupGate.RunsByItself"/>) on the form
-    /// now and the form as it will be once the draft is written (each needed fact the architect chose, no longer
-    /// needed). A form with nothing needed never checks on Save (Mark facts opened on a project already set).</summary>
-    public static bool ChecksAfterSave(SetupScreen screen, SetupDraft draft)
-    {
-        ArgumentNullException.ThrowIfNull(screen);
-        ArgumentNullException.ThrowIfNull(draft);
-        return SetupGate.RunsByItself(screen, screen with { Needed = StillNeeded(screen, draft) });
-    }
-
-    /// <summary>The needed facts the draft doesn't choose: what stays needed after Save.</summary>
-    public static IReadOnlyList<string> StillNeeded(SetupScreen screen, SetupDraft draft)
-    {
-        ArgumentNullException.ThrowIfNull(screen);
-        ArgumentNullException.ThrowIfNull(draft);
-        return screen.Needed.Where(n => !screen.Fields.Any(f => f.Mark.Name == n && draft.Chosen(f.Mark) is not null)).ToList();
-    }
-
-    /// <summary>The footer's words for a form and its draft: how many facts are needed (the form's Needed list), how
-    /// many are chosen and not saved yet (<see cref="Unsaved"/>: the same count Save writes, so the footer and the
-    /// button never disagree), and the street edge's way when it is still needed and not picked.</summary>
+    /// <summary>The footer's words for a form and its draft: what Save writes (<see cref="Unsaved"/>: the same count
+    /// the button says), and each numbered step still not set once it has, by its title (a fact to set, a mark to set
+    /// on elements).</summary>
     public static string SetupFooter(SetupScreen screen, SetupDraft draft)
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(draft);
-        return SetupFooter(screen.Needed.Count, Unsaved(screen, draft), StillNeeded(screen, draft).Contains(Marks.StreetEdge.Name));
+        var open = SetupSteps.Of(screen, draft).Where(s => !s.Done).ToList();
+        return SetupFooter(Unsaved(screen, draft),
+                           open.Where(s => s.Field is not null).Select(s => s.Title.ToLowerInvariant()).ToList(),
+                           open.Where(s => s.Line is not null).Select(s => s.Title.ToLowerInvariant()).ToList());
     }
 
     /// <summary>The fields the draft changes (a choice that differs from what the model holds): what Save writes and
@@ -129,8 +154,8 @@ public static class PaneWords
     /// <summary>Check now anyway, as a link beside Save.</summary>
     public const string CheckWithout = "Check without them";
 
-    /// <summary>The form's one line on why it is shown.</summary>
-    public const string SetupWhy = "Gordium can't read these from the model and never guesses them. Nothing is written until you click Save.";
+    /// <summary>The form's one line on why it is shown (the Save promise is in the footer).</summary>
+    public const string SetupWhy = "Gordium reads the geometry. These are design decisions it can't see in the model.";
 
     // ---- the results' top (change 7) ---------------------------------------------------------------------------
 
@@ -273,8 +298,8 @@ public static class PaneWords
     /// <summary>The ribbon badge's tooltip once stale (PR #168), by why.</summary>
     public static string StaleBadgeTip(StaleReason reason, string at) => reason switch
     {
-        StaleReason.Cancelled => $"These results are from the check at {at}, {StaleBefore(reason)}: they may not hold. Click to check again.",
-        _ => $"The model changed after the check at {at}: its results may not hold. Click to check again.",
+        StaleReason.Cancelled => $"These results are from the {at} check, {StaleBefore(reason)}. Click to check again.",
+        _ => $"The model changed after the {at} check. Click to check again.",
     };
 
     /// <summary>The selection strip's line once stale (PR #168), by why: "2 results mentioned it at the check at

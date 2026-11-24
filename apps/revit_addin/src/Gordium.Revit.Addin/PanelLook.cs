@@ -143,4 +143,33 @@ internal static class PanelLook
     /// <summary>Revit's theme as the panel's (UIThemeManager.CurrentTheme, Revit 2014+): dark only when Revit says dark.</summary>
     internal static PanelTheme OfRevit(Autodesk.Revit.UI.UITheme theme) =>
         theme == Autodesk.Revit.UI.UITheme.Dark ? PanelTheme.Dark : PanelTheme.Light;
+
+    /// <summary>A small line icon (UI polish change 46), <paramref name="size"/> pixels square, in the muted text
+    /// colour (never a status colour; the review triangle is the status glyph itself).</summary>
+    internal static W.FrameworkElement Icon(PaneIcon icon, double size = 16)
+    {
+        if (icon == PaneIcon.Review)
+            return Glyph(PanelStatus.Review, size);
+        var data = icon switch
+        {
+            PaneIcon.Page => "M 4,2 L 10,2 L 13,5 L 13,14 L 4,14 Z M 10,2 L 10,5 L 13,5",
+            PaneIcon.Pencil => "M 3,13 L 4,10 L 11,3 L 13,5 L 6,12 Z M 9.5,4.5 L 11.5,6.5",
+            PaneIcon.Pin => "M 8,14 C 8,14 3.5,9.5 3.5,6.5 A 4.5,4.5 0 0 1 12.5,6.5 C 12.5,9.5 8,14 8,14 Z M 9.5,6.5 A 1.5,1.5 0 1 1 6.5,6.5 A 1.5,1.5 0 1 1 9.5,6.5",
+            PaneIcon.Form => "M 3,3 L 13,3 L 13,13 L 3,13 Z M 5,6 L 11,6 M 5,8.5 L 11,8.5 M 5,11 L 9,11",
+            PaneIcon.Map => "M 2,4 L 6,2.5 L 10,4 L 14,2.5 L 14,12 L 10,13.5 L 6,12 L 2,13.5 Z M 6,2.5 L 6,12 M 10,4 L 10,13.5",
+            PaneIcon.Ruler => "M 2,10 L 10,2 L 14,6 L 6,14 Z M 5,9 L 6.5,10.5 M 7,7 L 8.5,8.5 M 9,5 L 10.5,6.5",
+            PaneIcon.Scales => "M 8,2.5 L 8,13.5 M 5,13.5 L 11,13.5 M 3,5 L 13,5 M 3,5 L 1.5,9 L 4.5,9 Z M 13,5 L 11.5,9 L 14.5,9 Z",
+            PaneIcon.Question => "M 14.5,8 A 6.5,6.5 0 1 1 1.5,8 A 6.5,6.5 0 1 1 14.5,8 M 6,6 A 2,2 0 1 1 8,8 L 8,9.5 M 8,11.5 L 8,12",
+            _ => "M 3,3 L 13,13",
+        };
+        var path = new S.Path
+        {
+            Data = Frozen(M.Geometry.Parse(data)), StrokeThickness = 1.2, StrokeLineJoin = M.PenLineJoin.Round,
+            StrokeStartLineCap = M.PenLineCap.Round, StrokeEndLineCap = M.PenLineCap.Round, Stretch = M.Stretch.None,
+        };
+        path.SetResourceReference(S.Shape.StrokeProperty, PanelTokens.TextMuted);
+        var canvas = new C.Canvas { Width = 16, Height = 16 };
+        canvas.Children.Add(path);
+        return new C.Viewbox { Width = size, Height = size, Child = canvas, IsHitTestVisible = false };
+    }
 }

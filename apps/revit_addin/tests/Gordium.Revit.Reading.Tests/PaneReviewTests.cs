@@ -57,29 +57,27 @@ public sealed class PaneReviewTests
 
     // ---- Class A: what the panel says comes from the same rule as what it does --------------------------------------
 
-    /// <summary>P2: a form with nothing needed (Mark facts on a project already set) never checks on Save
-    /// (SetupGate.RunsByItself), so one field changed says "Save 1 fact", never "and check".</summary>
+    /// <summary>P2, as the UI polish has it (change 7): Save always writes and then checks ("Save and check"), so its
+    /// words never depend on what stays unset; the footer says what Save writes and what stays unset, by the steps'
+    /// own titles (the same Done rule the steps' circles use).</summary>
     [Fact]
-    public void Save_says_check_only_when_SetupGate_runs_the_check()
+    public void Save_and_check_says_what_it_writes_and_what_stays_unset()
     {
         var stories = new SetupField(Marks.Stories, "Stories", FieldKind.Number, SetupFacts.OtherGroup, false, [], "2", "law", null);
         var ready = new SetupScreen("house", [stories], [], [], []);
         var draft = new SetupDraft();
         draft.Choose(Marks.Stories, "3");
-        Assert.False(PaneWords.ChecksAfterSave(ready, draft));
-        Assert.Equal("Save 1 fact", PaneWords.SaveAndCheck(1, PaneWords.ChecksAfterSave(ready, draft)));
-        // waiting on the zone, and the zone chosen: Save runs the check (SetupGate's own rule)
-        var zone = new SetupField(Marks.Zone, "Zone", FieldKind.Choice, SetupFacts.NeededGroup, true, [], null, "law", null);
-        var waiting = new SetupScreen("house", [zone], [], [], [Marks.Zone.Name]);
-        Assert.False(PaneWords.ChecksAfterSave(waiting, new SetupDraft()));
+        Assert.Equal("Save 1 and check", PaneWords.SaveAndCheck(PaneWords.Unsaved(ready, draft)));
+        Assert.Equal("Saves 1 fact to Project Information (one undo).", PaneWords.SetupFooter(ready with { Steps = SetupSteps.Of(ready, draft) }, draft));
+        // waiting on the zone and the use: the zone chosen, the use still to set
+        var zone = new SetupField(Marks.Zone, "Zone", FieldKind.Choice, SetupFacts.NeededGroup, true, [new("R-1b", "R-1b")], null, "law", null);
+        var use = new SetupField(Marks.Use, "Use", FieldKind.Choice, SetupFacts.NeededGroup, true, [new("one_family_detached", "One-family")], null, "law", null);
+        var waiting = new SetupScreen("house", [zone, use], [], [], [Marks.Zone.Name, Marks.Use.Name]);
+        Assert.Equal(PaneWords.BlankFact, PaneWords.SetupFooter(waiting, new SetupDraft()));
         var chosen = new SetupDraft();
         chosen.Choose(Marks.Zone, "R-1b");
-        Assert.True(PaneWords.ChecksAfterSave(waiting, chosen));
-        Assert.Equal(SetupGate.RunsByItself(waiting, waiting with { Needed = [] }), PaneWords.ChecksAfterSave(waiting, chosen));
-        // the footer counts from the same Needed list
-        Assert.Equal("1 fact needed; 1 chosen, not saved yet.", PaneWords.SetupFooter(waiting, chosen));
-        // a ready form with Stories changed: the footer says what Save writes (review round 2)
-        Assert.Equal("Every fact the check needs is set; 1 chosen, not saved yet.", PaneWords.SetupFooter(ready, draft));
+        Assert.Equal("Saves 1 fact to Project Information (one undo). Use isn't set yet: its rules will need review.",
+                     PaneWords.SetupFooter(waiting, chosen));
         Assert.Contains("PaneWords.SetupFooter(_screen, _draft)", Read("SetupView.cs"), StringComparison.Ordinal);
     }
 

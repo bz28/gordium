@@ -64,11 +64,19 @@ internal sealed class ResultsPane : IDockablePaneProvider
     internal static void Show(UIApplication ui, Document doc, PanelContent content)
     {
         _checked = doc;
+        if (content.Model is { } model)                      // the code the checker said governs (the Setup form's ask)
+            Codes[DocKeys.Of(doc)] = model.Code is { Decided: true } c ? c.Code : null;
         if (!CheckRun.Flow.Running)
             View().EndProgress();
         View().Show(content);
         ui.GetDockablePane(Id).Show();
     }
+
+    /// <summary>The code the last check of each project said governs (which_code.code), by the project's key.</summary>
+    private static readonly Dictionary<string, string?> Codes = new(StringComparer.Ordinal);
+
+    /// <summary>The code the last check shown of <paramref name="doc"/> said governs, or null (none shown, or not decided).</summary>
+    internal static string? LastCode(Document doc) => Codes.TryGetValue(DocKeys.Of(doc), out var c) ? c : null;
 
     /// <summary>Shows the Setup form for <paramref name="doc"/> in the pane and brings the pane up (Revit's thread).</summary>
     internal static void ShowSetup(UIApplication ui, Document doc, SetupScreen screen, SetupDraft draft, SetupHandlers handlers,
@@ -102,6 +110,29 @@ internal sealed class ResultsPane : IDockablePaneProvider
 
     /// <summary>A line in the panel (a click's result, a problem), when the panel exists. From any thread.</summary>
     internal static void Say(string words) => Ui(() => _view?.Say(words));
+
+    /// <summary>While Revit waits for the street edge's click: the pane says so, with Cancel (UI polish change 9: the
+    /// status bar alone is easy to miss, and the pane looked frozen); drawn at once (the pick runs on Revit's thread).</summary>
+    internal static void Picking(bool on)
+    {
+        if (_view is null)
+            return;
+        _view.Picking(on, CancelPick);
+        if (on)
+            _view.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Render);
+    }
+
+    /// <summary>Cancel on the picking card: Esc to Revit's main window, as the status bar says (PickObject then ends
+    /// with OperationCanceledException, its own way out).</summary>
+    private static void CancelPick()
+    {
+        var main = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+        if (main != IntPtr.Zero)
+        {
+            NativeKeys.PostMessage(main, NativeKeys.KeyDown, (IntPtr)NativeKeys.Escape, IntPtr.Zero);
+            NativeKeys.PostMessage(main, NativeKeys.KeyUp, (IntPtr)NativeKeys.Escape, IntPtr.Zero);
+        }
+    }
 
     /// <summary>Runs <paramref name="act"/> on the panel's thread (Revit's: WPF and Revit share it): now when called
     /// there, else queued to it (a pool thread's refusal). Never calls Revit's API.</summary>
@@ -315,4 +346,16 @@ internal sealed class ResultsPane : IDockablePaneProvider
             (gone > 0 ? $"; {gone} not in this model now" : "") + (zoom ? "." : " (Show or Space zooms to them)."));
         return found.Count;
     }
+}
+
+/// <summary>The one Windows call the picking card's Cancel makes: Esc posted to Revit's main window.</summary>
+internal static class NativeKeys
+{
+    internal const uint KeyDown = 0x0100;
+    internal const uint KeyUp = 0x0101;
+    internal const int Escape = 0x1B;
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "PostMessageW")]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    internal static extern bool PostMessage(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
 }

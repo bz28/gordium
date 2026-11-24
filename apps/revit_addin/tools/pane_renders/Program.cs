@@ -38,6 +38,7 @@ internal static class Program
         var house = Load(Path.Combine(answers, "ithaca_106_house_check_answer.json"));
         var houseAfter = Load(Path.Combine(answers, "ithaca_106_house_after_check_answer.json"));
         var childcare = Load(Path.Combine(answers, "children_odyssey_check_answer.json"));
+        // the four-unit apartment's Setup records (Ben's Revit trial, 2026-11-23): the Building Code governs its use
         foreach (var (n, r) in new[] { ("house", house), ("childcare", childcare) })
         {
             var cs = ResultRows.Build(r, "New Construction", [], null).Causes;
@@ -53,6 +54,51 @@ internal static class Program
                 // a: first open, before any check
                 Step(make(theme, []), "01_welcome", 430, dark, _ => { });
                 // the house (106 Ithaca Rd) and the childcare centre (Children's Odyssey)
+                // the apartment's Setup (UI polish, PR 1): the form as Revit shows it in a docked pane of the trial's height
+                // (740 px, Ben's screenshot), its numbered steps all above the fold; filled; More facts open; picking
+                {
+                    var (_, model, sides) = Fixture(Path.Combine(fix, "setup_apartment.json"));
+                    const string title = "Four-unit apartment";
+                    var blank = SetupScreen.Build(model, sides, options, new SetupDraft());
+                    Step(make(theme, []), "02_setup_apartment", 740, dark, p =>
+                    {
+                        p.Setup(title, blank, new SetupDraft());
+                        StepsAboveFold(p.View, "02 apartment", 740);
+                        NoAmberOnEmptyFields(p.View, "02 apartment");
+                    });
+                    var draft = Filled(blank, "apartment");
+                    var filled = SetupScreen.Build(model, sides, options, draft);
+                    Check(filled.BuildingCode, "apartment: multiple family is a use the Building Code governs, so the form asks for its two facts");
+                    Check(filled.Steps.Any(st => st.Field?.Mark == Marks.OccupancyGroups) && filled.Steps.Any(st => st.Field?.Mark == Marks.SprinklerSystem),
+                          "apartment: occupancy group and sprinkler system are numbered steps");
+                    Step(make(theme, []), "03_setup_filled_apartment", 1150, dark, p => p.Setup(title, filled, draft));
+                    Step(make(theme, []), "03b_setup_more_facts_open_apartment", 740, dark, p =>
+                    {
+                        p.Setup(title, filled, draft, [SetupView.MoreKey]);
+                        Settle(p.View);
+                        var form = FindAll<SetupView>(p.View).Single();
+                        var scroll = FindAll<ScrollViewer>(p.View).First(v => v.Content == form);
+                        var more = FindAll<Expander>(form).Single();
+                        scroll.ScrollToVerticalOffset(more.TranslatePoint(new Point(0, 0), form).Y - 8);
+                    });
+                    Step(make(theme, []), "04_picking_street_edge_apartment", 520, dark, p =>
+                    {
+                        p.Setup(title, blank, new SetupDraft());
+                        p.Picking(true);
+                        Settle(p.View);
+                        Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, ResultsView.PickTag)), "picking: the card says what Revit waits for");
+                        Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t) == PaneWords.PickFormStays), "picking: the form stays as it was");
+                    });
+                    Step(make(theme, []), "04c_picking_ended_apartment", 740, dark, p =>
+                    {
+                        p.Setup(title, blank, new SetupDraft());
+                        p.Picking(true);
+                        p.Picking(false);
+                        Settle(p.View);
+                        Check(!FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, ResultsView.PickTag)) && FindAll<DockPanel>(p.View).Any(d => d.IsVisible && Equals(d.Tag, SetupView.StepTag)),
+                              "picking ended: the form back, the card gone");
+                    });
+                }
                 foreach (var (tag, title, setupFile, answer) in new[] { ("house", "106 Ithaca Rd", "setup_ithaca106.json", house), ("childcare", "Children's Odyssey", "setup_childcare.json", childcare) })
                 {
                     if (dark && tag == "childcare")
@@ -60,11 +106,16 @@ internal static class Program
                     var (setupTitle, model, sides) = Fixture(Path.Combine(fix, setupFile));
                     var blank = SetupScreen.Build(model, sides, options, new SetupDraft());
                     // b: Check project with facts missing: the Setup form
-                    Step(make(theme, []), $"02_setup_{tag}", 430, dark, p => p.Setup(title, blank, new SetupDraft()));
+                    Step(make(theme, []), $"02_setup_{tag}", 740, dark, p =>
+                    {
+                        p.Setup(title, blank, new SetupDraft());
+                        StepsAboveFold(p.View, $"02 {tag}", 740);
+                        NoAmberOnEmptyFields(p.View, $"02 {tag}");
+                    });
                     // c: the form filled in, then the check running
                     var draft = Filled(blank, tag);
                     var filled = SetupScreen.Build(model, sides, options, draft);
-                    Step(make(theme, []), $"03_setup_filled_{tag}", 430, dark, p => p.Setup(title, filled, draft));
+                    Step(make(theme, []), $"03_setup_filled_{tag}", 740, dark, p => p.Setup(title, filled, draft));
                     Step(make(theme, []), $"04_checking_{tag}", 430, dark, p =>
                     {
                         p.Setup(title, filled, draft);
@@ -151,13 +202,39 @@ internal static class Program
         var draft = new SetupDraft();
         foreach (var f in blank.Fields.Where(f => f.Required && f.Current is null))
         {
-            var pick = f.Mark == Marks.Zone ? (tag == "house" ? "R-1b" : f.Choices.FirstOrDefault()?.Value)
-                : f.Mark == Marks.Use ? (tag == "house" ? "one_family_detached" : f.Choices.FirstOrDefault(c => c.Value.Contains("day_care"))?.Value ?? f.Choices.FirstOrDefault()?.Value)
-                : f.Kind == FieldKind.YesNo ? "Yes" : f.Choices.FirstOrDefault()?.Value;
+            var pick = f.Mark == Marks.Zone ? (tag == "house" ? "R-1b" : tag == "apartment" ? "R-3a" : f.Choices.FirstOrDefault()?.Value)
+                : f.Mark == Marks.Use ? (tag == "house" ? "one_family_detached" : tag == "apartment" ? "multiple_family" : f.Choices.FirstOrDefault(c => c.Value.Contains("day_care"))?.Value ?? f.Choices.FirstOrDefault()?.Value)
+                : f.Mark == Marks.LotSurveyed ? "No"
+                : f.Kind == FieldKind.YesNo ? "Yes" : null;
             if (pick is not null && f.Kind != FieldKind.StreetPick)
                 draft.Choose(f.Mark, pick);
         }
         return draft;
+    }
+
+    /// <summary>Every numbered step of the Setup form is above the fold of a docked pane <paramref name="fold"/> px tall
+    /// (UI polish change 1: Ben saw "6 facts to set" and found 4; the other 2 were ~1,100 px down).</summary>
+    private static void StepsAboveFold(FrameworkElement view, string what, int fold)
+    {
+        Settle(view);
+        // the form's scroll viewport (the header above it, the sticky footer below): each step's title within it
+        var form = FindAll<SetupView>(view).Single();
+        var scroll = FindAll<ScrollViewer>(view).First(v => v.Content == form);
+        var steps = FindAll<DockPanel>(form).Where(d => d.IsVisible && Equals(d.Tag, SetupView.StepTag)).ToList();
+        var bottom = steps.Count == 0 ? 0 : steps.Max(d => d.TranslatePoint(new Point(0, 22), scroll).Y);
+        Check(steps.Count > 0 && bottom <= scroll.ViewportHeight,
+              $"{what}: {steps.Count} steps, the last one's title at {bottom:0} px of a {scroll.ViewportHeight:0} px view (pane {fold} px)");
+    }
+
+    /// <summary>No text in the review colour on a form with nothing set (UI polish change 8: status colours are for
+    /// results; an empty field is a task, not a warning), other than a problem a field holds.</summary>
+    private static void NoAmberOnEmptyFields(FrameworkElement view, string what)
+    {
+        Settle(view);
+        var amber = ((SolidColorBrush)view.FindResource(PanelTokens.StatusReview)).Color;
+        var said = FindAll<TextBlock>(view).Where(t => t.IsVisible && t.Foreground is SolidColorBrush b && b.Color == amber).Select(TextOf).ToList();
+        Check(said.All(w => w.Contains("Choose", StringComparison.Ordinal) || w.Contains("Pick it", StringComparison.Ordinal)),
+              $"{what}: no amber \"needed\" ({string.Join(" | ", said)})");
     }
 
     /// <summary>A stale pane shows no complies colour anywhere: no shape filled or stroked in status.pass.</summary>
@@ -320,7 +397,10 @@ internal static class Program
             .Select(u => new UseChoice(u.GetProperty("id").GetString()!, u.GetProperty("name").GetString()!,
                                        u.GetProperty("permitted").ValueKind switch { JsonValueKind.True => true, JsonValueKind.False => false, _ => null },
                                        u.GetProperty("note").ValueKind == JsonValueKind.String ? u.GetProperty("note").GetString() : null)).ToList());
-        return new PlaceOptions(j.GetProperty("zones").EnumerateArray().Select(z => z.GetString()!).ToList(), uses, district);
+        return new PlaceOptions(j.GetProperty("zones").EnumerateArray().Select(z => z.GetString()!).ToList(), uses, district)
+        {
+            BuildingCodeUses = j.TryGetProperty("building_code_uses", out var bc) ? bc.EnumerateArray().Select(u => u.GetString()!).ToList() : [],
+        };
     }
 
     private static MarkValue? Yes(JsonElement m, string key) =>
