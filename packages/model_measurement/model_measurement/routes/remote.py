@@ -40,7 +40,7 @@ from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
 from model_measurement.routes.floor import _reflex
-from model_measurement.routes.paths import EPS, StoryRoutes, _circle_walls, _Leg, _show
+from model_measurement.routes.paths import EPS, StoryRoutes, _circle_walls, _Leg, _show, exact
 from model_measurement.routes.stops import Stop
 
 START = 24.0          # in: the triangles' longest side to begin with
@@ -368,17 +368,17 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
         return cache[key]
 
     floor_bound, near, clusters, shut = -math.inf, None, [], []
+    shapes = _shapes_memo(routes)
     for room in [x for x in routes.story.rooms.values() if x is not None]:
-        cut = room.holes + room.obstructions
-        floor = room.outline.difference(unary_union(cut)) if cut else room.outline
-        if floor.is_empty:
+        got = shapes.get(room.id) if shapes is not None else None
+        if got is None:
+            got = _room_shapes(routes, room, r)
+            if shapes is not None:
+                shapes[room.id] = got
+        floor, rings, centres, ring_points, walls, arcs = got
+        if floor is None:
             continue
-        rings = [tuple(map(float, c)) for c in routes.rings_for(room)] if r > 0 else []
-        centres = np.array(rings, dtype=float).reshape(-1, 2)
-        ring_points = shapely.points(centres) if len(centres) else None       # made once per room, not per triangle
         reach = _reach_memo(centres, r)
-        walls = _walls(floor)
-        arcs = _clear_arcs(floor, rings, r, walls) if rings else []
         edge = {k: [] for k in range(len(rings))}
         shut_before = len(shut)
         for k, a0, sweep in arcs:
@@ -448,8 +448,8 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
             if len(group) == 1 and _in_sight(rings[group[0]], walls, r):
                 margin, how = r, "lone ring in sight of its corner"
             else:
-                margin, how = _walk_margin(floor, [rings[k] for k in group], r, [p for _, p in samples]), \
-                    "walk out sampled"
+                margin, how = _walk_margin_memo(routes, room, floor, [rings[k] for k in group], r,
+                                                [p for _, p in samples]), "walk out sampled"
             clusters.append(Cluster([rings[k] for k in group], top_v, top_p, margin, how,
                                     top_v + SPACING / 2 + margin))
         for pocket, first in pockets:
@@ -463,6 +463,54 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
     part, figure = max(parts, key=lambda x: x[1])
     return Remote(figure, found["best"], found["at"], max(floor_bound, found["best"]), near, clusters, part,
                   len(cache))
+
+
+def _story_of(routes):
+    """The StoryRoutes a farthest() samples (itself, or the one a common-path or room sampler reads), or None (a
+    sampler of its own, such as a sleeping room's)."""
+    base = routes if isinstance(routes, StoryRoutes) else getattr(routes, "_routes", None)
+    return base if isinstance(base, StoryRoutes) else None
+
+
+def _shapes_memo(routes) -> dict | None:
+    """Each room's floor, rings and clear arcs, kept on the story's routes (so for one measure() call only, never
+    another building's): the story's farthest(), each room's and the occupied rooms' cut the same floors. None for a
+    sampler of its own (worked afresh, as before)."""
+    base = _story_of(routes)
+    return None if base is None else base.__dict__.setdefault("_farthest_shapes", {})
+
+
+def _room_shapes(routes, room, r) -> tuple:
+    """(floor, rings, centres, ring points, walls, clear arcs) for one room, as farthest() works them; floor None
+    where the room has no floor left."""
+    cut = room.holes + room.obstructions
+    floor = room.outline.difference(unary_union(cut)) if cut else room.outline
+    if floor.is_empty:
+        return (None,) * 6
+    rings = [tuple(map(float, c)) for c in routes.rings_for(room)] if r > 0 else []
+    centres = np.array(rings, dtype=float).reshape(-1, 2)
+    ring_points = shapely.points(centres) if len(centres) else None       # made once per room, not per triangle
+    walls = _walls(floor)
+    arcs = _clear_arcs(floor, rings, r, walls) if rings else []
+    return floor, rings, centres, ring_points, walls, arcs
+
+
+def _walk_margin_memo(routes, room, floor, rings, r, targets) -> float:
+    """_walk_margin, worked once per room, rings and edge samples on the story's routes (its stop too)."""
+    base = _story_of(routes)
+    if base is None:
+        return _walk_margin(floor, rings, r, targets)
+    memo = base.__dict__.setdefault("_farthest_margins", {})
+    key = (room.id, tuple(exact(c) for c in rings), r, tuple(exact(p) for p in targets))
+    if key not in memo:
+        try:
+            memo[key] = (_walk_margin(floor, rings, r, targets), None)
+        except Stop as s:
+            memo[key] = (None, s)
+    got, stop = memo[key]
+    if stop is not None:
+        raise stop
+    return got
 
 
 def _pockets(floor, rings, r, shut_points) -> list:
