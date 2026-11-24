@@ -522,3 +522,48 @@ def test_an_adu_pick_is_one_ask_under_the_hints_headline():
         item["hint"] = present.PICK_ADU
         got = ui_data.asks_of(item, _ctx())
         assert [(a["key"], a["headline"]) for a in got] == [("pick:adu_building", present.PICK_ADU.rstrip("…"))], code
+
+
+def _revit_marks() -> dict:
+    """{fact key: its mark's label} from the Revit add-in's own Marks.cs: each MarkDefinition's label and the
+    `building.`/`facts.` fields it feeds."""
+    import re
+    text = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    out = {}
+    for label, feeds in re.findall(r'new\(\s*"(Gordium: [^"]+)"[^;]*?\]\s*,\s*"([^"]+)"', text):
+        for key in re.findall(r"(?:building|facts)\.([a-z_]+)", feeds):
+            out.setdefault(key, label)
+    return out
+
+
+def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
+    revit = _revit_marks()
+    assert revit.get("stories") == "Gordium: Stories" and revit.get("use") == "Gordium: Use"
+    keys = (set(code_scope.READS) | set(code_scope.FACTS)) - {"facts_not_sent"}
+    for k in sorted(keys):
+        if k in revit:
+            assert code_scope.MARK.get(k) == revit[k], (k, code_scope.MARK.get(k), revit[k])
+        else:                        # no host has a mark for it: never one invented here
+            assert k not in code_scope.MARK, k
+    # the facts no Revit mark states yet (the BCNYS's balcony and atrium): asked for by name, never by a mark
+    assert keys - set(revit) == {"egress_balcony_increase_taken", "building_has_atrium"}
+
+
+@pytest.mark.parametrize("key", code_scope.READS)
+@pytest.mark.parametrize("how", ["not_sent", "set_aside", "unreadable_in_values", "unreadable_in_building"])
+def test_a_fact_the_code_choice_cant_use_is_asked_for_by_its_mark(key, how):
+    values, building = {"use": "one_family_detached"}, {}
+    bad = "not a value" if key not in ("use",) else 12
+    if how == "not_sent":
+        building["facts_not_sent"] = [key]
+    elif how == "set_aside":
+        values[code_scope.SET_ASIDE] = {key: "stated twice, the two disagree"}
+    elif how == "unreadable_in_values":
+        values[key] = bad
+    else:
+        if key not in code_scope.FACTS:
+            pytest.skip(f"{key} is no building fact: a building block can't send it")
+        building[key] = bad
+    got = code_scope.decide(values, building)
+    assert got["code"] is None and got["ask"] != code_scope.BY_HAND, got
+    assert key in got["ask_facts"], (got["ask"], got["ask_facts"])
