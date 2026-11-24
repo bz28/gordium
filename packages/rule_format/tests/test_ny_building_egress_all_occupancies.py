@@ -508,6 +508,23 @@ def test_a_close_pair_fails_in_another_group_where_two_are_required(ctx, rules):
     assert _one(space, "space", far, b | {"occupancy_group": "R-2"}, ctx) == "fail"
 
 
+def test_a_close_pair_on_a_story_follows_each_table_row_exactly_where_one_exit_could_do(ctx, rules):
+    """Group 2's review round 2 (2026-11-24): 1007.1.1's loose one-exit test reads each Table 1006.3.4(2) row at its
+    own larger column, as the story-exit rules do (the table above): at the row's limit a close pair needs review
+    (one exit could do); just past it, where the row fails one exit, the close pair fails, sprinklered."""
+    story = rules["general.bc_1007_1_1_remoteness"]
+    close = {"exit_remoteness_ratio": 0.2, "story_dwelling_units": 0}
+    for groups, where, most, without, with_ in TABLE_1006_3_4_2:
+        for g in groups:
+            given = {"occupancy_group": g, "occupancy_group_i4": False, "other_occupancy_present": True} | NFPA13
+            at = close | _story(where, most, with_, exits=2)
+            assert _one(story, "story", at, given, ctx) == "needs_review", (g, where)
+            for past in (_story(where, most, with_ + 0.01, exits=2), _story(where, most + 0.5, 10, exits=2)):
+                assert _one(story, "story", close | past, given, ctx) == "fail", (g, where, past)
+            assert _one(_story_rule(rules, g), "story", _story(where, most, with_ + 0.01), given | STORY_FACTS,
+                        ctx) == "fail", (g, where)                      # the row itself fails one exit there
+
+
 def test_the_readme_counts_the_pieces_and_numbers_the_second_reading_holds():
     """Review round 2 (P3): the folder's README states how many pieces are brought in and how many numbers were
     read twice; both must be the second reading's own counts, so a piece brought in can't leave them stale."""

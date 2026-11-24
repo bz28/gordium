@@ -6706,19 +6706,25 @@ rules:
       where 1006.3.4 allows (BCNYS 1006.3.3)”''s question; a person checks.'
   - when: story_exit_count >= 2 and not (exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
       else 1 / 2)) and (not (occupancy_group_i4 or other_occupancy_present) or other_occupancy_present and occupancy_group
-      == "mixed" or story_rooms_exit_directly_outside or (story_first_above_or_below_grade and story_occupant_load <= 10 and
-      egress_travel_distance <= 75))
+      == "mixed" or story_rooms_exit_directly_outside or (occupancy_group_i4 and story_first_above_or_below_grade and story_occupant_load
+      <= 10 and egress_travel_distance <= 75))
     reason: 'The story''s exits are close together, but it may not need two: one exit may do here (1006.3.4: Table 1006.3.4(2)''s
       row, or rooms that exit directly outside), or the building is in another occupancy (or its occupancy isn''t stated).
       Whether 1007.1.1 applies to it is a person''s check.'
   - when: story_exit_count >= 2 and not exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
       else 1 / 2) and other_occupancy_present and (occupancy_group in ["R-3", "R-4", "S-2"] or occupancy_group == "R-2" and
-      not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance <= 125 or story_first_above_or_below_grade
-      and (occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "M", "U", "S-1", "S-2"] and story_occupant_load
-      <= 49 and egress_travel_distance <= 100 or occupancy_group in ["H-2", "H-3"] and story_occupant_load <= 3 and egress_travel_distance
-      <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "I-3", "R-1", "R-2"] and story_occupant_load <= 10 and egress_travel_distance
-      <= 75) or story_second_above_grade_plane and occupancy_group in ["B", "F-1", "F-2", "M", "S-1", "S-2"] and story_occupant_load
-      <= 29 and egress_travel_distance <= 100)
+      not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance <= 125)
+    reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
+      or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
+      (2026-11-23). Elsewhere two are required and a close pair fails.'
+  - when: story_exit_count >= 2 and not exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      else 1 / 2) and other_occupancy_present and (story_first_above_or_below_grade and (occupancy_group in ["A-1", "A-2",
+      "A-3", "A-4", "A-5", "E", "M", "U"] and story_occupant_load <= 49 and egress_travel_distance <= 75 or occupancy_group
+      in ["B", "F-1", "F-2"] and story_occupant_load <= 49 and egress_travel_distance <= 100 or occupancy_group == "S-1" and
+      story_occupant_load <= 29 and egress_travel_distance <= 100 or occupancy_group in ["H-2", "H-3"] and story_occupant_load
+      <= 3 and egress_travel_distance <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "I-3", "R-1", "R-2"] and story_occupant_load
+      <= 10 and egress_travel_distance <= 75) or story_second_above_grade_plane and occupancy_group in ["B", "F-1", "F-2",
+      "M", "S-1"] and story_occupant_load <= 29 and egress_travel_distance <= 75)
     reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
       or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
       (2026-11-23). Elsewhere two are required and a close pair fails.'
@@ -6956,7 +6962,10 @@ rules:
     (2026-11-23): where the building is of one group other than I-4, a close pair fails unless that group''s row of Table
     1006.3.4(1) or (2) (a story) or Table 1006.2.1 (a space) could allow one exit, read loosely (the larger value of its columns),
     so it never fails where one could do. Group 2 review round 1 (2026-11-24): a close pair in a one-group S-2 building needs
-    review (1006.3.4 item 3: a mechanically parked garage may have one exit at any load).'
+    review (1006.3.4 item 3: a mechanically parked garage may have one exit at any load). Group 2 review round 2 (2026-11-24):
+    the loose test reads each Table 1006.3.4(2) row at its own larger column (the first story A, E, M, U 75 ft; S-1 29 occupants;
+    the second story 75 ft), so a close pair fails wherever the row itself fails one exit. The I-4 row''s own test (the first
+    story, 10 occupants, 75 ft) reads Group I-4 only.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_2_three_or_more_exits
