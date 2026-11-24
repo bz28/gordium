@@ -54,7 +54,7 @@ internal static class SetupRun
         return Screen();
     }
 
-    private static string? _lastCode;
+    private static LastCheck? _lastCode;
     private static string? _streetWords;
     private static bool? _streetOnLot;
 

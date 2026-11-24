@@ -64,8 +64,13 @@ internal sealed class ResultsPane : IDockablePaneProvider
     internal static void Show(UIApplication ui, Document doc, PanelContent content)
     {
         _checked = doc;
-        if (content.Model is { } model)                      // the code the checker said governs (the Setup form's ask)
-            Codes[DocKeys.Of(doc)] = model.Code is { Decided: true } c ? c.Code : null;
+        if (content.Model is { } model)                      // the code the checker said governs (the Setup form's ask),
+        {                                                    // with the use and Follows answer it was decided on
+            var info = doc.ProjectInformation;
+            var follows = info?.get_Parameter(Marks.FollowsBuildingCode.Guid) is { HasValue: true } p ? p.AsInteger() == 1 : (bool?)null;
+            Codes[DocKeys.Of(doc)] = new LastCheck(model.Code is { Decided: true } c ? c.Code : null,
+                                                   info?.get_Parameter(Marks.Use.Guid)?.AsString() is { Length: > 0 } u ? u.Trim() : null, follows);
+        }
         if (!CheckRun.Flow.Running)
             View().EndProgress();
         View().Show(content);
@@ -73,10 +78,10 @@ internal sealed class ResultsPane : IDockablePaneProvider
     }
 
     /// <summary>The code the last check of each project said governs (which_code.code), by the project's key.</summary>
-    private static readonly Dictionary<string, string?> Codes = new(StringComparer.Ordinal);
+    private static readonly Dictionary<string, LastCheck> Codes = new(StringComparer.Ordinal);
 
     /// <summary>The code the last check shown of <paramref name="doc"/> said governs, or null (none shown, or not decided).</summary>
-    internal static string? LastCode(Document doc) => Codes.TryGetValue(DocKeys.Of(doc), out var c) ? c : null;
+    internal static LastCheck? LastCode(Document doc) => Codes.TryGetValue(DocKeys.Of(doc), out var c) ? c : null;
 
     /// <summary>Shows the Setup form for <paramref name="doc"/> in the pane and brings the pane up (Revit's thread).</summary>
     internal static void ShowSetup(UIApplication ui, Document doc, SetupScreen screen, SetupDraft draft, SetupHandlers handlers,

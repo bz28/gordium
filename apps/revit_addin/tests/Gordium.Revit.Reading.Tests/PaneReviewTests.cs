@@ -73,7 +73,8 @@ public sealed class PaneReviewTests
         var zone = new SetupField(Marks.Zone, "Zone", FieldKind.Choice, SetupFacts.NeededGroup, true, [new("R-1b", "R-1b")], null, "law", null);
         var use = new SetupField(Marks.Use, "Use", FieldKind.Choice, SetupFacts.NeededGroup, true, [new("one_family_detached", "One-family")], null, "law", null);
         var waiting = new SetupScreen("house", [zone, use], [], [], [Marks.Zone.Name, Marks.Use.Name]);
-        Assert.Equal(PaneWords.BlankFact, PaneWords.SetupFooter(waiting, new SetupDraft()));
+        // nothing chosen: without the zoning district nothing is checked (said first), then what a blank does
+        Assert.Equal(PaneWords.NoZone + " " + PaneWords.BlankFact, PaneWords.SetupFooter(waiting, new SetupDraft()));
         var chosen = new SetupDraft();
         chosen.Choose(Marks.Zone, "R-1b");
         Assert.Equal("Saves 1 fact to Project Information (one undo). Use isn't set yet: its rules will need review.",

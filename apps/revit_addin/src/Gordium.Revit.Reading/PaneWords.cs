@@ -117,8 +117,12 @@ public static class PaneWords
         blockers ??= [];
         ArgumentNullException.ThrowIfNull(unsetFacts);
         ArgumentNullException.ThrowIfNull(unmarked);
+
+        // before a choice: a fact without which nothing is checked says so first (review round 3), never only that
+        // a blank makes its rules need review
         if (chosen == 0)
-            return BlankFact;
+            return blockers.Count == 0 ? BlankFact
+                : string.Join(" ", blockers) + (unsetFacts.Count + unmarked.Count > 0 ? " " + BlankFact : "");
         var words = new List<string> { $"Saves {chosen} {(chosen == 1 ? "fact" : "facts")} to Project Information (one undo)." };
         words.AddRange(blockers);
         if (unsetFacts.Count > 0)
