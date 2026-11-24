@@ -632,6 +632,11 @@ panel itself is checked in Revit (it needs Revit to run). The Children's Odyssey
 `tools/evals/make_odyssey_answer.py` from the add-in's read of the marked model (the worker's egress code with Maine's
 law and the eval's building facts; the route parts as the eval measures them); the read stays outside the repo with
 the sheet it was built from. `GORDIUM_UPDATE_SNAPSHOTS=1` rewrites the snapshots (read the diff before committing).
+The four-unit apartment's answer (`answers/four_unit_apartment_check_answer.json`, for `ResultViewsTests`: the
+results as "What to fix" and "By code", UI polish PR 2) is the worker's answer to Ben's 2026-11-23 trial request,
+`test_data/test_sites/new_york/ithaca_city/four_unit_apartment/revit_check_site_request.json`: `design_checker.__main__.answer`
+on that request, written with `json.dumps(answer, indent=1, ensure_ascii=False)`. Make it again when the checker's
+`asks`, `in_code` or `contents` change.
 
 **Where Revit's thread went: `ui_thread`** (PR 8). Each `check_project` line from the button or the panel ends
 with `ended` (`shown`, `shown_stale`, `nothing_sent`, `cancelled`, `failed`), `answer_use`, `cancelled` (the stage
