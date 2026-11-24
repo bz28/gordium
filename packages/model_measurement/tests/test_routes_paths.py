@@ -398,7 +398,8 @@ LATER_KEYS = {"corridor_not_legs", "corridor_end_only", "door_off_legs", "dead_e
               "stated_not_given", "not_measured_yet", "readings", "room_not_measured", "maybe_kind",
               "exit_access_unclear", "passage_in_ring", "no_room_doors", "no_exit_access",   # test_routes_parts.py
               "no_route_host_blocked", "no_route_via_host",                          # test_routes_served.py
-              "not_occupied_refused", "none_occupied"}                               # test_routes_not_occupied.py
+              "not_occupied_refused", "none_occupied",                               # test_routes_not_occupied.py
+              "exit_side_unclear"}                                                   # test_routes_space_is_exit.py
 
 
 def test_every_reason_has_a_case():
