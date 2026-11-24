@@ -185,7 +185,7 @@ documents:
         '1017.3':
           smoke protected seating: The book prints "smoke protected seating" in italics; the defined term is
             SMOKE-PROTECTED ASSEMBLY SEATING, which the phrase does not name whole, so it is not brought in. Exception
-            2 is for assembly seating (Section 1030.7, not brought in), not Group I-4.
+            2 is for assembly seating (Section 1030.7, brought in alone since review round 2), not Group I-4.
         '1030.8':
           smoke-protected: 'The book prints "smoke-protected" in italics before "or open-air assembly seating"
             (p.355, line 18), and the defined term is SMOKE-PROTECTED ASSEMBLY SEATING, which the word does not
