@@ -376,12 +376,12 @@ rules:
     notes: >-
       §325-8B(1): every residential district's lot-size figure applies again to each further primary use in a separate
       building on the lot (the code's own example: in R-2b, 3,000 sf for a house and 3,000 sf more for each further
-      house). With one primary building this rule doesn't apply: the use's own lot-area rule (the lot-size rule for each
-      use) checks it. With two or more, the lot needs the figure once per building, when every building holds the lot's
-      use (as the architect states it); otherwise each building's own figure, added by hand. Gordium counts the primary
-      buildings from the drawing where it can (one building, or none standing apart that could hold a home); a building
-      standing apart that could (a large garage, a second house) is read both ways until the architect states the count.
-      An accessory building (a garage, a shed, an accessory dwelling unit, §325-3B) isn't a primary building.
+      house). With one primary building this rule doesn't apply: the use's own lot-size rule checks it. With two or
+      more, the lot needs the figure once per building, when every building holds the lot's use (as the architect states
+      it); otherwise each building's own figure, added by hand. Gordium counts the primary buildings from the drawing
+      where it can (one building, or none standing apart that could hold a home); a building standing apart that could
+      (a large garage, a second house) is read both ways until the architect states the count. An accessory building (a
+      garage, a shed, an accessory dwelling unit, §325-3B) isn't a primary building.
     drafted_by: claude
     status: draft
 
@@ -1167,7 +1167,7 @@ rules:
     notes: >-
       R-1a is an R-1 District: the chart groups R-1A and R-1B under "R-1" (p.2, p.3, p.14), and §325-4 lists R-1a as a
       residential district. So §325-25C's R-1 distances (6 ft side, 3 ft rear) apply, as in R-1b. Whether they apply to
-      an accessory building that isn't frame isn't settled (325-25C#1, in the section labels): the rule is worked out
+      an accessory building that isn't frame isn't settled (325-25C#1, in the section labels): the distances are applied
       under every reading it lists, and the rule complies only if it passes under all of them. Below-grade accessory
       structures (§325-25B) and garages on a common lot line by agreement (§325-25D) aren't checked; §325-25 sets no
       height limit.

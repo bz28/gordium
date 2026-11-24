@@ -1124,12 +1124,12 @@ rules:
     notes: >-
       §325-8B(1): every residential district's lot-size figure applies again to each further primary use in a separate
       building on the lot (the code's own example: in R-2b, 3,000 sf for a house and 3,000 sf more for each further
-      house). With one primary building this rule doesn't apply: the use's own lot-area rule (R-2c.lot_area_*) checks
-      it. With two or more, the lot needs the figure once per building, when every building holds the lot's use (as the
-      architect states it); otherwise each building's own figure, added by hand. Gordium counts the primary buildings
-      from the drawing where it can (one building, or none standing apart that could hold a home); a building standing
-      apart that could (a large garage, a second house) is read both ways until the architect states the count. An
-      accessory building (a garage, a shed, an accessory dwelling unit, §325-3B) isn't a primary building.
+      house). With one primary building this rule doesn't apply: the use's own lot-size rule checks it. With two or
+      more, the lot needs the figure once per building, when every building holds the lot's use (as the architect states
+      it); otherwise each building's own figure, added by hand. Gordium counts the primary buildings from the drawing
+      where it can (one building, or none standing apart that could hold a home); a building standing apart that could
+      (a large garage, a second house) is read both ways until the architect states the count. An accessory building (a
+      garage, a shed, an accessory dwelling unit, §325-3B) isn't a primary building.
     drafted_by: claude
     status: draft
 
@@ -2422,7 +2422,7 @@ rules:
     notes: >-
       R-2c is not an R-1 District (the chart groups R-2A, R-2B and R-2C under "R-2"), so §325-25C's first sentence
       applies: frame accessory buildings 3 ft from any side or rear lot line. Whether the distances apply to an
-      accessory building that isn't frame is §325-25C's open question (325-25C#1): the rule is worked out under every
+      accessory building that isn't frame is §325-25C's open question (325-25C#1): the distances are applied under every
       reading, which gives NEEDS REVIEW until the architect says the building is frame.
     drafted_by: claude
     status: draft
