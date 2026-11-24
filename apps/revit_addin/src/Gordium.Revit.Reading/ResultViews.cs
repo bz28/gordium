@@ -486,9 +486,19 @@ public static class ResultViews
         var summary = rows.Count == 0 ? null : Summary(rows.Select(r => r.Verdict));
         if (summary is not null)
             parts.Add(summary);
-        var greyed = GreyedInside(children).Where(c => c.State == CodeState.NotCheckedYet);
-        foreach (var g in greyed.GroupBy(c => c.Kind))
+        // the parts at the next level Gordium hasn't checked, by what they are ("8 articles not checked yet"); what
+        // is unchecked deeper down is said once, not counted level by level (the line stays short: change 34)
+        var here = children.SelectMany(c => c.Level == CodeLevel.Others ? c.Children : c.Greyed ? [c] : Array.Empty<CodeNode>())
+                           .Where(c => c.State == CodeState.NotCheckedYet).ToList();
+        foreach (var g in here.GroupBy(c => c.Kind))
             parts.Add($"{g.Count()} {Plural(g.Key, g.Count())} not checked yet");
+        if (children.Any(c => !c.Greyed && GreyedInside(c.Children).Any(x => x.State == CodeState.NotCheckedYet)))
+        {
+            if (here.Count == 0)
+                parts.Add("parts inside not checked yet");
+            else
+                parts[^1] += ", nor parts of the others";
+        }
         return parts.Count == 0 ? "Nothing to check here" : string.Join(" · ", parts);
     }
 }

@@ -82,7 +82,7 @@ public sealed class PanelThemeTests(ITestOutputHelper output)
     public void Every_status_has_its_own_glyph_and_its_own_word()
     {
         var all = StatusLook.All;
-        Assert.Equal(5, all.Count);
+        Assert.Equal(6, all.Count);   // not checked yet joined (UI polish PR 3: a dashed circle)
         Assert.Equal(all.Count, all.Select(StatusLook.Word).Distinct(StringComparer.OrdinalIgnoreCase).Count());
         // a glyph is its outline and its mark together: no two alike, and none empty
         Assert.Equal(all.Count, all.Select(s => StatusLook.GlyphOf(s).Outline + "|" + StatusLook.GlyphOf(s).Mark).Distinct().Count());

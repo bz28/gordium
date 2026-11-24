@@ -19,6 +19,9 @@ internal interface IListHost
 
     /// <summary>A row's "looked at" tick changed.</summary>
     void TickRow(ListRow row, bool ticked);
+
+    /// <summary>A "What to fix" group or card, or a "By code" node, opened or folded (UI polish PR 3).</summary>
+    void ToggleOpen(string key);
 }
 
 /// <summary>One item of the list's ItemsSource: what <see cref="EntryView"/> draws.</summary>
@@ -43,6 +46,24 @@ internal sealed class SubItem(IListHost host, ListSubheading sub) : ListItem(hos
 internal sealed class RowItem(IListHost host, ListRow row) : ListItem(host)
 {
     internal ListRow Row { get; } = row;
+}
+
+/// <summary>A "What to fix" group's heading (UI polish PR 3).</summary>
+internal sealed class FixGroupItem(IListHost host, FixGroupEntry entry) : ListItem(host)
+{
+    internal FixGroupEntry Entry { get; } = entry;
+}
+
+/// <summary>One card of an open "What to fix" group.</summary>
+internal sealed class FixCardItem(IListHost host, FixCardEntry entry) : ListItem(host)
+{
+    internal FixCardEntry Entry { get; } = entry;
+}
+
+/// <summary>One node of "By code".</summary>
+internal sealed class CodeNodeItem(IListHost host, CodeNodeEntry entry) : ListItem(host)
+{
+    internal CodeNodeEntry Entry { get; } = entry;
 }
 
 /// <summary>The list's first entry: the worker's state and counts, made afresh each time it scrolls into view.</summary>
@@ -103,8 +124,104 @@ public sealed class EntryView : C.Border
             FoldItem f => Fold(f),
             SummaryItem m => Summary(m),
             CausesItem c => Causes(c),
+            FixGroupItem g => FixGroupView(g),
+            FixCardItem c => FixCardView(c),
+            CodeNodeItem n => CodeNodeView(n),
             _ => null,
         };
+    }
+
+    // ---- UI polish PR 3: the two views' entries -------------------------------------------------------------
+
+    /// <summary>A line the whole of which opens or folds <paramref name="key"/> (a chevron when it can), its glyph
+    /// and words; never selected.</summary>
+    private static C.DockPanel Opener(IListHost host, string key, bool canOpen, bool open, PanelStatus status, double glyph,
+                                      W.Thickness margin)
+    {
+        var line = new C.DockPanel { Margin = margin };
+        line.SetResourceReference(C.Panel.BackgroundProperty, PanelTokens.BgPane);   // the whole line takes the click
+        var chevron = new S.Path
+        {
+            Width = 10, Height = 10, Margin = new W.Thickness(0, 0, 4, 0), VerticalAlignment = W.VerticalAlignment.Top,
+            Data = W.Media.Geometry.Parse(open ? "M 2,3.5 L 5,6.5 L 8,3.5" : "M 3.5,2 L 6.5,5 L 3.5,8"),
+            StrokeThickness = 1.5, StrokeStartLineCap = W.Media.PenLineCap.Round, StrokeEndLineCap = W.Media.PenLineCap.Round,
+            Visibility = canOpen ? W.Visibility.Visible : W.Visibility.Hidden,
+        };
+        chevron.SetResourceReference(S.Shape.StrokeProperty, PanelTokens.TextMuted);
+        C.DockPanel.SetDock(chevron, C.Dock.Left);
+        line.Children.Add(chevron);
+        var g = PanelLook.Glyph(status, glyph);
+        g.Margin = new W.Thickness(0, 0, 6, 0);
+        g.VerticalAlignment = W.VerticalAlignment.Top;
+        g.ToolTip = StatusLook.Word(status);
+        C.DockPanel.SetDock(g, C.Dock.Left);
+        line.Children.Add(g);
+        if (canOpen)
+        {
+            line.Cursor = I.Cursors.Hand;
+            line.MouseLeftButtonDown += (_, e) =>
+            {
+                e.Handled = true;
+                host.ToggleOpen(key);
+            };
+        }
+        return line;
+    }
+
+    private static W.UIElement FixGroupView(FixGroupItem item)
+    {
+        var e = item.Entry;
+        var line = Opener(item.Host, e.Key, canOpen: true, e.Open, e.Status, 14, new W.Thickness(0, 10, 0, 4));
+        var see = Typed(new C.TextBlock { Text = e.Open ? "Hide" : e.Group.SeeWords, Margin = new W.Thickness(8, 0, 0, 0) }, "type.caption");
+        Ink(see, PanelTokens.Accent);
+        C.DockPanel.SetDock(see, C.Dock.Right);
+        line.Children.Add(see);
+        var words = new C.StackPanel();
+        words.Children.Add(Ink(Typed(new C.TextBlock { Text = e.Group.Title, TextWrapping = W.TextWrapping.Wrap, FontWeight = W.FontWeights.SemiBold }, "type.body"),
+                               e.Status == PanelStatus.NotChecked ? PanelTokens.TextMuted : PanelTokens.Text));
+        if (e.Group.Sub is { } sub)
+            words.Children.Add(Ink(Typed(new C.TextBlock { Text = sub, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
+        line.Children.Add(words);
+        W.Automation.AutomationProperties.SetName(line, $"{e.Group.Title}, {StatusLook.Word(e.Status)}, {e.Group.SeeWords}");
+        return line;
+    }
+
+    private static W.UIElement FixCardView(FixCardItem item)
+    {
+        var e = item.Entry;
+        var line = Opener(item.Host, e.Key, canOpen: true, e.Open, e.Status, 11, new W.Thickness(14, 2, 0, 2));
+        var count = Typed(new C.TextBlock { Text = PaneWords.Results(e.Card.Rows.Count), Margin = new W.Thickness(8, 0, 0, 0) }, "type.caption");
+        Ink(count, PanelTokens.TextMuted);
+        C.DockPanel.SetDock(count, C.Dock.Right);
+        line.Children.Add(count);
+        // the headline on one line (change 25), the checker's words behind it on hover ("Why?")
+        var head = Typed(new C.TextBlock { Text = e.Card.Headline, TextTrimming = W.TextTrimming.CharacterEllipsis }, "type.body");
+        line.ToolTip = e.Card.Why is { } why ? $"{e.Card.Headline}\n\nWhy: {why}" : e.Card.Headline;
+        line.Children.Add(head);
+        W.Automation.AutomationProperties.SetName(line, $"{e.Card.Headline}, {PaneWords.Results(e.Card.Rows.Count)}");
+        return line;
+    }
+
+    private static W.UIElement CodeNodeView(CodeNodeItem item)
+    {
+        var e = item.Entry;
+        var n = e.Node;
+        var top = e.Depth == 0 ? 10 : 2;
+        var line = Opener(item.Host, e.Key, e.CanOpen, e.Open, e.Status, e.Depth == 0 ? 14 : 11,
+                          new W.Thickness(14 * e.Depth, top, 0, 2));
+        var words = new C.StackPanel();
+        var title = n.Number is { Length: > 0 } number && n.Level != CodeLevel.Others ? $"{number} {n.Title}" : n.Title;
+        words.Children.Add(Ink(Typed(new C.TextBlock
+        {
+            Text = title, TextWrapping = W.TextWrapping.Wrap,
+            FontWeight = e.Depth == 0 ? W.FontWeights.SemiBold : W.FontWeights.Normal,
+        }, "type.body"), n.Greyed ? PanelTokens.TextMuted : PanelTokens.Text));
+        if (n.Note is { } note)
+            words.Children.Add(Ink(Typed(new C.TextBlock { Text = note, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
+        words.Children.Add(Ink(Typed(new C.TextBlock { Text = n.Line, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
+        line.Children.Add(words);
+        W.Automation.AutomationProperties.SetName(line, $"{title}, {StatusLook.Word(e.Status)}, {n.Line}");
+        return line;
     }
 
     private static W.UIElement Heading(HeadingItem item)
