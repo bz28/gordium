@@ -40,10 +40,15 @@ public sealed class ResultViewsTests
         Assert.Equal("Nothing fails yet. 98 results can't be decided until the questions below are answered.", m.Headline);
         Assert.Equal("1 fails · 2 need review", ResultViews.Summary([Verdict.NeedsReview, Verdict.DoesNotComply, Verdict.NeedsReview]));
         Assert.Equal("1 rule fails. Fix it first; 2 results also need review.",
-                     ResultViews.Headline([Verdict.NeedsReview, Verdict.DoesNotComply, Verdict.NeedsReview]));
+                     ResultViews.Headline([(Verdict.NeedsReview, "a"), (Verdict.DoesNotComply, "b"), (Verdict.NeedsReview, "c")]));
+        // a rule failing in three spaces is one rule that fails (review round 1), two rules are two
+        Assert.Equal("1 rule fails. Fix it first.",
+                     ResultViews.Headline([(Verdict.DoesNotComply, "exits"), (Verdict.DoesNotComply, "exits"), (Verdict.DoesNotComply, "exits")]));
+        Assert.StartsWith("2 rules fail. Fix them first",
+                          ResultViews.Headline([(Verdict.DoesNotComply, "exits"), (Verdict.DoesNotComply, "width")]), StringComparison.Ordinal);
         // never "complies" as the whole story: Gordium doesn't check every part of the code
-        Assert.Contains("doesn't check every part", ResultViews.Headline([Verdict.Complies]), StringComparison.Ordinal);
-        Assert.Contains("not checked yet", ResultViews.Headline([Verdict.Complies, Verdict.NotChecked]), StringComparison.Ordinal);
+        Assert.Contains("doesn't check every part", ResultViews.Headline([(Verdict.Complies, "a")]), StringComparison.Ordinal);
+        Assert.Contains("not checked yet", ResultViews.Headline([(Verdict.Complies, "a"), (Verdict.NotChecked, "b")]), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -113,10 +118,52 @@ public sealed class ResultViewsTests
         Assert.StartsWith("Governs this building: ", m.Code[1].Note, StringComparison.Ordinal);
         Assert.Null(m.Code[0].Note);
         // the chapters Gordium has no rows in are greyed and folded, never hidden
-        var others = m.Code[1].Children.Single(c => c.Level == CodeLevel.Others);
-        Assert.True(others.Greyed);
+        var folds = m.Code[1].Children.Where(c => c.Level == CodeLevel.Others).ToList();
+        Assert.NotEmpty(folds);
+        Assert.All(folds, f => Assert.True(f.Greyed && f.Children.Count >= 2 && f.Children.All(c => c.Greyed && c.Level == CodeLevel.Chapter)));
         Assert.Contains("chapters not checked yet", m.Code[1].Line, StringComparison.Ordinal);
-        Assert.All(others.Children, c => Assert.Equal(CodeLevel.Chapter, c.Level));
+        Assert.Contains("appendices not checked yet", m.Code[1].Line, StringComparison.Ordinal);
+    }
+
+    /// <summary>The pieces of a section the contents say aren't checked yet (or the rest of a section only partly
+    /// brought in) keep that section from green even when every row in it complies (review round 1: a section with
+    /// rows was judged by its rows alone).</summary>
+    [Fact]
+    public void A_section_whose_rows_all_comply_is_not_green_while_a_piece_of_it_is_not_checked_yet()
+    {
+        var result = AllComplyButOneSection();
+        var m = ResultViews.Build(Parse(result));
+        var sections = Walk(m.Code).Where(n => n.Level == CodeLevel.Section && !n.Greyed).ToList();
+        var zoning825 = sections.Single(n => n.Number == "325-8");
+        var bc1020 = sections.Single(n => n.Number == "1020");
+        foreach (var n in new[] { zoning825, bc1020 })
+        {
+            Assert.All(RowsIn(n), r => Assert.Equal(Verdict.Complies, r.Verdict));
+            Assert.Equal(CodeState.NotCheckedYet, n.State);
+            Assert.Contains("not checked yet", n.Line, StringComparison.Ordinal);
+        }
+        // the class: every section the contents list with a piece not checked yet, or not whole, is never green
+        var listed = result["view"]!["contents"]!.AsArray().SelectMany(d => d!["chapters"]!.AsArray())
+                           .SelectMany(c => c!["sections"]!.AsArray())
+                           .Where(x => x!["whole"]?.GetValue<bool>() != true
+                                       || x!["pieces"]?.AsArray().Any(p => (string?)p!["coverage"] is "not_checked_yet" or "not_brought_in") == true)
+                           .Select(x => (string?)x!["number"]).ToHashSet();
+        Assert.Contains("1020", listed);
+        Assert.All(sections.Where(n => listed.Contains(n.Number)), n => Assert.NotEqual(CodeState.Complies, n.State));
+    }
+
+    /// <summary>Greyed runs are folded where they are, in the document's order, and named as the document names them:
+    /// the zoning chapter's articles, never "chapters" (review round 1).</summary>
+    [Fact]
+    public void Greyed_runs_fold_in_place_and_are_named_as_the_document_names_them()
+    {
+        var zoning = ResultViews.Build(Apartment()).Code[0];
+        var titles = zoning.Children.Select(c => c.Level == CodeLevel.Others ? c.Title : c.Number).ToList();
+        Assert.Equal("I", titles[0]);
+        Assert.Contains("Articles III–IV", titles);
+        Assert.True(titles.IndexOf("Articles III–IV") > titles.IndexOf("II") && titles.IndexOf("Articles III–IV") < titles.IndexOf("V"));
+        Assert.Contains("articles not checked yet", zoning.Line, StringComparison.Ordinal);
+        Assert.DoesNotContain("chapter", zoning.Line, StringComparison.Ordinal);
     }
 
     /// <summary>The class rule of change 34, over every node: complies only when every row inside complies or doesn't

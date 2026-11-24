@@ -59,7 +59,12 @@ public enum CodeLevel { Document, Chapter, Section, Rule, Others }
 /// <param name="Children">The nodes inside, in the document's order (greyed runs folded).</param>
 /// <param name="Rows">A rule's rows (its parts); empty above the rule.</param>
 public sealed record CodeNode(CodeLevel Level, string? Number, string Title, string? Note, CodeState State, string Line,
-                              bool Greyed, IReadOnlyList<CodeNode> Children, IReadOnlyList<ResultRow> Rows);
+                              bool Greyed, IReadOnlyList<CodeNode> Children, IReadOnlyList<ResultRow> Rows)
+{
+    /// <summary>What the document calls it, from its contents: "chapter", "article", "appendix", "section", or
+    /// "part" (a piece of a section); a fold's is its nodes' when they share one, else "part".</summary>
+    public string Kind { get; init; } = "part";
+}
 
 /// <summary>Both views of one answer, and the words at the top of either.</summary>
 /// <param name="Summary">"98 need review · 8 not checked yet · 1 complies" (zero counts left out; change 18).</param>
@@ -81,7 +86,8 @@ public static class ResultViews
     {
         ArgumentNullException.ThrowIfNull(result);
         var rows = result.Items.Select(i => (Item: i, Row: ResultRows.Row(i))).ToList();
-        return new ResultViewsModel(Summary(rows.Select(r => r.Row.Verdict)), Headline(rows.Select(r => r.Row.Verdict)),
+        return new ResultViewsModel(Summary(rows.Select(r => r.Row.Verdict)),
+                                    Headline(rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id))),
                                     FixGroups(rows), CodeTree(result, rows));
     }
 
@@ -109,10 +115,12 @@ public static class ResultViews
     /// <summary>The headline sentence (change 19): what fails first; else that nothing fails yet and how many results
     /// wait on the architect; never that the design complies (a check where everything Gordium checked complies still
     /// says Gordium doesn't check everything).</summary>
-    public static string Headline(IEnumerable<Verdict> verdicts)
+    public static string Headline(IEnumerable<(Verdict Verdict, string Rule)> rows)
     {
-        var all = verdicts.ToList();
-        int fails = all.Count(v => v == Verdict.DoesNotComply), review = all.Count(v => v == Verdict.NeedsReview),
+        var list = rows.ToList();
+        var all = list.Select(r => r.Verdict).ToList();
+        // the rules that fail, each once (a rule failing in 3 spaces is one rule)
+        int fails = list.Where(r => r.Verdict == Verdict.DoesNotComply).Select(r => r.Rule).Distinct().Count(), review = all.Count(v => v == Verdict.NeedsReview),
             notChecked = all.Count(v => v == Verdict.NotChecked);
         if (fails > 0)
             return (fails == 1 ? "1 rule fails. Fix it first" : $"{fails} rules fail. Fix them first")
@@ -213,7 +221,7 @@ public static class ResultViews
             FixKind.Measure => ($"Measure {n} {S(n, "thing", "things")} by hand", "Gordium doesn't read or measure these yet."),
             FixKind.Decide => ($"{n} code {S(n, "question", "questions")} for you to decide", "The code leaves these to judgment. Gordium shows the words; you decide."),
             FixKind.OpenQuestion => ($"{n} open {S(n, "question", "questions")} about the law", "The law reads more than one way here, so these can't pass yet."),
-            FixKind.NotChecked => ("Not checked yet by Gordium", "Check these by hand."),
+            FixKind.NotChecked => ("Not checked yet by Gordium", $"{Results(rows)} Gordium has no rules for yet. Check these by hand."),
             _ => ($"Complies or doesn't apply · {rows}", null),
         };
     }
@@ -256,7 +264,15 @@ public static class ResultViews
                          Str(c, "piece"), Str(c, "piece_title"))
             : null;
 
-    private sealed record Contents(string Document, List<(string Number, string Title, List<(string Number, string Title, string Coverage)> Sections)> Chapters);
+    /// <summary>A section as the contents list it: its coverage, whether all of it was brought in, and its pieces
+    /// Gordium has no rules for yet (<c>not_checked_yet</c>, <c>not_brought_in</c>).</summary>
+    private sealed record ContentsSection(string Number, string Title, string Coverage, bool Whole, List<(string Id, string Title)> Unchecked);
+
+    private sealed record ContentsChapter(string Number, string Kind, string Title, List<ContentsSection> Sections);
+
+    private sealed record Contents(string Document, List<ContentsChapter> Chapters);
+
+    private static readonly HashSet<string> UncheckedCoverage = new(StringComparer.Ordinal) { "not_checked_yet", "not_brought_in" };
 
     private static List<Contents> ContentsOf(JsonElement result)
     {
@@ -268,15 +284,26 @@ public static class ResultViews
         {
             if (d.ValueKind != JsonValueKind.Object || Str(d, "document") is not { Length: > 0 } name)
                 continue;
-            var chapters = new List<(string, string, List<(string, string, string)>)>();
+            var chapters = new List<ContentsChapter>();
             if (d.TryGetProperty("chapters", out var cs) && cs.ValueKind == JsonValueKind.Array)
                 foreach (var c in cs.EnumerateArray().Where(c => c.ValueKind == JsonValueKind.Object))
                 {
-                    var sections = new List<(string, string, string)>();
+                    var sections = new List<ContentsSection>();
                     if (c.TryGetProperty("sections", out var ss) && ss.ValueKind == JsonValueKind.Array)
                         foreach (var s in ss.EnumerateArray().Where(s => s.ValueKind == JsonValueKind.Object))
-                            sections.Add((Str(s, "number") ?? "", Str(s, "title") ?? "", Str(s, "coverage") ?? "not_brought_in"));
-                    chapters.Add((Str(c, "number") ?? "", Str(c, "title") ?? "", sections));
+                        {
+                            // a piece not yet checked, or a section only partly brought in, keeps its section from
+                            // green (change 34); "whole" missing is read as partly brought in, never as all of it
+                            var notYet = new List<(string, string)>();
+                            if (s.TryGetProperty("pieces", out var ps) && ps.ValueKind == JsonValueKind.Array)
+                                foreach (var piece in ps.EnumerateArray().Where(x => x.ValueKind == JsonValueKind.Object))
+                                    if (UncheckedCoverage.Contains(Str(piece, "coverage") ?? "not_brought_in"))
+                                        notYet.Add((Str(piece, "id") ?? "", Str(piece, "title") ?? ""));
+                            var whole = s.TryGetProperty("whole", out var w) && w.ValueKind == JsonValueKind.True;
+                            sections.Add(new ContentsSection(Str(s, "number") ?? "", Str(s, "title") ?? "",
+                                                             Str(s, "coverage") ?? "not_brought_in", whole, notYet));
+                        }
+                    chapters.Add(new ContentsChapter(Str(c, "number") ?? "", Str(c, "kind") ?? "chapter", Str(c, "title") ?? "", sections));
                 }
             list.Add(new Contents(name, chapters));
         }
@@ -304,23 +331,24 @@ public static class ResultViews
             if (mine.Count == 0 && !isGoverning)
                 continue;   // a book that governs nothing here and holds no row (the Residential Code of an apartment)
             var chapters = new List<CodeNode>();
-            foreach (var (cn, ct, sections) in doc.Chapters)
+            foreach (var chapter in doc.Chapters)
             {
+                var (cn, ct, sections) = (chapter.Number, chapter.Title, chapter.Sections);
                 var inChapter = mine.Where(p => p.In!.Chapter == cn).ToList();
                 var secNodes = new List<CodeNode>();
-                foreach (var (sn, st, coverage) in sections)
+                foreach (var sec in sections)
                 {
-                    var inSection = inChapter.Where(p => p.In!.Section == sn).ToList();
+                    var inSection = inChapter.Where(p => p.In!.Section == sec.Number).ToList();
                     secNodes.Add(inSection.Count == 0
-                        ? Empty(CodeLevel.Section, sn, st, coverage)
-                        : Node(CodeLevel.Section, sn, st, null, Rules(inSection), []));
+                        ? Empty(CodeLevel.Section, sec.Number, sec.Title, sec.Coverage) with { Kind = "section" }
+                        : Node(CodeLevel.Section, sec.Number, sec.Title, null, Fold([.. Rules(inSection), .. Unchecked(sec)]), []) with { Kind = "section" });
                 }
                 // a row whose section the contents don't list stays in its chapter, under its own section
                 foreach (var g in inChapter.Where(p => sections.All(s => s.Number != p.In!.Section)).GroupBy(p => p.In!.Section ?? ""))
-                    secNodes.Add(Node(CodeLevel.Section, g.Key.Length == 0 ? null : g.Key, g.First().In!.SectionTitle ?? "Other rules", null, Rules(g.ToList()), []));
-                chapters.Add(inChapter.Count == 0
+                    secNodes.Add(Node(CodeLevel.Section, g.Key.Length == 0 ? null : g.Key, g.First().In!.SectionTitle ?? "Other rules", null, Rules(g.ToList()), []) with { Kind = "section" });
+                chapters.Add((inChapter.Count == 0
                     ? Empty(CodeLevel.Chapter, cn, ct, sections.Count == 0 ? "not_brought_in" : Coverage(sections.Select(s => s.Coverage)))
-                    : Node(CodeLevel.Chapter, cn, ct, null, Fold(secNodes, "sections"), []));
+                    : Node(CodeLevel.Chapter, cn, ct, null, Fold(secNodes), [])) with { Kind = chapter.Kind });
                 used.UnionWith(inChapter.Select(p => p.Row));
             }
             // a row whose chapter the contents don't list: its own chapter, never dropped
@@ -330,13 +358,13 @@ public static class ResultViews
                 used.UnionWith(g.Select(p => p.Row));
             }
             var note = isGoverning && why is not null ? $"Governs this building: {why}" : null;
-            docs.Add(Node(CodeLevel.Document, null, doc.Document, note, Fold(chapters, "chapters"), []));
+            docs.Add(Node(CodeLevel.Document, null, doc.Document, note, Fold(chapters), []));
         }
         // a row the contents can't place (no in_code, or a document they don't list): its own document node, last
         var left = placed.Where(p => !used.Contains(p.Row)).ToList();
         foreach (var g in left.GroupBy(p => p.In?.Document ?? ""))
             docs.Add(Node(CodeLevel.Document, null, g.Key.Length == 0 ? Unplaced : g.Key, null,
-                          g.Key.Length == 0 ? Rules(g.ToList()) : Fold(Chapters(g.ToList()), "chapters"), []));
+                          g.Key.Length == 0 ? Rules(g.ToList()) : Chapters(g.ToList()), []));
         return docs;
     }
 
@@ -369,18 +397,54 @@ public static class ResultViews
                             nothing ? "Nothing to check here" : "Not checked yet by Gordium", true, [], []);
     }
 
-    /// <summary>Runs of greyed nodes folded into one "N other chapters, not checked yet by Gordium" node holding them
-    /// (never hidden: it opens to the list); a single greyed node stays as it is.</summary>
-    private static List<CodeNode> Fold(List<CodeNode> nodes, string what)
+    /// <summary>The pieces of a section that has rows which Gordium has no rules for yet, and the rest of a section
+    /// only partly brought in: greyed "not checked yet" parts beside its rules, so the section is never green
+    /// (change 34) while part of it isn't checked.</summary>
+    private static List<CodeNode> Unchecked(ContentsSection sec)
     {
-        var greyed = nodes.Where(n => n.Greyed).ToList();
-        if (greyed.Count < 2)
-            return nodes;
-        var shown = nodes.Where(n => !n.Greyed).ToList();
-        var state = greyed.Any(n => n.State == CodeState.NotCheckedYet) ? CodeState.NotCheckedYet : CodeState.NothingToCheck;
-        var title = shown.Count == 0 ? $"{greyed.Count} {what}" : $"{greyed.Count} other {what}";
-        shown.Add(new CodeNode(CodeLevel.Others, null, title, null, state,
-                               state == CodeState.NotCheckedYet ? "Not checked yet by Gordium" : "Nothing to check here", true, greyed, []));
+        var parts = sec.Unchecked.Select(p => new CodeNode(CodeLevel.Rule, p.Id.Length == 0 ? null : p.Id, p.Title, null,
+                                                           CodeState.NotCheckedYet, NotCheckedWords, true, [], [])).ToList();
+        if (!sec.Whole)
+            parts.Add(new CodeNode(CodeLevel.Rule, null, $"The rest of {sec.Number}: not brought in by Gordium", null,
+                                   CodeState.NotCheckedYet, NotCheckedWords, true, [], []));
+        return parts;
+    }
+
+    private const string NotCheckedWords = "Not checked yet by Gordium";
+
+    private static string Plural(string kind, int n) => n == 1 ? kind : kind switch
+    {
+        "appendix" => "appendices",
+        _ => kind + "s",
+    };
+
+    /// <summary>Each run of two or more greyed nodes folded, where it is, into one node holding them ("Articles
+    /// III–IV", "26 sections"; never hidden: it opens to the list); a single greyed node stays as it is.</summary>
+    private static List<CodeNode> Fold(List<CodeNode> nodes)
+    {
+        var shown = new List<CodeNode>();
+        for (var i = 0; i < nodes.Count;)
+        {
+            var j = i;
+            while (j < nodes.Count && nodes[j].Greyed)
+                j++;
+            if (j - i < 2)
+            {
+                shown.Add(nodes[i]);
+                i = Math.Max(j, i + 1);
+                continue;
+            }
+            var run = nodes.GetRange(i, j - i);
+            var kind = run.Select(n => n.Kind).Distinct().Count() == 1 ? run[0].Kind : "part";
+            var state = run.Any(n => n.State == CodeState.NotCheckedYet) ? CodeState.NotCheckedYet : CodeState.NothingToCheck;
+            var words = Plural(kind, run.Count);
+            var title = run[0].Number is { } first && run[^1].Number is { } last
+                ? $"{char.ToUpperInvariant(words[0])}{words[1..]} {first}–{last}"
+                : $"{run.Count} {(i == 0 ? "" : "other ")}{words}";
+            shown.Add(new CodeNode(CodeLevel.Others, null, title, null, state,
+                                   state == CodeState.NotCheckedYet ? NotCheckedWords : "Nothing to check here", true, run, []) { Kind = kind });
+            i = j;
+        }
         return shown;
     }
 
@@ -415,6 +479,10 @@ public static class ResultViews
         return verdicts.Count > 0 ? CodeState.NotApplicable : CodeState.NothingToCheck;
     }
 
+    /// <summary>The greyed nodes inside, at any depth (a greyed chapter is one chapter, not its sections).</summary>
+    private static IEnumerable<CodeNode> GreyedInside(IEnumerable<CodeNode> nodes) =>
+        nodes.SelectMany(c => c.Level == CodeLevel.Others ? c.Children : c.Greyed ? [c] : GreyedInside(c.Children));
+
     /// <summary>"62 need review · 26 sections not checked yet": the rows inside by verdict, then the parts of the
     /// document inside that Gordium hasn't checked, by what they are.</summary>
     private static string Line(List<ResultRow> rows, List<CodeNode> children)
@@ -423,13 +491,9 @@ public static class ResultViews
         var summary = rows.Count == 0 ? null : Summary(rows.Select(r => r.Verdict));
         if (summary is not null)
             parts.Add(summary);
-        foreach (var (level, one, many) in new[] { (CodeLevel.Chapter, "chapter", "chapters"), (CodeLevel.Section, "section", "sections") })
-        {
-            var n = children.Sum(c => c.Level == CodeLevel.Others ? c.Children.Count(x => x.Level == level && x.State == CodeState.NotCheckedYet)
-                                       : c.Level == level && c.Greyed && c.State == CodeState.NotCheckedYet ? 1 : 0);
-            if (n > 0)
-                parts.Add($"{n} {(n == 1 ? one : many)} not checked yet");
-        }
+        var greyed = GreyedInside(children).Where(c => c.State == CodeState.NotCheckedYet);
+        foreach (var g in greyed.GroupBy(c => c.Kind))
+            parts.Add($"{g.Count()} {Plural(g.Key, g.Count())} not checked yet");
         return parts.Count == 0 ? "Nothing to check here" : string.Join(" · ", parts);
     }
 }
