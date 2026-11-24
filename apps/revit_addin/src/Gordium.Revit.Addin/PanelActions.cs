@@ -45,5 +45,5 @@ internal sealed class PanelActions : IExternalEventHandler
         ResultsPane.Say($"{what} failed: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})");
     });
 
-    public string GetName() => "Gordium results panel";
+    public string GetName() => "Gordium results pane";
 }

@@ -176,7 +176,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
         if (PanelActions.Current is not { } actions)
         {
             refused?.Invoke();
-            Say("The Gordium add-in didn't start its panel actions: restart Revit.");
+            Say("The Gordium add-in didn't start its pane's actions: restart Revit.");
             return;
         }
         if (actions.Post(what, act, refused) is { } said)

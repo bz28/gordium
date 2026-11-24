@@ -216,7 +216,7 @@ not in the list, or a window's word on a door, is not stated, never a near guess
   (`MarkingListResult.Headline`) says every room, window and door is marked only when rooms are drawn and nothing
   is unset or in the way.
 
-In Revit, **Mark facts** (the Gordium tab's Check panel; the command is `MarkForEgressCommand`) adds the marks on first use, in one undoable
+In Revit, **Set up** (was Mark facts; the Gordium tab's Check panel; the command is `MarkForEgressCommand`) adds the marks on first use, in one undoable
 transaction, logs every row of the list to `results.jsonl`, and opens the **Setup form** in the Gordium pane (below;
 it replaced the list's dialog). Nothing is sent to the checker: the interior reader (section 7, step 3) builds the
 description's flags from `MarkReading` alone.
@@ -312,7 +312,7 @@ change).
 
 **Makers' clear openings, filled as drafts** (`MakerClearOpenings.cs`, data in
 [`data/maker_clear_openings.json`](data/maker_clear_openings.json), embedded in the library; design note, section
-5a). Mark facts and Check project fill an empty window type's `Clear width`, `Clear height` and `Clear
+5a). Set up and Check project fill an empty window type's `Clear width`, `Clear height` and `Clear
 source` from its maker's published formula when its Manufacturer and a call-number Model (Marvin's "UCA3648") match an
 entry, its Gordium: Operation is the entry's or unset, its Width and Height are surely the maker's frame size, and the family's own Vent Area, when it has
 one, agrees; never `Clear confirmed`, so nothing is sent until that type is confirmed. The
@@ -331,12 +331,12 @@ component stair as one flight of `stairs`, by the [design note](../../docs/revit
 section 4 ("As built in step 4"):
 
 - **Only on the architect's tick and with nothing hidden.** `stairs` is sent only when `Gordium: These are all the
-  stairs` on Project Information says Yes (a mark added by Mark facts; unset or No: not read) and nothing could
+  stairs` on Project Information says Yes (a mark added by Set up; unset or No: not read) and nothing could
   be a stair the reader doesn't walk: a stair not made of components, a multistory stair, anything else in Stairs,
   Railings or Generic Models (an in-place or loadable family, a DirectShape), a closed workset, an unloaded link, a
   link holding stairs, a coordination model. Each is listed first in the marking list (`MarkingListResult.StairBlockers`),
   with a summary line for the tick. With no stair found, `stairs` is left out, never `[]`. An element the architect
-  marks `Gordium: Not a stair` Yes (Generic Models, Stairs, Railings; added by Mark facts) is cleared, and listed
+  marks `Gordium: Not a stair` Yes (Generic Models, Stairs, Railings; added by Set up) is cleared, and listed
   as cleared ("Not a stair (architect): ... x N, ids in the log": `MarkingListResult.NotAStair`,
   `InteriorReadResult.NotAStair`); on a Revit Stair or Railing the mark is a conflict, listed first, and doesn't count.
 - **Each flight from what is drawn.** `bottom_elevation`: the floor or landing in front of the first riser, as drawn
@@ -377,7 +377,7 @@ By the [design note](../../docs/revit/revit_interior_reading_design.md)'s sectio
   only when the type's `Gordium: Clear confirmed` stamp, made for a door, confirms every value now (the type itself,
   its size and operation, the clear width and height, the source, a mapped maker's parameter: exactly as windows'),
   and it fits inside the door as placed. `Clear width`, `Clear height`, `Clear source` and `Clear confirmed` are now
-  bound to Doors too (Mark facts extends an existing project's binding); a door has no `Clear offset`. Nothing
+  bound to Doors too (Set up extends an existing project's binding); a door has no `Clear offset`. Nothing
   drawn is sent (stops, hinge pin, leaf, threshold): door families don't model them consistently.
 - **Handrails** (`StairReader`): a railing on the stair beside a wall, read exactly, between the wall face and the
   flight's middle and no higher than 38 in over the nosings, with nothing of it but its handrails standing farther in
