@@ -34,6 +34,7 @@ import math
 from dataclasses import dataclass
 
 import numpy as np
+import shapely
 from shapely import prepare
 from shapely.geometry import LineString, Point
 
@@ -44,6 +45,9 @@ FOOT = 12.0
 TIE = 1e-6 * FOOT            # in: two route lengths this close are a tie (decision 2)
 EPS = 1e-6                   # in: touching (a tangent line on its ring, a line along a wall)
 MOST_TIES = 64
+RING_WAYS_MOST = 1 << 16      # points whose ways onto a zone's graph are remembered (ring_ways; a childcare: 36,301)
+LINES_MOST = 1 << 19          # lines from sampled points to targets, clear() kept (clear_to; a childcare: 263,085)
+ROOMS_AT_MOST = 1 << 16       # points whose rooms are remembered (rooms_at)
 
 
 @dataclass
@@ -181,9 +185,23 @@ class _Leg:
                 segs += [(*pts[i], *pts[i + 1]) for i in range(len(pts) - 1)]
         self.walls = np.array(segs, dtype=float).reshape(-1, 4)
         self._base = None
+        self._facts = {}                 # each ring's facts for _arc_clear, worked once
+        self._ring_ways = {}             # each point's ways onto the graph built once (ring_ways)
+        self._lines = {}                 # clear(p, t) from sampled points to targets (clear_to)
 
     def covers(self, p) -> bool:
         return self.cover.covers(Point(p))
+
+    def clear_to(self, p, t) -> bool:
+        """`clear(p, t)` from a sampled point to a target, remembered (the story's travel and its common path, each
+        exit's union, ask it of the same points and door centres)."""
+        key = (p, t)
+        got = self._lines.get(key)
+        if got is None:
+            if len(self._lines) >= LINES_MOST:
+                self._lines.clear()
+            got = self._lines[key] = self.clear(p, t)
+        return got
 
     def inside(self, p) -> bool:
         """Whether p is inside a ring (closer than 12 in to a corner): no route is defined from there."""
@@ -212,6 +230,46 @@ class _Leg:
                 out.append((ang % (2 * math.pi), q, math.dist(p, q)))
         return out
 
+    def tangents_to(self, p, ks) -> dict:
+        """`_tangents(p, k, c)` for each ring k of ks (c its centre), {k: the same list}: the same tangent points by
+        the same float operations, each line's floor test (`clear`'s covers) for all of them in one shapely call,
+        then `clear`'s own ring test on each line the floor holds. The same answers as one `_tangents` per ring."""
+        r = self.r
+        out, lines = {}, []
+        for k in ks:
+            c = (float(self.rings[k][0]), float(self.rings[k][1]))
+            d = math.dist(p, c)
+            out[k] = []
+            if d < r - EPS:
+                continue
+            base = math.atan2(p[1] - c[1], p[0] - c[0])
+            if d <= r + EPS:
+                out[k].append((base % (2 * math.pi), None, 0.0))
+                continue
+            alpha = math.acos(r / d)
+            for ang in (base + alpha, base - alpha):
+                lines.append((k, ang, (c[0] + r * math.cos(ang), c[1] + r * math.sin(ang))))
+        for (k, ang, q), ok in zip(lines, self.clear_from(p, [q for _, _, q in lines])):
+            if ok:
+                out[k].append((ang % (2 * math.pi), q, math.dist(p, q)))
+        return out
+
+    def clear_from(self, a, ends) -> list:
+        """`clear(a, b)` for each b of ends, the floor's covers test on every line in one shapely call."""
+        return self.clear_lines([(a, b) for b in ends])
+
+    def clear_lines(self, lines) -> list:
+        """`clear(a, b)` for each (a, b) of lines, as `clear` works it: the same ends, the floor's covers test on every
+        line longer than EPS in one shapely call, then the ring test on each line the floor holds."""
+        got = [math.dist(a, b) <= EPS for a, b in lines]
+        long = [i for i, short in enumerate(got) if not short]
+        if long:
+            held = shapely.covers(self.cover, shapely.linestrings([[lines[i][0], lines[i][1]] for i in long]))
+            for i, ok in zip(long, held):
+                a, b = lines[i]
+                got[i] = bool(ok) and (not len(self.rings) or _seg_dist(self.rings, a, b).min() >= self.r - EPS)
+        return got
+
     def _graph(self, points):
         """The graph among the rings and these points: (xy, adj, on, ids), `on[k]` ring k's nodes by angle."""
         r, rings = self.r, self.rings
@@ -229,20 +287,24 @@ class _Leg:
 
         ids = [node(q) for q in points]
         on = [[] for _ in range(len(rings))]
+        # each test of a line below is `clear`'s, many in one shapely call (clear_from, tangents_to, clear_lines),
+        # and the nodes and links are made in the same order as ever
         for i, a in enumerate(ids):
-            for b in ids[i + 1:]:
-                if self.clear(xy[a], xy[b]):
+            rest = ids[i + 1:]
+            for b, ok in zip(rest, self.clear_from(xy[a], [xy[b] for b in rest])):
+                if ok:
                     link(a, b, ("line", xy[a], xy[b]))
-        for k, c in enumerate(rings):
-            c = (float(c[0]), float(c[1]))
-            for a in ids:
-                for ang, q, _ in self._tangents(xy[a], k, c):
+        touching = [self.tangents_to(xy[a], range(len(rings))) for a in ids]
+        for k in range(len(rings)):
+            for m, a in enumerate(ids):
+                for ang, q, _ in touching[m][k]:
                     if q is None:
                         on[k].append((ang, a))
                     else:
                         n = node(q)
                         on[k].append((ang, n))
                         link(a, n, ("line", xy[a], q))
+        common = []                                  # the four lines common to each pair of rings, in order
         for i in range(len(rings)):
             ci = (float(rings[i][0]), float(rings[i][1]))
             for j in range(i + 1, len(rings)):
@@ -258,11 +320,13 @@ class _Leg:
                 for ai, aj in pairs:
                     qi = (ci[0] + r * math.cos(ai), ci[1] + r * math.sin(ai))
                     qj = (cj[0] + r * math.cos(aj), cj[1] + r * math.sin(aj))
-                    if self.clear(qi, qj):
-                        ni, nj = node(qi), node(qj)
-                        on[i].append((ai % (2 * math.pi), ni))
-                        on[j].append((aj % (2 * math.pi), nj))
-                        link(ni, nj, ("line", qi, qj))
+                    common.append((i, j, ai, aj, qi, qj))
+        for (i, j, ai, aj, qi, qj), ok in zip(common, self.clear_lines([(x[4], x[5]) for x in common])):
+            if ok:
+                ni, nj = node(qi), node(qj)
+                on[i].append((ai % (2 * math.pi), ni))
+                on[j].append((aj % (2 * math.pi), nj))
+                link(ni, nj, ("line", qi, qj))
         for k in range(len(rings)):
             c = (float(rings[k][0]), float(rings[k][1]))
             on[k].sort()
@@ -320,6 +384,7 @@ class _Leg:
         dists = {t: _dijkstra(adj, n) for t, n in zip(targets, ids)}
         self._base = (targets, on, dists, ids[len(targets):], xy, adj, dict(zip(targets, ids)))
         self._ways = None
+        self._ring_ways = {}
 
     def between(self, a, b) -> list[Path]:
         """Every tied shortest curve from the target a to the target b (both given to `prepare`), on the graph
@@ -359,6 +424,38 @@ class _Leg:
                 out.append(Path(sum(_piece_length(q) for q in pieces), pieces))
         return out
 
+    def ring_ways(self, p, on) -> list:
+        """Every way a curve from p (clear of every ring) reaches the graph by a tangent to a ring and round it to
+        the first node there (`on`, each ring's nodes by angle), each way: (length, node, ring, tangent point or
+        None, tangent angle, signed sweep from it). Worked once per point on the graph built once and remembered
+        (the story's travel and its common path both sample the same points): `_ways_from` and the common path's
+        `firsts` read the same list, each as it always worked it (the same float operations, in the same order)."""
+        mine = self._base is not None and on is self._base[1]
+        if mine and p in self._ring_ways:
+            return self._ring_ways[p]
+        out = []
+        touching = self.tangents_to(p, [k for k in range(len(self.rings)) if on[k]])
+        for k in range(len(self.rings)):
+            ring = on[k]
+            if not ring:
+                continue
+            c = (float(self.rings[k][0]), float(self.rings[k][1]))
+            angles = [a for a, _ in ring]
+            for ang, q, length in touching[k]:
+                i = bisect.bisect_left(angles, ang)
+                after, before = ring[i % len(ring)], ring[(i - 1) % len(ring)]
+                # round the ring each way to the first node met
+                up, down = (after[0] - ang) % (2 * math.pi), (ang - before[0]) % (2 * math.pi)
+                if self._arc_clear(k, c, ang, up):
+                    out.append((length + self.r * up, after[1], k, q, ang, up))
+                if self._arc_clear(k, c, before[0], down):
+                    out.append((length + self.r * down, before[1], k, q, ang, -down))
+        if mine:
+            if len(self._ring_ways) >= RING_WAYS_MOST:
+                self._ring_ways.clear()
+            self._ring_ways[p] = out
+        return out
+
     def _ways_from(self, p) -> list:
         """Every way a curve from p reaches the graph other than straight to a target: to a corner (no clearance),
         or by a tangent to a ring and round it to the first node there, each way: [(length, node)]. Worked once per
@@ -367,20 +464,7 @@ class _Leg:
             return self._ways[1]
         _, on, _, bend_ids, _, _, _ = self._base
         ways = [(math.dist(p, b), n) for b, n in zip(self.bends, bend_ids) if self.clear(p, b)]
-        for k in range(len(self.rings)):
-            ring = on[k]
-            if not ring:
-                continue
-            c = (float(self.rings[k][0]), float(self.rings[k][1]))
-            angles = [a for a, _ in ring]
-            for ang, _, length in self._tangents(p, k, c):
-                i = bisect.bisect_left(angles, ang)
-                after, before = ring[i % len(ring)], ring[(i - 1) % len(ring)]
-                # round the ring each way to the first node met
-                for (a1, n1), a0, sweep in ((after, ang, (after[0] - ang) % (2 * math.pi)),
-                                            (before, before[0], (ang - before[0]) % (2 * math.pi))):
-                    if self._arc_clear(k, c, a0, sweep):
-                        ways.append((length + self.r * sweep, n1))
+        ways += [(length, n) for length, n, *_ in self.ring_ways(p, on)]
         self._ways = (p, ways)
         return ways
 
@@ -390,34 +474,51 @@ class _Leg:
         tangent point and round it to the first node there: every way it can leave a ring is a node of the graph."""
         D = self._base[2][tuple(map(float, t))]
         t = tuple(map(float, t))
-        best = math.dist(p, t) if self.clear(p, t) else math.inf
+        best = math.dist(p, t) if self.clear_to(p, t) else math.inf
         for length, n in self._ways_from(p):
             if length + D[n] < best:
                 best = length + D[n]
         return best
 
+    def _ring_facts(self, k, c) -> tuple:
+        """What `_arc_clear` reads of ring k (centre c) that no arc changes, worked once per ring: each other ring
+        whose circle meets it, as (phi, beta), the angle to its centre and the half-angle of the overlap (the same
+        expressions, in the same order, as `_arc_clear` always worked them per arc); and the absolute angle of each
+        place its circle crosses a wall (`_circle_wall_angles`, before `_circle_walls` takes a0 off)."""
+        key = (k, c[0], c[1])
+        facts = self._facts
+        if key not in facts:
+            active, r = self.rings, self.r
+            meets = []
+            for j in range(len(active)):
+                if j == k:
+                    continue
+                d = math.dist(c, active[j])
+                if d >= 2 * r - EPS:
+                    continue
+                meets.append((math.atan2(active[j][1] - c[1], active[j][0] - c[0]), math.acos(d / (2 * r))))
+            facts[key] = (meets, _circle_wall_angles(self.walls, c, r))
+        return facts[key]
+
     def _arc_clear(self, k, c, a0, sweep) -> bool:
-        active = self.rings
+        """Whether the arc of ring k from a0 through sweep stays out of every other ring and in the floor. Exactly as
+        it was worked per arc, from the ring's facts worked once (`_ring_facts`): each other ring that meets it
+        (`(phi - beta - a0) % 2 pi`, the same floats), then each stretch between the wall crossings (`(angle - a0) %
+        2 pi`, the same floats `_circle_walls` gives) by its middle point, every one in the floor (all of them in
+        one shapely call: the same covers test on the same points)."""
         r, slack = self.r, EPS / self.r
         if sweep <= slack:
             return True
-        for j in range(len(active)):
-            if j == k:
-                continue
-            d = math.dist(c, active[j])
-            if d >= 2 * r - EPS:
-                continue
-            phi, beta = math.atan2(active[j][1] - c[1], active[j][0] - c[0]), math.acos(d / (2 * r))
+        meets, walls = self._ring_facts(k, c)
+        for phi, beta in meets:
             u = (phi - beta - a0) % (2 * math.pi)
             if u < sweep - slack or u + 2 * beta - 2 * math.pi > slack:
                 return False
-        cuts = sorted(x for x in _circle_walls(self.walls, c, r, a0) if slack < x < sweep - slack)
+        cuts = sorted(x for x in ((t - a0) % (2 * math.pi) for t in walls) if slack < x < sweep - slack)
         marks = [0.0, *cuts, sweep]
-        for x0, x1 in zip(marks, marks[1:]):
-            mid = a0 + (x0 + x1) / 2
-            if not self.cover.covers(Point(c[0] + r * math.cos(mid), c[1] + r * math.sin(mid))):
-                return False
-        return True
+        mids = [a0 + (x0 + x1) / 2 for x0, x1 in zip(marks, marks[1:])]
+        return bool(shapely.covers(self.cover, shapely.points(
+            [(c[0] + r * math.cos(mid), c[1] + r * math.sin(mid)) for mid in mids])).all())
 
 
 def _dijkstra(adj, source) -> list:
@@ -445,6 +546,11 @@ def _seg_dist(centres, a, b):
 
 def _circle_walls(walls, c, r, a0):
     """Where the circle crosses the walls: angles measured on from a0, in [0, 2 pi)."""
+    return [(t - a0) % (2 * math.pi) for t in _circle_wall_angles(walls, c, r)]
+
+
+def _circle_wall_angles(walls, c, r):
+    """Where the circle crosses the walls: each place's own angle (atan2, before any a0 is taken off)."""
     if not len(walls):
         return []
     p, q = walls[:, :2] - c, walls[:, 2:] - c
@@ -459,7 +565,7 @@ def _circle_walls(walls, c, r, a0):
         for s in ((-B[k] - root) / (2 * A[k]), (-B[k] + root) / (2 * A[k])):
             if -1e-12 <= s <= 1 + 1e-12:
                 x, y = p[k] + s * d[k]
-                out.append((math.atan2(y, x) - a0) % (2 * math.pi))
+                out.append(math.atan2(y, x))
     return out
 
 
@@ -517,6 +623,12 @@ def _signature(pieces) -> tuple:
 
 # --- a story's routes ------------------------------------------------------------------------------------------------
 
+def exact(point) -> tuple:
+    """A point as a memo's key: its coordinates exactly, each with its sign (0.0 and -0.0 are two keys, as a stop's
+    words or a route's pieces may show either)."""
+    return tuple((v, math.copysign(1.0, v)) for v in point)
+
+
 class StoryRoutes:
     """Every route on one story (decisions 1, 1a, 2 and 4). `clearance` is the rings' radius (12 in; 0 gives the
     no-clearance figure the eval compares a hand path with)."""
@@ -527,6 +639,7 @@ class StoryRoutes:
         self.story, self.r = story, clearance
         self._engines, self._legs, self._chains, self._regions = {}, {}, {}, {}
         self._start_cache, self._plain, self._onward_cache = {}, None, {}
+        self._travels = {}               # travel(p) to the nearest exit: every farthest() on the story shares it
         self.exits = {}
         for d in story.exits():
             self.exits.setdefault(d.exit_id, []).append(d.id)
@@ -621,8 +734,18 @@ class StoryRoutes:
             self._grown = [(r, r.outline.buffer(EPS)) for r in self.story.rooms.values() if r is not None]
             for _, g in self._grown:
                 prepare(g)
-        q = Point(p)
-        return [r for r, g in self._grown if g.covers(q)]
+            self._grown_all = np.array([g for _, g in self._grown], dtype=object)
+            self._rooms_at = {}
+        if not self._grown:
+            return []
+        key = (float(p[0]), float(p[1]))
+        got = self._rooms_at.get(key)
+        if got is None:              # one shapely call for every room: the same covers test, outlines and point
+            held = shapely.covers(self._grown_all, Point(p))
+            if len(self._rooms_at) >= ROOMS_AT_MOST:
+                self._rooms_at.clear()
+            got = self._rooms_at[key] = tuple(r for (r, _), ok in zip(self._grown, held) if ok)
+        return list(got)                # each caller its own list, as ever
 
     def rings_for(self, room) -> list:
         """The centres of every ring a route from this room meets (its zone's, or for an end-only room those of its
@@ -834,8 +957,24 @@ class StoryRoutes:
 
     def travel(self, point, exit_ids=None) -> float:
         """The length (inches) of the shortest route from a point clear of every ring to the nearest exit named,
-        as `route(...).length` gives it, from each zone's graph built once (decision 3 samples with it)."""
+        as `route(...).length` gives it, from each zone's graph built once (decision 3 samples with it). To the
+        nearest of every exit (exit_ids None), worked once per point, its stop too: the story's farthest(), each
+        room's and the occupied rooms' all sample the same points."""
         p = (float(point[0]), float(point[1]))
+        if exit_ids is not None:
+            return self._travel(p, exit_ids)
+        key = exact(p)
+        got = self._travels.get(key)
+        if got is None:
+            try:
+                got = self._travels[key] = (self._travel(p, None), None)
+            except Stop as s:
+                got = self._travels[key] = (None, s)
+        if got[1] is not None:
+            raise got[1]
+        return got[0]
+
+    def _travel(self, p, exit_ids) -> float:
         at = _show(p)
         wanted = self._wanted(exit_ids)
         dist, _, _ = self._chain(wanted)

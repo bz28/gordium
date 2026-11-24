@@ -37,6 +37,8 @@ internal static class RevitMarks
             .Select(e => Element(doc, e)).ToList(),
         Bindings = Bindings(doc),
         ProjectMarks = doc.ProjectInformation is { } info ? Values(info) : new Dictionary<Guid, MarkValue>(),
+        // the Setup form shows and takes a length in the project's units, as Revit's own dialogs do
+        DisplayUnits = doc.GetUnits().GetFormatOptions(SpecTypeId.Length).GetUnitTypeId().TypeId,
         VertexTolerance = doc.Application.VertexTolerance,
         Elements = RevitRead.HouseOutline(doc),          // the site slabs' rows (SiteSlabs), no geometry
     };

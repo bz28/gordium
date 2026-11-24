@@ -33,8 +33,19 @@ public sealed record Fix(string Key, string Title, CardAction Action, IReadOnlyL
         _ => "causes",
     };
 
+    /// <summary>How many things it joins: the facts to set for a Project Information fix (its cards' marks, each once:
+    /// one card can ask two, the stream's yes and its distance), else its cards.</summary>
+    public int Joined => Key == "pi" && Members.SelectMany(CauseCards.MarksOf).Distinct().Count() is var n and > 0 ? n : Members.Count;
+
+    /// <summary>The opened fix's overline over its cards: "The 11 causes, in Gordium's checker's words"; for a
+    /// Project Information fix whose cards ask more facts than there are cards, both counts ("The 6 causes asking 9
+    /// facts, …"), so it never claims a number of facts the title and count don't.</summary>
+    public string MembersWords =>
+        (Noun == "facts" && Joined != Members.Count ? $"The {Members.Count} causes asking {Joined} facts" : $"The {Members.Count} {Noun}")
+        + ", in Gordium's checker's words";
+
     /// <summary>"28 results waiting on this · 11 causes": counted, never a figure.</summary>
-    public string Count => $"{PaneWords.Results(Rows.Count)} waiting on this" + (Members.Count > 1 ? $" · {Members.Count} {Noun}" : "");
+    public string Count => $"{PaneWords.Results(Rows.Count)} waiting on this" + (Joined > 1 ? $" · {Joined} {Noun}" : "");
 }
 
 /// <summary>
@@ -124,7 +135,7 @@ public static class Fixes
         if (key == "pi")
         {
             var marks = members.SelectMany(CauseCards.MarksOf).Distinct().Select(m => Short(m.Name)).ToList();
-            return $"Set {n} facts on Project Information" + (marks.Count > 0 ? ": " + PaneWords.And(marks) : "");
+            return $"Set {(marks.Count > 0 ? marks.Count : n)} facts on Project Information" + (marks.Count > 0 ? ": " + PaneWords.And(marks) : "");
         }
         if (key == "nofield")
             return $"{n} facts Gordium has no field for yet";

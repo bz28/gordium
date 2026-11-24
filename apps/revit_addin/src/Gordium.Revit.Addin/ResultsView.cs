@@ -494,11 +494,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var b = new C.Border
         {
             Child = p, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),
-            Padding = new W.Thickness(8, 5, 8, 6), Margin = new W.Thickness(0, 6, 0, 0), ToolTip = change.Words,
+            Padding = new W.Thickness(8, 5, 8, 6), Margin = new W.Thickness(0, 6, 0, 0), ToolTip = PaneWords.ChangesAll(change),
         };
         b.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
         b.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
-        W.Automation.AutomationProperties.SetName(b, change.Words);
+        W.Automation.AutomationProperties.SetName(b, PaneWords.ChangesAll(change));
         return b;
     }
 

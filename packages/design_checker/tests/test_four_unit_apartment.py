@@ -11,19 +11,20 @@ import sys
 import pytest
 
 from design_checker import code_scope, egress, present
-from rule_format.rulebook import REPO, load
+from rule_format.rulebook import REPO, Context, load
 
 sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
 import make_ny_build_data as build  # noqa: E402
 
 FOLDER = REPO / "test_data/test_sites/new_york/ithaca_city/four_unit_apartment"
 VALUES = {"use": "multiple_family", "dwelling_units": 4}
+ALLOWED = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/ithaca_city").allowed()
 
 
 @pytest.fixture(scope="module")
 def got():
     return egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), build.interior_of(), VALUES,
-                        {"use": set()})
+                        ALLOWED)
 
 
 @pytest.fixture(scope="module")
@@ -59,7 +60,7 @@ def test_the_story_figures_are_the_hand_worked_ones(got, expected):
 def test_a_rule_reading_a_figure_not_measured_yet_says_so(got):
     rows = [i for i in got["items"] if i["rule"] == "general.bc_1006_3_3_story_exits"]
     assert len(rows) == 2 and all(i["status"] == present.REVIEW for i in rows)
-    assert all("story occupant load not measured" in i["reason"] for i in rows)
+    assert all("occupant load not measured" in i["reason"] for i in rows)   # its plain name (C4)
 
 
 def test_each_flag_is_its_own_line_with_its_section(got):
