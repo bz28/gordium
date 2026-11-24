@@ -151,19 +151,18 @@ public sealed record SetupScreen(string Noun, IReadOnlyList<SetupField> Fields, 
     public string Headline => SetupSteps.Headline(Steps);
 
     /// <summary>Made from the model's marks, the openings' sides, the place's options (null while the worker hasn't
-    /// answered: the zone and use are then typed), what the architect has chosen but not saved, what the last check
-    /// of this project said governs (null for none), the kept street edge in words (null when not known), and
+    /// answered: the zone and use are then typed), what the architect has chosen but not saved, the kept street edge in words (null when not known), and
     /// whether the kept edges are still edges of the lot (false: the property line changed, so a problem the form
     /// waits for, as the check would refuse it; null when not known).</summary>
     public static SetupScreen Build(RevitModel model, IReadOnlyList<OpeningSides>? sides, PlaceOptions? options,
-                                    SetupDraft? draft = null, LastCheck? lastCheck = null, string? streetWords = null,
+                                    SetupDraft? draft = null, string? streetWords = null,
                                     bool? streetOnLot = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         var use = draft?.Chosen(Marks.Use) ?? Marks.Text(SetupFacts.Get(model, Marks.Use));
         var noun = SetupWords.Noun(use);
         var follows = draft?.Chosen(Marks.FollowsBuildingCode) is { } f ? f == "Yes" : Marks.YesNo(SetupFacts.Get(model, Marks.FollowsBuildingCode));
-        var governs = SetupSteps.BuildingCodeGoverns(use, follows, options, lastCheck);
+        var governs = SetupSteps.BuildingCodeGoverns(use, follows, options);
         var fields = SetupFacts.Fields(model, options, draft, noun, governs).Select(f =>
             f.Mark == Marks.StreetEdge && streetOnLot == false && f.Current is not null && f.Problem is null
                 ? f with { Problem = SetupSteps.StreetOffLot } : f).ToList();

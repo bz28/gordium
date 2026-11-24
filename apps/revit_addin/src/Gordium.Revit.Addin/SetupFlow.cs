@@ -46,7 +46,6 @@ internal static class SetupRun
         }
         _model = RevitMarks.Model(doc);
         _sides = RevitMarks.Sides(doc);                      // read again each time: a window added since has its rooms
-        _lastCode = ResultsPane.LastCode(doc);
         var kept = Marks.Text(SetupFacts.Value(_model, Marks.StreetEdge));
         _streetWords = EdgeWords.OfMark(kept, RevitRead.LotLines(doc), RevitRead.InternalToShared(doc), doc.Application.VertexTolerance);
         // a kept edge (text Gordium wrote) no property line has any more: the form waits for a new pick, as the check would
@@ -54,11 +53,10 @@ internal static class SetupRun
         return Screen();
     }
 
-    private static LastCheck? _lastCode;
     private static string? _streetWords;
     private static bool? _streetOnLot;
 
-    private static SetupScreen Screen() => SetupScreen.Build(_model!, _sides, _options, Draft, _lastCode, _streetWords, _streetOnLot);
+    private static SetupScreen Screen() => SetupScreen.Build(_model!, _sides, _options, Draft, _streetWords, _streetOnLot);
 
     /// <summary>Check project's gate (Revit's thread, during the check's read): the form's screen, and what to do
     /// (SetupGate.Decide: show the form, send anyway for what was already checked anyway, or send).</summary>

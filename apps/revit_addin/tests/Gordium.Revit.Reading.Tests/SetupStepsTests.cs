@@ -36,9 +36,8 @@ public sealed class SetupStepsTests
         BuildingCodeUses = ["multiple_family", "dormitory"],
     };
 
-    private static SetupScreen Screen(Dictionary<Guid, MarkValue>? project = null, SetupDraft? draft = null, PlaceOptions? options = null,
-                                      LastCheck? lastCheck = null) =>
-        SetupScreen.Build(Model(project), [], options ?? Options, draft, lastCheck);
+    private static SetupScreen Screen(Dictionary<Guid, MarkValue>? project = null, SetupDraft? draft = null, PlaceOptions? options = null) =>
+        SetupScreen.Build(Model(project), [], options ?? Options, draft);
 
     private static SetupDraft Use(string use)
     {
@@ -112,33 +111,33 @@ public sealed class SetupStepsTests
         Assert.False(SetupScreen.Build(Model(), [], null, Use("multiple_family")).BuildingCode);
     }
 
-    /// <summary>The other two ways the form knows the Building Code governs: the architect applies it (Follows
-    /// building code, R101.2's exception), or the last check of this project said so.</summary>
+    /// <summary>The other way the form knows the Building Code governs: the architect applies it (Follows building
+    /// code, R101.2's exception). Rounds 3 and 4: never an earlier check's verdict (any fact it read may have changed
+    /// since), so a house with four stories is asked for the two facts by its results, never required here.</summary>
     [Theory]
-    [InlineData("one_family_detached", true, null, true)]
-    [InlineData("one_family_detached", null, "building_code", true)]
-    [InlineData("one_family_detached", null, "residential_code", false)]
-    [InlineData("one_family_detached", false, null, false)]
-    [InlineData(null, null, null, false)]
-    [InlineData("multiple_family", null, null, true)]
-    public void The_building_code_governs_by_the_use_the_exception_or_the_last_check(string? use, bool? follows, string? last, bool governs) =>
-        Assert.Equal(governs, SetupSteps.BuildingCodeGoverns(use, follows, Options, new LastCheck(last, use, follows)));
+    [InlineData("one_family_detached", true, true)]
+    [InlineData("one_family_detached", false, false)]
+    [InlineData("one_family_detached", null, false)]
+    [InlineData(null, null, false)]
+    [InlineData("multiple_family", null, true)]
+    [InlineData("multiple_family", false, true)]
+    public void The_building_code_governs_by_the_use_or_the_exception(string? use, bool? follows, bool governs) =>
+        Assert.Equal(governs, SetupSteps.BuildingCodeGoverns(use, follows, Options));
 
-    /// <summary>Round 3, #2: the last check's code holds only for the use (and Follows answer) it was decided on: a
-    /// project checked as multiple family whose use is now a one-family house is decided afresh, never told the
-    /// Building Code governs it nor asked its two facts.</summary>
+    /// <summary>Round 4: the form decides only from what the project holds now. A screen's Build takes no earlier
+    /// check's code at all (the gate can't be held up by a verdict a corrected fact no longer supports), and a house
+    /// whose stories make it the Building Code's is not asked for the two facts here.</summary>
     [Fact]
-    public void The_last_check_s_code_holds_only_for_the_use_it_was_decided_on()
+    public void No_earlier_verdict_requires_the_building_code_facts()
     {
-        var last = new LastCheck(WhichCodeWords.BuildingCode, "multiple_family", null);
-        Assert.True(SetupSteps.BuildingCodeGoverns("multiple_family", null, null, last));
-        Assert.False(SetupSteps.BuildingCodeGoverns("one_family_detached", null, null, last));
-        Assert.False(SetupSteps.BuildingCodeGoverns("multiple_family", false, null, last));
-        var house = Screen(new Dictionary<Guid, MarkValue> { [Marks.Use.Guid] = new(true, Text: "multiple_family") }, Use("one_family_detached"),
-                           lastCheck: last);
-        Assert.False(house.BuildingCode);
-        Assert.Null(SetupSteps.BuildingNote(house));
-        Assert.DoesNotContain(house.Steps, x => x.Field?.Mark == Marks.OccupancyGroups);
+        Assert.DoesNotContain(typeof(SetupScreen).GetMethod(nameof(SetupScreen.Build))!.GetParameters(),
+                              p => p.Name!.Contains("last", StringComparison.OrdinalIgnoreCase) || p.Name!.Contains("code", StringComparison.OrdinalIgnoreCase));
+        var four = Screen(new Dictionary<Guid, MarkValue> { [Marks.StoriesAboveGradePlane.Guid] = new(true, 4) }, Use("one_family_detached"));
+        Assert.False(four.BuildingCode);
+        Assert.Null(SetupSteps.BuildingNote(four));
+        Assert.DoesNotContain(Marks.OccupancyGroups.Name, four.Needed);
+        var pane = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsPane.cs"));
+        Assert.DoesNotContain("LastCode", pane, StringComparison.Ordinal);
     }
 
     /// <summary>The two facts take the book's own words: the groups of BCNYS Chapter 3 and the sprinkler systems,
@@ -219,7 +218,7 @@ public sealed class SetupStepsTests
     public void The_street_edge_step_says_which_edge()
     {
         var kept = StreetEdges.Format([(new Xyz(0, 0, 0), new Xyz(100, 0, 0))]);
-        var s = SetupScreen.Build(Model(new Dictionary<Guid, MarkValue> { [Marks.StreetEdge.Guid] = new(true, Text: kept) }), [], Options, null, null,
+        var s = SetupScreen.Build(Model(new Dictionary<Guid, MarkValue> { [Marks.StreetEdge.Guid] = new(true, Text: kept) }), [], Options, null,
                                   "the south edge, 100'-0\"");
         var f = s.Fields.Single(x => x.Mark == Marks.StreetEdge);
         Assert.Equal("The south edge, 100'-0\"", SetupSteps.StreetState(f, null, s.StreetWords));
@@ -274,7 +273,7 @@ public sealed class SetupStepsTests
     {
         var kept = StreetEdges.Format([(new Xyz(0, 0, 0), new Xyz(100, 0, 0))]);
         var project = new Dictionary<Guid, MarkValue> { [Marks.StreetEdge.Guid] = new(true, Text: kept) };
-        var off = SetupScreen.Build(Model(project), [], Options, null, null, null, streetOnLot: false);
+        var off = SetupScreen.Build(Model(project), [], Options, null, null, streetOnLot: false);
         var f = off.Fields.Single(x => x.Mark == Marks.StreetEdge);
         Assert.Equal(SetupSteps.StreetOffLot, f.Problem);
         Assert.Contains(Marks.StreetEdge.Name, off.Needed);
@@ -283,11 +282,11 @@ public sealed class SetupStepsTests
         // round 2, #2: a check refuses it, so the footer never says only its rules will need review
         var draft = new SetupDraft();
         draft.Choose(Marks.Zone, "R-1b");
-        var footer = PaneWords.SetupFooter(SetupScreen.Build(Model(project), [], Options, draft, null, null, streetOnLot: false), draft);
+        var footer = PaneWords.SetupFooter(SetupScreen.Build(Model(project), [], Options, draft, null, streetOnLot: false), draft);
         Assert.Contains(PaneWords.NoStreet, footer, StringComparison.Ordinal);
         Assert.DoesNotContain("street edge isn't set yet", footer, StringComparison.OrdinalIgnoreCase);
         Assert.Contains(PaneWords.NoStreet, PaneWords.SetupFooter(off, new SetupDraft()), StringComparison.Ordinal);   // round 3, #1
-        var on = SetupScreen.Build(Model(project), [], Options, null, null, "the south edge, 100'-0\"", streetOnLot: true);
+        var on = SetupScreen.Build(Model(project), [], Options, null, "the south edge, 100'-0\"", streetOnLot: true);
         Assert.Null(on.Fields.Single(x => x.Mark == Marks.StreetEdge).Problem);
         Assert.DoesNotContain(Marks.StreetEdge.Name, on.Needed);
     }

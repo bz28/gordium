@@ -41,15 +41,15 @@ public static class SetupSteps
     public static IReadOnlyList<MarkDefinition> BuildingCodeFacts { get; } = [Marks.OccupancyGroups, Marks.SprinklerSystem];
 
     /// <summary>Whether the 2025 Building Code of New York State governs the building as far as the form can tell
-    /// before a check: the use is one the Building Code covers whatever else is stated (the worker's
-    /// <c>building_code_uses</c>, code_scope.by_use), the architect applies the Building Code (Gordium: Follows
-    /// building code, R101.2's exception), or the last check of this project said so for the same use and the same
-    /// answer to Follows building code (a use changed since, a house now, is decided afresh: review round 3). Never a
-    /// guess the other way: false only means the form doesn't ask for the two facts first (the results still ask).</summary>
-    public static bool BuildingCodeGoverns(string? use, bool? followsBuildingCode, PlaceOptions? options, LastCheck? last) =>
+    /// from what it holds now: the use is one the Building Code covers whatever else is stated (the worker's
+    /// <c>building_code_uses</c>, code_scope.by_use), or the architect applies the Building Code (Gordium: Follows
+    /// building code, R101.2's exception). Never an earlier check's verdict: any fact the code choice reads can change
+    /// after it (review rounds 3 and 4), so a building the Building Code covers for another reason (a fourth story,
+    /// three units) is asked for the two facts by its results, never required here by a stale verdict. False only
+    /// means the form doesn't ask for them first; it never makes anything pass.</summary>
+    public static bool BuildingCodeGoverns(string? use, bool? followsBuildingCode, PlaceOptions? options) =>
         use is not null && options is not null && options.BuildingCodeUses.Contains(use, StringComparer.Ordinal)
-        || followsBuildingCode == true
-        || last is { Code: WhichCodeWords.BuildingCode } l && l.Use == use && l.Follows == followsBuildingCode;
+        || followsBuildingCode == true;
 
     /// <summary>The line under "The building": that the Building Code governs, only when the form knows it does and
     /// both its facts are steps (never on a house whose one building fact holds a problem); null otherwise.</summary>
@@ -283,17 +283,6 @@ public static class SetupSteps
             return f.Problem == StreetOffLot ? "The lot changed — pick again" : "Typed by hand — pick again";
         return edgeWords is { } w ? PaneWords.Capital(w) : "Picked";
     }
-}
-
-/// <summary>What the last check of a project said governs (the worker's <c>which_code.code</c>), and the use and the
-/// Follows building code answer it was decided on (as Project Information held them when it was shown).</summary>
-public sealed record LastCheck(string? Code, string? Use, bool? Follows);
-
-/// <summary>Which code word the worker's <c>which_code.code</c> carries for each book (code_scope.CODES).</summary>
-public static class WhichCodeWords
-{
-    public const string BuildingCode = "building_code";
-    public const string ResidentialCode = "residential_code";
 }
 
 /// <summary>A suggested occupancy group from the building's use (Ben, 2026-11-23: offered only as a suggestion, with
