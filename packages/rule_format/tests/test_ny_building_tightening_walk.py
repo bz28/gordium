@@ -118,30 +118,117 @@ def test_the_walk_varies_every_building_fact_the_drafted_rules_read(rules):
     assert read - walked == set(), "facts the drafted rules read that the walk doesn't vary"
 
 
-def test_no_table_row_passes_past_a_tightening_that_applies(ctx, rules):
-    scope = _scope(rules)
-    story_rules = [r for r in scope if r["for_each"] == "story"]
-    space_rules = [r for r in scope if r["for_each"] == "space"]
+# The measures a tightening makes unreliable or holds to a shorter limit; every drafted rule reading one is walked
+AFFECTED = ("egress_travel_distance", "space_common_path", "egress_travel_in_sleeping_room")
+FAR = 10_000
+
+
+def _reads(r):
+    out = set()
+    for t in [r.get("applies_when"), r.get("check")] + [w["when"] for w in r.get("review_when") or []]:
+        if t:
+            out |= formula.names(t)
+    return out
+
+
+def walked_rules(rules):
+    """Every drafted rule whose formulas read a measure a tightening affects: worked out, never listed by hand."""
+    return [r for r in rules if r["kind"] == "rule" and _reads(r) & set(AFFECTED)]
+
+
+def story_limits(group, sprinkler, facts):
+    """The tightened limit on each story measure where a tightening applies (0: the figure can't be trusted)."""
+    travel = []
+    if _may(facts["assembly_fixed_seating"]):
+        travel.append(0)            # 202, 1030.7: measured along the aisles, never over the seats
+    if group in ("I-3", UNSTATED):
+        travel.append(0)            # 408.6.1: smoke-barrier distances, not measured
+    if _may(facts["special_egress_spaces"]):
+        travel.append(50)           # note a's and 1006.2.2's spaces: their own distances, the shortest 50 ft
+    d13 = sprinkler == "nfpa_13d" or sprinkler is UNSTATED
+    if group in ("R-3", UNSTATED) and d13:
+        travel.append(125)          # 1006.2.2.6
+    if group in ("R-4", UNSTATED) and d13:
+        travel.append(75)
+    if _may(facts["building_has_atrium"]):
+        travel.append(200)          # 1017.3.2.3
+    out = {"egress_travel_distance": min(travel)} if travel else {}
+    if group in ("I-2", UNSTATED):
+        out["egress_travel_in_sleeping_room"] = 50                  # 407.4.2
+    return out
+
+
+def space_limits(group, facts, load_):
+    cp = []
+    if _may(facts["assembly_fixed_seating"]):
+        cp.append(0)                # 202, 1030.7, 1030.8: a fixed-seat room's path is along its aisles
+    if group in ("M", UNSTATED) and _may(facts["merchandise_pads"]):
+        cp.append(75 if load_ <= 50 else 30)                        # 1018.4
+    return {"space_common_path": min(cp)} if cp else {}
+
+
+_SEEN = {}
+_READS = {}
+
+
+def _outcome(r, kind, m, given, ctx):
+    """A rule's row, worked out once for each set of the values it reads (the walk's cases repeat them)."""
+    reads = _READS.get(r["id"])
+    if reads is None:
+        reads = _READS[r["id"]] = _reads(r)
+    key = (r["id"], tuple((k, given.get(k, UNSTATED), m.get(k, UNSTATED)) for k in sorted(reads)))
+    if key not in _SEEN:
+        _SEEN[key] = parts.rows(r, {kind: [{"id": "p", "measures": m}]}, given, ctx.allowed())[0]["outcome"]
+    return _SEEN[key]
+
+
+STORY_CASES = [dict(egress_travel_distance=t, egress_travel_in_sleeping_room=i, story_exit_count=x,
+                    story_occupant_load=n, story_first_above_or_below_grade=f, story_second_above_grade_plane=False,
+                    story_fourth_or_higher_above_grade_plane=False, story_rooms_exit_directly_outside=False,
+                    story_dwelling_units=2, exit_remoteness_ratio=0.9)
+               for t, i, x, n, f in itertools.product((51, 76, 126, 201), (51,), (1, 2), (5, 40), (True, False))]
+SPACE_CASES = [dict(space_is_exit=False, space_exit_count=x, space_occupant_load=n, space_common_path=c,
+                    space_exit_remoteness_ratio=0.9)
+               for x, n, c in itertools.product((1, 2), (5, 40, 60), (31, 76, 126))]
+
+
+def test_no_pass_rests_on_a_measure_a_tightening_makes_unreliable_or_shorter(ctx, rules):
+    """For every walked rule, every group, every fact's value and each story or space case: where a tightening
+    applies and the measure is past its tightened limit, a pass must not depend on the measure (raised far past
+    every limit, the rule still passes); else the rule rests on a figure the law doesn't trust or a looser limit."""
+    walked = walked_rules(rules)
+    seen = {r["id"]: 0 for r in walked}
     bad = []
     for group, sprinkler, facts in itertools.product(GROUPS + ["mixed", UNSTATED], SPRINKLERS, _fact_values()):
         given = _given(group, sprinkler, facts)
-        for travel, in_room in itertools.product((49, 51, 74, 76, 124, 126, 199, 201), (40, 51)):
-            why = tightened_story(group, sprinkler, facts, travel, in_room)
-            if not why:
-                continue
-            m = {"egress_travel_distance": travel, "egress_travel_in_sleeping_room": in_room}
-            for r in story_rules:
-                [row] = parts.rows(r, {"story": [{"id": "p", "measures": m}]}, given, ctx.allowed())
-                if row["outcome"] == "pass":
-                    bad.append((r["id"], group if group is not UNSTATED else "unstated", sprinkler, facts, m, why))
-        for exits, load_, common in itertools.product((1, 2), (1, 49, 60), (29, 31, 74, 76, 124)):
-            why = tightened_space(group, facts, exits, load_, common)
-            if not why:
-                continue
-            m = {"space_is_exit": False, "space_exit_count": exits, "space_occupant_load": load_,
-                 "space_common_path": common}
-            for r in space_rules:
-                [row] = parts.rows(r, {"space": [{"id": "p", "measures": m}]}, given, ctx.allowed())
-                if row["outcome"] == "pass":
-                    bad.append((r["id"], group if group is not UNSTATED else "unstated", sprinkler, facts, m, why))
-    assert not bad, f"{len(bad)} passes past a tightening, e.g. {bad[:3]}"
+        for kind, cases in (("story", STORY_CASES), ("space", SPACE_CASES)):
+            mine = [r for r in walked if r["for_each"] == kind]
+            for m in cases:
+                limits = (story_limits(group, sprinkler, facts) if kind == "story" else
+                          space_limits(group, facts, m["space_occupant_load"]))
+                for r in mine:
+                    got = _outcome(r, kind, m, given, ctx)
+                    seen[r["id"]] += got != "not_applicable"
+                    if got != "pass":
+                        continue
+                    for name, lim in limits.items():
+                        if name in _reads(r) and m[name] > lim and _outcome(r, kind, m | {name: FAR}, given, ctx) != "pass":
+                            bad.append((r["id"], group if group is not UNSTATED else "unstated", sprinkler,
+                                        {k: v for k, v in facts.items() if v is not False}, name, m[name], lim))
+    assert [k for k, n in seen.items() if n == 0] == [], "walked rules that never applied in any case"
+    assert not bad, f"{len(bad)} passes resting on a tightened measure, e.g. {bad[:3]}"
+
+
+def test_no_table_1006_2_1_row_passes_a_one_exit_space_a_1006_2_2_room_may_be(ctx, rules):
+    """1006.2.2's rooms need two exits by their use: with such a room stated or not ruled out, no row that decides a
+    space's second exit (its check reads the exit count against 2) passes a one-exit space."""
+    rows = [r for r in rules if r["kind"] == "rule" and "space_exit_count >= 2" in (r.get("check") or "")]
+    bad = []
+    for group, sprinkler, facts in itertools.product(GROUPS + ["mixed", UNSTATED], SPRINKLERS, _fact_values()):
+        if not _may(facts["special_egress_spaces"]):
+            continue
+        given = _given(group, sprinkler, facts)
+        for m in SPACE_CASES:
+            if m["space_exit_count"] < 2:
+                bad += [(r["id"], group) for r in rows if _outcome(r, "space", m, given, ctx) == "pass"]
+    assert not bad, bad[:5]

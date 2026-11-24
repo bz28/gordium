@@ -5337,6 +5337,22 @@ rules:
     reason: 'Fewer exits than Table 1006.3.3 gives, but 1006.3.4 may allow one: the building is in another occupancy (or its
       occupancy isn''t stated), whose row of Table 1006.3.4(2) is a flag, or the story''s rooms exit directly outside at the
       level of exit discharge (item 2): a person checks.'
+  - when: assembly_fixed_seating and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or (story_exit_count > 0 and occupancy_group_i4 and not other_occupancy_present and story_first_above_or_below_grade
+      and story_occupant_load <= 10 and egress_travel_distance <= 75))
+    reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
+      may have a room used for assembly purposes with fixed seating (stated or not ruled out): 1030.7 measures travel along
+      the aisles, never over the seats the routes measure across, so the figure can''t be trusted: a person checks. (Only
+      where the story would otherwise pass: a measured fail still fails.)'
+  - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
+      else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or (story_exit_count
+      > 0 and occupancy_group_i4 and not other_occupancy_present and story_first_above_or_below_grade and story_occupant_load
+      <= 10 and egress_travel_distance <= 75))
+    reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
+      may hold a space Table 1017.2 note a or 1006.2.2 gives a shorter distance (a temporary structure''s 100 ft, a refrigeration
+      room''s 150 ft unsprinklered, a special amusement area), stated or not ruled out: a person checks. (Only where the story
+      would otherwise pass.)'
   for_each: story
   when_none: needs_review
   sources:
@@ -5376,6 +5392,8 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       story:
       - id: p1
@@ -5395,6 +5413,8 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       story:
       - id: p2
@@ -5415,6 +5435,8 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       story:
       - id: p3
@@ -5435,6 +5457,8 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       story:
       - id: p7
@@ -5455,6 +5479,8 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
     parts:
       story:
       - id: p4
@@ -5527,7 +5553,8 @@ rules:
     that exit directly outside at the level of exit discharge, which on a sloping site may be an upper story), or left blank
     or the building is in another occupancy (its rows are the rule “Table 1006.3.4(2)''s rows for other occupancies (BCNYS)”).
     Items 3 to 5 (mechanical parking, Groups R-3 and R-4, dwelling units) are for other groups. Hand-drafted in a Claude Code
-    session (2026-11-21).'
+    session (2026-11-21). Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed
+    seating (1030.7) or a space with a shorter distance (Table 1017.2 note a, 1006.2.2) is stated or not ruled out.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_3_4_1_mixed_occupancies
