@@ -753,12 +753,13 @@ rules:
     two exits where the common path exceeds it, so a space with two exits and a common path over 75 ft (or any, unsprinklered)
     needs review (the open question), never a pass. Exception 1 (foyers and lobbies counted without the loads discharging
     through them) and exception 3 (unoccupied mechanical rooms and penthouses need not meet the common path) only loosen the
-    test: a person''s check where they apply. The cumulative occupant load (1004.2, not brought in) is in the architect''s
-    the space''s occupant load. Most restrictive where the 2009 IBC applied (Maine): 1015.1 and Table 1015.1 set the same
-    10 for day care. Hand-drafted in a Claude Code session (2026-11-21). Review round 2 (2026-11-23): a room with fixed seating,
-    in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft); a one-exit space where a 1006.2.2 room
-    is stated or not ruled out needs review (as its siblings). Review round 3 (2026-11-23): with fixed seating stated or not
-    ruled out, the row needs review at any common path, as its travel does (202, 1030.7), where it would otherwise pass.'
+    test: a person''s check where they apply. The cumulative occupant load (1004.2, not brought in) is in the occupant load
+    the architect states for the space. Most restrictive where the 2009 IBC applied (Maine): 1015.1 and Table 1015.1 set the
+    same 10 for day care. Hand-drafted in a Claude Code session (2026-11-21). Review round 2 (2026-11-23): a room with fixed
+    seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft); a one-exit space where a 1006.2.2
+    room is stated or not ruled out needs review (as its siblings). Review round 3 (2026-11-23): with fixed seating stated
+    or not ruled out, the row needs review at any common path, as its travel does (202, 1030.7), where it would otherwise
+    pass.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_other_occupancies
