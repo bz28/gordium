@@ -109,7 +109,7 @@ CITES = {
 }
 # the marks the architect answers with on Project Information (apps/revit_addin: Marks.cs; every one is a mark there,
 # test_code_scope.py), named in each `ask`; Rhino asks the same facts in its start box and rows
-MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane",
+MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stories": "Gordium: Stories",
         "separate_means_of_egress": "Gordium: Separate means of egress", "townhouse_units": "Gordium: Townhouse units",
         "follows_building_code": "Gordium: Follows the Building Code", "occupancy_groups": "Gordium: Occupancy groups",
         "use": "Gordium: Use", "attached_units_in_building": "Gordium: Units in the attached building",
@@ -253,17 +253,52 @@ def building_measures(building: dict | None) -> dict:
     states: occupancy_group_i4 and other_occupancy_present from the groups, the two sprinkler systems the limits
     name from the system, and the two stated yes/no facts. A fact not stated is left out (its rules need review)."""
     facts, _ = _given(building)
-    out = {}
-    if "occupancy_groups" in facts:
-        out["occupancy_group_i4"] = "I-4" in facts["occupancy_groups"]
-        out["other_occupancy_present"] = any(g != "I-4" for g in facts["occupancy_groups"])
-    if "sprinkler_system" in facts:
-        out["sprinklered_903_3_1_1"] = facts["sprinkler_system"] == "nfpa_13"
-        out["sprinklered_903_3_1_2"] = facts["sprinkler_system"] == "nfpa_13r"
-    for k in ("egress_balcony_increase_taken", "building_has_atrium"):
-        if k in facts:
-            out[k] = facts[k]
-    return out
+    return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
+
+
+# Each building measure the BCNYS rulebook reads: the `building` fact it is worked out from, and how
+# (building_measures). The one table, so a cause that lacks a measure names the fact, and the host's field, that
+# answers it (field_of: occupancy_group_i4 is answered by building.occupancy_groups, never a field of its own)
+DERIVED = {
+    "occupancy_group_i4": ("occupancy_groups", lambda groups: "I-4" in groups),
+    "other_occupancy_present": ("occupancy_groups", lambda groups: any(g != "I-4" for g in groups)),
+    "sprinklered_903_3_1_1": ("sprinkler_system", lambda system: system == "nfpa_13"),
+    "sprinklered_903_3_1_2": ("sprinkler_system", lambda system: system == "nfpa_13r"),
+    "egress_balcony_increase_taken": ("egress_balcony_increase_taken", lambda v: v),
+    "building_has_atrium": ("building_has_atrium", lambda v: v),
+}
+
+
+def field_of(measure: str) -> str | None:
+    """The description's field that answers a building measure ("building.occupancy_groups" for
+    occupancy_group_i4: Revit's Gordium: Occupancy groups feeds it), or None for a measure no building fact gives."""
+    return f"building.{DERIVED[measure][0]}" if measure in DERIVED else None
+
+
+BY_HAND = ASK_BY_HAND.format(mark=MARK["follows_building_code"])
+
+
+def asked_facts(ask: str | None) -> list[str]:
+    """The facts an ask names, by their marks (MARK: Gordium's own words for each), in the order it names them: the
+    one place they are worked out, from the very words the architect is shown, so the two never drift. Longest mark
+    first, each place in the words read once (no mark is read inside another)."""
+    if not ask:
+        return []
+    found, taken = [], [False] * len(ask)
+    for key, mark in sorted(MARK.items(), key=lambda km: -len(km[1])):
+        start = 0
+        while (at := ask.find(mark, start)) >= 0:
+            if not any(taken[at:at + len(mark)]):
+                taken[at:at + len(mark)] = [True] * len(mark)
+                found.append((at, key))
+            start = at + len(mark)
+    return list(dict.fromkeys(k for _, k in sorted(found)))
+
+
+def _marks(keys) -> str:
+    """Facts by their marks, "A, B and C" (a fact with no mark by its words)."""
+    said = [fact_words(k) for k in dict.fromkeys(keys)]
+    return said[0] if len(said) == 1 else ", ".join(said[:-1]) + " and " + said[-1]
 
 
 def _answer(code, why, cites, used, ask=None, assumes=()):
@@ -274,7 +309,10 @@ def _answer(code, why, cites, used, ask=None, assumes=()):
     return {"code": code, "title": TITLES.get(code), "why": why,
             "cites": [{"section": ("RCNYS " if CITES[k][0] == RCNYS else "BCNYS ") + k, "document": CITES[k][0],
                        "page": CITES[k][1], "quote": CITES[k][2]} for k in dict.fromkeys(cites)],
-            "ask": ask if code is None else None, "assumes": list(assumes), "facts": used}
+            "ask": ask if code is None else None, "assumes": list(assumes), "facts": used,
+            # the facts `ask` asks the architect to state or correct, as data (a host's mark answers each one)
+            # (a choice to check by hand asks for no fact: a person decides which code governs)
+            "ask_facts": asked_facts(ask) if code is None and ask != BY_HAND else []}
 
 
 def stories_bound(values: dict, facts: dict) -> tuple[int | None, str]:
@@ -320,11 +358,16 @@ def decide(values: dict, building: dict | None, uses=None, place=None) -> dict:
     # the building block's facts, and any the check's values carry (a host with no interior description may state
     # them as facts); the building block's own stand where both give one
     given = {k: values[k] for k in FACTS if k in values}
-    facts, bad = _given({**given, **building} if isinstance(building, dict) else given if building is None else building)
+    block = {**given, **building} if isinstance(building, dict) else given if building is None else building
+    facts, bad = _given(block)
     used = dict(facts)
-    by_hand = ASK_BY_HAND.format(mark=MARK["follows_building_code"])
+    by_hand = BY_HAND
     if bad:
-        return _answer(None, "; ".join(bad), ["R101.2"], used, "correct it on Project Information")
+        # every fact of the block that couldn't be read, whether the building block or the check's values sent it
+        bad_keys = [k for k in block if k in FACTS and k not in facts] if isinstance(block, dict) else []
+        return _answer(None, "; ".join(bad), ["R101.2"], used,
+                       f"correct {_marks(bad_keys)} on Project Information" if bad_keys else
+                       "correct it on Project Information")
     if facts.get("follows_building_code") is True:
         return _answer(BUILDING, "the architect applies the Building Code to it, as R101.2's exception permits",
                        ["R101.2 exception"], used)
@@ -337,14 +380,15 @@ def decide(values: dict, building: dict | None, uses=None, place=None) -> dict:
     if conflicted:
         return _answer(None, "facts this reads are stated but set aside or not sent, so they can't be used ("
                        + "; ".join(f"{k.replace('_', ' ')}: {aside[k]}" for k in conflicted) + ")",
-                       ["R202 DWELLING", "R101.2"], used, "correct the facts that disagree or can't be read")
+                       ["R202 DWELLING", "R101.2"], used,
+                       f"correct the facts that disagree or can't be read ({_marks(conflicted)})")
     # a lot fact of the wrong kind (text for a count, a count under 0): said, never used or read as not stated
     wrong = [k for k in COUNTS if values.get(k) is not None and (type(values[k]) not in (int, float) or values[k] < 0)]
     wrong += [k for k in YES_NO if values.get(k) is not None and type(values[k]) is not bool]
     if wrong:
         return _answer(None, "; ".join(f"the {k.replace('_', ' ')} is {value_words(values[k])}, which Gordium can't "
                                        "read"
-                                       for k in wrong), ["R101.2"], used, "correct it")
+                                       for k in wrong), ["R101.2"], used, f"correct {_marks(wrong)}")
     use = values.get("use")
     used["use"] = use
     if not isinstance(use, str) or not use:

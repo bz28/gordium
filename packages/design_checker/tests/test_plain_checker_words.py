@@ -71,6 +71,14 @@ DATA = {
     "kinds": "on `open`: part kinds' keys",
     "part": "on `part`: the part's kind key",
     "rules": "on `has_none`: rule ids (on a cause, a count in words: a string checked where it is words)",
+    "coverage": "on `contents`: Gordium's coverage word the host reads (rules, not_checked_yet …)",
+    "file": "on `in_code` and `contents`: the document's file",
+    "number": "on `contents`: a chapter's or section's number as the book prints it",
+    "piece": "on `in_code`: the piece's id (its words are `piece_title`)",
+    "section": "on `in_code`: the section's number (its words are `section_title`)",
+    "chapter": "on `in_code` and a contents row: the chapter's number (its words are `chapter_title`)",
+    "ask_facts": "on code_scope: the facts its ask names, as their keys (a host's mark answers each)",
+    "params": "on `stops`: a reason part's blanks, as the measuring filled them (its words are `words`, checked)",
 }
 # words let through on purpose, each with its reason: none (egress.py's two, deferred while the NY building code
 # branch changed it, were made plain once it merged, 2026-11-23)

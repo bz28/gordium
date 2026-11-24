@@ -28,7 +28,7 @@ from shapely.validation import explain_validity
 from rule_format.rulebook import MEASURES_FILE, load
 
 from ... import interpretations as law
-from ...stops import in_words, said, stop
+from ...stops import in_words, joined, said, stop
 from ...street_lines import _norm, matching_ids, street_verdict
 
 MEASURES = list(load(MEASURES_FILE))
@@ -683,7 +683,7 @@ def _height(building: dict, grade: float, facts: dict) -> dict:
     try:
         return _height_of(building, grade, facts)
     except _Stop as e:
-        return _missing("building_height", str(e))
+        return _missing("building_height", e.args[0])
 
 
 def _height_of(building: dict, grade: float, facts: dict) -> dict:
@@ -2160,7 +2160,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         return [i for b in placed(bs) if place.get(b["id"]) == "off" for i in _parts(b)]
 
     def both(*whys):                # every reason that applies, each naming its own buildings (round 22)
-        return "; ".join(w for w in whys if w) or None
+        return joined(w for w in whys if w) or None
     why_main_off = unplaced(group)
     why_acc_off = unplaced(detached)
     why_inside = both(why_building, unplaced(buildings))    # coverage

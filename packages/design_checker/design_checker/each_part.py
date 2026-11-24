@@ -466,8 +466,41 @@ def _unit(rule: dict, measure: str) -> str:
     return f" {u}" if u else ""
 
 
+# A measure in an architect's words where its key isn't (C4, the UI polish design 2026-11-23): the building facts
+# the BCNYS rulebook reads (its drafted/records/proposed_measures.yaml), each by the question it answers, and the
+# few part measures whose key says it badly. Each name stays distinct from every other measure a rule may read with
+# it (test_plain_measure_names), so two causes never read as one.
+MEASURE_NAMES = {
+    "occupancy_group_i4": "occupancy group (whether Group I-4)",
+    "other_occupancy_present": "occupancy group (whether any group besides I-4)",
+    "sprinklered_903_3_1_1": "sprinkler system (NFPA 13)",
+    "sprinklered_903_3_1_2": "sprinkler system (NFPA 13R)",
+    "egress_balcony_increase_taken": "egress balcony travel increase (whether the design takes it)",
+    "building_has_atrium": "atrium (whether the building has one)",
+    "space_occupant_load": "occupant load",
+    "story_first_above_or_below_grade": "whether the story is the first above or below grade",
+    "space_exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
+    "exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
+}
+# a key's leading word for its part kind, in words ("moe_door_latched": "door latched", never "moe latched")
+PREFIX_WORDS = (("moe_door_", "door "), ("atd_", "alternating tread device "), ("ladder_", "ship's ladder "),
+                ("opening_", ""), ("stair_", ""), ("door_", ""))
+
+
 def _words(rule: dict, measure: str) -> str:
-    return measure.replace("opening_", "").replace("stair_", "").replace("door_", "").replace("_", " ")
+    """A measure in words: its plain name (MEASURE_NAMES), else its key without the part kind's own leading word
+    ("space_egress_through_locked_room" on a space: "egress through locked room")."""
+    if measure in MEASURE_NAMES:
+        return MEASURE_NAMES[measure]
+    kind = rule.get("for_each") if isinstance(rule, dict) else None
+    text = measure
+    if isinstance(kind, str) and kind in ("space", "story") and text.startswith(kind + "_"):
+        text = text[len(kind) + 1:]
+    for prefix, said in PREFIX_WORDS:
+        if text.startswith(prefix):
+            text = said + text[len(prefix):]
+            break
+    return text.replace("opening_", "").replace("stair_", "").replace("door_", "").replace("_", " ")
 
 
 def _first_failing(rule: dict, values: dict, allowed: dict, if_it_applies: bool = False) -> str | None:

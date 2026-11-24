@@ -205,9 +205,71 @@ STOPS = {
 }
 
 
+class Said(str):
+    """Words made of reasons, each kept as data beside them: `parts`, ((code, blanks, words), …) in order, and
+    `seps`, the words between them. A stop is one part (its key, its blanks, its words); words joined with `joined`
+    keep every part, so what a row asks is read from its codes (design_checker/ui_data.py), never from its words.
+    Anything else done to the words (an f-string, a replace) gives plain words: they are then one part, "words"."""
+
+    def __new__(cls, parts, seps=()):
+        parts, seps = tuple(parts), tuple(seps)
+        text = (parts[0][2] + "".join(s + p[2] for s, p in zip(seps, parts[1:]))) if parts else ""
+        obj = super().__new__(cls, text)
+        obj.parts, obj.seps = parts, seps
+        return obj
+
+    def __reduce__(self):
+        return (Said, (self.parts, self.seps))
+
+
+def reason_part(code: str, words: str, **blanks) -> Said:
+    """Words as one part of a reason, under its own code (a row's own reason, not the measuring's)."""
+    return Said([(code, blanks, str(words))])
+
+
+def parts_of(words) -> tuple:
+    """The parts of a reason: its own (Said), else the words as one "words" part; none for no words."""
+    if isinstance(words, Said):
+        return words.parts
+    return (("words", {}, str(words)),) if words else ()
+
+
+def joined(texts, sep: str = "; "):
+    """`sep`.join(texts), every part of each kept (the measuring's "; "-joined reasons)."""
+    texts = list(texts)
+    parts, seps = [], []
+    for t in texts:
+        mine = parts_of(t)
+        if not mine:
+            return sep.join(str(x) for x in texts)       # an empty piece: plain words, as join gives them
+        if parts:
+            seps.append(sep)
+        parts += mine
+        seps += list(t.seps) if isinstance(t, Said) else []
+    return Said(parts, seps) if parts else ""
+
+
+def mapped(words, fn):
+    """fn over the words, each part's words through fn too where that gives the same words (a phrase replaced
+    inside a part); else the new words as one "words" part, never a part misplaced."""
+    if not isinstance(words, Said):
+        return fn(words)
+    whole = fn(str(words))
+    each = Said([(c, b, fn(w)) for c, b, w in words.parts], words.seps)
+    return each if str(each) == whole else reason_part("words", whole)
+
+
 def stop(key: str, **values) -> str:
-    """The reason for `key`, with its blanks filled in."""
-    return STOPS[key].format(**values)
+    """The reason for `key`, with its blanks filled in (a Said: its key and blanks kept beside its words)."""
+    return Said([(key, values, STOPS[key].format(**values))])
+
+
+try:                                       # a reason written to YAML is its words (the measuring's own output)
+    import yaml as _yaml
+    for _dumper in (_yaml.SafeDumper, _yaml.Dumper):
+        _dumper.add_representer(Said, lambda d, s: d.represent_str(str(s)))
+except ImportError:                        # pragma: no cover
+    pass
 
 
 def words_of(problem) -> str:
@@ -229,8 +291,9 @@ def words_of(problem) -> str:
 
 
 def said(problems) -> str:
-    """Problems and reasons joined into one reason ("a; b"), each in words (words_of)."""
-    return "; ".join(words_of(p) for p in problems or [])
+    """Problems and reasons joined into one reason ("a; b"), each in words (words_of), every stop's parts kept
+    (joined)."""
+    return joined([words_of(p) for p in problems or []])
 
 
 def in_words(site: dict) -> dict:

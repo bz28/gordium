@@ -20,6 +20,8 @@ New fields on an item (each optional; a host that doesn't know them ignores them
   how_far     how far off, in words that always carry their direction ("2.5 ft short", "1.2 ft over",
               "116.16 ft to spare if confirmed", "at the limit"), never a bare signed number; over several readings,
               what is true whichever is right ("at least …", "up to …").
+  (The rebuilt pane reads each row's `asks` instead: one per clause, each with its kind and a headline, the
+  causes' words as its why; ui_data.py, docs/revit/checker_ui_data.md. These fields stay as they are.)
   limit_length  for a rule whose limit is a ratio of two lengths (IBC 1015.2.1's 1/3 of the diagonal): the two
               lengths and the limit as a length, {measure, measured, limit, of, unit, words}.
 """
