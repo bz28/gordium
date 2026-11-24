@@ -347,6 +347,16 @@ def class_problems(view: dict, ctx: dict) -> list[str]:
                 if not any((kind is None or a["kind"] == kind) and (field is None or a.get("field") == field)
                            and (why is None or a["why"] == why) for a in asks):
                     out.append(f"{i['id']}: {p['code']} has no {kind or 'ask'} ask ({field or why!r:.80})")
+        picks = [a["key"] for a in asks if a["key"].startswith("pick:") or
+                 (a["key"].startswith("stop:") and a["key"].split(":")[1] in ui_data._pick_keys())]
+        out += [f"{i['id']}: a pick asked twice or under its stop: {picks}" for _ in [0]
+                if len(picks) != len(set(picks)) or any(k.startswith("stop:") for k in picks)]
+        out += [f"{i['id']}: a field no host description has: {a['field']}" for a in asks
+                if a["kind"] == ui_data.MARK and a.get("field") and a["field"] not in _known_fields()]
+        specific = [p["code"] for p in parts if p["code"] not in ("words", "review", "unsettled", "use_detail")]
+        scope_facts = (i.get("code_scope") or {}).get("ask_facts") if isinstance(i.get("code_scope"), dict) else None
+        if all(a["headline"] == "A person decides this: see why" for a in asks) and (specific or scope_facts):
+            out.append(f"{i['id']}: only the generic ask, though it says {specific or scope_facts}")
         seen = [(a["kind"], a["headline"]) for a in asks]
         out += [f"{i['id']}: two asks alike: {k}" for k in dict.fromkeys(seen) if seen.count(k) > 1]
         if parts and "".join(p.get("sep", "") + p["words"] for p in parts) != str(i.get("reason") or ""):
@@ -357,6 +367,28 @@ def class_problems(view: dict, ctx: dict) -> list[str]:
         out += [f"{i['id']}: {e} of its cause is in no ask" for c in i.get("causes") or []
                 for e in c.get("elements") or [] if e not in asked]
     return out
+
+
+_FIELDS = []
+
+
+def _known_fields() -> set:
+    """Every field a host's description has, read from where it is defined, never copied: the Revit add-in's own
+    fields (every "building.…", "facts.…" and "kind[].flag" its C# names), the stated facts the start box and the
+    rows' Enter… ask for (host_core.facts.STATED_FACTS), the building block's facts (code_scope.FACTS) and the
+    site's own questions (ui_data.SITE_STOPS)."""
+    if not _FIELDS:
+        import re
+        from design_checker.host_core.facts import STATED_FACTS
+        found = set()
+        for cs in (REPO / "apps/revit_addin/src").rglob("*.cs"):
+            if "obj" not in cs.parts:
+                found |= set(re.findall(r'"((?:building|facts)\.[a-z_]+|[a-z]+\[\]\.[a-z_]+)"',
+                                        cs.read_text(encoding="utf-8")))
+        found |= {f"facts.{k}" for k in STATED_FACTS} | {f"building.{k}" for k in code_scope.FACTS}
+        found |= {f"facts.{f}" for facts in ui_data.SITE_STOPS.values() for f in facts}
+        _FIELDS.append(found)
+    return _FIELDS[0]
 
 
 def _a_stops_words(words: str) -> bool:
@@ -428,8 +460,9 @@ def test_a_looked_up_fact_asks_to_confirm_or_change_it():
     reason = reason_part("looked_up", "Complies on the looked-up lot area, which needs review: x · confirm it",
                          fact="lot_area", name="lot area")
     got, = ui_data.asks_of(_zoning(reason), _ctx())
-    assert (got["kind"], got["field"], got["headline"]) == (ui_data.MARK, "facts.lot_area",
-                                                          "Confirm or change the looked-up lot area")
+    assert (got["kind"], got.get("field"), got["headline"]) == (ui_data.MARK, None,
+                                                              "Confirm or change the looked-up lot area")
+    # (no field: the looked-up lot, street or ground is changed in the site's own setup, no one fact; review round 3)
 
 
 def test_the_pick_a_hint_and_a_stop_ask_for_is_one_ask():
@@ -448,3 +481,44 @@ def test_a_use_detail_rows_parts_are_still_its_reason():
     item = {"id": "x", "status": present.REVIEW, "group": "building", "needs": ["home_occupation"], "objects": [],
             "reason": f"{USE_DETAILS_WHEN}: {stop('no_home_occupation')}", "stops": parts, "causes": []}
     assert not class_problems({"items": [dict(item, asks=ui_data.asks_of(item, _ctx()))]}, _ctx())
+
+
+def _code_choices():
+    """decide() over a spread of facts: every use, with each building fact stated, unstated, wrong or set aside."""
+    from itertools import product
+    uses = ["one_family_detached", "two_family", "one_family_semi_detached", "one_family_attached",
+            "multiple_family_dwelling", None, "not_a_use"]
+    for use, egress, town, stories, units in product(uses, (None, True, False), (None, True, False),
+                                                     (None, 2, 4, "x"), (None, 1, 2, "three")):
+        building = {k: v for k, v in (("separate_means_of_egress", egress), ("townhouse_units", town),
+                                      ("stories_above_grade_plane", stories)) if v is not None}
+        yield code_scope.decide({"use": use, "dwelling_units": units}, building)
+
+
+def test_a_code_choices_ask_facts_are_the_marks_its_ask_names():
+    import re
+    undecided = [got for got in _code_choices() if got["code"] is None]
+    assert len(undecided) > 100
+    for got in undecided:
+        named = {k for k, m in code_scope.MARK.items() if re.search(re.escape(m) + r"(?![A-Za-z])", got["ask"] or "")}
+        named -= {k for k in named for j in named if j != k and code_scope.MARK[k] in code_scope.MARK[j]}
+        expected = set() if got["ask"] == code_scope.BY_HAND else named
+        assert set(got["ask_facts"]) == expected, (got["ask"], got["ask_facts"])
+    one = code_scope.decide({"use": "one_family_detached"}, {"separate_means_of_egress": False})
+    assert one["ask_facts"] == ["separate_means_of_egress"]       # a house: never its townhouse units
+
+
+def test_a_code_choice_on_facts_it_cant_read_asks_for_those_facts():
+    got = code_scope.decide({"use": "one_family_detached"}, {"stories_above_grade_plane": 0})
+    assert got["code"] is None and got["ask_facts"] == ["stories_above_grade_plane"]
+    got = code_scope.decide({"use": "one_family_detached", "dwelling_units": "x"}, None)
+    assert got["ask_facts"] == ["dwelling_units"]
+
+
+def test_an_adu_pick_is_one_ask_under_the_hints_headline():
+    from model_measurement.stops import stop
+    for code in ("adu_not_found", "adu_is_main", "no_adu_building"):
+        item = _zoning(stop(code), objects=["b1"])
+        item["hint"] = present.PICK_ADU
+        got = ui_data.asks_of(item, _ctx())
+        assert [(a["key"], a["headline"]) for a in got] == [("pick:adu_building", present.PICK_ADU.rstrip("…"))], code
