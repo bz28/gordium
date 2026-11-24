@@ -73,3 +73,37 @@ def pytest_collection_modifyitems(config, items):
     if gone:
         config.hook.pytest_deselected(items=gone)
     items[:] = keep
+
+
+# Every slow test must be in the list, or the balancer counts it at UNLISTED and one part runs long (review round 5,
+# 2026-11-24: the tightening walk ran 16 minutes counted as 0.2 s). The list keeps every test of a second or more;
+# a part fails only for an unlisted test of TOO_SLOW or more, as CI's machines run slower or faster than the one the
+# list was recorded on and a test near a second would otherwise fail by chance.
+TOO_SLOW = 3.0
+_took = {}
+
+
+def unlisted_slow(took, listed, limit=TOO_SLOW):
+    """The tests that took `limit` seconds or more (setup + run + teardown) and aren't in the list, slowest first."""
+    return sorted(((round(s, 1), i) for i, s in took.items() if s >= limit and i not in listed), reverse=True)
+
+
+def pytest_runtest_logreport(report):
+    _took[report.nodeid] = _took.get(report.nodeid, 0.0) + report.duration
+
+
+def pytest_sessionfinish(session, exitstatus):
+    config = session.config
+    if not config.getoption("--shard") or hasattr(config, "workerinput"):
+        return
+    try:
+        listed = json.loads(DURATIONS.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        listed = {}
+    slow = unlisted_slow(_took, listed)
+    if slow:
+        print(f"\n{len(slow)} test(s) of {TOO_SLOW:g} s or more missing from tests/test_durations.json (record them "
+              "with `python tests/check_shards.py record`):")
+        for s, i in slow[:20]:
+            print(f"  {s} s  {i}")
+        session.exitstatus = pytest.ExitCode.TESTS_FAILED

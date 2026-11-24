@@ -204,7 +204,7 @@ def test_the_walk_covers_every_walked_rule_and_each_applies_somewhere(ctx, rules
     assert walked and {r["for_each"] for r in walked} <= {"story", "space"}
     never = [r["id"] for r in walked
              if not any(_outcome(r, r["for_each"], m, given, ctx) != "not_applicable"
-                        for where in WHERE for given, *_ in _distinct(r, _group(where)) for m in _cases(r))]
+                        for where in WHERE[::-1] for given, *_ in _distinct(r, _group(where)) for m in _cases(r))]
     assert never == [], "walked rules that never applied in any case"
 
 
@@ -224,7 +224,8 @@ def test_no_pass_rests_on_a_measure_a_tightening_makes_unreliable_or_shorter(ctx
                     continue
                 for name in past:
                     if _outcome(r, kind, m | {name: FAR}, given, ctx) != "pass":
-                        bad.append((r["id"], where, sprinkler, {k: v for k, v in facts.items() if v is not False},
+                        bad.append((r["id"], where, sprinkler if sprinkler is not UNSTATED else "unstated",
+                                    {k: "unstated" if v is UNSTATED else v for k, v in facts.items() if v is not False},
                                     name, m[name], _limits(r, lim, m)[name]))
     assert not bad, f"{len(bad)} passes resting on a tightened measure, e.g. {bad[:3]}"
 
@@ -236,17 +237,24 @@ def _needs_two_exits(text):
                and n.comparators[0].value == 2 for n in ast.walk(formula.parse(text)))
 
 
-def test_no_table_1006_2_1_row_passes_a_one_exit_space_a_1006_2_2_room_may_be(ctx, rules):
+def _two_exit_rows(rules):
+    return [r for r in rules if r["kind"] == "rule" and r.get("check") and _needs_two_exits(r["check"])]
+
+
+def test_the_one_exit_walk_finds_every_table_1006_2_1_row_and_no_other_rule(rules):
+    """The rows are Table 1006.2.1's (one per group's row) and Group I-4's own two-exit rule, and no others."""
+    expected = {r["id"] for r in rules if r["kind"] == "rule" and r["id"].startswith("general.bc_table_1006_2_1_")}
+    assert len(expected) >= 12
+    assert {r["id"] for r in _two_exit_rows(rules)} == expected | {"general.bc_1006_2_1_two_exits"}
+
+
+@pytest.mark.parametrize("where", WHERE)
+def test_no_table_1006_2_1_row_passes_a_one_exit_space_a_1006_2_2_room_may_be(ctx, rules, where):
     """1006.2.2's rooms need two exits by their use: with such a room stated or not ruled out, no row that decides a
     space's second exit (its check compares the exit count against 2) passes a one-exit space."""
-    rows = [r for r in rules if r["kind"] == "rule" and r.get("check") and _needs_two_exits(r["check"])]
-    # the rows are Table 1006.2.1's (one per group's row) and Group I-4's own two-exit rule, and no others
-    expected = {r["id"] for r in rules if r["kind"] == "rule" and r["id"].startswith("general.bc_table_1006_2_1_")}
-    assert len(expected) >= 12 and {r["id"] for r in rows} == expected | {"general.bc_1006_2_1_two_exits"}
     bad = []
-    for r in rows:
-        for where in WHERE:
-            for given, *_ in _distinct(r, _group(where), keep=lambda f: _may(f["special_egress_spaces"])):
-                bad += [(r["id"], where) for m in SPACE_CASES
-                        if m["space_exit_count"] < 2 and _outcome(r, "space", m, given, ctx) == "pass"]
+    for r in _two_exit_rows(rules):
+        for given, *_ in _distinct(r, _group(where), keep=lambda f: _may(f["special_egress_spaces"])):
+            bad += [r["id"] for m in SPACE_CASES
+                    if m["space_exit_count"] < 2 and _outcome(r, "space", m, given, ctx) == "pass"]
     assert not bad, bad[:5]
