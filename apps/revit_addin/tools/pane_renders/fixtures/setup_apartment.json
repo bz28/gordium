@@ -1,0 +1,207 @@
+{
+ "title": "Four-unit apartment",
+ "project": {},
+ "elements": [
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+   "cat": "OST_Rooms",
+   "name": "APARTMENT SOUTH L1",
+   "number": "1",
+   "marks": {
+    "sleeping": false
+   }
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf",
+   "cat": "OST_Rooms",
+   "name": "STAIR WEST L1",
+   "number": "2",
+   "marks": {
+    "sleeping": false
+   }
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+   "cat": "OST_Rooms",
+   "name": "CORRIDOR L1",
+   "number": "3",
+   "marks": {
+    "sleeping": false
+   }
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3",
+   "cat": "OST_Rooms",
+   "name": "STAIR EAST L1",
+   "number": "4",
+   "marks": {
+    "sleeping": false
+   }
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5",
+   "cat": "OST_Rooms",
+   "name": "APARTMENT NORTH L1",
+   "number": "5",
+   "marks": {
+    "sleeping": false
+   }
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+   "cat": "OST_Rooms",
+   "name": "APARTMENT SOUTH L2",
+   "number": "6",
+   "marks": {
+    "sleeping": false
+   }
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7da",
+   "cat": "OST_Rooms",
+   "name": "STAIR WEST L2",
+   "number": "7",
+   "marks": {
+    "sleeping": false
+   }
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+   "cat": "OST_Rooms",
+   "name": "CORRIDOR L2",
+   "number": "8",
+   "marks": {
+    "sleeping": false
+   }
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7de",
+   "cat": "OST_Rooms",
+   "name": "STAIR EAST L2",
+   "number": "9",
+   "marks": {
+    "sleeping": false
+   }
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0",
+   "cat": "OST_Rooms",
+   "name": "APARTMENT NORTH L2",
+   "number": "10",
+   "marks": {
+    "sleeping": false
+   }
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b777",
+   "cat": "OST_Doors",
+   "name": "Door 36\" x 84\" (NY four-unit eval)",
+   "family": "Single-Flush",
+   "number": "D01",
+   "type": "t:Single-Flush: Door 36\" x 84\" (NY four-unit eval)",
+   "w": 3.0,
+   "h": 7.0,
+   "marks": {}
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b779",
+   "cat": "OST_Doors",
+   "name": "Door 36\" x 84\" (NY four-unit eval)",
+   "family": "Single-Flush",
+   "number": "D02",
+   "type": "t:Single-Flush: Door 36\" x 84\" (NY four-unit eval)",
+   "w": 3.0,
+   "h": 7.0,
+   "marks": {}
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77a",
+   "cat": "OST_Doors",
+   "name": "Door 36\" x 84\" (NY four-unit eval)",
+   "family": "Single-Flush",
+   "number": "D03",
+   "type": "t:Single-Flush: Door 36\" x 84\" (NY four-unit eval)",
+   "w": 3.0,
+   "h": 7.0,
+   "marks": {}
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77b",
+   "cat": "OST_Doors",
+   "name": "Door 36\" x 84\" (NY four-unit eval)",
+   "family": "Single-Flush",
+   "number": "D04",
+   "type": "t:Single-Flush: Door 36\" x 84\" (NY four-unit eval)",
+   "w": 3.0,
+   "h": 7.0,
+   "marks": {}
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77c",
+   "cat": "OST_Doors",
+   "name": "Door 36\" x 84\" (NY four-unit eval)",
+   "family": "Single-Flush",
+   "number": "D05",
+   "type": "t:Single-Flush: Door 36\" x 84\" (NY four-unit eval)",
+   "w": 3.0,
+   "h": 7.0,
+   "marks": {}
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77d",
+   "cat": "OST_Doors",
+   "name": "Door 36\" x 84\" (NY four-unit eval)",
+   "family": "Single-Flush",
+   "number": "D06",
+   "type": "t:Single-Flush: Door 36\" x 84\" (NY four-unit eval)",
+   "w": 3.0,
+   "h": 7.0,
+   "marks": {}
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77e",
+   "cat": "OST_Doors",
+   "name": "Door 36\" x 84\" (NY four-unit eval)",
+   "family": "Single-Flush",
+   "number": "D07",
+   "type": "t:Single-Flush: Door 36\" x 84\" (NY four-unit eval)",
+   "w": 3.0,
+   "h": 7.0,
+   "marks": {}
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77f",
+   "cat": "OST_Doors",
+   "name": "Door 36\" x 84\" (NY four-unit eval)",
+   "family": "Single-Flush",
+   "number": "D08",
+   "type": "t:Single-Flush: Door 36\" x 84\" (NY four-unit eval)",
+   "w": 3.0,
+   "h": 7.0,
+   "marks": {}
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b780",
+   "cat": "OST_Doors",
+   "name": "Door 36\" x 84\" (NY four-unit eval)",
+   "family": "Single-Flush",
+   "number": "D09",
+   "type": "t:Single-Flush: Door 36\" x 84\" (NY four-unit eval)",
+   "w": 3.0,
+   "h": 7.0,
+   "marks": {}
+  },
+  {
+   "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781",
+   "cat": "OST_Doors",
+   "name": "Door 36\" x 84\" (NY four-unit eval)",
+   "family": "Single-Flush",
+   "number": "D10",
+   "type": "t:Single-Flush: Door 36\" x 84\" (NY four-unit eval)",
+   "w": 3.0,
+   "h": 7.0,
+   "marks": {}
+  }
+ ],
+ "sides": []
+}

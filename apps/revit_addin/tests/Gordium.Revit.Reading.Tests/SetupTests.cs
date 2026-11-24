@@ -88,7 +88,8 @@ public sealed class SetupTests
         var code = new MarkDefinition("Gordium: Sprinkler system", Guid.NewGuid(), MarkValueKind.Text, MarkBinding.Instance,
                                       [Marks.ProjectInformation], "building.sprinkler_system", "x");
         Assert.Equal(SetupFacts.CodeGroup, SetupFacts.Group(code, "building"));
-        Assert.Equal("The lot and the building", SetupFacts.Group(Marks.CornerLot, "building"));
+        Assert.Equal("The lot", SetupFacts.Group(Marks.CornerLot, "building"));
+        Assert.Equal(SetupFacts.DwellingsGroup, SetupFacts.Group(Marks.AccessoryDwellingUnit, "building"));
         Assert.Equal("What the house has none of", SetupFacts.Group(Marks.NoStairs, "house"));
     }
 
@@ -106,7 +107,7 @@ public sealed class SetupTests
         // the district's own first, then every other city use, said not listed there (the true use can always be stated)
         Assert.Equal(["one_family_detached", "two_family_detached", "day_care"], use.Choices.Select(c => c.Value));
         // R2 #2: what the checker decides for a use the chart doesn't list (its use row: does not comply)
-        Assert.Equal("Day care center (not on R-1b's list of uses: its use row won't comply)", use.Choices[2].Label);
+        Assert.Equal("Day care center — not allowed in R-1b", use.Choices[2].Label);
         Assert.DoesNotContain("needs review", use.Choices[2].Label, StringComparison.Ordinal);
         Assert.DoesNotContain("one_family_detached", use.Law, StringComparison.Ordinal);   // plain help, not Gordium's words
         Assert.Equal("Two-family dwelling, detached (by special permit (zoning chart p.2))", use.Choices[1].Label);
@@ -120,7 +121,7 @@ public sealed class SetupTests
         Assert.Equal(FieldKind.Text, none.Single(f => f.Mark == Marks.Zone).Kind);
         // a zone typed that isn't a district Gordium has rules for: a problem, so needed
         var odd = Screen(Model(new() { [Marks.Zone.Guid] = new(true, Text: "B-1a") }));
-        Assert.Contains("isn't a district", odd.Fields.Single(f => f.Mark == Marks.Zone).Problem);
+        Assert.Contains("Gordium has no rules for “B-1a”", odd.Fields.Single(f => f.Mark == Marks.Zone).Problem);
         Assert.Contains(Marks.Zone.Name, odd.Needed);
     }
 
@@ -427,7 +428,7 @@ public sealed class SetupTests
         Assert.Null(use.Problem);
         Assert.True(use.IsSet);
         Assert.DoesNotContain(Marks.Use.Name, s.Needed);
-        Assert.Contains("not on R-1b's list of uses", use.CurrentLabel, StringComparison.Ordinal);
+        Assert.Contains("not allowed in R-1b", use.CurrentLabel, StringComparison.Ordinal);
         var odd = Screen(Model(new() { [Marks.Use.Guid] = new(true, Text: "casino") })).Fields.Single(f => f.Mark == Marks.Use);
         Assert.Contains("isn't one of the City's uses", odd.Problem, StringComparison.Ordinal);
     }
@@ -460,11 +461,11 @@ public sealed class SetupTests
     public void Nothing_sent_is_said_in_plain_words()
     {
         var words = SetupWords.NothingSent(StreetRefusal.None, [Marks.Zone, Marks.Use, Marks.StreetEdge], "building");
-        Assert.StartsWith("Nothing was checked: the zone chooses the rules", words, StringComparison.Ordinal);
+        Assert.StartsWith("Choose the zoning district first: it decides which rules apply.", words, StringComparison.Ordinal);
         Assert.Contains("use, street edge", words, StringComparison.Ordinal);
         Assert.DoesNotContain("one_family_detached", words, StringComparison.Ordinal);
         Assert.DoesNotContain("Check project asks", words, StringComparison.Ordinal);
-        Assert.Contains("Pick it again on the plan", SetupWords.NothingSent(StreetRefusal.NoLongerAnEdge, [], "house"), StringComparison.Ordinal);
+        Assert.StartsWith("The property line changed, so the street edge needs picking again.", SetupWords.NothingSent(StreetRefusal.NoLongerAnEdge, [], "house"), StringComparison.Ordinal);
         var check = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckProject.cs"));
         Assert.Contains("notice: clear + SetupWords.NothingSent(prepared.StreetRefused, notSet,", check, StringComparison.Ordinal);
         Assert.DoesNotContain("notice: clear + \"Nothing was checked: \" + string.Join", check, StringComparison.Ordinal);

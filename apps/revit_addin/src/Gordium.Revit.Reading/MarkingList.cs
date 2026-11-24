@@ -292,7 +292,7 @@ public static class MarkingList
         var name = t.Kind.Mark.Name;
         if (read is null)
             return $"{name}: {(t.Ticked is true ? "Yes" : t.Ticked is false ? "No" : "not set")} on Project Information " +
-                   "(not yet checked against the model: Mark facts checks it, reading the model's inside).";
+                   "(not yet checked against the model: Set up checks it, reading the model's inside).";
         if (t.Sent)
             return $"{name}: Yes (on Project Information): read as a house with none.";
         if (t.Ticked is true && t.Conflicts.Count > 0)

@@ -198,7 +198,8 @@ public sealed class PaneTests
             Assert.False(PaneWords.WelcomeShows(other, true));
         }
         Assert.Equal(3, PaneWords.WelcomeLines.Count);
-        Assert.Contains(PaneWords.WelcomeLines, l => l.Words.Contains("never complies", StringComparison.Ordinal));
+        Assert.Contains(PaneWords.WelcomeLines, l => l.Words.Contains("It never guesses a pass", StringComparison.Ordinal));
+        Assert.Contains(PaneWords.WelcomeLines, l => l.Icon == PaneIcon.Review && l.Words.Contains("Needs review", StringComparison.Ordinal));
         var view = Read("ResultsView.cs");
         var welcome = Between(view, "    private void Welcome(string? checking = null)", "\n    }\n");
         Assert.Contains("if (!PaneWords.WelcomeShows(PaneShows.Welcome, _everShown))\n            return;", welcome, StringComparison.Ordinal);
@@ -227,14 +228,15 @@ public sealed class PaneTests
     [Fact]
     public void Setup_save_is_pinned_at_the_foot()
     {
-        Assert.Equal("Save", PaneWords.SaveAndCheck(0, checksAfter: true));
-        Assert.Equal("Save 3 facts", PaneWords.SaveAndCheck(3, checksAfter: false));
-        Assert.Equal("Save 1 fact and check", PaneWords.SaveAndCheck(1, checksAfter: true));
-        Assert.Equal("4 facts needed; 3 chosen, not saved yet. The street edge is picked on the plan (Pick on plan, above).",
-                     PaneWords.SetupFooter(4, 3, streetToPick: true));
-        Assert.Equal("1 fact needed; none chosen yet.", PaneWords.SetupFooter(1, 0, streetToPick: false));
-        // Revit 2027 trial: opened by Mark facts with everything set, never "0 facts needed" nor Check without them
-        Assert.Equal("Every fact the check needs is set.", PaneWords.SetupFooter(0, 0, streetToPick: false));
+        Assert.Equal("Save and check", PaneWords.SaveAndCheck(0));
+        Assert.Equal("Save 4 and check", PaneWords.SaveAndCheck(4));
+        Assert.Equal("Saves 4 facts to Project Information (one undo). Escape openings and exit doors still need marking: their rules will need review.",
+                     PaneWords.SetupFooter(4, [], ["escape openings", "exit doors"]));
+        Assert.Equal("Saves 1 fact to Project Information (one undo). Street edge isn't set yet: its rules will need review.",
+                     PaneWords.SetupFooter(1, ["street edge"], []));
+        Assert.Equal(PaneWords.BlankFact, PaneWords.SetupFooter(0, ["zoning district"], []));
+        // opened by Set up with everything set: only what Save writes
+        Assert.Equal("Saves 2 facts to Project Information (one undo).", PaneWords.SetupFooter(2, [], []));
         var view = Read("ResultsView.cs");
         Assert.Contains("page.Children.Add(_setupFoot);\n        page.Children.Add(_setupScroll);", view, StringComparison.Ordinal);
         Assert.Contains("_setupFoot.Child = _setup.Footer;", view, StringComparison.Ordinal);

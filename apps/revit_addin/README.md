@@ -216,7 +216,7 @@ not in the list, or a window's word on a door, is not stated, never a near guess
   (`MarkingListResult.Headline`) says every room, window and door is marked only when rooms are drawn and nothing
   is unset or in the way.
 
-In Revit, **Mark facts** (the Gordium tab's Check panel; the command is `MarkForEgressCommand`) adds the marks on first use, in one undoable
+In Revit, **Set up** (was Mark facts; the Gordium tab's Check panel; the command is `MarkForEgressCommand`) adds the marks on first use, in one undoable
 transaction, logs every row of the list to `results.jsonl`, and opens the **Setup form** in the Gordium pane (below;
 it replaced the list's dialog). Nothing is sent to the checker: the interior reader (section 7, step 3) builds the
 description's flags from `MarkReading` alone.
@@ -312,7 +312,7 @@ change).
 
 **Makers' clear openings, filled as drafts** (`MakerClearOpenings.cs`, data in
 [`data/maker_clear_openings.json`](data/maker_clear_openings.json), embedded in the library; design note, section
-5a). Mark facts and Check project fill an empty window type's `Clear width`, `Clear height` and `Clear
+5a). Set up and Check project fill an empty window type's `Clear width`, `Clear height` and `Clear
 source` from its maker's published formula when its Manufacturer and a call-number Model (Marvin's "UCA3648") match an
 entry, its Gordium: Operation is the entry's or unset, its Width and Height are surely the maker's frame size, and the family's own Vent Area, when it has
 one, agrees; never `Clear confirmed`, so nothing is sent until that type is confirmed. The
@@ -331,12 +331,12 @@ component stair as one flight of `stairs`, by the [design note](../../docs/revit
 section 4 ("As built in step 4"):
 
 - **Only on the architect's tick and with nothing hidden.** `stairs` is sent only when `Gordium: These are all the
-  stairs` on Project Information says Yes (a mark added by Mark facts; unset or No: not read) and nothing could
+  stairs` on Project Information says Yes (a mark added by Set up; unset or No: not read) and nothing could
   be a stair the reader doesn't walk: a stair not made of components, a multistory stair, anything else in Stairs,
   Railings or Generic Models (an in-place or loadable family, a DirectShape), a closed workset, an unloaded link, a
   link holding stairs, a coordination model. Each is listed first in the marking list (`MarkingListResult.StairBlockers`),
   with a summary line for the tick. With no stair found, `stairs` is left out, never `[]`. An element the architect
-  marks `Gordium: Not a stair` Yes (Generic Models, Stairs, Railings; added by Mark facts) is cleared, and listed
+  marks `Gordium: Not a stair` Yes (Generic Models, Stairs, Railings; added by Set up) is cleared, and listed
   as cleared ("Not a stair (architect): ... x N, ids in the log": `MarkingListResult.NotAStair`,
   `InteriorReadResult.NotAStair`); on a Revit Stair or Railing the mark is a conflict, listed first, and doesn't count.
 - **Each flight from what is drawn.** `bottom_elevation`: the floor or landing in front of the first riser, as drawn
@@ -377,7 +377,7 @@ By the [design note](../../docs/revit/revit_interior_reading_design.md)'s sectio
   only when the type's `Gordium: Clear confirmed` stamp, made for a door, confirms every value now (the type itself,
   its size and operation, the clear width and height, the source, a mapped maker's parameter: exactly as windows'),
   and it fits inside the door as placed. `Clear width`, `Clear height`, `Clear source` and `Clear confirmed` are now
-  bound to Doors too (Mark facts extends an existing project's binding); a door has no `Clear offset`. Nothing
+  bound to Doors too (Set up extends an existing project's binding); a door has no `Clear offset`. Nothing
   drawn is sent (stops, hinge pin, leaf, threshold): door families don't model them consistently.
 - **Handrails** (`StairReader`): a railing on the stair beside a wall, read exactly, between the wall face and the
   flight's middle and no higher than 38 in over the nosings, with nothing of it but its handrails standing farther in
@@ -426,10 +426,16 @@ Anything not read exactly is left out with its reason. **How we know:** `RouteTe
 
 ## The Setup form
 
-(Design pass pieces 7 and 9, merged and built; [decision](../../docs/decisions/2026-11-22_setup_form.md).) When
+(Design pass pieces 7 and 9, merged and built; [decision](../../docs/decisions/2026-11-22_setup_form.md); redrawn as
+numbered steps by the UI polish, changes 1 to 11, Ben 2026-11-23: only what the check needs, numbered, each with one
+help line and the law behind ⓘ; the occupancy group and the sprinkler system required where the Building Code governs,
+from the worker's `options.building_code_uses`; every optional fact in one "More facts (optional)" fold; one footer,
+**Save and check**; the street pick's confirmation says the edge by its side and length and ends the pick with **Use
+this edge**, **Use it, and pick another street edge** or **Pick a different edge**, the pane saying what Revit waits
+for meanwhile.) When
 **Check project** finds a fact the check needs missing, the Gordium pane shows the Setup form instead of a check;
-**Mark facts** opens it too. Every decision is in `Gordium.Revit.Reading/Setup.cs`, tested without Revit
-(`SetupTests.cs`); the Revit side is `SetupFlow.cs` (reads, writes, through the panel's one ExternalEvent) and
+**Set up** opens it too. Every decision is in `Gordium.Revit.Reading/Setup.cs` and `SetupSteps.cs`, tested without
+Revit (`SetupTests.cs`, `SetupStepsTests.cs`); the Revit side is `SetupFlow.cs` (reads, writes, through the panel's one ExternalEvent) and
 `SetupView.cs` (the WPF form, in the panel's theme tokens; the dropdown's style is in `PanelStyles.xaml`).
 
 - **Project facts** (`SetupFacts`): every mark `Marks.All` binds to Project Information is a field (data: a mark
@@ -775,25 +781,27 @@ CI restores in locked mode.
 `Gordium.Worker.slnx` (which CI and the Mac build and test). It is built once per Revit version installed:
 `net10.0-windows` against Revit 2027, `net8.0-windows` against Revit 2026.
 
-**The Gordium tab** (`Ribbon.cs`, built from `RibbonPlan` in `Gordium.Revit.Reading`; design pass section 2.2):
+**The Gordium tab** (`Ribbon.cs`, built from `RibbonPlan` in `Gordium.Revit.Reading`; design pass section 2.2; UI
+polish change 48, Ben 2026-11-23):
 
 | Panel | Button | What it does |
 |---|---|---|
 | Check | **Check project** | the check above |
-| Check | **Mark facts** | the Setup form in the Gordium pane (the project facts and the checklist) |
-| Results | **Panel** | shows the results panel, or hides it when it is showing; usable with no project open |
+| Check | **Set up** (was Mark facts) | the Setup form in the Gordium pane (the numbered steps and More facts) |
+| Results | **Results** (was Panel) | shows the Gordium pane, or hides it when it is showing; usable with no project open |
+| Results | **Summary** | the printable summary of the last check |
 | Help | **About** | shows and logs which build Revit loaded and on which .NET runtime; usable with no project open |
-| Trial | **Check box house**, **Record scenes**, **Read inside**, **Record houses** | the trial's test tools, only in a trial build or with `GORDIUM_TRIAL=1` |
+| Help | **Trial** pull-down: **Check box house**, **Record scenes**, **Read inside**, **Record houses** | the trial's test tools, only in a trial build or with `GORDIUM_TRIAL=1` |
 
 Each button has a one-line tooltip and up to three lines more on a longer hover (Revit's `LongDescription`), and an
 icon at 16 and 32 px in Revit's light and dark themes: simple strokes drawn to PNG by `RibbonIcons` from the panel's
 colour tokens (the outline in `text`, the mark in `accent`), swapped on `ThemeChanged` (Revit doesn't switch an
 add-in's images by theme itself). No Settings button: there is nothing to set yet. `install_trial_addin.ps1` installs
-the build an architect gets by default (no Trial panel: Ben, 2026-11-23, for demos to architects); `-Dev` installs a
-trial build (`-p:GordiumTrial=true`, the Trial panel always there), and `GORDIUM_TRIAL=1` in Revit's environment turns
-it on in any build. Revit names an add-in button's Quick Access Toolbar copy and keyboard shortcut by tab, panel and name, so the
-four buttons that moved panels in this pass (Mark facts, About, Read inside, Record houses) lose an existing copy or
-shortcut once: add them again. The request files the trial runs by (read in `App`'s Idling handler) never use a button, so they work in both.
+the build an architect gets by default (no Trial pull-down: Ben, 2026-11-23, for demos to architects); `-Dev` installs a
+trial build (`-p:GordiumTrial=true`, the Trial pull-down always there), and `GORDIUM_TRIAL=1` in Revit's environment turns
+it on in any build. Revit names an add-in button's Quick Access Toolbar copy and keyboard shortcut by tab, panel and name, so a
+button renamed or moved loses an existing copy or shortcut once (the UI polish renamed Mark facts to Set up and Panel to
+Results, and moved the four trial tools into the Help panel's Trial pull-down): add them again. The request files the trial runs by (read in `App`'s Idling handler) never use a button, so they work in both.
 How we know: `RibbonTests.cs` (which buttons exist with the switch off and on, the tooltips' length, every icon a
 valid PNG at both sizes in both themes, never the pass green).
 

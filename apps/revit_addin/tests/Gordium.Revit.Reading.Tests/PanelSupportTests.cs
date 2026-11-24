@@ -124,7 +124,7 @@ public sealed class PanelSupportTests
         Assert.DoesNotContain("Check again", path, StringComparison.Ordinal);
         var check = File.ReadAllText(Path.Combine(addin, "CheckProject.cs"));
         var pick = check[check.IndexOf("static List<PickedEdge> PickEdges(", StringComparison.Ordinal)..];
-        pick = pick[..pick.IndexOf("return kept;", StringComparison.Ordinal)];
+        pick = pick[..pick.IndexOf("return [.. session.Kept];", StringComparison.Ordinal)];
         Assert.Contains("new TaskDialog(StreetEdges.PickTitle)", pick, StringComparison.Ordinal);
         Assert.Contains("TaskDialog.Show(StreetEdges.PickTitle, why)", pick, StringComparison.Ordinal);
         Assert.DoesNotContain("(Title", pick, StringComparison.Ordinal);

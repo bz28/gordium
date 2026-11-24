@@ -50,7 +50,7 @@ public sealed class CheckProjectCommand : IExternalCommand
         var doc = ui.ActiveUIDocument?.Document;
         if (doc is null || doc.IsFamilyDocument)
         {
-            TaskDialog.Show(Title, "Open a project (not a family) to check it.");
+            TaskDialog.Show(Title, "Gordium checks projects. Open a project (not a family) to check it.");
             return (Result.Cancelled, null);
         }
         if (CheckRun.Start(ui, doc) is { } refused)
@@ -401,28 +401,35 @@ public sealed class CheckProjectCommand : IExternalCommand
         return true;
     }
 
-    /// <summary>Revit's pick of the lot edges along the street, each said back and confirmed: the edges kept, nothing
-    /// written (empty when none was, or no property line is drawn).</summary>
+    /// <summary>Revit's pick of the lot edges along the street, each said back in the architect's words ("the south
+    /// edge of the lot, 100'-0\" long") and confirmed (UI polish changes 10 and 11): "Use this edge" ends the pick,
+    /// "Use it, and pick another street edge" asks for one more, "Pick a different edge" forgets the click; never a
+    /// silent wait for Esc after a confirmation (Ben hit it in the trial). The edges kept, nothing written (empty when
+    /// none was, or no property line is drawn). The coordinates go only to the log.</summary>
     internal static List<PickedEdge> PickEdges(UIDocument ui, Dictionary<string, object?> log)
     {
         var doc = ui.Document;
-        var lines = RevitRead.LotLines(doc).Where(l => l.IsPropertyLine).ToDictionary(l => l.UniqueId);
+        var all = RevitRead.LotLines(doc);
+        var lines = all.Where(l => l.IsPropertyLine).ToDictionary(l => l.UniqueId);
         if (lines.Count == 0)
             return [];                                               // no property line: the dialog says what is missing
         var toShared = RevitRead.InternalToShared(doc);
-        var kept = new List<PickedEdge>();
+        var tol = doc.Application.VertexTolerance;
+        var session = new PickSession();
         var said = new List<string>();
-        while (true)
+        ResultsPane.Picking(true);                                   // the pane says what Revit is waiting for
+        try
+        {
+        while (session.Asking)
         {
             Reference picked;
             try
             {
-                picked = ui.Selection.PickObject(ObjectType.Element, new PropertyLines(),
-                    kept.Count == 0 ? "Gordium: " + StreetEdges.PickPrompt
-                                    : "Gordium: click another lot edge along the street, or press Esc when done");
+                picked = ui.Selection.PickObject(ObjectType.Element, new PropertyLines(), session.Prompt);
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
+                session.Escape();
                 break;
             }
             var e = doc.GetElement(picked);
@@ -432,22 +439,25 @@ public sealed class CheckProjectCommand : IExternalCommand
             if (edge is { } got)
             {
                 // said back before it is kept: Revit highlights the whole property line, never the edge it took
-                var words = StreetEdges.Describe(got, toShared);
+                var words = EdgeWords.Of(got.A, got.B, all, toShared, tol) ?? new EdgeDescription(null, EdgeWords.FeetInches(got.Length));
+                var (instruction, content, use, another, different) = PickSession.Confirm(words);
                 var ask = new TaskDialog(StreetEdges.PickTitle)
                 {
-                    MainInstruction = $"Use {words} as the street line?",
-                    MainContent = "Shared coordinates, feet. No: the click is forgotten; click the edge again.",
-                    CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
-                    DefaultButton = TaskDialogResult.No,
+                    MainInstruction = instruction, MainContent = content, CommonButtons = TaskDialogCommonButtons.Cancel,
+                    AllowCancellation = true,
                 };
-                if (ask.Show() == TaskDialogResult.Yes)
+                ask.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, use);
+                ask.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, another);
+                ask.AddCommandLink(TaskDialogCommandLinkId.CommandLink3, different);
+                var answer = ask.Show() switch
                 {
-                    if (!kept.Contains(got))
-                        kept.Add(got);
-                    said.Add("kept " + words);
-                }
-                else
-                    said.Add("not kept " + words);
+                    TaskDialogResult.CommandLink1 => PickAnswer.Use,
+                    TaskDialogResult.CommandLink2 => PickAnswer.UseAndAnother,
+                    TaskDialogResult.CommandLink3 => PickAnswer.Different,
+                    _ => PickAnswer.Close,
+                };
+                session.Answer(got, answer);
+                said.Add($"{answer}: {StreetEdges.Describe(got, toShared)} ({words.Words})");
             }
             else
             {
@@ -455,8 +465,23 @@ public sealed class CheckProjectCommand : IExternalCommand
                 TaskDialog.Show(StreetEdges.PickTitle, why);
             }
         }
+        }
+        finally
+        {
+            ResultsPane.Picking(false);
+        }
         log["street_picks"] = said;
-        return kept;
+        return [.. session.Kept];
+    }
+
+    /// <summary>The edges picked, in words ("the south edge, 100'-0\" and the east edge, 60'-0\""), or null when any
+    /// can't be said.</summary>
+    internal static string? EdgesInWords(Document doc, IReadOnlyList<PickedEdge> kept)
+    {
+        var all = RevitRead.LotLines(doc);
+        var toShared = RevitRead.InternalToShared(doc);
+        var said = kept.Select(e => EdgeWords.Of(e.A, e.B, all, toShared, doc.Application.VertexTolerance)?.Words).ToList();
+        return said.Count == 0 || said.Any(w => w is null) ? null : PaneWords.And(said!);
     }
 
     private sealed class PropertyLines : ISelectionFilter

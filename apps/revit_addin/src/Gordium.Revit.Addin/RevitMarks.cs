@@ -321,7 +321,7 @@ public sealed class MarkForEgressCommand : IExternalCommand
         var doc = commandData.Application.ActiveUIDocument?.Document;
         if (doc is null || doc.IsFamilyDocument)
         {
-            TaskDialog.Show("Gordium: mark facts", "Open a project (not a family) to mark its facts.");
+            TaskDialog.Show("Gordium: Set up", "Open a project (not a family) to set it up.");
             return Result.Cancelled;
         }
         var log = new Dictionary<string, object?> { ["document"] = doc.Title };
@@ -377,7 +377,7 @@ public sealed class MarkForEgressCommand : IExternalCommand
         {
             log["error"] = $"{e.GetType().Name}: {e.Message}";
             Trial.Log("mark_for_egress", log);
-            TaskDialog.Show("Gordium: mark facts", $"Failed: {e.GetType().Name}\n{e.Message}");
+            TaskDialog.Show("Gordium: Set up", $"Failed: {e.GetType().Name}\n{e.Message}");
             message = e.Message;
             return Result.Failed;
         }
