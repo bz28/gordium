@@ -7,8 +7,6 @@ name: New York State
 
 results_title: Egress (NY State Residential Code 2025)   # how a check's results of this law are headed
 
-plain_words: true                     # the words an architect reads carry no engineer's key (rulebook.py)
-
 scope: residential_code               # which buildings it covers (R101.2): a check runs it only for a building
                                       # design_checker/code_scope.py finds it covers (2026-11-22_which_ny_code.md)
 

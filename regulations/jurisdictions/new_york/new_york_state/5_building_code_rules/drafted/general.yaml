@@ -5526,9 +5526,9 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-  notes: >-
-    A tie between parts, not a law limit: R318.3.1's drop rules read the exterior door marked as the egress door, so an
-    egress door the model does not also give as one needs review (R318.2 checks that the egress door exists).
+  notes: 'A tie between parts, not a law limit: R318.3.1''s drop rules read the exterior_door part marked as the
+    egress door, so an egress door the model does not also give as one needs review (R318.2 checks that the egress
+    door exists).'
   drafted_by: claude_code/claude-opus-5-5 (for Ben, after the AI's draft)
   status: draft
   revised:

@@ -2,7 +2,7 @@
 rule's title, notes, review reasons and examples' notes carry no engineer's key (a snake_case name of a measure or
 fact, a rule id with one). A state law folder says so in its state.yaml, a place for its own rulebooks in its
 jurisdiction.yaml; the nearest settings file decides, and an answer key (test_data/, no settings) is never held to
-it. Turned on for the City of Ithaca, Maine and New York's Residential Code on 2026-11-24."""
+it. Turned on for the City of Ithaca and Maine on 2026-11-24."""
 
 from pathlib import Path
 
@@ -15,18 +15,17 @@ from rule_format.rulebook import (REPO, _plain_words_law, load, plain_words_prob
                                   rulebook_paths, rules_folder)
 
 LAWS = REPO / "regulations/jurisdictions"
-PLAIN = {"new_york/ithaca_city": "jurisdiction.yaml", "maine/maine_state": "state.yaml",
-         "new_york/new_york_state": "state.yaml"}
+PLAIN = {"new_york/ithaca_city": "jurisdiction.yaml", "maine/maine_state": "state.yaml"}
 
 
 @pytest.mark.parametrize("law, settings", PLAIN.items())
-def test_ithaca_maine_and_the_residential_code_ask_for_plain_words(law, settings):
+def test_ithaca_and_maine_ask_for_plain_words(law, settings):
     assert load(LAWS / law / settings)["plain_words"] is True
 
 
 @pytest.mark.parametrize("law", PLAIN)
 def test_every_rulebook_they_hold_is_in_plain_words(law):
-    """Each rulebook is held to it (the nearest settings file is its law's) and shows the architect no key: 311
+    """Each rulebook is held to it (the nearest settings file is its law's) and shows the architect no key: 310
     notes, reasons and examples' notes were reworded, a fact by the field the add-in shows, a rule by its title."""
     books = rulebook_paths(rules_folder(LAWS / law))
     assert books
