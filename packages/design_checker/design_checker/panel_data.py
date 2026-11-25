@@ -28,6 +28,7 @@ New fields on an item (each optional; a host that doesn't know them ignores them
 
 import ast
 import math
+import re
 
 from rule_format import formula, parts
 from rule_format.rulebook import _kinds
@@ -46,9 +47,13 @@ REVIEW_WHEN_WORDS = "the law asks a person to decide here (its review condition 
 NO_ROUTE = ("no_route", "no_route_host_blocked", "no_route_via_host", "no_exit_access")
 OUTCOME_STATUS = {"pass": present.COMPLIES, "fail": present.FAILS, "needs_review": present.REVIEW}
 STEP = 0.01                      # the step a how-far is shown in, in its unit
+# a reason that asks for a mark says so in the word itself ("mark", "marks", "marked", "unmarked"), never inside a
+# room's name or a value a reason quotes ("Supermarket", "Landmark hall", a function "market": group 3 review round 8)
+MARK_WORD = re.compile(r"\b(un)?mark(s|ed)?\b")
 
 
 # ---- how far off ------------------------------------------------------------------------------------------------
+
 
 def _floor(x: float) -> float:
     return math.floor(x / STEP + 1e-9) * STEP
@@ -297,8 +302,13 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
         elif m not in own:                            # the building's: a fact the architect states for the project
             add({"kind": MARK, "key": f"fact:{m}", "words": f"{_words(rule, m)}: not stated for the project",
                  "elements": [], "measure": m, "field": f"facts.{m}"})
-        elif why and ("mark" in why or "stated by the architect" in why):
-            add({"kind": MARK, "key": f"mark:{kind}:{m}", "words": f"{_words(rule, m)}: {why}", "elements": own_id,
+        elif why and (MARK_WORD.search(why) or "stated by the architect" in why):
+            # a mark set on other elements than this row's (a story's occupant load waits on its rooms' function marks:
+            # occupant_load.FUNCTION_ROOMS) names those elements, never the row's own (a level can't hold a room mark)
+            held = (more or {}).get(m)
+            on = held.get("room_ids_without_function") if isinstance(held, dict) else None
+            add({"kind": MARK, "key": f"mark:{kind}:{m}", "words": f"{_words(rule, m)}: {why}",
+                 "elements": list(on) if on else own_id,
                  "measure": m})
         else:
             add({"kind": FIX_MODEL, "key": f"model:{kind}:{m}:{why or ''}",

@@ -415,7 +415,8 @@ def interior_of() -> dict:
             rooms.append({"id": f"{L}{r['id']}", "name": f"{r['name']} {L}", "sleeping": False, "level": L,
                           "floor": [list(p) for p in _rect(r["rect"])], "floor_elevation": lv["elevation"],
                           "ceiling_height": a["story_height"] - 1, "use": words[r["use"]], "lockable": r["lockable"],
-                          "pass_through": r["pass_through"], "holes": [], "obstructions": []})
+                          "pass_through": r["pass_through"], "holes": [], "obstructions": [],
+                          **({"function": r["function"]} if "function" in r else {})})
         for d in a["doors"] + (a["discharge_doors"] if lv is a["levels"][0] else []):
             door = {"id": f"{L}{d['id']}", "name": f"{d['name']} {L}", "exit": False, "level": L,
                     # the type's clear opening as eval_marks.yaml door_types stamps it: the reader sends a door's

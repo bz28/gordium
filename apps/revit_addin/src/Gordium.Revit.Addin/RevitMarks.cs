@@ -39,6 +39,7 @@ internal static class RevitMarks
         ProjectMarks = doc.ProjectInformation is { } info ? Values(info) : new Dictionary<Guid, MarkValue>(),
         // the Setup form shows and takes a length in the project's units, as Revit's own dialogs do
         DisplayUnits = doc.GetUnits().GetFormatOptions(SpecTypeId.Length).GetUnitTypeId().TypeId,
+        AreaDisplayUnits = doc.GetUnits().GetFormatOptions(SpecTypeId.Area).GetUnitTypeId().TypeId,
         VertexTolerance = doc.Application.VertexTolerance,
         Elements = RevitRead.HouseOutline(doc),          // the site slabs' rows (SiteSlabs), no geometry
     };
@@ -156,7 +157,7 @@ internal static class RevitMarks
             var done = p is { IsReadOnly: false } && (w.Mark.Kind switch
             {
                 MarkValueKind.YesNo or MarkValueKind.Integer => p.Set(w.Value.Integer!.Value),
-                MarkValueKind.Length => p.Set(w.Value.Number!.Value),
+                MarkValueKind.Length or MarkValueKind.Area => p.Set(w.Value.Number!.Value),
                 _ => p.Set(w.Value.Text!),
             });
             (done ? applied : refused).Add($"{w.Label}: {w.Mark.Name} = {w.Value.Text ?? w.Value.Integer?.ToString(CultureInfo.InvariantCulture) ?? w.Value.Number?.ToString(CultureInfo.InvariantCulture)}" +
@@ -240,6 +241,7 @@ internal static class RevitMarks
             MarkValueKind? kind = dataType == SpecTypeId.Boolean.YesNo ? MarkValueKind.YesNo
                 : dataType == SpecTypeId.String.Text ? MarkValueKind.Text
                 : dataType == SpecTypeId.Length ? MarkValueKind.Length
+                : dataType == SpecTypeId.Area ? MarkValueKind.Area
                 : dataType == SpecTypeId.Int.Integer ? MarkValueKind.Integer : null;
             bound.Add(new BoundParameter(def.Name, guid, kind, dataType.TypeId, binding is InstanceBinding,
                                          binding.Categories.Cast<Category>().Select(c => c.BuiltInCategory.ToString()).ToList()));
@@ -252,6 +254,7 @@ internal static class RevitMarks
         MarkValueKind.YesNo => SpecTypeId.Boolean.YesNo,
         MarkValueKind.Text => SpecTypeId.String.Text,
         MarkValueKind.Length => SpecTypeId.Length,
+        MarkValueKind.Area => SpecTypeId.Area,
         MarkValueKind.Integer => SpecTypeId.Int.Integer,
         _ => throw new ArgumentOutOfRangeException(nameof(kind)),
     };

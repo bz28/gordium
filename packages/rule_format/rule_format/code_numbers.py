@@ -37,7 +37,8 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
    comparison the second reading has ("(>=)", "the second reading (none) is right") or says the number is part of
    one length ("one length"). Otherwise the rule is refused: such a number is for a person (make it a flag, which
    always needs review). A table cell whose unit is printed only in its column's heading ("(feet)") is a length in
-   feet where such a flag says so ("a length in feet": _column_feet); otherwise it is a count.
+   feet where such a flag says so ("a length in feet": _column_feet), and one whose heading prints "(inches)" a
+   length in inches where it says "a length in inches"; otherwise it is a count.
 4. A range a table prints joined by a hyphen ("1-500", Table 1006.3.3 of the 2025 Building Code of New York State)
    counts only where a verification flag of its piece names it as "printed range 'A-B'" and the cited quote prints
    it: numbers.py reads no number after a hyphen (so "R-2" is never a number), so without that its upper end is lost.
@@ -264,19 +265,24 @@ def _in_feet(length: dict, quote: str) -> dict:
 
 
 COLUMN_FEET = "a length in feet"     # a verification flag's words for a table cell whose column heading prints "(feet)"
+COLUMN_INCHES = "a length in inches"  # ... and for one whose heading prints "(inches)" (Table 1020.3, section group 4)
 
 
 def _column_feet(length: dict) -> dict:
     """A table cell prints its unit in its column's heading ("(feet)": Tables 1006.2.1 and 1017.2 of the 2025 Building
-    Code of New York State), never beside the number, so numbers.py reads it with no unit. A flag of the second
-    reading quoting the number that says it is "a length in feet" (its column read by position and on the page
-    image: text_verification.yaml) makes it one. Only a number with no unit of its own, and only by such a flag:
-    another table's cells (an occupant load) stay counts. Its comparison stays the second reading's."""
-    if not set(length["values"]) <= {"count", "any"} or len(length["statements"]) != 1 \
-            or not any(COLUMN_FEET in f for f in length["flags"]):
+    Code of New York State; "(inches)": Table 1020.3), never beside the number, so numbers.py reads it with no unit.
+    A flag of the second reading quoting the number that says it is "a length in feet" (or "a length in inches")
+    (its column read by position and on the page image: text_verification.yaml) makes it one. Only a number with no
+    unit of its own, and only by such a flag: another table's cells (an occupant load) stay counts. Its comparison
+    stays the second reading's."""
+    if not set(length["values"]) <= {"count", "any"} or len(length["statements"]) != 1:
         return length
     value = length["statements"][0][0]
-    return dict(length, values=dict(length["values"], ft=value, **{"in": value * 12}))
+    if any(COLUMN_FEET in f for f in length["flags"]):
+        return dict(length, values=dict(length["values"], ft=value, **{"in": value * 12}))
+    if any(COLUMN_INCHES in f for f in length["flags"]):
+        return dict(length, values=dict(length["values"], ft=value / 12, **{"in": value}))
+    return length
 
 
 def _unverified(length: dict) -> dict:
@@ -380,10 +386,13 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
                 and not any(_close(Fraction(node.value), n) for n in seen):
             out.append(f"number {float(node.value):g} in '{key}' sits where the number check can't read it "
                        "(write it as a comparison of a measure with the law's number)")
-    for number, op, sure, measures, in_formula in uses:
+    for number, op, sure, measures, in_formula, rate in uses:
         if number == 0:
             continue
         unit_classes = {UNIT_OF.get(units.get(m)) for m in measures} - {None}
+        if rate and rate[0] and {UNIT_OF.get(units.get(m)) for m in rate[0]} == {"count"}:
+            # a rate: counts times it give the length it is compared with (inches per occupant)
+            unit_classes = {UNIT_OF.get(units.get(m)) for m in rate[1]} & {"in", "ft", "sf"}
         # a count, a degree or a percent ("any") backs a number with no unit of its own (a coefficient, a count),
         # never a length or an area
         length = bool(unit_classes & {"in", "ft", "sf"})
@@ -471,14 +480,19 @@ def _uses(tree) -> list[tuple]:
                                     needed = MIRROR[needed]
                                 if not positive:
                                     needed = OPPOSITE.get(needed, {"==": "!=", "!=": "=="}.get(needed))
-                            # a coefficient (0.5 * floor area) has no unit of its own
-                            out.append((number, needed, pair_sure, set() if coefficient else names, _formula(side)))
+                            # a coefficient (0.5 * floor area) has no unit of its own; one that multiplies counts
+                            # only and is compared with a length is a rate, in that length's unit (1005.3.2: 0.2
+                            # inch per occupant): the side's and the other side's measures, for _formula_problems
+                            rate = (frozenset(_compared_names(side)), frozenset(_compared_names(other))) \
+                                if coefficient else None
+                            out.append((number, needed, pair_sure, set() if coefficient else names, _formula(side),
+                                        rate))
                 for side in sides:
                     for n in _conditions(side):              # an if's test inside a side: it picks a limit
                         walk(n, positive, False, True)
             case _:
                 for number, _, _ in _numbers(node):
-                    out.append((number, None, False, set(), True))
+                    out.append((number, None, False, set(), True, None))
                 for n in _conditions(node):
                     walk(n, positive, False, True)
 

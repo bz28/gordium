@@ -271,7 +271,16 @@ import re
 # Each drafted piece's lines (the sections file) that must all be quoted somewhere in the rulebook, so a reference
 # in them can't go unseen; and each section a reference names -> (the rule that handles it, a word its text holds)
 SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2.1": (315, 3, 13),
-         "1017.2": (341, 23, 23), "1020.5": (344, 37, 47)}
+         "1017.2": (341, 23, 23), "1020.5": (344, 37, 47),
+         # section group 4: the corridor sections and tables drafted
+         "1020.2": (343, 40, 53), "Table 1020.2": (344, 7, 18), "1020.3": (344, 21, 24), "Table 1020.3": (344, 27, 34),
+         "1020.4": (344, 35, 36), "1020.6": (344, 48, 53), "1020.6 (part 2)": (345, 3, 6), "1020.7": (345, 17, 23),
+         "1020.6.1": (345, 7, 16),
+         # section group 5a: egress capacity
+         "1005.3.1": (313, 51, 55), "1005.3.1 (part 2)": (314, 3, 13), "1005.3.2": (314, 14, 28),
+         "1005.4": (314, 29, 30), "1005.5": (314, 31, 33), "1005.6": (314, 34, 36),       # section group 5b
+         "1005.7": (314, 37, 38), "1005.7.1": (314, 39, 49), "1005.7.2": (314, 50, 53),
+         "1005.7.3": (314, 54, 54)}                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -292,11 +301,34 @@ HANDLERS = {
     "903.2.5": ("general.bc_table_1017_2_note_d_group_h", "903.2.5"),
     "1030.8": ("general.bc_table_1006_2_1_a_e_m", "1030.8"), "1006.2.2.1": ("general.bc_table_1006_2_1_b", "1006.2.2"), "1006.2.2.6": ("general.bc_table_1006_2_1_r3_r4", "1006.2.2.6"),
     "1004.2": ("general.bc_1006_2_1_two_exits", "1004.2"),
+    # section group 4: 1020.2, Table 1020.2's notes, 1020.3
+    "708": ("general.bc_1020_2_fire_partitions", "708"), "705.5": ("general.bc_1020_2_fire_partitions", "705.5"),
+    "705.9": ("general.bc_1020_2_fire_partitions", "705.9"),
+    "1006.2": ("general.bc_table_1020_2_a_b_e_f_m_s_u", "one means of egress"),
+    "407.2": ("general.bc_table_1020_2_note_a_group_i2", "407.2"),
+    "407.3": ("general.bc_table_1020_2_note_a_group_i2", "407.3"),
+    "408.8": ("general.bc_table_1020_2_i1_i3", "408.8"),
+    "903.2.8": ("general.bc_table_1020_2_r", "903.2.8"),
+    "1005.1": ("general.bc_1020_3_corridor_capacity", "1005.1"),
+    # section group 4c: the rest of Section 1020
+    "1005.7": ("general.bc_1020_4_obstruction", "1005.7"), "1016.2": ("general.bc_1020_7_continuity", "1016.2"),
+    # section group 5a: 1005.3.1 and 1005.3.2's exceptions
+    "907.5.2.2": ("general.bc_1020_3_corridor_capacity", "907.5.2.2"),
+    "1030.6.2": ("general.bc_1020_3_corridor_capacity", "1030.6.2"),
+    "1030.6.3": ("general.bc_1020_3_corridor_capacity", "1030.6.3"), "909": ("general.bc_1020_3_corridor_capacity", "909"),
+    # section group 5c: 1005.7's
+    "1014.9": ("general.bc_1005_7_2_projections", "1014.9"), "407.4.3": ("general.bc_1005_7_2_projections", "407.4.3"),
+    "1003.3": ("general.bc_1005_7_3_protruding_objects", "1003.3"),
 }
-NO_LIMIT = {"1006.2.1", "1017.2", "1020.5"}          # the piece naming itself
+NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
+            "1005.7.1", "1005.7.2", "1005.7.3"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
-UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39)}
+UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
+            (343, 42), (344, 34),       # group 4: 1020.2's 'Exceptions:', Table 1020.3's 'For SI'
+            (344, 49), (345, 21),       # group 4c: 1020.6's and 1020.7's 'Exceptions:'
+            (313, 55), (314, 17),       # group 5a: 1005.3.1's and 1005.3.2's 'Exceptions:'
+            (314, 41)}                  # group 5c: 1005.7.1's 'Exceptions:'
 
 
 def _quoted(book, page, a, b):
@@ -623,3 +655,238 @@ def test_every_rule_on_a_spaces_own_exits_lets_an_exit_be():
         for w in r.get("review_when") or []:
             assert str(w["when"]).startswith("not space_is_exit and "), (r["id"], w["when"])
     assert "general.bc_1006_2_1_two_exits" in checked and len(checked) >= 16
+
+
+def test_every_occupant_load_factor_is_quoted_word_for_word_from_its_row():
+    """Section group 3's frozen factors (records/occupant_load_factors.yaml) sit outside the rulebook's own checks
+    (rulebook_paths leaves records/ out), so their quotes are checked here as a rule's are: each at its page and lines,
+    word for word, where the code cache is; elsewhere each one not checked is listed, never passed (review of group 3,
+    round 1, 2026-11-24)."""
+    from rule_format.rulebook import _source_problems
+    data = load(NY / "5_building_code_rules/drafted/records/occupant_load_factors.yaml")
+    sources = [e["source"] for e in data["functions"].values()] + [data["increase_cap"]["source"]]
+    assert len(sources) == len(data["functions"]) + 1 and all(isinstance(x, dict) for x in sources)
+    ctx = Context.for_jurisdiction(NY)
+    assert _source_problems(sources, ctx) == []
+    if ctx.skipped:                                    # no code cache on this machine: every quote said, none passed
+        assert len(ctx.skipped) == len(sources), ctx.skipped
+        pytest.skip(f"{len(sources)} quotes not checked here: {ctx.skipped[0]}")
+
+
+# ---- section group 4 (2026-11-25): Table 1020.3, corridor width (p.344, lines 27-33) --------------------------------
+
+# Table 1020.3, p.344: line -> the row's width in inches, typed from the page
+TABLE_1020_3 = {27: 44, 28: 24, 29: 36, 30: 36, 31: 72, 32: 72, 33: 96}
+ONE_GROUP = A + ["B", "E", "F-1", "F-2", "H-1", "H-2", "H-3", "H-4", "H-5", "I-1", "I-2", "I-3", "I-4", "M"] + R + \
+    ["S-1", "S-2", "U"]
+
+
+def _corridor(width, load_):
+    return {"corridor_width": width, "corridor_occupant_load": load_}
+
+
+def test_table_1020_3_every_row_passes_at_its_width_and_not_just_short_of_it(ctx, rules):
+    """Each row of Table 1020.3 (p.344) for every group: at its width it passes (where the row is the one that
+    applies), just short of it it fails, or needs review where a looser row the model can't see may apply (24 in to
+    mechanical, plumbing or electrical equipment; 36 in within a dwelling unit; Group I-2's exception, 1020.3, p.344
+    lines 23-24; stretcher traffic in an ambulatory care facility, stated)."""
+    r = rules["general.bc_table_1020_3_corridor_width"]
+    assert all(_cites(r, 344, line) for line in TABLE_1020_3)
+    no_amb = {"ambulatory_care_facility": False}
+    for g in ONE_GROUP:
+        given = {"occupancy_group": g} | no_amb
+        if g == "I-2":
+            assert _one(r, "corridor", _corridor(TABLE_1020_3[33], 200), given, ctx) == "pass"
+            assert _one(r, "corridor", _corridor(TABLE_1020_3[33] - 0.5, 200), given, ctx) == "needs_review"
+            assert _one(r, "corridor", _corridor(TABLE_1020_3[28] - 0.5, 10), given, ctx) == "fail"
+            continue
+        # line 27: any facility not listed, 44 in (50 occupants or more, under 100 for Group E)
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[27], 50), given, ctx) == "pass", g
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[27] - 0.5, 50), given, ctx) == "needs_review", g  # line 30
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[30] - 0.5, 50), given, ctx) == "needs_review", g  # line 28
+        # line 29: fewer than 50 occupants, 36 in
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[29], 49.5), given, ctx) == "pass", g
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[29] - 0.5, 49.5), given, ctx) == "needs_review", g
+        # line 28: 24 in at the least, for any corridor
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[28], 10), given, ctx) == "needs_review", g
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[28] - 0.5, 10), given, ctx) == "fail", g
+        # line 31: Group E with 100 or more, 72 in
+        want = ("pass", "fail") if g == "E" else ("pass", "pass")
+        assert (_one(r, "corridor", _corridor(TABLE_1020_3[31], 100), given, ctx),
+                _one(r, "corridor", _corridor(TABLE_1020_3[31] - 0.5, 100), given, ctx)) == want, g
+    # line 32: stretcher traffic in an ambulatory care facility (Group B, 304.1), stated or not ruled out
+    for amb in ({"ambulatory_care_facility": True}, {}):
+        b = {"occupancy_group": "B"} | amb
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[32], 60), b, ctx) == "pass"
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[32] - 0.5, 60), b, ctx) == "needs_review"
+    # a building of two or more groups, or one whose group isn't stated, never passes
+    assert _one(r, "corridor", _corridor(120, 10), {"occupancy_group": "mixed"}, ctx) == "not_applicable"
+    assert _one(r, "corridor", _corridor(120, 10), {}, ctx) == "needs_review"
+    assert rules["general.bc_table_1020_3_other_occupancies"]["applies_when"] == 'occupancy_group == "mixed"'
+
+
+def test_a_corridors_capacity_is_1005_3_2s_factor_at_its_limit_and_just_past_it(ctx, rules):
+    """Section group 5a: 1020.3 asks the capacity of 1005.1, for a corridor 1005.3.2's (p.314): 0.2 in per occupant
+    (lines 14-16), 0.15 with a 903.3.1.1 or 903.3.1.2 system and a voice/alarm system other than in Groups H and I-2
+    (exception 1, lines 18-22); fixed seating not ruled out (exceptions 2 and 3: smoke-protected or open-air seating's
+    own factors) needs review short of it. Was 4a's flag."""
+    r = rules["general.bc_1020_3_corridor_capacity"]
+    assert r["kind"] == "rule" and _cites(r, 314, 15) and _cites(r, 314, 20) and _cites(r, 344, 21)
+    plain = {S1: False, S2: False, "emergency_voice_alarm_system": False, "assembly_fixed_seating": False}
+    for g in ("B", "I-2", "H-3", "mixed"):
+        given = {"occupancy_group": g} | plain
+        assert _one(r, "corridor", _corridor(44, 220), given, ctx) == "pass", g      # 0.2 x 220 = 44
+        assert _one(r, "corridor", _corridor(44, 220.5), given, ctx) == "fail", g
+    voice = {S1: True, S2: False, "emergency_voice_alarm_system": True, "assembly_fixed_seating": False}
+    # review round 1 of group 5a: a building of two or more groups is each portion's (1004.4): between the two
+    # factors, a person's check, never a fail on 0.2 alone
+    for g, want in (("B", "pass"), ("R-2", "pass"), ("I-2", "fail"), ("H-3", "fail"), ("mixed", "needs_review")):
+        assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": g} | voice, ctx) == want, g   # 0.15 x 300
+        assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": g} | voice, ctx) == "fail", g
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "mixed"} | voice | {
+        "emergency_voice_alarm_system": False}, ctx) == "fail"
+    # review round 1 (P1): 903.3.1.2 (13R) counts in Group R; elsewhere it is a person's check, never a pass on 0.15
+    r13r = voice | {S1: False, S2: True}
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "R-2"} | r13r, ctx) == "pass"
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "B"} | r13r, ctx) == "needs_review"
+    assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": "B"} | r13r, ctx) == "fail"
+    no_voice = voice | {"emergency_voice_alarm_system": False}
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "B"} | no_voice, ctx) == "fail"
+    seats = voice | {"assembly_fixed_seating": True}
+    assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": "A-3"} | seats, ctx) == "needs_review"
+    # the group not stated: never a pass (the walk, test_ny_building_corridor_walk.py, covers it at every factor)
+    assert _one(r, "corridor", _corridor(80, 400), voice, ctx) == "needs_review"
+
+
+# ---- section group 4b (2026-11-25): Table 1020.2, corridor fire-resistance rating (p.344, lines 7-18) ----------------
+
+# Table 1020.2, p.344: line -> (groups, the occupant load above which a rating applies (None: All), hours without a
+# sprinkler system (None: Not Permitted), with one (note c: 903.3.1.1 or 903.3.1.2), the rule), typed from the page
+TABLE_1020_2 = {
+    7: (["H-1", "H-2", "H-3"], None, None, 1, "h1_h2_h3"),
+    8: (["H-4", "H-5"], 30, None, 1, "h4_h5"),
+    9: (A + ["B", "E", "F-1", "F-2", "M", "S-1", "S-2", "U"], 30, 1, 0, "a_b_e_f_m_s_u"),
+    10: (R, 10, None, 0.5, "r"),
+    11: (["I-2"], None, None, 0, "i2"),
+    12: (["I-1", "I-3"], None, None, 1, "i1_i3"),
+    13: (["I-4"], None, 1, 0, "i4"),
+}
+NO_UNITS = {"corridors_within_dwelling_units": False}
+EXCEPTED = {"B", "E", "S-2"}          # 1020.2 exceptions 4, 1 and 3 (p.343): reviewed where the rating falls short
+
+
+def _rating(load_, hours=None):
+    m = {"corridor_occupant_load": load_}
+    if hours is not None:
+        m["corridor_fire_rating_hours"] = hours
+    return m
+
+
+def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ctx, rules):
+    """Each row of Table 1020.2 (p.344) for every group: with a sprinkler system (NFPA 13) and without, at the row's
+    occupant load and just past it, at its rating and just under it; Not Permitted fails whatever the rating."""
+    for line, (groups, over, without, with_, rid) in TABLE_1020_2.items():
+        r = rules[f"general.bc_table_1020_2_{rid}"]
+        assert _cites(r, 344, line), rid
+        many = (over or 0) + 0.5                                   # just past the row's load (any load for "All")
+        for g in groups:
+            for system, need in ((NFPA13, with_), (NONE, without)):
+                given = {"occupancy_group": g} | system | NO_UNITS
+                if need is None:                                  # Not Permitted
+                    assert _one(r, "corridor", _rating(many, 5), given, ctx) == "fail", (g, line)
+                    continue
+                if need:
+                    assert _one(r, "corridor", _rating(many, need), given, ctx) == "pass", (g, line)
+                    # 1020.2's exceptions (p.343) and note b (Group I-3's reduction, 408.8) need review short of it
+                    short = "needs_review" if (g in EXCEPTED and system is NONE) or (g == "I-3" and system is NFPA13)                         else "fail"
+                    assert _one(r, "corridor", _rating(many, need - 0.25), given, ctx) == short, (g, line)
+                else:
+                    assert _one(r, "corridor", _rating(many), given, ctx) == "pass", (g, line)    # 0: none asked
+            if over is not None:                                  # at the row's load: no rating asked
+                assert _one(r, "corridor", _rating(over), {"occupancy_group": g} | NONE | NO_UNITS, ctx) == "pass", g
+    # note d (p.344 lines 17-18): Group R-3 and R-4 with 903.3.1.3 (NFPA 13D), 1 hour; R-1 and R-2 have no such cell
+    r = rules["general.bc_table_1020_2_r"]
+    d13 = {S1: False, S2: False, "sprinklered_903_3_1_3": True} | NO_UNITS
+    assert _cites(r, 344, 17)
+    assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-3"} | d13, ctx) == "pass"
+    assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": "R-3"} | d13, ctx) == "fail"
+    # review round 1 of group 4b: note d's 903.2.8 permits 13D in Group R-4 only in Condition 1 (903.2.8.2, p.271),
+    # which isn't stated: never a pass on it; under 1 hour it fails either way (round 2)
+    for h in (1, 2):
+        assert _one(r, "corridor", _rating(11, h), {"occupancy_group": "R-4"} | d13, ctx) == "needs_review", h
+    assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": "R-4"} | d13, ctx) == "fail"
+    assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-2"} | d13, ctx) == "fail"
+    # note c's 903.3.1.2 (NFPA 13R): Group R's 0.5 hour; elsewhere "where allowed", a person's check
+    s13r = {S1: False, S2: True, "sprinklered_903_3_1_3": False} | NO_UNITS
+    assert _one(r, "corridor", _rating(11, 0.5), {"occupancy_group": "R-2"} | s13r, ctx) == "pass"
+    for rid, g in (("h1_h2_h3", "H-1"), ("i1_i3", "I-1"), ("i2", "I-2"), ("i4", "I-4"), ("a_b_e_f_m_s_u", "M")):
+        assert _one(rules[f"general.bc_table_1020_2_{rid}"], "corridor", _rating(31, 0.5),
+                    {"occupancy_group": g} | s13r, ctx) == "needs_review", rid
+    # exception 2 (p.343 lines 47-48): a corridor within a dwelling or sleeping unit, stated or not ruled out
+    for units in ({"corridors_within_dwelling_units": True}, {}):
+        assert _one(r, "corridor", _rating(11, 0), {"occupancy_group": "R-2"} | NONE | units, ctx) == "needs_review"
+    # note b (p.344 line 15): Group I-3's reduction (408.8) under 1 hour with a sprinkler system
+    assert _one(rules["general.bc_table_1020_2_i1_i3"], "corridor", _rating(5, 0.5),
+                {"occupancy_group": "I-3"} | NFPA13, ctx) == "needs_review"
+    # a building of two or more groups, or one whose group isn't stated, never passes
+    assert rules["general.bc_table_1020_2_other_occupancies"]["applies_when"] == 'occupancy_group == "mixed"'
+    for rid in ("a_b_e_f_m_s_u", "r", "i4"):
+        rr = rules[f"general.bc_table_1020_2_{rid}"]
+        assert _one(rr, "corridor", _rating(5, 2), {"occupancy_group": "mixed"} | NFPA13, ctx) == "not_applicable"
+        assert _one(rr, "corridor", _rating(5, 2), NFPA13, ctx) == "needs_review"
+
+
+def test_table_1020_3_within_a_dwelling_unit_needs_review_only_while_not_ruled_out(ctx, rules):
+    """Group 4b: Table 1020.3's 36 in within a dwelling unit (p.344 line 30) needs review only while the building
+    states it has such corridors or doesn't say; stated no, a 43.5 in corridor serving 50 fails."""
+    r = rules["general.bc_table_1020_3_corridor_width"]
+    base = {"occupancy_group": "R-2", "ambulatory_care_facility": False}
+    for units, want in (({"corridors_within_dwelling_units": True}, "needs_review"), ({}, "needs_review"),
+                        (NO_UNITS, "fail")):
+        assert _one(r, "corridor", _corridor(43.5, 50), base | units, ctx) == want, units
+
+
+def test_more_than_one_reads_the_same_comparison_in_every_piece():
+    """Review round 1 of group 5b (P3): 1005.5's 'Where more than one exit ... is required' was read 'none' while
+    1020.5's same words read '>': the second reading says what the printed sentence says of each number, so 'more
+    than <n>' is '>' everywhere in this book (a condition, but a comparison all the same)."""
+    pieces = load(NY / "text_verification.yaml")["pieces"]
+    seen = []
+    for pid, e in pieces.items():
+        for n, comp in zip(e["second_reading_numbers"], e["second_reading_comparisons"]):
+            if str(n).startswith("more than "):
+                seen.append((pid, n, comp))
+    assert seen and all(comp == ">" for _, _, comp in seen), [x for x in seen if x[2] != ">"]
+
+
+def test_the_readmes_not_brought_in_list_names_no_section_brought_in():
+    """Review round 1 of group 5c (P3): the README listed 1005.7 as not brought in after this group brought it in.
+    Every section number in its 'References in the brought-in sections that are not brought in' list is neither a
+    brought-in section nor one under it."""
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    listed = readme.split("## References in the brought-in sections that are not brought in", 1)[1].split("\n## ", 1)[0]
+    brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
+    ids = [str(x) for x in brought["sections"] + brought["alone"] if not str(x).startswith("Table")]
+    tables = {str(x) for x in brought["sections"] if str(x).startswith("Table")}
+    # round 2: tables by name first ("Table 1006.3.4(1)", "Tables 705.5 and 705.9"), before brackets are dropped
+    named = []
+    # ("Table 1017.2's note a lists": a brought-in table named as the source of a reference, not as one)
+    # round 3: "Tables X and Y" names two tables; "Table X and Y" a table and a section (Y stays for the section check)
+    num = r"\d{3,4}(?:\.\d+)*(?:\(\d\))?"
+    plural = rf"Tables ({num}) and ({num})(?!'s)"
+    single = rf"Table ({num})(?![\d.(]|'s)"
+    for m in re.finditer(plural, listed):
+        named += [f"Table {g}" for g in m.groups()]
+    for m in re.finditer(single, listed):
+        named.append(f"Table {m.group(1)}")
+    bad = [t for t in named if t in tables]
+    listed = re.sub(plural, "", listed)
+    listed = re.sub(single, "", listed)
+    listed = re.sub(rf"Table {num}'s", "", listed)       # a table named as a reference's source
+    listed = re.sub(r"\([^()]*\)", "", listed)             # what a reference is for, in brackets, may name a section
+    # the parts under a section brought in alone ("903.3.1.2's parts"); a section brought in whole has its parts in
+    listed = re.sub(r"(\d{3,4}(?:\.\d+)*)'s parts", lambda m: "" if m.group(1) in brought["alone"] else m.group(1),
+                    listed)
+    bad += [n for n in re.findall(r"\b\d{3,4}(?:\.\d+)*\b", listed)
+            if any(n == b or (n.startswith(b + ".") and b not in brought["alone"]) for b in ids)]
+    assert named and not bad, bad

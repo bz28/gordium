@@ -208,6 +208,8 @@ public static class SetupFacts
         Marks.DwellingUnits.Guid, Marks.UnitsInAttachedBuilding.Guid, Marks.RoomsLetForProfit.Guid, Marks.AdusOnParcel.Guid,
         Marks.AccessoryDwellingUnit.Guid, Marks.AduDetached.Guid, Marks.HomeOccupation.Guid, Marks.OwnerOccupied.Guid,
         Marks.UnrelatedPersons.Guid, Marks.FunctionalFamilyUnit.Guid,
+        Marks.HomeOccupationArea.Guid, Marks.HomeOccupationUnitArea.Guid, Marks.AduExistingBuilding.Guid,
+        Marks.AduBedrooms.Guid, Marks.AduFloorArea.Guid, Marks.MainBuildingFloorArea.Guid,
     ];
 
     /// <summary>The choices of a Text mark whose words Gordium lists (by GUID). The zone and use come from the place's
@@ -218,6 +220,7 @@ public static class SetupFacts
         [Marks.GroundFrom.Guid] = () => Marks.GroundWords.Select(w => new FieldChoice(w.Word, w.Word)).ToList(),
         [Marks.OccupancyGroups.Guid] = () => OccupancyGroupWords.Words.Select(w => new FieldChoice(w, w)).ToList(),
         [Marks.SprinklerSystem.Guid] = () => SprinklerWords.Table.Words.Select(w => new FieldChoice(w, w)).ToList(),
+        [Marks.R2SleepingUnits.Guid] = () => R2UnitWords.Table.Words.Select(w => new FieldChoice(w, w)).ToList(),
     };
 
     /// <summary>What a project mark holds, or null.</summary>
@@ -356,13 +359,18 @@ public static class SetupFacts
                     fields.Add(new(m, label, kind, group, required, choices ?? [], text, Plain.TryGetValue(m.Guid, out var plain) ? plain : law, problem));
                     break;
                 }
-                case MarkValueKind.Length:
+                case MarkValueKind.Length or MarkValueKind.Area:
                 {
                     // shown and typed in the project's length units, as Revit's own dialogs show it; feet inside
-                    var unit = LengthUnits.Of(model.DisplayUnits);
+                    // an area likewise in the project's area units, square feet inside
+                    var area = m.Kind == MarkValueKind.Area;
+                    var unit = area ? AreaUnits.Of(model.AreaDisplayUnits) : LengthUnits.Of(model.DisplayUnits);
                     var shown = LengthUnits.Shown(Marks.Length(v), unit);
-                    var note = unit.Known ? "" : $" This project's length units ({model.DisplayUnits}) aren't ones Gordium reads: type feet here.";
-                    fields.Add(new(m, SetupWords.Label(m, noun, unit.Symbol), FieldKind.Feet, group, required, [], shown, law + note, null)
+                    var note = unit.Known ? ""
+                        : area ? $" This project's area units ({model.AreaDisplayUnits}) aren't ones Gordium reads: type square feet here."
+                        : $" This project's length units ({model.DisplayUnits}) aren't ones Gordium reads: type feet here.";
+                    fields.Add(new(m, area ? SetupWords.Label(m, noun, areaUnit: unit.Symbol) : SetupWords.Label(m, noun, unit.Symbol),
+                                   FieldKind.Feet, group, required, [], shown, law + note, null)
                     {
                         LengthUnit = unit,
                         HeldFeet = Marks.Length(v),
@@ -520,7 +528,7 @@ public sealed class SetupDraft
                 problems.Add(f.Kind switch
                 {
                     FieldKind.Number => $"{f.Label}: \"{chosen}\" isn't a whole number {SetupFacts.Least(f.Mark)} or more: not saved",
-                    FieldKind.Feet => $"{f.Label}: \"{chosen}\" isn't a length in {f.LengthUnit.Words}, 0 or more (a number such as 18.5): not saved",
+                    FieldKind.Feet => $"{f.Label}: \"{chosen}\" isn't {(f.LengthUnit.Quantity == "area" ? "an area" : "a length")} in {f.LengthUnit.Words}, 0 or more (a number such as 18.5): not saved",
                     FieldKind.StreetPick => $"{f.Label}: pick it on the plan",
                     _ => $"{f.Label}: \"{chosen}\" isn't one of its choices: not saved",
                 });
@@ -610,35 +618,42 @@ public static class SetupWords
     private static readonly Regex HouseCap = new(@"\bHouse\b", RegexOptions.CultureInvariant);
 
     /// <summary>Words written for a house, said for this building ("This house has no stairs" → "This building has no
-    /// stairs" on a day care).</summary>
+    /// stairs" on a day care). The law's words, quoted ("..."), are never changed (review round 1: §325-8B(1)'s "a one
+    /// family house or a two-family house" was shown as "a one family building").</summary>
     public static string InBuildingWords(string words, string noun)
     {
         ArgumentNullException.ThrowIfNull(words);
         if (noun == "house")
             return words;
-        return HouseCap.Replace(House.Replace(words, noun), char.ToUpperInvariant(noun[0]) + noun[1..]);
+        var parts = words.Split('"');
+        for (var i = 0; i < parts.Length; i += 2)                 // the even parts are outside the quotes
+            parts[i] = HouseCap.Replace(House.Replace(parts[i], noun), char.ToUpperInvariant(noun[0]) + noun[1..]);
+        return string.Join('"', parts);
     }
 
     /// <summary>A mark's name in the form: without "Gordium: ", in the building's words, with what its number is:
     /// "(count)", or a length's unit as the form takes it (<paramref name="lengthUnit"/>, the project's: "(mm)"; feet
-    /// when not given).</summary>
-    public static string Label(MarkDefinition m, string noun, string? lengthUnit = null)
+    /// when not given), an area's likewise (<paramref name="areaUnit"/>: "(m²)"; square feet when not given; review
+    /// round 1: an area was labelled with the length unit, "(mm)").</summary>
+    public static string Label(MarkDefinition m, string noun, string? lengthUnit = null, string? areaUnit = null)
     {
         var name = m.Name.StartsWith("Gordium: ", StringComparison.Ordinal) ? m.Name["Gordium: ".Length..] : m.Name;
-        var unit = m.Kind == MarkValueKind.Length ? lengthUnit ?? LengthUnits.Feet.Symbol : Marks.Unit(m);
+        var unit = m.Kind == MarkValueKind.Length ? lengthUnit ?? LengthUnits.Feet.Symbol
+            : m.Kind == MarkValueKind.Area ? areaUnit ?? AreaUnits.SquareFeet.Symbol : Marks.Unit(m);
         return InBuildingWords(name, noun) + (unit is not null ? $" ({unit})" : "");
     }
 
     /// <summary>The form's notice when a check sent nothing, in plain words from what is missing (never the marks'
     /// typing instructions): the street edge kept no longer on the lot (or matching two edges), or the facts not set.</summary>
-    public static string NothingSent(StreetRefusal refused, IReadOnlyList<MarkDefinition> notSet, string noun, string? lengthUnit = null)
+    public static string NothingSent(StreetRefusal refused, IReadOnlyList<MarkDefinition> notSet, string noun, string? lengthUnit = null,
+                                     string? areaUnit = null)
     {
         ArgumentNullException.ThrowIfNull(notSet);
         if (refused == StreetRefusal.NoLongerAnEdge)
             return "The property line changed, so the street edge needs picking again. Nothing was checked.";
         if (refused == StreetRefusal.Ambiguous)
             return "The street edge matches two edges of the lot (an arc and its chord), so it needs picking again. Nothing was checked.";
-        var names = notSet.Select(m => SetupSteps.Title(m, Label(m, noun, lengthUnit)).ToLowerInvariant()).ToList();
+        var names = notSet.Select(m => SetupSteps.Title(m, Label(m, noun, lengthUnit, areaUnit)).ToLowerInvariant()).ToList();
         if (notSet.Contains(Marks.Zone))
             return "Choose the zoning district first: it decides which rules apply. Nothing was checked" +
                    (names.Count > 1 ? $"; also not set: {string.Join(", ", names.Where(n => n != "zoning district"))}." : ".");
@@ -647,13 +662,13 @@ public static class SetupWords
     }
 
     /// <summary>What a fact not set leaves when the architect checks anyway: each is needs review, never a pass.</summary>
-    public static string SentWithout(MarkDefinition m, string noun, string? lengthUnit = null) =>
+    public static string SentWithout(MarkDefinition m, string noun, string? lengthUnit = null, string? areaUnit = null) =>
         m == Marks.Use ? "Use not set: every rule that turns on the use needs review."
         : m == Marks.LotSurveyed ? "Lot surveyed not set: the property line is read as traced from the tax map (its 2 ft accuracy), never as surveyed."
         : m == Marks.StreetEdge ? "Street edge not picked: the front yard, the yards measured from it and the lot width need review."
         : m == Marks.Zone ? "Zone not set: the district chooses the rules, so nothing can be checked without it."
         : m == Marks.Stories ? "Stories holds a count under 1 (a count is 1 or more), so it wasn't sent: height and stories need review."
-        : $"{Label(m, noun, lengthUnit)}: what it holds isn't one of Gordium's words, so it wasn't sent: the rows it decides need review.";
+        : $"{Label(m, noun, lengthUnit, areaUnit)}: what it holds isn't one of Gordium's words, so it wasn't sent: the rows it decides need review.";
 }
 
 /// <summary>The facts inside the building, as the checklist's lines.</summary>
@@ -1009,6 +1024,10 @@ public static class SetupChecklist
 /// and whether it is the project's own (false: the project's units aren't ones Gordium reads, and feet are used).</summary>
 public sealed record LengthUnit(string Symbol, string Words, double PerFoot, bool Known = true)
 {
+    /// <summary>What it measures, for the form's words: "length" (per foot), or "area" (an <see cref="AreaUnits"/> unit:
+    /// <see cref="PerFoot"/> is then per square foot).</summary>
+    public string Quantity { get; init; } = "length";
+
     /// <summary>A number typed in this unit, in feet: typed / units per foot, as Revit converts it (6.096 m is exactly
     /// 20 ft; times a feet-per-unit factor gave 19.999999999999996, which fails 20 ft).</summary>
     public double ToFeet(double typed) => typed / PerFoot;
@@ -1045,7 +1064,36 @@ public static class LengthUnits
     }
 
     /// <summary>A length in feet as the form shows it in <paramref name="unit"/> (to 6 places, so 22.5 ft is 6858 mm,
-    /// never 6858.000000000001), or null.</summary>
+    /// never 6858.000000000001), or null. An area likewise, from square feet in an <see cref="AreaUnits"/> unit.</summary>
     public static string? Shown(double? feet, LengthUnit unit) =>
         feet is { } f ? Math.Round(unit.FromFeet(f), 6).ToString("0.######", CultureInfo.InvariantCulture) : null;
+}
+
+/// <summary>The project's area display unit (<c>RevitModel.AreaDisplayUnits</c>) as the Setup form uses it, so an area
+/// typed there is the area Revit's own dialogs show for the same number: each unit with how many of it make one square
+/// foot (Revit's internal unit, which the mark holds and the check reads).</summary>
+public static class AreaUnits
+{
+    public static readonly LengthUnit SquareFeet = new("sq ft", "square feet", 1) { Quantity = "area" };
+
+    private static readonly (string Id, LengthUnit Unit)[] Table =
+    [
+        ("squareFeet", SquareFeet),
+        ("squareInches", new("sq in", "square inches", 144) { Quantity = "area" }),
+        ("squareMeters", new("m²", "square meters", 0.09290304) { Quantity = "area" }),
+        ("squareCentimeters", new("cm²", "square centimeters", 929.0304) { Quantity = "area" }),
+        ("squareMillimeters", new("mm²", "square millimeters", 92903.04) { Quantity = "area" }),
+    ];
+
+    /// <summary>The unit of a Revit unit type id ("autodesk.unit.unit:squareMeters-1.0.1"; "SquareFeet", the reader's
+    /// default, is square feet); square feet, marked not known, for any other (said beside the field, never a guessed
+    /// conversion).</summary>
+    public static LengthUnit Of(string? typeId)
+    {
+        if (string.IsNullOrWhiteSpace(typeId) || typeId == "SquareFeet")
+            return SquareFeet;
+        var colon = typeId.IndexOf(':', StringComparison.Ordinal);
+        var id = (colon >= 0 ? typeId[(colon + 1)..] : typeId).Split('-')[0];
+        return Table.FirstOrDefault(t => t.Id == id).Unit ?? SquareFeet with { Known = false };
+    }
 }

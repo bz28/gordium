@@ -43,7 +43,7 @@ import re
 
 from rule_format import formula
 
-from design_checker import code_scope, present
+from design_checker import code_scope, occupant_load, present
 
 MARK, FIX_MODEL, SURVEY, DECIDE, MEASURE, OPEN_QUESTION = ("mark", "fix_model", "survey", "decide", "measure",
                                                          "open_question")
@@ -58,8 +58,12 @@ FIELD_HEADLINES = {
     "building.assembly_fixed_seating": "Say whether any room has fixed assembly seating",
     "building.special_egress_spaces": "Say whether the building has special egress spaces (boiler or electrical rooms, malls…)",
     "building.merchandise_pads": "Say whether the store has merchandise pads",
-    "building.r2_sleeping_units": "Say whether the Group R-2 is of sleeping units (not dwelling units)",
+    "building.r2_sleeping_units": "Say whether the Group R-2 units are all sleeping units, all dwelling units, or both",
     "building.emergency_escape_openings_1031": "Say whether every sleeping room has an emergency escape opening (1031)",
+    "building.occupied_outdoor_areas": "Say whether the occupants use outdoor areas (yards, patios, roofs: 1004.7)",
+    "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
+    "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
+    "building.emergency_voice_alarm_system": "Say whether the building has an emergency voice/alarm communication system (907.5.2.2)",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",
     "facts.ground_is_flat": "Say whether the ground is flat",
@@ -162,6 +166,9 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
             return {**base, "kind": MARK, "key": f"field:{field}", "field": field,
                     "headline": FIELD_HEADLINES.get(field) or f"Set the {name}"}
         stated = STOPS["stated_not_given"].split("{what}")[0]
+        if key.startswith("mark:") and occupant_load.FUNCTION_STATED in words:   # a room's function: its own mark
+            return {**base, "kind": MARK, "key": f"field:{occupant_load.FUNCTION_FIELD}",
+                    "field": occupant_load.FUNCTION_FIELD, "headline": "Set the room's function"}
         if key.startswith("mark:") and isinstance(measure, str) and stated in words:
             name = _measure_name(measure, rule_kind)
             return {**base, "kind": MEASURE,

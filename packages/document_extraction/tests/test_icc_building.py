@@ -135,3 +135,15 @@ def test_a_definition_brought_in_by_name_comes_in_with_why_and_a_stale_name_is_a
     stale = {**BROUGHT_IN, "definitions": {"202:floor_area_net": "No such term on these pages."}}
     assert any("brought_in.definitions names 202:floor_area_net" in p
                for p in icc_sections.split(_book(), stale, STYLE)["problems"])
+
+
+def test_a_raised_letter_before_a_slash_ends_a_cell_so_both_numbers_are_read():
+    """Section group 4b: Table 1020.2 prints "0.5[fnc]/1[fnd]" (p.344 line 10: 0.5 hour with note c, 1 hour with note
+    d). Read as one fraction "0.5/1" it was neither number; the mark before the slash ends the first cell."""
+    assert [shown(s) for s in statements("R Greater than 10 Not Permitted 0.5[fnc]/1[fnd]")] == [
+        "greater than 10", "0.5", "1"]
+    assert [shown(s) for s in statements("a ratio of 1/2 and 3[fn2] m")] == ["1/2", "and 3 m"]   # a fraction stays one
+    # review round 1 of group 4b: only a note letter's mark ends a cell; a raised digit before a slash is a stacked
+    # fraction's top, read as before (Table 716.1's "2 1[fn1]/ 2" hours, a drawing's "[fn5]/8 IN.")
+    assert "1" not in [shown(s) for s in statements("2 1[fn1]/ 2 W-120")]
+    assert "8 inch" not in [shown(s) for s in statements("[fn5]/8 IN. MIN. TO EDGE")]

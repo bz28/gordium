@@ -143,7 +143,11 @@ public static class BuildingFacts
                      // what the Building Code's Chapter 10 rules read of the whole building (code_scope.FACTS)
                      (Marks.AssemblyFixedSeating, "assembly_fixed_seating"), (Marks.SpecialEgressSpaces, "special_egress_spaces"),
                      (Marks.MerchandisePads, "merchandise_pads"), (Marks.EgressBalconyIncrease, "egress_balcony_increase_taken"),
-                     (Marks.Atrium, "building_has_atrium") })
+                     (Marks.Atrium, "building_has_atrium"),
+                     // group 2's (Table 1006.3.4 note a): a Group R-2's escape openings per 1031
+                     (Marks.EscapeOpenings1031, "emergency_escape_openings_1031"),
+                     // group 3's: outdoor areas the occupants use (1004.7), and 1004.5.1's increased occupant load
+                     (Marks.OccupiedOutdoorAreas, "occupied_outdoor_areas"), (Marks.OccupantLoadIncreased, "occupant_load_increased") })
         {
             var v = Get(mark);
             if (Marks.YesNo(v) is { } yes)
@@ -177,6 +181,22 @@ public static class BuildingFacts
                 notRead.Add(Marks.OccupancyGroups);
                 missing.Add($"{Marks.OccupancyGroups.Name} is \"{groups}\": type the Building Code's groups separated by " +
                             $"commas ({OccupancyGroupWords.Listed}), or leave it blank{Where}.");
+            }
+        }
+        // what a Group R-2's units are (Table 1006.3.4's notes b and c): all sleeping units true, all dwelling units
+        // false, both nothing (not stated: both tables' rows need review); another word asked again, sent as typed
+        if (Marks.Text(Get(Marks.R2SleepingUnits)) is { } units)
+        {
+            if (R2UnitWords.Table.Of(units) is { } word)
+            {
+                if (word != R2UnitWords.Both)
+                    b["r2_sleeping_units"] = word == "true";
+            }
+            else
+            {
+                b["r2_sleeping_units"] = units;
+                notRead.Add(Marks.R2SleepingUnits);
+                missing.Add($"{Marks.R2SleepingUnits.Name} is \"{units}\": type one of {R2UnitWords.Table.Listed}, or leave it blank{Where}.");
             }
         }
         if (Marks.Text(Get(Marks.SprinklerSystem)) is { } system)
@@ -295,16 +315,24 @@ public static class ProjectFacts
         (Marks.UnrelatedPersons, "unrelated_persons", 0), (Marks.OwnerOccupied, "owner_occupied", 0),
         (Marks.FunctionalFamilyUnit, "functional_family_unit", 0), (Marks.GarageCars, "garage_cars", 0),
         (Marks.PrivateGarages, "private_garages", 1),
+        // the lot facts the worker's cards asked for with no mark to set (an area in square feet, a count, a yes/no)
+        (Marks.AbutsR1, "abuts_r1_district", 0), (Marks.Conversion, "conversion", 0),
+        (Marks.PrimaryBuildings, "primary_buildings", 1), (Marks.PrimaryBuildingsSameUse, "primary_buildings_same_use", 0),
+        (Marks.HomeOccupationArea, "home_occupation_area", 0), (Marks.HomeOccupationUnitArea, "home_occupation_unit_area", 0),
+        (Marks.AduExistingBuilding, "adu_existing_building", 0), (Marks.AduBedrooms, "adu_bedrooms", 0),
+        (Marks.AduFloorArea, "adu_floor_area", 0), (Marks.MainBuildingFloorArea, "primary_floor_area", 0),
     ];
 
     /// <summary>Adds each house fact set to <paramref name="facts"/>, and returns the ones holding what Gordium can't
     /// send, each with why in plain words: a value of another kind than the mark's (a Yes/No that isn't 1 or 0, text in
-    /// a number), a count under its least, a length under 0 or not a number. A blank one is neither: not stated.</summary>
+    /// a number), a count under its least, a length or an area under 0 or not a number. A blank one is neither: not
+    /// stated.</summary>
     public static IReadOnlyList<(MarkDefinition Mark, string Problem)> HouseFacts(RevitModel model, JsonObject? facts = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         var problems = new List<(MarkDefinition, string)>();
         var unit = LengthUnits.Of(model.DisplayUnits);          // a length's messages in the project's units, as it is typed
+        var areaUnit = AreaUnits.Of(model.AreaDisplayUnits);    // an area's, likewise
         foreach (var (mark, key, least) in HouseFactMarks)
         {
             if (!model.ProjectMarks.TryGetValue(mark.Guid, out var v) || !v.HasValue)
@@ -331,6 +359,16 @@ public static class ProjectFacts
                     break;
                 case MarkValueKind.Length when Marks.Length(v) is { } feet:
                     problems.Add((mark, $"is {LengthUnits.Shown(feet, unit)} {unit.Symbol}: type a length of 0 {unit.Symbol} or more, or leave it blank"));
+                    break;
+                // an area: square feet as Revit holds it (its internal unit), sent as is, never rounded
+                case MarkValueKind.Area when Marks.Area(v) is { } squareFeet && squareFeet >= 0:
+                    if (facts is not null) facts[key] = squareFeet;
+                    break;
+                case MarkValueKind.Area when Marks.Area(v) is { } squareFeet:
+                    problems.Add((mark, $"is {LengthUnits.Shown(squareFeet, areaUnit)} {areaUnit.Symbol}: type an area of 0 {areaUnit.Symbol} or more, or leave it blank"));
+                    break;
+                case MarkValueKind.Area:
+                    problems.Add((mark, $"holds a value that isn't an area: type an area in {areaUnit.Words}, or leave it blank"));
                     break;
                 default:
                     problems.Add((mark, $"holds a value that isn't a length: type a length in {unit.Words}, or leave it blank"));
