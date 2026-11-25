@@ -636,7 +636,7 @@ The four-unit apartment's answer (`answers/four_unit_apartment_check_answer.json
 results as "What to fix" and "By code", UI polish PR 2) is the worker's answer to Ben's 2026-11-23 trial request,
 `test_data/test_sites/new_york/ithaca_city/four_unit_apartment/revit_check_site_request.json`: `design_checker.__main__.answer`
 on that request, written with `json.dumps(answer, indent=1, ensure_ascii=False)`. Make it again whenever the checker's
-answer to it changes (`apps/revit_addin/tools/tests/test_pane_answer_fresh.py` fails until it is).
+result for it changes (the `about` fingerprints aside) (`apps/revit_addin/tools/tests/test_pane_answer_fresh.py` fails until it is).
 
 **Where Revit's thread went: `ui_thread`** (PR 8). Each `check_project` line from the button or the panel ends
 with `ended` (`shown`, `shown_stale`, `nothing_sent`, `cancelled`, `failed`), `answer_use`, `cancelled` (the stage
