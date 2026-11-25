@@ -81,9 +81,7 @@ def measure(description, clearance: float = CLEARANCE) -> dict:
     for level, story in floor.stories.items():
         uses = {rid: (items.get(rid) or {}).get("use") for rid in story.rooms}
         here = [u for u in unknown if u.get("level") == level]
-        building = description.get("building")
-        outdoor_ruled_out = isinstance(building, dict) and building.get("occupied_outdoor_areas") is False
-        toward.update(_egress_sides(story, _story_parts(story, uses, items, here, parts, clearance), outdoor_ruled_out))
+        toward.update(_egress_sides(story, _story_parts(story, uses, items, here, parts, clearance)))
     parts["means_of_egress_door"] = door_parts(description, floor, toward)   # every door given (section group 6a)
     if floor.stops:                                      # a part that can't be placed on a story: none is "none"
         for u in unknown:
@@ -157,21 +155,22 @@ def _story_parts(story, uses, items, unknown, parts, r):
     return access if routes is not None else None
 
 
-def _egress_sides(story, access, outdoor_ruled_out=False) -> dict:
+def _egress_sides(story, access) -> dict:
     """{door id: the side (a room id, or "outside") egress travel goes into through it, or the Stop why that isn't
     known} for each door the story's routes read (section group 6b, 1010.1.2.1: "swing in the direction of egress
     travel"). Known only where the door can carry egress one way alone (review round 1 of section group 6b):
 
-    - An exit door into an exit enclosure or passageway (the room it enters): into the exit, only where that room has
-      its own door to outside on this story or the story has no door to outside at all, so the door can't be the
-      exit's discharge (1028.1's discharge through a lobby or corridor runs out of the stair through it). An exit door
-      to outside: outside.
-    - Any other door to outside: outside, only where the building states it has no occupied outdoor areas (1004.7: a
-      patio or roof whose way out is back through the building egresses inward through it).
+    - A door into an exit enclosure or passageway (the room it enters): into the exit, only where that room has its own
+      door to outside on this story or the story has no door to outside at all, so the door can't be the exit's
+      discharge (1028.1's discharge through a lobby or corridor runs out of the stair through it). A horizontal exit:
+      not known (the routes count it an exit for the rooms on both its sides; it is often used both ways, 1026).
+    - Any door to outside: outside. Whether an occupied patio or roof egresses back in through it (1004.7) is the
+      swing rule's own condition (the building's occupied outdoor areas), so the panel asks that fact.
     - Any other: away from the one room whose exit access it is (a door from which a route reaches an exit without
-      coming back into the room), only where that room is one no route crosses (end-only: decision 1a), so no one
-      else's route runs back through the door into it (a corridor's occupants crossing a pass-through room to its
-      own exit).
+      coming back into the room), only where that room is stated end-only (sleeping, an end-only use, lockable, or
+      pass_through stated false: `end_only_stated`), so no one else's route runs back through the door into it (a
+      corridor's occupants crossing a lobby to its own front door); a room whose crossing isn't stated may be crossed
+      (review rounds 1 and 2).
 
     Else not known; a story whose routes aren't measured: every door not known."""
     out = {}
@@ -184,14 +183,14 @@ def _egress_sides(story, access, outdoor_ruled_out=False) -> dict:
         if d.exit_kind:
             if OUTSIDE_SIDE in d.sides:
                 out[d.id] = OUTSIDE_SIDE
-            elif d.exit_id in d.sides:
+            elif d.exit_kind in ("exit_enclosure", "exit_passageway") and d.exit_id in d.sides:
                 own_outside = any(d.exit_id in story.doors[o].sides for o in outside_doors)
                 out[d.id] = d.exit_id if own_outside or not outside_doors else unclear(d)
             else:
                 out[d.id] = unclear(d)
             continue
         if OUTSIDE_SIDE in d.sides:
-            out[d.id] = OUTSIDE_SIDE if outdoor_ruled_out else unclear(d)
+            out[d.id] = OUTSIDE_SIDE
             continue
         rooms = [s for s in d.sides if s != OUTSIDE_SIDE]
         if any(isinstance(access.get(s), Stop) for s in rooms):
@@ -199,7 +198,7 @@ def _egress_sides(story, access, outdoor_ruled_out=False) -> dict:
             continue
         from_ = [s for s in rooms if d.id in (access.get(s) or {})]
         room = story.rooms.get(from_[0]) if len(from_) == 1 else None
-        out[d.id] = next(s for s in rooms if s != from_[0]) if room is not None and not room.crossable else unclear(d)
+        out[d.id] = next(s for s in rooms if s != from_[0]) if room is not None and room.end_only_stated else unclear(d)
     return out
 
 

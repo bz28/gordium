@@ -293,19 +293,38 @@ def test_a_swing_not_stated_or_not_read_or_a_direction_not_known_leaves_it_unmea
 
 
 def test_egress_direction_is_known_only_where_travel_can_cross_the_door_one_way_alone():
-    """Review round 1 of group 6b (F1, F4): a door from a pass-through room with its own exit onto a corridor may be
-    crossed by the corridor's occupants into the room, so which way egress goes through it isn't known; a door to
-    outside that isn't marked an exit may be an occupied patio's or roof's way back in (1004.7), so it leads outside
-    only where the building states it has no occupied outdoor areas."""
+    """Review rounds 1 and 2 of group 6b: a door from a room with its own exit onto a corridor may be crossed by the
+    corridor's occupants into the room unless the room is stated end-only (a pass-through room, or one whose use,
+    lockable or pass_through isn't given), so which way egress goes through it isn't known; a horizontal exit is used
+    both ways; a door to outside leads outside (whether an occupied patio's occupants come in through it, 1004.7, is
+    the swing rule's own condition on the building's fact)."""
     d = _office(swings_into="c")
     d["rooms"][0].update(lockable=False, pass_through=True)
     d["doors"].append(door("y", (-0.25, 7.5), (0, 1), ("r", "outside"), exit_id="B"))
     got = _parts(d)["d"]
     assert _why(got, "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="d")
+    # round 2: a room whose crossing isn't stated (a lobby, its pass_through, lockable or use left out)
+    for key in ("pass_through", "lockable", "use"):
+        lobby = copy.deepcopy(d)
+        lobby["rooms"][0].update(use="lobby", lockable=False)
+        del lobby["rooms"][0]["pass_through"]
+        if key != "pass_through":
+            lobby["rooms"][0].pop(key)
+        assert _why(_parts(lobby)["d"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(
+            name="d"), key
+    # stated end-only (lockable false, pass_through false): one way, out of the room
+    shut = copy.deepcopy(d)
+    shut["rooms"][0].update(use="other", lockable=False, pass_through=False)
+    assert _parts(shut)["d"]["measures"]["moe_door_swings_with_egress"] is True
+    # round 2: a horizontal exit is used both ways
+    two = description([room("a", rect(0, 0, 10, 10), use="other", lockable=False, pass_through=False),
+                       room("b", rect(10.5, 0, 20, 10), use="other", lockable=False, pass_through=False)],
+                      [door("hx", (10.25, 5), (0, 1), ("a", "b"), exit_id="b", kind="horizontal_exit",
+                            swings_into="b"),
+                       door("xa", (-0.25, 5), (0, 1), ("a", "outside"), exit_id="A"),
+                       door("xb", (20.25, 5), (0, 1), ("b", "outside"), exit_id="B")])
+    got = {p["id"]: p for p in measure(two)["parts"]["means_of_egress_door"]}
+    assert _why(got["hx"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="hx")
     patio = _office()
     patio["doors"].append(door("p", (10, -0.25), (1, 0), ("r", "outside"), swings_into="outside"))
-    assert _why(_parts(patio)["p"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="p")
-    patio["building"] = {"occupied_outdoor_areas": False}
     assert _parts(patio)["p"]["measures"]["moe_door_swings_with_egress"] is True
-    patio["building"] = {"occupied_outdoor_areas": True}
-    assert "moe_door_swings_with_egress" not in _parts(patio)["p"]["measures"]

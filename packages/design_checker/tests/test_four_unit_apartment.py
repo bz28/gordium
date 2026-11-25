@@ -389,3 +389,20 @@ def test_a_stair_that_may_discharge_through_the_corridor_never_passes_on_its_doo
     rows = {r["id"]: r["outcome"] for r in stated["rows"] if r["rule"] == SWING}
     assert rows["L1W"] == present.REVIEW and stated["results"][SWING] == present.REVIEW
     assert rows["L2W"] == "pass"
+
+
+def test_a_swing_waiting_on_outdoor_areas_asks_for_that_fact_never_a_model_fix(got):
+    """Review round 2 of group 6b (P3): a door swing that waits on whether the occupants use outdoor areas (a door to
+    outside that isn't an exit; a door's load, which 1004.7 leaves unbounded) asks the building's fact, which has a
+    Revit mark (Gordium: Occupied outdoor areas), never 'fix the model'."""
+    from design_checker import ui_data
+    desc = build.interior_of()
+    for d in desc["doors"]:
+        d["swings_into"] = d["sides"][1]
+    for case in (_check(desc, egress.measure_routes(desc)), got):          # swings stated; nothing stated
+        items = [i for i in case["items"] if i.get("rule") == SWING and i["status"] == present.REVIEW]
+        assert items
+        for i in items:
+            asks = [ui_data._from_cause(c, "means_of_egress_door") for c in i.get("causes") or []]
+            assert "building.occupied_outdoor_areas" in {a.get("field") for a in asks}, i["name"]
+            assert not any(a["headline"].startswith("Fix the model") for a in asks), (i["name"], asks)

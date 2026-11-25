@@ -986,7 +986,7 @@ def test_1010_1_2_1_swing_at_its_limit_and_just_past(ctx, rules):
     r = rules["general.bc_1010_1_2_1_direction_of_swing"]
     assert _cites(r, 323, 24) and _cites(r, 323, 25)
     one = lambda m, g: _one(r, "means_of_egress_door", m, {"occupancy_group": g}, ctx)
-    against = {"moe_door_swinging": True, "moe_door_swings_with_egress": False}
+    against = {"moe_door_swinging": True, "moe_door_swings_with_egress": False, "moe_door_exterior": False, "moe_door_exit": False}
     for g in ("B", "A-2", "R-2"):
         assert one(against | {"moe_door_occupant_load": 49.99}, g) == "pass", g
         assert one(against | {"moe_door_occupant_load": 50}, g) == "fail", g
@@ -997,7 +997,15 @@ def test_1010_1_2_1_swing_at_its_limit_and_just_past(ctx, rules):
     assert one(against | {"moe_door_occupant_load": 50}, "mixed") == "fail"
     assert one({"moe_door_swinging": True, "moe_door_occupant_load": 1}, "H-3") == "needs_review"  # swing not stated
     assert one({"moe_door_swinging": False, "moe_door_occupant_load": 500}, "H-1") == "pass"       # not swinging
-    assert one({"moe_door_swinging": True, "moe_door_swings_with_egress": True, "moe_door_occupant_load": 900}, "B")         == "pass"
+    inside = {"moe_door_exterior": False, "moe_door_exit": False}
+    assert one({"moe_door_swinging": True, "moe_door_swings_with_egress": True, "moe_door_occupant_load": 900} | inside,
+               "B") == "pass"
+    # review round 2: a door to outside that isn't an exit, outdoor areas not ruled out: either way, never decided
+    patio = {"moe_door_swinging": True, "moe_door_exterior": True, "moe_door_exit": False, "moe_door_occupant_load": 900}
+    for swings in (True, False):
+        assert one(patio | {"moe_door_swings_with_egress": swings}, "B") == "needs_review", swings
+        assert _one(r, "means_of_egress_door", patio | {"moe_door_swings_with_egress": swings},
+                    {"occupancy_group": "B", "occupied_outdoor_areas": False}, ctx) == ("pass" if swings else "fail")
 
 
 def test_1010_1_2_door_kind_is_never_a_fail(ctx, rules):

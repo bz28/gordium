@@ -169,6 +169,10 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
         if key.startswith("mark:") and occupant_load.FUNCTION_STATED in words:   # a room's function: its own mark
             return {**base, "kind": MARK, "key": f"field:{occupant_load.FUNCTION_FIELD}",
                     "field": occupant_load.FUNCTION_FIELD, "headline": "Set the room's function"}
+        if key.startswith("mark:") and occupant_load.DOOR_OUTDOOR in words:   # a door's load: the building's fact
+            field = "building." + occupant_load.OUTDOOR                         # settles it (group 6b, round 2)
+            return {**base, "kind": MARK, "key": f"field:{field}", "field": field,
+                    "headline": FIELD_HEADLINES.get(field) or "Say whether the occupants use outdoor areas"}
         if key.startswith("mark:") and isinstance(measure, str) and stated in words:
             name = _measure_name(measure, rule_kind)
             return {**base, "kind": MEASURE,

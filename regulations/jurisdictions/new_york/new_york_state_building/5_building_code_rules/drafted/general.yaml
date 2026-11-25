@@ -13868,9 +13868,13 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Door swings with egress travel at 50 or more, or Group H (BCNYS 1010.1.2.1)
-  check: not moe_door_swinging or moe_door_swings_with_egress or (moe_door_occupant_load < 50 and occupancy_group not in ["H-1",
-    "H-2", "H-3", "H-4", "H-5", "mixed"])
+  check: not moe_door_swinging or moe_door_swings_with_egress or (moe_door_occupant_load < 50 and occupancy_group not in
+    ["H-1", "H-2", "H-3", "H-4", "H-5", "mixed"])
   review_when:
+  - when: moe_door_swinging and moe_door_exterior and not moe_door_exit and occupied_outdoor_areas
+    reason: 'A door to outside that isn''t an exit, in a building whose occupants use outdoor areas (stated, or not ruled
+      out): a patio''s or roof''s occupants may come in through it (1004.7), so which way egress travel goes through it isn''t
+      known: a person checks.'
   - when: occupancy_group == "mixed" and moe_door_occupant_load < 50 and moe_door_swinging and not moe_door_swings_with_egress
     reason: 'Swinging against egress travel and serving under 50, in a building of two or more groups: it must swing with
       egress travel only if a Group H occupancy is among them or it serves one, which isn''t shown: a person checks.'
@@ -13887,6 +13891,7 @@ rules:
       H occupancy.
   examples:
   - given:
+      occupied_outdoor_areas: false
       occupancy_group: B
     parts:
       means_of_egress_door:
@@ -13902,6 +13907,7 @@ rules:
     expect: pass
     note: It swings in the direction of egress travel.
   - given:
+      occupied_outdoor_areas: false
       occupancy_group: B
     parts:
       means_of_egress_door:
@@ -13917,6 +13923,7 @@ rules:
     expect: pass
     note: 'Under 50 occupants, not Group H: either way.'
   - given:
+      occupied_outdoor_areas: false
       occupancy_group: B
     parts:
       means_of_egress_door:
@@ -13932,6 +13939,7 @@ rules:
     expect: fail
     note: '50 or more occupants: it must swing with egress travel.'
   - given:
+      occupied_outdoor_areas: false
       occupancy_group: H-2
     parts:
       means_of_egress_door:
@@ -13947,6 +13955,7 @@ rules:
     expect: fail
     note: 'Group H: with egress travel whatever the load.'
   - given:
+      occupied_outdoor_areas: false
       occupancy_group: mixed
     parts:
       means_of_egress_door:
@@ -13962,6 +13971,7 @@ rules:
     expect: needs_review
     note: 'Two or more groups: whether a Group H occupancy is among them isn''t shown.'
   - given:
+      occupied_outdoor_areas: false
       occupancy_group: B
     parts:
       means_of_egress_door:
@@ -13976,6 +13986,7 @@ rules:
     expect: needs_review
     note: 'Which way it swings isn''t stated: a person checks.'
   - given:
+      occupied_outdoor_areas: false
       occupancy_group: B
     parts:
       means_of_egress_door:
@@ -13989,6 +14000,25 @@ rules:
     expect: pass
     note: 'Not a swinging door: 1010.1.2.1 asks only side-hinged, pivoted and balanced doors (its kind is 1010.1.2''s flag).'
   - given:
+      occupied_outdoor_areas: true
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Patio door swinging out, not an exit, serving 120
+        measures:
+          moe_door_swinging: true
+          moe_door_swings_with_egress: true
+          moe_door_exterior: true
+          moe_door_exit: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A door to an occupied outdoor area that isn''t an exit: the area''s occupants may come in through it (1004.7), so
+      which way egress travel goes through it isn''t known.'
+  - given:
+      occupied_outdoor_areas: false
       occupancy_group: B
     parts:
       means_of_egress_door: []
