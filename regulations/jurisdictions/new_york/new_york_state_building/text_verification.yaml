@@ -12,14 +12,17 @@ second_reading:
     1006.3.3, 1006.3.4 and their tables), a fifth for Table 1006.3.4(1) on 2026-11-23, a sixth for the 23 pieces
     brought in by review round 1 on 2026-11-23 (1006.2.2, 1018.4, 1030.8, 407.4.2 and the 13 definitions their italics
     name), a seventh for 1030.7 and SMOKE-PROTECTED ASSEMBLY SEATING (review round 2, 2026-11-23), an eighth for
-    the 27 pieces of section group 3 (1004, Table 1004.5 and 12 definitions), and a helper for the comparison words)
+    the 27 pieces of section group 3 (1004, Table 1004.5 and 12 definitions), a ninth for the 9 pieces of section
+    group 4's corridor width (1005.3.2, 1020.1, 1020.3, Table 1020.3 and 5 definitions, 2026-11-25), and a helper for
+    the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
-    as step_5, 3 pages, 3 boxes as step_7, and 14 pages, 29 boxes as step_6 (section group 3); p.47''s two and pp.42,
+    as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), and 8 pages, 9 boxes as
+    step_8 (section group 4); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 210 pieces, 518 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 219 pieces, 547 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -77,6 +80,30 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:24_hour_basis:
+    piece_sha256: 23ae5d4bd7b80cf273deabadedccc85cc252290d8192c751eb305258112fa020
+    numbers:
+    - '24'
+    - '24'
+    - '24'
+    second_reading: agrees
+    second_reading_numbers:
+    - '24'
+    - '24'
+    - '24'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  202:ambulatory_care_facility:
+    piece_sha256: f8827fc2c2ee2e25dc6a6469174a5fd88f5b9d5b5ed64f8212626f76f38eaf69
+    numbers:
+    - less than 24
+    second_reading: agrees
+    second_reading_numbers:
+    - less than 24
+    second_reading_comparisons:
+    - <
   202:alternating_tread_device:
     piece_sha256: a058f79e2fd37fafc2c5dc897e49657d3573f111aca84fc61e969a299a4dc432
     numbers:
@@ -355,6 +382,12 @@ pieces:
     - none
   202:custodial_care:
     piece_sha256: 44133a2ce27f0e8a43479860532e14a23db315684f953b34ebe75ba63ffe579a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:defend_in_place:
+    piece_sha256: 1cea632e328d972400a3b32de1eda54e27356b1716305f5b98074704827c2d75
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -659,6 +692,12 @@ pieces:
     second_reading_comparisons: []
   202:information_technology_equipment_facilities_itef:
     piece_sha256: 7f4a216aec668d0b146659fca8173bbfdde05a2e2494f8fac71806644df2fb44
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:incapable_of_self_preservation:
+    piece_sha256: 880ddb9dbc77dfc27fe1035d2d27a00501a3ad3416d559c09ccb2197d91501c9
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -1006,6 +1045,12 @@ pieces:
     flags:
     - '''within one'': ''located within one exit enclosure'' counts the enclosure, no limit: the second reading
       (none) is right.'
+  202:self_preservation_incapable_of:
+    piece_sha256: 50b8c4cbacb15a3e6a86db2597c2e3ac0f0a18d76cb39b1fa3454c3effef76bf
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:self_closing:
     piece_sha256: 6bfda0739cb8a8540ce92bf66e9a0c9669ed2b7b94bc03d2cc03098da01eb33f
     numbers: []
@@ -1804,6 +1849,27 @@ pieces:
     second_reading_numbers:
     - '1004.9'
     second_reading_comparisons:
+    - none
+  1005.3.2:
+    piece_sha256: c3ee309be6c7724ad7150d670b51be58d0eb3e1a9f30556cf0853bb831cd34bf
+    numbers:
+    - 0.2 inch
+    - 5.1 mm
+    - 0.15 inch
+    - 3.8 mm
+    - '909'
+    second_reading: agrees
+    second_reading_numbers:
+    - 0.2 inch
+    - 5.1 mm
+    - 0.15 inch
+    - 3.8 mm
+    - '909'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
     - none
   1006.2.1:
     piece_sha256: 85d4a9fd1b8484c8228e3888e992cbee10ca81d48325c328420fb78e8fa1c65d
@@ -2839,6 +2905,99 @@ pieces:
       30-inch (762 mm) minimum clear width''; the recorded words miss it (numbers.py reads comparison words only
       directly before a number or after its unit). The second reading is right. Used by no rule yet (aisle accessways
       aren''t drawn).'
+  '1020.1':
+    piece_sha256: e089431fd652d4b812d499e864d0d17a933f666ecabb468e2b49b995348ab6d2
+    numbers:
+    - '1020.1'
+    - '1020.2'
+    - '1020.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1020.1'
+    - '1020.2'
+    - '1020.7'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  '1020.3':
+    piece_sha256: b2c136b1270aba75a19b6bed51288c8945bcef9137f11fb204e6a7eda34fed89
+    numbers:
+    - '1020.3'
+    - '1005.1'
+    - '1020.3'
+    - 96 inch
+    - 2438 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1020.3'
+    - '1005.1'
+    - '1020.3'
+    - 96 inch
+    - 2438 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    flags:
+    - '''96 inch'' (>=), the clear width the exception names (Group I-2 corridors need not have it where beds and
+      stretchers don''t move): Table 1020.3''s row for Group I-2 is a minimum, so the exception''s 96 inches is the
+      width it lifts. Recorded ''none'' (the sentence prints no comparison word beside it); the second reading is
+      right.'
+  Table 1020.3:
+    piece_sha256: 4a8a2129be81b04c677060c0e7e069878b587bef4b4754839c39c6d3be72d4af
+    numbers:
+    - '1020.3'
+    - '44'
+    - '24'
+    - less than 50
+    - '36'
+    - 36 inch
+    - 100 or more
+    - 72 inch
+    - '72'
+    - '96'
+    - 1 inch
+    - 25.4 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1020.3'
+    - '44'
+    - '24'
+    - less than 50
+    - '36'
+    - 36 inch
+    - 100 or more
+    - 72 inch
+    - '72'
+    - '96'
+    - 1 inch
+    - 25.4 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - '>='
+    - <
+    - '>='
+    - '>='
+    - '>='
+    - '>='
+    - '>='
+    - '>='
+    - none
+    - none
+    flags:
+    - 'Width cells: ''44'', ''24'', ''36'', ''72'', ''96'' (>=), each a length in inches (the table prints ''(inches)''
+      only in its column heading MINIMUM WIDTH, never beside the number; read on the page image, one width a row).
+      The table prints no comparison words, so each is recorded ''none''; 1020.3 says ''the minimum width shall be
+      not less than that specified in Table 1020.3'', so each is the least a corridor may have: the second reading
+      is right.'
+    - '''36 inch'' and ''72 inch'' (>=): the cells of lines 30 and 31 (Within a dwelling unit 36; In Group E ... 72),
+      which the text reader joins to the next row''s first word ''In'' and so reads with a unit; each is that row''s
+      width in inches, the least a corridor may have, as the other width cells. Recorded ''none''; the second reading
+      is right.'
   '1020.5':
     piece_sha256: 3a8020bc52c9e2bd47f823c3c37f59c86f78c5c113ec84325a82e8dacdf2d3cc
     numbers:

@@ -52,6 +52,11 @@ FACTS = {
     "merchandise_pads": "yes_no",             # Group M merchandise pads (1018.4: their own common path)
     "occupied_outdoor_areas": "yes_no",       # outdoor areas the occupants use (1004.7)
     "occupant_load_increased": "yes_no",      # the design takes 1004.5.1's increased occupant load (up to 1 per 7 sq ft)
+    # section group 4 (corridors): another level's occupants reach a corridor (an unenclosed stairway or ramp, a
+    # mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's load doesn't
+    # bound the corridor's; and the building is (or holds) an ambulatory care facility (Table 1020.3's 72 in)
+    "other_level_egress_into_corridors": "yes_no",
+    "ambulatory_care_facility": "yes_no",
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -301,6 +306,7 @@ DERIVED = {
     "r2_sleeping_units": ("r2_sleeping_units", lambda v: v),
     "emergency_escape_openings_1031": ("emergency_escape_openings_1031", lambda v: v),
     "occupied_outdoor_areas": ("occupied_outdoor_areas", lambda v: v),
+    "ambulatory_care_facility": ("ambulatory_care_facility", lambda v: v),
 }
 
 

@@ -172,6 +172,8 @@ occupancy_group:
   - general.bc_table_1017_2_i2_i3
   - general.bc_table_1017_2_note_d_group_h
   - general.bc_table_1017_2_other_occupancies
+  - general.bc_table_1020_3_corridor_width
+  - general.bc_table_1020_3_other_occupancies
 assembly_fixed_seating:
   meaning: The building has rooms or spaces used for assembly purposes with fixed seating (2025 BCNYS Table 1006.2.1 note
     c, 1030.8; Table 1017.2 note a, 1030.7), as the architect states it
@@ -308,3 +310,9 @@ occupied_outdoor_areas:
   unit: yes_no
   needed_by:
   - general.bc_1004_7_outdoor_areas
+ambulatory_care_facility:
+  meaning: 'The building is or holds an ambulatory care facility (2025 BCNYS 202, Section 422; Group B, 304.1), as the architect
+    states it: Table 1020.3 asks 72 inches of its corridors serving stretcher traffic'
+  unit: yes_no
+  needed_by:
+  - general.bc_table_1020_3_corridor_width

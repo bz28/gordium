@@ -639,3 +639,67 @@ def test_every_occupant_load_factor_is_quoted_word_for_word_from_its_row():
     if ctx.skipped:                                    # no code cache on this machine: every quote said, none passed
         assert len(ctx.skipped) == len(sources), ctx.skipped
         pytest.skip(f"{len(sources)} quotes not checked here: {ctx.skipped[0]}")
+
+
+# ---- section group 4 (2026-11-25): Table 1020.3, corridor width (p.344, lines 27-33) --------------------------------
+
+# Table 1020.3, p.344: line -> the row's width in inches, typed from the page
+TABLE_1020_3 = {27: 44, 28: 24, 29: 36, 30: 36, 31: 72, 32: 72, 33: 96}
+ONE_GROUP = A + ["B", "E", "F-1", "F-2", "H-1", "H-2", "H-3", "H-4", "H-5", "I-1", "I-2", "I-3", "I-4", "M"] + R + \
+    ["S-1", "S-2", "U"]
+
+
+def _corridor(width, load_):
+    return {"corridor_width": width, "corridor_occupant_load": load_}
+
+
+def test_table_1020_3_every_row_passes_at_its_width_and_not_just_short_of_it(ctx, rules):
+    """Each row of Table 1020.3 (p.344) for every group: at its width it passes (where the row is the one that
+    applies), just short of it it fails, or needs review where a looser row the model can't see may apply (24 in to
+    mechanical, plumbing or electrical equipment; 36 in within a dwelling unit; Group I-2's exception, 1020.3, p.344
+    lines 23-24; stretcher traffic in an ambulatory care facility, stated)."""
+    r = rules["general.bc_table_1020_3_corridor_width"]
+    assert all(_cites(r, 344, line) for line in TABLE_1020_3)
+    no_amb = {"ambulatory_care_facility": False}
+    for g in ONE_GROUP:
+        given = {"occupancy_group": g} | no_amb
+        if g == "I-2":
+            assert _one(r, "corridor", _corridor(TABLE_1020_3[33], 200), given, ctx) == "pass"
+            assert _one(r, "corridor", _corridor(TABLE_1020_3[33] - 0.5, 200), given, ctx) == "needs_review"
+            assert _one(r, "corridor", _corridor(TABLE_1020_3[28] - 0.5, 10), given, ctx) == "fail"
+            continue
+        # line 27: any facility not listed, 44 in (50 occupants or more, under 100 for Group E)
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[27], 50), given, ctx) == "pass", g
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[27] - 0.5, 50), given, ctx) == "needs_review", g  # line 30
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[30] - 0.5, 50), given, ctx) == "needs_review", g  # line 28
+        # line 29: fewer than 50 occupants, 36 in
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[29], 49.5), given, ctx) == "pass", g
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[29] - 0.5, 49.5), given, ctx) == "needs_review", g
+        # line 28: 24 in at the least, for any corridor
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[28], 10), given, ctx) == "needs_review", g
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[28] - 0.5, 10), given, ctx) == "fail", g
+        # line 31: Group E with 100 or more, 72 in
+        want = ("pass", "fail") if g == "E" else ("pass", "pass")
+        assert (_one(r, "corridor", _corridor(TABLE_1020_3[31], 100), given, ctx),
+                _one(r, "corridor", _corridor(TABLE_1020_3[31] - 0.5, 100), given, ctx)) == want, g
+    # line 32: stretcher traffic in an ambulatory care facility (Group B, 304.1), stated or not ruled out
+    for amb in ({"ambulatory_care_facility": True}, {}):
+        b = {"occupancy_group": "B"} | amb
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[32], 60), b, ctx) == "pass"
+        assert _one(r, "corridor", _corridor(TABLE_1020_3[32] - 0.5, 60), b, ctx) == "needs_review"
+    # a building of two or more groups, or one whose group isn't stated, never passes
+    assert _one(r, "corridor", _corridor(120, 10), {"occupancy_group": "mixed"}, ctx) == "not_applicable"
+    assert _one(r, "corridor", _corridor(120, 10), {}, ctx) == "needs_review"
+    assert rules["general.bc_table_1020_3_other_occupancies"]["applies_when"] == 'occupancy_group == "mixed"'
+
+
+def test_a_corridor_wide_enough_for_the_table_but_not_its_capacity_needs_review(ctx, rules):
+    """1020.3 asks the capacity of 1005.1 too: 0.2 in per occupant (1005.3.2, p.314 lines 14-16). Past 220
+    occupants a 44 in corridor may need more: needs review, never a pass, until section group 5 checks capacity."""
+    r = rules["general.bc_table_1020_3_corridor_width"]
+    assert _cites(r, 314, 15)
+    given = {"occupancy_group": "B", "ambulatory_care_facility": False}
+    assert _one(r, "corridor", _corridor(44, 220), given, ctx) == "pass"
+    assert _one(r, "corridor", _corridor(44, 221), given, ctx) == "needs_review"
+    assert _one(r, "corridor", _corridor(80, 400), given, ctx) == "pass"
+    assert _one(r, "corridor", _corridor(79.5, 400), given, ctx) == "needs_review"

@@ -28,6 +28,9 @@ that room has an occupant load of its own or one not worked out) carries their l
 cumulative one only where no other room's path is known to pass through it, so such a room's load is left not
 measured. A room the description marks a corridor is never a space; a function stated on one, or on a space that is
 itself an exit, leaves its story's load not measured (said, never dropped). Stories are not added together (1004.2.3).
+A corridor's load (section group 4: Table 1020.3) is two readings, none and the whole story's, only where the
+building states no other level's occupants reach its corridors (`other_level_egress_into_corridors: false`), else not
+worked out (_corridor_loads).
 """
 
 from model_measurement.routes.stops import STOPS
@@ -72,6 +75,22 @@ STORY_NONE = ("no room on the story holds an occupant load of its own (its space
 GROSS_NOT_MEASURED = "the story's gross floor area isn't measured, so the gross-function rooms' share of it can't be"
 AREAS_OVER = ("the story's rooms add up to more than its gross floor area (inside its exterior walls), so the "
               "gross-function rooms' share of it can't be: a room's outline may overlap another's or the walls")
+# a corridor's load (section group 4): the story's bounds it only where no other level's occupants reach it
+OTHER_LEVELS = "other_level_egress_into_corridors"
+CORRIDOR_QUESTION, CORRIDOR_NONE, CORRIDOR_STORY = "corridor_occupants_served", "none", "whole_story"
+CORRIDOR_BY_HAND = STOPS["stated_not_given"].format(what="the occupant load the corridor serves, worked out by hand")
+CORRIDOR_NOT_RULED_OUT = ("the building doesn't say whether another level's occupants reach its corridors (an "
+                          "unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: "
+                          "1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: "
+                          "say so on the building, or " + CORRIDOR_BY_HAND)
+CORRIDOR_OTHER_LEVELS = ("another level's occupants reach the building's corridors (an unenclosed stairway or ramp, a "
+                         "mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the "
+                         "story's occupant load doesn't bound the corridor's: " + CORRIDOR_BY_HAND)
+CORRIDOR_NO_STORY = "the story's occupant load isn't worked out, so the corridor's isn't either"
+CORRIDOR_READINGS = ("given as two readings (none, the least it can serve; {load:.1f}, the whole story's, the most it "
+                     "can serve): the routes don't split a story's occupants between its corridors, so a rule "
+                     "reading it complies only if it complies at the whole story's load, fails only if it fails at "
+                     "none")
 CORRIDOR_FUNCTION = ("{name}'s use is corridor, yet it states the function {f!r}: a corridor holds no occupant load of "
                      "its own (Table 1004.5 has no corridor row), so which it is isn't known")
 
@@ -172,7 +191,42 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
             _give(story, "story_occupant_load", low, high, no_share)
         else:
             story["not_measured"]["story_occupant_load"] = STORY_NONE
+        _corridor_loads(story, [c for c in corridors.values() if c.get("within") == story["id"]], building)
     return parts
+
+
+def _corridor_loads(story: dict, mine: list, building: dict | None) -> None:
+    """Each corridor's occupant load (1020.3, Table 1020.3; 1005.3.2): the occupants whose egress the corridor
+    serves, which the routes don't split between a story's corridors. It is bounded by the story's own load only
+    where no other level's occupants can reach the corridor: 1004.2.3 adds no other story's load "other than for
+    the egress components designed for convergence in accordance with Section 1005.6", and 1004.2.2 adds a
+    mezzanine's to the room or space below it, so the bound holds only where the building states that no
+    unenclosed stairway or ramp, mezzanine, convergence or exit discharge brings another level's occupants into
+    a corridor (`other_level_egress_into_corridors: false`). Then two readings: none (the least it can serve) and
+    the whole story's (its upper reading): a rule reading it passes only at the whole story's load and fails only
+    at none, else needs review. Otherwise not worked out, with why (never the story's load as if it were the
+    corridor's)."""
+    if not mine:
+        return
+    bounded = isinstance(building, dict) and building.get(OTHER_LEVELS) is False
+    load = story["measures"].get("story_occupant_load")
+    if load is None:
+        got = [r["value"] for r in (story.get("readings") or {}).get("story_occupant_load") or []
+               if isinstance(r.get("value"), (int, float))]
+        load = max(got) if got else None
+    for c in mine:
+        c["measures"].pop("corridor_occupant_load", None)
+        if not bounded:
+            c["not_measured"]["corridor_occupant_load"] = (CORRIDOR_OTHER_LEVELS if isinstance(building, dict) and
+                                                           building.get(OTHER_LEVELS) is True else
+                                                           CORRIDOR_NOT_RULED_OUT)
+        elif load is None:
+            c["not_measured"]["corridor_occupant_load"] = CORRIDOR_NO_STORY
+        else:
+            c.setdefault("readings", {})["corridor_occupant_load"] = [
+                {"value": 0, "named": {CORRIDOR_QUESTION: CORRIDOR_NONE}},
+                {"value": load, "named": {CORRIDOR_QUESTION: CORRIDOR_STORY}}]
+            c["not_measured"]["corridor_occupant_load"] = CORRIDOR_READINGS.format(load=load)
 
 
 def _give(part: dict, name: str, low: float, high: float | None, no_share: str) -> None:
