@@ -119,8 +119,8 @@ STOPS = {
     "door_no_stated_clear": "the door {name} has no maker's stated clear opening (its type's clear width and height, "
                             "confirmed): its size is never taken from the door's own size or its leaf",
     "door_clear_not_read": "the door {name}'s clear opening isn't read: {reason}",
-    "door_clear_disagree": "the door {name}'s plan gives a clear width of {plan} in and its maker's stated clear "
-                           "opening {stated} in: which is the door's isn't clear",
+    "door_clear_disagree": "the door {name}'s {where} gives a clear {size} of {other} in and its maker's stated "
+                           "clear opening {stated} in: which is the door's isn't clear",
     "door_leaves_not_given": "the door {name} doesn't say how many leaves it has (one, or a pair with no mullion), and "
                              "Gordium has no mark for it in the model yet",
     "door_leaves_not_read": "the door {name} gives its leaves as {got}, not 1 or 2",

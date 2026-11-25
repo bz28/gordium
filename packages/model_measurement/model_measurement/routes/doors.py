@@ -12,8 +12,10 @@ Each part says:
   (`stated_clear`, read and refused as model_measurement.interior.doors.stated_clear reads it), the confirmed
   figure the routes pass the door by. Never the door's size, its leaf, or a plan width alone: a door with no stated
   clear opening (or a malformed one) has neither size measured, so BCNYS 1010.1.1 needs review for it, never a
-  pass. Where the door's plan also gives a clear width (the routes' figure), the two must agree within 1/16 in, or
-  the width isn't measured either (which is the door's is unclear).
+  pass. Every other figure given for a size must agree with the maker's within 1/16 in, or that size isn't
+  measured either (which is the door's is unclear): the plan's clear width (the routes' figure), and the drawn door
+  where its drawing is given (its stops, hinge pin and closed leaf; its threshold and head stop, measured as the
+  house reading measures them, model_measurement.interior.doors), or that drawing can't be measured.
 - `moe_door_leaves` (count): the description's `leaves` (1, or 2 for a pair with no mullion): 1010.1.1 asks one
   leaf of a pair for the 32 in, which a pair's clear opening doesn't show. Not given: not measured.
 - `moe_door_exit`: the door is marked an exit (`exit_kind`); `moe_door_exterior`: one side is outside;
@@ -25,7 +27,7 @@ Each part says:
 Lengths in inches, as interior/ reads them. Plain code, no AI.
 """
 
-from model_measurement.interior.doors import stated_clear
+from model_measurement.interior.doors import DRAWN, clear_height, clear_width, stated_clear
 from model_measurement.interior.read import name_of, tidy
 from model_measurement.interior.stops import Stop as InteriorStop
 from model_measurement.routes.floor import EXIT_KINDS, OUTSIDE, SAME, _reader
@@ -84,22 +86,38 @@ def _sizes(part, item, reader) -> None:
         for k in SIZES:
             why[k] = Stop("door_no_stated_clear", name=name).reason
         return
-    width, height = tidy(maker["width"]), tidy(maker["height"])
-    part["more"]["stated_clear"] = {"width": width, "height": height, "source": maker["source"]}
-    m["moe_door_clear_height"] = height
+    stated = {"width": tidy(maker["width"]), "height": tidy(maker["height"])}
+    part["more"]["stated_clear"] = {**stated, "source": maker["source"]}
+    # every other figure the description gives for a size must agree with the maker's (within 1/16 in), else the
+    # size isn't measured: the drawn door (as the house reading draws it: its stops, hinge pin and closed leaf; its
+    # threshold and head stop) and, for the width, the plan's clear width the routes pass it by. Never the larger of
+    # two figures, and never a size taken from anything but the maker's (review round 1 of section group 6a: a door
+    # drawn 70 in high was measured at its stated 84)
     plan = item.get("plan")
-    drawn = plan.get("clear_width") if isinstance(plan, dict) else None
-    if drawn is not None:
-        try:
-            drawn = tidy(reader.size(drawn, "the door's plan clear width"))
-        except InteriorStop as s:
-            why["moe_door_clear_width"] = Stop("door_clear_not_read", name=name, reason=s.reason).reason
-            return
-        part["more"]["plan_clear_width"] = drawn
-        if abs(drawn - width) > SAME:
-            why["moe_door_clear_width"] = Stop("door_clear_disagree", name=name, plan=drawn, stated=width).reason
-            return
-    m["moe_door_clear_width"] = width
+    others = {"width": [("plan", plan.get("clear_width") if isinstance(plan, dict) else None, None)],
+              "height": []}
+    for key, fn in (("width", clear_width), ("height", clear_height)):
+        if any(item.get(k) is not None for k in DRAWN[key]):
+            others[key].append(("drawing", None, fn))
+    for key, name_ in (("width", "moe_door_clear_width"), ("height", "moe_door_clear_height")):
+        why_not = None
+        for where, value, fn in others[key]:
+            if value is None and fn is None:
+                continue
+            try:
+                got = tidy(fn(item, reader) if fn else reader.size(value, f"the door's {where} clear {key}"))
+            except InteriorStop as s:
+                why_not = Stop("door_clear_not_read", name=name, reason=s.reason).reason
+                break
+            part["more"][f"{where}_clear_{key}"] = got
+            if abs(got - stated[key]) > SAME:
+                why_not = Stop("door_clear_disagree", name=name, where=where, size=key, other=got,
+                               stated=stated[key]).reason
+                break
+        if why_not:
+            why[name_] = why_not
+        else:
+            m[name_] = stated[key]
 
 
 def _leaves(part, item) -> None:
