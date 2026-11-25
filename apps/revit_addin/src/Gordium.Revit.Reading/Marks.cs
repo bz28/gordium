@@ -333,6 +333,41 @@ public static class Marks
         "Yes when the design takes BCNYS 1004.5.1's increased occupant load: more occupants than Table 1004.5's factors give, every other requirement met for that number, at most one occupant per 7 sq ft of occupiable floor space. " +
         "No: the design takes no increase, so each room's occupant load is Table 1004.5's alone. Yes or blank: each room's larger reading is at least its area / 7 (the most 1004.5.1 allows), so a rule an increase could fail needs review or fails, never passes.");
 
+    // ---- groups 4 and 5's (corridors, 1020; egress capacity, 1005.3): what the corridor rules read of the building
+
+    /// <summary>Whether another level's occupants reach the building's corridors (<c>building.other_level_egress_into_corridors</c>;
+    /// BCNYS 1004.2.2, 1004.2.3, 1005.6): read by the occupant loads (occupant_load.py), never a rule's own measure.</summary>
+    public static readonly MarkDefinition OtherLevelsReachCorridors = new(
+        "Gordium: Other levels reach corridors", new("63ce1aaf-5fb8-4af6-9c71-730392b78bb4"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.other_level_egress_into_corridors",
+        "Yes when any other level's occupants reach a corridor of the building: an unenclosed stairway or ramp, a mezzanine (BCNYS 1004.2.2 adds its occupants to the space below), or stairs converging or discharging into it (1004.2.3, 1005.6). " +
+        "Yes: a corridor's occupant load is worked out by hand (the story's doesn't bound it). No: none does, so each corridor's load lies between none and its whole story's. Blank: worked out by hand, as for Yes.");
+
+    /// <summary>Whether the building is or holds an ambulatory care facility (<c>building.ambulatory_care_facility</c>,
+    /// BCNYS 202, Section 422, Table 1020.3).</summary>
+    public static readonly MarkDefinition AmbulatoryCareFacility = new(
+        "Gordium: Ambulatory care facility", new("2a31e2c4-cf29-4ac4-9c57-a41ca85748b3"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.ambulatory_care_facility",
+        "Yes when the building is or holds an ambulatory care facility (BCNYS 202 AMBULATORY CARE FACILITY, Section 422: outpatient care where patients may be rendered incapable of self-preservation, Group B). " +
+        "Table 1020.3 asks 72 in for its corridors and areas serving stretcher traffic, which the model doesn't show. Yes: a Group B corridor under 72 in is a person's check. No: none. Blank: that check needs review.");
+
+    /// <summary>Whether any corridor is inside a dwelling or sleeping unit (<c>building.corridors_within_dwelling_units</c>,
+    /// BCNYS 1020.2 exception 2, Table 1020.3).</summary>
+    public static readonly MarkDefinition CorridorsWithinDwellingUnits = new(
+        "Gordium: Corridors within dwelling units", new("a61d6738-cc50-4a7a-bf34-eb258e6b55d7"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.corridors_within_dwelling_units",
+        "Yes when any corridor of the building is inside a dwelling unit or sleeping unit. BCNYS 1020.2 exception 2: \"A fire-resistance rating is not required for corridors contained within a dwelling unit or sleeping unit in an occupancy in Groups I-1 and R.\" (Table 1020.3 also asks only 36 in within a dwelling unit.) " +
+        "Yes: a corridor short of the rating or the width is a person's check (which corridors are inside a unit isn't shown). No: none is, so the table's rating and width apply to every corridor, and a door onto a corridor gets none of BCNYS 1010.1.1's exceptions for doors inside a dwelling unit (exceptions 1, 4, 6, 7: its width and height are held to the full size). Blank: those checks need review.");
+
+    /// <summary>Whether the building has an emergency voice/alarm communication system per BCNYS 907.5.2.2
+    /// (<c>building.emergency_voice_alarm_system</c>; 1005.3.1 and 1005.3.2 exception 1).</summary>
+    public static readonly MarkDefinition EmergencyVoiceAlarm = new(
+        "Gordium: Emergency voice/alarm system", new("f4184d32-275e-4423-90c6-66a2e4d247ee"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.emergency_voice_alarm_system",
+        "Yes only when the building is equipped throughout with an emergency voice/alarm communication system in accordance with BCNYS Section 907.5.2.2. A system in only part of the building: No. " +
+        "With an automatic sprinkler system throughout too (NFPA 13; NFPA 13R in Group R only, elsewhere a person checks), BCNYS 1005.3.1 and 1005.3.2 exception 1 lower the egress capacity factors (other than Groups H and I-2): 0.15 in per occupant for corridors and other components, 0.2 in for stairways. " +
+        "No: the full factors (0.2 in and 0.3 in). Blank: a capacity met only at the lower factor needs review.");
+
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
         "Gordium: Atrium", new("8c3211a5-546b-463e-8d8c-b70fd753c1b6"), MarkValueKind.YesNo,
@@ -631,7 +666,8 @@ public static class Marks
         CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
-        EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased,
+        EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased, OtherLevelsReachCorridors,
+        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
