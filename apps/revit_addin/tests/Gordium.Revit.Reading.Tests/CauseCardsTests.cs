@@ -438,7 +438,7 @@ public sealed class CauseCardsTests
         Assert.Contains("    public void TickCard(Fix group, bool ticked)\n    {\n        _looked.SetCard(group.Key, ticked);\n        RefreshTicks();\n    }", view, StringComparison.Ordinal);
         Assert.Contains("    internal void Show(PanelContent content)\n    {\n        NewCheck(content);", view, StringComparison.Ordinal);
         // compared and carried by the document's identity (review round 2 of UI changes 13-15: a Save As renames it)
-        Assert.Contains("        if (key is not null && model.Stale is null)\n            _compared[key] = (content.When, model);", view, StringComparison.Ordinal);
+        Assert.Contains("        if (key is not null && model.Stale is null)\n            _compared[key] = (content.When, model, content.Questions);", view, StringComparison.Ordinal);
         Assert.Contains("        if (_shownCheck == (content.Key ?? content.Project, content.When))\n            return;", view, StringComparison.Ordinal);
     }
 

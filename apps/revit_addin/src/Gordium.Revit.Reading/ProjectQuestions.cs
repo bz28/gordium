@@ -28,9 +28,6 @@ public static class ProjectQuestions
     /// <summary>What a question Gordium has no field for says.</summary>
     public const string NoField = "Gordium has no field for this in Revit yet. Decide it by hand from its results.";
 
-    /// <summary>What the street edge's question says (it is picked on the plan, in Setup).</summary>
-    public const string PickInSetup = "The street edge is picked on the plan: use Set up on the ribbon.";
-
     /// <summary>The questions of an "Answer" group, in its cards' order (the most results first), each with its field.</summary>
     public static IReadOnlyList<ProjectQuestion> Of(FixGroup group, IReadOnlyList<SetupField>? fields)
     {

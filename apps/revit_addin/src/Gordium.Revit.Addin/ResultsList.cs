@@ -116,6 +116,8 @@ internal sealed class MoreQuestionsItem(IListHost host, MoreQuestionsEntry entry
 internal sealed class AnswerFootItem(IListHost host, AnswerFootEntry entry) : ListItem(host)
 {
     internal AnswerFootEntry Entry { get; } = entry;
+
+    internal override string? Spoken => ResultViewList.Spoken(Entry);
 }
 
 /// <summary>The list's first entry: the worker's state and counts, made afresh each time it scrolls into view.</summary>
@@ -163,7 +165,7 @@ internal sealed class EntryStyles : C.StyleSelector
         return (W.Style)c.FindResource(item switch
         {
             RowItem => "list.row",
-            FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem => "list.opener",   // reached and opened by the keyboard too
+            FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem or AnswerFootItem => "list.opener",   // reached and opened by the keyboard too
             _ => "list.heading",
         });
     }
@@ -419,7 +421,10 @@ public sealed class EntryView : C.Border
                     Text = shown ?? "", Margin = new W.Thickness(0, 4, 0, 0), MinWidth = number ? 90 : 0, MaxWidth = number ? 120 : double.PositiveInfinity,
                     HorizontalAlignment = number ? W.HorizontalAlignment.Left : W.HorizontalAlignment.Stretch,
                 };
-                W.Automation.AutomationProperties.SetName(text, name);
+                // a length is typed in the project's unit, said beside the box as the Setup form's label says it
+                // (review round 1: "20" in a metric project is 20 m), and feet when Gordium can't read the project's
+                var unit = f.Kind == FieldKind.Feet ? f.LengthUnit : null;
+                W.Automation.AutomationProperties.SetName(text, unit is null ? name : $"{name}, in {unit.Words}");
                 // the draft follows every keystroke (an emptied box chooses nothing), Save's words with it
                 text.TextChanged += (_, _) =>
                 {
@@ -429,7 +434,14 @@ public sealed class EntryView : C.Border
                         host.Answers.Choose(f.Mark, text.Text);
                     host.Answered();
                 };
-                return text;
+                if (unit is null)
+                    return text;
+                var row = new C.StackPanel { Orientation = C.Orientation.Horizontal };
+                row.Children.Add(text);
+                var symbol = Muted(unit.Known ? unit.Symbol : $"{unit.Symbol} (this project's units aren't ones Gordium reads: type feet)");
+                symbol.Margin = new W.Thickness(6, 6, 0, 0);
+                row.Children.Add(symbol);
+                return row;
             }
         }
     }
