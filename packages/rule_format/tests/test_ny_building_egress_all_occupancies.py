@@ -1157,6 +1157,11 @@ def test_the_6d_flags_state_each_permissions_own_conditions(rules):
     unlatch = note("general.bc_1010_2_1_unlatching")
     assert "each openable from the inside without a key or tool" in unlatch                              # item 5
     assert "that leaf without a doorknob, panic hardware or similar operating hardware" in unlatch       # item 4
+    # review round 2: 1010.2.6 permits no lock against egress, and 1010.2.9 to 1010.2.15 permit other locking systems
+    ops = note("general.bc_1010_2_door_operations")
+    assert "stairway doors per 1010.2.6," not in ops and "a stairway door per 1010.2.6 still opens from the egress side" in ops
+    assert "the locking systems of 1010.2.9 to 1010.2.15" in ops and "electrical locking systems" not in ops
+    assert "(or a locking system of 1010.2.9 to 1010.2.15, section group 6e)" in locks
 
 
 def test_the_6d_labels_say_their_section_group():
