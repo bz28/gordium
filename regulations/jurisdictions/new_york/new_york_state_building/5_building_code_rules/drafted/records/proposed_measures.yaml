@@ -128,6 +128,7 @@ occupancy_group:
   - U
   - mixed
   needed_by:
+  - general.bc_1004_9_posting
   - general.bc_1006_2_2_6_r3_r4_nfpa_13d
   - general.bc_1006_3_3_story_exits
   - general.bc_1006_3_4_1_mixed_occupancies
@@ -301,3 +302,9 @@ emergency_escape_openings_1031:
   needed_by:
   - general.bc_table_1006_3_4_1__r2_dwelling_units
   - general.bc_table_1006_3_4_2__h_i_r
+occupied_outdoor_areas:
+  meaning: 'The building has outdoor areas accessible to and usable by its occupants (2025 BCNYS 1004.7: yards, patios, occupiable
+    roofs, courts and similar), as the architect states it'
+  unit: yes_no
+  needed_by:
+  - general.bc_1004_7_outdoor_areas
