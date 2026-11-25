@@ -458,13 +458,22 @@ public static class MarkingList
     /// <summary>Room names a Table 1004.5 function is suggested from (BCNYS occupant loads), the first that matches, each
     /// with the function and when it may be offered. Only a suggestion, only on a room whose function is unset, written
     /// only when the architect accepts it (SetupWrites.Accept). Never one for a corridor, an exit enclosure, a closet or
-    /// a toilet (FunctionFromName's caller rules those out first).</summary>
-    private static readonly (Regex Name, string Function)[] FunctionNames =
+    /// a toilet (FunctionFromName's caller rules those out first). Each is the whole name, the room type alone with at
+    /// most a number or a letter after it ("Bedroom 2", "Mechanical Rm 3"), never a word inside a longer name (review
+    /// round 1: "Mechanical Engineering Lab", "The Boiler Room" bar and "Community Living Room" are other rows, with
+    /// smaller factors: a larger load).</summary>
+    private static readonly (Regex Name, string Function, string Rooms)[] FunctionNames =
     [
-        (new(@"\b(mechanical|mech|boiler|furnace)(\s*room)?\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "accessory_storage_mechanical"),
-        (new(@"\b(storage|store\s*room|stock\s*room)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "storage_stock_shipping"),
-        (new(@"\b(bed\s*room|bedrm|bdrm|living(\s*room)?)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "residential"),
+        (Whole(@"(mechanical|mech\.?|boiler|furnace)(\s*(room|rm\.?))?"), "accessory_storage_mechanical", "any"),
+        (Whole(@"(storage|store\s*room|stock\s*room)(\s*(room|rm\.?))?"), "storage_stock_shipping", "any"),
+        (Whole(@"(bed\s*room|bedrm|bdrm)"), "residential", "R"),
+        // a living room is a dwelling unit's in Group R-2 or R-3; in R-1 or R-4 one so named is often a shared lounge
+        (Whole(@"living(\s*room)?"), "residential", "R-2 R-3"),
     ];
+
+    /// <summary>A room type as the whole name, with an optional number or single letter after it.</summary>
+    private static Regex Whole(string type) =>
+        new(@"^\s*" + type + @"(\s*[#.\-]?\s*(\d+[A-Za-z]?|[A-Za-z]))?\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     /// <summary>Rooms a function is never suggested for, by name: a corridor, a closet, a toilet (and the stairs, which
     /// an exit enclosure holds).</summary>
@@ -474,10 +483,10 @@ public static class MarkingList
 
     /// <summary>The Table 1004.5 function a room's name suggests, as the description's word, or null. <paramref name="use"/>:
     /// the room's use as marked (the description's word): an accessory storage room is Table 1004.5's accessory storage
-    /// row whatever its name; a corridor, a closet or a toilet is offered none. <paramref name="residentialGroups"/>: the
-    /// building's stated groups are all Group R (Residential is never offered otherwise: a dormitory's rooms are
-    /// Dormitories, 50 gross, not Residential's 200).</summary>
-    internal static string? FunctionFromName(string? name, string? use, bool residentialGroups)
+    /// row whatever its name; a corridor, a closet or a toilet is offered none. <paramref name="groups"/>: the building's
+    /// groups as stated (null when not stated or not read): Residential is offered only where every one is Group R (a
+    /// bedroom), or R-2 or R-3 (a living room); never otherwise (a classroom building's "Bedroom" set is a stage set).</summary>
+    internal static string? FunctionFromName(string? name, string? use, IReadOnlyList<string>? groups)
     {
         if (use is "corridor" or "closet" or "toilet")
             return null;
@@ -485,8 +494,15 @@ public static class MarkingList
             return "accessory_storage_mechanical";
         if (name is not { } n || NoFunctionName.IsMatch(n))
             return null;
-        var hit = FunctionNames.FirstOrDefault(f => f.Name.IsMatch(n)).Function;
-        return hit == "residential" && !residentialGroups ? null : hit;
+        foreach (var (rx, function, rooms) in FunctionNames)
+        {
+            if (!rx.IsMatch(n))
+                continue;
+            var allowed = rooms == "any" || groups is { Count: > 0 } && groups.All(g =>
+                rooms == "R" ? g.StartsWith("R-", StringComparison.Ordinal) : rooms.Split(' ').Contains(g, StringComparer.Ordinal));
+            return allowed ? function : null;
+        }
+        return null;
     }
 
     /// <summary>A word mark read through its table: given, not a word Gordium reads (to mark), or blank, whose meaning

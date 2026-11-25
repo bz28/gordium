@@ -36,6 +36,8 @@ public sealed class RoomFunctionTests
         Assert.Equal((MarkValueKind.Text, MarkBinding.Instance, "rooms[].function"), (m.Kind, m.Binding, m.Feeds));
         Assert.Equal(TableRows, RoomFunctions.Words.Select(w => RoomFunctions.Table.Of(w)));
         Assert.Equal(41, RoomFunctions.Words.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        // the table's Decks row sits under "Skating rinks, swimming pools": a rink's deck too (review round 1)
+        Assert.Equal("pool_deck", RoomFunctions.Table.Of("Rink or pool deck"));
         foreach (var w in RoomFunctions.Words)
             Assert.Contains(w, m.Description, StringComparison.Ordinal);       // the tooltip lists each
         // once group 3's factors are in this tree, its rows are exactly these (the names are fixed: group 3's review)
@@ -102,7 +104,10 @@ public sealed class RoomFunctionTests
         Assert.Null(Line(Model(floor, "R-2"), buildingCode: false));
         var line = Line(Model(floor, "R-2"))!;
         Assert.False(line.Needed);                                         // blank: its load needs review, never blocks
-        Assert.Equal((0, 5), (line.Set, line.Total));
+        // counted: the offices and the lobby; never the corridor or the stair an exit enclosure door opens onto, left
+        // blank by design (review round 1: the line never read done)
+        Assert.Equal((0, 3), (line.Set, line.Total));
+        Assert.Equal([FakeFloor.Uid("A"), FakeFloor.Uid("B"), FakeFloor.Uid("L")], line.Unset);
         floor.SetMark("A", Marks.RoomFunction, new(true, Text: "Business area"));
         floor.SetMark("B", Marks.RoomFunction, new(true, Text: "office"));  // not a row: not set
         Assert.Equal(1, Line(Model(floor, "R-2"))!.Set);
@@ -133,6 +138,65 @@ public sealed class RoomFunctionTests
         var bed = Line(Model(floor, "R-2"))!.Suggestions.Single(s => s.Element == FakeFloor.Uid("A"));
         Assert.Contains("named \"Bedroom 2\"", bed.Basis, StringComparison.Ordinal);
         Assert.Contains("a dormitory's rooms are Dormitory instead", bed.Basis, StringComparison.Ordinal);
+        Assert.Contains("a shared lounge or dining room Assembly unconcentrated", bed.Basis, StringComparison.Ordinal);
+        // a hotel (R-1): a bedroom is its guest room, a "Living Room" may be its lounge: none offered for it
+        Assert.Equal([FakeFloor.Uid("A"), FakeFloor.Uid("L")], Suggested(Line(Model(floor, "R-1"))!).Keys);
+    }
+
+    /// <summary>Review round 1: a suggestion only for the room type as the whole name (with a number or letter): a word
+    /// inside a longer name is another row, often with a smaller factor (a larger load).</summary>
+    [Theory]
+    [InlineData("Mechanical Engineering Lab", null)]
+    [InlineData("Mech Shop", null)]
+    [InlineData("Mech Lab", null)]
+    [InlineData("The Boiler Room", null)]
+    [InlineData("Storage Unit Leasing Office", null)]
+    [InlineData("Community Living Room", null)]
+    [InlineData("Assisted Living Dining", null)]
+    [InlineData("Living Room Lounge", null)]
+    [InlineData("Master Bedroom Suite", null)]
+    [InlineData("Mechanical Room", "Accessory storage or mechanical equipment room")]
+    [InlineData("Boiler Room 2", "Accessory storage or mechanical equipment room")]
+    [InlineData("Mech. Rm 3", "Accessory storage or mechanical equipment room")]
+    [InlineData("Storage", "Storage, stock or shipping area")]
+    [InlineData("Stock Room B", "Storage, stock or shipping area")]
+    [InlineData("Bedroom 2", "Residential")]
+    [InlineData("BEDROOM A", "Residential")]
+    [InlineData("Living Room", "Residential")]
+    public void Only_the_room_type_as_the_whole_name_is_suggested(string name, string? word)
+    {
+        var floor = new FakeFloor();
+        Name(floor, "A", name);
+        var got = Suggested(Line(Model(floor, "R-2"))!);
+        if (word is null)
+            Assert.DoesNotContain(FakeFloor.Uid("A"), got.Keys);
+        else
+            Assert.Equal(word, got[FakeFloor.Uid("A")]);
+    }
+
+    /// <summary>Review round 1: Accept writes apart from Save, so Residential is offered on the groups the form holds,
+    /// chosen and not saved yet, never only on those saved.</summary>
+    [Fact]
+    public void Residential_follows_the_groups_the_form_holds_not_only_those_saved()
+    {
+        var floor = new FakeFloor();
+        Name(floor, "A", "Bedroom 1");
+        var model = floor.Model() with
+        {
+            ProjectMarks = new Dictionary<Guid, MarkValue>
+            {
+                [Marks.OccupancyGroups.Guid] = new(true, Text: "R-2"), [Marks.FollowsBuildingCode.Guid] = new(true, 1),
+            },
+        };
+        string? Offered(SetupDraft? draft) => SetupScreen.Build(model, Sides(), null, draft).Lines
+            .Single(l => l.Key == "room_function").Suggestions.SingleOrDefault(s => s.Element == FakeFloor.Uid("A"))?.Value.Text;
+        Assert.Equal("Residential", Offered(null));
+        var mixed = new SetupDraft();
+        mixed.Choose(Marks.OccupancyGroups, "R-2, B");
+        Assert.Null(Offered(mixed));
+        var cleared = new SetupDraft();
+        cleared.Choose(Marks.OccupancyGroups, "");
+        Assert.Null(Offered(cleared));
     }
 
     [Theory]

@@ -167,8 +167,8 @@ public static class Marks
         "Gordium: Function", new("de595662-5386-4cab-9245-600eefb9462d"), MarkValueKind.Text, MarkBinding.Instance,
         [Rooms], "rooms[].function",
         "The room's function as the 2025 Building Code of New York State's Table 1004.5 lists them (its occupant load factor is read from it), one of: " +
-        RoomFunctions.Listed + ". Leave it blank for a corridor, an exit stair enclosure, a closet or a toilet with none. " +
-        "Blank, or a word not in the list: the room's occupant load and its story's need review.");
+        RoomFunctions.Listed + ". Leave it blank for a corridor or an exit stair enclosure, and for a closet or toilet nobody occupies. " +
+        "Blank on an occupied room, or a word not in the list: the room's occupant load and its story's need review.");
 
     public static readonly MarkDefinition LotSurveyed = new(
         "Gordium: Lot surveyed", new("133d30e3-832f-4956-88c3-6b48989ac3f7"), MarkValueKind.YesNo, MarkBinding.Instance,
@@ -660,7 +660,7 @@ public static class RoomFunctions
         ("Library stack area", "library_stack"), ("Locker room", "locker_room"), ("Mall building (covered or open)", "mall"),
         ("Mercantile", "mercantile"), ("Storage, stock or shipping area", "storage_stock_shipping"),
         ("Parking garage", "parking_garage"), ("Residential", "residential"), ("Rink or pool", "rink_pool"),
-        ("Pool deck", "pool_deck"), ("Stage or platform", "stage_platform"), ("Warehouse", "warehouse"));
+        ("Rink or pool deck", "pool_deck"), ("Stage or platform", "stage_platform"), ("Warehouse", "warehouse"));
 
     public static IReadOnlyList<string> Words => Table.Words;
 
