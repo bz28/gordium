@@ -250,6 +250,13 @@ public sealed class DetailPageTests
         Assert.Contains("Within<C.ComboBoxItem>(source) is not null ||", view, StringComparison.Ordinal);
         Assert.Contains("if (Within<C.ComboBoxItem>(e.OriginalSource) is not null)\n                return;", view.Replace("\r\n", "\n"), StringComparison.Ordinal);
         Assert.Contains("ResultViewList.EntersControl(_entries[at], e.Key.ToString())", view, StringComparison.Ordinal);
+        // review round 3: a key acts on the line it came from, Esc selects the line it focuses, and the keyboard going
+        // into a control selects its line (a selection left on the foot never saves from a question's line)
+        Assert.Contains("var at = Within<C.ListBoxItem>(e.OriginalSource) is { } from && _list.ItemContainerGenerator.IndexFromContainer(from) is var fi and >= 0", view, StringComparison.Ordinal);
+        Assert.Contains("FocusEntry(_list.ItemContainerGenerator.IndexFromContainer(inItem));", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("inItem.Focus();", view, StringComparison.Ordinal);
+        Assert.Contains("_list.PreviewGotKeyboardFocus += ", view, StringComparison.Ordinal);
+        Assert.Contains("FocusEntry(ResultList.Next(_entries, at, ", view, StringComparison.Ordinal);
         Assert.Contains("ResultViewList.Saves(_entries[at], e.Key.ToString())", view, StringComparison.Ordinal);
         Assert.Contains("or AnswerFootItem => \"list.opener\"",
                         File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs")), StringComparison.Ordinal);

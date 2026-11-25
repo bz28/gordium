@@ -176,6 +176,25 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _list.ItemContainerStyleSelector = new EntryStyles();
         _list.SelectionChanged += (_, _) => Selected();
         _list.PreviewKeyDown += ListKeys;
+        // the keyboard going into an entry's control (a click into a question's dropdown or Yes / No): that entry is
+        // selected too (quietly: never sent to Revit), so the selection is always the line the keyboard is on (review
+        // round 3: a stale selection on the card's foot let Enter on a question's line save)
+        _list.PreviewGotKeyboardFocus += (_, e) =>
+        {
+            if (Within<C.ListBoxItem>(e.NewFocus) is { } item && !ReferenceEquals(item, _list.ItemContainerGenerator.ContainerFromItem(_list.SelectedItem))
+                && _list.ItemContainerGenerator.IndexFromContainer(item) is var i and >= 0)
+            {
+                _quiet = true;
+                try
+                {
+                    _list.SelectedIndex = i;
+                }
+                finally
+                {
+                    _quiet = false;
+                }
+            }
+        };
         _list.MouseDoubleClick += (_, e) =>
         {
             if (Within<C.Button>(e.OriginalSource) is not null || Within<C.ListBoxItem>(e.OriginalSource)?.DataContext is not RowItem row)
@@ -1112,7 +1131,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         {
             if (e.Key == I.Key.Escape)
             {
-                inItem.Focus();
+                FocusEntry(_list.ItemContainerGenerator.IndexFromContainer(inItem));   // selected and focused, together
                 e.Handled = true;
                 return;
             }
@@ -1139,7 +1158,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             return;
         var ctrl = (I.Keyboard.Modifiers & I.ModifierKeys.Control) != 0;
         // a question: Enter or Space goes into its control; the card's foot: Enter or Space saves (review round 1)
-        var at = _list.SelectedIndex;
+        // the entry the key is on: the list item it came from (never a selection left elsewhere), else the selected one
+        var at = Within<C.ListBoxItem>(e.OriginalSource) is { } from && _list.ItemContainerGenerator.IndexFromContainer(from) is var fi and >= 0
+            ? fi : _list.SelectedIndex;
         if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.EntersControl(_entries[at], e.Key.ToString())
             && _list.ItemContainerGenerator.ContainerFromIndex(at) is C.ListBoxItem item)
         {
@@ -1164,7 +1185,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         switch (e.Key)
         {
             case I.Key.Down or I.Key.Up when !ctrl:
-                FocusEntry(ResultList.Next(_entries, _list.SelectedIndex, e.Key == I.Key.Down ? 1 : -1));
+                FocusEntry(ResultList.Next(_entries, at, e.Key == I.Key.Down ? 1 : -1));
                 e.Handled = true;
                 break;
             case I.Key.Enter when SelectedRow is { } row:
