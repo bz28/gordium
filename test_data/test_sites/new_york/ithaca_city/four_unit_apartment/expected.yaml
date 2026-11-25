@@ -87,6 +87,22 @@ results:
   # 1020.3's capacity flag: needs review while the corridor's load isn't worked out; stated, not applicable (72 in
   # is past 51.4 in)
   general.bc_1020_3_corridor_capacity: needs_review
+  # Table 1020.2 (section group 4b): the R row; no sprinkler system, so a corridor serving more than 10 is Not
+  # Permitted, but the corridor's load isn't worked out (as above) and whether a corridor is within a dwelling unit
+  # (exception 2) isn't stated, so needs review; the other rows: not this building's group
+  general.bc_table_1020_2_r: needs_review
+  general.bc_table_1020_2_h1_h2_h3: not_applicable
+  general.bc_table_1020_2_h4_h5: not_applicable
+  general.bc_table_1020_2_a_b_e_f_m_s_u: not_applicable
+  general.bc_table_1020_2_i2: not_applicable
+  general.bc_table_1020_2_i1_i3: not_applicable
+  general.bc_table_1020_2_i4: not_applicable
+  general.bc_table_1020_2_other_occupancies: not_applicable
+  general.bc_table_1020_2_note_a_group_i2: not_applicable
+  # the corridors' rating isn't stated (no mark), so whether their walls are fire partitions (708) is a person's
+  # check; elevator hoistway doors (1020.2.1) always are
+  general.bc_1020_2_fire_partitions: needs_review
+  general.bc_1020_2_1_hoistway_protection: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

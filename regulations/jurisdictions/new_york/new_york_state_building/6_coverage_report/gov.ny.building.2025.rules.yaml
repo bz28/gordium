@@ -227,6 +227,29 @@ pieces:
     heading: Aisle accessways in Group M
     rules:
     - general.bc_1018_4_merchandise_pads
+  '1020.2':
+    label: rule
+    heading: Construction
+    rules:
+    - general.bc_1020_2_fire_partitions
+  Table 1020.2:
+    label: rule
+    heading: Corridor fire-resistance rating
+    rules:
+    - general.bc_table_1020_2_h1_h2_h3
+    - general.bc_table_1020_2_h4_h5
+    - general.bc_table_1020_2_a_b_e_f_m_s_u
+    - general.bc_table_1020_2_r
+    - general.bc_table_1020_2_i2
+    - general.bc_table_1020_2_i1_i3
+    - general.bc_table_1020_2_i4
+    - general.bc_table_1020_2_other_occupancies
+    - general.bc_table_1020_2_note_a_group_i2
+  1020.2.1:
+    label: flag
+    heading: Construction › Hoistway protection
+    rules:
+    - general.bc_1020_2_1_hoistway_protection
   '1020.3':
     label: rule
     heading: Width and capacity

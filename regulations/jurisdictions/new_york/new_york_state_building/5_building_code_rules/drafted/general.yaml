@@ -11204,9 +11204,9 @@ rules:
   check: (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours >= 1
   review_when:
   - when: sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
-    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed (its own scope,
-      not brought in), and the table''s other cells name no system, so whether this system is the one the column means is
-      a person''s check (never a pass on it).'
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -11333,9 +11333,9 @@ rules:
     >= 1)
   review_when:
   - when: corridor_occupant_load > 30 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
-    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed (its own scope,
-      not brought in), and the table''s other cells name no system, so whether this system is the one the column means is
-      a person''s check (never a pass on it).'
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -11446,9 +11446,9 @@ rules:
       Group S-2 (exception 3); a Group B space needing only one means of egress (exception 4): a person checks.'
   - when: corridor_occupant_load > 30 and not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3) and
       corridor_fire_rating_hours < 1
-    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed (its own scope,
-      not brought in), and the table''s other cells name no system, so whether this system is the one the column means is
-      a person''s check (never a pass on it).'
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -11793,9 +11793,9 @@ rules:
   check: sprinklered_903_3_1_1
   review_when:
   - when: not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
-    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed (its own scope,
-      not brought in), and the table''s other cells name no system, so whether this system is the one the column means is
-      a person''s check (never a pass on it).'
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -11864,9 +11864,9 @@ rules:
   check: (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours >= 1
   review_when:
   - when: sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
-    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed (its own scope,
-      not brought in), and the table''s other cells name no system, so whether this system is the one the column means is
-      a person''s check (never a pass on it).'
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
   - when: occupancy_group == "I-3" and sprinklered_903_3_1_1 and corridor_fire_rating_hours < 1
     reason: 'Group I-3 under 1 hour: note b''s reduction (408.8, not brought in) may allow less: a person checks.'
   - when: occupancy_group == "I-1" and corridors_within_dwelling_units and not (sprinklered_903_3_1_1 and corridor_fire_rating_hours
@@ -11993,9 +11993,9 @@ rules:
   review_when:
   - when: not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3) and corridor_fire_rating_hours <
       1
-    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed (its own scope,
-      not brought in), and the table''s other cells name no system, so whether this system is the one the column means is
-      a person''s check (never a pass on it).'
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -12196,6 +12196,13 @@ rules:
       outcome: needs_review
     expect: needs_review
     note: 'The rating isn''t stated: a person checks.'
+  - given: {}
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the flag doesn''t apply.'
   notes: '1020.2''s second sentence: corridor walls required to be rated comply with Section 708 (fire partitions: continuity,
     openings, doors), not brought in; exception 5 permits unprotected openings on unrated exterior walls (Tables 705.5 and
     705.9, not brought in). Hand-drafted in a Claude Code session (2026-11-25).'

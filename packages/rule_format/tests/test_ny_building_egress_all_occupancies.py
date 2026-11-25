@@ -271,7 +271,9 @@ import re
 # Each drafted piece's lines (the sections file) that must all be quoted somewhere in the rulebook, so a reference
 # in them can't go unseen; and each section a reference names -> (the rule that handles it, a word its text holds)
 SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2.1": (315, 3, 13),
-         "1017.2": (341, 23, 23), "1020.5": (344, 37, 47)}
+         "1017.2": (341, 23, 23), "1020.5": (344, 37, 47),
+         # section group 4: the corridor sections and tables drafted
+         "1020.2": (343, 40, 53), "Table 1020.2": (344, 7, 18), "1020.3": (344, 21, 24), "Table 1020.3": (344, 27, 34)}
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -292,11 +294,21 @@ HANDLERS = {
     "903.2.5": ("general.bc_table_1017_2_note_d_group_h", "903.2.5"),
     "1030.8": ("general.bc_table_1006_2_1_a_e_m", "1030.8"), "1006.2.2.1": ("general.bc_table_1006_2_1_b", "1006.2.2"), "1006.2.2.6": ("general.bc_table_1006_2_1_r3_r4", "1006.2.2.6"),
     "1004.2": ("general.bc_1006_2_1_two_exits", "1004.2"),
+    # section group 4: 1020.2, Table 1020.2's notes, 1020.3
+    "708": ("general.bc_1020_2_fire_partitions", "708"), "705.5": ("general.bc_1020_2_fire_partitions", "705.5"),
+    "705.9": ("general.bc_1020_2_fire_partitions", "705.9"),
+    "1006.2": ("general.bc_table_1020_2_a_b_e_f_m_s_u", "one means of egress"),
+    "407.2": ("general.bc_table_1020_2_note_a_group_i2", "407.2"),
+    "407.3": ("general.bc_table_1020_2_note_a_group_i2", "407.3"),
+    "408.8": ("general.bc_table_1020_2_i1_i3", "408.8"),
+    "903.2.8": ("general.bc_table_1020_2_r", "903.2.8"),
+    "1005.1": ("general.bc_1020_3_corridor_capacity", "1005.1"),
 }
-NO_LIMIT = {"1006.2.1", "1017.2", "1020.5"}          # the piece naming itself
+NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
-UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39)}
+UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
+            (343, 42), (344, 34)}       # group 4: 1020.2's 'Exceptions:', Table 1020.3's 'For SI'
 
 
 def _quoted(book, page, a, b):
@@ -704,3 +716,87 @@ def test_a_corridor_wide_enough_for_the_table_but_not_its_capacity_needs_review(
         assert _one(flag, "corridor", _corridor(44, 221), given, ctx) == "needs_review", given
         assert _one(flag, "corridor", _corridor(80, 400), given, ctx) == "not_applicable", given
         assert _one(flag, "corridor", _corridor(79.5, 400), given, ctx) == "needs_review", given
+
+
+# ---- section group 4b (2026-11-25): Table 1020.2, corridor fire-resistance rating (p.344, lines 7-18) ----------------
+
+# Table 1020.2, p.344: line -> (groups, the occupant load above which a rating applies (None: All), hours without a
+# sprinkler system (None: Not Permitted), with one (note c: 903.3.1.1 or 903.3.1.2), the rule), typed from the page
+TABLE_1020_2 = {
+    7: (["H-1", "H-2", "H-3"], None, None, 1, "h1_h2_h3"),
+    8: (["H-4", "H-5"], 30, None, 1, "h4_h5"),
+    9: (A + ["B", "E", "F-1", "F-2", "M", "S-1", "S-2", "U"], 30, 1, 0, "a_b_e_f_m_s_u"),
+    10: (R, 10, None, 0.5, "r"),
+    11: (["I-2"], None, None, 0, "i2"),
+    12: (["I-1", "I-3"], None, None, 1, "i1_i3"),
+    13: (["I-4"], None, 1, 0, "i4"),
+}
+NO_UNITS = {"corridors_within_dwelling_units": False}
+EXCEPTED = {"B", "E", "S-2"}          # 1020.2 exceptions 4, 1 and 3 (p.343): reviewed where the rating falls short
+
+
+def _rating(load_, hours=None):
+    m = {"corridor_occupant_load": load_}
+    if hours is not None:
+        m["corridor_fire_rating_hours"] = hours
+    return m
+
+
+def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ctx, rules):
+    """Each row of Table 1020.2 (p.344) for every group: with a sprinkler system (NFPA 13) and without, at the row's
+    occupant load and just past it, at its rating and just under it; Not Permitted fails whatever the rating."""
+    for line, (groups, over, without, with_, rid) in TABLE_1020_2.items():
+        r = rules[f"general.bc_table_1020_2_{rid}"]
+        assert _cites(r, 344, line), rid
+        many = (over or 0) + 0.5                                   # just past the row's load (any load for "All")
+        for g in groups:
+            for system, need in ((NFPA13, with_), (NONE, without)):
+                given = {"occupancy_group": g} | system | NO_UNITS
+                if need is None:                                  # Not Permitted
+                    assert _one(r, "corridor", _rating(many, 5), given, ctx) == "fail", (g, line)
+                    continue
+                if need:
+                    assert _one(r, "corridor", _rating(many, need), given, ctx) == "pass", (g, line)
+                    # 1020.2's exceptions (p.343) and note b (Group I-3's reduction, 408.8) need review short of it
+                    short = "needs_review" if (g in EXCEPTED and system is NONE) or (g == "I-3" and system is NFPA13)                         else "fail"
+                    assert _one(r, "corridor", _rating(many, need - 0.25), given, ctx) == short, (g, line)
+                else:
+                    assert _one(r, "corridor", _rating(many), given, ctx) == "pass", (g, line)    # 0: none asked
+            if over is not None:                                  # at the row's load: no rating asked
+                assert _one(r, "corridor", _rating(over), {"occupancy_group": g} | NONE | NO_UNITS, ctx) == "pass", g
+    # note d (p.344 lines 17-18): Group R-3 and R-4 with 903.3.1.3 (NFPA 13D), 1 hour; R-1 and R-2 have no such cell
+    r = rules["general.bc_table_1020_2_r"]
+    d13 = {S1: False, S2: False, "sprinklered_903_3_1_3": True} | NO_UNITS
+    assert _cites(r, 344, 17)
+    for g in ("R-3", "R-4"):
+        assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": g} | d13, ctx) == "pass", g
+        assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": g} | d13, ctx) == "fail", g
+    assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-2"} | d13, ctx) == "fail"
+    # note c's 903.3.1.2 (NFPA 13R): Group R's 0.5 hour; elsewhere "where allowed", a person's check
+    s13r = {S1: False, S2: True, "sprinklered_903_3_1_3": False} | NO_UNITS
+    assert _one(r, "corridor", _rating(11, 0.5), {"occupancy_group": "R-2"} | s13r, ctx) == "pass"
+    for rid, g in (("h1_h2_h3", "H-1"), ("i1_i3", "I-1"), ("i2", "I-2"), ("i4", "I-4"), ("a_b_e_f_m_s_u", "M")):
+        assert _one(rules[f"general.bc_table_1020_2_{rid}"], "corridor", _rating(31, 0.5),
+                    {"occupancy_group": g} | s13r, ctx) == "needs_review", rid
+    # exception 2 (p.343 lines 47-48): a corridor within a dwelling or sleeping unit, stated or not ruled out
+    for units in ({"corridors_within_dwelling_units": True}, {}):
+        assert _one(r, "corridor", _rating(11, 0), {"occupancy_group": "R-2"} | NONE | units, ctx) == "needs_review"
+    # note b (p.344 line 15): Group I-3's reduction (408.8) under 1 hour with a sprinkler system
+    assert _one(rules["general.bc_table_1020_2_i1_i3"], "corridor", _rating(5, 0.5),
+                {"occupancy_group": "I-3"} | NFPA13, ctx) == "needs_review"
+    # a building of two or more groups, or one whose group isn't stated, never passes
+    assert rules["general.bc_table_1020_2_other_occupancies"]["applies_when"] == 'occupancy_group == "mixed"'
+    for rid in ("a_b_e_f_m_s_u", "r", "i4"):
+        rr = rules[f"general.bc_table_1020_2_{rid}"]
+        assert _one(rr, "corridor", _rating(5, 2), {"occupancy_group": "mixed"} | NFPA13, ctx) == "not_applicable"
+        assert _one(rr, "corridor", _rating(5, 2), NFPA13, ctx) == "needs_review"
+
+
+def test_table_1020_3_within_a_dwelling_unit_needs_review_only_while_not_ruled_out(ctx, rules):
+    """Group 4b: Table 1020.3's 36 in within a dwelling unit (p.344 line 30) needs review only while the building
+    states it has such corridors or doesn't say; stated no, a 43.5 in corridor serving 50 fails."""
+    r = rules["general.bc_table_1020_3_corridor_width"]
+    base = {"occupancy_group": "R-2", "ambulatory_care_facility": False}
+    for units, want in (({"corridors_within_dwelling_units": True}, "needs_review"), ({}, "needs_review"),
+                        (NO_UNITS, "fail")):
+        assert _one(r, "corridor", _corridor(43.5, 50), base | units, ctx) == want, units
