@@ -120,8 +120,9 @@ public static class ResultViews
 
     // ---- the scope note (change 24) ---------------------------------------------------------------------------
 
-    /// <summary>The checker's words for a rule drafted for one occupancy group only (design_checker/egress.py FLAG_WHY
-    /// and the rulebook's notes: "this rulebook's rules are drafted for Group I-4 only").</summary>
+    /// <summary>The checker's words for a rule drafted for one occupancy group only ("this rulebook's rules are drafted
+    /// for Group I-4 only", in a result's reason or an ask's why). Since #182 no New York rule says them; the note stays
+    /// for a rulebook that does, and shows only then.</summary>
     public const string DraftedFor = "drafted for Group I-4 only";
 
     /// <summary>Whether the checker says of this row (its reason, or an ask's why) that its rules are drafted for Group
@@ -135,8 +136,7 @@ public static class ResultViews
     }
 
     /// <summary>The scope note in words, for the results that say it: how many, and what to do. Said of those results
-    /// only, never of all egress (the Chapter 10 rules now cover every group; only a few, such as the mixed-occupancy
-    /// story exits, are still drafted for Group I-4 alone).</summary>
+    /// only, never of all egress (the Chapter 10 rules cover every group since #181 and #182).</summary>
     public static string ScopeWords(int results) =>
         (results == 1 ? "1 Building Code result is" : $"{results} Building Code results are") +
         " drafted for day care (Group I-4) only so far. For any other group, " + (results == 1 ? "it stays" : "they stay") +

@@ -39,6 +39,9 @@ internal static class Program
         var houseAfter = Load(Path.Combine(answers, "ithaca_106_house_after_check_answer.json"));
         var childcare = Load(Path.Combine(answers, "children_odyssey_check_answer.json"));
         var apartment = Load(Path.Combine(answers, "four_unit_apartment_check_answer.json"));
+        // the same answer with two Chapter 10 results and the corner-lot question's result saying their rules are drafted
+        // for Group I-4 only (since #182 no real result says it): what the scope note looks like where it shows
+        var apartmentScoped = LoadSaying(Path.Combine(answers, "four_unit_apartment_check_answer.json"));
         // the four-unit apartment's Setup records (Ben's Revit trial, 2026-11-23): the Building Code governs its use
         foreach (var (n, r) in new[] { ("house", house), ("childcare", childcare) })
         {
@@ -176,6 +179,23 @@ internal static class Program
                         p.Answer();
                         Settle(p.View);
                         Check(FindAll<ComboBox>(p.View).Any(c => c.IsVisible), "18: Answer N questions goes back to the questions card, open");
+                    });
+                    // the scope note where it shows (the answer changed one way): once under the Building Code in By code, and
+                    // in the questions card for the card's own result
+                    var scopedRows = ResultRows.Build(apartmentScoped, "New Construction", [], null);
+                    Step(make(theme, []), "14s_by_code_scope_note_apartment", 900, dark, p =>
+                    {
+                        p.Show(title, when, scopedRows, Labels(apartmentScoped), questions);
+                        p.UseView(ResultsViewKind.ByCode);
+                        Settle(p.View);
+                        var notes = FindAll<Border>(p.View).Where(b => b.IsVisible && Equals(b.Tag, EntryView.ScopeTag)).ToList();
+                        Check(notes.Count == 2, $"14s: the scope note under each book whose results say it ({notes.Count})");
+                    });
+                    Step(make(theme, []), "16s_questions_scope_note_apartment", 1100, dark, p =>
+                    {
+                        p.Show(title, when, scopedRows, Labels(apartmentScoped), questions);
+                        Settle(p.View);
+                        Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, EntryView.ScopeTag)), "16s: the scope note in the card, for its own result");
                     });
                     // UI polish PR 4b: What changed with what the architect changed (change 40; two checks of one
                     // project, the second after the sprinkler system and corner lot were answered), the proportion bar
@@ -510,6 +530,21 @@ internal static class Program
 
     private static string TextOf(TextBlock t) =>
         t.Text is { Length: > 0 } x ? x : new System.Windows.Documents.TextRange(t.ContentStart, t.ContentEnd).Text;
+
+    internal static CheckResult LoadSaying(string path)
+    {
+        var node = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8))!;
+        var items = node["result"]!["view"]!["items"]!.AsArray();
+        var picked = items.Where(i => (string?)i!["in_code"]?["chapter"] == "10"
+                                      && ((string?)i!["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true
+                                      && i!["asks"] is System.Text.Json.Nodes.JsonArray a && a.All(x => (string?)x!["kind"] != "mark")).Take(2)
+                          .Concat(items.Where(i => i!["asks"] is System.Text.Json.Nodes.JsonArray a && a.Any(x => (string?)x!["field"] == "facts.corner_lot")).Take(1));
+        foreach (var i in picked)
+            i!["reason"] = "the building holds another occupancy: this rulebook's rules are " + ResultViews.DraftedFor + ", so a person checks";
+        var doc = JsonDocument.Parse(node.ToJsonString());
+        return (CheckResult)typeof(CheckResult).GetMethod("Parse", BindingFlags.NonPublic | BindingFlags.Static)!
+            .Invoke(null, [new WorkerAnswer(doc.RootElement.GetProperty("result").Clone(), About)])!;
+    }
 
     internal static CheckResult Load(string path)
     {
