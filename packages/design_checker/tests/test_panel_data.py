@@ -17,7 +17,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from design_checker import each_part, grouping, panel_data, present
+from design_checker import each_part, egress, grouping, panel_data, present
 from rule_format.rulebook import REPO, Context, load
 
 sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
@@ -512,3 +512,18 @@ def test_the_odyssey_answer_maker_loads_maines_law_with_no_model_description():
     assert found["place"] == "Portland, ME (the eval)" and found["folder"] == maker.MAINE
     assert [law["key"] for law in found["laws"]] == ["maine/maine_state"] and found["laws"][0]["rules"]
     assert egress.place_of is real                                     # the patching undone
+
+
+def test_the_odyssey_answers_route_join_never_adds_the_building_codes_door_parts():
+    """Section group 6a's review: the routes now give a door part for every door (New York's door size rules), but
+    the committed Odyssey answer was made with Maine's means of egress door rules not read (they read what the
+    architect marks: swing, latch, panic hardware, which no door part measures). The eval's join takes the story,
+    space and corridor parts only, so the answer the script makes stays the committed one."""
+    sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
+    import make_ny_build_data as build
+    import make_odyssey_answer
+    desc = build.interior_of()
+    with make_odyssey_answer.as_the_eval():
+        got = egress.measure_interior(desc)
+    assert got["parts"].get("means_of_egress_door") is None
+    assert got["parts"]["story"] and got["parts"]["corridor"]

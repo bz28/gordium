@@ -159,7 +159,8 @@ def test_no_levels_no_parts_read():
     d = description([room("c", rect(0, 0, 10, 8))], [door("a", (-0.25, 4), (0, 1), ("c", "outside"), exit_id="A")])
     del d["levels"]
     got = measure(d)
-    assert got["parts"] == {"story": None, "space": None, "corridor": None} and got["problems"]
+    assert got["parts"] == {"story": None, "space": None, "corridor": None, "means_of_egress_door": None} \
+        and got["problems"]
 
 
 def test_an_unknown_space_may_be_a_space_or_a_corridor_and_its_story_needs_review():
