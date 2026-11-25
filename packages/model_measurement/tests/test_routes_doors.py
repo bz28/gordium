@@ -107,6 +107,22 @@ def test_leaves_stated_or_not():
         assert _why(_parts(_office(leaves=bad))["d"], "moe_door_leaves").startswith("the door d gives its leaves as")
 
 
+def test_the_leaves_meaning_gives_the_mullioned_pair_reading():
+    """A pair with a mullion is two openings, each needing the 32 in: 1 only at the narrower leaf's own clear width.
+    The part's meaning (what the rulebook and spreadsheet show) and this module's own account both say so, as the
+    interior format and the Revit mark do; a "no mullion" reading alone would let a mullioned pair be stated 1 at
+    the pair's whole width."""
+    import yaml
+
+    import model_measurement.routes.doors as doors
+    root = Path(__file__).resolve().parents[3]
+    kinds = yaml.safe_load((root / "packages/rule_format/rule_format/parts.yaml").read_text(encoding="utf-8"))
+    meaning = kinds["means_of_egress_door"]["measures"]["moe_door_leaves"]["meaning"]
+    for words in (meaning, " ".join(doors.__doc__.split())):
+        assert "a pair with a mullion is two openings, each needing the 32 in" in words
+        assert "narrower leaf's own opening" in words
+
+
 def test_an_exit_kind_not_read_is_not_measured():
     d = _office()
     d["doors"][0]["exit_kind"] = "fire_escape"
