@@ -145,7 +145,12 @@ public static class BuildingFacts
                      // group 2's (Table 1006.3.4 note a): a Group R-2's escape openings per 1031
                      (Marks.EscapeOpenings1031, "emergency_escape_openings_1031"),
                      // group 3's: outdoor areas the occupants use (1004.7), and 1004.5.1's increased occupant load
-                     (Marks.OccupiedOutdoorAreas, "occupied_outdoor_areas"), (Marks.OccupantLoadIncreased, "occupant_load_increased") })
+                     (Marks.OccupiedOutdoorAreas, "occupied_outdoor_areas"), (Marks.OccupantLoadIncreased, "occupant_load_increased"),
+                     // groups 4 and 5's: corridors (1020) and egress capacity (1005.3)
+                     (Marks.OtherLevelsReachCorridors, "other_level_egress_into_corridors"),
+                     (Marks.AmbulatoryCareFacility, "ambulatory_care_facility"),
+                     (Marks.CorridorsWithinDwellingUnits, "corridors_within_dwelling_units"),
+                     (Marks.EmergencyVoiceAlarm, "emergency_voice_alarm_system") })
         {
             var v = Get(mark);
             if (Marks.YesNo(v) is { } yes)
