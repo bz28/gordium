@@ -129,6 +129,7 @@ def test_the_leaves_meaning_gives_the_mullioned_pair_reading():
     assert "a mullioned pair not stated at its narrower leaf's own opening" in rule["review_when"][0]["reason"]
     assert "Gordium's reading" in rule["notes"] and "a pair with a mullion between its leaves is two door openings" in " ".join(
         rule["notes"].split())
+    assert "else 2 (needs review at 32 in or more)" in " ".join(rule["notes"].split())   # under 32 in it fails
 
 
 def test_an_exit_kind_not_read_is_not_measured():
