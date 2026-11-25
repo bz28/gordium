@@ -370,6 +370,14 @@ public sealed class PaneTests
         Assert.EndsWith(PaneWords.ChangesSaid(saidOne)!, PaneWords.ChangesAll(saidOne), StringComparison.Ordinal);
         var cleared = PaneWords.FactsChanged(after, F(M()));
         Assert.Contains("cleared", cleared, StringComparison.Ordinal);
+        // a building Yes/No fact holding something that isn't Yes or No (it has a problem, no current value): said as
+        // unreadable, never cleared, and a change into it from blank is said too
+        var odd = F(M((Marks.AssemblyFixedSeating, new MarkValue(true, Text: "maybe"))));
+        Assert.NotNull(odd.Single(x => x.Mark == Marks.AssemblyFixedSeating).Problem);
+        var intoOdd = PaneWords.FactsChanged(F(M((Marks.AssemblyFixedSeating, new MarkValue(true, 1)))), odd);
+        Assert.Contains("a value Gordium can't read", intoOdd, StringComparison.Ordinal);
+        Assert.DoesNotContain("cleared", intoOdd, StringComparison.Ordinal);
+        Assert.Contains("a value Gordium can't read", PaneWords.FactsChanged(F(M()), odd), StringComparison.Ordinal);
     }
 
     /// <summary>The proportion bar (change 18): one segment per verdict, worst first, as long as its count; never green
