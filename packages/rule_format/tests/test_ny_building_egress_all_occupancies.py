@@ -775,9 +775,10 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
     assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-3"} | d13, ctx) == "pass"
     assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": "R-3"} | d13, ctx) == "fail"
     # review round 1 of group 4b: note d's 903.2.8 permits 13D in Group R-4 only in Condition 1 (903.2.8.2, p.271),
-    # which isn't stated: never a pass on it
-    for h in (0.75, 1, 2):
+    # which isn't stated: never a pass on it; under 1 hour it fails either way (round 2)
+    for h in (1, 2):
         assert _one(r, "corridor", _rating(11, h), {"occupancy_group": "R-4"} | d13, ctx) == "needs_review", h
+    assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": "R-4"} | d13, ctx) == "fail"
     assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-2"} | d13, ctx) == "fail"
     # note c's 903.3.1.2 (NFPA 13R): Group R's 0.5 hour; elsewhere "where allowed", a person's check
     s13r = {S1: False, S2: True, "sprinklered_903_3_1_3": False} | NO_UNITS
