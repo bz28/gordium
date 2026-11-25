@@ -113,11 +113,11 @@ public sealed class SelectionMap
         var at = CheckedAt.ToString("HH:mm", CultureInfo.InvariantCulture);
         string line;
         if (rows.Count == 0)
-            line = $"No result of this check mentions {it}. That is not a pass: Gordium may not read or check {it}.";
+            line = $"No result mentions {it}. That isn't a pass: Gordium may not read or check {it} yet.";
         else if (Stale)
             line = PaneWords.StaleSelection($"{Results(rows.Count)} mentioned {it}", at, StaleKind);
         else
-            line = $"{Results(rows.Count)} mention{(rows.Count == 1 ? "s" : "")} {it}: {Verdicts(rows)}";
+            line = $"{Results(rows.Count)} mention{(rows.Count == 1 ? "s" : "")} {it} · {Verdicts(rows)}";
         return new SelectionAnswer(title, line, rows);
     }
 
@@ -142,6 +142,7 @@ public sealed class SelectionMap
         return string.Join(", ", said);
     }
 
-    /// <summary>How many rows the strip lists before "Show all N": eight (the docked pane keeps room for the list).</summary>
-    public const int Shown = 8;
+    /// <summary>How many rows the strip lists before "Show all N": the top three (UI polish change 41: the strip a third
+    /// shorter, the docked pane's room kept for the list).</summary>
+    public const int Shown = 3;
 }

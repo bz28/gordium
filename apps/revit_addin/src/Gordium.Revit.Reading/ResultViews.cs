@@ -163,6 +163,25 @@ public static class ResultViews
         return parts.Count == 0 ? "No results" : string.Join(" · ", parts);
     }
 
+    private static readonly (Verdict Verdict, string One, string Many)[] Past =
+    [
+        (Verdict.DoesNotComply, "failed", "failed"),
+        (Verdict.NeedsReview, "needed review", "needed review"),
+        (Verdict.NotChecked, "wasn't checked yet", "weren't checked yet"),
+        (Verdict.Complies, "complied", "complied"),
+        (Verdict.NotApplicable, "didn't apply", "didn't apply"),
+    ];
+
+    /// <summary>The summary line in the past tense, for results the model changed after ("1 failed · 132 needed
+    /// review"): what the check said then, never what holds now.</summary>
+    public static string SummaryPast(IEnumerable<Verdict> verdicts)
+    {
+        var all = verdicts.ToList();
+        var parts = Past.Select(c => (c, n: all.Count(v => v == c.Verdict))).Where(x => x.n > 0)
+                        .Select(x => $"{x.n} {(x.n == 1 ? x.c.One : x.c.Many)}").ToList();
+        return parts.Count == 0 ? "No results" : string.Join(" · ", parts);
+    }
+
     /// <summary>The headline sentence (change 19): what fails first; else that nothing fails yet and how many results
     /// wait on the architect; never that the design complies (a check where everything Gordium checked complies still
     /// says Gordium doesn't check everything).</summary>
