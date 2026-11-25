@@ -38,11 +38,15 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md):
   ground beside it. Outlines that come apart (two buildings) aren't placed: whose ground is whose isn't known. A
   spot is never item 2's "finished ground level at any point" (it may stand in an areaway or a window well: open
   question 4.6 of docs/questions_for_architects.md); only flat ground gives that point. The slope-away rule can only lower the grade plane, below any spot at the walls, so
-  spots give no lower bound: a story is never proven a basement from spots, only from flat ground. No ground stated,
+  spots give no lower bound. No ground stated,
   or existing ground (not the finished ground the code measures from), or flat ground only assumed: nothing is
   measured.
-- Each story is certainly above grade plane, certainly a basement, or could be either (every threshold tested with
-  1/16 in to spare, so a floor on the line is "either"). Below the top story, being above grade plane holds for
+- Each story is certainly above grade plane, or could be either (every threshold tested with 1/16 in to spare, so a
+  floor on the line is "either"). A story is never proven a basement, on flat ground either: that needs the finished
+  ground at every point beside the building, and every review round from 3 to 6 found another way the model can
+  hold ground below the stated ground (an area well, a sill below it, a walk-out door, a double-height room over the
+  floor next above). Proving a story above grade plane needs only the grade plane's top end, which the stated ground
+  bounds. Below the top story, being above grade plane holds for
   every story above one that is (each test only gets easier higher up), so those readings are "the lowest b stories
   are basements"; the top story has no floor next above, so only its own floor decides it, whatever the stories
   under it are. Every reading is tried; a story under the grade plane above one that is above it isn't placed (the
@@ -200,17 +204,16 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
 def _readings(stack, plane):
     """(index, facts or UNPLACED) for each story of `stack` [((lowest, highest floor), id)] in every reading the
     ground allows: below the top, the lowest b stories basements; the top story either way its own floor allows."""
-    lo, hi, low_point, flat = plane["low"], plane["high"], plane["point"], plane["flat"]
+    hi, low_point = plane["high"], plane["point"]
     n = len(stack)
-    above, basement = [], []
+    above = []
     for i, ((f_lo, f_hi), _) in enumerate(stack):
         nxt = stack[i + 1][0] if i + 1 < n else None
         above.append(_certainly_above(f_lo, nxt, hi, low_point))
-        basement.append(_certainly_basement(f_hi, nxt, flat))
     under = n - 1                                        # the stories below the top: monotone upward
-    b_least = next((i for i in range(under) if not basement[i]), under)
+    b_least = 0                                          # a basement is never proven (review rounds 3 to 6)
     b_most = next((i for i in range(under) if above[i]), under)
-    tops = [s for s in (True, False) if not (s and basement[-1]) and not (not s and above[-1])]
+    tops = [True] if above[-1] else [True, False]
     for b in range(b_least, max(b_least, b_most) + 1):
         for top in tops:
             vec = [i >= b for i in range(under)] + [top]
@@ -248,48 +251,23 @@ def _certainly_above(f_lo, nxt, g_hi, ground_low) -> bool:
     return ground_low is not None and nxt[0] > ground_low + 12 * FT + SAME      # item 2: a known point of ground
 
 
-def _certainly_basement(f_hi, nxt, flat) -> bool:
-    """Not above grade plane, on flat ground at `flat` (the grade plane and the ground at every point); never from
-    spots (no lower end), and never the top story (whether its roof counts as "the floor next above" for items 1 to
-    3 the definition doesn't say: either way)."""
-    if flat is None or f_hi > flat - SAME or nxt is None:   # its floor could be entirely above grade plane, or
-        return False                                         # it is the top story
-    return nxt[1] < flat + 6 * FT - SAME                     # items 1 and 3 (and so item 2) fail
-
-
-def _stated_ground(description, reader) -> tuple | None:
-    """(ground, lower): every finished ground level the description states at an opening (`ground_outside`: one value
-    or a list) and every area well's floor; and the floors that show ground may be as low (a door to the outside from
-    a room: its floor; a stair's foot), all in inches. None where one is given but can't be read."""
-    ground, lower = [], []
-    desc = description or {}
-    for o in desc.get("openings") or []:
+def _stated_ground(description, reader) -> list | None:
+    """Every finished ground level the description states at an opening (`ground_outside`: one value or a list) and
+    every area well's floor, in inches; None where one is given but can't be read."""
+    out = []
+    for o in (description or {}).get("openings") or []:
         if not isinstance(o, dict):
             continue
         given = o.get("ground_outside")
         well = o.get("area_well")
         try:
             for v in (given if isinstance(given, list) else [] if given is None else [given]):
-                ground.append(reader.length(v, "the ground outside an opening"))
+                out.append(reader.length(v, "the ground outside an opening"))
             if isinstance(well, dict) and well.get("floor_elevation") is not None:
-                ground.append(reader.length(well["floor_elevation"], "an area well's floor"))
+                out.append(reader.length(well["floor_elevation"], "an area well's floor"))
         except InteriorStop:
             return None
-    floor = {r["id"]: r.get("floor_elevation") for r in desc.get("rooms") or []
-             if isinstance(r, dict) and isinstance(r.get("id"), str)}
-    try:
-        for d in desc.get("doors") or []:
-            sides = d.get("sides") if isinstance(d, dict) else None
-            if isinstance(sides, list) and "outside" in sides:
-                for r in sides:
-                    if r != "outside" and floor.get(r) is not None:
-                        lower.append(reader.length(floor[r], "the floor at a door to the outside"))
-        for st in desc.get("stairs") or []:
-            if isinstance(st, dict) and st.get("bottom_elevation") is not None:
-                lower.append(reader.length(st["bottom_elevation"], "a stair's foot"))
-    except InteriorStop:
-        return None
-    return ground, lower
+    return out
 
 
 def _floors(description, reader, stories) -> tuple:
@@ -321,15 +299,14 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
         return None, ground["none"]
     if "flat" in ground:
         z = ground["flat"] * FT
-        stated = _stated_ground(description, reader)
-        if stated is None:
+        given = _stated_ground(description, reader)
+        if given is None:
             return None, Stop("ground_openings_not_read").reason
-        given, lower = stated
         if any(g > z + SAME for g in given):
             return None, Stop("ground_disagrees", flat=f"{ground['flat']:g} ft", high=f"{max(given) / FT:g} ft").reason
-        if any(g < z - SAME for g in given + lower):     # an areaway, a well, a walk-out door or a stair's foot under
-            return {"low": -math.inf, "high": z, "point": None, "flat": None}, None    # the ground (question 4.6)
-        return {"low": z, "high": z, "point": z, "flat": z}, None
+        # the grade plane at most the flat ground (an areaway, a well, a walk-out door may be lower: never a basement
+        # proven); the flat ground itself a known point of finished ground (item 2)
+        return {"low": -math.inf, "high": z, "point": z, "flat": z}, None
     spots = [p for p in ground.get("spots") or []
              if isinstance(p, (list, tuple)) and len(p) == 3 and all(_number(v) for v in p)]
     if not spots or len(spots) != len(ground.get("spots") or []):
@@ -362,9 +339,8 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
     stated = _stated_ground(description, reader)         # finished ground stated at an opening: above every spot,
     if stated is None:                                   # the spots don't bound the grade plane (nothing placed)
         return None, Stop("ground_openings_not_read").reason
-    if any(g > high + SAME for g in stated[0]):
-        return None, Stop("ground_disagrees_spots", high=f"{high / FT:g} ft",
-                          stated=f"{max(stated[0]) / FT:g} ft").reason
+    if any(g > high + SAME for g in stated):
+        return None, Stop("ground_disagrees_spots", high=f"{high / FT:g} ft", stated=f"{max(stated) / FT:g} ft").reason
     # item 2's "finished ground level at any point": never a spot (it may stand in an areaway or a window well,
     # whose floor as "ground" is an open question: docs/questions_for_architects.md 4.6), only flat ground
     return {"low": -math.inf, "high": high, "point": None, "flat": None,
