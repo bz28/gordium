@@ -121,6 +121,12 @@ def test_the_leaves_meaning_gives_the_mullioned_pair_reading():
     for words in (meaning, " ".join(doors.__doc__.split())):
         assert "a pair with a mullion is two openings, each needing the 32 in" in words
         assert "narrower leaf's own opening" in words
+    width = kinds["means_of_egress_door"]["measures"]["moe_door_clear_width"]["meaning"]
+    assert "for a pair with no mullion, the whole opening's" in width and "narrower leaf's own opening" in width
+    rules = (root / "regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/general.yaml")
+    rule = next(r for r in yaml.safe_load(rules.read_text(encoding="utf-8"))["rules"]
+                if r["id"] == "general.bc_1010_1_1_door_width")
+    assert "a mullioned pair not stated at its narrower leaf's own opening" in rule["review_when"][0]["reason"]
 
 
 def test_an_exit_kind_not_read_is_not_measured():

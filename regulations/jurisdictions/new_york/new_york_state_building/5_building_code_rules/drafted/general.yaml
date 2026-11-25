@@ -13233,8 +13233,9 @@ rules:
   check: moe_door_clear_width >= 32
   review_when:
   - when: moe_door_clear_width >= 32 and moe_door_leaves != 1
-    reason: 'Two leaves with no mullion between them (or how many isn''t stated): 1010.1.1 asks one leaf for the 32 in, and
-      the maker''s clear opening is the whole opening''s: a person checks the leaf.'
+    reason: 'Two leaves with no mullion between them, a mullioned pair not stated at its narrower leaf''s own opening, or how
+      many isn''t stated: 1010.1.1 asks one leaf (each opening of a mullioned pair) for the 32 in, and the maker''s clear
+      opening may be the whole pair''s: a person checks each leaf.'
   - when: moe_door_clear_width >= 32 and moe_door_clear_width < 41.5 and occupancy_group in ["I-2", "mixed"]
     reason: 'Group I-2 (stated, or not ruled out in a building of two or more groups): a door used for the movement of beds
       needs 41 1/2 in, and which doors are isn''t shown: a person checks.'
