@@ -529,9 +529,15 @@ public static class RouteReader
     /// <summary>The side of its wall a door's plan symbol draws its swing on, as the sign along the wall's normal
     /// (<see cref="DoorPlace.Normal"/>): see <see cref="SwingsInto"/>; null with why where the drawing doesn't settle
     /// it. Also what the Revit trial's swing check (SwingCheck) holds against the side the model was built to.</summary>
-    internal static int? SwingSide(RevitModel model, OpeningRecord rec, DoorPlace p, double width, out string? why)
+    internal static int? SwingSide(RevitModel model, OpeningRecord rec, DoorPlace p, double width, out string? why) =>
+        SwingRead(model, rec, p, width, out why, out _);
+
+    /// <summary><see cref="SwingSide"/>, and the jambs its counted arcs are hinged at (each the sign along the wall,
+    /// <see cref="DoorPlace.Along"/>, of its centre from the door's).</summary>
+    internal static int? SwingRead(RevitModel model, OpeningRecord rec, DoorPlace p, double width, out string? why, out HashSet<int> jambs)
     {
         why = null;
+        jambs = [];
         if (rec.Swing is not { } drawn)
         {
             why = "its plan symbol wasn't read, so which side it swings into isn't read";
@@ -567,6 +573,7 @@ public static class RouteReader
                 return null;
             }
             found.Add(Math.Sign(nM));
+            jambs.Add(Math.Sign(uC));
         }
         if (found.Count == 0)
         {
@@ -608,6 +615,54 @@ public static class RouteReader
             var d = InteriorReader.Turned(model, dir);
             var b = Math.Sign(P2Dot(new P2(d.X, d.Y), place.Normal));
             rows.Add(new(rec.UniqueId, SwingSide(model, rec, place, rec.TypeWidth ?? 0, out why), b == 0 ? null : b, why));
+        }
+        return rows;
+    }
+
+    /// <summary>One door as the model build reads it back (ModelBuild: flipped until what Revit draws is what the data
+    /// says, never by a family's facing or hand convention): the side its plan symbol swings to and the jamb its single
+    /// leaf is hinged at (each a sign along the wall's normal and along the wall, from what is drawn; null when not
+    /// read: the hinge of a pair, or of a swing not read), and the same for the data (null where it gives none).</summary>
+    public sealed record BuildSwing(string Id, int? Side, int? Hinge, int? DataSide, int? DataHinge, string? Why)
+    {
+        /// <summary>The flips that bring what is read to the data: facing when both sides are known and differ; hand
+        /// when both hinges are known and differ. Nothing is flipped on what isn't read.</summary>
+        public bool FlipFacing => Side is { } s && DataSide is { } d && s != d;
+
+        public bool FlipHand => Hinge is { } h && DataHinge is { } d && h != d;
+
+        /// <summary>Read as the data says: the side read and equal to the data's, and the hinge too where the data
+        /// gives one.</summary>
+        public bool AsTheData => Side is { } s && s == DataSide && (DataHinge is null || Hinge == DataHinge);
+    }
+
+    /// <summary>Each door the build gives a swing (by <c>UniqueId</c>: its <c>swing_dir</c> and, for a single door,
+    /// its hinge point, both internal), read back from its plan symbol (<see cref="SwingSide"/>, the door's type width).
+    /// A door whose place in its wall isn't read has nothing read.</summary>
+    public static List<BuildSwing> ReadBuildSwings(RevitModel model, IReadOnlyDictionary<string, (Xyz Dir, Xyz? Hinge)> data)
+    {
+        var rows = new List<BuildSwing>();
+        var t = model.InternalToShared;
+        foreach (var rec in model.Interior?.Openings ?? [])
+        {
+            if (!data.TryGetValue(rec.UniqueId, out var d))
+                continue;
+            if (Place(model, rec, out var why) is not { } place)
+            {
+                rows.Add(new(rec.UniqueId, null, null, null, null, why));
+                continue;
+            }
+            var dir = InteriorReader.Turned(model, d.Dir);
+            var dataSide = Math.Sign(P2Dot(new P2(dir.X, dir.Y), place.Normal));
+            int? dataHinge = null;
+            if (d.Hinge is { } h)
+            {
+                var h3 = t.Apply(h);
+                dataHinge = Math.Sign(P2Dot(new P2(h3.X, h3.Y) - place.Centre, place.Along));
+            }
+            var side = SwingRead(model, rec, place, rec.TypeWidth ?? 0, out why, out var jambs);
+            int? hinge = side is not null && jambs.Count == 1 ? jambs.Single() : null;
+            rows.Add(new(rec.UniqueId, side, hinge, dataSide == 0 ? null : dataSide, dataHinge == 0 ? null : dataHinge, why));
         }
         return rows;
     }

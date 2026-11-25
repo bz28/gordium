@@ -681,18 +681,9 @@ public static class BuildData
 
     // ---- doors -------------------------------------------------------------------------------------------------
 
-    /// <summary>Whether to flip a door's facing so its leaf opens to <paramref name="swingDir"/>: in Revit's stock door
-    /// families the leaf opens to the side opposite the facing arrow (the script's SWING_OPPOSITE_FACING, true), so the
-    /// facing is flipped when it points the way the door should swing (or, with the toggle false, when it points
-    /// away). A facing square to the swing (dot 0) is left.</summary>
-    public static bool FlipFacing(PlanPoint facing, PlanPoint swingDir, bool swingOppositeFacing) =>
-        (facing.X * swingDir.X + facing.Y * swingDir.Y) * (swingOppositeFacing ? -1.0 : 1.0) < 0;
-
-    /// <summary>Whether to flip a door's hand so it hinges at <paramref name="hinge"/>: read once the facing is set
-    /// (flipping the facing mirrors across the wall, which leaves the hand as it was). The script's
-    /// HINGE_OPPOSITE_HAND (true): the stock families hinge on the side opposite the hand arrow.</summary>
-    public static bool FlipHand(PlanPoint hand, PlanPoint center, PlanPoint hinge, bool hingeOppositeHand) =>
-        (hand.X * (hinge.X - center.X) + hand.Y * (hinge.Y - center.Y)) * (hingeOppositeHand ? -1.0 : 1.0) < 0;
+    // (Which way to flip a door is never worked out from its facing or hand: a family's convention is its own, and
+    // Revit 2027's Single-Flush swings toward its facing, the opposite of what the script assumed. The build reads
+    // each door's drawn swing back and flips until it is the data's: ModelBuild.SwingDoors, RouteReader.ReadBuildSwings.)
 
     // ---- the floor, the rooms, the phases ----------------------------------------------------------------------
 

@@ -68,3 +68,28 @@ def test_the_reading_follows_what_revit_draws_not_the_builds_flip_convention():
     single = [r for r in rows if r[2] == "single"]
     assert single and all(r[6] in "+-" and r[7] in "+-" and r[6] != r[7] for r in single)
     assert all(r[8] == "agrees" for r in rows if r[2] == "double")
+
+
+def test_the_build_flips_each_door_until_what_it_reads_back_is_the_data():
+    # the model build's read-back (ModelBuild.SwingDoors), built with no flip convention at all: every door said to
+    # swing as the data only from what was read back, the flips it needed covering facing, hand, both and neither on
+    # the template's Single-Flush and facing on Gordium's double; then the swing check on the model it saved agrees,
+    # side and room (Revit's own GetRoomAtPoint on the built side)
+    rec = json.loads((HERE / "build_read_back_recorded.json").read_text(encoding="utf-8"))
+    assert rec["build_data"]["sha256"] == RECORDED["build_data"]["sha256"]
+    build = rec["build"]
+    assert build["ok"] and build["all_built"] and not build["failed"]
+    assert len(build["doors"]) == 10
+    assert all(line.endswith("; swings as the data") and "read back: swings " in line for line in build["doors"])
+    template = [line for line in build["doors"] if "(the template's family" in line]
+    flips = {line.split("): ")[1].split("; read back")[0] for line in template}
+    assert flips == {"nothing flipped", "facing flipped", "hand flipped", "facing flipped, hand flipped"}, flips
+    assert any("(Gordium's family" in line for line in build["doors"])
+    for line in build["doors"]:
+        m = re.search(r"swings ([+-]) \(the data ([+-])\)", line)
+        assert m and m.group(1) == m.group(2), line
+        h = re.search(r"hinged ([+-]) \(the data ([+-])\)", line)
+        assert h is None or h.group(1) == h.group(2), line
+    rows = rec["swing_check"]
+    assert all(r.endswith("(agrees)") for r in rows["rooms"]) and len(rows["rooms"]) == 10
+    assert all("(agrees)" in r for r in rows["as_built"] + rows["views_coarse_swings_hidden"])
