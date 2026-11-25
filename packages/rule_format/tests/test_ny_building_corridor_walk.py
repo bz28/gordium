@@ -325,8 +325,10 @@ def factors(group, s13, s13r, voice, seating):
     fact may be either way."""
     def may(v):
         return v is True or v is UNSTATED
-    sure_less = group in LESS and (s13 is True or s13r is True) and voice is True
-    may_less = (group in LESS or group is UNSTATED) and (may(s13) or may(s13r)) and may(voice)
+    # 903.3.1.2 (13R) counts only where it's allowed, in Group R (review round 1 of group 5a); a building of two or
+    # more groups may be all portions other than H and I-2 (1004.4)
+    sure_less = group in LESS and (s13 is True or (s13r is True and group in ("R-1", "R-2", "R-3", "R-4")))         and voice is True
+    may_less = (group in LESS or group in (UNSTATED, "mixed")) and (may(s13) or may(s13r)) and may(voice)
     return (0.15 if sure_less else 0.2), (0 if may(seating) else 0.15 if may_less else 0.2)
 
 

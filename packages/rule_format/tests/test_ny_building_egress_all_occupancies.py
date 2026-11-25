@@ -731,11 +731,18 @@ def test_a_corridors_capacity_is_1005_3_2s_factor_at_its_limit_and_just_past_it(
         assert _one(r, "corridor", _corridor(44, 220), given, ctx) == "pass", g      # 0.2 x 220 = 44
         assert _one(r, "corridor", _corridor(44, 220.5), given, ctx) == "fail", g
     voice = {S1: True, S2: False, "emergency_voice_alarm_system": True, "assembly_fixed_seating": False}
-    for g, want in (("B", "pass"), ("R-2", "pass"), ("I-2", "fail"), ("H-3", "fail"), ("mixed", "fail")):
+    # review round 1 of group 5a: a building of two or more groups is each portion's (1004.4): between the two
+    # factors, a person's check, never a fail on 0.2 alone
+    for g, want in (("B", "pass"), ("R-2", "pass"), ("I-2", "fail"), ("H-3", "fail"), ("mixed", "needs_review")):
         assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": g} | voice, ctx) == want, g   # 0.15 x 300
         assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": g} | voice, ctx) == "fail", g
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "mixed"} | voice | {
+        "emergency_voice_alarm_system": False}, ctx) == "fail"
+    # review round 1 (P1): 903.3.1.2 (13R) counts in Group R; elsewhere it is a person's check, never a pass on 0.15
     r13r = voice | {S1: False, S2: True}
-    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "B"} | r13r, ctx) == "pass"   # 903.3.1.2 too
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "R-2"} | r13r, ctx) == "pass"
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "B"} | r13r, ctx) == "needs_review"
+    assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": "B"} | r13r, ctx) == "fail"
     no_voice = voice | {"emergency_voice_alarm_system": False}
     assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "B"} | no_voice, ctx) == "fail"
     seats = voice | {"assembly_fixed_seating": True}

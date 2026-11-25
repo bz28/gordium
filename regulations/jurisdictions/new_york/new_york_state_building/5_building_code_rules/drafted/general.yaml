@@ -12258,15 +12258,26 @@ rules:
   topic: means_of_egress
   title: Corridor capacity, 0.2 or 0.15 in per occupant (BCNYS 1020.3, 1005.3.2)
   check: corridor_width >= (corridor_occupant_load * 0.15 if occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E",
-    "F-1", "F-2", "I-1", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"] and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
-    and emergency_voice_alarm_system else corridor_occupant_load * 0.2)
+    "F-1", "F-2", "I-1", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"] and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and emergency_voice_alarm_system else corridor_occupant_load * 0.2)
   review_when:
   - when: assembly_fixed_seating and corridor_width < (corridor_occupant_load * 0.15 if occupancy_group in ["A-1", "A-2",
       "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "I-1", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"]
-      and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_voice_alarm_system else corridor_occupant_load *
-      0.2)
+      and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and emergency_voice_alarm_system
+      else corridor_occupant_load * 0.2)
     reason: 'Narrower than the factor, but the building may have smoke-protected or open-air assembly seating (fixed seating
       stated or not ruled out), whose factors (Table 1030.6.2, 1030.6.3) may ask less: a person checks.'
+  - when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "I-1", "I-3", "I-4", "M", "S-1",
+      "S-2", "U"] and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and corridor_width >= corridor_occupant_load * 0.15
+      and corridor_width < corridor_occupant_load * 0.2 and emergency_voice_alarm_system
+    reason: 'Between 0.15 and 0.2 in per occupant, with an NFPA 13R system and a voice/alarm system outside Group R: exception
+      1 counts a 903.3.1.2 system, but 903.3.1.2 allows it in Group R occupancies, so whether the building''s system is one
+      that counts is a person''s check (as Table 1006.2.1''s rows take it).'
+  - when: occupancy_group == "mixed" and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_width >= corridor_occupant_load
+      * 0.15 and corridor_width < corridor_occupant_load * 0.2 and emergency_voice_alarm_system
+    reason: 'Between 0.15 and 0.2 in per occupant in a building of two or more groups with a sprinkler system and a voice/alarm
+      system: each portion follows its own occupancy and a shared corridor the more stringent (1004.4), so 0.15 holds unless
+      a Group H or I-2 portion uses the corridor, which isn''t shown: a person checks.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -12380,6 +12391,24 @@ rules:
     expect: fail
     note: 'Exception 1: 0.15 in each, 44.1 in.'
   - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: Office, NFPA 13R and voice alarm
+        measures:
+          corridor_width: 45
+          corridor_occupant_load: 300
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: '903.3.1.2 allows a 13R system in Group R: whether this office''s system counts for exception 1 is a person''s check.'
+  - given:
       occupancy_group: I-2
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -12408,13 +12437,14 @@ rules:
       - id: p1
         name: Two groups, NFPA 13 and voice alarm
         measures:
-          corridor_width: 44
-          corridor_occupant_load: 290
+          corridor_width: 45
+          corridor_occupant_load: 300
     rows:
     - part: p1
-      outcome: fail
-    expect: fail
-    note: 'Two or more groups: a corridor they share meets the more stringent (1004.4), 0.2 in each.'
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: 0.15 in each holds unless a Group H or I-2 portion uses the corridor (1004.4), not shown: a
+      person checks.'
   - given:
       occupancy_group: A-3
       sprinklered_903_3_1_1: true
@@ -12463,13 +12493,14 @@ rules:
     expect: not_applicable
     note: 'No corridor: with none, the rule doesn''t apply.'
   notes: '1020.3''s capacity, determined by 1005.1: for a corridor, a component other than a stairway, 0.2 in for each occupant
-    it serves (1005.3.2); 0.15 in exception 1''s buildings (a sprinkler system per 903.3.1.1 or 903.3.1.2 and an emergency
-    voice/alarm system per 907.5.2.2, both stated, in one group other than H and I-2); assembly seating''s factors (exceptions
-    2 and 3, Table 1030.6.2 and 1030.6.3, not brought in) need review while fixed seating is stated or not ruled out. The
-    occupant load is the corridor''s, two readings (none and the whole story''s) only where the building says no other level''s
-    occupants reach its corridors (1004.2.2, 1004.2.3): it passes only at the whole story''s load. How the load splits between
-    exits (1005.5) is section group 5b''s. Section group 5a (2026-11-25) made this a rule; it was 4a''s flag. Hand-drafted
-    in a Claude Code session (2026-11-25).'
+    it serves (1005.3.2); 0.15 in exception 1''s buildings (a sprinkler system per 903.3.1.1, or 903.3.1.2 in Group R where
+    that system is allowed, and an emergency voice/alarm system per 907.5.2.2, both stated, in one group other than H and
+    I-2; a 13R system outside Group R, or a building of two or more groups, needs review between 0.15 and 0.2); assembly seating''s
+    factors (exceptions 2 and 3, Table 1030.6.2 and 1030.6.3, not brought in) need review while fixed seating is stated or
+    not ruled out. The occupant load is the corridor''s, two readings (none and the whole story''s) only where the building
+    says no other level''s occupants reach its corridors (1004.2.2, 1004.2.3): it passes only at the whole story''s load.
+    How the load splits between exits (1005.5) is section group 5b''s. Section group 5a (2026-11-25) made this a rule; it
+    was 4a''s flag. Hand-drafted in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1020_3_corridor_width
@@ -12968,7 +12999,7 @@ rules:
 - id: general.bc_1005_3_2_other_components
   kind: flag
   topic: means_of_egress
-  title: Doors, ramps and passageways, 0.2 or 0.15 in per occupant (BCNYS 1005.3.2)
+  title: Other components' capacity, doors and ramps included (BCNYS 1005.3.2)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 314
