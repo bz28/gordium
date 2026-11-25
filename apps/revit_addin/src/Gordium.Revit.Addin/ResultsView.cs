@@ -596,7 +596,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var p = new C.StackPanel();
         if (!PaneWords.ChangeIsList(change))                   // no verdict changed: the worker's one line, as it says
         {
-            p.Children.Add(Typed(new C.TextBlock { Text = change.Words, TextWrapping = W.TextWrapping.Wrap }, Caption));
+            p.Children.Add(Typed(new C.TextBlock { Text = PaneWords.ChangeWords(change, _factsChanged is not null), TextWrapping = W.TextWrapping.Wrap }, Caption));
             if (_factsChanged is { } changed)                  // what the architect changed, said either way (review round 1)
                 p.Children.Add(Small(changed, top: 2));
         }

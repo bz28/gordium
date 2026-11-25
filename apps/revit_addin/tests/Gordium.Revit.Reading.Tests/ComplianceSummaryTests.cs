@@ -50,8 +50,12 @@ public sealed class ComplianceSummaryTests
             IEnumerable<ResultRow> Walk(CodeNode n) => n.Rows.Concat(n.Children.Where(c => c.Level == CodeLevel.Rule && !c.Greyed).SelectMany(c => c.Rows))
                                                          .Concat(n.Children.Where(c => c.Level != CodeLevel.Rule || c.Greyed).SelectMany(Walk));
             Assert.Equal(model.Views!.Code.SelectMany(Walk).Select(r => r.Id), ids);
-            // the appendix: every row's law, in the same order
+            // the appendix: every row's law, in the same order, each table row numbered and linked to its law (review
+            // round 2)
             Assert.Equal(ids, LawTag.Matches(html).Select(m => WebUtility.HtmlDecode(m.Groups["id"].Value)));
+            var rows = RowTag.Matches(html).ToList();
+            for (var i = 0; i < rows.Count; i++)
+                Assert.Contains($"<a class=\"law-ref\" href=\"#law-{i + 1}\">{i + 1}.</a> ", rows[i].Groups["body"].Value, StringComparison.Ordinal);
             Assert.True(html.IndexOf(WebUtility.HtmlEncode(ComplianceSummary.AppendixTitle), StringComparison.Ordinal) > html.LastIndexOf("<tr data-row=", StringComparison.Ordinal));
         }
         Assert.Equal(190, RowTag.Matches(ComplianceSummary.Html(UxAnswers.Model(UxAnswers.Odyssey()), "o", At, Made)).Count);
@@ -87,7 +91,8 @@ public sealed class ComplianceSummaryTests
             foreach (Match m in RowTag.Matches(html))
             {
                 var row = rows[WebUtility.HtmlDecode(m.Groups["id"].Value)];
-                var body = laws[row.Id] + m.Groups["body"].Value;
+                // the summary's own numbering (the appendix's "12. ", the row's link to it) is its place, not a figure
+                var body = Regex.Replace(laws[row.Id] + m.Groups["body"].Value, "<a class=\"law-ref\"[^>]*>[0-9]+\\.</a>|<b>[0-9]+\\. ", "<b>");
                 var text = WebUtility.HtmlDecode(Regex.Replace(Regex.Replace(body, "<svg.*?</svg>", "", RegexOptions.Singleline), "<[^>]+>", " "));
                 Assert.Contains(row.Name, text, StringComparison.Ordinal);
                 Assert.Equal(StatusLook.Of(row.Tone, false).ToString().ToLowerInvariant(), m.Groups["status"].Value);
@@ -99,7 +104,7 @@ public sealed class ComplianceSummaryTests
                                                 .Concat(row.FigureLines.SelectMany(l => new[] { l.What, l.Measured, l.Limit }))
                                                 .Concat(row.Links.Select(l => l.Citation)).Where(s => s is not null));
                 // the appendix's own numbering ("12. ") is the summary's place, not a figure
-                foreach (Match n in Regex.Matches(Regex.Replace(text, @"^\s*[0-9]+\. ", ""), @"[0-9]+(?:[.,][0-9]+)*"))
+                foreach (Match n in Regex.Matches(text, @"[0-9]+(?:[.,][0-9]+)*"))
                     Assert.True(own.Contains(n.Value, StringComparison.Ordinal), $"{row.Id}: {n.Value} is not the checker's");
             }
         }

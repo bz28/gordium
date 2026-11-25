@@ -353,6 +353,11 @@ public sealed class PaneTests
         Assert.Contains(": 4", said, StringComparison.Ordinal);
         Assert.Null(PaneWords.FactsChanged(before, before));
         Assert.Null(PaneWords.FactsChanged(null, after));
+        // review round 2: a fact changed and no result did: "No result changed since 14:32.", never "Nothing changed"
+        var none = CheckChanges.Between(Model(House()), new DateTime(2026, 11, 22, 14, 32, 0), Model(House()))!;
+        Assert.Equal("No result changed since 14:32.", PaneWords.ChangeWords(none, factsChanged: true));
+        Assert.StartsWith("Nothing changed", PaneWords.ChangeWords(none, factsChanged: false), StringComparison.Ordinal);
+        Assert.Contains("PaneWords.ChangeWords(change, _factsChanged is not null)", Read("ResultsView.cs"), StringComparison.Ordinal);
         var cleared = PaneWords.FactsChanged(after, F(M()));
         Assert.Contains("cleared", cleared, StringComparison.Ordinal);
     }

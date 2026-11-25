@@ -256,6 +256,17 @@ public static class PaneWords
         return all ? "Show fewer" : $"Show all {change.Rows.Count}";
     }
 
+    /// <summary>What changed's one line when the architect changed a fact and no result changed at all (review round 2:
+    /// "Nothing changed" beside "You changed: …" contradicted itself): "No result changed since 14:32."; else the
+    /// checker's own line.</summary>
+    public static string ChangeWords(CheckChange change, bool factsChanged)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+        return factsChanged && change.Rows.Count == 0 && change.Said == 0 && change.Compared
+            ? "No result changed" + (change.Since is { } at ? $" since {at.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)}." : ".")
+            : change.Words;
+    }
+
     /// <summary>"2 more say something new (the same verdict)", or null.</summary>
     public static string? ChangesSaid(CheckChange change)
     {
