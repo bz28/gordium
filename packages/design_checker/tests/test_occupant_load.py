@@ -233,8 +233,8 @@ def test_a_function_on_a_room_marked_a_corridor_or_an_exit_is_said_never_dropped
     """A room marked a corridor is never a space, and a space that is itself an exit holds no load, so a function
     stated on either would give none: its story's load is left not worked out, saying why; the other story's still is
     (an exit's: review of group 3, round 1, 2026-11-24)."""
-    for rid, words in (("L1C", "is marked a corridor, yet states the function 'mercantile'"),
-                       ("L1SW", "is itself an exit (a door into it is marked an exit enclosure or passageway), yet "
+    for rid, words in (("L1C", "'s use is corridor, yet it states the function 'mercantile'"),
+                       ("L1SW", "is itself an exit (a door into it is an exit enclosure's or passageway's), yet "
                                 "states the function 'mercantile'")):
         desc = copy.deepcopy(apartment)
         next(r for r in desc["rooms"] if r["id"] == rid)["function"] = "mercantile"
@@ -496,6 +496,8 @@ def test_a_story_names_a_missing_function_only_where_a_room_lacks_one():
     missing = story_words([{"id": "a", "use": "other", "function": "business"}, {"id": "c", "use": "other"}],
                           [{"space_floor_area": 100}, {"space_floor_area": 100}])
     assert "(c)" in missing and missing.endswith(stated)
+    elsewhere = story_words([{"id": "m", "use": "other", "function": "mall"}], [{"space_floor_area": 100}])
+    assert "(m)" in elsewhere and elsewhere.endswith(occupant_load.STORY_STATED)      # round 7: by hand, as its room
 
 
 def _asked(why):
@@ -514,20 +516,37 @@ def _asked(why):
 
 
 def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answered():
-    """Group 3 review round 6 (P2, 2026-11-25): a load Gordium or a person must work out (a room others pass through,
-    one a loaded room is served through, a function the table sends elsewhere, a room or closet with no function) is
-    asked for by hand; only what the model itself can fix (an outline, a floor area, a mark against a function) is a
-    model fix. The class: every reason occupant_load.py gives."""
+    """Group 3 review rounds 6 and 7 (2026-11-25): a load Gordium or a person must work out (no function, a room
+    others pass through or a loaded room is served through, a function the table sends elsewhere, an exit, a story of
+    no loaded room, or one left open by any of these) is asked for by hand; only what the model itself can fix (an
+    outline, a floor area, a function value no table row has, a use or exit against a function) is a model fix; none
+    is ever a mark to set (no host has an occupant-load mark). The class: every reason occupant_load.py defines, so a
+    new one can't slip through unclassified; and none says a function 'is stated' when it isn't."""
     ol = occupant_load
-    by_hand = [ol.NOT_GIVEN, ol.NO_LOAD.format(use="closet"), ol.THROUGH, ol.ELSEWHERE.format(f="mall", where="402.8.2"),
-               ol.SERVED.format(names="st", es="es", their="its"), ol.IS_EXIT]
-    model = [ol.GROSS_NOT_MEASURED, ol.AREAS_OVER, "the room's floor area isn't measured"]
-    for why in by_hand:
+    by_hand, model = "by hand", "model"
+    reasons = {
+        "NOT_GIVEN": (ol.NOT_GIVEN, by_hand), "NO_LOAD": (ol.NO_LOAD.format(use="closet"), by_hand),
+        "THROUGH": (ol.THROUGH, by_hand), "SERVED": (ol.SERVED.format(names="st", es="es", their="its"), by_hand),
+        "ELSEWHERE": (ol.ELSEWHERE.format(f="mall", where="402.8.2"), by_hand), "IS_EXIT": (ol.IS_EXIT, by_hand),
+        "STORY_NONE": (ol.STORY_NONE, by_hand),
+        "STORY_OPEN": (ol.STORY_OPEN.format(names="k"), model),                   # its rooms' floor areas, say
+        "UNKNOWN": (ol.UNKNOWN.format(f="apartment"), model),
+        "EXIT_FUNCTION": (ol.EXIT_FUNCTION.format(name="s", f="business"), model),
+        "CORRIDOR_FUNCTION": (ol.CORRIDOR_FUNCTION.format(name="c", f="business"), model),
+        "GROSS_NOT_MEASURED": (ol.GROSS_NOT_MEASURED, model), "AREAS_OVER": (ol.AREAS_OVER, model),
+    }
+    fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "LOAD_STATED", "STORY_STATED", "STORY_FUNCTION"}
+    defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
+    assert defined == set(reasons), defined ^ set(reasons)
+    cases = [(w, kind) for w, kind in reasons.values()] + [
+        ("the room's floor area isn't measured", model),
+        (ol.STORY_OPEN.format(names="k") + ol.STORY_FUNCTION, by_hand),             # a room with no function
+        (ol.STORY_OPEN.format(names="k") + ": " + ol.STORY_STATED, by_hand)]       # one sent elsewhere
+    for why, kind in cases:
         heads = _asked(why)
-        assert heads and not any(h.startswith(("Fix the model", "Mark the")) for h in heads), (why, heads)
-    for why in model:
-        assert any(h.startswith("Fix the model") for h in _asked(why)), why
-    assert "its function is stated" not in ol.NO_LOAD          # round 6, P3: it reads as not yet stated
+        assert heads and not any(h.startswith("Mark the") for h in heads), (why, heads)
+        assert any(h.startswith("Fix the model") for h in heads) == (kind == model), (why, kind, heads)
+        assert "is stated by the architect" not in why, why     # round 6: never says it was stated
     # the reviewer's layout: a closet with no function, a storeroom behind it, off a kitchen: asked by hand
     desc = description([CORRIDOR, room("k", rect(10, 6.5, 20, 16.5), use="kitchen", lockable=False),
                         room("s13", rect(10, 17, 20, 27), use="closet", lockable=False),

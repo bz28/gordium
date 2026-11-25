@@ -43,6 +43,7 @@ NOT_GIVEN = "the room's function (Table 1004.5) isn't stated, so its occupant lo
 # the same words for a load Gordium (or a person) must work out and no mark carries (round 6): a room others pass
 # through (their loads aren't summed yet), a function the table sends elsewhere; asked by hand, never as a model fix
 LOAD_STATED = STOPS["stated_not_given"].format(what="the room's occupant load, worked out by hand")
+STORY_STATED = STOPS["stated_not_given"].format(what="the story's occupant load, worked out by hand")
 UNKNOWN = "the room's function {f!r} is none of Table 1004.5's (docs/interior/interior_description_format.md)"
 ELSEWHERE = "the function {f} takes its occupant load from {where}, not a factor: " + LOAD_STATED
 THROUGH = ("other rooms' egress passes through it (1004.2: their occupant loads add to its own), which isn't summed "
@@ -50,20 +51,22 @@ THROUGH = ("other rooms' egress passes through it (1004.2: their occupant loads 
 SERVED = ("{names} egress{es} through it (1004.2: {their} occupant load adds to its own), which isn't summed yet: "
           + LOAD_STATED)
 STORY_OPEN = "a room on the story has no occupant load worked out ({names}), so the story's isn't either"
-# where a room is open for want of a stated function, the story says so in the routes' words (asked by hand); where
-# every open room is so for another reason (its floor area, a function the table sends elsewhere), not (round 5)
+# where a room is open for want of a stated function, the story says so in the routes' words; where one is open for
+# a load to work out by hand (a function the table sends elsewhere, a room passed through), the story's is by hand too;
+# where every open room is so for the model's sake (its floor area), it is a model fix (rounds 5 and 7)
 STORY_FUNCTION = ": " + FUNCTION_STATED
-EXIT_FUNCTION = ("{name} is itself an exit (a door into it is marked an exit enclosure or passageway), yet states "
+EXIT_FUNCTION = ("{name} is itself an exit (a door into it is an exit enclosure's or passageway's), yet states "
                  "the function {f!r}: an exit holds no occupant load of its own, so which it is isn't known")
 IS_EXIT = ("it is itself an exit (an exit stair's enclosure, an exit passageway): it holds no occupant load of its own, "
            "so a rule that reads one for it is a person's check: ") + LOAD_STATED
 NO_LOAD = ("a {use} with no function stated holds no occupant load of its own (202 FLOOR AREA, NET leaves closets and "
            "toilet rooms out); if people use it, its function needs to be ") + FUNCTION_STATED
-STORY_NONE = "no room on the story holds an occupant load of its own (its spaces are exits, closets or toilets)"
+STORY_NONE = ("no room on the story holds an occupant load of its own (its spaces are exits, closets or toilets): "
+              + STORY_STATED)
 GROSS_NOT_MEASURED = "the story's gross floor area isn't measured, so the gross-function rooms' share of it can't be"
 AREAS_OVER = ("the story's rooms add up to more than its gross floor area (inside its exterior walls), so the "
               "gross-function rooms' share of it can't be: a room's outline may overlap another's or the walls")
-CORRIDOR_FUNCTION = ("{name} is marked a corridor, yet states the function {f!r}: a corridor holds no occupant load of "
+CORRIDOR_FUNCTION = ("{name}'s use is corridor, yet it states the function {f!r}: a corridor holds no occupant load of "
                      "its own (Table 1004.5 has no corridor row), so which it is isn't known")
 
 
@@ -148,7 +151,9 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
         if open_ or odd:
             story["not_measured"]["story_occupant_load"] = "; ".join(
                 ([STORY_OPEN.format(names=", ".join(n for n, _ in open_))
-                  + (STORY_FUNCTION if any(w == NOT_GIVEN for _, w in open_) else "")] if open_ else []) + odd)
+                  + (STORY_FUNCTION if any(w == NOT_GIVEN for _, w in open_) else
+                     ": " + STORY_STATED if any(w.endswith(LOAD_STATED) for _, w in open_) else "")]
+                 if open_ else []) + odd)
         elif loads:
             low = sum(x for x, _ in loads)
             high = None if any(h is None for _, h in loads) else sum(h for _, h in loads)
