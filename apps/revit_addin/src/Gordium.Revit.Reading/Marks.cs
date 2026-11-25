@@ -87,7 +87,7 @@ public static class Marks
     public static readonly MarkDefinition DoorLeaves = new(
         "Gordium: Leaves", new("f23ad40b-e048-4b61-a92a-b7963e64d4cf"), MarkValueKind.Integer, MarkBinding.Type,
         [Doors], "doors[].leaves",
-        "A count: how many leaves this door type's opening has: 1 for a single leaf; 2 for a pair with no mullion between them. A pair with a mullion is two door openings: give 1 only if this type's Gordium: Clear width is one leaf's own opening, else 2. " +
+        "A count: how many leaves this door type's opening has: 1 for a single leaf; 2 for a pair with no mullion between them. A pair with a mullion is two door openings, each needing the 32 in itself: give 1 only if this type's Gordium: Clear width is the narrower leaf's own opening, else 2. " +
         "BCNYS 1010.1.1: \"Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm).\" " +
         "1: the door's clear width is checked against 32 in. 2: one leaf of the pair must give the 32 in, which the maker's clear opening of the whole pair doesn't show, so a person checks. Blank or any other number: the door width needs review.");
 

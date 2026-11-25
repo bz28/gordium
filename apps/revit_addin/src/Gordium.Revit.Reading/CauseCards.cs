@@ -222,7 +222,7 @@ public static class CauseCards
     /// hold); "" when every mark is the element's own.</summary>
     internal static string OnType(IReadOnlyList<MarkDefinition> marks) =>
         marks.Any(m => m.Binding == MarkBinding.Type)
-            ? " (a type's mark: click Edit Type and set it once for each type)" : "";
+            ? " (a type's mark: with one type selected, picked in Properties' type list, click Edit Type; once for each type)" : "";
 
     /// <summary>The Gordium marks the card names, each once, in Gordium's list order. When the worker names the
     /// fields the card needs (<see cref="CauseCard.Fields"/>): the mark that feeds each one exactly (doors[].exit:

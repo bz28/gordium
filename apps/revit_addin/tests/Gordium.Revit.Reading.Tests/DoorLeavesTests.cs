@@ -33,7 +33,8 @@ public sealed class DoorLeavesTests
         Assert.Contains("\"Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm).\"",
                         m.Description, StringComparison.Ordinal);
         // a pair with a mullion: 1 only if the clear width given is one leaf's own (never a pair's whole opening as 1)
-        Assert.Contains("A pair with a mullion is two door openings: give 1 only if this type's Gordium: Clear width is one leaf's own opening, else 2.",
+        // review round 2: the narrower leaf's, each opening of a mullioned pair needing the 32 in (1010.1)
+        Assert.Contains("A pair with a mullion is two door openings, each needing the 32 in itself: give 1 only if this type's Gordium: Clear width is the narrower leaf's own opening, else 2.",
                         m.Description, StringComparison.Ordinal);
     }
 
@@ -77,6 +78,8 @@ public sealed class DoorLeavesTests
         Assert.Equal(CardAction.ShowAndProperties, CauseCards.Action(cause, labels));
         Assert.Contains("Edit Type", CauseCards.Note(cause, labels), StringComparison.Ordinal);
         Assert.Contains("Edit Type", CauseCards.AfterProperties(cause, 10), StringComparison.Ordinal);
+        // review round 2: Edit Type is greyed with more than one type selected, so the words say to pick one
+        Assert.Contains("with one type selected", CauseCards.AfterProperties(cause, 10), StringComparison.Ordinal);
         var fix = Assert.Single(Fixes.Of([cause], labels));
         Assert.Contains("Edit Type", Fixes.Note(fix), StringComparison.Ordinal);
         // an element's own mark says nothing of types
