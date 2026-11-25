@@ -112,6 +112,11 @@ results:
   # and the doors' capacity are flags (their widths aren't measured)
   general.bc_1005_3_1_stairway_capacity: needs_review
   general.bc_1005_3_2_other_components: needs_review
+  # section group 5b: continuity, distribution and convergence are flags (the exits' and stairways' widths aren't
+  # measured)
+  general.bc_1005_4_continuity: needs_review
+  general.bc_1005_5_distribution: needs_review
+  general.bc_1005_6_convergence: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

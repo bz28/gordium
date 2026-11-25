@@ -75,6 +75,21 @@ pieces:
     heading: Required capacity based on occupant load › Other egress components
     rules:
     - general.bc_1005_3_2_other_components
+  '1005.4':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_1005_4_continuity
+  '1005.5':
+    label: flag
+    heading: Distribution of minimum width and required capacity
+    rules:
+    - general.bc_1005_5_distribution
+  '1005.6':
+    label: flag
+    heading: Egress convergence
+    rules:
+    - general.bc_1005_6_convergence
   1006.2.1:
     label: rule
     heading: Egress based on occupant load and common path of egress travel distance

@@ -3021,6 +3021,60 @@ labels:
       5a, which makes 1020.3''s capacity a rule.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '1005.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'The width or capacity required from a story never narrows along the path of egress travel to the public way: the
+      routes measure each story''s spaces and corridors, not the exits and discharge beyond them, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 314
+      lines:
+      - 29
+      - 30
+      quote: 1005.4 Continuity. The minimum width or required capacity of the means of egress required from any story of a building
+        shall not be reduced along the path of egress travel until arrival at the public way.
+    piece_sha256: bb8aa3f1ff728dca055216cdc24eeaddab43196e65e089a6e7371a25a490f858
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1005.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'Where more than one exit is required, losing any one exit (or access to it) leaves at least half the required capacity
+      or width: the exits'' widths aren''t measured, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 314
+      lines:
+      - 31
+      - 33
+      quote: 1005.5 Distribution of minimum width and required capacity. Where more than one exit, or access to more than one
+        exit, is required, the means of egress shall be configured such that the loss of any one exit, or access to one exit,
+        shall not reduce the avail- able capacity or width to less than 50 percent of the required capacity or width.
+    piece_sha256: a22aeae86d46fcdd796c97600f31228c8473a05ca57b20e460d425932f972306
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1005.6':
+    label: flag
+    topic: means_of_egress
+    reason: 'Where egress from the stories above and below meets at an intermediate level, the capacity from there on is the
+      larger of the widest minimum or the two stories'' stairways'' or ramps'' required capacities added: the stairways aren''t
+      measured, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 314
+      lines:
+      - 34
+      - 36
+      quote: 1005.6 Egress convergence. Where the means of egress from stories above and below converge at an intermediate level,
+        the capac- ity of the means of egress from the point of convergence shall be not less than the largest minimum width
+        or the sum of the required capacities for the stairways or ramps serving the two adjacent stories, whichever is larger.
+    piece_sha256: d067fb3163d47c39f60b4575a5f7b6e290cb80ba252eccdca28c820a1072dff7
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   1006.2.1:
     label: rule
     topic: means_of_egress

@@ -12998,3 +12998,70 @@ rules:
     check doesn''t read yet (section group 6 brings in the doors).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1005_4_continuity
+  kind: flag
+  topic: means_of_egress
+  title: Egress width never reduced toward the public way (BCNYS 1005.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 29
+    - 30
+    quote: 1005.4 Continuity. The minimum width or required capacity of the means of egress required from any story of a building
+      shall not be reduced along the path of egress travel until arrival at the public way.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The width or capacity required from a story never narrows along the path of egress travel to the public way: the
+      routes measure each story''s spaces and corridors, not the exits and discharge beyond them, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 5b. The corridors' own widths and capacities are
+    their rules (Table 1020.3, 1020.3's capacity); that nothing narrows after them (exits, exit passageways, discharge) isn't
+    measured.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_5_distribution
+  kind: flag
+  topic: means_of_egress
+  title: Losing one exit leaves half the capacity (BCNYS 1005.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 31
+    - 33
+    quote: 1005.5 Distribution of minimum width and required capacity. Where more than one exit, or access to more than one
+      exit, is required, the means of egress shall be configured such that the loss of any one exit, or access to one exit,
+      shall not reduce the avail- able capacity or width to less than 50 percent of the required capacity or width.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where more than one exit is required, losing any one exit (or access to it) leaves at least half the required capacity
+      or width: the exits'' widths aren''t measured, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 5b. The routes count each story's exits but don't
+    measure their widths; the corridors' capacity rule doesn't split a story's occupants between exits either.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_6_convergence
+  kind: flag
+  topic: means_of_egress
+  title: Converging stairways' capacity added (BCNYS 1005.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 34
+    - 36
+    quote: 1005.6 Egress convergence. Where the means of egress from stories above and below converge at an intermediate level,
+      the capac- ity of the means of egress from the point of convergence shall be not less than the largest minimum width
+      or the sum of the required capacities for the stairways or ramps serving the two adjacent stories, whichever is larger.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where egress from the stories above and below meets at an intermediate level, the capacity from there on is the
+      larger of the widest minimum or the two stories'' stairways'' or ramps'' required capacities added: the stairways aren''t
+      measured, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 5b. The routes measure each story on its own (1004.2.3
+    adds no other story''s load but at a convergence: this section''s).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft

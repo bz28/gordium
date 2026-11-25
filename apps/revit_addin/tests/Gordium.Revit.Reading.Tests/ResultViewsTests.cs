@@ -36,8 +36,8 @@ public sealed class ResultViewsTests
     public void The_top_says_the_checker_s_counts_and_what_they_mean()
     {
         var m = ResultViews.Build(Apartment());
-        Assert.Equal("257 need review · 8 not checked yet · 21 comply · 1 doesn't apply", m.Summary);   // group 2's story exits: +8; group 3's 1004.7 and 1004.9 flags: +2; group 4a's corridor width and capacity (2 corridors each) and the mixed-building flag: +5; group 4b's seven Table 1020.2 rows and the fire-partition flag (2 corridors each), and its mixed, Group I-2 and hoistway flags: +19; group 4c's obstruction and air-movement flags and the continuity flag (2 corridors): +4; group 5a's stairway and other-component capacity flags: +2
-        Assert.Equal("Nothing fails yet. 257 results can't be decided until the questions below are answered.", m.Headline);
+        Assert.Equal("260 need review · 8 not checked yet · 21 comply · 1 doesn't apply", m.Summary);   // group 2's story exits: +8; group 3's 1004.7 and 1004.9 flags: +2; group 4a's corridor width and capacity (2 corridors each) and the mixed-building flag: +5; group 4b's seven Table 1020.2 rows and the fire-partition flag (2 corridors each), and its mixed, Group I-2 and hoistway flags: +19; group 4c's obstruction and air-movement flags and the continuity flag (2 corridors): +4; group 5a's stairway and other-component capacity flags: +2; group 5b's continuity, distribution and convergence flags: +3
+        Assert.Equal("Nothing fails yet. 260 results can't be decided until the questions below are answered.", m.Headline);
         Assert.Equal("1 fails · 2 need review", ResultViews.Summary([Verdict.NeedsReview, Verdict.DoesNotComply, Verdict.NeedsReview]));
         Assert.Equal("1 rule fails. Fix it first; 2 results also need review.",
                      ResultViews.Headline([(Verdict.NeedsReview, "a"), (Verdict.DoesNotComply, "b"), (Verdict.NeedsReview, "c")]));
