@@ -137,6 +137,14 @@ results:
   # stated (no Revit mark yet), and how many people each door serves isn't worked out (50 or more can't be ruled out)
   general.bc_1010_1_2_door_types: not_applicable
   general.bc_1010_1_2_1_direction_of_swing: needs_review
+  # section group 6c: forces, floor levels, landings, thresholds and doors in a series aren't in the model, so each is
+  # a person's check; every door is side-hinged, so 1010.1.3.2's flag for a manual sliding door sets each aside
+  general.bc_1010_1_3_door_forces: needs_review
+  general.bc_1010_1_3_2_sliding_door_latch: not_applicable
+  general.bc_1010_1_4_floor_elevation: needs_review
+  general.bc_1010_1_5_landings: needs_review
+  general.bc_1010_1_6_thresholds: needs_review
+  general.bc_1010_1_7_door_arrangement: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

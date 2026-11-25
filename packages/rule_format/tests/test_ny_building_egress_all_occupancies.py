@@ -283,7 +283,11 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          "1005.7.3": (314, 54, 54),
          "1010.1": (322, 28, 36), "1010.1.1": (322, 37, 58), "1010.1.1 (part 2)": (323, 3, 5),
          "1010.1.1.1": (323, 6, 10),
-         "1010.1.2": (323, 11, 23), "1010.1.2.1": (323, 24, 25)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
+         "1010.1.2": (323, 11, 23), "1010.1.2.1": (323, 24, 25),
+         # section group 6c: the rest of 1010.1
+         "1010.1.3": (323, 26, 36), "1010.1.3.1": (323, 37, 37), "1010.1.3.2": (323, 38, 39),
+         "1010.1.4": (323, 40, 56), "1010.1.4 (part 2)": (324, 3, 5), "1010.1.5": (324, 6, 11),
+         "1010.1.6": (324, 12, 25), "1010.1.7": (324, 26, 32)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -331,10 +335,13 @@ HANDLERS = {
     # section group 6b: 1010.1.2's exceptions 5 to 7 (revolving, power-operated, special-purpose sliding doors)
     "1010.3.1": ("general.bc_1010_1_2_door_types", "1010.3.1"), "1010.3.2": ("general.bc_1010_1_2_door_types", "1010.3.2"),
     "1010.3.3": ("general.bc_1010_1_2_door_types", "1010.3.3"),
+    # section group 6c: 1010.1.4's exception 6 (equipment spaces not required to be accessible)
+    "1103.2.9": ("general.bc_1010_1_4_floor_elevation", "1103.2.9"),
 }
 NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
             "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1", "1010.1.2",
-            "1010.1.2.1"}          # the piece naming itself
+            "1010.1.2.1", "1010.1.3", "1010.1.3.1", "1010.1.3.2", "1010.1.4", "1010.1.5", "1010.1.6",
+            "1010.1.7"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
@@ -1017,3 +1024,34 @@ def test_1010_1_2_door_kind_is_never_a_fail(ctx, rules):
         assert _one(r, "means_of_egress_door", {"moe_door_swinging": False}, {"occupancy_group": g}, ctx) ==             "needs_review", g
         assert _one(r, "means_of_egress_door", {"moe_door_swinging": True}, {"occupancy_group": g}, ctx) ==             "not_applicable", g
 
+
+# ---- section group 6c (2026-11-25): the rest of 1010.1, 1010.1.3 to 1010.1.7 (pp.323-324) -----------------------------
+
+FLAGS_6C = {"general.bc_1010_1_3_door_forces": (323, 26), "general.bc_1010_1_4_floor_elevation": (324, 5),
+            "general.bc_1010_1_5_landings": (324, 9), "general.bc_1010_1_6_thresholds": (324, 25),
+            "general.bc_1010_1_7_door_arrangement": (324, 32)}
+
+
+@pytest.mark.parametrize("rid", sorted(FLAGS_6C))
+def test_1010_1_3_to_1010_1_7_are_always_a_persons_check(ctx, rules, rid):
+    """Forces, floor levels, landings, thresholds and doors in a series aren't in the model: each is a flag shown for
+    every building, whatever its group or doors, never a pass or a fail (typed from the page: the line each cites)."""
+    r = rules[rid]
+    assert r["kind"] == "flag" and "applies_when" not in r and "for_each" not in r
+    assert _cites(r, *FLAGS_6C[rid])
+    from rule_format.rulebook import outcome
+    for g in ("B", "H-1", "R-2", "A-1", "mixed", None):
+        given = {} if g is None else {"occupancy_group": g}
+        assert outcome(r, given, ctx.allowed()) == "needs_review", (rid, g)
+
+
+def test_1010_1_3_2_a_door_not_stated_side_hinged_is_a_persons_check(ctx, rules):
+    """1010.1.3.2 (p.323 lines 38-39): a manual horizontal sliding door required to latch; any door that isn't stated
+    side-hinged may be one (sliding, folding, pocket, other, or not stated): a person's check, never a pass; a
+    side-hinged door is set aside."""
+    r = rules["general.bc_1010_1_3_2_sliding_door_latch"]
+    assert _cites(r, 323, 38) and _cites(r, 323, 39)
+    for g in ("B", "H-1", "R-2"):
+        assert _one(r, "means_of_egress_door", {"moe_door_swinging": False}, {"occupancy_group": g}, ctx) ==             "needs_review", g
+        assert _one(r, "means_of_egress_door", {}, {"occupancy_group": g}, ctx) == "needs_review", g
+        assert _one(r, "means_of_egress_door", {"moe_door_swinging": True}, {"occupancy_group": g}, ctx) ==             "not_applicable", g

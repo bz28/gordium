@@ -235,6 +235,36 @@ pieces:
     heading: Egress door types › Direction of swing
     rules:
     - general.bc_1010_1_2_1_direction_of_swing
+  1010.1.3:
+    label: flag
+    heading: General › Forces to unlatch and open doors
+    rules:
+    - general.bc_1010_1_3_door_forces
+  1010.1.3.2:
+    label: flag
+    heading: Forces to unlatch and open doors › Manual horizontal sliding doors
+    rules:
+    - general.bc_1010_1_3_2_sliding_door_latch
+  1010.1.4:
+    label: flag
+    heading: General › Floor elevation
+    rules:
+    - general.bc_1010_1_4_floor_elevation
+  1010.1.5:
+    label: flag
+    heading: General › Landings at doors
+    rules:
+    - general.bc_1010_1_5_landings
+  1010.1.6:
+    label: flag
+    heading: General › Thresholds
+    rules:
+    - general.bc_1010_1_6_thresholds
+  1010.1.7:
+    label: flag
+    heading: General › Door arrangement
+    rules:
+    - general.bc_1010_1_7_door_arrangement
   '1016.2':
     label: rule
     heading: Egress through intervening spaces

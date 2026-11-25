@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 73 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 78 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1403,9 +1403,14 @@
     "Egress · Doors take at most 7 in: A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
     "Egress · Trim at most 1 1/2 in each side into the width: A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
     "Egress · Protruding objects per 1003.3: A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
-    "Egress · Doors recognizable as doors: A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's, 1010.1.2's and 1010.1.2.1's are rules of their own; 1010.1.3 to 1010.3.4 follow in section group 6c.",
+    "Egress · Doors recognizable as doors: A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
     "Egress · Each door's capacity for its occupant load: A person checks this (Gordium doesn't decide it): Each door opening's capacity is enough for the occupants it serves (1005.3.2: 0.2 in each, 0.15 in with a sprinkler system and an emergency voice/alarm system, other than Groups H and I-2): which occupants each door serves isn't worked out, so a person's check.",
-    "Egress · Nothing projects into a door's clear opening: A person checks this (Gordium doesn't decide it): No projection into a door's required clear width below 34 in, at most 4 in between 34 and 80 in, and door closers, overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn't in the model, so a person's check."
+    "Egress · Nothing projects into a door's clear opening: A person checks this (Gordium doesn't decide it): No projection into a door's required clear width below 34 in, at most 4 in between 34 and 80 in, and door closers, overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn't in the model, so a person's check.",
+    "Egress · Forces to unlatch and open each door: A person checks this (Gordium doesn't decide it): Hardware that unlatches by push or pull needs at most 15 pounds, by rotation at most 28 inch-pounds; an interior manually operated swinging door not required to be fire rated opens with at most 5 pounds; any other swinging, sliding or folding door, and a fire-rated one, is set in motion by at most 30 pounds and opens fully at most 15 pounds; each force applied at the latch side (1010.1.3.1): door hardware and forces aren't in the model, so a person's check.",
+    "Egress · A floor or landing at the same level on each side of a door: A person checks this (Gordium doesn't decide it): A floor or landing on each side of every door, at the same elevation, level (an exterior landing at most 2 percent); the exceptions allow a dwelling or sleeping unit's door at the top step of an interior stair it doesn't swing over (Groups R-2 and R-3), an exterior landing up to 7 inches lower (Groups F, H, R-2 and S, off an accessible route, the door not swinging over it) or 7 3/4 inches lower (Group U and R-2 and R-3 units not required to be Accessible, Type A or Type B), 1/2 inch for finish materials, a Type B unit's deck, patio or balcony up to 4 inches lower, and an equipment space's door (not required to be accessible by 1103.2.9, five occupants or fewer) up to 7 inches above or below: floor levels at each door and landings aren't in the model, so a person's check.",
+    "Egress · Landings at doors: A person checks this (Gordium doesn't decide it): A landing at least as wide as the stairway or the door, whichever is greater, and at least 44 inches long in the direction of travel (36 inches in Groups R-3 and U and within a Group R-2 unit); a fully open door reduces a required dimension by at most 7 inches, and where the landing serves 50 or more, a door in any position leaves at least half its required width: landings aren't in the model, so a person's check.",
+    "Egress · Thresholds at doorways: A person checks this (Gordium doesn't decide it): A threshold at most 3/4 inch high for a sliding door serving a dwelling unit, 1/2 inch for any other door, and any raised threshold or level change over 1/4 inch beveled no steeper than 1 in 2; the exceptions allow up to 7 3/4 inches at a Group R-2 or R-3 exterior sliding or side-hinged door that is not part of the required means of egress, an accessible route or an Accessible, Type A or Type B unit, and 4 3/4 or 4 1/2 inches above a Type B unit's deck, patio or balcony where 1010.1.4's exception 5 applies: thresholds aren't in the model, so a person's check.",
+    "Egress · Space between two doors in a series: A person checks this (Gordium doesn't decide it): Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space, and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches, and storm and screen doors of Group R-2 and R-3 dwelling units, and doors within those units (but Type A units), are excepted: doors in a series and the space between them aren't in the model, so a person's check."
    ]
   },
   "red": [],
@@ -64487,11 +64492,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's, 1010.1.2's and 1010.1.2.1's are rules of their own; 1010.1.3 to 1010.3.4 follow in section group 6c.",
+     "reason": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's, 1010.1.2's and 1010.1.2.1's are rules of their own; 1010.1.3 to 1010.3.4 follow in section group 6c.",
+      "line": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
       "quotes": [
        {
         "text": "1010.1 General. Doors in the means of egress shall comply with the requirements of Sections 1010.1.1 through 1010.3.4. Exterior exit doors shall also comply with the requirements of Section 1022.2. Gates in the means of egress shall comply with the requirements of Sections 1010.4 and 1010.4.1. Turnstiles in the means of egress shall comply with the requirements of Sections 1010.5 through 1010.5.4. Doors, gates and turnstiles provided for egress purposes in numbers greater than required by this code shall comply with the requirements of this section. Doors in the means of egress shall be readily distinguishable from the adjacent construction and finishes such that the doors are easily recognizable as doors. Mirrors or similar reflecting materials shall not be used on means of egress doors. Means of egress doors shall not be concealed by curtains, drapes, decorations or similar materials.",
@@ -64516,14 +64521,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1010_1_doors_general",
-       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's, 1010.1.2's and 1010.1.2.1's are rules of their own; 1010.1.3 to 1010.3.4 follow in section group 6c.",
+       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1010_1_doors_general",
-       "why": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's, 1010.1.2's and 1010.1.2.1's are rules of their own; 1010.1.3 to 1010.3.4 follow in section group 6c.",
+       "why": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -64679,6 +64684,364 @@
       "section_title": "Doors, Gates and Turnstiles",
       "piece": "1010.1.1.1",
       "piece_title": "Projections into clear opening"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_1_3_door_forces",
+     "rule": "general.bc_1010_1_3_door_forces",
+     "name": "Egress · Forces to unlatch and open each door (BCNYS 1010.1.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Hardware that unlatches by push or pull needs at most 15 pounds, by rotation at most 28 inch-pounds; an interior manually operated swinging door not required to be fire rated opens with at most 5 pounds; any other swinging, sliding or folding door, and a fire-rated one, is set in motion by at most 30 pounds and opens fully at most 15 pounds; each force applied at the latch side (1010.1.3.1): door hardware and forces aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Hardware that unlatches by push or pull needs at most 15 pounds, by rotation at most 28 inch-pounds; an interior manually operated swinging door not required to be fire rated opens with at most 5 pounds; any other swinging, sliding or folding door, and a fire-rated one, is set in motion by at most 30 pounds and opens fully at most 15 pounds; each force applied at the latch side (1010.1.3.1): door hardware and forces aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.1.3 Forces to unlatch and open doors. The forces to unlatch doors shall comply with the following: 1. Where door hardware operates by push or pull, the operational force to unlatch the door shall not exceed 15 pounds (67 N). 2. Where door hardware operates by rotation, the operational force to unlatch the door shall not exceed 28 inch-pounds (315 N-cm). The force to open doors shall comply with the following: 1. For interior swinging egress doors that are manually operated, other than doors required to be fire rated, the force for pushing or pulling open the door shall not exceed 5 pounds (22 N). 2. For other swinging doors, sliding doors or folding doors, and doors required to be fire rated, the door shall require not more than a 30-pound (133 N) force to be set in motion and shall move to a full-open position when subjected to not more than a 15-pound (67 N) force.",
+        "where": "1010.1.3, 2025 Building Code of New York State (BCNYS), PDF p.323"
+       },
+       {
+        "text": "1010.1.3.1 Location of applied forces. Forces shall be applied to the latch side of the door.",
+        "where": "1010.1.3.1, 2025 Building Code of New York State (BCNYS), PDF p.323"
+       }
+      ],
+      "citation": "1010.1.3, 2025 Building Code of New York State (BCNYS), PDF p.323",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.1.3",
+      "quote": "1010.1.3 Forces to unlatch and open doors. The forces to unlatch doors shall comply with the following: 1. Where door hardware operates by push or pull, the operational force to unlatch the door shall not exceed 15 pounds (67 N). 2. Where door hardware operates by rotation, the operational force to unlatch the door shall not exceed 28 inch-pounds (315 N-cm). The force to open doors shall comply with the following: 1. For interior swinging egress doors that are manually operated, other than doors required to be fire rated, the force for pushing or pulling open the door shall not exceed 5 pounds (22 N). 2. For other swinging doors, sliding doors or folding doors, and doors required to be fire rated, the door shall require not more than a 30-pound (133 N) force to be set in motion and shall move to a full-open position when subjected to not more than a 15-pound (67 N) force."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_1_3_door_forces",
+       "words": "A person checks this (Gordium doesn't decide it): Hardware that unlatches by push or pull needs at most 15 pounds, by rotation at most 28 inch-pounds; an interior manually operated swinging door not required to be fire rated opens with at most 5 pounds; any other swinging, sliding or folding door, and a fire-rated one, is set in motion by at most 30 pounds and opens fully at most 15 pounds; each force applied at the latch side (1010.1.3.1): door hardware and forces aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_1_3_door_forces",
+       "why": "A person checks this (Gordium doesn't decide it): Hardware that unlatches by push or pull needs at most 15 pounds, by rotation at most 28 inch-pounds; an interior manually operated swinging door not required to be fire rated opens with at most 5 pounds; any other swinging, sliding or folding door, and a fire-rated one, is set in motion by at most 30 pounds and opens fully at most 15 pounds; each force applied at the latch side (1010.1.3.1): door hardware and forces aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Forces to unlatch and open each door",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.1.3",
+      "piece_title": "Forces to unlatch and open doors"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_1_4_floor_elevation",
+     "rule": "general.bc_1010_1_4_floor_elevation",
+     "name": "Egress · A floor or landing at the same level on each side of a door (BCNYS 1010.1.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A floor or landing on each side of every door, at the same elevation, level (an exterior landing at most 2 percent); the exceptions allow a dwelling or sleeping unit's door at the top step of an interior stair it doesn't swing over (Groups R-2 and R-3), an exterior landing up to 7 inches lower (Groups F, H, R-2 and S, off an accessible route, the door not swinging over it) or 7 3/4 inches lower (Group U and R-2 and R-3 units not required to be Accessible, Type A or Type B), 1/2 inch for finish materials, a Type B unit's deck, patio or balcony up to 4 inches lower, and an equipment space's door (not required to be accessible by 1103.2.9, five occupants or fewer) up to 7 inches above or below: floor levels at each door and landings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A floor or landing on each side of every door, at the same elevation, level (an exterior landing at most 2 percent); the exceptions allow a dwelling or sleeping unit's door at the top step of an interior stair it doesn't swing over (Groups R-2 and R-3), an exterior landing up to 7 inches lower (Groups F, H, R-2 and S, off an accessible route, the door not swinging over it) or 7 3/4 inches lower (Group U and R-2 and R-3 units not required to be Accessible, Type A or Type B), 1/2 inch for finish materials, a Type B unit's deck, patio or balcony up to 4 inches lower, and an equipment space's door (not required to be accessible by 1103.2.9, five occupants or fewer) up to 7 inches above or below: floor levels at each door and landings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.1.4 Floor elevation. There shall be a floor or landing on each side of a door. Such floor or landing shall be at the same eleva- tion on each side of the door. Landings shall be level except for exterior landings, which are permitted to have a slope not to exceed 0.25 unit vertical in 12 units horizontal (2-percent slope). Exceptions: 1. At doors serving individual dwelling units or sleeping units in Groups R-2 and R-3, a door is permitted to open at the top step of an interior flight of stairs, provided that the door does not swing over the top step. 2. At exterior doors serving Groups F, H, R-2 and S and where such doors are not part of an accessible route, the landing at an exterior door shall not be more than 7 inches (178 mm) below the landing on the egress side of the door, provided that the door, other than an exterior storm or screen door, does not swing over the landing. 3. At exterior doors serving Group U and individual dwelling units and sleeping units in Groups R-2 and R-3, and where such units are not required to be Accessible units, Type A units or Type B units, the landing at an exterior doorway shall be not more than 7 3/4 inches (197 mm) below the landing on the egress side of the door. Such doors, including storm or screen doors, shall be permitted to swing over either landing. 4. Variations in elevation due to differences in finish materials, but not more than 1/2 inch (12.7 mm). 5. Exterior decks, patios or balconies that are part of Type B dwelling units or sleeping units, that have impervious surfaces and that are not more than 4 inches (102 mm) below the finished floor level of the adjacent interior space of the dwelling unit or sleeping unit.",
+        "where": "1010.1.4, 2025 Building Code of New York State (BCNYS), PDF p.323"
+       },
+       {
+        "text": "6. Doors serving equipment spaces not required to be accessible in accordance with Section 1103.2.9 and serving an occupant load of five or less shall be permitted to have a landing on one side to be not more than 7 inches (178 mm) above or below the landing on the egress side of the door.",
+        "where": "1010.1.4, 2025 Building Code of New York State (BCNYS), PDF p.324"
+       }
+      ],
+      "citation": "1010.1.4, 2025 Building Code of New York State (BCNYS), PDF p.323",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.1.4",
+      "quote": "1010.1.4 Floor elevation. There shall be a floor or landing on each side of a door. Such floor or landing shall be at the same eleva- tion on each side of the door. Landings shall be level except for exterior landings, which are permitted to have a slope not to exceed 0.25 unit vertical in 12 units horizontal (2-percent slope). Exceptions: 1. At doors serving individual dwelling units or sleeping units in Groups R-2 and R-3, a door is permitted to open at the top step of an interior flight of stairs, provided that the door does not swing over the top step. 2. At exterior doors serving Groups F, H, R-2 and S and where such doors are not part of an accessible route, the landing at an exterior door shall not be more than 7 inches (178 mm) below the landing on the egress side of the door, provided that the door, other than an exterior storm or screen door, does not swing over the landing. 3. At exterior doors serving Group U and individual dwelling units and sleeping units in Groups R-2 and R-3, and where such units are not required to be Accessible units, Type A units or Type B units, the landing at an exterior doorway shall be not more than 7 3/4 inches (197 mm) below the landing on the egress side of the door. Such doors, including storm or screen doors, shall be permitted to swing over either landing. 4. Variations in elevation due to differences in finish materials, but not more than 1/2 inch (12.7 mm). 5. Exterior decks, patios or balconies that are part of Type B dwelling units or sleeping units, that have impervious surfaces and that are not more than 4 inches (102 mm) below the finished floor level of the adjacent interior space of the dwelling unit or sleeping unit."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_1_4_floor_elevation",
+       "words": "A person checks this (Gordium doesn't decide it): A floor or landing on each side of every door, at the same elevation, level (an exterior landing at most 2 percent); the exceptions allow a dwelling or sleeping unit's door at the top step of an interior stair it doesn't swing over (Groups R-2 and R-3), an exterior landing up to 7 inches lower (Groups F, H, R-2 and S, off an accessible route, the door not swinging over it) or 7 3/4 inches lower (Group U and R-2 and R-3 units not required to be Accessible, Type A or Type B), 1/2 inch for finish materials, a Type B unit's deck, patio or balcony up to 4 inches lower, and an equipment space's door (not required to be accessible by 1103.2.9, five occupants or fewer) up to 7 inches above or below: floor levels at each door and landings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_1_4_floor_elevation",
+       "why": "A person checks this (Gordium doesn't decide it): A floor or landing on each side of every door, at the same elevation, level (an exterior landing at most 2 percent); the exceptions allow a dwelling or sleeping unit's door at the top step of an interior stair it doesn't swing over (Groups R-2 and R-3), an exterior landing up to 7 inches lower (Groups F, H, R-2 and S, off an accessible route, the door not swinging over it) or 7 3/4 inches lower (Group U and R-2 and R-3 units not required to be Accessible, Type A or Type B), 1/2 inch for finish materials, a Type B unit's deck, patio or balcony up to 4 inches lower, and an equipment space's door (not required to be accessible by 1103.2.9, five occupants or fewer) up to 7 inches above or below: floor levels at each door and landings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "A floor or landing at the same level on each side of a door",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.1.4",
+      "piece_title": "Floor elevation"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_1_5_landings",
+     "rule": "general.bc_1010_1_5_landings",
+     "name": "Egress · Landings at doors, their width and length (BCNYS 1010.1.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A landing at least as wide as the stairway or the door, whichever is greater, and at least 44 inches long in the direction of travel (36 inches in Groups R-3 and U and within a Group R-2 unit); a fully open door reduces a required dimension by at most 7 inches, and where the landing serves 50 or more, a door in any position leaves at least half its required width: landings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A landing at least as wide as the stairway or the door, whichever is greater, and at least 44 inches long in the direction of travel (36 inches in Groups R-3 and U and within a Group R-2 unit); a fully open door reduces a required dimension by at most 7 inches, and where the landing serves 50 or more, a door in any position leaves at least half its required width: landings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.1.5 Landings at doors. Landings shall have a width not less than the width of the stairway or the door, whichever is greater. Doors in the fully open position shall not reduce a required dimension by more than 7 inches (178 mm). Where a landing serves an occupant load of 50 or more, doors in any position shall not reduce the landing to less than one-half its required width. Landings shall have a length measured in the direction of travel of not less than 44 inches (1118 mm). Exception: Landing length in the direction of travel in Groups R-3 and U and within individual units of Group R-2 need not exceed 36 inches (914 mm).",
+        "where": "1010.1.5, 2025 Building Code of New York State (BCNYS), PDF p.324"
+       }
+      ],
+      "citation": "1010.1.5, 2025 Building Code of New York State (BCNYS), PDF p.324",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.1.5",
+      "quote": "1010.1.5 Landings at doors. Landings shall have a width not less than the width of the stairway or the door, whichever is greater. Doors in the fully open position shall not reduce a required dimension by more than 7 inches (178 mm). Where a landing serves an occupant load of 50 or more, doors in any position shall not reduce the landing to less than one-half its required width. Landings shall have a length measured in the direction of travel of not less than 44 inches (1118 mm). Exception: Landing length in the direction of travel in Groups R-3 and U and within individual units of Group R-2 need not exceed 36 inches (914 mm)."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_1_5_landings",
+       "words": "A person checks this (Gordium doesn't decide it): A landing at least as wide as the stairway or the door, whichever is greater, and at least 44 inches long in the direction of travel (36 inches in Groups R-3 and U and within a Group R-2 unit); a fully open door reduces a required dimension by at most 7 inches, and where the landing serves 50 or more, a door in any position leaves at least half its required width: landings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_1_5_landings",
+       "why": "A person checks this (Gordium doesn't decide it): A landing at least as wide as the stairway or the door, whichever is greater, and at least 44 inches long in the direction of travel (36 inches in Groups R-3 and U and within a Group R-2 unit); a fully open door reduces a required dimension by at most 7 inches, and where the landing serves 50 or more, a door in any position leaves at least half its required width: landings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Landings at doors, their width and length",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.1.5",
+      "piece_title": "Landings at doors"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_1_6_thresholds",
+     "rule": "general.bc_1010_1_6_thresholds",
+     "name": "Egress · Thresholds at doorways (BCNYS 1010.1.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A threshold at most 3/4 inch high for a sliding door serving a dwelling unit, 1/2 inch for any other door, and any raised threshold or level change over 1/4 inch beveled no steeper than 1 in 2; the exceptions allow up to 7 3/4 inches at a Group R-2 or R-3 exterior sliding or side-hinged door that is not part of the required means of egress, an accessible route or an Accessible, Type A or Type B unit, and 4 3/4 or 4 1/2 inches above a Type B unit's deck, patio or balcony where 1010.1.4's exception 5 applies: thresholds aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A threshold at most 3/4 inch high for a sliding door serving a dwelling unit, 1/2 inch for any other door, and any raised threshold or level change over 1/4 inch beveled no steeper than 1 in 2; the exceptions allow up to 7 3/4 inches at a Group R-2 or R-3 exterior sliding or side-hinged door that is not part of the required means of egress, an accessible route or an Accessible, Type A or Type B unit, and 4 3/4 or 4 1/2 inches above a Type B unit's deck, patio or balcony where 1010.1.4's exception 5 applies: thresholds aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.1.6 Thresholds. Thresholds at doorways shall not exceed 3/4 inch (19.1 mm) in height above the finished floor or landing for sliding doors serving dwelling units or 1/2 inch (12.7 mm) above the finished floor or landing for other doors. Raised thresholds and floor level changes greater than 1/4 inch (6.4 mm) at doorways shall be beveled with a slope not greater than one unit vertical in two units horizontal (50-percent slope). Exceptions: 1. In occupancy Group R-2 or R-3, threshold heights for sliding and side-hinged exterior doors shall be permitted to be up to 7 3/4 inches (197 mm) in height if all of the following apply: 1.1. The door is not part of the required means of egress. 1.2. The door is not part of an accessible route as required by Chapter 11. 1.3. The door is not part of an Accessible unit, Type A unit or Type B unit. 2. In Type B units, where Exception 5 to Section 1010.1.4 permits a 4-inch (102 mm) elevation change at the door, the threshold height on the exterior side of the door shall not exceed 4 3/4 inches (120 mm) in height above the exterior deck, patio or balcony for sliding doors or 4 1/2 inches (114 mm) above the exterior deck, patio or balcony for other doors.",
+        "where": "1010.1.6, 2025 Building Code of New York State (BCNYS), PDF p.324"
+       }
+      ],
+      "citation": "1010.1.6, 2025 Building Code of New York State (BCNYS), PDF p.324",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.1.6",
+      "quote": "1010.1.6 Thresholds. Thresholds at doorways shall not exceed 3/4 inch (19.1 mm) in height above the finished floor or landing for sliding doors serving dwelling units or 1/2 inch (12.7 mm) above the finished floor or landing for other doors. Raised thresholds and floor level changes greater than 1/4 inch (6.4 mm) at doorways shall be beveled with a slope not greater than one unit vertical in two units horizontal (50-percent slope). Exceptions: 1. In occupancy Group R-2 or R-3, threshold heights for sliding and side-hinged exterior doors shall be permitted to be up to 7 3/4 inches (197 mm) in height if all of the following apply: 1.1. The door is not part of the required means of egress. 1.2. The door is not part of an accessible route as required by Chapter 11. 1.3. The door is not part of an Accessible unit, Type A unit or Type B unit. 2. In Type B units, where Exception 5 to Section 1010.1.4 permits a 4-inch (102 mm) elevation change at the door, the threshold height on the exterior side of the door shall not exceed 4 3/4 inches (120 mm) in height above the exterior deck, patio or balcony for sliding doors or 4 1/2 inches (114 mm) above the exterior deck, patio or balcony for other doors."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_1_6_thresholds",
+       "words": "A person checks this (Gordium doesn't decide it): A threshold at most 3/4 inch high for a sliding door serving a dwelling unit, 1/2 inch for any other door, and any raised threshold or level change over 1/4 inch beveled no steeper than 1 in 2; the exceptions allow up to 7 3/4 inches at a Group R-2 or R-3 exterior sliding or side-hinged door that is not part of the required means of egress, an accessible route or an Accessible, Type A or Type B unit, and 4 3/4 or 4 1/2 inches above a Type B unit's deck, patio or balcony where 1010.1.4's exception 5 applies: thresholds aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_1_6_thresholds",
+       "why": "A person checks this (Gordium doesn't decide it): A threshold at most 3/4 inch high for a sliding door serving a dwelling unit, 1/2 inch for any other door, and any raised threshold or level change over 1/4 inch beveled no steeper than 1 in 2; the exceptions allow up to 7 3/4 inches at a Group R-2 or R-3 exterior sliding or side-hinged door that is not part of the required means of egress, an accessible route or an Accessible, Type A or Type B unit, and 4 3/4 or 4 1/2 inches above a Type B unit's deck, patio or balcony where 1010.1.4's exception 5 applies: thresholds aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Thresholds at doorways",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.1.6",
+      "piece_title": "Thresholds"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_1_7_door_arrangement",
+     "rule": "general.bc_1010_1_7_door_arrangement",
+     "name": "Egress · Space between two doors in a series, and their swings (BCNYS 1010.1.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space, and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches, and storm and screen doors of Group R-2 and R-3 dwelling units, and doors within those units (but Type A units), are excepted: doors in a series and the space between them aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space, and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches, and storm and screen doors of Group R-2 and R-3 dwelling units, and doors within those units (but Type A units), are excepted: doors in a series and the space between them aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.1.7 Door arrangement. Space between two doors in a series shall be 48 inches (1219 mm) minimum plus the width of a door swinging into the space. Doors in a series shall swing either in the same direction or away from the space between the doors. Exceptions: 1. The minimum distance between horizontal sliding power-operated doors in a series shall be 48 inches (1219 mm). 2. Storm and screen doors serving individual dwelling units in Groups R-2 and R-3 need not be spaced 48 inches (1219 mm) from the other door. 3. Doors within individual dwelling units in Groups R-2 and R-3 other than within Type A dwelling units.",
+        "where": "1010.1.7, 2025 Building Code of New York State (BCNYS), PDF p.324"
+       }
+      ],
+      "citation": "1010.1.7, 2025 Building Code of New York State (BCNYS), PDF p.324",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.1.7",
+      "quote": "1010.1.7 Door arrangement. Space between two doors in a series shall be 48 inches (1219 mm) minimum plus the width of a door swinging into the space. Doors in a series shall swing either in the same direction or away from the space between the doors. Exceptions: 1. The minimum distance between horizontal sliding power-operated doors in a series shall be 48 inches (1219 mm). 2. Storm and screen doors serving individual dwelling units in Groups R-2 and R-3 need not be spaced 48 inches (1219 mm) from the other door. 3. Doors within individual dwelling units in Groups R-2 and R-3 other than within Type A dwelling units."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_1_7_door_arrangement",
+       "words": "A person checks this (Gordium doesn't decide it): Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space, and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches, and storm and screen doors of Group R-2 and R-3 dwelling units, and doors within those units (but Type A units), are excepted: doors in a series and the space between them aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_1_7_door_arrangement",
+       "why": "A person checks this (Gordium doesn't decide it): Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space, and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches, and storm and screen doors of Group R-2 and R-3 dwelling units, and doors within those units (but Type A units), are excepted: doors in a series and the space between them aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Space between two doors in a series, and their swings",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.1.7",
+      "piece_title": "Door arrangement"
      }
     },
     {
@@ -69065,7 +69428,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 73 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 78 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -69622,7 +69985,12 @@
       "egress.general.bc_1005_7_3_protruding_objects",
       "egress.general.bc_1010_1_doors_general",
       "egress.general.bc_1010_1_1_door_capacity",
-      "egress.general.bc_1010_1_1_1_projections"
+      "egress.general.bc_1010_1_1_1_projections",
+      "egress.general.bc_1010_1_3_door_forces",
+      "egress.general.bc_1010_1_4_floor_elevation",
+      "egress.general.bc_1010_1_5_landings",
+      "egress.general.bc_1010_1_6_thresholds",
+      "egress.general.bc_1010_1_7_door_arrangement"
      ],
      "lines": [
       {
@@ -70732,7 +71100,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Doors recognizable as doors, no mirrors, not concealed (BCNYS 1010.1): A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's, 1010.1.2's and 1010.1.2.1's are rules of their own; 1010.1.3 to 1010.3.4 follow in section group 6c.",
+       "title": "Egress · Doors recognizable as doors, no mirrors, not concealed (BCNYS 1010.1): A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
        "mark": "?",
        "name": "Egress · Doors recognizable as doors, no mirrors, not concealed (BCNYS 1010.1)"
       },
@@ -70761,9 +71129,74 @@
        "title": "Egress · Nothing projects into a door's clear opening (BCNYS 1010.1.1.1): A person checks this (Gordium doesn't decide it): No projection into a door's required clear width below 34 in, at most 4 in between 34 and 80 in, and door closers, overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Nothing projects into a door's clear opening (BCNYS 1010.1.1.1)"
+      },
+      {
+       "key": "review#5cecc82c41",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_1_3_door_forces"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Forces to unlatch and open each door (BCNYS 1010.1.3): A person checks this (Gordium doesn't decide it): Hardware that unlatches by push or pull needs at most 15 pounds, by rotation at most 28 inch-pounds; an interior manually operated swinging door not required to be fire rated opens with at most 5 pounds; any other swinging, sliding or folding door, and a fire-rated one, is set in motion by at most 30 pounds and opens fully at most 15 pounds; each force applied at the latch side (1010.1.3.1): door hardware and forces aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Forces to unlatch and open each door (BCNYS 1010.1.3)"
+      },
+      {
+       "key": "review#071cc3193f",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_1_4_floor_elevation"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · A floor or landing at the same level on each side of a door (BCNYS 1010.1.4): A person checks this (Gordium doesn't decide it): A floor or landing on each side of every door, at the same elevation, level (an exterior landing at most 2 percent); the exceptions allow a dwelling or sleeping unit's door at the top step of an interior stair it doesn't swing over (Groups R-2 and R-3), an exterior landing up to 7 inches lower (Groups F, H, R-2 and S, off an accessible route, the door not swinging over it) or 7 3/4 inches lower (Group U and R-2 and R-3 units not required to be Accessible, Type A or Type B), 1/2 inch for finish materials, a Type B unit's deck, patio or balcony up to 4 inches lower, and an equipment space's door (not required to be accessible by 1103.2.9, five occupants or fewer) up to 7 inches above or below: floor levels at each door and landings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · A floor or landing at the same level on each side of a door (BCNYS 1010.1.4)"
+      },
+      {
+       "key": "review#6078968c24",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_1_5_landings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Landings at doors, their width and length (BCNYS 1010.1.5): A person checks this (Gordium doesn't decide it): A landing at least as wide as the stairway or the door, whichever is greater, and at least 44 inches long in the direction of travel (36 inches in Groups R-3 and U and within a Group R-2 unit); a fully open door reduces a required dimension by at most 7 inches, and where the landing serves 50 or more, a door in any position leaves at least half its required width: landings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Landings at doors, their width and length (BCNYS 1010.1.5)"
+      },
+      {
+       "key": "review#7678d98346",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_1_6_thresholds"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Thresholds at doorways (BCNYS 1010.1.6): A person checks this (Gordium doesn't decide it): A threshold at most 3/4 inch high for a sliding door serving a dwelling unit, 1/2 inch for any other door, and any raised threshold or level change over 1/4 inch beveled no steeper than 1 in 2; the exceptions allow up to 7 3/4 inches at a Group R-2 or R-3 exterior sliding or side-hinged door that is not part of the required means of egress, an accessible route or an Accessible, Type A or Type B unit, and 4 3/4 or 4 1/2 inches above a Type B unit's deck, patio or balcony where 1010.1.4's exception 5 applies: thresholds aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Thresholds at doorways (BCNYS 1010.1.6)"
+      },
+      {
+       "key": "review#0b4c0e9b10",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_1_7_door_arrangement"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Space between two doors in a series, and their swings (BCNYS 1010.1.7): A person checks this (Gordium doesn't decide it): Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space, and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches, and storm and screen doors of Group R-2 and R-3 dwelling units, and doors within those units (but Type A units), are excepted: doors in a series and the space between them aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Space between two doors in a series, and their swings (BCNYS 1010.1.7)"
       }
      ],
-     "count": 73,
+     "count": 78,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -71569,7 +72002,7 @@
       {
        "key": "reason:egress.general.bc_1010_1_doors_general",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's, 1010.1.2's and 1010.1.2.1's are rules of their own; 1010.1.3 to 1010.3.4 follow in section group 6c.",
+       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
        "elements": [],
        "items": [
         "egress.general.bc_1010_1_doors_general"
@@ -71593,6 +72026,56 @@
        "elements": [],
        "items": [
         "egress.general.bc_1010_1_1_1_projections"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_1_3_door_forces",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Hardware that unlatches by push or pull needs at most 15 pounds, by rotation at most 28 inch-pounds; an interior manually operated swinging door not required to be fire rated opens with at most 5 pounds; any other swinging, sliding or folding door, and a fire-rated one, is set in motion by at most 30 pounds and opens fully at most 15 pounds; each force applied at the latch side (1010.1.3.1): door hardware and forces aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_1_3_door_forces"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_1_4_floor_elevation",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A floor or landing on each side of every door, at the same elevation, level (an exterior landing at most 2 percent); the exceptions allow a dwelling or sleeping unit's door at the top step of an interior stair it doesn't swing over (Groups R-2 and R-3), an exterior landing up to 7 inches lower (Groups F, H, R-2 and S, off an accessible route, the door not swinging over it) or 7 3/4 inches lower (Group U and R-2 and R-3 units not required to be Accessible, Type A or Type B), 1/2 inch for finish materials, a Type B unit's deck, patio or balcony up to 4 inches lower, and an equipment space's door (not required to be accessible by 1103.2.9, five occupants or fewer) up to 7 inches above or below: floor levels at each door and landings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_1_4_floor_elevation"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_1_5_landings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A landing at least as wide as the stairway or the door, whichever is greater, and at least 44 inches long in the direction of travel (36 inches in Groups R-3 and U and within a Group R-2 unit); a fully open door reduces a required dimension by at most 7 inches, and where the landing serves 50 or more, a door in any position leaves at least half its required width: landings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_1_5_landings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_1_6_thresholds",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A threshold at most 3/4 inch high for a sliding door serving a dwelling unit, 1/2 inch for any other door, and any raised threshold or level change over 1/4 inch beveled no steeper than 1 in 2; the exceptions allow up to 7 3/4 inches at a Group R-2 or R-3 exterior sliding or side-hinged door that is not part of the required means of egress, an accessible route or an Accessible, Type A or Type B unit, and 4 3/4 or 4 1/2 inches above a Type B unit's deck, patio or balcony where 1010.1.4's exception 5 applies: thresholds aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_1_6_thresholds"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_1_7_door_arrangement",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space, and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches, and storm and screen doors of Group R-2 and R-3 dwelling units, and doors within those units (but Type A units), are excepted: doors in a series and the space between them aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_1_7_door_arrangement"
        ],
        "rules": 1
       }
@@ -71948,7 +72431,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "73 to review · 30 comply"
+     "summary": "78 to review · 30 comply"
     }
    ],
    "contents": [
@@ -84215,7 +84698,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 167
+          "not_for_checking": 172
          },
          "pieces": [
           {
@@ -84233,6 +84716,12 @@
           {
            "id": "202:accessible",
            "title": "ACCESSIBLE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:accessible_route",
+           "title": "ACCESSIBLE ROUTE",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -84305,6 +84794,12 @@
           {
            "id": "202:atrium",
            "title": "ATRIUM",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:authority_having_jurisdiction",
+           "title": "AUTHORITY HAVING JURISDICTION",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -84903,8 +85398,26 @@
            "rules": []
           },
           {
+           "id": "202:part_1203",
+           "title": "PART 1203",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:part_1203_compliant_code_enforcement_program",
+           "title": "PART 1203—COMPLIANT CODE ENFORCEMENT PROGRAM",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:penthouse",
            "title": "PENTHOUSE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:permit",
+           "title": "PERMIT",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -86836,7 +87349,8 @@
          "whole": false,
          "counts": {
           "rules": 2,
-          "flag": 3
+          "flag": 9,
+          "not_for_checking": 1
          },
          "pieces": [
           {
@@ -86880,6 +87394,60 @@
            "rules": [
             "general.bc_1010_1_2_1_direction_of_swing"
            ]
+          },
+          {
+           "id": "1010.1.3",
+           "title": "Forces to unlatch and open doors",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_1_3_door_forces"
+           ]
+          },
+          {
+           "id": "1010.1.3.2",
+           "title": "Manual horizontal sliding doors",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_1_3_2_sliding_door_latch"
+           ]
+          },
+          {
+           "id": "1010.1.4",
+           "title": "Floor elevation",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_1_4_floor_elevation"
+           ]
+          },
+          {
+           "id": "1010.1.5",
+           "title": "Landings at doors",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_1_5_landings"
+           ]
+          },
+          {
+           "id": "1010.1.6",
+           "title": "Thresholds",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_1_6_thresholds"
+           ]
+          },
+          {
+           "id": "1010.1.7",
+           "title": "Door arrangement",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_1_7_door_arrangement"
+           ]
+          },
+          {
+           "id": "1010.1.3.1",
+           "title": "Location of applied forces",
+           "coverage": "not_for_checking",
+           "rules": []
           }
          ]
         },
@@ -91207,6 +91775,11 @@
    "egress.general.bc_1010_1_doors_general": "needs_review",
    "egress.general.bc_1010_1_1_door_capacity": "needs_review",
    "egress.general.bc_1010_1_1_1_projections": "needs_review",
+   "egress.general.bc_1010_1_3_door_forces": "needs_review",
+   "egress.general.bc_1010_1_4_floor_elevation": "needs_review",
+   "egress.general.bc_1010_1_5_landings": "needs_review",
+   "egress.general.bc_1010_1_6_thresholds": "needs_review",
+   "egress.general.bc_1010_1_7_door_arrangement": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7da": "complies",
@@ -91251,7 +91824,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "73 to review · 30 comply"
+    "summary": "78 to review · 30 comply"
    }
   ],
   "egress": {
@@ -95901,6 +96474,166 @@
      "unknown": [],
      "home": "Level 2",
      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): door occupant load not measured: Gordium doesn't measure this yet; door swings with egress not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say which side it swings into, and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable)"
+    },
+    {
+     "rule": "general.bc_1010_1_3_2_sliding_door_latch",
+     "part": "means_of_egress_door",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b777",
+     "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01)",
+     "within": null,
+     "outcome": "not_applicable",
+     "reason": null,
+     "values": {
+      "moe_door_swinging": true
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 1",
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): A manual sliding door's latch keeps it from rebounding open (BCNYS 1010.1.3.2): not applicable"
+    },
+    {
+     "rule": "general.bc_1010_1_3_2_sliding_door_latch",
+     "part": "means_of_egress_door",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b779",
+     "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02)",
+     "within": null,
+     "outcome": "not_applicable",
+     "reason": null,
+     "values": {
+      "moe_door_swinging": true
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 1",
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): A manual sliding door's latch keeps it from rebounding open (BCNYS 1010.1.3.2): not applicable"
+    },
+    {
+     "rule": "general.bc_1010_1_3_2_sliding_door_latch",
+     "part": "means_of_egress_door",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77a",
+     "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03)",
+     "within": null,
+     "outcome": "not_applicable",
+     "reason": null,
+     "values": {
+      "moe_door_swinging": true
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 1",
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): A manual sliding door's latch keeps it from rebounding open (BCNYS 1010.1.3.2): not applicable"
+    },
+    {
+     "rule": "general.bc_1010_1_3_2_sliding_door_latch",
+     "part": "means_of_egress_door",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77b",
+     "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04)",
+     "within": null,
+     "outcome": "not_applicable",
+     "reason": null,
+     "values": {
+      "moe_door_swinging": true
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 1",
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): A manual sliding door's latch keeps it from rebounding open (BCNYS 1010.1.3.2): not applicable"
+    },
+    {
+     "rule": "general.bc_1010_1_3_2_sliding_door_latch",
+     "part": "means_of_egress_door",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77c",
+     "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05)",
+     "within": null,
+     "outcome": "not_applicable",
+     "reason": null,
+     "values": {
+      "moe_door_swinging": true
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 1",
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): A manual sliding door's latch keeps it from rebounding open (BCNYS 1010.1.3.2): not applicable"
+    },
+    {
+     "rule": "general.bc_1010_1_3_2_sliding_door_latch",
+     "part": "means_of_egress_door",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77d",
+     "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06)",
+     "within": null,
+     "outcome": "not_applicable",
+     "reason": null,
+     "values": {
+      "moe_door_swinging": true
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 1",
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): A manual sliding door's latch keeps it from rebounding open (BCNYS 1010.1.3.2): not applicable"
+    },
+    {
+     "rule": "general.bc_1010_1_3_2_sliding_door_latch",
+     "part": "means_of_egress_door",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77e",
+     "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07)",
+     "within": null,
+     "outcome": "not_applicable",
+     "reason": null,
+     "values": {
+      "moe_door_swinging": true
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 2",
+     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): A manual sliding door's latch keeps it from rebounding open (BCNYS 1010.1.3.2): not applicable"
+    },
+    {
+     "rule": "general.bc_1010_1_3_2_sliding_door_latch",
+     "part": "means_of_egress_door",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77f",
+     "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08)",
+     "within": null,
+     "outcome": "not_applicable",
+     "reason": null,
+     "values": {
+      "moe_door_swinging": true
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 2",
+     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): A manual sliding door's latch keeps it from rebounding open (BCNYS 1010.1.3.2): not applicable"
+    },
+    {
+     "rule": "general.bc_1010_1_3_2_sliding_door_latch",
+     "part": "means_of_egress_door",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b780",
+     "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09)",
+     "within": null,
+     "outcome": "not_applicable",
+     "reason": null,
+     "values": {
+      "moe_door_swinging": true
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 2",
+     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): A manual sliding door's latch keeps it from rebounding open (BCNYS 1010.1.3.2): not applicable"
+    },
+    {
+     "rule": "general.bc_1010_1_3_2_sliding_door_latch",
+     "part": "means_of_egress_door",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781",
+     "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10)",
+     "within": null,
+     "outcome": "not_applicable",
+     "reason": null,
+     "values": {
+      "moe_door_swinging": true
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 2",
+     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): A manual sliding door's latch keeps it from rebounding open (BCNYS 1010.1.3.2): not applicable"
     }
    ],
    "results": {
@@ -95959,6 +96692,7 @@
     "general.bc_1010_1_1_door_height": "pass",
     "general.bc_1010_1_2_door_types": "not_applicable",
     "general.bc_1010_1_2_1_direction_of_swing": "needs_review",
+    "general.bc_1010_1_3_2_sliding_door_latch": "not_applicable",
     "general.bc_308_5_classification": "needs_review",
     "general.bc_308_5_1_group_e": "needs_review",
     "general.bc_308_5_2_religious_worship": "needs_review",
@@ -96009,7 +96743,12 @@
     "general.bc_1005_7_3_protruding_objects": "needs_review",
     "general.bc_1010_1_doors_general": "needs_review",
     "general.bc_1010_1_1_door_capacity": "needs_review",
-    "general.bc_1010_1_1_1_projections": "needs_review"
+    "general.bc_1010_1_1_1_projections": "needs_review",
+    "general.bc_1010_1_3_door_forces": "needs_review",
+    "general.bc_1010_1_4_floor_elevation": "needs_review",
+    "general.bc_1010_1_5_landings": "needs_review",
+    "general.bc_1010_1_6_thresholds": "needs_review",
+    "general.bc_1010_1_7_door_arrangement": "needs_review"
    },
    "interior": {
     "parts": {
@@ -99925,7 +100664,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "64659972c0fa96e1aa9a006ee0c56bb5e863f1cecf3664c810b6b772e0e580de",
   "rulebook": {
-   "new_york/ithaca_city": "0562498ffe14b511dd585797dba3f037730e1c80da44c6f9ea25702d705af659"
+   "new_york/ithaca_city": "ccebb5de4ddfc78d493c59387db14bdb4191cca17e881c5835cad6a1344bc44b"
   }
  }
 }

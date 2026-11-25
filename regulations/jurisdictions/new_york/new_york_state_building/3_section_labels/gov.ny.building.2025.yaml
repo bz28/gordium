@@ -54,6 +54,21 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:accessible_route:
+    label: reference
+    topic: definitions
+    reason: 'Defines ACCESSIBLE ROUTE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 32
+      lines:
+      - 31
+      - 31
+      quote: '[BE] ACCESSIBLE ROUTE. A continuous, unobstructed path that complies with Chapter 11.'
+    piece_sha256: b0e89be9e01e2fff4b654e9d76076d81905259d25bce2f8644fc032e60db2074
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:accessible_unit:
     label: reference
     topic: definitions
@@ -248,6 +263,22 @@ labels:
         escalators, plumbing,'
     piece_sha256: 090002320b9abb7f7175a132d5badf3d33b72fc2206f69a74a40c8ff2566deed
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:authority_having_jurisdiction:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTHORITY HAVING JURISDICTION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 10
+      - 11
+      quote: '[NY] AUTHORITY HAVING JURISDICTION. The governmental unit or agency responsible for administration and enforcement
+        of this code.'
+    piece_sha256: 266faf22994f54b27642ec4f44ec5f2c271ed7073b37a9b88dfe22abc942a5c5
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:automatic:
@@ -1842,6 +1873,38 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:part_1203:
+    label: reference
+    topic: definitions
+    reason: 'Defines PART 1203, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 27
+      - 28
+      quote: '[NY] PART 1203. The regulations set forth in 19 NYCRR Part 1203 (“Uniform Code: Minimum Standards for Administration
+        and Enforce- ment”), as currently in effect and as hereafter amended from time to time.'
+    piece_sha256: f9624053f96eb38c56331ec59311ae1b985c9a157e4d53f92e96b097f91d816d
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:part_1203_compliant_code_enforcement_program:
+    label: reference
+    topic: definitions
+    reason: 'Defines PART 1203-COMPLIANT CODE ENFORCEMENT PROGRAM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 29
+      - 30
+      quote: '[NY] PART 1203—COMPLIANT CODE ENFORCEMENT PROGRAM. A code enforcement program that includes the features required
+        by Part 1203 and satisfies the requirements of Part 1203.'
+    piece_sha256: 7f0151ea42cfca7168e2fa71f800fbc78d90a2cc0ad36d2ac0316c30713b2efe
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:penthouse:
     label: reference
     topic: definitions
@@ -1856,6 +1919,25 @@ labels:
         tanks,'
     piece_sha256: fc5256d01cd9ee53d90c31802d6855c67f03f6585f624353f2a6f1146beda4ed
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:permit:
+    label: reference
+    topic: definitions
+    reason: 'Defines PERMIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 50
+      - 54
+      quote: '[NY] PERMIT. An official document or certificate issued by the authority having jurisdiction that authorizes
+        performance of a specified activity. [NY] Building permit. A building permit, construction permit, demolition permit
+        or permit that authorizes the performance of work. [NY] Operating permit. A permit required under the stricter of
+        the authority having jurisdiction’s Code Enforcement Program or a Part 1203—Compliant Code Enforcement Program to
+        conduct a specified activity or to use a specified category of building.'
+    piece_sha256: ff84d2b1f3ce08aa62753821db364b0eac9543293da4052c88c4806a476013d6
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:person:
@@ -3997,6 +4079,171 @@ labels:
         H occupancy.
     piece_sha256: a65bc3fae01ea8bd6d08c7d6f9bf8d8d33730adcf8232db5848f6f97772fc809
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'The forces to unlatch a door (15 pounds push or pull, 28 inch-pounds rotation) and to open it (5 pounds for an
+      interior manual swinging door not required to be fire rated; else 30 pounds to set in motion, 15 to open fully): door
+      hardware and forces aren''t in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 323
+      lines:
+      - 26
+      - 36
+      quote: '1010.1.3 Forces to unlatch and open doors. The forces to unlatch doors shall comply with the following: 1. Where
+        door hardware operates by push or pull, the operational force to unlatch the door shall not exceed 15 pounds (67 N).
+        2. Where door hardware operates by rotation, the operational force to unlatch the door shall not exceed 28 inch-pounds
+        (315 N-cm). The force to open doors shall comply with the following: 1. For interior swinging egress doors that are
+        manually operated, other than doors required to be fire rated, the force for pushing or pulling open the door shall
+        not exceed 5 pounds (22 N). 2. For other swinging doors, sliding doors or folding doors, and doors required to be
+        fire rated, the door shall require not more than a 30-pound (133 N) force to be set in motion and shall move to a
+        full-open position when subjected to not more than a 15-pound (67 N) force.'
+    piece_sha256: 749351239167cedf58d20312c042a1e5dca103a788049863a5e5d37b543828a3
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.3.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says where 1010.1.3''s forces are applied (the latch side of the door): how to measure them, read with 1010.1.3''s
+      flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 323
+      lines:
+      - 37
+      - 37
+      quote: 1010.1.3.1 Location of applied forces. Forces shall be applied to the latch side of the door.
+    piece_sha256: f69e859b52d5a2423e5f3ffb83cd9721a2a76c42fc17ea6c64d540d6c1f90a36
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.3.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A manual horizontal sliding door required to latch doesn''t rebound into a partly open position when closed:
+      latches aren''t in the model, a person''s check for each door that isn''t stated side-hinged.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 323
+      lines:
+      - 38
+      - 39
+      quote: 1010.1.3.2 Manual horizontal sliding doors. Where a manual horizontal sliding door is required to latch, the
+        latch or other mechanism shall prevent the door from rebounding into a partially open position when the door is closed.
+    piece_sha256: 5e3cfa67b15a7a0b1fd6cd6b427305420aa228e2f398850cdb9925cea1fceae4
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'A floor or landing at the same elevation on each side of a door, level (an exterior landing at most 2 percent),
+      with six exceptions: floor levels at doors and landings aren''t in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 323
+      lines:
+      - 40
+      - 56
+      quote: '1010.1.4 Floor elevation. There shall be a floor or landing on each side of a door. Such floor or landing shall
+        be at the same eleva- tion on each side of the door. Landings shall be level except for exterior landings, which are
+        permitted to have a slope not to exceed 0.25 unit vertical in 12 units horizontal (2-percent slope). Exceptions: 1.
+        At doors serving individual dwelling units or sleeping units in Groups R-2 and R-3, a door is permitted to open at
+        the top step of an interior flight of stairs, provided that the door does not swing over the top step. 2. At exterior
+        doors serving Groups F, H, R-2 and S and where such doors are not part of an accessible route, the landing at an exterior
+        door shall not be more than 7 inches (178 mm) below the landing on the egress side of the door, provided that the
+        door, other than an exterior storm or screen door, does not swing over the landing. 3. At exterior doors serving Group
+        U and individual dwelling units and sleeping units in Groups R-2 and R-3, and where such units are not required to
+        be Accessible units, Type A units or Type B units, the landing at an exterior doorway shall be not more than 7 3/4
+        inches (197 mm) below the landing on the egress side of the door. Such doors, including storm or screen doors, shall
+        be permitted to swing over either landing. 4. Variations in elevation due to differences in finish materials, but
+        not more than 1/2 inch (12.7 mm). 5. Exterior decks, patios or balconies that are part of Type B dwelling units or
+        sleeping units, that have impervious surfaces and that are not more than 4 inches (102 mm) below the finished floor
+        level of the adjacent interior space of the dwelling unit or sleeping unit.'
+    - file: gov.ny.building.2025.pdf
+      page: 324
+      lines:
+      - 3
+      - 5
+      quote: 6. Doors serving equipment spaces not required to be accessible in accordance with Section 1103.2.9 and serving
+        an occupant load of five or less shall be permitted to have a landing on one side to be not more than 7 inches (178
+        mm) above or below the landing on the egress side of the door.
+    piece_sha256: a8afde0342c7e7e225fb319d2ad3aa235b4dc00d63b8ec66030afb17da89d552
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'A landing at a door as wide as the stairway or door, whichever is greater, at least 44 inches long (36 in Groups
+      R-3 and U and within Group R-2 units), not reduced by a door beyond 7 inches or, serving 50 or more, below half its
+      width: landings aren''t in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 324
+      lines:
+      - 6
+      - 11
+      quote: '1010.1.5 Landings at doors. Landings shall have a width not less than the width of the stairway or the door,
+        whichever is greater. Doors in the fully open position shall not reduce a required dimension by more than 7 inches
+        (178 mm). Where a landing serves an occupant load of 50 or more, doors in any position shall not reduce the landing
+        to less than one-half its required width. Landings shall have a length measured in the direction of travel of not
+        less than 44 inches (1118 mm). Exception: Landing length in the direction of travel in Groups R-3 and U and within
+        individual units of Group R-2 need not exceed 36 inches (914 mm).'
+    piece_sha256: da498140fce8bb2e15da037aa5a1d0884e4a7cc87ce6489a61b73b8ecc8ebf3e
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'Threshold heights (3/4 inch for a dwelling unit''s sliding door, 1/2 inch for others, beveled above 1/4 inch),
+      with exceptions for Group R-2 and R-3 exterior doors and Type B units: thresholds aren''t in the model, a person''s
+      check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 324
+      lines:
+      - 12
+      - 25
+      quote: '1010.1.6 Thresholds. Thresholds at doorways shall not exceed 3/4 inch (19.1 mm) in height above the finished
+        floor or landing for sliding doors serving dwelling units or 1/2 inch (12.7 mm) above the finished floor or landing
+        for other doors. Raised thresholds and floor level changes greater than 1/4 inch (6.4 mm) at doorways shall be beveled
+        with a slope not greater than one unit vertical in two units horizontal (50-percent slope). Exceptions: 1. In occupancy
+        Group R-2 or R-3, threshold heights for sliding and side-hinged exterior doors shall be permitted to be up to 7 3/4
+        inches (197 mm) in height if all of the following apply: 1.1. The door is not part of the required means of egress.
+        1.2. The door is not part of an accessible route as required by Chapter 11. 1.3. The door is not part of an Accessible
+        unit, Type A unit or Type B unit. 2. In Type B units, where Exception 5 to Section 1010.1.4 permits a 4-inch (102
+        mm) elevation change at the door, the threshold height on the exterior side of the door shall not exceed 4 3/4 inches
+        (120 mm) in height above the exterior deck, patio or balcony for sliding doors or 4 1/2 inches (114 mm) above the
+        exterior deck, patio or balcony for other doors.'
+    piece_sha256: 7dc0944dd150d5a5648247f2c514ec26049dbf0a7e74983f1c83c29c4c2d8cac
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'Two doors in a series at least 48 inches apart plus a door swinging into the space, swinging the same way or
+      away from it: vestibules aren''t in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 324
+      lines:
+      - 26
+      - 32
+      quote: '1010.1.7 Door arrangement. Space between two doors in a series shall be 48 inches (1219 mm) minimum plus the
+        width of a door swinging into the space. Doors in a series shall swing either in the same direction or away from the
+        space between the doors. Exceptions: 1. The minimum distance between horizontal sliding power-operated doors in a
+        series shall be 48 inches (1219 mm). 2. Storm and screen doors serving individual dwelling units in Groups R-2 and
+        R-3 need not be spaced 48 inches (1219 mm) from the other door. 3. Doors within individual dwelling units in Groups
+        R-2 and R-3 other than within Type A dwelling units.'
+    piece_sha256: 2a103ee8e4be3f2396bb7490c4c00752b3a0e91c4281a41837230c7d1262b342
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1016.2':

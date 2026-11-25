@@ -19,15 +19,16 @@ second_reading:
     the 4 pieces of section group 5a (1005.1, 1005.2, 1005.3, 1005.3.1, 2026-11-25), a thirteenth for the 3 of section
     group 5b (1005.4, 1005.5, 1005.6), a fourteenth for the 6 of section group 5c (1005.7 to 1005.7.3 and 2
     definitions), a fifteenth for the 9 of section group 6a (1010.1, 1010.1.1, 1010.1.1.1 and 6 definitions,
-    2026-11-25), a sixteenth for the 11 of section group 6b (1010.1.2, 1010.1.2.1 and 9 definitions), and a helper for the comparison words)
+    2026-11-25), a sixteenth for the 11 of section group 6b (1010.1.2, 1010.1.2.1 and 9 definitions), a seventeenth for the 12 of section
+    group 6c (1010.1.3 to 1010.1.7 and 5 definitions), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), and 6 pages, 11 boxes as step_15 (section group 6b); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), and 5 pages, 13 boxes as step_16 (section group 6c); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 263 pieces, 668 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 275 pieces, 735 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -48,6 +49,15 @@ pieces:
     - none
   202:accessible:
     piece_sha256: 448b071e5a39107e0584f9c3a0bea2a3d5764b3166e5500fc0a89fbde54e468a
+    numbers:
+    - '11'
+    second_reading: agrees
+    second_reading_numbers:
+    - '11'
+    second_reading_comparisons:
+    - none
+  202:accessible_route:
+    piece_sha256: b0e89be9e01e2fff4b654e9d76076d81905259d25bce2f8644fc032e60db2074
     numbers:
     - '11'
     second_reading: agrees
@@ -163,6 +173,12 @@ pieces:
     second_reading_comparisons:
     - '>='
     - none
+  202:authority_having_jurisdiction:
+    piece_sha256: 266faf22994f54b27642ec4f44ec5f2c271ed7073b37a9b88dfe22abc942a5c5
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:automatic:
     piece_sha256: d4a09578ec9aa29d640e81df267daa1a209a9dee6ac4ac76fc7358f405c78e9e
     numbers: []
@@ -998,12 +1014,51 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:part_1203:
+    piece_sha256: f9624053f96eb38c56331ec59311ae1b985c9a157e4d53f92e96b097f91d816d
+    numbers:
+    - '1203'
+    - '19'
+    - '1203'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1203'
+    - '19'
+    - '1203'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  202:part_1203_compliant_code_enforcement_program:
+    piece_sha256: 7f0151ea42cfca7168e2fa71f800fbc78d90a2cc0ad36d2ac0316c30713b2efe
+    numbers:
+    - '1203'
+    - '1203'
+    - '1203'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1203'
+    - '1203'
+    - '1203'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
   202:penthouse:
     piece_sha256: fc5256d01cd9ee53d90c31802d6855c67f03f6585f624353f2a6f1146beda4ed
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:permit:
+    piece_sha256: ff84d2b1f3ce08aa62753821db364b0eac9543293da4052c88c4806a476013d6
+    numbers:
+    - '1203'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1203'
+    second_reading_comparisons:
+    - none
   202:person:
     piece_sha256: bbcff593e1603747f83a21aef9d7fc87f08ff971fe211899a8a1731254a57ef5
     numbers: []
@@ -3022,6 +3077,248 @@ pieces:
     - 50 or more
     second_reading_comparisons:
     - '>='
+  1010.1.3:
+    piece_sha256: 749351239167cedf58d20312c042a1e5dca103a788049863a5e5d37b543828a3
+    numbers:
+    - not exceed 15 pound
+    - '67'
+    - not exceed 28 inch
+    - '315'
+    - not exceed 5 pound
+    - '22'
+    - 30 pound
+    - '133'
+    - 15 pound
+    - '67'
+    second_reading: agrees
+    second_reading_numbers:
+    - not exceed 15 pound
+    - '67'
+    - not exceed 28 inch
+    - '315'
+    - not exceed 5 pound
+    - '22'
+    - 30 pound
+    - '133'
+    - 15 pound
+    - '67'
+    second_reading_comparisons:
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    flags:
+    - '''30 pound'' (<=): ''shall require not more than a 30-pound (133 N) force to be set in motion''; ''15 pound'' (<=),
+      the second: ''when subjected to not more than a 15-pound (67 N) force''. The recorded words miss them (numbers.py reads
+      comparison words only directly before a number; here ''a'' stands between). The second reading is right. A flag: no
+      rule uses them.'
+  1010.1.3.1:
+    piece_sha256: f69e859b52d5a2423e5f3ffb83cd9721a2a76c42fc17ea6c64d540d6c1f90a36
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1010.1.3.2:
+    piece_sha256: 5e3cfa67b15a7a0b1fd6cd6b427305420aa228e2f398850cdb9925cea1fceae4
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1010.1.4:
+    piece_sha256: a8afde0342c7e7e225fb319d2ad3aa235b4dc00d63b8ec66030afb17da89d552
+    numbers:
+    - not to exceed 0.25 unit vertical
+    - 12 unit horizontal
+    - 2 percent
+    - not be more than 7 inch
+    - 178 mm
+    - not more than 7 3/4 inch
+    - 197 mm
+    - not more than 1/2 inch
+    - 12.7 mm
+    - not more than 4 inch
+    - 102 mm
+    - five or less
+    - one
+    - not more than 7 inch
+    - 178 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not to exceed 0.25 unit vertical
+    - 12 unit horizontal
+    - 2 percent
+    - not be more than 7 inch
+    - 178 mm
+    - not more than 7 3/4 inch
+    - 197 mm
+    - not more than 1/2 inch
+    - 12.7 mm
+    - not more than 4 inch
+    - 102 mm
+    - five or less
+    - one
+    - not more than 7 inch
+    - 178 mm
+    second_reading_comparisons:
+    - <=
+    - none
+    - <=
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    flags:
+    - '''2 percent'' (<=): ''(2-percent slope)'' restates ''a slope not to exceed 0.25 unit vertical in 12 units horizontal'';
+      the recorded words miss it. The second reading is right. A flag: no rule uses it.'
+  1010.1.5:
+    piece_sha256: da498140fce8bb2e15da037aa5a1d0884e4a7cc87ce6489a61b73b8ecc8ebf3e
+    numbers:
+    - not reduce a required dimension by more than 7 inch
+    - 178 mm
+    - 50 or more
+    - not reduce the landing to less than one-half
+    - not less than 44 inch
+    - 1118 mm
+    - not exceed 36 inch
+    - 914 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not reduce a required dimension by more than 7 inch
+    - 178 mm
+    - 50 or more
+    - not reduce the landing to less than one-half
+    - not less than 44 inch
+    - 1118 mm
+    - not exceed 36 inch
+    - 914 mm
+    second_reading_comparisons:
+    - <=
+    - none
+    - '>='
+    - '>='
+    - '>='
+    - none
+    - '>='
+    - none
+    flags:
+    - '''not exceed 36 inch'' (>=): ''Landing length in the direction of travel ... need not exceed 36 inches'': the exception
+      lowers 44 inches'' minimum length to 36, so a landing there is at least 36 inches long; the recorded words read ''not
+      exceed'' as a maximum. The second reading is right. A flag: no rule uses it.'
+  1010.1.6:
+    piece_sha256: 7dc0944dd150d5a5648247f2c514ec26049dbf0a7e74983f1c83c29c4c2d8cac
+    numbers:
+    - not exceed 3/4 inch
+    - 19.1 mm
+    - 1/2 inch
+    - 12.7 mm
+    - greater than 1/4 inch
+    - 6.4 mm
+    - not greater than one unit vertical
+    - two unit horizontal
+    - 50 percent
+    - up to 7 3/4 inch
+    - 197 mm
+    - '11'
+    - '5'
+    - 4 inch
+    - 102 mm
+    - not exceed 4 3/4 inch
+    - 120 mm
+    - 4 1/2 inch
+    - 114 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not exceed 3/4 inch
+    - 19.1 mm
+    - 1/2 inch
+    - 12.7 mm
+    - greater than 1/4 inch
+    - 6.4 mm
+    - not greater than one unit vertical
+    - two unit horizontal
+    - 50 percent
+    - up to 7 3/4 inch
+    - 197 mm
+    - '11'
+    - '5'
+    - 4 inch
+    - 102 mm
+    - not exceed 4 3/4 inch
+    - 120 mm
+    - 4 1/2 inch
+    - 114 mm
+    second_reading_comparisons:
+    - <=
+    - none
+    - <=
+    - none
+    - '>'
+    - none
+    - <=
+    - none
+    - <=
+    - <=
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    flags:
+    - '''1/2 inch'' (<=) and ''4 1/2 inch'' (<=): each the second of ''shall not exceed ... or ...'', the ''not exceed'' carried
+      over; ''50 percent'' (<=): ''(50-percent slope)'' restates ''a slope not greater than one unit vertical in two units
+      horizontal''; ''4 inch'' (<=): ''where Exception 5 to Section 1010.1.4 permits a 4-inch (102 mm) elevation change'',
+      1010.1.4''s ''not more than 4 inches''. The recorded words miss them. The second reading is right. A flag: no rule uses
+      them.'
+  1010.1.7:
+    piece_sha256: 2a103ee8e4be3f2396bb7490c4c00752b3a0e91c4281a41837230c7d1262b342
+    numbers:
+    - between two
+    - 48 inch
+    - 1219 mm
+    - 48 inch
+    - 1219 mm
+    - 48 inch
+    - 1219 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - between two
+    - 48 inch
+    - 1219 mm
+    - 48 inch
+    - 1219 mm
+    - 48 inch
+    - 1219 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    flags:
+    - '''48 inch'' (>=), the first: ''shall be 48 inches (1219 mm) minimum'', ''minimum'' after the number; the second: ''The
+      minimum distance ... shall be 48 inches''; the third: ''need not be spaced 48 inches'', the 48-inch minimum the exception
+      lifts. ''between two'' (none): ''Space between two doors in a series'' counts the doors, no range. The recorded words
+      miss the minimums and read ''between'' as a range. The second reading is right. A flag: no rule uses them.'
   '1016.2':
     piece_sha256: 75ce5120ce02dba41247b79ce0300db00da2a96dfe6066836bd5c20e9e0df752
     numbers:
