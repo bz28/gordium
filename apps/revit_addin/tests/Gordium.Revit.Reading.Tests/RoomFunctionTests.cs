@@ -280,6 +280,26 @@ public sealed class RoomFunctionTests
         Assert.Contains(Line(Model(floor, "B"))!.Notes, n => n.Contains("an exit passageway holds no occupant load of its own", StringComparison.Ordinal));
     }
 
+    /// <summary>Review round 6: a word not in the list is the architect's, never dropped unsaid: counted, not done, and
+    /// named, on any room (a closet's too, which would otherwise read as holding no load of its own).</summary>
+    [Fact]
+    public void A_word_not_in_the_list_is_counted_and_named_on_any_room()
+    {
+        var floor = new FakeFloor();
+        foreach (var id in new[] { "A", "B", "L" })
+            floor.SetMark(id, Marks.RoomFunction, new(true, Text: "Business area"));
+        floor.SetMark("C", Marks.Use, new(true, Text: "Closet"));
+        floor.SetMark("C", Marks.RoomFunction, new(true, Text: "Storage"));
+        floor.SetMark("A", Marks.RoomFunction, new(true, Text: "Office"));
+        var line = Line(Model(floor, "B"))!;
+        Assert.False(line.Done);
+        Assert.Equal((2, 4), (line.Set, line.Total));
+        Assert.Contains(FakeFloor.Uid("C"), line.Unset);
+        Assert.Contains(line.Notes, n => n.Contains("is \"Storage\", not one of Table 1004.5's words", StringComparison.Ordinal));
+        Assert.Contains(line.Notes, n => n.Contains("is \"Office\", not one of Table 1004.5's words", StringComparison.Ordinal));
+        Assert.Equal("Room function: 2 of 4 rooms set, 2 with a word not in the list (Office 101 (A), Corridor (C)).", SetupSteps.LineCount(line));
+    }
+
     /// <summary>Review round 2: what stays blank is said by the Use mark, the one the count and the occupant loads read:
     /// a room only named so ("Bathroom 1") with no Use is counted, still to set.</summary>
     [Fact]

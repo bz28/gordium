@@ -92,7 +92,7 @@ public static class RouteReader
         if (r.Function is { } function)
             room["function"] = function;
         else if (r.FunctionWord is { } typed)
-            notes.Add(new(r.Id, "function", $"{Marks.RoomFunction.Name} is \"{typed}\", not one of Table 1004.5's functions Gordium lists: its occupant load needs review"));
+            notes.Add(new(r.Id, "function", $"{Marks.RoomFunction.Name} is \"{typed}\", not one of Table 1004.5's functions Gordium lists, so it isn't sent (read as no function stated)"));
     }
 
     // ---- everything else, once the rooms and doors are read ----------------------------------------------------

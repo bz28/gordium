@@ -938,7 +938,11 @@ public static class SetupChecklist
         var exits = EnteredExits(doors, side);
         bool BlankByDesign(MarkedElement r) => exits.ContainsKey(r.UniqueId)
             || RoomUses.Table.Of(Marks.Text(MarkReading.Value(r, Marks.Use))) is "corridor" or "closet" or "toilet";
-        var counted = rooms.Where(r => Set(r) || !BlankByDesign(r)).ToList();
+        // typed at all: a word not in the list is the architect's too, counted and said (review round 6: on a closet it
+        // was dropped unsaid, and read as no load of its own)
+        string? Typed(MarkedElement r) => Marks.Text(MarkReading.Value(r, Marks.RoomFunction));
+        var counted = rooms.Where(r => Typed(r) is not null || !BlankByDesign(r)).ToList();
+        var unlisted = counted.Where(r => Typed(r) is not null && !Set(r)).ToList();
         // a function on a corridor or on the exit enclosure contradicts it (it holds no load of its own: the story's load
         // is then not worked out), so it is still to clear, never set (review round 3: the line read done)
         bool Contradicts(MarkedElement r) => Set(r) && (exits.ContainsKey(r.UniqueId)
@@ -950,6 +954,9 @@ public static class SetupChecklist
         var clear = counted.Where(Contradicts).Select(r =>
             $"{RoomName(r)}: clear its {Marks.RoomFunction.Name} ({What(r)} holds no occupant load of its own; with one " +
             "stated, its story's load isn't worked out)").ToList();
+        var notes = clear.Concat(unlisted.Select(r =>
+            $"{RoomName(r)}: its {Marks.RoomFunction.Name} is \"{Typed(r)}\", not one of Table 1004.5's words, so it isn't " +
+            "sent: choose one from the list, or clear it")).ToList();
         var done = counted.Count(Done);
         var line = new ChecklistLine("room_function", Marks.RoomFunction, "Room function (occupant loads)", "rooms", done, counted.Count,
                    counted.Where(r => !Done(r)).Select(r => r.UniqueId).ToList(), false, false,
@@ -957,13 +964,17 @@ public static class SetupChecklist
                    $"A room whose {Marks.Use.Name} is Corridor, Closet or Toilet, and an exit stair enclosure or exit passageway, " +
                    "stay blank (they aren't counted here unless one holds a function); any other room left blank has its occupant " +
                    "load, and its story's, at needs review.",
-                   suggestions, clear);
+                   suggestions, notes);
         // the rooms to clear said in the count itself, never only behind "Why?" (review round 4: "Select 2" read as to set)
-        return clear.Count == 0 ? line : line with
-        {
-            CountWords = $"Room function: {done} of {counted.Count} rooms set, {clear.Count} to clear " +
-                         $"(a function on {(clear.Count == 1 ? "a corridor or an exit" : "corridors or exits")}: {string.Join(", ", counted.Where(Contradicts).Select(RoomName))})",
-        };
+        if (clear.Count == 0 && unlisted.Count == 0)
+            return line;
+        var said = new List<string>();
+        if (clear.Count > 0)
+            said.Add($"{clear.Count} to clear (a function on {(clear.Count == 1 ? "a corridor or an exit" : "corridors or exits")}: " +
+                     $"{string.Join(", ", counted.Where(Contradicts).Select(RoomName))})");
+        if (unlisted.Count > 0)
+            said.Add($"{unlisted.Count} with a word not in the list ({string.Join(", ", unlisted.Select(RoomName))})");
+        return line with { CountWords = $"Room function: {done} of {counted.Count} rooms set, {string.Join(", ", said)}" };
     }
 
     /// <summary>The rooms an exit stair enclosure or exit passageway door enters, as the route reader reads it
