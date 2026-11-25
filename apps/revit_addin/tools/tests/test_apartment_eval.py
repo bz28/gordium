@@ -80,7 +80,7 @@ def test_the_real_workers_answer_compares_as_worked_out(tmp_path):
     assert made["ok"], made["summary"]
     # every rule of the rulebook, each worked out in expected.yaml (2026-11-23: 74; section group 4a, 2026-11-25:
     # 77, Table 1020.3's width rule and its two-or-more-groups flag, and 1020.3's corridor capacity)
-    assert made["summary"]["as_worked_out"] == 93    # group 4b: 88, Table 1020.2's seven rows, its two-or-more-groups and Group I-2 flags, the fire-partition and hoistway flags; group 4c, 2026-11-25: 91, 1020.4's, 1020.6's and 1020.7's flags; group 5a, 2026-11-25: 93, 1005.3.1's stairway and 1005.3.2's other-component flags (the corridor capacity was 4a's)
+    assert made["summary"]["as_worked_out"] == 96    # group 4b: 88, Table 1020.2's seven rows, its two-or-more-groups and Group I-2 flags, the fire-partition and hoistway flags; group 4c, 2026-11-25: 91, 1020.4's, 1020.6's and 1020.7's flags; group 5a, 2026-11-25: 93, 1005.3.1's stairway and 1005.3.2's other-component flags (the corridor capacity was 4a's); group 5b: 96, 1005.4's, 1005.5's and 1005.6's flags
     assert made["summary"]["as_worked_out"] == len(load("expected.yaml")["results"])
     # and a kinder verdict than the hand-work is named a false pass, never ok
     got["result"]["egress"]["results"]["general.bc_table_1006_3_4_1__r2_dwelling_units"] = "pass"

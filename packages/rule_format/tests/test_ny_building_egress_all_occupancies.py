@@ -277,7 +277,8 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          "1020.4": (344, 35, 36), "1020.6": (344, 48, 53), "1020.6 (part 2)": (345, 3, 6), "1020.7": (345, 17, 23),
          "1020.6.1": (345, 7, 16),
          # section group 5a: egress capacity
-         "1005.3.1": (313, 51, 55), "1005.3.1 (part 2)": (314, 3, 13), "1005.3.2": (314, 14, 28)}      # review round 1 of group 4c: its five conditions quoted too
+         "1005.3.1": (313, 51, 55), "1005.3.1 (part 2)": (314, 3, 13), "1005.3.2": (314, 14, 28),
+         "1005.4": (314, 29, 30), "1005.5": (314, 31, 33), "1005.6": (314, 34, 36)}       # section group 5b      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -314,7 +315,7 @@ HANDLERS = {
     "1030.6.2": ("general.bc_1020_3_corridor_capacity", "1030.6.2"),
     "1030.6.3": ("general.bc_1020_3_corridor_capacity", "1030.6.3"), "909": ("general.bc_1020_3_corridor_capacity", "909"),
 }
-NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2"}          # the piece naming itself
+NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
@@ -836,3 +837,16 @@ def test_table_1020_3_within_a_dwelling_unit_needs_review_only_while_not_ruled_o
     for units, want in (({"corridors_within_dwelling_units": True}, "needs_review"), ({}, "needs_review"),
                         (NO_UNITS, "fail")):
         assert _one(r, "corridor", _corridor(43.5, 50), base | units, ctx) == want, units
+
+
+def test_more_than_one_reads_the_same_comparison_in_every_piece():
+    """Review round 1 of group 5b (P3): 1005.5's 'Where more than one exit ... is required' was read 'none' while
+    1020.5's same words read '>': the second reading says what the printed sentence says of each number, so 'more
+    than <n>' is '>' everywhere in this book (a condition, but a comparison all the same)."""
+    pieces = load(NY / "text_verification.yaml")["pieces"]
+    seen = []
+    for pid, e in pieces.items():
+        for n, comp in zip(e["second_reading_numbers"], e["second_reading_comparisons"]):
+            if str(n).startswith("more than "):
+                seen.append((pid, n, comp))
+    assert seen and all(comp == ">" for _, _, comp in seen), [x for x in seen if x[2] != ">"]
