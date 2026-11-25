@@ -1076,3 +1076,15 @@ def test_the_6c_flags_state_each_exceptions_own_conditions(rules):
     assert "and one required to be fire rated, is set in motion by at most 30 pounds" in forces
     assert "a fire-rated one" not in forces
     assert "(in a vestibule or anywhere else on the way out)" in series
+
+
+def test_the_6c_labels_name_their_exceptions():
+    """Review round 3 of group 6c: a label read alone never states a requirement stricter than the page; 1010.1.7's
+    names its three exceptions (p.324 lines 28-32), as 1010.1.4's, 1010.1.5's and 1010.1.6's do theirs."""
+    labels = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]
+    reason = lambda pid: " ".join(labels[pid]["reason"].split())
+    assert "with exceptions for horizontal sliding power-operated doors, Group R-2 and R-3 storm and screen doors, and " \
+           "doors within those units other than Type A units" in reason("1010.1.7")
+    assert "with six exceptions" in reason("1010.1.4")
+    assert "36 in Groups R-3 and U and within Group R-2 units" in reason("1010.1.5")
+    assert "with exceptions for Group R-2 and R-3 exterior doors and Type B units" in reason("1010.1.6")
