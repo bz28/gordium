@@ -191,7 +191,9 @@ def required(group, system, load_):
             return 0
         if s13 or s13r:
             return 0.5                                  # note c: 13R is allowed for Group R (903.3.1.2's own group)
-        return 1 if group in ("R-3", "R-4") and s13d else None
+        # note d: 903.3.1.3 in Group R-3, and in Group R-4 only in Condition 1 (903.2.8.2, p.271), not stated: the
+        # strict reading has no R-4 cell for 13D (review round 1 of group 4b)
+        return 1 if group == "R-3" and s13d else None
     if group == "I-2":
         return 0 if s13 else None
     if group in ("I-1", "I-3"):
@@ -216,7 +218,7 @@ def loosest(group, system, load_, dwelling):
     if group in A_U:
         return 0 if load_ <= 30 or s13 or s13r or s13d else 1
     if group in ("R-1", "R-2", "R-3", "R-4"):
-        return required(group, system, load_)
+        return 1 if group == "R-4" and s13d and load_ > 10 else required(group, system, load_)   # Condition 1
     if group == "I-2":
         return 0 if s13 or s13r or s13d else None
     if group == "I-3":

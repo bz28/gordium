@@ -768,9 +768,12 @@ def test_table_1020_2_every_row_passes_at_its_rating_and_not_just_short_of_it(ct
     r = rules["general.bc_table_1020_2_r"]
     d13 = {S1: False, S2: False, "sprinklered_903_3_1_3": True} | NO_UNITS
     assert _cites(r, 344, 17)
-    for g in ("R-3", "R-4"):
-        assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": g} | d13, ctx) == "pass", g
-        assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": g} | d13, ctx) == "fail", g
+    assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-3"} | d13, ctx) == "pass"
+    assert _one(r, "corridor", _rating(11, 0.75), {"occupancy_group": "R-3"} | d13, ctx) == "fail"
+    # review round 1 of group 4b: note d's 903.2.8 permits 13D in Group R-4 only in Condition 1 (903.2.8.2, p.271),
+    # which isn't stated: never a pass on it
+    for h in (0.75, 1, 2):
+        assert _one(r, "corridor", _rating(11, h), {"occupancy_group": "R-4"} | d13, ctx) == "needs_review", h
     assert _one(r, "corridor", _rating(11, 1), {"occupancy_group": "R-2"} | d13, ctx) == "fail"
     # note c's 903.3.1.2 (NFPA 13R): Group R's 0.5 hour; elsewhere "where allowed", a person's check
     s13r = {S1: False, S2: True, "sprinklered_903_3_1_3": False} | NO_UNITS
