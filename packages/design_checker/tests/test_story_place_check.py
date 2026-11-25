@@ -63,18 +63,15 @@ def test_on_flat_ground_at_its_floor_level_2_is_the_second_story_and_one_exit_fa
     assert result == "fail"
 
 
-def test_on_ground_5_ft_up_level_1_is_a_basement_level_2_the_first_story_and_one_exit_passes(one_exit, monkeypatch):
-    """Ground at 5 ft with no door to the outside under it (the stair's doors out left off): Level 1 is a basement,
-    Level 2 the first story above, and one exit passes. With the doors out at 0 (an areaway, question 4.6) Level 2
-    may be the second: needs review, never a pass."""
-    bare = {**one_exit, "doors": [d for d in one_exit["doors"] if "outside" not in d["sides"]]}
-    result, stories = _result(bare, {"flat": 5.0}, monkeypatch)
-    assert stories["Level 1"]["measures"]["story_first_above_or_below_grade"] is True
-    assert stories["Level 2"]["measures"]["story_first_above_or_below_grade"] is True
-    assert result == "pass"
-    result, stories = _result(one_exit, {"flat": 5.0}, monkeypatch)
-    assert "story_first_above_or_below_grade" not in stories["Level 2"]["measures"]
-    assert result == "needs_review"
+def test_on_ground_5_ft_up_level_2_may_be_the_first_or_second_so_one_exit_needs_review(one_exit, monkeypatch):
+    """Ground at 5 ft: Level 1 may be a basement (Level 2 the first story, one exit allowed) or, with ground lower
+    somewhere beside it (never ruled out: a basement is never proven), the first story above (Level 2 the second,
+    one exit too few): needs review, never a pass."""
+    for interior in (one_exit, {**one_exit, "doors": [d for d in one_exit["doors"] if "outside" not in d["sides"]]}):
+        result, stories = _result(interior, {"flat": 5.0}, monkeypatch)
+        assert stories["Level 1"]["measures"]["story_first_above_or_below_grade"] is True
+        assert "story_first_above_or_below_grade" not in stories["Level 2"]["measures"]
+        assert result == "needs_review"
 
 
 @pytest.mark.parametrize("ground", [None, {"none": "none stated"}, {"spots": [p + [4] for p in SPOTS]},
