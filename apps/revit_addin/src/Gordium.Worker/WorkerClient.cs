@@ -73,13 +73,13 @@ public sealed class WorkerClient : IDisposable
         try
         {
             if (!client._process.Start())
-                throw new WorkerExitedException("The Gordium checker didn't start", null, "");
+                throw new WorkerUnavailableException("The Gordium checker didn't start");
         }
         catch (System.ComponentModel.Win32Exception e)
         {
             client._stopped = "it didn't start";
             client._process.Dispose();
-            throw new WorkerExitedException($"The Gordium checker couldn't be started with {options.PythonPath}: {e.Message}", null, "");
+            throw new WorkerUnavailableException($"The Gordium checker couldn't be started with {options.PythonPath}: {e.Message}", e);
         }
         client.StartReaders();
         try

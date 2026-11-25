@@ -92,11 +92,26 @@ internal sealed class CheckRun
     {
         try
         {
-            return Trial.WorkerAsync();
+            return Started(Trial.WorkerAsync());
         }
         catch (Exception e)                                    // no clone: said when the worker is needed
         {
-            return Task.FromException<WorkerClient>(e);
+            return Task.FromException<WorkerClient>(new WorkerUnavailableException($"The Gordium checker couldn't be started: {e.Message}", e));
+        }
+    }
+
+    /// <summary>The worker's start, its failures that aren't the worker's own words (no Gordium folder, Revit closing)
+    /// said as the worker that couldn't be started, wherever it is first waited for: the read's question or the check
+    /// (UI polish PR 5 review round 8: the same cause, one card). A cancel stays a cancel.</summary>
+    internal static async Task<WorkerClient> Started(Task<WorkerClient> start)
+    {
+        try
+        {
+            return await start.ConfigureAwait(false);
+        }
+        catch (Exception e) when (e is not WorkerException and not OperationCanceledException)
+        {
+            throw new WorkerUnavailableException($"The Gordium checker couldn't be started: {e.Message}", e);
         }
     }
 

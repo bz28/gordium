@@ -84,6 +84,13 @@ public sealed class CheckFailuresTests
         Assert.Equal(FailureKind.Unreadable, CheckFailures.OfRead(notJson, Details).Kind);
         Assert.Equal(FailureKind.Unreadable, CheckFailures.Of(new AggregateException(notJson), Details).Kind);
         Assert.Equal(FailureKind.Unreadable, CheckFailures.Of(Task.FromException(notJson).Exception!, Details).Kind);
+        // review round 8: the start's failure is wrapped where the worker task is made, so the check's own wait (no
+        // read question asked) gets the same card
+        var run = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckRun.cs"));
+        Assert.Contains("return Started(Trial.WorkerAsync());", run, StringComparison.Ordinal);
+        Assert.Contains("catch (Exception e) when (e is not WorkerException and not OperationCanceledException)", run, StringComparison.Ordinal);
+        var client = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Worker", "WorkerClient.cs"));
+        Assert.Contains("throw new WorkerUnavailableException($\"The Gordium checker couldn't be started with", client, StringComparison.Ordinal);
         var answered = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckProject.cs"));
         Assert.Contains("var why = sent.Exception is { } failed ? CheckFailures.Unwrap(failed)", answered, StringComparison.Ordinal);
         var objects = new System.Text.Json.Nodes.JsonArray(new System.Text.Json.Nodes.JsonObject { ["id"] = "a" });
