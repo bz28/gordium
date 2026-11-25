@@ -359,6 +359,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:building_element:
+    label: reference
+    topic: definitions
+    reason: 'Defines BUILDING ELEMENT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 35
+      lines:
+      - 33
+      - 34
+      quote: '[BG] BUILDING ELEMENT. A fundamental component of building construction, specified in Table 601, which may or may not be of fire-resistance-rated construction and is constructed of materials based on the building type of construction.'
+    piece_sha256: ddc7bd84392f0ad6360b9829020ce99efe3343bc73c4f74ae851281f5e6b19c5
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
+      4b (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor rating sections use, by
+      the book''s italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:building_height:
     label: reference
     topic: definitions
@@ -915,6 +932,40 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
       of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
       table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_partition:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE PARTITION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 24
+      - 24
+      quote: '[BF] FIRE PARTITION. A vertical assembly of materials designed to restrict the spread of fire in which openings are protected.'
+    piece_sha256: 7b18317fa0cd93ac4325b7f63770ed609747b4d17b7219c76358368426d30b01
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
+      4b (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor rating sections use, by
+      the book''s italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_resistance_rating:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE-RESISTANCE RATING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 50
+      - 52
+      quote: '[BF] FIRE-RESISTANCE RATING. The period of time a building element, component or assembly maintains the ability to confine a fire, continues to perform a given structural function, or both, as determined by the tests, or the methods based on tests, prescribed in Section 703.'
+    piece_sha256: ab291c8db4785dc1eac628068d1a6988557c3e8c2f341e2f613253a61fdc7ded
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
+      4b (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor rating sections use, by
+      the book''s italics.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_wall:
@@ -3624,6 +3675,68 @@ labels:
         requirements of Sections 1020.2 through 1020.7.
     piece_sha256: e089431fd652d4b812d499e864d0d17a933f666ecabb468e2b49b995348ab6d2
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 4.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1020.2':
+    label: rule
+    topic: means_of_egress
+    reason: 'Corridors are fire-resistance rated as Table 1020.2 asks, and walls required to be rated are fire partitions
+      (Section 708, not brought in); exceptions 1 to 4 lift the rating (Group E rooms with doors straight outside, corridors
+      within a dwelling or sleeping unit in Groups I-1 and R, open parking garages, a Group B space needing one means of
+      egress), exception 5 allows unprotected openings on unrated exterior walls: the rating is checked per corridor against
+      the table, the fire-partition construction a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 343
+      lines:
+      - 40
+      - 41
+      quote: 1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls
+        required to be fire- resistance rated shall comply with Section 708 for fire partitions.
+    piece_sha256: fb7fa8b5724e18ce5774c6e0394124cf085c9af0ede5f6f381600b0f481e0c9a
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 4b: the rating is
+      Table 1020.2''s rules (one per printed row, every group); a rated corridor''s walls as fire partitions (708) is the
+      flag "A rated corridor''s walls are fire partitions"; exceptions 1 to 4 need review where the table''s rating fails.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1020.2:
+    label: rule
+    topic: means_of_egress
+    reason: 'The ratings 1020.2 uses, row by row, by occupancy and the occupant load the corridor serves, without and with
+      an automatic sprinkler system (note c: 903.3.1.1 or 903.3.1.2 where allowed; note d: Group R-3 and R-4 with 903.3.1.3);
+      Not Permitted without a sprinkler system for Groups H, R, I-1, I-2 and I-3.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 344
+      lines:
+      - 7
+      - 13
+      quote: H-1, H-2, H-3 All Not Permitted 1[fnc] H-4, H-5 Greater than 30 Not Permitted 1[fnc] A, B, E, F, M, S, U Greater
+        than 30 1 0 R Greater than 10 Not Permitted 0.5[fnc]/1[fnd] I-2[fna] All Not Permitted 0 I-1, I-3 All Not Permitted
+        1[fnb,] [fnc] I-4 All 1 0
+    piece_sha256: 8caec5a85e56fb6bac660726e4bf74e5f91038a4fd14463d4aa98496823ba665
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Read by position (each character''s
+      size: the note letters are 5.04-point beside 8.4-point digits) and on the page image; sources.yaml brought_in.misread
+      puts each raised letter right by line. Every row is a rule of its own (section group 4b), a building of two or more
+      groups a flag.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1020.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Elevator hoistway doors in rated hoistway enclosures are protected per Sections 716 and 3006.2 (not brought in):
+      the elevators and their doors aren''t drawn, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 344
+      lines:
+      - 19
+      - 20
+      quote: 1020.2.1 Hoistway protection. Elevator hoistway doors in elevators hoistway enclosures required to be fire-resistance
+        rated shall be protected in accordance with Section 716. Elevator hoistway doors shall also be protected in accordance
+        with Section 3006.2.
+    piece_sha256: 8a508542ed4c9e0ec67245fd38808dbd0c3fff23291df46fad83def384312fe1
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 4b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1020.3':

@@ -540,12 +540,12 @@ def _asked_corridor(why):
     from design_checker.each_part import GORDIUM_GAPS
     rule = next(r for r in load(NY / "5_building_code_rules/drafted/general.yaml")["rules"]
                 if r["id"] == "general.bc_table_1020_3_corridor_width")
+    # the building facts the rule reads stated (group 4b's dwelling-unit fact too), so only the load is asked
     part = {"id": "c", "measures": {"corridor_width": 40}, "not_measured": {"corridor_occupant_load": why}}
-    row = {"outcome": "needs_review", "id": "c", "values": {**part["measures"], "occupancy_group": "R-2",
-                                                           "ambulatory_care_facility": False}}
-    found = panel_data.causes(rule, row, None, part, None, part["not_measured"],
-                              {"occupancy_group": "R-2", "ambulatory_care_facility": False}, ALLOWED,
-                              GORDIUM_GAPS)
+    stated = {"occupancy_group": "R-2", "ambulatory_care_facility": False, "corridors_within_dwelling_units": True}
+    row = {"outcome": "needs_review", "id": "c", "values": {**part["measures"], **stated}}
+    law = Context.for_jurisdiction(NY).allowed()           # the Building Code's own facts, each with its kind
+    found = panel_data.causes(rule, row, None, part, None, part["not_measured"], stated, law, GORDIUM_GAPS)
     return [ui_data._from_cause(c, "corridor")["headline"] for c in found]
 
 

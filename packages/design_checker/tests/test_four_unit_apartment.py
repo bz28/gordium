@@ -128,6 +128,24 @@ def test_the_corridor_width_waits_only_on_whether_other_levels_reach_the_corrido
                 assert values == pytest.approx([0, 1800 / 7])
 
 
+def test_the_corridor_rating_needs_review_however_the_corridor_facts_are_stated(routes, got):
+    """Section group 4b (2026-11-25), before and after: Table 1020.2's R row needs review as sent (the corridor's load
+    isn't worked out). Stating that no other level reaches the corridors and that none is within a dwelling unit
+    settles neither way: its load is two readings, none (no rating asked) and the story's 257.1 (more than 10
+    occupants, no sprinkler system: Not Permitted), so it still needs review, never a pass; only rules reading those
+    facts change, and only between needs review and an answer the law gives."""
+    rule = "general.bc_table_1020_2_r"
+    assert got["results"][rule] == present.REVIEW
+    desc = build.interior_of()
+    desc["building"] = {**(desc.get("building") or {}), "other_level_egress_into_corridors": False,
+                        "corridors_within_dwelling_units": False}
+    stated = _check(desc, routes)
+    assert stated["results"][rule] == present.REVIEW
+    changed = {k for k in got["results"] if stated["results"][k] != got["results"][k]}
+    assert changed <= {"general.bc_table_1020_3_corridor_width", "general.bc_1020_3_corridor_capacity"}, changed
+    assert stated["results"]["general.bc_table_1020_3_corridor_width"] == "pass"     # 72 in, as group 4a found
+
+
 def test_the_occupant_loads_come_from_each_rooms_function(got):
     """Section group 3 (2026-11-23): each apartment's stated function (residential, 200 gross) gives its occupant
     load as two readings, 690 / 200 from its own area and 690 / 7 while 1004.5.1's increase isn't ruled out; both at
@@ -167,9 +185,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     """23 of the rulebook's 34 flags show (2026-11-23; 1006.2.2's five rooms by use since review round 1; the
     mixed-occupancy single-exit flags not applicable since section group 2; 1030.8's on its fact alone since round
     2): those narrowed to a building of two or more groups, or to another group (F-1 and S-1's increase, H-5's,
-    Group H's sprinkler system), are not applicable to a one-group R-2."""
+    Group H's sprinkler system), are not applicable to a one-group R-2. Section group 4b adds 1020.2.1's elevator
+    hoistway doors (24); its per-corridor flag (a rated corridor's walls) is a corridor's row, not a building line."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 23 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 24 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):

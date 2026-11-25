@@ -63,6 +63,7 @@ BUILDING = {
     "occupant_load_increased": (None, True, False, "no"),
     "other_level_egress_into_corridors": (None, True, False, "no"),     # section group 4
     "ambulatory_care_facility": (None, True, False, "no"),
+    "corridors_within_dwelling_units": (None, True, False, "no"),     # section group 4b
     "facts_not_sent": (None, [], ["dwelling_units"], ["sprinkler_system"], "use"),
 }
 DOMAIN = {**VALUES, **BUILDING}
@@ -80,7 +81,7 @@ BASE = {"use": "one_family_detached", "dwelling_units": 1, "attached_units_in_bu
         "special_egress_spaces": None, "merchandise_pads": None,
         "emergency_escape_openings_1031": None, "r2_sleeping_units": None, "occupied_outdoor_areas": None,
         "occupant_load_increased": None, "other_level_egress_into_corridors": None, "ambulatory_care_facility": None,
-        "facts_not_sent": None}
+        "corridors_within_dwelling_units": None, "facts_not_sent": None}
 
 
 def count(v, least=0):
@@ -100,7 +101,8 @@ def law(f):
                                     "egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating",
                                     "special_egress_spaces", "merchandise_pads", "emergency_escape_openings_1031",
                                     "r2_sleeping_units", "occupied_outdoor_areas", "occupant_load_increased",
-                                    "other_level_egress_into_corridors", "ambulatory_care_facility")]
+                                    "other_level_egress_into_corridors", "ambulatory_care_facility",
+                                    "corridors_within_dwelling_units")]
     kinds += [f[k] is None or count(f[k]) for k in ("dwelling_units", "attached_units_in_building", "adus_on_parcel",
                                                     "rooms_let_for_profit", "stories")]
     kinds += [f["stories_above_grade_plane"] is None or count(f["stories_above_grade_plane"], 1),

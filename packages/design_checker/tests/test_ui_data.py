@@ -28,7 +28,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "merchandise_pads": False, "r2_sleeping_units": False,
                                           "emergency_escape_openings_1031": False,           # group 2's two
                                           "occupied_outdoor_areas": False,                   # group 3's
-                                          "ambulatory_care_facility": False})                # group 4's
+                                          "ambulatory_care_facility": False,                 # group 4's
+                                          "corridors_within_dwelling_units": False})
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -572,7 +573,8 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # group 4's two Building Code facts have no Revit mark yet (Table 1020.3's ambulatory care facility; whether
     # another level's occupants reach a corridor): asked for by name, never by a mark; their marks follow in the
     # Revit-fields work. Groups 2 and 3's facts have theirs (PR #194).
-    assert keys - set(revit) == {"ambulatory_care_facility", "other_level_egress_into_corridors"}
+    # and this branch's own: corridors_within_dwelling_units (their marks follow in the Revit-fields work)
+    assert keys - set(revit) == {"ambulatory_care_facility", "corridors_within_dwelling_units", "other_level_egress_into_corridors"}
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased"):
         # a fact a rule reads as a measure is answered by its field (field_of); occupant_load_increased is read by the
         # occupant loads themselves, not as a measure

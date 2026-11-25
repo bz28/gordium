@@ -62,6 +62,7 @@ FIELD_HEADLINES = {
     "building.emergency_escape_openings_1031": "Say whether every sleeping room has an emergency escape opening (1031)",
     "building.occupied_outdoor_areas": "Say whether the occupants use outdoor areas (yards, patios, roofs: 1004.7)",
     "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
+    "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",
     "facts.ground_is_flat": "Say whether the ground is flat",

@@ -483,7 +483,8 @@ def _uses(tree) -> list[tuple]:
                             # a coefficient (0.5 * floor area) has no unit of its own; one that multiplies counts
                             # only and is compared with a length is a rate, in that length's unit (1005.3.2: 0.2
                             # inch per occupant): the side's and the other side's measures, for _formula_problems
-                            rate = (frozenset(_compared_names(side)), frozenset(_compared_names(other)))                                 if coefficient else None
+                            rate = (frozenset(_compared_names(side)), frozenset(_compared_names(other))) \
+                                if coefficient else None
                             out.append((number, needed, pair_sure, set() if coefficient else names, _formula(side),
                                         rate))
                 for side in sides:
