@@ -939,12 +939,20 @@ public static class SetupChecklist
         bool BlankByDesign(MarkedElement r) => exits.Contains(r.UniqueId)
             || RoomUses.Table.Of(Marks.Text(MarkReading.Value(r, Marks.Use))) is "corridor" or "closet" or "toilet";
         var counted = rooms.Where(r => Set(r) || !BlankByDesign(r)).ToList();
-        return new("room_function", Marks.RoomFunction, "Room function (occupant loads)", "rooms", counted.Count(Set), counted.Count,
-                   counted.Where(r => !Set(r)).Select(r => r.UniqueId).ToList(), false, false,
+        // a function on a corridor or on the exit enclosure contradicts it (it holds no load of its own: the story's load
+        // is then not worked out), so it is still to clear, never set (review round 3: the line read done)
+        bool Contradicts(MarkedElement r) => Set(r) && (exits.Contains(r.UniqueId)
+            || RoomUses.Table.Of(Marks.Text(MarkReading.Value(r, Marks.Use))) == "corridor");
+        bool Done(MarkedElement r) => Set(r) && !Contradicts(r);
+        var clear = counted.Where(Contradicts).Select(r =>
+            $"{RoomName(r)}: clear its {Marks.RoomFunction.Name} ({(exits.Contains(r.UniqueId) ? "an exit stair enclosure" : "a corridor")} " +
+            "holds no occupant load of its own; with one stated, its story's load isn't worked out)").ToList();
+        return new("room_function", Marks.RoomFunction, "Room function (occupant loads)", "rooms", counted.Count(Done), counted.Count,
+                   counted.Where(r => !Done(r)).Select(r => r.UniqueId).ToList(), false, false,
                    "What each room is used for, in Table 1004.5's words, gives its occupant load factor; Revit doesn't record it.",
                    $"A room whose {Marks.Use.Name} is Corridor, Closet or Toilet, and an exit stair enclosure, stay blank (they " +
                    "aren't counted here); any other room left blank has its occupant load, and its story's, at needs review.",
-                   suggestions, []);
+                   suggestions, clear);
     }
 
     /// <summary>The rooms an exit stair enclosure or exit passageway door enters, as the route reader reads it

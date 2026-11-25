@@ -251,6 +251,26 @@ public sealed class RoomFunctionTests
         Assert.Contains(FakeFloor.Uid("S"), unclear.Unset);
     }
 
+    /// <summary>Review round 3: a function on a corridor or on the exit enclosure contradicts it (the occupant loads then
+    /// leave the story's load not worked out), so the line names it to clear and never reads done.</summary>
+    [Fact]
+    public void A_function_on_a_corridor_or_the_exit_enclosure_is_named_to_clear_never_done()
+    {
+        var floor = new FakeFloor();
+        foreach (var id in new[] { "A", "B", "L" })
+            floor.SetMark(id, Marks.RoomFunction, new(true, Text: "Business area"));
+        Assert.True(Line(Model(floor, "B"))!.Done);                                   // the three occupied rooms: done
+        floor.SetMark("C", Marks.RoomFunction, new(true, Text: "Business area"));      // the corridor (its Use)
+        floor.SetMark("S", Marks.RoomFunction, new(true, Text: "Business area"));      // the stair dS enters
+        var line = Line(Model(floor, "B"))!;
+        Assert.False(line.Done);
+        Assert.Equal((3, 5), (line.Set, line.Total));
+        Assert.Equal([FakeFloor.Uid("C"), FakeFloor.Uid("S")], line.Unset.Order(StringComparer.Ordinal));
+        Assert.Equal(2, line.Notes.Count);
+        Assert.Contains(line.Notes, n => n.Contains("a corridor holds no occupant load of its own", StringComparison.Ordinal));
+        Assert.Contains(line.Notes, n => n.Contains("an exit stair enclosure holds no occupant load of its own", StringComparison.Ordinal));
+    }
+
     /// <summary>Review round 2: what stays blank is said by the Use mark, the one the count and the occupant loads read:
     /// a room only named so ("Bathroom 1") with no Use is counted, still to set.</summary>
     [Fact]
