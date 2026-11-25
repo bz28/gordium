@@ -70,6 +70,25 @@ public sealed class BuildSwingTests
     }
 
     [Fact]
+    public void A_data_hinge_at_the_centre_is_never_matched_even_by_a_hinge_read_at_the_centre()
+    {
+        // build review round 2: the match itself refuses a data hinge of 0, whatever is read
+        var r = new RouteReader.BuildSwing("d", 1, 0, 1, 0, null);
+        Assert.False(r.AsTheData || r.FlipHand);
+    }
+
+    [Fact]
+    public void A_swing_not_read_keeps_its_reason_beside_the_datas_own()
+    {
+        var floor = new FakeFloor();
+        var i = floor.OpeningIndex("dA");
+        floor.Openings[i] = floor.Openings[i] with { Swing = new SwingDrawing([]) };
+        var r = Read(floor, (0, 1), (10, 9.75));
+        Assert.Contains("draws no swing", r.Why);
+        Assert.Contains("hinge is at the door's centre", r.Why);
+    }
+
+    [Fact]
     public void A_pairs_hinge_isnt_read_so_its_hand_is_never_flipped()
     {
         var floor = new FakeFloor();

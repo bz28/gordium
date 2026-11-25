@@ -633,7 +633,7 @@ public static class RouteReader
 
         /// <summary>Read as the data says: the side read and equal to the data's, and the hinge too where the data
         /// gives one (a data hinge at the door's centre, 0, is never matched: build review round 1).</summary>
-        public bool AsTheData => Side is { } s && s == DataSide && (DataHinge is null || Hinge == DataHinge);
+        public bool AsTheData => Side is { } s && s == DataSide && (DataHinge is null || DataHinge != 0 && Hinge == DataHinge);
     }
 
     /// <summary>Each door the build gives a swing (by <c>UniqueId</c>: its <c>swing_dir</c> and, for a single door,
@@ -664,10 +664,11 @@ public static class RouteReader
             int? hinge = side is not null && jambs.Count == 1 ? jambs.Single() : null;
             // the data's own side or hinge that says neither way (a swing along the wall, a hinge at the door's centre):
             // kept so the door is never matched on it, and said (build review round 1)
-            if (dataSide == 0)
-                why = "the data's swing runs along its wall, so which side it should swing to isn't told";
-            else if (dataHinge == 0)
-                why = "the data's hinge is at the door's centre along its wall, so which jamb it should hang at isn't told";
+            var dataWhy = dataSide == 0 ? "the data's swing runs along its wall, so which side it should swing to isn't told"
+                : dataHinge == 0 ? "the data's hinge is at the door's centre along its wall, so which jamb it should hang at isn't told"
+                : null;
+            if (dataWhy is not null)
+                why = why is null ? dataWhy : $"{why}; {dataWhy}";      // both said (build review round 2)
             rows.Add(new(rec.UniqueId, side, hinge, dataSide == 0 ? null : dataSide, dataHinge, why));
         }
         return rows;
