@@ -468,7 +468,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     sw.Children.Add(sa);
                     summary.Children.Add(Banner(PanelStatus.Stale, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, sw, bottom: 6));
                     break;
-                case PanelPart.Code when model.Code is { } code && model.Views is null:   // By code says it under the book (change 36)
+                // which code and why: By code says it under the book (change 36), so here only without the two views
+                // or while it isn't decided (needs review: the architect must see that before any result)
+                case PanelPart.Code when model.Code is { } code && (model.Views is null || !code.Decided):
                     // which code and why, the worker's words: plain when decided (never green), needs review when not,
                     // the clock once stale; the law's quoted words on hover; at most two lines (the whole on hover)
                     var codeStatus = code.Status(stale);
@@ -1053,8 +1055,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     {
         if (_list.SelectedItem is not RowItem row)
         {
-            if (!_quiet && _list.SelectedItem is not null)
-                _list.SelectedItem = null;                       // a heading is never the selection
+            // a heading is never the selection; an opener of the two views is (the keyboard is on it), sent to Revit never
+            if (!_quiet && _list.SelectedItem is not null and not (FixGroupItem or FixCardItem or CodeNodeItem))
+                _list.SelectedItem = null;
             return;
         }
         _selectedId = row.Row.Row.Id;                            // kept while a filter or a search hides it
@@ -1078,10 +1081,20 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private void ListKeys(object sender, I.KeyEventArgs e)
     {
         // only a key on a row, or on the list itself: never one meant for a fold after the rows (Space on Details)
-        if (!ResultList.ListTakesKey(onRow: Within<C.ListBoxItem>(e.OriginalSource)?.DataContext is RowItem,
+        var on = Within<C.ListBoxItem>(e.OriginalSource)?.DataContext;
+        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem,
                                      onList: ReferenceEquals(e.OriginalSource, _list)))
             return;
         var ctrl = (I.Keyboard.Modifiers & I.ModifierKeys.Control) != 0;
+        // an opener of the two views: the key opens or folds it, as a click does, and the keyboard stays on it
+        var at = _list.SelectedIndex;
+        if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.KeyToggles(_entries[at], e.Key.ToString()) is { } toggles)
+        {
+            ToggleOpen(toggles);
+            FocusEntry(at);
+            e.Handled = true;
+            return;
+        }
         switch (e.Key)
         {
             case I.Key.Down or I.Key.Up when !ctrl:

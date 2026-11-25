@@ -112,6 +112,59 @@ public sealed class ResultViewListTests
         Assert.Equal(PanelStatus.Review, ResultViewList.StatusOf(FixKind.Answer, [], stale: false));
     }
 
+    /// <summary>A result asked for by two open cards is listed under both, and Previous / Next in its detail still
+    /// visits every result once, in order, never looping back to its first place (review round 1).</summary>
+    [Fact]
+    public void Stepping_through_details_visits_each_result_once_when_two_open_cards_share_one()
+    {
+        var m = Apartment();
+        var cards = m.Views!.Fix.SelectMany(g => g.Cards).ToList();
+        var (a, b) = cards.SelectMany((x, i) => cards.Skip(i + 1).Select(y => (x, y)))
+                          .First(p => p.x.Rows.Any(r => p.y.Rows.Any(q => q.Id == r.Id)));
+        var groups = m.Views.Fix.Where(g => g.Cards.Contains(a) || g.Cards.Contains(b)).Select(ResultViewList.GroupKey);
+        var entries = Layout(m, ResultsViewKind.WhatToFix, [.. groups, ResultViewList.CardKey(a), ResultViewList.CardKey(b)]);
+        var listed = entries.OfType<ListRowEntry>().Select(e => e.Row.Row.Id).ToList();
+        Assert.True(listed.Count > listed.Distinct().Count());                    // a result listed twice
+        var (rows, index) = Details.Among(entries, listed[0]);
+        var seen = new List<string>();
+        for (var at = index; at >= 0 && at < rows.Count; at = Details.Among(entries, rows[at].Row.Id).Index + 1)
+        {
+            Assert.DoesNotContain(rows[at].Row.Id, seen);
+            seen.Add(rows[at].Row.Id);
+        }
+        Assert.Equal(listed.Distinct(), seen);
+    }
+
+    /// <summary>The keyboard reaches and opens what a click does (review round 1): Up/Down stop on each group, card
+    /// and node; Enter, Space or Right opens one, Left folds it; opening along the way reaches every result.</summary>
+    [Fact]
+    public void The_keyboard_reaches_every_opener_and_through_them_every_result()
+    {
+        var m = Apartment();
+        foreach (var view in new[] { ResultsViewKind.WhatToFix, ResultsViewKind.ByCode })
+        {
+            var open = ResultViewList.OpenAtFirst(m.Views!).ToHashSet();
+            var entries = Layout(m, view, open);
+            Assert.NotEqual(-1, ResultList.Next(entries, -1, 1));
+            Assert.All(entries.Where(e => e is FixGroupEntry or FixCardEntry or CodeNodeEntry), e => Assert.True(ResultList.Stops(e)));
+            // open every opener the keyboard lands on, Down by Down, until nothing new opens: every result is then listed
+            for (var round = 0; round < 12; round++)
+            {
+                var more = entries.Select(e => ResultViewList.KeyToggles(e, "Right")).OfType<string>().ToList();
+                if (more.Count == 0)
+                    break;
+                open.UnionWith(more);
+                entries = Layout(m, view, open);
+            }
+            var listed = entries.OfType<ListRowEntry>().Select(e => e.Row.Row.Id).ToHashSet();
+            Assert.All(ResultList.Place(m), r => Assert.Contains(r.Row.Id, listed));
+            var first = entries.First(e => e is FixGroupEntry or CodeNodeEntry);
+            Assert.NotNull(ResultViewList.KeyToggles(first, "Left"));
+            Assert.NotNull(ResultViewList.KeyToggles(first, "Return"));
+            Assert.Null(ResultViewList.KeyToggles(first, "Right"));               // already open
+        }
+    }
+
     /// <summary>The view is remembered per project across sessions (change 17); a file that can't be read, or a word
     /// it doesn't know, starts on What to fix.</summary>
     [Fact]

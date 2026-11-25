@@ -99,7 +99,8 @@ public sealed class WhichCodeTests
     public void The_view_draws_the_line_from_its_words_and_status_only()
     {
         var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
-        var at = view.IndexOf("case PanelPart.Code when model.Code is { } code:", StringComparison.Ordinal);
+        // shown at the top without the two views, or while the code isn't decided (UI polish PR 3: By code says it otherwise)
+        var at = view.IndexOf("case PanelPart.Code when model.Code is { } code && (model.Views is null || !code.Decided):", StringComparison.Ordinal);
         Assert.True(at > 0);
         var block = view[at..view.IndexOf("case PanelPart.State:", at, StringComparison.Ordinal)];
         Assert.Contains("var codeStatus = code.Status(stale);", block, StringComparison.Ordinal);

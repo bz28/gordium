@@ -362,6 +362,19 @@
     </Setter>
   </Style>
 
+  <!-- an opener of the two results views (a group, a card, a node of the law's tree): plain like a heading, but the
+       keyboard stops on it (Up/Down) and opens it (Enter, Space, Right) or folds it (Left); UI polish PR 3 -->
+  <Style x:Key="list.opener" TargetType="ListBoxItem">
+    <Setter Property="Foreground" Value="{DynamicResource text}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <ContentPresenter HorizontalAlignment="Stretch" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
   <Style x:Key="list.heading" TargetType="ListBoxItem">
     <Setter Property="Foreground" Value="{DynamicResource text}" />
     <Setter Property="Focusable" Value="False" />

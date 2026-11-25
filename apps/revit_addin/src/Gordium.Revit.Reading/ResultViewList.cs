@@ -128,6 +128,29 @@ public static class ResultViewList
         return entries;
     }
 
+    /// <summary>The opener a key on <paramref name="e"/> toggles (UI polish PR 3 review round 1: the keyboard opens
+    /// what a click opens): Enter or Space either way, Right only to open, Left only to fold; null for any other key
+    /// or entry (a node with nothing inside opens nothing).</summary>
+    public static string? KeyToggles(ListEntry e, string key)
+    {
+        var (k, open, canOpen) = e switch
+        {
+            FixGroupEntry g => (g.Key, g.Open, true),
+            FixCardEntry c => (c.Key, c.Open, true),
+            CodeNodeEntry n => (n.Key, n.Open, n.CanOpen),
+            _ => ((string?)null, false, false),
+        };
+        if (k is null || !canOpen)
+            return null;
+        return key switch
+        {
+            "Enter" or "Return" or "Space" => k,
+            "Right" when !open => k,
+            "Left" when open => k,
+            _ => null,
+        };
+    }
+
     /// <summary>The keys to open so a row shows in a view (its group and card, or its document, chapter, section
     /// and rule): what "show this result" opens, so no row is ever out of reach.</summary>
     public static IReadOnlyList<string> PathTo(ResultViewsModel model, ResultsViewKind view, string rowId)

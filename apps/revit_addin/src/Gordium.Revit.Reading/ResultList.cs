@@ -346,10 +346,14 @@ public static class ResultList
         if (from < 0 || from >= entries.Count)
             from = step > 0 ? -1 : entries.Count;
         for (var i = from + step; i >= 0 && i < entries.Count; i += step)
-            if (entries[i] is ListRowEntry)
+            if (Stops(entries[i]))
                 return i;
-        return from >= 0 && from < entries.Count && entries[from] is ListRowEntry ? from : -1;
+        return from >= 0 && from < entries.Count && Stops(entries[from]) ? from : -1;
     }
+
+    /// <summary>The entries Up and Down stop on: a row, and an opener of the two results views (a group, a card, a node
+    /// of the law's tree), so a keyboard reaches every result (UI polish PR 3 review round 1).</summary>
+    public static bool Stops(ListEntry e) => e is ListRowEntry or FixGroupEntry or FixCardEntry or CodeNodeEntry;
 
     /// <summary>A row's second line in the list (its first is its glyph, name and section): its verdict's words when its
     /// place's heading doesn't already say them ("not checked", "not applicable", a word the add-in doesn't know: "needs

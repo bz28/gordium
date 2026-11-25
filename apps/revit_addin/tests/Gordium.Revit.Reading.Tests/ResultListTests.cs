@@ -338,8 +338,12 @@ public sealed class ResultListTests
         var view = Addin("ResultsView.cs");
         var keys = view[view.IndexOf("    private void ListKeys(", StringComparison.Ordinal)..];
         Assert.StartsWith("    private void ListKeys(object sender, I.KeyEventArgs e)\n    {\n        // only a key on a row, or on the list itself", keys, StringComparison.Ordinal);
-        Assert.Contains("if (!ResultList.ListTakesKey(onRow: Within<C.ListBoxItem>(e.OriginalSource)?.DataContext is RowItem,\n" +
+        // a row, or an opener of the two results views (UI polish PR 3 review round 1: the keyboard opens what a click does);
+        // never a fold after the rows
+        Assert.Contains("var on = Within<C.ListBoxItem>(e.OriginalSource)?.DataContext;\n" +
+                        "        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem,\n" +
                         "                                     onList: ReferenceEquals(e.OriginalSource, _list)))\n            return;", keys, StringComparison.Ordinal);
+        Assert.DoesNotContain("FoldItem", keys[..keys.IndexOf("return;", StringComparison.Ordinal)], StringComparison.Ordinal);
         // a sub-heading's status is drawn, as its doc says (its place's glyph; the clock once stale)
         var entries = Addin("ResultsList.cs");
         var sub = entries[entries.IndexOf("    private static W.UIElement Sub(SubItem item)", StringComparison.Ordinal)..];
@@ -425,8 +429,12 @@ public sealed class ResultListTests
         var styles = Addin("PanelStyles.xaml");
         // the rows, their order, filters, search, keys and copy are ResultList's (tested here), never the view's own
         Assert.Contains("_placed = ResultList.Place(model);", view, StringComparison.Ordinal);
-        Assert.Contains("var layout = ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),\n" +
-                        "                                           _summary is not null && AllCards.Count > 0, _filter, _search.Text);\n" +
+        // the two results views' entries are ResultViewList's (UI polish PR 3, tested in ResultViewListTests); the plain
+        // list (an answer without them) is ResultList's
+        Assert.Contains("var layout = _content?.Model?.Views is { } views\n" +
+                        "            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale)\n" +
+                        "            : ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),\n" +
+                        "                                    _summary is not null && AllCards.Count > 0, _filter, _search.Text);\n" +
                         "        _entries = _summary is null ? layout : ResultList.WithSummary(layout);", view, StringComparison.Ordinal);
         Assert.Contains("FocusEntry(ResultList.Next(_entries, _list.SelectedIndex, e.Key == I.Key.Down ? 1 : -1));", view, StringComparison.Ordinal);
         Assert.Contains("ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When,", view, StringComparison.Ordinal);

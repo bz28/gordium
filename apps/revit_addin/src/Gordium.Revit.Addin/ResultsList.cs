@@ -94,7 +94,12 @@ internal sealed class FoldItem(IListHost host, string title, Func<W.UIElement> b
 internal sealed class EntryStyles : C.StyleSelector
 {
     public override W.Style SelectStyle(object item, W.DependencyObject container) =>
-        (W.Style)((W.FrameworkElement)container).FindResource(item is RowItem ? "list.row" : "list.heading");
+        (W.Style)((W.FrameworkElement)container).FindResource(item switch
+        {
+            RowItem => "list.row",
+            FixGroupItem or FixCardItem or CodeNodeItem => "list.opener",   // reached and opened by the keyboard too
+            _ => "list.heading",
+        });
 }
 
 /// <summary>
