@@ -57,6 +57,8 @@ public sealed class CorridorFactsTests
                         Marks.EmergencyVoiceAlarm.Description, StringComparison.Ordinal);
         Assert.Contains("NFPA 13R in Group R only", Marks.EmergencyVoiceAlarm.Description, StringComparison.Ordinal);
         Assert.Contains("No: none does, so each corridor's load lies between none and its whole story's", Marks.OtherLevelsReachCorridors.Description, StringComparison.Ordinal);
+        // the door size rules (#202) read it too: No holds a door onto a corridor to the full size (merge review)
+        Assert.Contains("1010.1.1's exceptions for doors inside a dwelling unit", Marks.CorridorsWithinDwellingUnits.Description, StringComparison.Ordinal);
         Assert.Contains("Table 1020.3 asks 72 in", Marks.AmbulatoryCareFacility.Description, StringComparison.Ordinal);
     }
 }

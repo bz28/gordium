@@ -357,7 +357,7 @@ public static class Marks
         "Gordium: Corridors within dwelling units", new("a61d6738-cc50-4a7a-bf34-eb258e6b55d7"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.corridors_within_dwelling_units",
         "Yes when any corridor of the building is inside a dwelling unit or sleeping unit. BCNYS 1020.2 exception 2: \"A fire-resistance rating is not required for corridors contained within a dwelling unit or sleeping unit in an occupancy in Groups I-1 and R.\" (Table 1020.3 also asks only 36 in within a dwelling unit.) " +
-        "Yes: a corridor short of the rating or the width is a person's check (which corridors are inside a unit isn't shown). No: none is, so the table's rating and width apply to every corridor. Blank: those checks need review.");
+        "Yes: a corridor short of the rating or the width is a person's check (which corridors are inside a unit isn't shown). No: none is, so the table's rating and width apply to every corridor, and a door onto a corridor gets none of BCNYS 1010.1.1's exceptions for doors inside a dwelling unit (exceptions 1, 4, 6, 7: its width and height are held to the full size). Blank: those checks need review.");
 
     /// <summary>Whether the building has an emergency voice/alarm communication system per BCNYS 907.5.2.2
     /// (<c>building.emergency_voice_alarm_system</c>; 1005.3.1 and 1005.3.2 exception 1).</summary>
