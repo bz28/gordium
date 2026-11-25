@@ -333,7 +333,11 @@ public sealed class DetailPageTests
         Assert.StartsWith("2025 Building Code", book.Title, StringComparison.Ordinal);
         Assert.Equal(m.Views.Scope, book.Scope);                                 // every such row is under that book
         Assert.Contains("Group I-4", m.Views.Scope, StringComparison.Ordinal);
-        Assert.Equal(ResultViews.ScopeWords, m.Views.Scope);
+        // said of the results that say it, with how many: never of all egress
+        var scopedRows = ResultList.Place(m).Count(p => p.Row.Reason?.Contains(ResultViews.DraftedFor, StringComparison.Ordinal) == true
+                                                  || ResultViews.CardsOf(m.Views, p.Row.Id).Any(c => c.Why?.Contains(ResultViews.DraftedFor, StringComparison.Ordinal) == true));
+        Assert.Equal(ResultViews.ScopeWords(scopedRows), m.Views.Scope);
+        Assert.StartsWith("1 Building Code result is", ResultViews.ScopeWords(1), StringComparison.Ordinal);
         // a house whose rows say nothing of the kind: no note
         Assert.Null(House().Views!.Scope);
     }

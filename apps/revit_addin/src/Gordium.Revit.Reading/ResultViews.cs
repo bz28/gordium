@@ -110,7 +110,7 @@ public static class ResultViews
                                     Headline(rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id))),
                                     FixGroups(rows), CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
         {
-            Scope = scoped.Count == 0 ? null : ScopeWords,
+            Scope = scoped.Count == 0 ? null : ScopeWords(scoped.Count),
         };
     }
 
@@ -130,10 +130,13 @@ public static class ResultViews
                && asks.EnumerateArray().Any(a => Str(a, "why")?.Contains(DraftedFor, StringComparison.Ordinal) == true);
     }
 
-    /// <summary>The scope note in words (strings.md, "What to fix": the rulebook's own note, said for any group).</summary>
-    public const string ScopeWords =
-        "Gordium's Building Code egress rules are drafted for day care (Group I-4) so far. For any other group, most egress " +
-        "results will stay Needs review: check egress by hand.";
+    /// <summary>The scope note in words, for the results that say it: how many, and what to do. Said of those results
+    /// only, never of all egress (the Chapter 10 rules now cover every group; only a few, such as the mixed-occupancy
+    /// story exits, are still drafted for Group I-4 alone).</summary>
+    public static string ScopeWords(int results) =>
+        (results == 1 ? "1 Building Code result is" : $"{results} Building Code results are") +
+        " drafted for day care (Group I-4) only so far. For any other group, " + (results == 1 ? "it stays" : "they stay") +
+        " Needs review: check " + (results == 1 ? "it" : "them") + " by hand.";
 
     // ---- the top: one summary line and the headline sentence --------------------------------------------------
 
@@ -414,7 +417,7 @@ public static class ResultViews
             docs.Add(Node(CodeLevel.Document, null, doc.Document, note, Fold(chapters), []) with
             {
                 NoteTooltip = note is null ? null : Gordium.Revit.Reading.WhichCode.Read(result.Raw)?.Tooltip,
-                Scope = scopedHere == 0 ? null : ScopeWords,
+                Scope = scopedHere == 0 ? null : ScopeWords(scopedHere),
             });
         }
         // a row the contents can't place (no in_code, or a document they don't list): its own document node, last
