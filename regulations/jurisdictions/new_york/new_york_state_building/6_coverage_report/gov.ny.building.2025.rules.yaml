@@ -208,6 +208,23 @@ pieces:
     heading: Remoteness of exit access stairways or ramps › Three or more exit access stairways or ramps
     rules:
     - general.bc_1007_1_3_1_three_or_more_stairways
+  '1010.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_1010_1_doors_general
+  1010.1.1:
+    label: rule
+    heading: General › Size of doors
+    rules:
+    - general.bc_1010_1_1_door_width
+    - general.bc_1010_1_1_door_height
+    - general.bc_1010_1_1_door_capacity
+  1010.1.1.1:
+    label: flag
+    heading: Size of doors › Projections into clear opening
+    rules:
+    - general.bc_1010_1_1_1_projections
   '1016.2':
     label: rule
     heading: Egress through intervening spaces

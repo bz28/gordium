@@ -6,9 +6,11 @@ marked model, with the Maine state law (IBC 2009, NFPA 101 2012) and the buildin
 
 Maine has no place in the repo yet (no zoning for Portland), so check_site can't be asked for it: the law is loaded
 here as egress.laws loads an inherited one, and the answer has the egress section alone (zoning's empty section is
-dropped). The route parts (story, space, corridor, means of egress door) are measured by the route code the eval runs
+dropped). The route parts (story, space, corridor) are measured by the route code the eval runs
 (model_measurement.routes.measure, as make_eval_comparison.py), joined to the interior's own parts: check_site's
-interior measuring doesn't join them yet. Everything else is the worker's.
+interior measuring doesn't join them yet. The routes' door parts (New York's Building Code section group 6a, every
+door with its stated clear opening) are never joined: Maine's means of egress door rules read what its architect
+marks (swing, latch, panic hardware), which no door part measures, so they stay not read, as the answer records. Everything else is the worker's.
 
     python make_odyssey_answer.py <interior description .json> <out .json>
 """
@@ -38,10 +40,13 @@ MAINE = REPO / "regulations/jurisdictions/maine/maine_state"
 PLACE = stand_in(MAINE, "Portland, ME (the eval)", ["maine/maine_state"])
 
 
+ROUTE_KINDS = ("story", "space", "corridor")      # the answer's route parts (never the door parts: above)
+
+
 @contextlib.contextmanager
 def as_the_eval():
     """egress as the eval runs it: the place is PLACE, Maine's law may be checked alone, and the interior's parts are
-    joined by the route parts the eval measures (its story, space, corridor and doors)."""
+    joined by the route parts the eval measures (its story, space and corridor)."""
     from model_measurement.routes import measure as measure_routes
     real = egress.place_of, egress.refuse_state_alone, egress.measure_interior
     inside = real[2]
@@ -49,7 +54,7 @@ def as_the_eval():
     def both(description):
         measured = inside(description)
         for kind, parts in measure_routes(description)["parts"].items():
-            if measured["parts"].get(kind) is None:
+            if kind in ROUTE_KINDS and measured["parts"].get(kind) is None:
                 measured["parts"][kind] = parts
         return measured
     egress.place_of, egress.refuse_state_alone, egress.measure_interior = (lambda folder: PLACE), (lambda j: None), both
