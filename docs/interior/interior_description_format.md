@@ -155,6 +155,7 @@ is in the last column. Coordinates are plan points in `units`, like everything e
 | `sides: [a, b]` | a door | what it joins: two room ids, or a room id and `outside` | the same |
 | `exit_kind` | a door | which exit it is, in IBC 1016.1's own list: `exterior_at_discharge`, `exit_enclosure`, `exit_passageway`, `horizontal_exit`, `exterior_stair_or_ramp` | not an exit (exits are marked, never guessed) |
 | `exit_id` | a door with `exit_kind` | which exit it enters: every door into one stair enclosure carries the same id | the door isn't read (an `exit_id` with no `exit_kind` isn't read either) |
+| `leaves` | a door | how many leaves its opening has: `1`, or `2` for a pair with no mullion between them (BCNYS 1010.1.1 asks one leaf of such a pair for the 32 in clear), as the architect states it (no Revit mark yet) | not measured: the Building Code's door width rule needs review at 32 in or more (a pair isn't ruled out); under 32 in it fails as for any door (one leaf is never wider than the opening) |
 | `passages: [{rooms: [a, b], line}]` | the description | two rooms joined with no wall or door between them (a room separation line), the line where they meet (`[]` for none) | no story's routes are measured |
 | `story_outlines: [{level, outer, inner}]` | the description | the outside faces and the inside faces of each story's exterior walls | the diagonal and the story's area aren't measured |
 | `outline` | an unknown space | where it is | (an unknown space on a story makes its routes need review either way) |

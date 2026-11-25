@@ -13196,3 +13196,535 @@ rules:
     in) aren't measured.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1010_1_doors_general
+  kind: flag
+  topic: means_of_egress
+  title: Doors recognizable as doors, no mirrors, not concealed (BCNYS 1010.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 322
+    lines:
+    - 28
+    - 36
+    quote: 1010.1 General. Doors in the means of egress shall comply with the requirements of Sections 1010.1.1 through 1010.3.4.
+      Exterior exit doors shall also comply with the requirements of Section 1022.2. Gates in the means of egress shall comply
+      with the requirements of Sections 1010.4 and 1010.4.1. Turnstiles in the means of egress shall comply with the requirements
+      of Sections 1010.5 through 1010.5.4. Doors, gates and turnstiles provided for egress purposes in numbers greater than
+      required by this code shall comply with the requirements of this section. Doors in the means of egress shall be readily
+      distinguishable from the adjacent construction and finishes such that the doors are easily recognizable as doors. Mirrors
+      or similar reflecting materials shall not be used on means of egress doors. Means of egress doors shall not be concealed
+      by curtains, drapes, decorations or similar materials.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials
+      and aren''t concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1,
+      and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn''t in the model, so a person''s check.
+      1010.1.1''s clear width and height are rules of their own; 1010.1.2 to 1010.3.4 follow in section group 6.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 6a. 1010.1 applies the rest of Section 1010 to
+    every door in the means of egress, extra doors included ("in numbers greater than required"): the door rules read every
+    door the model gives, required or not.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_1_1_door_width
+  kind: rule
+  topic: means_of_egress
+  title: Door clear width at least 32 in, from one leaf of a pair (BCNYS 1010.1.1)
+  check: moe_door_clear_width >= 32
+  review_when:
+  - when: moe_door_clear_width >= 32 and moe_door_leaves != 1
+    reason: 'Two leaves with no mullion between them (or how many isn''t stated): 1010.1.1 asks one leaf for the 32 in, and
+      the maker''s clear opening is the whole opening''s: a person checks the leaf.'
+  - when: moe_door_clear_width >= 32 and moe_door_clear_width < 41.5 and occupancy_group in ["I-2", "mixed"]
+    reason: 'Group I-2 (stated, or not ruled out in a building of two or more groups): a door used for the movement of beds
+      needs 41 1/2 in, and which doors are isn''t shown: a person checks.'
+  - when: moe_door_clear_width < 32 and occupancy_group in ["I-1", "R-2", "R-3", "R-4", "mixed"] and not (moe_door_exit and
+      not moe_door_exterior) and not (moe_door_to_corridor and not corridors_within_dwelling_units)
+    reason: 'Under 32 in, but exceptions 1 and 6 don''t ask the width of a door in a dwelling or sleeping unit not required
+      to be an Accessible, Type A or Type B unit (Groups R-2 and R-3: a door not part of the required means of egress; Groups
+      I-1, R-2, R-3 and R-4: an interior egress door), and whether this door is one isn''t shown: a person checks.'
+  - when: moe_door_clear_width >= 28 and moe_door_clear_width < 32 and occupancy_group in ["I-3", "mixed"]
+    reason: 'Under 32 in, but exception 2 allows 28 in for a door to a Group I-3 resident sleeping unit not required to be
+      an Accessible unit, and whether this door is one isn''t shown: a person checks.'
+  - when: moe_door_clear_width < 32 and moe_door_to_room_under_10_sf
+    reason: 'Under 32 in, but one side is a room under 10 sq ft, and exception 3 doesn''t limit the width of a door to a storage
+      closet that small: a person checks whether it is one.'
+  - when: moe_door_clear_width >= 31.75 and moe_door_clear_width < 32 and not moe_door_exit and not (moe_door_to_corridor
+      and not corridors_within_dwelling_units)
+    reason: 'Under 32 in, but exception 7 allows 31.75 in for a door for user passage within a Type B unit, and whether this
+      door is one isn''t shown: a person checks.'
+  - when: moe_door_clear_width >= 20 and moe_door_clear_width < 32 and not moe_door_exit and not moe_door_exterior and not
+      moe_door_to_corridor
+    reason: 'Under 32 in, but exceptions 8 and 9 allow less for a door serving a sauna, toilet, shower, dressing, fitting
+      or changing compartment (20 in; a shower compartment''s per the Plumbing Code of New York State''s 421.4.2), and whether
+      this door is one isn''t shown: a person checks.'
+  for_each: means_of_egress_door
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 322
+    lines:
+    - 37
+    - 43
+    quote: 1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof
+      and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging
+      doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where
+      this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves
+      without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving
+      as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches
+      (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).
+  - file: gov.ny.building.2025.pdf
+    page: 322
+    lines:
+    - 44
+    - 50
+    quote: 'Exceptions: 1. In Group R-2 and R-3 dwelling and sleeping units that are not required to be an Accessible unit,
+      Type A unit or Type B unit, the minimum width shall not apply to door openings that are not part of the required means
+      of egress. 2. In Group I-3, door openings to resident sleeping units that are not required to be an Accessible unit
+      shall have a mini- mum clear opening width of 28 inches (711 mm). 3. Door openings to storage closets less than 10 square
+      feet (0.93 m[fn2]) in area shall not be limited by the minimum clear opening width.'
+  - file: gov.ny.building.2025.pdf
+    page: 322
+    lines:
+    - 55
+    - 58
+    quote: 6. In Groups I-1, R-2, R-3 and R-4, in dwelling and sleeping units that are not required to be Accessible, Type
+      A or Type B units, the minimum clear opening widths shall not apply to interior egress doors. 7. Door openings required
+      to be accessible within Type B units intended for user passage shall have a minimum clear opening width of 31.75 inches
+      (806 mm).
+  - file: gov.ny.building.2025.pdf
+    page: 323
+    lines:
+    - 3
+    - 5
+    quote: 8. Doors serving sauna compartments, toilet compartments or dressing, fitting or changing compartments that are
+      not required to be accessible shall have a minimum clear opening width of 20 inches (508 mm). 9. Doors serving shower
+      compartments shall comply with Section 421.4.2 of the Plumbing Code of New York State.
+  examples:
+  - given:
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Office door, 34 in clear, one leaf
+        measures:
+          moe_door_clear_width: 34
+          moe_door_leaves: 1
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: One leaf giving 32 in or more.
+  - given:
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Office door to the corridor, 30 in clear
+        measures:
+          moe_door_clear_width: 30
+          moe_door_leaves: 1
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Under 32 in, on a corridor in Group B: no exception can apply.'
+  - given:
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: A pair, 60 in clear
+        measures:
+          moe_door_clear_width: 60
+          moe_door_leaves: 2
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A pair: one leaf must give 32 in, which the opening''s width doesn''t show.'
+  - given:
+      occupancy_group: I-2
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Patient room door, 36 in clear
+        measures:
+          moe_door_clear_width: 36
+          moe_door_leaves: 1
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group I-2: 41 1/2 in where beds are moved through it, not shown.'
+  - given:
+      occupancy_group: I-2
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Patient room door, 41.5 in clear
+        measures:
+          moe_door_clear_width: 41.5
+          moe_door_leaves: 1
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group I-2 at 41 1/2 in: enough even for beds.'
+  - given:
+      occupancy_group: R-2
+      corridors_within_dwelling_units: false
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Bedroom door in an apartment, 28 in clear
+        measures:
+          moe_door_clear_width: 28
+          moe_door_leaves: 1
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: false
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: A door between two rooms in Group R-2 may be within a dwelling unit, where exceptions 1 and 6 don't ask the width.
+  - given:
+      occupancy_group: R-2
+      corridors_within_dwelling_units: false
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Apartment entry door from the corridor, 30 in clear
+        measures:
+          moe_door_clear_width: 30
+          moe_door_leaves: 1
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'On a corridor the building states is in no dwelling unit: no exception can apply.'
+  - given:
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Closet door, 24 in clear
+        measures:
+          moe_door_clear_width: 24
+          moe_door_leaves: 1
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+          moe_door_to_room_under_10_sf: true
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A room under 10 sq ft on one side: exception 3''s storage closet, if it is one.'
+  - given:
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door between two rooms, 24 in clear
+        measures:
+          moe_door_clear_width: 24
+          moe_door_leaves: 1
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: false
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Between two rooms: a compartment''s door takes 20 in (exception 8).'
+  - given:
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door between two rooms, 19.5 in clear
+        measures:
+          moe_door_clear_width: 19.5
+          moe_door_leaves: 1
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: false
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Under every width an exception allows in Group B.
+  - given:
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door with no stated clear opening
+        measures:
+          moe_door_leaves: 1
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'No maker''s clear opening: the width isn''t measured (never the door''s size), so a person checks.'
+  - given:
+      occupancy_group: B
+    parts:
+      means_of_egress_door: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No door read: a building''s means of egress has doors, so a person checks.'
+  notes: 'Section group 6a (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): every door the model gives,
+    each with its maker''s stated clear opening only (never its size or its leaf: a door with none isn''t measured and needs
+    review). 32 in, from one leaf where two leaves meet with no mullion (the number of leaves is stated; not stated, a pair
+    isn''t ruled out). Group I-2''s 41 1/2 in for bed movement needs review between 32 and 41 1/2 in (which doors move beds
+    isn''t shown), in a building of two or more groups too (1004.4). The exceptions only loosen it, each where the model can''t
+    rule it out and only down to its own width: a door that may be in a dwelling or sleeping unit (1 and 6: Groups R-2, R-3,
+    I-1 and R-4), to a Group I-3 resident sleeping unit (2: 28 in), to a storage closet under 10 sq ft (3), within a Type
+    B unit (7: 31.75 in), serving a compartment (8 and 9: 20 in, a shower compartment''s per the Plumbing Code of New York
+    State 421.4.2). A door is ruled out of a unit only on a corridor the building states is in no dwelling unit, or marked
+    an exit into an enclosure, passageway or horizontal exit; of a compartment, only on a corridor, outside or marked an exit.
+    The capacity for the occupant load is its own flag. Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_1_1_door_height
+  kind: rule
+  topic: means_of_egress
+  title: Door clear height at least 80 in (BCNYS 1010.1.1)
+  check: moe_door_clear_height >= 80
+  review_when:
+  - when: moe_door_clear_height >= 78 and moe_door_clear_height < 80 and not moe_door_exterior and not moe_door_exit and not
+      (moe_door_to_corridor and not corridors_within_dwelling_units)
+    reason: 'Under 80 in, but exception 4 allows 78 in for a door within a dwelling or sleeping unit, and whether this door
+      is one isn''t shown: a person checks.'
+  - when: moe_door_clear_height >= 76 and moe_door_clear_height < 80 and moe_door_exterior
+    reason: 'Under 80 in, but exception 5 allows 76 in for an exterior door of a dwelling or sleeping unit not required to
+      be an Accessible, Type A or Type B unit, other than its required exit door, and whether this door is one isn''t shown:
+      a person checks.'
+  for_each: means_of_egress_door
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 322
+    lines:
+    - 37
+    - 43
+    quote: 1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof
+      and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging
+      doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where
+      this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves
+      without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving
+      as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches
+      (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).
+  - file: gov.ny.building.2025.pdf
+    page: 322
+    lines:
+    - 51
+    - 54
+    quote: 4. Door openings within a dwelling unit or sleeping unit shall have a minimum clear opening height of 78 inches
+      (1981 mm). 5. In dwelling and sleeping units that are not required to be Accessible, Type A or Type B units, exterior
+      door openings other than the required exit door shall have a minimum clear opening height of 76 inches (1930 mm).
+  examples:
+  - given: {}
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door, 80 in clear high
+        measures:
+          moe_door_clear_height: 80
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 80 in.
+  - given:
+      corridors_within_dwelling_units: false
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Corridor door, 79 in clear high
+        measures:
+          moe_door_clear_height: 79
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'On a corridor the building states is in no dwelling unit: 80 in.'
+  - given:
+      corridors_within_dwelling_units: false
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door between two rooms, 78 in clear high
+        measures:
+          moe_door_clear_height: 78
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Between two rooms, maybe within a dwelling or sleeping unit: 78 in there (exception 4).'
+  - given:
+      corridors_within_dwelling_units: false
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door between two rooms, 77.5 in clear high
+        measures:
+          moe_door_clear_height: 77.5
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Under the 78 in exception 4 allows inside a unit.
+  - given: {}
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Exterior door, 76 in clear high
+        measures:
+          moe_door_clear_height: 76
+          moe_door_exit: false
+          moe_door_exterior: true
+          moe_door_to_corridor: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'An exterior door, maybe a dwelling unit''s other than its required exit door: 76 in there (exception 5).'
+  - given: {}
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Exterior door, 75.5 in clear high
+        measures:
+          moe_door_clear_height: 75.5
+          moe_door_exit: false
+          moe_door_exterior: true
+          moe_door_to_corridor: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Under every height an exception allows.
+  - given: {}
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door with no stated clear opening
+        measures:
+          moe_door_exit: false
+          moe_door_exterior: false
+          moe_door_to_corridor: true
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'No maker''s clear opening: the height isn''t measured, so a person checks.'
+  - given: {}
+    parts:
+      means_of_egress_door: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No door read: a person checks.'
+  notes: 'Section group 6a: 80 in for every door the model gives, from its maker''s stated clear height only (none stated:
+    not measured, needs review). The exceptions only loosen it, each only where the model can''t rule it out and only down
+    to its own height: 78 in for a door within a dwelling or sleeping unit (4: ruled out on outside, an exit door, or a corridor
+    the building states is in no unit), 76 in for a unit''s exterior door other than its required exit door (5: any exterior
+    door may be one). Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_1_1_door_capacity
+  kind: flag
+  topic: means_of_egress
+  title: Each door's capacity for its occupant load (BCNYS 1010.1.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 322
+    lines:
+    - 37
+    - 38
+    quote: 1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof
+      and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging
+      doors shall be
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Each door opening''s capacity is enough for the occupants it serves (1005.3.2: 0.2 in each, 0.15 in with a sprinkler
+      system and an emergency voice/alarm system, other than Groups H and I-2): which occupants each door serves isn''t worked
+      out, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 6a. The routes don''t divide a story''s occupants
+    between its doors, and a door at a stair''s discharge serves every story above: its 32 in and 80 in are the rules for
+    each door.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_1_1_1_projections
+  kind: flag
+  topic: means_of_egress
+  title: Nothing projects into a door's clear opening (BCNYS 1010.1.1.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 323
+    lines:
+    - 6
+    - 10
+    quote: '1010.1.1.1 Projections into clear opening. There shall not be projections into the required clear opening width
+      lower than 34 inches (864 mm) above the floor or ground. Projections into the clear opening width between 34 inches
+      (864 mm) and 80 inches (2032 mm) above the floor or ground shall not exceed 4 inches (102 mm). Exception: Door closers,
+      overhead doorstops, frame stops, power door operators, and electromagnetic door locks shall proj- ect into the door
+      opening height not lower than 78 inches (1980 mm) above the floor.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'No projection into a door''s required clear width below 34 in, at most 4 in between 34 and 80 in, and door closers,
+      overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn''t
+      in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 6a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft

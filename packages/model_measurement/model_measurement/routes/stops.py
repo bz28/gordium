@@ -115,6 +115,21 @@ STOPS = {
     "area_unknown_space": "the story has an enclosed space with no room drawn in it ({name}): which area it counts in "
                           "isn't known",
     "area_rooms_overlap": "the rooms {a} and {b} overlap: an area counted twice",
+    # each door's own part (doors.py, section group 6a): its sizes only from the maker's stated clear opening
+    "door_no_stated_clear": "the door {name} has no maker's stated clear opening (its type's clear width and height, "
+                            "confirmed): its size is never taken from the door's own size or its leaf",
+    "door_clear_not_read": "the door {name}'s clear opening isn't read: {reason}",
+    "door_clear_disagree": "the door {name}'s plan gives a clear width of {plan} in and its maker's stated clear "
+                           "opening {stated} in: which is the door's isn't clear",
+    "door_leaves_not_given": "the door {name} doesn't say how many leaves it has (one, or a pair with no mullion), and "
+                             "Gordium has no mark for it in the model yet",
+    "door_leaves_not_read": "the door {name} gives its leaves as {got}, not 1 or 2",
+    "door_exit_kind_not_read": "the door {name} gives its kind of exit as {got}, not one Gordium reads",
+    "door_sides_not_read": "the door {name}'s sides (the two rooms, or a room and outside, it joins) aren't read",
+    "door_side_no_use": "a side of the door {name} is the room {room}, which has no use given: whether it is a "
+                        "corridor isn't known",
+    "door_side_room_not_read": "a side of the door {name} is the room {room}, which isn't read: its floor area isn't "
+                               "known",
 }
 
 
