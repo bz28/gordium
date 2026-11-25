@@ -383,8 +383,8 @@ def apartment() -> dict:
                       "windows": "no rule checked reads a window (the Building Code's escape-window sections aren't "
                                  "brought in)",
                       "apartment interiors": "each apartment is one room: the rules checked read the routes from its "
-                                             "door, and its own rooms would only lengthen the travel figures, which no "
-                                             "rule checked for Group R-2 limits (expected.yaml)"},
+                                             "door, and its own rooms would only lengthen the travel figures, about "
+                                             "54 ft against Table 1017.2's 200 ft for Group R-2 (expected.yaml)"},
         "assumptions": [
             {"what": "The slabs and the roof 12 in thick", "why": "the eval building has none given",
              "effect": "none: no rule reads a slab's thickness"},

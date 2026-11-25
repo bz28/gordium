@@ -23,7 +23,9 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
     assert code_scope.field_of("space_occupant_load") is None
     # the one table: every measure building_measures gives is one field_of names, and the other way round
     given = code_scope.building_measures({"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13",
-                                          "egress_balcony_increase_taken": False, "building_has_atrium": False})
+                                          "egress_balcony_increase_taken": False, "building_has_atrium": False,
+                                          "assembly_fixed_seating": False, "special_egress_spaces": False,
+                                          "merchandise_pads": False})
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -242,8 +244,25 @@ def test_the_open_walls_are_named_by_id(apartment):
 def test_no_engineer_key_in_the_apartments_words(apartment):
     text = json.dumps([[i.get("reason"), i.get("detail", {}).get("line"), [c["words"] for c in i.get("causes") or []]]
                        for i in apartment["view"]["items"]], ensure_ascii=False)
-    for key in ("occupancy group i4", "sprinklered 903", "space occupant load", "other occupancy present"):
-        assert key not in text, key
+    # every building measure, not a fixed few, so the next one added can't slip through (PR #181 review round 8)
+    from design_checker import each_part
+    keys = {*code_scope.DERIVED, "space_occupant_load", "space_is_exit"}
+    for key in sorted(keys):
+        said = key.replace("_", " ")
+        if each_part.MEASURE_NAMES.get(key, "").startswith(said):
+            continue                         # its plain name begins with the same words ("merchandise pads (...)")
+        assert said not in text, key
+    assert "sprinklered 903" not in text
+
+
+def test_every_building_measure_has_a_plain_name_and_every_asked_fact_a_headline():
+    # PR #181 review round 8: a measure added to DERIVED without a name read "sprinklered 903 3 1 3" to the architect
+    from design_checker import each_part
+    assert set(code_scope.DERIVED) <= set(each_part.MEASURE_NAMES), set(code_scope.DERIVED) - set(each_part.MEASURE_NAMES)
+    names = [each_part.MEASURE_NAMES[m] for m in code_scope.DERIVED]
+    assert all("_" not in n for n in names)
+    for field in {code_scope.field_of(m) for m in code_scope.DERIVED}:
+        assert field in ui_data.FIELD_HEADLINES, field
 
 
 def test_every_rule_row_has_its_place_in_its_document(apartment):
@@ -545,8 +564,10 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
             assert code_scope.MARK.get(k) == revit[k], (k, code_scope.MARK.get(k), revit[k])
         else:                        # no host has a mark for it: never one invented here
             assert k not in code_scope.MARK, k
-    # the facts no Revit mark states yet (the BCNYS's balcony and atrium): asked for by name, never by a mark
-    assert keys - set(revit) == {"egress_balcony_increase_taken", "building_has_atrium"}
+    # the facts no Revit mark states yet (the BCNYS's balcony, atrium, fixed seating, special egress spaces and
+    # merchandise pads): asked for by name, never by a mark
+    assert keys - set(revit) == {"egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating",
+                                 "special_egress_spaces", "merchandise_pads"}
 
 
 @pytest.mark.parametrize("key", code_scope.READS)
@@ -567,3 +588,17 @@ def test_a_fact_the_code_choice_cant_use_is_asked_for_by_its_mark(key, how):
     got = code_scope.decide(values, building)
     assert got["code"] is None and got["ask"] != code_scope.BY_HAND, got
     assert key in got["ask_facts"], (got["ask"], got["ask_facts"])
+
+
+def test_every_plain_measure_name_reads_inside_each_asks_headline():
+    # PR #181 review round 9: a name that was a "whether" clause read "Fix the model so the whether the space is
+    # itself an exit can be measured"; each name is a noun phrase, so every headline template reads
+    from design_checker import each_part
+    # story_first_above_or_below_grade's name is main's, read by the Revit add-in's saved answer: a to-do (PR #181)
+    for measure, name in each_part.MEASURE_NAMES.items():
+        if measure == "story_first_above_or_below_grade":
+            continue
+        assert not name.lower().startswith(("whether", "if ", "is ", "the ")), (measure, name)
+    got = ui_data._from_cause({"kind": "fix_model", "key": "model:space:space_is_exit:x", "words": "w",
+                               "measure": "space_is_exit"}, "space")["headline"]
+    assert got == "Fix the model so the exit status (whether the space is itself an exit) can be measured"

@@ -5,8 +5,8 @@ parts' results (.github/workflows/ci.yml).
     python tests/check_shards.py N
 
 `record` re-measures the slow tests the parts are balanced by (tests/test_durations.json; conftest.py): it runs the
-whole suite on every CPU and keeps each test of a second or more (setup + run + teardown), or reads a saved
-`pytest --durations=0 --durations-min=1.0` output instead:
+whole suite on every CPU and keeps each test whose run takes a second or more (at setup + run + teardown), or reads a
+saved `pytest --durations=0 --durations-min=1.0` output instead:
 
     python tests/check_shards.py record [pytest_output.txt]
 """
@@ -43,6 +43,13 @@ def main(n):
     print("every test is in exactly one part")
 
 
+def listed(seconds, run):
+    """The tests to list: each whose run (`call`) takes a second or more, at its whole time (setup + run + teardown,
+    which the balancer counts). A test slow only in setup isn't listed: a module fixture's setup lands on whichever of
+    its tests runs first (conftest.py's guard counts the run alone too)."""
+    return {i: round(s, 1) for i, s in sorted(seconds.items()) if run.get(i, 0) >= 1.0}
+
+
 def record(saved=None):
     if saved:
         text = open(saved, encoding="utf-8").read()
@@ -50,12 +57,14 @@ def record(saved=None):
         text = subprocess.run([sys.executable, "-m", "pytest", "-n", "auto", "-q", "-p", "no:cacheprovider",
                                "--durations=0", "--durations-min=1.0"], capture_output=True, text=True,
                               encoding="utf-8").stdout
-    seconds = {}
-    for m in re.finditer(r"^([\d.]+)s (?:setup|call|teardown) +(\S+)$", text, re.M):
-        seconds[m[2]] = seconds.get(m[2], 0) + float(m[1])
+    seconds, run = {}, {}
+    for m in re.finditer(r"^([\d.]+)s (setup|call|teardown) +(\S+)$", text, re.M):
+        seconds[m[3]] = seconds.get(m[3], 0) + float(m[1])
+        if m[2] == "call":
+            run[m[3]] = run.get(m[3], 0) + float(m[1])
     if not seconds:
         sys.exit("no durations found in the pytest output")
-    out = {i: round(s, 1) for i, s in sorted(seconds.items()) if s >= 1.0}
+    out = listed(seconds, run)
     path = Path(__file__).resolve().parent / "test_durations.json"
     path.write_text(json.dumps(out, indent=0, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     print(f"{len(out)} tests of a second or more, {sum(out.values()):.0f} s in all, written to {path}")
