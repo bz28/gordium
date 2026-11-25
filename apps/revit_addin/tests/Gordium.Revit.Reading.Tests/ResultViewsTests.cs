@@ -36,8 +36,8 @@ public sealed class ResultViewsTests
     public void The_top_says_the_checker_s_counts_and_what_they_mean()
     {
         var m = ResultViews.Build(Apartment());
-        Assert.Equal("98 need review · 8 not checked yet · 1 complies · 1 doesn't apply", m.Summary);
-        Assert.Equal("Nothing fails yet. 98 results can't be decided until the questions below are answered.", m.Headline);
+        Assert.Equal("217 need review · 8 not checked yet · 21 comply · 1 doesn't apply", m.Summary);
+        Assert.Equal("Nothing fails yet. 217 results can't be decided until the questions below are answered.", m.Headline);
         Assert.Equal("1 fails · 2 need review", ResultViews.Summary([Verdict.NeedsReview, Verdict.DoesNotComply, Verdict.NeedsReview]));
         Assert.Equal("1 rule fails. Fix it first; 2 results also need review.",
                      ResultViews.Headline([(Verdict.NeedsReview, "a"), (Verdict.DoesNotComply, "b"), (Verdict.NeedsReview, "c")]));
@@ -75,8 +75,13 @@ public sealed class ResultViewsTests
     {
         var m = ResultViews.Build(Apartment());
         var answer = m.Fix.Single(g => g.Kind == FixKind.Answer);
-        Assert.Equal(["building.sprinkler_system", "building.occupancy_groups"], answer.Cards.Take(2).Select(c => c.Field));
-        Assert.Equal([28, 22], answer.Cards.Take(2).Select(c => c.Rows.Count));
+        // the cards most results wait on come first: the occupancy group, then (NY Building Code egress for every
+        // group, PR #181) the special egress spaces and fixed seating, then the sprinkler system
+        Assert.Equal("building.occupancy_groups", answer.Cards[0].Field);
+        Assert.Equal(150, answer.Cards[0].Rows.Count);
+        Assert.Contains(answer.Cards, c => c.Field == "building.sprinkler_system" && c.Rows.Count == 52);
+        Assert.Contains(answer.Cards, c => c.Field == "building.special_egress_spaces" && c.Rows.Count == 74);
+        Assert.Contains(answer.Cards, c => c.Field == "building.assembly_fixed_seating" && c.Rows.Count == 74);
         Assert.Equal($"Answer {answer.Cards.Count} questions about the project", answer.Title);
         Assert.DoesNotContain(m.Fix.Where(g => g.Kind != FixKind.Answer).SelectMany(g => g.Cards),
                               c => c.Field is { } f && (f.StartsWith("facts.", StringComparison.Ordinal) || f.StartsWith("building.", StringComparison.Ordinal)));
