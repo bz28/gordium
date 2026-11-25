@@ -87,6 +87,11 @@ def ground_of(facts: dict | None, unsafe_flat: str | None = None) -> dict:
         return {"none": Stop("ground_existing").reason}
     points = facts.get("grade_points")
     if points:
+        # spot grades are finished ground only where the host says so: Revit's "Finished spot grades", or ground the
+        # architect states finished (Rhino's "No regrading near the house"); Revit's plain "Spot grades" are Rhino's
+        # Grade layer's, the existing ground
+        if facts.get("grade_from") != "finished_spots" and facts.get("grade_is") != "finished":
+            return {"none": Stop("ground_spots_not_finished").reason}
         return {"spots": [list(p) for p in points]}
     if facts.get("ground_is_flat") is True and _number(facts.get("grade_elevation")):
         if facts.get("ground_assumed") is not None:          # the host's assumption, never the architect's word
@@ -152,7 +157,7 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
                 if not any(floors[r][0] - SAME <= z <= floors[r][1] + SAME for r in order)]
     if len(roomless) > MOST_ROOMLESS:
         return none(Stop("place_too_many_levels", count=len(roomless)).reason)
-    plane, why = _plane(ground, stories)
+    plane, why = _plane(ground, stories, description, reader)
     if why:
         return none(why)
     seen = {lid: [] for lid in order}                    # every reading's facts (or UNPLACED) for each story placed
@@ -244,6 +249,25 @@ def _certainly_basement(f_hi, nxt, flat) -> bool:
     return nxt[1] < flat + 6 * FT - SAME                     # items 1 and 3 (and so item 2) fail
 
 
+def _stated_ground(description, reader) -> list | None:
+    """Every finished ground level the description states at an opening (`ground_outside`: one value or a list) and
+    every area well's floor, in inches; None where one is given but can't be read."""
+    out = []
+    for o in (description or {}).get("openings") or []:
+        if not isinstance(o, dict):
+            continue
+        given = o.get("ground_outside")
+        well = o.get("area_well")
+        try:
+            for v in (given if isinstance(given, list) else [] if given is None else [given]):
+                out.append(reader.length(v, "the ground outside an opening"))
+            if isinstance(well, dict) and well.get("floor_elevation") is not None:
+                out.append(reader.length(well["floor_elevation"], "an area well's floor"))
+        except InteriorStop:
+            return None
+    return out
+
+
 def _floors(description, reader, stories) -> tuple:
     """{level id: (lowest, highest finished floor of its rooms)} for every level with rooms, or why not."""
     floors = {}
@@ -262,14 +286,24 @@ def _floors(description, reader, stories) -> tuple:
     return floors, None
 
 
-def _plane(ground, stories) -> tuple:
+def _plane(ground, stories, description=None, reader=None) -> tuple:
     """The grade plane's range in inches {low, high, point (a known point of finished ground, or None), flat (its
-    elevation on flat ground, else None), reading}, or why not."""
+    elevation on flat ground, else None), reading}, or why not. Flat ground and the finished ground the description
+    states at an opening (`ground_outside`) or an area well's floor must agree: ground stated higher than the flat
+    ground contradicts it (nothing placed); lower (an areaway, a well: open question 4.6) leaves the grade plane and
+    item 2's point unsettled below it, so no basement is proven."""
     ground = ground or {"none": Stop("no_ground").reason}
     if "none" in ground:
         return None, ground["none"]
     if "flat" in ground:
         z = ground["flat"] * FT
+        lows = _stated_ground(description, reader)
+        if lows is None:
+            return None, Stop("ground_openings_not_read").reason
+        if any(g > z + SAME for g in lows):
+            return None, Stop("ground_disagrees", flat=f"{ground['flat']:g} ft", high=f"{max(lows) / FT:g} ft").reason
+        if any(g < z - SAME for g in lows):
+            return {"low": -math.inf, "high": z, "point": None, "flat": None}, None
         return {"low": z, "high": z, "point": z, "flat": z}, None
     spots = [p for p in ground.get("spots") or []
              if isinstance(p, (list, tuple)) and len(p) == 3 and all(_number(v) for v in p)]

@@ -86,7 +86,8 @@ def test_the_lot_facts_ground_reaches_the_routes():
     assumed flat (none, with the place's own reason)."""
     ithaca = {"jurisdiction": PLACE}
     assert check._story_ground({**ithaca, "ground_is_flat": True, "grade_elevation": 2}) == {"flat": 2.0}
-    assert check._story_ground({**ithaca, "grade_points": [[0, 0, 1]]}) == {"spots": [[0, 0, 1]]}
+    assert check._story_ground({**ithaca, "grade_points": [[0, 0, 1]], "grade_from": "finished_spots"}) ==         {"spots": [[0, 0, 1]]}
+    assert "none" in check._story_ground({**ithaca, "grade_points": [[0, 0, 1]]})      # Revit's plain spot grades
     assert "none" in check._story_ground({**ithaca, "grade_is": "existing", "grade_points": [[0, 0, 1]]})
     assumed = check._story_ground({**ithaca, "ground_is_flat": True, "grade_elevation": 0, "ground_assumed": "flat",
                                    "ground_fall": 3})
