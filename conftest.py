@@ -90,9 +90,10 @@ TOO_SLOW = 10.0
 GUARD_PLATFORM = "linux"
 
 
-def guard_fails(platform=sys.platform):
-    """Whether an unlisted slow test fails this machine's part (on Linux only; elsewhere it is only named)."""
-    return platform.startswith(GUARD_PLATFORM)
+def guard_fails(platform=None):
+    """Whether an unlisted slow test fails this machine's part (on Linux only; elsewhere it is only named). The
+    platform is read when asked, never once at import."""
+    return (sys.platform if platform is None else platform).startswith(GUARD_PLATFORM)
 _took = {}
 
 
