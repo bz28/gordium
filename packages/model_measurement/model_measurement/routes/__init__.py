@@ -1,8 +1,9 @@
 """Measuring a story's escape routes from an interior description (docs/decisions/2026-11-20_route_measurement.md):
-the `story`, `space` and `corridor` parts the commercial egress rules read (rule_format/parts.yaml), handed over the
+the `story`, `space`, `corridor` and `means_of_egress_door` parts the commercial egress rules read (rule_format/parts.yaml), handed over the
 way interior/ hands its parts.
 
-    measure(description) -> {"format", "units", "parts": {"story": [...], "space": [...], "corridor": [...]},
+    measure(description) -> {"format", "units", "parts": {"story": [...], "space": [...], "corridor": [...],
+                                                         "means_of_egress_door": [...]},
                              "problems": [...]}
 
 `parts` is what rule_format.parts.rows reads: each part {"id", "name", "within"?, "measures", "not_measured",

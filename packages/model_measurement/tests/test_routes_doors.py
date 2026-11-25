@@ -205,7 +205,7 @@ def test_a_drawn_door_that_disagrees_with_its_stated_opening_leaves_that_size_un
     """Review round 1 of section group 6a (P0): a door stated 34 by 84 in but drawn 70 in high was measured at 84 and
     passed 1010.1.1's 80 in. Every figure given for a size must agree with the maker's within 1/16 in, the drawn door
     as the house reading measures it (its stops, hinge pin and leaf; its threshold and head stop), else that size
-    isn't measured: never the larger, and never anything but the maker's."""
+    isn't measured; where they agree the smallest counts (round 2): never the larger, never a figure off the maker's."""
     tall = {**STATED, "height": 84 / 12}
     got = _parts(_office(stated_clear=tall, **_drawn(34, 70)))["d"]
     assert "moe_door_clear_height" not in got["measures"]

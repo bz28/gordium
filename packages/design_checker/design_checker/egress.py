@@ -295,8 +295,8 @@ OCCUPANT_LOAD_FACTORS = "5_building_code_rules/drafted/records/occupant_load_fac
 
 def _measured(law: dict, interior, readings: dict) -> dict:
     """The parts a law's rules read, measured once per kind of reading: the house code's from the interior measuring
-    (model_measurement.interior), the Building Code's from the routes (model_measurement.routes: story, space and
-    corridor), in the same shape."""
+    (model_measurement.interior), the Building Code's from the routes (model_measurement.routes: story, space,
+    corridor and every door), in the same shape."""
     kind = ROUTES if law.get("scope") == code_scope.BUILDING else "interior"
     if kind not in readings:
         if kind == ROUTES:
