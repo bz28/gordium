@@ -15,7 +15,7 @@ import pytest
 from design_checker import egress, occupant_load
 from design_checker.egress import OCCUPANT_LOAD_FACTORS
 from model_measurement.routes import measure
-from rule_format.rulebook import REPO, load
+from rule_format.rulebook import REPO, Context, load
 
 sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
 sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))       # the route tests' small layouts
@@ -24,6 +24,7 @@ from routes_layouts import description, door, rect, room  # noqa: E402
 
 NY = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
 FACTORS = occupant_load.factors_of(NY / OCCUPANT_LOAD_FACTORS)
+ALLOWED = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/ithaca_city").allowed()   # its uses
 
 
 _MEASURED = {}
@@ -389,7 +390,7 @@ def test_a_walk_over_group_3s_facts_never_passes_where_a_reading_or_a_load_not_w
     def run(desc, how=None):
         monkeypatch.setattr(occupant_load, "apply",
                             applied if how is None else lambda *a: _collapse(applied(*a), how))
-        return egress.check(laws, desc, values, {"use": set()})
+        return egress.check(laws, desc, values, ALLOWED)
 
     assert len(rules) >= 20
     for case in range(WALK_CASES):
@@ -432,18 +433,16 @@ def test_a_storeroom_with_no_function_is_never_a_room_of_no_one():
 
 def test_an_exits_reason_never_says_no_rule_asks_for_its_load(apartment, monkeypatch):
     """Review of group 3, round 2 (P3, 2026-11-24): an exit's reason once said 'the rules for the rooms exits serve
-    ask nothing of it', yet Group I-4's 1006.2.1 reads an exit enclosure's occupant load (it has no space_is_exit
-    guard: group 1's rule): on the apartment taken as I-4, sprinklered, each stair's row needs review and its reason
-    says only what is true."""
+    ask nothing of it', which no rule's own words guarantee: it says only that an exit holds no load, so a rule
+    reading one is a person's check. Group I-4's 1006.2.1 now lets an exit be (group 1's space_is_exit guard): on the
+    apartment taken as I-4, with no sprinkler system, each stair enclosure's row passes, never a fail."""
+    assert "ask nothing" not in occupant_load.IS_EXIT and "person's check" in occupant_load.IS_EXIT
     routes = _routes(apartment)
     monkeypatch.setattr(egress, "measure_routes", lambda interior: copy.deepcopy(routes))
     desc = copy.deepcopy(apartment)
-    desc["building"] = {"occupancy_groups": ["I-4"], "sprinkler_system": "nfpa_13"}
+    desc["building"] = {"occupancy_groups": ["I-4"], "sprinkler_system": "none"}
     got = egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), desc,
-                       {"use": "multiple_family", "dwelling_units": 4}, {"use": set()})
-    stairs = {"L1SW", "L1SE", "L2SW", "L2SE"}
-    rows = [i for i in got["items"] if i["rule"] == "general.bc_1006_2_1_two_exits" and i.get("id") in stairs]
-    if not rows:                                  # items name their part by name, not id
-        rows = [i for i in got["items"] if i["rule"] == "general.bc_1006_2_1_two_exits" and "Stair" in i["reason"]]
-    assert rows and all(i["status"] != "pass" for i in rows)
-    assert all("ask nothing" not in i["reason"] and "it is itself an exit" in i["reason"] for i in rows)
+                       {"use": "multiple_family", "dwelling_units": 4}, ALLOWED)
+    rows = [r for r in got["rows"] if r["rule"] == "general.bc_1006_2_1_two_exits"
+            and r["id"] in {"L1SW", "L1SE", "L2SW", "L2SE"}]
+    assert len(rows) == 4 and {r["outcome"] for r in rows} == {"pass"}, rows

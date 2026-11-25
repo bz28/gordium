@@ -5,3 +5,9 @@ Orangetown house: basement, main and second floor, the attic unfinished), so thr
 them a check can't tell which code governs, and runs both with a needs-review line (test_code_scope.py)."""
 
 HOUSE = {"use": "one_family_detached", "stories_above_grade_plane": 3}
+
+# the place's own allowed values (its uses), as check_site passes them to egress.check: the code choice reads its uses
+# (code_scope.decide: a use the place doesn't list needs review), so a test passes these, never an empty stand-in
+from rule_format.rulebook import REPO as _REPO, Context as _Context  # noqa: E402
+
+ALLOWED = _Context.for_jurisdiction(_REPO / "regulations/jurisdictions/new_york/ithaca_city").allowed()

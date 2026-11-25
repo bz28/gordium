@@ -313,7 +313,7 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
         mine = {m: v for m, v in (part.get("measures") or {}).items() if m in own}
         known = {**values, **mine}
         result, unknown, reason = part_outcome(rule, known, allowed), None, None
-        combos = reading_combinations(rule, part, own, mine)
+        combos = _combinations(rule, part, own, mine)
         if combos is not None:                   # measures given as named readings: every combination decides
             result, reason = _under_readings(rule, known, allowed, combos)
         elif result == "needs_review" and (unknown := fails_whatever(rule, known, allowed)):
@@ -379,8 +379,17 @@ def reading_combinations(rule: dict, part: dict, own: set, mine: dict):
     value for (`readings`: {measure: [{"value", "named": {question: answer}}]}, the shape the checker's zoning
     readings take: design_checker/check.py readings_of). Readings are combined question by question, as there: one
     answer to an open question holds for the whole part, so a measure takes, under each answer, the value of its
-    reading named so. [(answer words, {measure: value}), ...]; None when the rule reads no such measure (nothing
-    changes for it); [] when the readings can't be read or are too many (the row needs review)."""
+    reading named so. [(answer key, {measure: value}), ...], the key "question = answer, ..." (an engineer's key,
+    never shown: an architect reads reading_words); None when the rule reads no such measure (nothing changes for
+    it); [] when the readings can't be read or are too many (the row needs review)."""
+    got = _combinations(rule, part, own, mine)
+    if not got:
+        return got
+    return [(", ".join(f"{t} = {v}" for t, v in answer.items()), combo) for answer, combo in got]
+
+
+def _combinations(rule: dict, part: dict, own: set, mine: dict):
+    """reading_combinations with each combination's answers as {question: answer}."""
     given = part.get("readings")
     if not isinstance(given, dict):
         return None
@@ -411,25 +420,95 @@ def reading_combinations(rule: dict, part: dict, own: set, mine: dict):
             if len(fits) != 1:
                 return []                        # no reading, or two values, under one answer: not worked out
             combo[n] = fits.pop()
-        out.append((", ".join(f"{t} = {v}" for t, v in answer.items()), combo))
+        out.append((answer, combo))
         if len(out) > MAX_READING_COMBINATIONS:
             return []
     return out
 
 
+# The open questions a part's named readings answer (the tags the route measuring names them by:
+# model_measurement/model_measurement/routes/dead_ends.py QUESTION, routes/areas.py STORY_AREA_QUESTION and
+# ACCESSORY_AREA_QUESTION), in an architect's words: the question as its own list names it (the open questions of
+# docs/decisions/2026-11-20_route_measurement.md, by number) and what each answer means. A test checks every tag the
+# measuring gives is here; a tag that isn't is still said in words, never as "tag = answer".
+READING_QUESTIONS = {
+    "door_ends_dead_end": {
+        "question": "whether a door into a room with another way out ends a dead end", "number": 7,
+        "answers": {"with_door": "the door ends the dead end", "without_door": "the door doesn't end it"}},
+    "story_area_face": {
+        "question": "whether a story's area is measured inside its exterior walls or to their outer faces",
+        "number": 3,
+        "answers": {"inside": "the story's area is measured inside its walls",
+                    "outer_faces": "the story's area is measured to the walls' outer faces"}},
+    "accessory_area_face": {
+        "question": "whether a storage room's area is measured inside its walls or to their outer faces",
+        "number": 3,
+        "answers": {"inside": "the storage rooms' area is measured inside their walls",
+                    "outer_faces": "the storage rooms' area is measured to the walls' outer faces"}},
+}
+# what follows the open questions in every reason _under_readings gives for a mixed result (is_reading_words)
+_UNDER = (": under one reading it complies (", ": under either reading it doesn't comply", ": under every reading it "
+          "doesn't comply", ": it complies if ")
+
+
+def _plain(name: str) -> str:
+    return name.replace("_", " ")
+
+
+def _answer_words(answer: dict) -> str:
+    """One combination of answers in words: "the door ends the dead end" (and, for two questions, both)."""
+    said = []
+    for tag, value in answer.items():
+        known = READING_QUESTIONS.get(tag, {}).get("answers", {})
+        said.append(known.get(value) or f"the answer to “{_plain(tag)}” is “{_plain(value)}”")
+    return " and ".join(said)
+
+
+def question_words(tags) -> str:
+    """The open questions named by these tags, in words with their numbers: "whether a door into a room with another
+    way out ends a dead end is an open question (question 7)"."""
+    tags = list(dict.fromkeys(tags))
+    asked = [READING_QUESTIONS.get(t, {}).get("question") or f"“{_plain(t)}”" for t in tags]
+    numbers = list(dict.fromkeys(str(READING_QUESTIONS[t]["number"]) for t in tags if t in READING_QUESTIONS))
+    which = " and ".join(asked) + (" is an open question" if len(asked) == 1 else " are open questions")
+    if numbers:
+        which += f" (question{'s' if len(numbers) > 1 else ''} {' and '.join(numbers)})"
+    return which
+
+
+def reading_words(answers: list[dict], good: list[dict], bad: list[dict]) -> str:
+    """A mixed result under the readings, in words: which open question it turns on and what it gives under each
+    answer, never a tag or "tag = answer"."""
+    tags = [t for a in answers for t in a]
+    first = question_words(tags)
+    if len(answers) == 2 and len(good) == 1 and len(bad) == 1:
+        return (f"{first}: under one reading it complies ({_answer_words(good[0])}), under the other it doesn't "
+                f"comply or can't be told ({_answer_words(bad[0])})")
+    if not good:
+        return (f"{first}: under {'either reading' if len(answers) == 2 else 'every reading'} it doesn't comply or "
+                f"can't be told ({'; '.join(map(_answer_words, bad))})")
+    return (f"{first}: it complies if {' or if '.join(map(_answer_words, good))}; it doesn't comply or can't be "
+            f"told if {' or if '.join(map(_answer_words, bad))}")
+
+
+def is_reading_words(text) -> bool:
+    """Whether a row's reason is reading_words' (a mixed result under an open question's readings)."""
+    return isinstance(text, str) and "open question" in text and any(u in text for u in _UNDER)
+
+
 def _under_readings(rule: dict, known: dict, allowed: dict, combos: list) -> tuple:
     """The rule under every combination of readings: pass only if it passes under every one, fail only if it fails
-    under every one, else needs review naming the readings it fails (or can't be told) under."""
+    under every one, else needs review naming, in words, the open question and the readings it fails (or can't be
+    told) under."""
     if not combos:
         return "needs_review", "its measures' readings can't be combined"
-    got = {words: part_outcome(rule, {**known, **values}, allowed) for words, values in combos}
-    results = set(got.values())
+    got = [(answer, part_outcome(rule, {**known, **values}, allowed)) for answer, values in combos]
+    results = {r for _, r in got}
     if results in ({"pass"}, {"fail"}, {"not_applicable"}):
         return results.pop(), None
-    bad = [w for w, r in got.items() if r != "pass"]
-    good = [w for w, r in got.items() if r == "pass"]
-    return "needs_review", (f"does not comply (or can't be told) if the open question is answered {' or '.join(bad)}; "
-                            f"complies if {' or '.join(good) or 'none'}")
+    bad = [a for a, r in got if r != "pass"]
+    good = [a for a, r in got if r == "pass"]
+    return "needs_review", reading_words([a for a, _ in got], good, bad)
 
 
 def building_values(values: dict) -> dict:

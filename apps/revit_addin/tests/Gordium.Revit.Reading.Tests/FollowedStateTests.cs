@@ -137,7 +137,7 @@ public sealed class FollowedStateTests
         state.Shown(Complying("A"));
         state.Shown(new FollowedCheck("A", At, null, Missing: 2));
         Assert.Equal(BadgeKind.NotChecked, state.Badge.Kind);
-        Assert.Contains("2 facts to set first", state.Badge.ToolTip, StringComparison.Ordinal);
+        Assert.Contains("2 things to set first", state.Badge.ToolTip, StringComparison.Ordinal);
         state.Shown(Complying("A"));
         state.Shown(null);
         Assert.Null(state.Check);

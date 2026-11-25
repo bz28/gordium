@@ -19,7 +19,7 @@ import math
 from pathlib import Path
 
 from model_measurement.read_3dm import LAYERS
-from model_measurement.stops import STOPS, TOOL_WORDS, blanks, code_of, stop
+from model_measurement.stops import STOPS, TOOL_WORDS, blanks, code_of, stop, words_of
 
 SCHEMA = "gordium.site/1"
 UNITS = "ft"
@@ -300,7 +300,7 @@ def validate(doc) -> None:
 # ---- converting ----------------------------------------------------------------------------------------------
 
 def _words(problem: dict) -> str:
-    return stop(problem["code"], **problem["args"])
+    return words_of(problem)            # THE one way a problem becomes words (stops.py)
 
 
 def _coded(words, where: str, reasons: list):

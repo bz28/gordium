@@ -54,6 +54,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private readonly Action _projectInformation;
     private readonly Action _setUp;
     private readonly C.TextBlock _sub = Small("");
+    private readonly C.TextBlock _title;
     private readonly C.Button _again;
     private readonly C.TextBlock _status = Small("");
     private readonly C.Border _bodyHost = new();
@@ -127,8 +128,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var titleLine = new C.DockPanel();
         C.DockPanel.SetDock(_again, C.Dock.Right);
         titleLine.Children.Add(_again);
-        titleLine.Children.Add(Typed(new C.TextBlock { Text = RibbonPlan.PaneTitle, VerticalAlignment = W.VerticalAlignment.Center,
-                                                       TextTrimming = W.TextTrimming.CharacterEllipsis }, "type.title"));
+        // the project's name (UI polish change 47: the dock tab already says Gordium), "Gordium" until one is known
+        _title = Typed(new C.TextBlock { Text = PaneWords.HeaderTitle(null), VerticalAlignment = W.VerticalAlignment.Center,
+                                         TextTrimming = W.TextTrimming.CharacterEllipsis }, "type.state");
+        titleLine.Children.Add(_title);
         head.Children.Add(titleLine);
         head.Children.Add(_sub);
         _status.Visibility = W.Visibility.Collapsed;
@@ -202,25 +205,80 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             return;
         var card = new C.StackPanel { Tag = WelcomeTag };
         card.Children.Add(Typed(new C.TextBlock { Text = PaneWords.WelcomeTitle, TextWrapping = W.TextWrapping.Wrap }, "type.title"));
-        foreach (var (lead, words) in PaneWords.WelcomeLines)
+        card.Children.Add(Small(PaneWords.WelcomeIntro, top: 4));
+        foreach (var (icon, words) in PaneWords.WelcomeLines)
         {
-            var t = Typed(new C.TextBlock { TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 6, 0, 0) }, Body);
-            t.Inlines.Add(new W.Documents.Run(lead) { FontWeight = W.FontWeights.SemiBold });
-            t.Inlines.Add(new W.Documents.Run(words));
-            card.Children.Add(t);
+            var line = new C.DockPanel { Margin = new W.Thickness(0, 10, 0, 0) };
+            var mark = PanelLook.Icon(icon, 14);
+            mark.Margin = new W.Thickness(0, 1, 8, 0);
+            mark.VerticalAlignment = W.VerticalAlignment.Top;
+            C.DockPanel.SetDock(mark, C.Dock.Left);
+            line.Children.Add(mark);
+            line.Children.Add(Typed(new C.TextBlock { Text = words, TextWrapping = W.TextWrapping.Wrap }, Body));
+            card.Children.Add(line);
         }
         if (checking is null)
         {
             var go = CauseCardsView.Primary("Check project", () => _checkAgain());
             go.HorizontalAlignment = W.HorizontalAlignment.Left;
-            go.Margin = new W.Thickness(0, 10, 0, 0);
+            go.Margin = new W.Thickness(0, 14, 0, 0);
             card.Children.Add(go);
-            card.Children.Add(Small("Also on the Gordium tab of the ribbon.", top: 4));
+            card.Children.Add(Small(PaneWords.WelcomeAlso, top: 6));
         }
         var frame = new C.Border { Child = card, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4), Padding = new W.Thickness(12, 10, 12, 12) };
         frame.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
         frame.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
         _missing.Children.Add(frame);
+    }
+
+    /// <summary>While Revit waits for the street edge's click (UI polish change 9): the body is a card saying what to
+    /// click, Esc and Cancel; the form (or whatever was shown) comes back as it was when the pick ends.</summary>
+    internal void Picking(bool on, Action cancel)
+    {
+        if (on)
+        {
+            if (_beforePick is not null)
+                return;
+            _beforePick = _bodyHost.Child ?? new C.Border();
+            _bodyHost.Child = PickCard(cancel);
+            return;
+        }
+        if (_beforePick is null)
+            return;
+        _bodyHost.Child = _beforePick;
+        _beforePick = null;
+    }
+
+    private W.UIElement? _beforePick;
+
+    /// <summary>The picking card's tag (the renders find it by it).</summary>
+    internal const string PickTag = "pane.picking";
+
+    private W.UIElement PickCard(Action cancel)
+    {
+        var words = new C.StackPanel();
+        words.Children.Add(Typed(new C.TextBlock { Text = PaneWords.PickTitle, TextWrapping = W.TextWrapping.Wrap }, "type.title"));
+        words.Children.Add(Small(PaneWords.PickWords, top: 4));
+        words.Children.Add(Small(PaneWords.PickEsc, top: 6));
+        var stop = CauseCardsView.Link("Cancel", cancel);
+        stop.HorizontalAlignment = W.HorizontalAlignment.Left;
+        stop.Margin = new W.Thickness(0, 8, 0, 0);
+        words.Children.Add(stop);
+        var line = new C.DockPanel();
+        var pin = PanelLook.Icon(PaneIcon.Pin, 16);
+        pin.Margin = new W.Thickness(0, 1, 8, 0);
+        pin.VerticalAlignment = W.VerticalAlignment.Top;
+        C.DockPanel.SetDock(pin, C.Dock.Left);
+        line.Children.Add(pin);
+        line.Children.Add(words);
+        var card = new C.Border { Child = line, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(6), Padding = new W.Thickness(12, 10, 12, 12), Tag = PickTag };
+        card.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSelected);
+        card.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Accent);
+        var page = new C.StackPanel { Margin = new W.Thickness(12, 8, 12, 12) };
+        page.Children.Add(card);
+        if (_setupPage is not null && ReferenceEquals(_beforePick, _setupPage))
+            page.Children.Add(Small(PaneWords.PickFormStays, top: 10));
+        return page;
     }
 
     /// <summary>The welcome card's tag (the tests find it by it).</summary>
@@ -290,7 +348,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _again.Visibility = W.Visibility.Visible;
         _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
         _everShown |= content.Model is not null;
-        _sub.Text = $"Checked {content.When:HH:mm} · {content.Project}";
+        _title.Text = PaneWords.HeaderTitle(content.Project);
+        _sub.Text = $"Checked {content.When:HH:mm}";
         Say(_checkAgainState.Status(ClearPrefills.PanelStatus(content.MarksAdded, content.ClearWords, stale: content.Model?.Stale is not null)));
         _summary = null;
         _missing.Children.Clear();
@@ -494,11 +553,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var b = new C.Border
         {
             Child = p, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),
-            Padding = new W.Thickness(8, 5, 8, 6), Margin = new W.Thickness(0, 6, 0, 0), ToolTip = change.Words,
+            Padding = new W.Thickness(8, 5, 8, 6), Margin = new W.Thickness(0, 6, 0, 0), ToolTip = PaneWords.ChangesAll(change),
         };
         b.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
         b.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
-        W.Automation.AutomationProperties.SetName(b, change.Words);
+        W.Automation.AutomationProperties.SetName(b, PaneWords.ChangesAll(change));
         return b;
     }
 
@@ -570,6 +629,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     internal void Failed(string words)
     {
         _failed = true;
+        _title.Text = PaneWords.HeaderTitle(null);              // nothing of a project shown: never the last one's name
         _content = null;
         _detailId = null;
         _placed = [];
@@ -785,7 +845,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _summary = null;
         _again.Visibility = PaneWords.HeaderCheckAgain(PaneShows.Setup, _everShown) ? W.Visibility.Visible : W.Visibility.Collapsed;
         _again.IsEnabled = _checkAgainState.Enabled;
-        _sub.Text = _everShown ? $"Setup · {project}" : $"Before the first check · {project}";
+        _title.Text = PaneWords.HeaderTitle(project);
+        _sub.Text = _everShown ? "Setup" : PaneWords.NotCheckedYet;
         _checkingProject = project;
         Say(_checkAgainState.Status(""));
         _setupScroll = new C.ScrollViewer

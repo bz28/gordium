@@ -49,7 +49,7 @@ def house(*claims, **lists):
 
 
 def run(found, desc):
-    return egress.check(found, desc, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()})
+    return egress.check(found, desc, {"dwelling_units": 1, **egress_house.HOUSE}, egress_house.ALLOWED)
 
 
 def claim_items(got):

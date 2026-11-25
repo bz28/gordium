@@ -13,6 +13,7 @@ interior measuring doesn't join them yet. Everything else is the worker's.
     python make_odyssey_answer.py <interior description .json> <out .json>
 """
 
+import contextlib
 import json
 import sys
 from pathlib import Path
@@ -23,6 +24,7 @@ for p in ("packages/design_checker", "packages/model_measurement", "packages/rul
     sys.path.insert(0, str(REPO / p))
 
 from design_checker import egress, protocol  # noqa: E402
+from rule_format.place import stand_in  # noqa: E402
 from rule_format.rulebook import Context  # noqa: E402
 
 import make_eval_comparison as evalc  # noqa: E402
@@ -30,17 +32,16 @@ import make_eval_comparison as evalc  # noqa: E402
 MAINE = REPO / "regulations/jurisdictions/maine/maine_state"
 
 
-class _Maine:
-    """A place that inherits only Maine's state law (egress.laws reads a place's name and inherited rulebooks)."""
-    name = "Portland, ME (the eval)"
-
-    @staticmethod
-    def inherited_rulebooks():
-        from rule_format.place import building_code_rulebook
-        return ((MAINE, building_code_rulebook(MAINE)),)
+# a place that inherits only Maine's state law: the real Place (rule_format.place.stand_in). egress.laws reads its
+# name, folder and inherited law, which a stand-in has; settings it lacks (time zone, boundary...) raise, and
+# test_panel_data's un-skipped test of this script catches a new read in CI
+PLACE = stand_in(MAINE, "Portland, ME (the eval)", ["maine/maine_state"])
 
 
-def answer(interior: dict) -> dict:
+@contextlib.contextmanager
+def as_the_eval():
+    """egress as the eval runs it: the place is PLACE, Maine's law may be checked alone, and the interior's parts are
+    joined by the route parts the eval measures (its story, space, corridor and doors)."""
     from model_measurement.routes import measure as measure_routes
     real = egress.place_of, egress.refuse_state_alone, egress.measure_interior
     inside = real[2]
@@ -51,12 +52,17 @@ def answer(interior: dict) -> dict:
             if measured["parts"].get(kind) is None:
                 measured["parts"][kind] = parts
         return measured
-    egress.place_of, egress.refuse_state_alone, egress.measure_interior = (lambda folder: _Maine), (lambda j: None), both
+    egress.place_of, egress.refuse_state_alone, egress.measure_interior = (lambda folder: PLACE), (lambda j: None), both
     try:
-        found = egress.laws(MAINE)
-        got = egress.check(found, interior, dict(evalc.SHEET_VALUES), Context.for_jurisdiction(MAINE).allowed())
+        yield
     finally:
         egress.place_of, egress.refuse_state_alone, egress.measure_interior = real
+
+
+def answer(interior: dict) -> dict:
+    with as_the_eval():
+        found = egress.laws(MAINE)
+        got = egress.check(found, interior, dict(evalc.SHEET_VALUES), Context.for_jurisdiction(MAINE).allowed())
     view = {"items": []}
     egress.add_to_view(view, got, found["place"])
     view["sections"] = [s for s in view["sections"] if s["key"] != "zoning"]

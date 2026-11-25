@@ -65,7 +65,7 @@ def test_the_line_is_on_a_checked_house_and_lists_every_section_not_checked_yet(
         assert f"({section})" in line["reason"]
     assert sorted(line["detail"]["citation"].split(", ")) == sorted(uncovered())
     assert line["reason"].startswith("Gordium doesn't check these sections of the NY State Residential Code 2025 yet")
-    assert "new_york_state/6_coverage_report/gov.ny.residential.2025.rules.yaml" in line["reason"]
+    assert "6_coverage_report" not in line["reason"] and line["reason"].endswith(".")      # no file path: plain words
     assert result["sections"][1]["state"] != present.COMPLIES
 
 
@@ -104,7 +104,7 @@ def complying_law():
     """Only the egress rules whose every row on the ranch complies: every checked egress rule complies."""
     found = copy.deepcopy(egress.laws(ITHACA))
     law = found["laws"][0]
-    got = egress.check(found, ranch(), dict(egress_house.HOUSE), {"use": set()})
+    got = egress.check(found, ranch(), dict(egress_house.HOUSE), egress_house.ALLOWED)
     bad = {i["rule"] for i in got["items"] if i["status"] != present.COMPLIES}
     law["rules"] = [r for r in law["rules"] if r["id"] not in bad and r["id"] in got["results"]
                     and got["results"][r["id"]] == "pass"]
@@ -116,11 +116,11 @@ def test_egress_never_complies_while_sections_are_not_checked_even_when_every_ch
     found = complying_law()
     everything = copy.deepcopy(found)
     everything["laws"][0]["not_checked_yet"] = []               # the day every section has rules
-    got = egress.check(everything, ranch(), dict(egress_house.HOUSE), {"use": set()})
+    got = egress.check(everything, ranch(), dict(egress_house.HOUSE), egress_house.ALLOWED)
     assert {i["status"] for i in got["items"]} == {present.COMPLIES}
     assert got["sections"][0]["state"] == present.COMPLIES      # the case is real: without the list, it complies
 
-    got = egress.check(found, ranch(), dict(egress_house.HOUSE), {"use": set()})
+    got = egress.check(found, ranch(), dict(egress_house.HOUSE), egress_house.ALLOWED)
     rules_rows = [i for i in got["items"] if i["rule"]]
     assert rules_rows and {i["status"] for i in rules_rows} == {present.COMPLIES}    # every checked rule complies
     assert [i["id"] for i in got["items"] if i["status"] != present.COMPLIES] == [NOT_YET]

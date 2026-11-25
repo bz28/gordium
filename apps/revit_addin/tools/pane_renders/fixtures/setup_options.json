@@ -1,5 +1,17 @@
 {
  "zones": [
+  "B-1a",
+  "B-1b",
+  "B-2a",
+  "B-2d",
+  "B-4",
+  "B-5",
+  "CBD-100",
+  "CBD-120",
+  "CBD-140",
+  "CBD-50",
+  "CBD-60",
+  "CBD-85",
   "R-1a",
   "R-1b",
   "R-2a",
@@ -30,9 +42,2168 @@
   "neighborhood_commercial_facility": "Neighborhood commercial facility",
   "nursing_home": "Nursing, convalescent or rest home",
   "hospital_or_sanitarium": "Hospital or sanitarium",
-  "bed_and_breakfast_inn": "Bed-and-breakfast inn"
+  "bed_and_breakfast_inn": "Bed-and-breakfast inn",
+  "adult_day_care_facility": "Adult day care facility",
+  "funeral_home": "Funeral home or mortuary",
+  "business_or_professional_office": "Business or professional office",
+  "bank": "Bank or monetary institution",
+  "office_of_government": "Office of government",
+  "retail_store_or_service_commercial": "Retail store or service commercial facility",
+  "restaurant_or_tavern": "Restaurant, fast food establishment, tavern",
+  "club_or_lodge": "Club, lodge, or private social center",
+  "light_hand_fabrication": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+  "place_of_public_assembly": "Theater, bowling alley, auditorium, or other similar place of public assembly",
+  "hotel_motel": "Hotel, motel",
+  "urban_beverage_producer": "Urban beverage producer",
+  "parking_garage": "Parking garage",
+  "gasoline_station": "Gasoline station",
+  "motor_vehicle_sales_and_service": "Motor vehicle sales and service",
+  "service_shop": "Printing, heating, welding, air conditioning, plumbing, or similar shop",
+  "redemption_center": "Redemption center"
  },
  "district_uses": {
+  "B-1a": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in B-1a: Marked SP for B-1A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in B-1a: Marked SP for B-1A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in B-1a: Marked SP for B-1A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in B-1a: Marked SP for B-1A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in B-1a: Marked SP for B-1A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "B-1b": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in B-1b: Marked SP for B-1B on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in B-1b: Marked SP for B-1B on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in B-1b: Marked SP for B-1B on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in B-1b: Marked SP for B-1B on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in B-1b: Marked SP for B-1B on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "B-2a": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "retail_store_or_service_commercial",
+    "name": "Retail store or service commercial facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "restaurant_or_tavern",
+    "name": "Restaurant, fast food establishment, tavern",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "club_or_lodge",
+    "name": "Club, lodge, or private social center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "light_hand_fabrication",
+    "name": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "place_of_public_assembly",
+    "name": "Theater, bowling alley, auditorium, or other similar place of public assembly",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "hotel_motel",
+    "name": "Hotel, motel",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "urban_beverage_producer",
+    "name": "Urban beverage producer",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in B-2a: Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in B-2a: Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in B-2a: Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in B-2a: Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in B-2a: Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "redemption_center",
+    "name": "Redemption center",
+    "permitted": false,
+    "note": "Not permitted by right in B-2a: Marked SP for B-2A on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "B-2d": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "retail_store_or_service_commercial",
+    "name": "Retail store or service commercial facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "light_hand_fabrication",
+    "name": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in B-2d: Marked SP for B-2D on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in B-2d: Marked SP for B-2D on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in B-2d: Marked SP for B-2D on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in B-2d: Marked SP for B-2D on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in B-2d: Marked SP for B-2D on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "redemption_center",
+    "name": "Redemption center",
+    "permitted": false,
+    "note": "Not permitted by right in B-2d: Marked SP for B-2D on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "B-4": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "retail_store_or_service_commercial",
+    "name": "Retail store or service commercial facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "restaurant_or_tavern",
+    "name": "Restaurant, fast food establishment, tavern",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "club_or_lodge",
+    "name": "Club, lodge, or private social center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "light_hand_fabrication",
+    "name": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "place_of_public_assembly",
+    "name": "Theater, bowling alley, auditorium, or other similar place of public assembly",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "hotel_motel",
+    "name": "Hotel, motel",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "urban_beverage_producer",
+    "name": "Urban beverage producer",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "parking_garage",
+    "name": "Parking garage",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "gasoline_station",
+    "name": "Gasoline station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "motor_vehicle_sales_and_service",
+    "name": "Motor vehicle sales and service",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "service_shop",
+    "name": "Printing, heating, welding, air conditioning, plumbing, or similar shop",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in B-4: Marked SP for B-4 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in B-4: Marked SP for B-4 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in B-4: Marked SP for B-4 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in B-4: Marked SP for B-4 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in B-4: Marked SP for B-4 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "redemption_center",
+    "name": "Redemption center",
+    "permitted": false,
+    "note": "Not permitted by right in B-4: Marked SP for B-4 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "B-5": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "retail_store_or_service_commercial",
+    "name": "Retail store or service commercial facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "restaurant_or_tavern",
+    "name": "Restaurant, fast food establishment, tavern",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "club_or_lodge",
+    "name": "Club, lodge, or private social center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "light_hand_fabrication",
+    "name": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "place_of_public_assembly",
+    "name": "Theater, bowling alley, auditorium, or other similar place of public assembly",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "hotel_motel",
+    "name": "Hotel, motel",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "urban_beverage_producer",
+    "name": "Urban beverage producer",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "parking_garage",
+    "name": "Parking garage",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "gasoline_station",
+    "name": "Gasoline station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "motor_vehicle_sales_and_service",
+    "name": "Motor vehicle sales and service",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "service_shop",
+    "name": "Printing, heating, welding, air conditioning, plumbing, or similar shop",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in B-5: Marked SP for B-5 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in B-5: Marked SP for B-5 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in B-5: Marked SP for B-5 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in B-5: Marked SP for B-5 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in B-5: Marked SP for B-5 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "redemption_center",
+    "name": "Redemption center",
+    "permitted": false,
+    "note": "Not permitted by right in B-5: Marked SP for B-5 on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "CBD-100": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "retail_store_or_service_commercial",
+    "name": "Retail store or service commercial facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "restaurant_or_tavern",
+    "name": "Restaurant, fast food establishment, tavern",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "club_or_lodge",
+    "name": "Club, lodge, or private social center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "light_hand_fabrication",
+    "name": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "place_of_public_assembly",
+    "name": "Theater, bowling alley, auditorium, or other similar place of public assembly",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "hotel_motel",
+    "name": "Hotel, motel",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "urban_beverage_producer",
+    "name": "Urban beverage producer",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "parking_garage",
+    "name": "Parking garage",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-100: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-100: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-100: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-100: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-100: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "redemption_center",
+    "name": "Redemption center",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-100: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "CBD-120": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "retail_store_or_service_commercial",
+    "name": "Retail store or service commercial facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "restaurant_or_tavern",
+    "name": "Restaurant, fast food establishment, tavern",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "club_or_lodge",
+    "name": "Club, lodge, or private social center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "light_hand_fabrication",
+    "name": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "place_of_public_assembly",
+    "name": "Theater, bowling alley, auditorium, or other similar place of public assembly",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "hotel_motel",
+    "name": "Hotel, motel",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "urban_beverage_producer",
+    "name": "Urban beverage producer",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "parking_garage",
+    "name": "Parking garage",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-120: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-120: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-120: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-120: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-120: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "redemption_center",
+    "name": "Redemption center",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-120: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "CBD-140": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "retail_store_or_service_commercial",
+    "name": "Retail store or service commercial facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "restaurant_or_tavern",
+    "name": "Restaurant, fast food establishment, tavern",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "club_or_lodge",
+    "name": "Club, lodge, or private social center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "light_hand_fabrication",
+    "name": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "place_of_public_assembly",
+    "name": "Theater, bowling alley, auditorium, or other similar place of public assembly",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "hotel_motel",
+    "name": "Hotel, motel",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "urban_beverage_producer",
+    "name": "Urban beverage producer",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "parking_garage",
+    "name": "Parking garage",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-140: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-140: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-140: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-140: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-140: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "redemption_center",
+    "name": "Redemption center",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-140: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "CBD-50": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "retail_store_or_service_commercial",
+    "name": "Retail store or service commercial facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "restaurant_or_tavern",
+    "name": "Restaurant, fast food establishment, tavern",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "club_or_lodge",
+    "name": "Club, lodge, or private social center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "light_hand_fabrication",
+    "name": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "place_of_public_assembly",
+    "name": "Theater, bowling alley, auditorium, or other similar place of public assembly",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "hotel_motel",
+    "name": "Hotel, motel",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "urban_beverage_producer",
+    "name": "Urban beverage producer",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "parking_garage",
+    "name": "Parking garage",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-50: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-50: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-50: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-50: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-50: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "redemption_center",
+    "name": "Redemption center",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-50: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "CBD-60": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "retail_store_or_service_commercial",
+    "name": "Retail store or service commercial facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "restaurant_or_tavern",
+    "name": "Restaurant, fast food establishment, tavern",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "club_or_lodge",
+    "name": "Club, lodge, or private social center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "light_hand_fabrication",
+    "name": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "place_of_public_assembly",
+    "name": "Theater, bowling alley, auditorium, or other similar place of public assembly",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "hotel_motel",
+    "name": "Hotel, motel",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "urban_beverage_producer",
+    "name": "Urban beverage producer",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "parking_garage",
+    "name": "Parking garage",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-60: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-60: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-60: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-60: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-60: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "redemption_center",
+    "name": "Redemption center",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-60: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
+  "CBD-85": [
+   {
+    "id": "one_family_detached",
+    "name": "One-family dwelling, detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_semi_detached",
+    "name": "One-family dwelling, semi-detached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "one_family_attached",
+    "name": "One-family dwelling, attached",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "two_family",
+    "name": "Two-family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "multiple_family",
+    "name": "Multiple family dwelling",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "dormitory",
+    "name": "Dormitory",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "church",
+    "name": "Church or related building",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "public_park_or_playground",
+    "name": "Public park or playground",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "library_or_fire_station",
+    "name": "Library or fire station",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursery_school_or_child_day_care",
+    "name": "Nursery school, child day care center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "adult_day_care_facility",
+    "name": "Adult day care facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "nursing_home",
+    "name": "Nursing, convalescent or rest home",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "funeral_home",
+    "name": "Funeral home or mortuary",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "business_or_professional_office",
+    "name": "Business or professional office",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "bank",
+    "name": "Bank or monetary institution",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "office_of_government",
+    "name": "Office of government",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "school",
+    "name": "School and related buildings",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "retail_store_or_service_commercial",
+    "name": "Retail store or service commercial facility",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "restaurant_or_tavern",
+    "name": "Restaurant, fast food establishment, tavern",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "club_or_lodge",
+    "name": "Club, lodge, or private social center",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "light_hand_fabrication",
+    "name": "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "place_of_public_assembly",
+    "name": "Theater, bowling alley, auditorium, or other similar place of public assembly",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "hotel_motel",
+    "name": "Hotel, motel",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "urban_beverage_producer",
+    "name": "Urban beverage producer",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "parking_garage",
+    "name": "Parking garage",
+    "permitted": true,
+    "note": null
+   },
+   {
+    "id": "cemetery",
+    "name": "Cemetery or related building",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-85: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "public_utility_structure",
+    "name": "Public utility structure except office",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-85: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "neighborhood_commercial_facility",
+    "name": "Neighborhood commercial facility",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-85: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "hospital_or_sanitarium",
+    "name": "Hospital or sanitarium",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-85: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "bed_and_breakfast_inn",
+    "name": "Bed-and-breakfast inn",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-85: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   },
+   {
+    "id": "redemption_center",
+    "name": "Redemption center",
+    "permitted": false,
+    "note": "Not permitted by right in CBD-85: Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board."
+   }
+  ],
   "R-1a": [
    {
     "id": "one_family_detached",
@@ -80,7 +2251,7 @@
     "id": "bed_and_breakfast_inn",
     "name": "Bed-and-breakfast inn",
     "permitted": false,
-    "note": "Not permitted by right in R-1a: Marked - (not permitted) for R-1A on the zoning chart (p.2), but \u00a7325-9B(1)(p) lists bed-and-breakfast inns \"in all districts\" among the uses needing a special permit from the Planning and Development Board."
+    "note": "Not permitted by right in R-1a: Marked - (not permitted) for R-1A on the zoning chart (p.2), but §325-9B(1)(p) lists bed-and-breakfast inns \"in all districts\" among the uses needing a special permit from the Planning and Development Board."
    }
   ],
   "R-1b": [
@@ -130,7 +2301,7 @@
     "id": "bed_and_breakfast_inn",
     "name": "Bed-and-breakfast inn",
     "permitted": false,
-    "note": "Not permitted by right in R-1b: Marked - (not permitted) for R-1B on the zoning chart (p.2), but \u00a7325-9B(1)(p) lists bed-and-breakfast inns \"in all districts\" among the uses needing a special permit from the Planning and Development Board."
+    "note": "Not permitted by right in R-1b: Marked - (not permitted) for R-1B on the zoning chart (p.2), but §325-9B(1)(p) lists bed-and-breakfast inns \"in all districts\" among the uses needing a special permit from the Planning and Development Board."
    }
   ],
   "R-2a": [
@@ -210,7 +2381,7 @@
     "id": "bed_and_breakfast_inn",
     "name": "Bed-and-breakfast inn",
     "permitted": false,
-    "note": "Not permitted by right in R-2a: Marked - (not permitted) for R-2A on the zoning chart (p.2), but \u00a7325-9B(1)(p) lists bed-and-breakfast inns \"in all districts\" among the uses needing a special permit from the Planning and Development Board."
+    "note": "Not permitted by right in R-2a: Marked - (not permitted) for R-2A on the zoning chart (p.2), but §325-9B(1)(p) lists bed-and-breakfast inns \"in all districts\" among the uses needing a special permit from the Planning and Development Board."
    }
   ],
   "R-2b": [
@@ -290,7 +2461,7 @@
     "id": "bed_and_breakfast_inn",
     "name": "Bed-and-breakfast inn",
     "permitted": false,
-    "note": "Not permitted by right in R-2b: Marked - (not permitted) for R-2B on the zoning chart (p.2), but \u00a7325-9B(1)(p) lists bed-and-breakfast inns \"in all districts\" among the uses needing a special permit from the Planning and Development Board."
+    "note": "Not permitted by right in R-2b: Marked - (not permitted) for R-2B on the zoning chart (p.2), but §325-9B(1)(p) lists bed-and-breakfast inns \"in all districts\" among the uses needing a special permit from the Planning and Development Board."
    }
   ],
   "R-2c": [
@@ -382,7 +2553,7 @@
     "id": "bed_and_breakfast_inn",
     "name": "Bed-and-breakfast inn",
     "permitted": false,
-    "note": "Not permitted by right in R-2c: Marked - (not permitted) for R-2C on the zoning chart (p.2), but \u00a7325-9B(1)(p) lists bed-and-breakfast inns \"in all districts\" among the uses needing a special permit from the Planning and Development Board."
+    "note": "Not permitted by right in R-2c: Marked - (not permitted) for R-2C on the zoning chart (p.2), but §325-9B(1)(p) lists bed-and-breakfast inns \"in all districts\" among the uses needing a special permit from the Planning and Development Board."
    }
   ],
   "R-3a": [
@@ -468,43 +2639,43 @@
     "id": "one_family_detached_zero_lot_line",
     "name": "One-family dwelling, detached, zero lot line",
     "permitted": false,
-    "note": "Not permitted by right in R-3a: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3a: Marked SP for R-3A on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "cemetery",
     "name": "Cemetery or related building",
     "permitted": false,
-    "note": "Not permitted by right in R-3a: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3a: Marked SP for R-3A on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "public_utility_structure",
     "name": "Public utility structure except office",
     "permitted": false,
-    "note": "Not permitted by right in R-3a: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3a: Marked SP for R-3A on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "school",
     "name": "School and related buildings",
     "permitted": false,
-    "note": "Not permitted by right in R-3a: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3a: Marked SP for R-3A on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "neighborhood_commercial_facility",
     "name": "Neighborhood commercial facility",
     "permitted": false,
-    "note": "Not permitted by right in R-3a: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3a: Marked SP for R-3A on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "hospital_or_sanitarium",
     "name": "Hospital or sanitarium",
     "permitted": false,
-    "note": "Not permitted by right in R-3a: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3a: Marked SP for R-3A on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "bed_and_breakfast_inn",
     "name": "Bed-and-breakfast inn",
     "permitted": false,
-    "note": "Not permitted by right in R-3a: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3a: Marked SP for R-3A on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    }
   ],
   "R-3aa": [
@@ -706,43 +2877,43 @@
     "id": "one_family_detached_zero_lot_line",
     "name": "One-family dwelling, detached, zero lot line",
     "permitted": false,
-    "note": "Not permitted by right in R-3b: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3b: Marked SP for R-3B on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "cemetery",
     "name": "Cemetery or related building",
     "permitted": false,
-    "note": "Not permitted by right in R-3b: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3b: Marked SP for R-3B on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "public_utility_structure",
     "name": "Public utility structure except office",
     "permitted": false,
-    "note": "Not permitted by right in R-3b: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3b: Marked SP for R-3B on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "school",
     "name": "School and related buildings",
     "permitted": false,
-    "note": "Not permitted by right in R-3b: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3b: Marked SP for R-3B on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "neighborhood_commercial_facility",
     "name": "Neighborhood commercial facility",
     "permitted": false,
-    "note": "Not permitted by right in R-3b: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3b: Marked SP for R-3B on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "hospital_or_sanitarium",
     "name": "Hospital or sanitarium",
     "permitted": false,
-    "note": "Not permitted by right in R-3b: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3b: Marked SP for R-3B on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    },
    {
     "id": "bed_and_breakfast_inn",
     "name": "Bed-and-breakfast inn",
     "permitted": false,
-    "note": "Not permitted by right in R-3b: by special permit (zoning chart p.2)."
+    "note": "Not permitted by right in R-3b: Marked SP for R-3B on the zoning chart (p.2): a special permit from the Planning and Development Board (§325-9B(1))."
    }
   ],
   "RU": [
@@ -845,6 +3016,2526 @@
   ]
  },
  "follow_ups": {
+  "B-1a": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "dwelling_units",
+    "rooms_let_for_profit",
+    "conversion",
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "dwelling_units",
+    "rooms_let_for_profit",
+    "conversion",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "B-1b": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "dwelling_units",
+    "rooms_let_for_profit",
+    "conversion",
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "dwelling_units",
+    "rooms_let_for_profit",
+    "conversion",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "B-2a": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "B-2d": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "B-4": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "B-5": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "CBD-100": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "CBD-120": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "CBD-140": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "CBD-50": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "CBD-60": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
+  "CBD-85": {
+   "one_family_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_semi_detached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_attached": [
+    "unrelated_persons_with_children",
+    "accessory_dwelling_unit",
+    "functional_family_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "two_family": [
+    "unrelated_persons",
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "multiple_family": [
+    "accessory_dwelling_unit",
+    "home_occupation",
+    "home_occupation_area",
+    "home_occupation_unit_area",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "dormitory": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "church": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_park_or_playground": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "library_or_fire_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursery_school_or_child_day_care": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "nursing_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "school": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "cemetery": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "public_utility_structure": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "neighborhood_commercial_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bed_and_breakfast_inn": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "one_family_detached_zero_lot_line": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "fraternity_sorority_group_house": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ]
+  },
   "R-1a": {
    "one_family_detached": [
     "unrelated_persons",
@@ -1143,6 +5834,244 @@
     "primary_floor_area"
    ],
    "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "redemption_center": [
     "accessory_dwelling_unit",
     "stream_near_lot",
     "stream_distance",
@@ -1467,6 +6396,244 @@
     "adu_bedrooms",
     "adu_floor_area",
     "primary_floor_area"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
    ]
   },
   "R-2a": {
@@ -1776,6 +6943,244 @@
     "adu_bedrooms",
     "adu_floor_area",
     "primary_floor_area"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
    ]
   },
   "R-2b": {
@@ -2073,6 +7478,244 @@
     "primary_floor_area"
    ],
    "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "redemption_center": [
     "accessory_dwelling_unit",
     "stream_near_lot",
     "stream_distance",
@@ -2404,6 +8047,244 @@
     "adu_bedrooms",
     "adu_floor_area",
     "primary_floor_area"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "redemption_center": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "south_hill_overlay",
+    "garage_cars",
+    "private_garages",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
    ]
   },
   "R-3a": {
@@ -2666,6 +8547,210 @@
     "primary_floor_area"
    ],
    "bed_and_breakfast_inn": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "adult_day_care_facility": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "funeral_home": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "business_or_professional_office": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "bank": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "office_of_government": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "retail_store_or_service_commercial": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "restaurant_or_tavern": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "club_or_lodge": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "light_hand_fabrication": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "place_of_public_assembly": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "hotel_motel": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "urban_beverage_producer": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "parking_garage": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "gasoline_station": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "service_shop": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "redemption_center": [
     "abuts_r1_district",
     "accessory_dwelling_unit",
     "stream_near_lot",
@@ -2948,6 +9033,210 @@
     "adu_bedrooms",
     "adu_floor_area",
     "primary_floor_area"
+   ],
+   "adult_day_care_facility": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "funeral_home": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "business_or_professional_office": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "bank": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "office_of_government": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "retail_store_or_service_commercial": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "restaurant_or_tavern": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "club_or_lodge": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "light_hand_fabrication": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "place_of_public_assembly": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "hotel_motel": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "urban_beverage_producer": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "parking_garage": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "gasoline_station": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "service_shop": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "redemption_center": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
    ]
   },
   "R-3b": {
@@ -3220,6 +9509,210 @@
     "adu_bedrooms",
     "adu_floor_area",
     "primary_floor_area"
+   ],
+   "adult_day_care_facility": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "funeral_home": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "business_or_professional_office": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "bank": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "office_of_government": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "retail_store_or_service_commercial": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "restaurant_or_tavern": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "club_or_lodge": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "light_hand_fabrication": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "place_of_public_assembly": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "hotel_motel": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "urban_beverage_producer": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "parking_garage": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "gasoline_station": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "service_shop": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
+   ],
+   "redemption_center": [
+    "abuts_r1_district",
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance",
+    "adu_detached",
+    "adu_existing_building",
+    "adus_on_parcel",
+    "adu_bedrooms",
+    "adu_floor_area",
+    "primary_floor_area"
    ]
   },
   "RU": {
@@ -3353,6 +9846,91 @@
     "stream_distance"
    ],
    "hospital_or_sanitarium": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "adult_day_care_facility": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "funeral_home": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "business_or_professional_office": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "bank": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "office_of_government": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "retail_store_or_service_commercial": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "restaurant_or_tavern": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "club_or_lodge": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "light_hand_fabrication": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "place_of_public_assembly": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "hotel_motel": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "urban_beverage_producer": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "parking_garage": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "gasoline_station": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "motor_vehicle_sales_and_service": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "service_shop": [
+    "accessory_dwelling_unit",
+    "stream_near_lot",
+    "stream_distance"
+   ],
+   "redemption_center": [
     "accessory_dwelling_unit",
     "stream_near_lot",
     "stream_distance"
@@ -3360,6 +9938,474 @@
   }
  },
  "implied": {
+  "B-1a": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
+  },
+  "B-1b": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
+  },
+  "B-2a": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "redemption_center": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {}
+  },
+  "B-2d": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "retail_store_or_service_commercial": {},
+   "light_hand_fabrication": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "redemption_center": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {}
+  },
+  "B-4": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "redemption_center": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {}
+  },
+  "B-5": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "redemption_center": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {}
+  },
+  "CBD-100": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "redemption_center": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {}
+  },
+  "CBD-120": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "redemption_center": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {}
+  },
+  "CBD-140": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "redemption_center": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {}
+  },
+  "CBD-50": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "redemption_center": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {}
+  },
+  "CBD-60": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "redemption_center": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {}
+  },
+  "CBD-85": {
+   "one_family_detached": {},
+   "one_family_semi_detached": {},
+   "one_family_attached": {},
+   "two_family": {},
+   "multiple_family": {},
+   "dormitory": {},
+   "church": {},
+   "public_park_or_playground": {},
+   "library_or_fire_station": {},
+   "nursery_school_or_child_day_care": {},
+   "adult_day_care_facility": {},
+   "nursing_home": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "school": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "cemetery": {},
+   "public_utility_structure": {},
+   "neighborhood_commercial_facility": {},
+   "hospital_or_sanitarium": {},
+   "bed_and_breakfast_inn": {},
+   "redemption_center": {},
+   "one_family_detached_zero_lot_line": {},
+   "fraternity_sorority_group_house": {},
+   "adult_day_care_home": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {}
+  },
   "R-1a": {
    "one_family_detached": {},
    "church": {},
@@ -3380,7 +10426,24 @@
    "adult_day_care_home": {},
    "neighborhood_commercial_facility": {},
    "nursing_home": {},
-   "hospital_or_sanitarium": {}
+   "hospital_or_sanitarium": {},
+   "adult_day_care_facility": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
   },
   "R-1b": {
    "one_family_detached": {},
@@ -3402,7 +10465,24 @@
    "adult_day_care_home": {},
    "neighborhood_commercial_facility": {},
    "nursing_home": {},
-   "hospital_or_sanitarium": {}
+   "hospital_or_sanitarium": {},
+   "adult_day_care_facility": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
   },
   "R-2a": {
    "one_family_detached": {},
@@ -3424,7 +10504,24 @@
    "fraternity_sorority_group_house": {},
    "dormitory": {},
    "nursing_home": {},
-   "hospital_or_sanitarium": {}
+   "hospital_or_sanitarium": {},
+   "adult_day_care_facility": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
   },
   "R-2b": {
    "one_family_detached": {},
@@ -3446,7 +10543,24 @@
    "fraternity_sorority_group_house": {},
    "dormitory": {},
    "nursing_home": {},
-   "hospital_or_sanitarium": {}
+   "hospital_or_sanitarium": {},
+   "adult_day_care_facility": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
   },
   "R-2c": {
    "one_family_detached": {},
@@ -3468,7 +10582,24 @@
    "fraternity_sorority_group_house": {},
    "dormitory": {},
    "nursing_home": {},
-   "hospital_or_sanitarium": {}
+   "hospital_or_sanitarium": {},
+   "adult_day_care_facility": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
   },
   "R-3a": {
    "one_family_detached": {},
@@ -3490,7 +10621,24 @@
    "school": {},
    "neighborhood_commercial_facility": {},
    "hospital_or_sanitarium": {},
-   "bed_and_breakfast_inn": {}
+   "bed_and_breakfast_inn": {},
+   "adult_day_care_facility": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
   },
   "R-3aa": {
    "one_family_detached": {},
@@ -3512,7 +10660,24 @@
    "neighborhood_commercial_facility": {},
    "hospital_or_sanitarium": {},
    "bed_and_breakfast_inn": {},
-   "dormitory": {}
+   "dormitory": {},
+   "adult_day_care_facility": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
   },
   "R-3b": {
    "one_family_detached": {},
@@ -3534,7 +10699,24 @@
    "school": {},
    "neighborhood_commercial_facility": {},
    "hospital_or_sanitarium": {},
-   "bed_and_breakfast_inn": {}
+   "bed_and_breakfast_inn": {},
+   "adult_day_care_facility": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
   },
   "RU": {
    "one_family_detached": {},
@@ -3556,7 +10738,57 @@
    "one_family_detached_zero_lot_line": {},
    "neighborhood_commercial_facility": {},
    "nursing_home": {},
-   "hospital_or_sanitarium": {}
+   "hospital_or_sanitarium": {},
+   "adult_day_care_facility": {},
+   "funeral_home": {},
+   "business_or_professional_office": {},
+   "bank": {},
+   "office_of_government": {},
+   "retail_store_or_service_commercial": {},
+   "restaurant_or_tavern": {},
+   "club_or_lodge": {},
+   "light_hand_fabrication": {},
+   "place_of_public_assembly": {},
+   "hotel_motel": {},
+   "urban_beverage_producer": {},
+   "parking_garage": {},
+   "gasoline_station": {},
+   "motor_vehicle_sales_and_service": {},
+   "service_shop": {},
+   "redemption_center": {}
   }
- }
+ },
+ "building_code_uses": [
+  "multiple_family",
+  "fraternity_sorority_group_house",
+  "dormitory",
+  "church",
+  "public_park_or_playground",
+  "library_or_fire_station",
+  "cemetery",
+  "public_utility_structure",
+  "school",
+  "nursery_school_or_child_day_care",
+  "adult_day_care_home",
+  "neighborhood_commercial_facility",
+  "nursing_home",
+  "hospital_or_sanitarium",
+  "adult_day_care_facility",
+  "funeral_home",
+  "business_or_professional_office",
+  "bank",
+  "office_of_government",
+  "retail_store_or_service_commercial",
+  "restaurant_or_tavern",
+  "club_or_lodge",
+  "light_hand_fabrication",
+  "place_of_public_assembly",
+  "hotel_motel",
+  "urban_beverage_producer",
+  "parking_garage",
+  "gasoline_station",
+  "motor_vehicle_sales_and_service",
+  "service_shop",
+  "redemption_center"
+ ]
 }

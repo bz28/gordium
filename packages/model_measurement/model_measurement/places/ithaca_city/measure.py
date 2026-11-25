@@ -28,7 +28,7 @@ from shapely.validation import explain_validity
 from rule_format.rulebook import MEASURES_FILE, load
 
 from ... import interpretations as law
-from ...stops import stop
+from ...stops import in_words, joined, said, stop
 from ...street_lines import _norm, matching_ids, street_verdict
 
 MEASURES = list(load(MEASURES_FILE))
@@ -683,7 +683,7 @@ def _height(building: dict, grade: float, facts: dict) -> dict:
     try:
         return _height_of(building, grade, facts)
     except _Stop as e:
-        return _missing("building_height", str(e))
+        return _missing("building_height", e.args[0])
 
 
 def _height_of(building: dict, grade: float, facts: dict) -> dict:
@@ -1535,7 +1535,7 @@ def _building_problems(buildings: list[dict]) -> str | None:
         return stop("no_building")
     ids = [b["id"] for b in buildings]
     same = sorted({i for i in ids if ids.count(i) > 1}, key=str)
-    return "; ".join([p for b in buildings for p in b.get("problems") or []]
+    return said([p for b in buildings for p in b.get("problems") or []]
                      + [stop("same_id", id=i) for i in same]
                      + ([stop("empty_building")] if any(not b.get("faces") and not b.get("problems")
                                                         for b in buildings) else [])
@@ -1791,7 +1791,10 @@ def _grade_from_points(buildings: list[dict], points: list, others: list = ()) -
 
 
 def measure(site: dict, facts: dict) -> dict[str, dict]:
-    """Every measurement in measures.yaml, in its order, each with its working, for one site and its lot facts."""
+    """Every measurement in measures.yaml, in its order, each with its working, for one site and its lot facts.
+    The site's problems may come as words or coded ({code, args}, the site description's): read as words
+    (stops.in_words), so a lot or building that can't be read is said in plain words, never a crash."""
+    site = in_words(site)
     _SKY.clear()
     _PLANES.clear()
     _PLAN_OF.clear()
@@ -2079,7 +2082,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None
     if lot is None or lot.problems:
-        reason = "; ".join(problems or (lot.problems if lot else [stop("no_lot")]))
+        reason = said(problems or (lot.problems if lot else [stop("no_lot")]))
         for name in UNITS:
             out.setdefault(name, _missing(name, reason))
         return out
@@ -2157,7 +2160,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         return [i for b in placed(bs) if place.get(b["id"]) == "off" for i in _parts(b)]
 
     def both(*whys):                # every reason that applies, each naming its own buildings (round 22)
-        return "; ".join(w for w in whys if w) or None
+        return joined(w for w in whys if w) or None
     why_main_off = unplaced(group)
     why_acc_off = unplaced(detached)
     why_inside = both(why_building, unplaced(buildings))    # coverage

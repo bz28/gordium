@@ -193,8 +193,9 @@ def main(argv):
     mode = argv[0]
     record = open(argv[1], "ab") if len(argv) > 1 else None
     out = sys.stdout.buffer
-    n = 0
+    n, carry = 0, b""
     for raw in sys.stdin.buffer:
+        raw, carry = carry + raw, b""                  # a request whose first byte was read on its own ("slow")
         if record:
             record.write(raw)
             record.flush()
@@ -221,8 +222,10 @@ def main(argv):
             out.flush()
             if mode == "no_read":                      # stops reading its input: a large request fills the pipe
                 time.sleep(3600)
-            if mode == "slow":                         # slow to read the next request, then slow to answer it
-                time.sleep(1.5)
+            if mode == "slow":                         # slow to read the next request, then slow to answer it:
+                carry = sys.stdin.buffer.read(1)       # timed from when it starts to arrive (its first byte), so
+                time.sleep(1.5)                        # however long the client takes to begin sending, sending it
+                                                       # takes at least 1.5 s of the one time limit
         elif mode == "slow":
             time.sleep(1.5)
             out.write((ok(i, CHECK) + "\n").encode("utf-8"))

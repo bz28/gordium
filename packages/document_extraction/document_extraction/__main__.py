@@ -3,6 +3,7 @@
     python -m document_extraction           # (re)write 2_extracted_text/<pdf name>.jsonl, and
                                             # <pdf name>.cells.jsonl for documents with chart_pages
     python -m document_extraction --check   # exit 1 if any saved file differs from a fresh extraction
+    python -m document_extraction contents <jurisdiction folder> [--check]   # its contents list (contents.py)
 
 Refuses to extract a PDF whose fingerprint doesn't match sources.yaml. A document with
 `layout: ecode360` is also cut into sections: 2_extracted_text/<pdf name>.sections.jsonl.
@@ -37,6 +38,9 @@ REPO = Path(__file__).resolve().parents[3]
 
 
 def main(argv: list[str]) -> int:
+    if argv[:1] == ["contents"]:          # each law's contents list (contents.py)
+        from . import contents
+        return contents.main(argv[1:], REPO)
     parser = argparse.ArgumentParser(prog="python -m document_extraction")
     parser.add_argument("--check", action="store_true", help="compare with a fresh extraction; write nothing")
     check = parser.parse_args(argv).check  # unknown arguments stop here, so a typo can't overwrite files

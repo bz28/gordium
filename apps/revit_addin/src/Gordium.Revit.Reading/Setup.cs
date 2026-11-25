@@ -26,6 +26,10 @@ public enum FieldKind
     /// <summary>A whole number (the stories).</summary>
     Number,
 
+    /// <summary>A length, as typed in the project's length units (a decimal number, 0 or more: the distance from a
+    /// stream), never rounded; saved in feet, so Revit shows the same length.</summary>
+    Feet,
+
     /// <summary>The street edge: picked on the plan by a click (the check's own street pick), never typed.</summary>
     StreetPick,
 
@@ -53,6 +57,12 @@ public sealed record SetupField(MarkDefinition Mark, string Label, FieldKind Kin
 {
     /// <summary>Stated, and usable.</summary>
     public bool IsSet => Current is not null && Problem is null;
+
+    /// <summary>For a length field: the unit it is shown and typed in (the project's, as Revit's dialogs show it).</summary>
+    public LengthUnit LengthUnit { get; init; } = LengthUnits.Feet;
+
+    /// <summary>For a length field: the feet the mark holds, exactly (null when blank).</summary>
+    public double? HeldFeet { get; init; }
 
     /// <summary>The label of what it holds now (a use's name, not its word), or null.</summary>
     public string? CurrentLabel => Current is null ? null : CurrentChoice?.Label ?? Current;
@@ -126,32 +136,49 @@ public sealed record SetupScreen(string Noun, IReadOnlyList<SetupField> Fields, 
     /// <summary>Every needed fact is set: the check runs by itself.</summary>
     public bool Ready => Needed.Count == 0;
 
-    /// <summary>The form's headline.</summary>
-    public string Headline => Ready
-        ? "Everything the check needs is set"
-        : $"Before checking: {Needed.Count} {(Needed.Count == 1 ? "fact" : "facts")} to set";
+    /// <summary>The Building Code governs as far as the form can tell (<see cref="SetupSteps.BuildingCodeGoverns"/>):
+    /// the occupancy group and the sprinkler system are then required steps.</summary>
+    public bool BuildingCode { get; init; }
+
+    /// <summary>The street edge kept on Project Information in words ("the south edge, 100'-0\""), when the Revit
+    /// layer could say it; null otherwise.</summary>
+    public string? StreetWords { get; init; }
+
+    /// <summary>The numbered steps (<see cref="SetupSteps.Of"/>), with the draft as it was when the screen was made.</summary>
+    public IReadOnlyList<SetupTask> Steps { get; init; } = [];
+
+    /// <summary>The form's headline: "Set 6 things to check this project".</summary>
+    public string Headline => SetupSteps.Headline(Steps);
 
     /// <summary>Made from the model's marks, the openings' sides, the place's options (null while the worker hasn't
-    /// answered: the zone and use are then typed), and what the architect has chosen but not saved.</summary>
+    /// answered: the zone and use are then typed), what the architect has chosen but not saved, the kept street edge in words (null when not known), and
+    /// whether the kept edges are still edges of the lot (false: the property line changed, so a problem the form
+    /// waits for, as the check would refuse it; null when not known).</summary>
     public static SetupScreen Build(RevitModel model, IReadOnlyList<OpeningSides>? sides, PlaceOptions? options,
-                                    SetupDraft? draft = null)
+                                    SetupDraft? draft = null, string? streetWords = null,
+                                    bool? streetOnLot = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         var use = draft?.Chosen(Marks.Use) ?? Marks.Text(SetupFacts.Get(model, Marks.Use));
         var noun = SetupWords.Noun(use);
-        var fields = SetupFacts.Fields(model, options, draft, noun);
+        var follows = draft?.Chosen(Marks.FollowsBuildingCode) is { } f ? f == "Yes" : Marks.YesNo(SetupFacts.Get(model, Marks.FollowsBuildingCode));
+        var governs = SetupSteps.BuildingCodeGoverns(use, follows, options);
+        var fields = SetupFacts.Fields(model, options, draft, noun, governs).Select(f =>
+            f.Mark == Marks.StreetEdge && streetOnLot == false && f.Current is not null && f.Problem is null
+                ? f with { Problem = SetupSteps.StreetOffLot } : f).ToList();
         var routes = !SetupWords.IsDwelling(use) && use is not null || SetupChecklist.AnyRouteMark(model);
         var lines = SetupChecklist.Build(model, sides ?? [], noun, routes);
         var fixFirst = MarkReading.RoomBlockers(model).Select(e =>
-            $"{ElementNames.Of("Rooms", e.Name, e.Number, null, 0)}: " + (e.Placement switch
+            $"Room {ElementNames.Of("Rooms", e.Name, e.Number, null, 0)} " + (e.Placement switch
             {
-                RoomPlacement.Unplaced => "not placed: place it in a closed area or delete it",
-                RoomPlacement.NotEnclosed => "not enclosed: close its walls or room separation lines, or delete it",
-                RoomPlacement.Redundant => "redundant (another room is in the same area): delete one",
-                _ => "its placement couldn't be read",
-            }) + " (no room is read for egress until each is fixed)").ToList();
+                RoomPlacement.Unplaced => "isn't placed. Place it in a closed area, or delete it.",
+                RoomPlacement.NotEnclosed => "isn't enclosed. Close its walls, or delete it.",
+                RoomPlacement.Redundant => "is in the same area as another room. Delete one.",
+                _ => "can't be read where it is placed.",
+            }) + " Until then, no room is checked for egress.").ToList();
         var needed = SetupGate.Needed(model, fields, lines);
-        return new SetupScreen(noun, fields, lines, fixFirst, needed);
+        var screen = new SetupScreen(noun, fields, lines, fixFirst, needed) { BuildingCode = governs, StreetWords = streetWords };
+        return screen with { Steps = SetupSteps.Of(screen, draft) };
     }
 }
 
@@ -165,13 +192,23 @@ public static class SetupFacts
     /// <summary>The facts the check sends nothing without (ProjectFacts.Read; host_core.facts.REQUIRED).</summary>
     public static IReadOnlyList<MarkDefinition> Required { get; } = [Marks.Zone, Marks.Use, Marks.LotSurveyed, Marks.StreetEdge];
 
-    /// <summary>The headings, in the form's order.</summary>
+    /// <summary>The headings, in the form's order: the needed facts (the numbered steps), then the "More facts"
+    /// fold's plain sub-heads.</summary>
     public const string NeededGroup = "Needed to check";
-    public const string LotGroup = "The lot and the {0}";
-    public const string CodeGroup = "Which building code";
+    public const string LotGroup = "The lot";
+    public const string DwellingsGroup = "Dwellings";
+    public const string CodeGroup = "Building code";
     public const string DrawnGroup = "What is drawn";
     public const string NoneGroup = "What the {0} has none of";
     public const string OtherGroup = "Other facts";
+
+    /// <summary>The dwelling's own facts (its units, an ADU, a home business, rooms let), under "Dwellings".</summary>
+    private static readonly HashSet<Guid> Dwelling =
+    [
+        Marks.DwellingUnits.Guid, Marks.UnitsInAttachedBuilding.Guid, Marks.RoomsLetForProfit.Guid, Marks.AdusOnParcel.Guid,
+        Marks.AccessoryDwellingUnit.Guid, Marks.AduDetached.Guid, Marks.HomeOccupation.Guid, Marks.OwnerOccupied.Guid,
+        Marks.UnrelatedPersons.Guid, Marks.FunctionalFamilyUnit.Guid,
+    ];
 
     /// <summary>The choices of a Text mark whose words Gordium lists (by GUID). The zone and use come from the place's
     /// options; a text mark not here is typed (and checked by the worker). A mark added to Marks.cs with its own word
@@ -179,7 +216,16 @@ public static class SetupFacts
     private static readonly Dictionary<Guid, Func<IReadOnlyList<FieldChoice>>> Listed = new()
     {
         [Marks.GroundFrom.Guid] = () => Marks.GroundWords.Select(w => new FieldChoice(w.Word, w.Word)).ToList(),
+        [Marks.OccupancyGroups.Guid] = () => OccupancyGroupWords.Words.Select(w => new FieldChoice(w, w)).ToList(),
+        [Marks.SprinklerSystem.Guid] = () => SprinklerWords.Table.Words.Select(w => new FieldChoice(w, w)).ToList(),
     };
+
+    /// <summary>What a project mark holds, or null.</summary>
+    public static MarkValue? Value(RevitModel model, MarkDefinition m)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        return Get(model, m);
+    }
 
     internal static MarkValue? Get(RevitModel model, MarkDefinition m) =>
         model.ProjectMarks.TryGetValue(m.Guid, out var v) ? v : null;
@@ -191,6 +237,8 @@ public static class SetupFacts
             return NeededGroup;
         if (m == Marks.AllStairs || m == Marks.AllGuards)
             return DrawnGroup;
+        if (Dwelling.Contains(m.Guid))
+            return DwellingsGroup;
         if (m.Feeds.StartsWith("building.", StringComparison.Ordinal))
             return CodeGroup;
         if (m.Feeds.Contains("has_none", StringComparison.Ordinal) || m.Feeds.EndsWith(": []", StringComparison.Ordinal))
@@ -203,11 +251,12 @@ public static class SetupFacts
     private static int Order(string group) => group switch
     {
         NeededGroup => 0,
-        DrawnGroup => 2,
+        LotGroup => 1,
+        DwellingsGroup => 2,
         CodeGroup => 3,
-        OtherGroup => 5,
-        _ when group.StartsWith("The lot", StringComparison.Ordinal) => 1,
-        _ => 4,
+        DrawnGroup => 4,
+        OtherGroup => 6,
+        _ => 5,
     };
 
     /// <summary>The facts a check sent anyway leaves out (ProjectFacts.Read gave none for them): a required one not
@@ -231,24 +280,30 @@ public static class SetupFacts
                      (Marks.RoomsLetForProfit, "rooms_let_for_profit"), (Marks.AdusOnParcel, "adus_on_parcel") })
             if (Marks.Count(Get(model, m)) is not null && read.Facts[key] is null)
                 left.Add(m);
+        // the house's own facts (UI design change 20): one holding what Gordium can't send
+        left.AddRange(ProjectFacts.HouseFacts(model).Select(p => p.Mark));
         return left;
     }
 
     /// <summary>The least a whole-number mark takes: 1 for one whose words say "1 or more" (the stories), else 0.</summary>
     public static int Least(MarkDefinition m) => m.Description.Contains("1 or more", StringComparison.Ordinal) ? 1 : 0;
 
-    public static IReadOnlyList<SetupField> Fields(RevitModel model, PlaceOptions? options, SetupDraft? draft, string noun)
+    /// <summary>Every project fact as a field; <paramref name="buildingCode"/>: the Building Code governs, so the
+    /// occupancy group and the sprinkler system are required too (<see cref="SetupSteps.BuildingCodeFacts"/>).</summary>
+    public static IReadOnlyList<SetupField> Fields(RevitModel model, PlaceOptions? options, SetupDraft? draft, string noun,
+                                                   bool buildingCode = false)
     {
         ArgumentNullException.ThrowIfNull(model);
         var zone = draft?.Chosen(Marks.Zone) ?? Marks.Text(Get(model, Marks.Zone));
         var fields = new List<SetupField>();
+        var unsendable = ProjectFacts.HouseFacts(model).ToDictionary(p => p.Mark.Guid, p => p.Problem);
         foreach (var m in Marks.All.Where(m => m.Categories.Contains(Marks.ProjectInformation)))
         {
             var v = Get(model, m);
-            var group = Group(m, noun);
+            var required = Required.Contains(m) || buildingCode && SetupSteps.BuildingCodeFacts.Contains(m);
+            var group = required ? NeededGroup : Group(m, noun);
             var label = SetupWords.Label(m, noun);
             var law = SetupWords.InBuildingWords(m.Description, noun);
-            var required = Required.Contains(m);
             switch (m.Kind)
             {
                 case MarkValueKind.YesNo:
@@ -272,13 +327,18 @@ public static class SetupFacts
                     var text = Marks.Text(v);
                     fields.Add(new(m, label, FieldKind.StreetPick, group, required, [], text, law,
                                    text is not null && StreetEdges.Parse(text) is null
-                                       ? "it holds text Gordium didn't write: pick the edge again" : null));
+                                       ? "The street edge was typed by hand. Pick it on the plan." : null));
                     break;
                 }
                 case MarkValueKind.Text:
                 {
                     var text = Marks.Text(v);
                     var choices = Choices(m, options, zone);
+                    // a building of more than one group, typed on Project Information ("R-2, B"): its groups as typed
+                    // are one choice (the dropdown lists one group each)
+                    if (m == Marks.OccupancyGroups && text is not null && OccupancyGroupWords.Parse(text) is not null
+                        && !Reads(m, text, choices!))
+                        choices = [new FieldChoice(text.Trim(), text.Trim()), .. choices!];
                     var kind = choices is { Count: > 0 } ? FieldKind.Choice : FieldKind.Text;
                     string? problem = null;
                     // set exactly when the check reads it (Reads: the zone and use exactly, as the checker matches them;
@@ -286,16 +346,33 @@ public static class SetupFacts
                     // problem (choose it from the list), kept as typed so a Save writes it over
                     if (text is not null && kind == FieldKind.Choice && !Reads(m, text, choices!))
                         problem = choices!.Any(c => string.Equals(c.Value, text, StringComparison.OrdinalIgnoreCase))
-                                  ? $"\"{text}\" is typed in another case: choose it from the list (Gordium reads the words exactly)"
-                                  : m == Marks.Zone ? $"\"{text}\" isn't a district Gordium has rules for: choose one"
-                                  : m == Marks.Use ? $"\"{text}\" isn't one of the City's uses Gordium knows: choose one"
-                                  : $"\"{text}\" isn't one of Gordium's words: choose one";
+                                  ? $"“{text}” is typed in another case. Choose it from the list."
+                                  : m == Marks.Zone ? $"Gordium has no rules for “{text}”. Choose a district."
+                                  : m == Marks.Use ? $"“{text}” isn't one of the City's uses Gordium knows. Choose one."
+                                  : $"“{text}” isn't one of Gordium's words. Choose one.";
                     fields.Add(new(m, label, kind, group, required, choices ?? [], text, Plain.TryGetValue(m.Guid, out var plain) ? plain : law, problem));
                     break;
                 }
+                case MarkValueKind.Length:
+                {
+                    // shown and typed in the project's length units, as Revit's own dialogs show it; feet inside
+                    var unit = LengthUnits.Of(model.DisplayUnits);
+                    var shown = LengthUnits.Shown(Marks.Length(v), unit);
+                    var note = unit.Known ? "" : $" This project's length units ({model.DisplayUnits}) aren't ones Gordium reads: type feet here.";
+                    fields.Add(new(m, SetupWords.Label(m, noun, unit.Symbol), FieldKind.Feet, group, required, [], shown, law + note, null)
+                    {
+                        LengthUnit = unit,
+                        HeldFeet = Marks.Length(v),
+                    });
+                    break;
+                }
                 default:
-                    break;                                  // no length mark on Project Information
+                    break;
             }
+            // a house fact holding what Gordium can't send (another kind of value, under its least): said, so the form
+            // waits for it, never shown as blank
+            if (unsendable.TryGetValue(m.Guid, out var why) && fields.Count > 0 && fields[^1].Mark == m && fields[^1].Problem is null)
+                fields[^1] = fields[^1] with { Problem = why };
         }
         return fields.OrderBy(f => Order(f.Group)).ToList();      // stable: Marks.All's order within each heading
     }
@@ -338,7 +415,7 @@ public static class SetupFacts
             var listed = district.Select(u => new FieldChoice(u.Id, u.Permitted == false && u.Note is { } note ? $"{u.Name} ({note})" : u.Name)).ToList();
             var ids = district.Select(u => u.Id).ToHashSet(StringComparer.Ordinal);
             return listed.Concat(options.Uses.Where(u => !ids.Contains(u.Id))
-                .Select(u => new FieldChoice(u.Id, $"{u.Name} (not on {zone}'s list of uses: its use row won't comply)"))).ToList();
+                .Select(u => new FieldChoice(u.Id, $"{u.Name} — not allowed in {zone}"))).ToList();
         }
         return Listed.TryGetValue(m.Guid, out var list) ? list() : null;
     }
@@ -362,6 +439,10 @@ public sealed class SetupDraft
 
     public string? Chosen(MarkDefinition mark) => _chosen.TryGetValue(mark.Guid, out var v) ? v : null;
 
+    /// <summary>The picked street edges in words ("the south edge, 100'-0\""), as the pick said them; null when none
+    /// was picked in the form (or the words weren't known).</summary>
+    public string? PickedWords { get; set; }
+
     /// <summary>The street edges the architect picked on the plan, kept in the draft as the Street edge mark's text
     /// (exactly as StreetEdges.Keep writes it): nothing is written until Save, which writes it with the other facts in
     /// the one transaction. Returns the text; none picked changes nothing.</summary>
@@ -378,7 +459,32 @@ public sealed class SetupDraft
 
     public int Count => _chosen.Count;
 
-    public void Clear() => _chosen.Clear();
+    /// <summary>Whether <paramref name="chosen"/> is what the field's mark holds already: a length by the feet it
+    /// parses to against the feet the mark holds (never the shown text, rounded to 6 places: 6.096 typed over a mark
+    /// holding 19.999999999999996 ft is written, so it is 20 ft); anything else by its text.</summary>
+    private static bool Holds(SetupField f, string chosen)
+    {
+        if (f.Kind != FieldKind.Feet)
+            return chosen == f.Current;
+        return f.HeldFeet is { } held && double.TryParse(chosen, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var typed)
+               && double.IsFinite(typed) && f.LengthUnit.ToFeet(typed) == held;
+    }
+
+    public void Clear()
+    {
+        _chosen.Clear();
+        PickedWords = null;
+    }
+
+    /// <summary>Whether the draft changes <paramref name="f"/>: something is chosen, and it isn't what the mark holds
+    /// already (<see cref="Holds"/>: a length by its feet, never its text), or the field holds a problem (a Save writes
+    /// over it). The one rule Save's count, "not saved yet" and <see cref="Writes"/> all use, so the button never
+    /// counts a fact Save won't write, or greys out over one it will (review round 4 of change 20).</summary>
+    public bool Changes(SetupField f)
+    {
+        ArgumentNullException.ThrowIfNull(f);
+        return Chosen(f.Mark) is { } raw && raw.Trim() is { Length: > 0 } chosen && !(f.Problem is null && Holds(f, chosen));
+    }
 
     /// <summary>The writes a Save makes: each field the architect chose a value for that differs from what the mark
     /// holds, as Revit stores it; a choice that isn't an allowed value is refused with why (and not written). A field
@@ -390,17 +496,17 @@ public sealed class SetupDraft
         var problems = new List<string>();
         foreach (var f in fields)
         {
-            if (Chosen(f.Mark) is not { } raw)
-                continue;
-            var chosen = raw.Trim();
-            if (chosen.Length == 0 || chosen == f.Current && f.Problem is null)
+            if (!Changes(f))
                 continue;                                   // nothing chosen, or what it holds already
+            var chosen = Chosen(f.Mark)!.Trim();
             MarkValue? value = f.Kind switch
             {
                 FieldKind.YesNo when chosen is "Yes" or "No" => new MarkValue(true, chosen == "Yes" ? 1 : 0),
                 FieldKind.Number when int.TryParse(chosen, NumberStyles.None, CultureInfo.InvariantCulture, out var n)
                                       && n >= SetupFacts.Least(f.Mark) => new MarkValue(true, n),
                 FieldKind.Choice when f.Choices.FirstOrDefault(c => c.Value == chosen) is { } c => new MarkValue(true, Text: c.Value),
+                FieldKind.Feet when double.TryParse(chosen, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var typed)
+                                    && double.IsFinite(typed) && typed >= 0 => new MarkValue(true, Number: f.LengthUnit.ToFeet(typed)),
                 FieldKind.Text => new MarkValue(true, Text: chosen),
                 // the street edge: only edges Gordium's pick kept (never typed text)
                 FieldKind.StreetPick when StreetEdges.Parse(chosen) is not null => new MarkValue(true, Text: chosen),
@@ -411,6 +517,7 @@ public sealed class SetupDraft
                 problems.Add(f.Kind switch
                 {
                     FieldKind.Number => $"{f.Label}: \"{chosen}\" isn't a whole number {SetupFacts.Least(f.Mark)} or more: not saved",
+                    FieldKind.Feet => $"{f.Label}: \"{chosen}\" isn't a length in {f.LengthUnit.Words}, 0 or more (a number such as 18.5): not saved",
                     FieldKind.StreetPick => $"{f.Label}: pick it on the plan",
                     _ => $"{f.Label}: \"{chosen}\" isn't one of its choices: not saved",
                 });
@@ -509,40 +616,41 @@ public static class SetupWords
         return HouseCap.Replace(House.Replace(words, noun), char.ToUpperInvariant(noun[0]) + noun[1..]);
     }
 
-    /// <summary>A mark's name in the form: without "Gordium: ", in the building's words.</summary>
-    public static string Label(MarkDefinition m, string noun)
+    /// <summary>A mark's name in the form: without "Gordium: ", in the building's words, with what its number is:
+    /// "(count)", or a length's unit as the form takes it (<paramref name="lengthUnit"/>, the project's: "(mm)"; feet
+    /// when not given).</summary>
+    public static string Label(MarkDefinition m, string noun, string? lengthUnit = null)
     {
         var name = m.Name.StartsWith("Gordium: ", StringComparison.Ordinal) ? m.Name["Gordium: ".Length..] : m.Name;
-        return InBuildingWords(name, noun);
+        var unit = m.Kind == MarkValueKind.Length ? lengthUnit ?? LengthUnits.Feet.Symbol : Marks.Unit(m);
+        return InBuildingWords(name, noun) + (unit is not null ? $" ({unit})" : "");
     }
 
     /// <summary>The form's notice when a check sent nothing, in plain words from what is missing (never the marks'
     /// typing instructions): the street edge kept no longer on the lot (or matching two edges), or the facts not set.</summary>
-    public static string NothingSent(StreetRefusal refused, IReadOnlyList<MarkDefinition> notSet, string noun)
+    public static string NothingSent(StreetRefusal refused, IReadOnlyList<MarkDefinition> notSet, string noun, string? lengthUnit = null)
     {
         ArgumentNullException.ThrowIfNull(notSet);
         if (refused == StreetRefusal.NoLongerAnEdge)
-            return "Nothing was checked: the street edge kept is no longer an edge of the lot (the property line changed). " +
-                   "Pick it again on the plan, then Save.";
+            return "The property line changed, so the street edge needs picking again. Nothing was checked.";
         if (refused == StreetRefusal.Ambiguous)
-            return "Nothing was checked: the street edge kept matches two edges of the lot (an arc and its chord). " +
-                   "Pick it again on the plan, then Save.";
-        var names = notSet.Select(m => Label(m, noun).ToLowerInvariant()).ToList();
+            return "The street edge matches two edges of the lot (an arc and its chord), so it needs picking again. Nothing was checked.";
+        var names = notSet.Select(m => SetupSteps.Title(m, Label(m, noun, lengthUnit)).ToLowerInvariant()).ToList();
         if (notSet.Contains(Marks.Zone))
-            return "Nothing was checked: the zone chooses the rules, so nothing can be checked without it. Choose it above" +
-                   (names.Count > 1 ? $"; also not set: {string.Join(", ", names.Where(n => n != "zone"))}." : ".");
-        return names.Count == 0 ? "Nothing was checked: set the facts above, then Save."
-            : $"Nothing was checked: not set: {string.Join(", ", names)}. Set them above, then Save.";
+            return "Choose the zoning district first: it decides which rules apply. Nothing was checked" +
+                   (names.Count > 1 ? $"; also not set: {string.Join(", ", names.Where(n => n != "zoning district"))}." : ".");
+        return names.Count == 0 ? "Nothing was checked. Set the facts above, then Save and check."
+            : $"Nothing was checked: not set: {string.Join(", ", names)}. Set them above, then Save and check.";
     }
 
     /// <summary>What a fact not set leaves when the architect checks anyway: each is needs review, never a pass.</summary>
-    public static string SentWithout(MarkDefinition m, string noun) =>
+    public static string SentWithout(MarkDefinition m, string noun, string? lengthUnit = null) =>
         m == Marks.Use ? "Use not set: every rule that turns on the use needs review."
         : m == Marks.LotSurveyed ? "Lot surveyed not set: the property line is read as traced from the tax map (its 2 ft accuracy), never as surveyed."
         : m == Marks.StreetEdge ? "Street edge not picked: the front yard, the yards measured from it and the lot width need review."
         : m == Marks.Zone ? "Zone not set: the district chooses the rules, so nothing can be checked without it."
         : m == Marks.Stories ? "Stories holds a count under 1 (a count is 1 or more), so it wasn't sent: height and stories need review."
-        : $"{Label(m, noun)}: what it holds isn't one of Gordium's words, so it wasn't sent: the rows it decides need review.";
+        : $"{Label(m, noun, lengthUnit)}: what it holds isn't one of Gordium's words, so it wasn't sent: the rows it decides need review.";
 }
 
 /// <summary>The facts inside the building, as the checklist's lines.</summary>
@@ -781,4 +889,49 @@ public static class SetupChecklist
         }
         return lines;
     }
+}
+
+/// <summary>A length unit the Setup form shows and takes a length mark in: its symbol, its words, the feet in one of it,
+/// and whether it is the project's own (false: the project's units aren't ones Gordium reads, and feet are used).</summary>
+public sealed record LengthUnit(string Symbol, string Words, double PerFoot, bool Known = true)
+{
+    /// <summary>A number typed in this unit, in feet: typed / units per foot, as Revit converts it (6.096 m is exactly
+    /// 20 ft; times a feet-per-unit factor gave 19.999999999999996, which fails 20 ft).</summary>
+    public double ToFeet(double typed) => typed / PerFoot;
+
+    /// <summary>A length in feet, in this unit.</summary>
+    public double FromFeet(double feet) => feet * PerFoot;
+}
+
+/// <summary>The project's length display unit (<c>RevitModel.DisplayUnits</c>, Revit's unit type id) as the Setup form
+/// uses it, so a length typed there is the length Revit's own dialogs show for the same number (review round 2 of
+/// change 20: feet typed in a meters project's dialog were 3.28 times too long).</summary>
+public static class LengthUnits
+{
+    public static readonly LengthUnit Feet = new("ft", "feet", 1);
+
+    private static readonly (string Id, LengthUnit Unit)[] Table =
+    [
+        ("feet", Feet), ("feetFractionalInches", Feet),
+        ("inches", new("in", "inches", 12)), ("fractionalInches", new("in", "inches", 12)),
+        ("millimeters", new("mm", "millimeters", 304.8)), ("centimeters", new("cm", "centimeters", 30.48)),
+        ("decimeters", new("dm", "decimeters", 3.048)),
+        ("meters", new("m", "meters", 0.3048)), ("metersCentimeters", new("m", "meters", 0.3048)),
+    ];
+
+    /// <summary>The unit of a Revit unit type id ("autodesk.unit.unit:millimeters-1.0.1"; "Feet", the reader's default,
+    /// is feet); feet, marked not known, for any other (said beside the field, never a guessed conversion).</summary>
+    public static LengthUnit Of(string? typeId)
+    {
+        if (string.IsNullOrWhiteSpace(typeId) || typeId == "Feet")
+            return Feet;
+        var colon = typeId.IndexOf(':', StringComparison.Ordinal);
+        var id = (colon >= 0 ? typeId[(colon + 1)..] : typeId).Split('-')[0];
+        return Table.FirstOrDefault(t => t.Id == id).Unit ?? Feet with { Known = false };
+    }
+
+    /// <summary>A length in feet as the form shows it in <paramref name="unit"/> (to 6 places, so 22.5 ft is 6858 mm,
+    /// never 6858.000000000001), or null.</summary>
+    public static string? Shown(double? feet, LengthUnit unit) =>
+        feet is { } f ? Math.Round(unit.FromFeet(f), 6).ToString("0.######", CultureInfo.InvariantCulture) : null;
 }

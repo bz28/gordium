@@ -213,9 +213,11 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
     private static string FakeWorker =>
         Path.Combine(Env.Repo, "apps", "revit_addin", "tests", "Gordium.Worker.Tests", "fake_worker.py");
 
-    private static Task<WorkerClient> Fake(string mode, TimeSpan? timeout = null) => WorkerClient.StartAsync(new WorkerOptions
+    private static Task<WorkerClient> Fake(string mode, TimeSpan? timeout = null, string? record = null) =>
+        WorkerClient.StartAsync(new WorkerOptions
     {
-        PythonPath = Env.Python, WorkingDirectory = Env.Repo, Arguments = [FakeWorker, mode],
+        PythonPath = Env.Python, WorkingDirectory = Env.Repo,
+        Arguments = record is null ? [FakeWorker, mode] : [FakeWorker, mode, record],   // record: each line it read
         StartTimeout = TimeSpan.FromSeconds(30), RequestTimeout = timeout ?? TimeSpan.FromSeconds(30),
         Environment = new Dictionary<string, string> { ["GORDIUM_FAKE_PROTOCOL"] = "1.2" },   // a check with an interior
     });
@@ -229,25 +231,70 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
     }
 
     /// <summary>The caller (Revit's thread) never waits: Send returns while the worker hangs, and Cancel stops the
-    /// worker and the check's outcome is ignored.</summary>
+    /// worker and the check's outcome is ignored. Shown by what happened, not by a clock: Send returned to the test
+    /// with no answer come (the stand-in worker never answers, so a Send that waited for it would never return),
+    /// and the cancel comes only once the worker holds the request (its record file has the check's line). A cancel before that sends nothing and
+    /// keeps the worker (the next test), so cancelling after a fixed 300 ms raced a slow machine (CI, PR #177:
+    /// the request hadn't reached the worker yet, so it was rightly not stopped).</summary>
     [Fact]
     public async Task Send_returns_at_once_and_cancel_stops_the_hung_worker_and_is_ignored()
     {
-        using var worker = await Fake("hang");
-        var flow = new CheckFlow();
-        var t = flow.TryStart(PanelHad.Results)!.Value;
-        Assert.True(flow.ReadDone(t));
+        var record = Path.Combine(Path.GetTempPath(), $"gordium_send_{Guid.NewGuid():N}.jsonl");
+        try
+        {
+            using var worker = await Fake("hang", record: record);
+            var flow = new CheckFlow();
+            var t = flow.TryStart(PanelHad.Results)!.Value;
+            Assert.True(flow.ReadDone(t));
+            var (sent, arrived) = Send(flow, t, Task.FromResult(worker));
+            Assert.False(arrived.Task.IsCompleted);                            // Send returned with no answer yet
+            await Received(record, "check_site");                              // the worker holds the request...
+            Assert.False(arrived.Task.IsCompleted);                            // ...and hangs on it: no answer
+            Assert.False(sent.IsCompleted);
+            Assert.Equal(PanelHad.Results, flow.Cancel());
+            var (outcome, _) = await arrived.Task.WaitAsync(TimeSpan.FromSeconds(20));
+            await sent.WaitAsync(TimeSpan.FromSeconds(20));
+            Assert.NotEqual(TaskStatus.RanToCompletion, outcome.Status);
+            Assert.True(worker.IsStopped);                                     // the request killed, not left running
+            Assert.Equal(AnswerUse.Ignore, flow.Arrived(t, outcome));
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(record);
+            }
+            catch (IOException)
+            {
+                // the stopped worker's handle not let go yet: a temp file, left for the system to clear
+            }
+        }
+    }
+
+    /// <summary>Waits until the stand-in worker has read a request naming <paramref name="command"/> (its record
+    /// file holds each line it reads, written as it reads it). The bound is only so a broken worker fails the test
+    /// instead of hanging it: 60 s, far past any slow machine's start of a Python process and one pipe write.</summary>
+    private static async Task Received(string record, string command)
+    {
         var clock = Stopwatch.StartNew();
-        var (sent, arrived) = Send(flow, t, Task.FromResult(worker));
-        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(1), $"Send waited {clock.Elapsed}");
-        await Task.Delay(300);
-        Assert.False(arrived.Task.IsCompleted);                                // still waiting for the hung worker
-        Assert.Equal(PanelHad.Results, flow.Cancel());
-        var (outcome, _) = await arrived.Task.WaitAsync(TimeSpan.FromSeconds(20));
-        await sent.WaitAsync(TimeSpan.FromSeconds(20));
-        Assert.NotEqual(TaskStatus.RanToCompletion, outcome.Status);
-        Assert.True(worker.IsStopped);                                         // the request killed, not left running
-        Assert.Equal(AnswerUse.Ignore, flow.Arrived(t, outcome));
+        while (!Holds(record, $"\"cmd\": \"{command}\"") && !Holds(record, $"\"cmd\":\"{command}\""))
+        {
+            Assert.True(clock.Elapsed < TimeSpan.FromSeconds(60), $"the worker never read a {command} request");
+            await Task.Delay(20);
+        }
+    }
+
+    private static bool Holds(string path, string text)
+    {
+        try
+        {
+            using var read = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            return new StreamReader(read).ReadToEnd().Contains(text, StringComparison.Ordinal);
+        }
+        catch (IOException)
+        {
+            return false;                                                      // not made yet, or being written
+        }
     }
 
     [Fact]

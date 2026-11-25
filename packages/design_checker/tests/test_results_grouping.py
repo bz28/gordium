@@ -236,7 +236,7 @@ def test_a_list_the_description_left_out_is_the_drawings_to_give_never_gordiums_
     causes = [c["words"] for ln in got[grouping.BY_HAND_T] for c in ln.get("causes") or []]
     assert not any(c.startswith("stairs") for c in causes)
     [stairs] = [ln for ln in got[grouping.REVIEW_T] if ln["title"].startswith("Stairs: ")]
-    assert len(stairs["items"]) == 30 and "no `stairs` list" in stairs["title"]
+    assert len(stairs["items"]) == 30 and stairs["title"].endswith(": to give: the stairs weren't sent from the model")
 
 
 def test_the_panel_list_shows_a_part_of_several_rules_as_one_folded_line(checked):

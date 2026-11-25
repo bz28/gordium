@@ -144,16 +144,26 @@ def _top(room: dict, floor: float):
             plan = None
         shapes.append((plan, min(z for *_, z in pts), max(z for *_, z in pts)))
     tops = []
+    unions = {}             # the pieces under a height, unioned once: every piece starting there has the same ones
     for i, (plan, low, high) in enumerate(shapes):
         # strictly lower only: a piece at the same height hides nothing (and many coincident pieces unioned together
-        # lost coverage in GEOS, Orangetown's Revit recording: a hidden piece read as uncovered)
-        under = [q for j, (q, _, qh) in enumerate(shapes) if j != i and q is not None and qh < low]
+        # lost coverage in GEOS, Orangetown's Revit recording: a hidden piece read as uncovered). The pieces under
+        # depend on `low` alone (a piece is never under itself: it doesn't end below where it starts), so one union
+        # of exactly the same pieces, in the same order, serves every piece starting at that height
         hidden = False
-        if plan is not None and under:
-            try:
-                hidden = plan.difference(unary_union(under)).area <= plan.area * 1e-9
-            except GEOSException:
-                hidden = False
+        if plan is not None:
+            if low not in unions:
+                under = [q for q, _, qh in shapes if q is not None and qh < low]
+                try:
+                    unions[low] = unary_union(under) if under else None
+                except GEOSException:
+                    unions[low] = GEOSException
+            below = unions[low]
+            if below is not None and below is not GEOSException:
+                try:
+                    hidden = plan.difference(below).area <= plan.area * 1e-9
+                except GEOSException:
+                    hidden = False
         if not hidden:
             tops.append(high)
     return max(tops)
@@ -193,11 +203,14 @@ def room_within(description: dict) -> str | None:
         if plan is None or floor is None:
             return f"room {_name(r)}'s floor can't be read, to tell whether it is within another room"
         read.append((r, plan, floor))
+    tops = {}                   # each room's ceiling worked out once, however many rooms stand over it
     for r, plan, floor in read:
-        for other, under, below in read:
+        for k, (other, under, below) in enumerate(read):
             if other is r or not below < floor or plan.intersection(under).area <= 0:
                 continue
-            top = _top(other, below)
+            if k not in tops:
+                tops[k] = _top(other, below)
+            top = tops[k]
             if top is None:
                 return f"room {_name(other)}'s ceiling can't be read, to tell whether room {_name(r)} is within it"
             if floor < top:

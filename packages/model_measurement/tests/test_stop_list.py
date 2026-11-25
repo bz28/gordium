@@ -317,6 +317,9 @@ CASES = {
     "inventory_incomplete": _plain(buildings=[dict(box(10, 25, 35, 65), problems=[stop("inventory_incomplete")])]),
     "tool_words": _plain(buildings=[box(10, 25, 35, 65), {"id": "Building layer", "faces": [],
                                                           "problems": [stop("tool_words", words="a block (Garage)")]}]),
+    "problem_unreadable": lambda tmp_path: " | ".join(str(m.get("reason")) for m in measure(
+        {"units": "ft", "lot": None, "buildings": [box(10, 25, 35, 65)], "problems": [{"code": "not_a_reason"}]},
+        FACTS).values()),
     "no_roof": _plain(buildings=[_walls_only(10, 25, 35, 65)]),
     "other_height": _plain(buildings=[box(10, 25, 35, 65), _walls_only(38, 70, 48, 90, "shed")], main_building="house"),
     "too_many_roofs": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house"), *SHEDS], main_building="house"),

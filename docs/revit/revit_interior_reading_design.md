@@ -159,6 +159,13 @@ exactly:
 | `Gordium: Accessory dwelling unit` | Project Information (instance) | Yes / No / unset | `facts.accessory_dwelling_unit`: Yes asks whether it is detached; unset is assumed none, said as a reading |
 | `Gordium: ADU detached` | Project Information (instance) | Yes / No / unset | `facts.adu_detached`: No makes the ADU one more of the building's units (R202 DWELLING) |
 | `Gordium: ADUs on parcel` | Project Information (instance) | a whole number 1 or more / unset | `facts.adus_on_parcel`: more than one keeps which code governs at needs review; unset beside a stated ADU is assumed one, said as a reading |
+| `Gordium: Stream within 20 ft` | Project Information (instance) | Yes / No / unset | `facts.stream_near_lot` (§325-26: "No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream"); unset: the rule needs review |
+| `Gordium: Distance from stream` | Project Information (instance) | a length 0 ft or more / unset | `facts.stream_distance`, as typed (never rounded); under 0 is said and not sent |
+| `Gordium: Unrelated people per unit` | Project Information (instance) | a whole number 0 or more / unset | `facts.unrelated_persons` (§325-3B DWELLING, ONE-FAMILY); unset: the occupancy rule needs review |
+| `Gordium: Owner-occupied` | Project Information (instance) | Yes / No / unset | `facts.owner_occupied` (§325-3B: "permitted if the dwelling is owner-occupied") |
+| `Gordium: Functional family unit` | Project Information (instance) | Yes / No / unset | `facts.functional_family_unit` (§325-3B FUNCTIONAL FAMILY UNIT; the City's finding, so Yes asks a person) |
+| `Gordium: Garage cars` | Project Information (instance) | a whole number 0 or more / unset | `facts.garage_cars` (zoning chart, Private garage, note 6: "For not more than three cars.") |
+| `Gordium: Private garages` | Project Information (instance) | a whole number 1 or more / unset | `facts.private_garages`, read only once the cars are over three |
 | `Gordium: Exit` | Doors (instance) | Exterior door at discharge, Exit stair enclosure, Exit passageway, Horizontal exit, Exterior exit stair or ramp / unset | `doors[].exit_kind`, and from it `exit_id` (section 10). Unset: not an exit (exits are marked, never guessed) |
 
 Why shared parameters: architects already fill parameters, in bulk, in schedules ("select all bedroom windows, tick

@@ -491,3 +491,24 @@ def test_grouping_a_laws_items_gives_its_own_rows_their_causes():
     assert all(i.get("causes") for i in items if i["id"] in review)
     on_cards = {x for g in groups for c in g.get("causes") or [] for x in c["items"]}
     assert review <= on_cards
+
+
+def test_the_odyssey_answer_maker_loads_maines_law_with_no_model_description():
+    """Review round 7 (P1): the script that makes the committed Odyssey answer crashed in egress.laws once it read a
+    place's folder (its stand-in place had a name and inherited rulebooks only), and CI missed it: the test above is
+    skipped without the model's description. This runs its patching (as_the_eval) and egress.laws, which need none.
+    Its place is the real Place (rule_format.place.stand_in), so a field egress reads later can't break it."""
+    from dataclasses import fields
+
+    from design_checker import egress
+    from rule_format.place import Place
+    sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
+    import make_odyssey_answer as maker
+    assert isinstance(maker.PLACE, Place)
+    assert {f.name for f in fields(Place)} <= set(vars(maker.PLACE))
+    real = egress.place_of
+    with maker.as_the_eval():
+        found = egress.laws(maker.MAINE)
+    assert found["place"] == "Portland, ME (the eval)" and found["folder"] == maker.MAINE
+    assert [law["key"] for law in found["laws"]] == ["maine/maine_state"] and found["laws"][0]["rules"]
+    assert egress.place_of is real                                     # the patching undone
