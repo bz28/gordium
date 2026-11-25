@@ -871,11 +871,18 @@ def test_the_readmes_not_brought_in_list_names_no_section_brought_in():
     # round 2: tables by name first ("Table 1006.3.4(1)", "Tables 705.5 and 705.9"), before brackets are dropped
     named = []
     # ("Table 1017.2's note a lists": a brought-in table named as the source of a reference, not as one)
-    for m in re.finditer(r"Tables? (\d{3,4}(?:\.\d+)*(?:\(\d\))?)(?: and (\d{3,4}(?:\.\d+)*(?:\(\d\))?))?(?!'s)",
-                         listed):
-        named += [f"Table {g}" for g in m.groups() if g]
+    # round 3: "Tables X and Y" names two tables; "Table X and Y" a table and a section (Y stays for the section check)
+    num = r"\d{3,4}(?:\.\d+)*(?:\(\d\))?"
+    plural = rf"Tables ({num}) and ({num})(?!'s)"
+    single = rf"Table ({num})(?![\d.(]|'s)"
+    for m in re.finditer(plural, listed):
+        named += [f"Table {g}" for g in m.groups()]
+    for m in re.finditer(single, listed):
+        named.append(f"Table {m.group(1)}")
     bad = [t for t in named if t in tables]
-    listed = re.sub(r"Tables? \d{3,4}(?:\.\d+)*(?:\(\d\))?(?: and \d{3,4}(?:\.\d+)*(?:\(\d\))?)?", "", listed)
+    listed = re.sub(plural, "", listed)
+    listed = re.sub(single, "", listed)
+    listed = re.sub(rf"Table {num}'s", "", listed)       # a table named as a reference's source
     listed = re.sub(r"\([^()]*\)", "", listed)             # what a reference is for, in brackets, may name a section
     # the parts under a section brought in alone ("903.3.1.2's parts"); a section brought in whole has its parts in
     listed = re.sub(r"(\d{3,4}(?:\.\d+)*)'s parts", lambda m: "" if m.group(1) in brought["alone"] else m.group(1),
