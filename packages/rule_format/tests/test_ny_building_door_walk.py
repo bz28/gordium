@@ -15,10 +15,10 @@ law here, never from the rules:
 - **Loosest** (a fail is allowed only here): the size is measured and under the least any exception that may apply
   allows: no width at all for a door that may be in a dwelling or sleeping unit of Groups R-2, R-3, I-1 or R-4
   (exceptions 1 and 6) or to a storage closet under 10 sq ft (3); 28 in to a Group I-3 resident sleeping unit (2);
-  31.75 in within a Type B unit (7); 20 in for a compartment (8, 9); 78 in high within a unit (4), 76 in for a
+  31.75 in within a Type B unit (7); 20 in for a compartment (8, 9: any door not marked an exit); 78 in high within a unit (4), 76 in for a
   unit's exterior door (5). A door may be in a unit unless it is marked an exit into an enclosure, passageway or
-  horizontal exit, or it is on a corridor the building states is in no unit; within one (and a compartment's)
-  also unless it is outside or marked an exit; a compartment's unless it is on a corridor.
+  horizontal exit, or it is on a corridor the building states is in no unit; within one also unless it is outside
+  or marked an exit.
 
 So a door whose size rules pass is one the law can't fault on size, and one they fail is one no reading excuses."""
 
@@ -63,7 +63,9 @@ def may_be_within_unit(exit_, exterior, corridor, within):
 
 
 def may_be_compartment(exit_, exterior, corridor):
-    return not exit_ is True and not exterior is True and not corridor is True
+    """Exception 8 says nothing of what the door opens onto (a fitting room or sauna off a corridor, a cabana
+    outside: review round 1); only a door into an exit serves no compartment."""
+    return not exit_ is True
 
 
 def width_strict(group):
@@ -256,7 +258,7 @@ def test_the_hard_condition_a_door_with_no_stated_clear_opening_never_passes(rul
     """The sizes come only from the maker's stated clear opening (model_measurement/routes/doors.py): a door with
     none has neither, and every row then needs review, whatever else is known (never a pass, never a fail)."""
     got = walked(rules)
-    best = (False, False, True, False)                       # on a corridor: no exception could loosen it
+    best = (True, False, True, False)                        # into an exit from a corridor: no exception loosens it
     for rule in got.values():
         for group in ("B", "R-2", "I-2", "mixed", U):
             for within in TRI:
@@ -270,4 +272,4 @@ def test_a_pair_never_passes_on_its_openings_width(rules, ctx):
     assert _row(r, _part(door, 2, 72, U), _given("B", False), ctx) == "needs_review"
     assert _row(r, _part(door, U, 72, U), _given("B", False), ctx) == "needs_review"
     assert _row(r, _part(door, 1, 72, U), _given("B", False), ctx) == "pass"
-    assert _row(r, _part(door, 2, 31, U), _given("B", False), ctx) == "fail"   # a leaf is never wider than the opening
+    assert _row(r, _part(door, 2, 19, U), _given("B", False), ctx) == "fail"   # a leaf is never wider than the opening

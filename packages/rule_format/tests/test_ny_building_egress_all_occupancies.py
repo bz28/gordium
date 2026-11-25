@@ -925,14 +925,16 @@ def test_1010_1_1_width_at_its_limits_and_just_past(ctx, rules):
     assert _cites(r, 323, 4)
     b = {"occupancy_group": "B"} | NO_UNITS
     one = lambda m, g=b: _one(r, "means_of_egress_door", m, g, ctx)
-    assert one(_door(32)) == "pass" and one(_door(31.99)) == "fail"
+    assert one(_door(32)) == "pass" and one(_door(31.99, moe_door_exit=True)) == "fail"   # into an exit: nothing loosens it
+    assert one(_door(31.99)) == "needs_review"          # on a corridor: it may serve a compartment (8: 20 in, round 1)
     i2 = {"occupancy_group": "I-2"} | NO_UNITS
-    assert one(_door(41.5), i2) == "pass" and one(_door(41.49), i2) == "needs_review" and one(_door(31.99), i2) == "fail"
+    assert one(_door(41.5), i2) == "pass" and one(_door(41.49), i2) == "needs_review" and one(_door(31.99, moe_door_exit=True), i2) == "fail"
     i3 = {"occupancy_group": "I-3"} | NO_UNITS
-    assert one(_door(28), i3) == "needs_review" and one(_door(27.99), i3) == "fail" and one(_door(32), i3) == "pass"
+    assert one(_door(28), i3) == "needs_review" and one(_door(27.99, moe_door_exit=True), i3) == "fail" and one(_door(32), i3) == "pass"
     # exception 7 (31.75, within a Type B unit) and 8 (20, a compartment): only a door between two rooms may be one
     assert one(_door(31.75, **BETWEEN_ROOMS)) == "needs_review" and one(_door(19.99, **BETWEEN_ROOMS)) == "fail"
-    assert one(_door(20, **BETWEEN_ROOMS)) == "needs_review" and one(_door(31.75)) == "fail"
+    assert one(_door(20, **BETWEEN_ROOMS)) == "needs_review" and one(_door(31.75, moe_door_exit=True)) == "fail"
+    assert one(_door(24, **OUTSIDE)) == "needs_review"   # a compartment may open outside (review round 1)
     # exception 3: a storage closet under 10 sq ft, no width
     assert one(_door(10, moe_door_to_room_under_10_sf=True)) == "needs_review"
     # exceptions 1 and 6 (Groups R-2, R-3; I-1, R-2, R-3, R-4): no width for a door that may be in a unit
