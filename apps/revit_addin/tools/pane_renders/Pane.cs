@@ -45,5 +45,11 @@ internal sealed class Pane
 
     public void Stale() => _view.MarkStale();
 
+    /// <summary>The switch (UI polish PR 3): What to fix or By code.</summary>
+    public void UseView(ResultsViewKind view) => _view.UseView(view);
+
+    /// <summary>A group, card or node opened (or folded) by its key.</summary>
+    public void Toggle(string key) => _view.ToggleOpen(key);
+
     public void Failed(string words) => _view.Failed(words);
 }
