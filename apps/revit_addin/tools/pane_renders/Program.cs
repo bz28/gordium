@@ -39,6 +39,9 @@ internal static class Program
         var houseAfter = Load(Path.Combine(answers, "ithaca_106_house_after_check_answer.json"));
         var childcare = Load(Path.Combine(answers, "children_odyssey_check_answer.json"));
         var apartment = Load(Path.Combine(answers, "four_unit_apartment_check_answer.json"));
+        // the same answer with three Chapter 10 results (one of them a question's) saying their rules are drafted
+        // for Group I-4 only (since #182 no real result says it): what the scope note looks like where it shows
+        var apartmentScoped = LoadSaying(Path.Combine(answers, "four_unit_apartment_check_answer.json"));
         // the four-unit apartment's Setup records (Ben's Revit trial, 2026-11-23): the Building Code governs its use
         foreach (var (n, r) in new[] { ("house", house), ("childcare", childcare) })
         {
@@ -132,6 +135,112 @@ internal static class Program
                         Check(items.Where(i => i.DataContext is CodeNodeItem).All(i => System.Windows.Automation.AutomationProperties.GetName(i).Length > 0),
                               "14 By code: every node's list item has words for a screen reader");
                     });
+                    // UI polish PR 4: the questions asked in the card (changes 22 to 24), the result detail (28 to 32)
+                    var (_, setupModel, setupSides) = Fixture(Path.Combine(fix, "setup_apartment.json"));
+                    var questions = SetupScreen.Build(setupModel, setupSides, options).Fields;
+                    var answerGroup = views.Fix.First(g => g.Kind == FixKind.Answer);
+                    Step(make(theme, []), "16_questions_apartment", 1100, dark, p =>
+                    {
+                        p.Show(title, when, rows, Labels(apartment), questions);
+                        Settle(p.View);
+                        var combos = FindAll<ComboBox>(p.View).Count(c => c.IsVisible);
+                        var yesNo = FindAll<System.Windows.Controls.Primitives.ToggleButton>(p.View).Count(t => t.IsVisible && (t.Content as string) is "Yes" or "No");
+                        Check(combos >= 2 && yesNo >= 2, $"16 questions: asked in the card ({combos} dropdowns, {yesNo} Yes/No buttons)");
+                        var save = FindAll<Button>(p.View).SingleOrDefault(b => b.IsVisible && b.Content as string == ProjectQuestions.SaveWords(0));
+                        Check(save is { IsEnabled: false }, "16 questions: Save is off until an answer is chosen (nothing is written before)");
+                        var cardScoped = answerGroup.Rows.Any(r => views.Scoped.Contains(r.Id));
+                        Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, EntryView.ScopeTag)) == cardScoped, $"16 questions: the scope note is in the card only when its own results say it ({cardScoped})");
+                    });
+                    var exits = rows.Groups.SelectMany(g => g.AllRows).First(r => r.Name.Contains("Two exits", StringComparison.Ordinal) && r.Name.Contains("APARTMENT SOUTH L1", StringComparison.Ordinal));
+                    foreach (var why in new[] { false, true })
+                        Step(make(theme, []), why ? "17b_detail_why_open_apartment" : "17_detail_apartment", 900, dark, p =>
+                        {
+                            p.Show(title, when, rows, Labels(apartment), questions);
+                            p.OpenResult(exits.Id);
+                            Settle(p.View);
+                            var callout = FindAll<Border>(p.View).SingleOrDefault(b => b.IsVisible && Equals(b.Tag, DetailView.CalloutTag));
+                            Check(callout is not null, "17 detail: one callout with the headline");
+                            var asked = ResultViews.CardsOf(views, exits.Id).Count(c => c.Kind == FixKind.Answer);
+                            Check(FindAll<Button>(p.View).Any(b => b.IsVisible && (b.Content as TextBlock)?.Text == $"Answer {asked} questions"), $"17 detail: Answer {asked} questions beside it");
+                            Check(!FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t) == "MEASURED AGAINST THE LIMIT"), "17 detail: nothing measured, so no Measured block");
+                            Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t) == "WHAT THE CODE SAYS"), "17 detail: What the code says");
+                            if (why)
+                            {
+                                var link = FindAll<Button>(p.View).First(b => b.IsVisible && (b.Content as TextBlock)?.Text == "Why?");
+                                link.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+                                Settle(p.View);
+                                Check(FindAll<StackPanel>(p.View).Any(s => s.IsVisible && Equals(s.Tag, DetailView.WhyTag)), "17b detail: Why? opens the checker's own words");
+                            }
+                        });
+                    Step(make(theme, []), "18_detail_answer_goes_to_questions_apartment", 900, dark, p =>
+                    {
+                        p.Show(title, when, rows, Labels(apartment), questions);
+                        p.OpenResult(exits.Id);
+                        p.Answer();
+                        Settle(p.View);
+                        Check(FindAll<ComboBox>(p.View).Any(c => c.IsVisible), "18: Answer N questions goes back to the questions card, open");
+                    });
+                    // the scope note where it shows (the answer changed one way): once under the Building Code in By code, and
+                    // in the questions card for the card's own result
+                    var scopedRows = ResultRows.Build(apartmentScoped, "New Construction", [], null);
+                    Step(make(theme, []), "14s_by_code_scope_note_apartment", 900, dark, p =>
+                    {
+                        p.Show(title, when, scopedRows, Labels(apartmentScoped), questions);
+                        p.UseView(ResultsViewKind.ByCode);
+                        Settle(p.View);
+                        var notes = FindAll<Border>(p.View).Where(b => b.IsVisible && Equals(b.Tag, EntryView.ScopeTag)).ToList();
+                        Check(notes.Count == 1, $"14s: the scope note once, under the Building Code whose results say it ({notes.Count})");
+                    });
+                    Step(make(theme, []), "16s_questions_scope_note_apartment", 1100, dark, p =>
+                    {
+                        p.Show(title, when, scopedRows, Labels(apartmentScoped), questions);
+                        Settle(p.View);
+                        Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, EntryView.ScopeTag)), "16s: the scope note in the card, for its own result");
+                    });
+                    // UI polish PR 4b: What changed with what the architect changed (change 40; two checks of one
+                    // project, the second after the sprinkler system and corner lot were answered), the proportion bar
+                    // (18), the selection strip (41), the printable summary in By code order (38)
+                    // the house (106 Ithaca Rd) before and after its lot facts were answered: its two real answers, and its
+                    // Setup facts before and after (no ADU, no stream nearby, a garage for 2 cars)
+                    var (_, houseModel, houseSides) = Fixture(Path.Combine(fix, "setup_ithaca106.json"));
+                    var houseAnswered = new RevitModel
+                    {
+                        Document = houseModel.Document, Marked = houseModel.Marked, DisplayUnits = houseModel.DisplayUnits,
+                        ProjectMarks = new Dictionary<Guid, MarkValue>(houseModel.ProjectMarks)
+                        {
+                            [Marks.AccessoryDwellingUnit.Guid] = new(true, 0),
+                            [Marks.StreamNearLot.Guid] = new(true, 0),
+                            [Marks.GarageCars.Guid] = new(true, 2),
+                        },
+                    };
+                    Step(make(theme, []), "19_what_changed_house", 900, dark, p =>
+                    {
+                        p.Show("106 Ithaca Rd", when, ResultRows.Build(house, "New Construction", [], null), Labels(house),
+                               SetupScreen.Build(houseModel, houseSides, options).Fields, key: "render:what-changed");
+                        p.Show("106 Ithaca Rd", when.AddMinutes(9), ResultRows.Build(houseAfter, "New Construction", [], null), Labels(houseAfter),
+                               SetupScreen.Build(houseAnswered, houseSides, options).Fields, key: "render:what-changed");
+                        Settle(p.View);
+                        Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, ResultsView.ChangeTag)), "19: What changed sits at the top");
+                        Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t).StartsWith("You changed: ", StringComparison.Ordinal)), "19: it says what you changed");
+                        Check(!FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t).Contains("hover for all", StringComparison.Ordinal)), "19: no \"hover for all\"");
+                        Check(FindAll<Grid>(p.View).Any(g => g.IsVisible && Equals(g.Tag, ResultsView.BarTag)), "19: the proportion bar under the summary line");
+                        NoComplies(FindAll<Grid>(p.View).First(g => Equals(g.Tag, ResultsView.BarTag)), "19: the bar has no green while results need review");
+                    });
+                    Step(make(theme, []), "20_selection_strip_apartment", 740, dark, p =>
+                    {
+                        p.Show(title, when, rows, Labels(apartment), questions);
+                        var map = SelectionMap.Of(rows, when);
+                        var wall = map.Elements.OrderByDescending(u => map.For([u]).Count).First();
+                        p.Strip(map.Answer([wall], _ => "Wall “LS New 6\"”"));
+                        Settle(p.View);
+                        var strip = FindAll<Border>(p.View).Single(b => b.IsVisible && Equals(b.Tag, SelectionStrip.Tag));
+                        var links = FindAll<Button>(strip).Count(b => b.IsVisible && (b.Content as TextBlock)?.Text is { } t && !t.StartsWith("Show all", StringComparison.Ordinal));
+                        Check(links == SelectionMap.Shown, $"20: the strip lists the top {SelectionMap.Shown} ({links})");
+                        Check(FindAll<Button>(strip).Any(b => b.IsVisible && b.Content as string == "Clear"), "20: Clear puts it away");
+                    });
+                    if (!dark)
+                        File.WriteAllText(Path.Combine(_out, "21_summary_by_code_apartment.html"),
+                                          ComplianceSummary.Html(rows, title, when, when.AddMinutes(3)), new UTF8Encoding(false));
                     Step(make(theme, []), "15_by_code_stale_apartment", 900, dark, p =>
                     {
                         p.Show(title, when, rows, Labels(apartment));
@@ -375,6 +484,28 @@ internal static class Program
 
     private static string TextOf(TextBlock t) =>
         t.Text is { Length: > 0 } x ? x : new System.Windows.Documents.TextRange(t.ContentStart, t.ContentEnd).Text;
+
+    // a question of the questions card, by the pane's own rule (a "mark" ask is a project question only with a facts. or
+    // building. field; review after #202: a door's field-less mark, or rooms[].function, is a per-element mark)
+    private static bool Asked(System.Text.Json.Nodes.JsonNode? ask) =>
+        ResultViews.KindOf((string?)ask!["kind"], (string?)ask["field"]) == FixKind.Answer;
+
+    internal static CheckResult LoadSaying(string path)
+    {
+        var node = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8))!;
+        var items = node["result"]!["view"]!["items"]!.AsArray();
+        var picked = items.Where(i => (string?)i!["in_code"]?["chapter"] == "10"
+                                      && ((string?)i!["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true
+                                      && i!["asks"] is System.Text.Json.Nodes.JsonArray a && !a.Any(Asked)).Take(2)
+                          .Concat(items.Where(i => (string?)i!["in_code"]?["chapter"] == "10"
+                                                   && ((string?)i!["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true
+                                                   && i!["asks"] is System.Text.Json.Nodes.JsonArray a && a.Any(Asked)).Take(1));
+        foreach (var i in picked)
+            i!["reason"] = "the building holds another occupancy: this rulebook's rules are " + ResultViews.DraftedFor + ", so a person checks";
+        var doc = JsonDocument.Parse(node.ToJsonString());
+        return (CheckResult)typeof(CheckResult).GetMethod("Parse", BindingFlags.NonPublic | BindingFlags.Static)!
+            .Invoke(null, [new WorkerAnswer(doc.RootElement.GetProperty("result").Clone(), About)])!;
+    }
 
     internal static CheckResult Load(string path)
     {

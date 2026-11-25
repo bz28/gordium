@@ -59,3 +59,43 @@ public static class CountBar
     public static string? Short(string? title) =>
         title is not null && title.IndexOf(" (", StringComparison.Ordinal) is var i and > 0 ? title[..i] : title;
 }
+
+/// <summary>One segment of the results' proportion bar (UI polish change 18): the status it is drawn in, how many of
+/// the checker's rows it stands for, and their verdict in words ("1 complies": review round 1, a complying slice drawn
+/// neutral was called "Not applicable" on hover).</summary>
+public sealed record BarSegment(PanelStatus Status, int Count)
+{
+    /// <summary>What the slice is, in the checker's verdict: "98 need review", "1 complies".</summary>
+    public string Words { get; init; } = "";
+}
+
+/// <summary>
+/// The proportion bar under the results' summary line (UI polish change 18): one segment per verdict, as long as its
+/// share of the checker's rows, worst first, zero counts left out. Never green while anything fails, needs review or
+/// isn't checked yet (what complies is then drawn in the neutral colour: the bar is a glance, and a green sliver beside
+/// 98 results in review reads as "some of it passes"); never a verdict's colour once stale.
+/// </summary>
+public static class ProportionBar
+{
+    private static readonly (Gordium.Worker.Verdict Verdict, PanelStatus Status)[] Order =
+    [
+        (Gordium.Worker.Verdict.DoesNotComply, PanelStatus.Fails),
+        (Gordium.Worker.Verdict.NeedsReview, PanelStatus.Review),
+        (Gordium.Worker.Verdict.NotChecked, PanelStatus.NotChecked),
+        (Gordium.Worker.Verdict.Complies, PanelStatus.Complies),
+        (Gordium.Worker.Verdict.NotApplicable, PanelStatus.NotApplicable),
+    ];
+
+    /// <summary>The segments of <paramref name="verdicts"/>, worst first; every verdict counted once (an unknown one is
+    /// already needs review).</summary>
+    public static IReadOnlyList<BarSegment> Segments(IReadOnlyCollection<Gordium.Worker.Verdict> verdicts, bool stale)
+    {
+        ArgumentNullException.ThrowIfNull(verdicts);
+        var unsettled = verdicts.Any(v => v is Gordium.Worker.Verdict.DoesNotComply or Gordium.Worker.Verdict.NeedsReview or Gordium.Worker.Verdict.NotChecked);
+        return [.. Order.Select(o => (o, n: verdicts.Count(v => v == o.Verdict))).Where(x => x.n > 0).Select(x => new BarSegment(
+            stale ? PanelStatus.Stale : x.o.Status == PanelStatus.Complies && unsettled ? PanelStatus.NotApplicable : x.o.Status, x.n)
+        {
+            Words = (stale ? ResultViews.SummaryPast(Enumerable.Repeat(x.o.Verdict, x.n)) : ResultViews.Summary(Enumerable.Repeat(x.o.Verdict, x.n))),
+        })];
+    }
+}

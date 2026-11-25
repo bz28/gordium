@@ -369,9 +369,12 @@ public sealed class CheckProjectCommand : IExternalCommand
         }
         else
             files = $"Logged to {Trial.LogPath()}";
+        // the project's facts as the Setup form's fields: what the questions card asks with, and what What changed says
+        // the architect changed since the check before (UI polish change 40)
+        var questions = model?.Views is not null ? SetupRun.Questions(doc) : null;
         ResultsPane.Show(ui, doc, new PanelContent(doc.Title, when, model,
                                                    StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files,
-                                                   ClearWords: clear, Ids: ids, Key: DocKeys.Of(doc),
+                                                   ClearWords: clear, Ids: ids, Key: DocKeys.Of(doc), Questions: questions,
                                                    NotStated: run.Prepared.NotStated.Select(m => SetupWords.SentWithout(m, SetupWords.Noun(
                                                        run.Prepared.Request?.Facts["use"]?.GetValue<string>()), LengthUnits.Of(doc.GetUnits()
                                                        .GetFormatOptions(SpecTypeId.Length).GetUnitTypeId().TypeId).Symbol,

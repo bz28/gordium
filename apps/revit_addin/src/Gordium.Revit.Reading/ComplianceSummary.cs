@@ -92,6 +92,9 @@ public static class ComplianceSummary
          .Append(".why { font-size: 9pt; margin-top: 2px; }\n")
          .Append(".law { font-family: Georgia, 'Times New Roman', serif; font-size: 9pt; }\n")
          .Append(".law p { margin: 0 0 4px; }\n")
+         .Append(".greyed { margin: 2px 0 2px 12px; }\n")
+         .Append(".appendix { margin: 0 0 10px; break-inside: avoid; }\n")
+         .Append("h3, h4, h5 { font-weight: 600; margin: 12px 0 2px; break-after: avoid; }\n")
          .Append(".verbatim { white-space: pre-line; }\n")
          .Append("a { color: ").Append(C(PanelTokens.Accent)).Append("; }\n")
          .Append("@media print { body { padding: 0; max-width: none; } a { text-decoration: none; } }\n")
@@ -127,28 +130,98 @@ public static class ComplianceSummary
         if (model.Inside.Length > 0)
             h.Append("<h2>Not read from the model</h2>\n<p id=\"not-read\" class=\"verbatim\">").Append(E(model.Inside)).Append("</p>\n");
 
-        foreach (var (group, rows) in Sections(model))
-        {
-            h.Append("<h2>").Append(E(group.Title)).Append(" (").Append(rows.Count.ToString(CultureInfo.InvariantCulture)).Append(")</h2>\n")
-             .Append("<table>\n<thead><tr><th style=\"width:24%\">Rule</th><th style=\"width:11%\">Proposed</th>")
-             .Append("<th style=\"width:11%\">Required</th><th style=\"width:15%\">Result</th><th>The law's words</th></tr></thead>\n<tbody>\n");
-            foreach (var row in rows)
-                Row(h, row);
-            h.Append("</tbody>\n</table>\n");
-        }
+        if (model.Views is { } views)
+            ByCode(h, views);
+        else
+            foreach (var (group, rows) in Sections(model))
+            {
+                h.Append("<h2>").Append(E(group.Title)).Append(" (").Append(rows.Count.ToString(CultureInfo.InvariantCulture)).Append(")</h2>\n");
+                Table(h, rows, appendix: false);
+            }
         h.Append("<p class=\"muted\" style=\"margin-top:16px\">Every figure and verdict here is the checker's own, as the Gordium pane ")
          .Append("showed it; each law's words are quoted exactly, with where they are. ").Append(E(NotAPermit)).Append(".</p>\n");
         h.Append("</body>\n</html>\n");
         return h.ToString();
     }
 
-    private static void Row(StringBuilder h, ResultRow row)
+    private static void Table(StringBuilder h, IReadOnlyList<ResultRow> rows, bool appendix, int first = 0)
+    {
+        h.Append("<table>\n<thead><tr><th style=\"width:24%\">Rule</th><th style=\"width:11%\">Proposed</th>")
+         .Append("<th style=\"width:11%\">Required</th><th style=\"width:15%\">Result</th>")
+         .Append(appendix ? "" : "<th>The law's words</th>").Append("</tr></thead>\n<tbody>\n");
+        for (var i = 0; i < rows.Count; i++)
+            Row(h, rows[i], appendix, appendix ? first + i + 1 : 0);
+        h.Append("</tbody>\n</table>\n");
+    }
+
+    // ---- UI polish change 38: the summary in the By code order -------------------------------------------------
+
+    /// <summary>The title of the appendix holding every row's law, in the same order as the tables.</summary>
+    public const string AppendixTitle = "The law's words, in the same order";
+
+    /// <summary>Every row in the order a plan reviewer reads, By code's (document › chapter or article › section ›
+    /// rule; <see cref="ResultViews"/>, where each row is placed exactly once), the parts of each document Gordium hasn't
+    /// checked listed greyed, never left out; then the law's words of every row, in the same order, in an appendix.</summary>
+    private static void ByCode(StringBuilder h, ResultViewsModel views)
+    {
+        var order = new List<ResultRow>();
+        foreach (var doc in views.Code)
+            Node(h, doc, 0, order);
+        h.Append("<h2 id=\"the-laws-words\">").Append(E(AppendixTitle)).Append("</h2>\n");
+        var n = 0;
+        foreach (var row in order)
+        {
+            var at = (++n).ToString(CultureInfo.InvariantCulture);
+            h.Append("<div class=\"law appendix\" id=\"law-").Append(at).Append("\" data-law=\"").Append(E(row.Id)).Append("\">")
+             .Append("<p><b>").Append(at).Append(". ").Append(E(row.Name)).Append("</b></p>");
+            Law(h, row);
+            h.Append("</div>\n");
+        }
+    }
+
+    /// <summary>A node of the law's tree: its heading and status line (a document's which-code note and scope note),
+    /// its rules' rows as one table, its greyed parts said as not checked yet by Gordium, then what is inside.</summary>
+    private static void Node(StringBuilder h, CodeNode node, int depth, List<ResultRow> order)
+    {
+        if (node.Greyed || node.Level == CodeLevel.Others)
+        {
+            // not checked yet by Gordium (or nothing to check): listed, greyed, never left out (change 35)
+            h.Append("<p class=\"muted greyed\" data-greyed=\"").Append(E(node.State.ToString())).Append("\">")
+             .Append(E(ResultViewList.Title(node))).Append(": ").Append(E(node.Line));
+            if (node.Level == CodeLevel.Others && node.Children.Count > 0)
+                h.Append(" (").Append(E(string.Join("; ", node.Children.Select(ResultViewList.Title)))).Append(')');
+            h.Append("</p>\n");
+            return;
+        }
+        var tag = "h" + Math.Min(2 + depth, 5).ToString(CultureInfo.InvariantCulture);
+        h.Append('<').Append(tag).Append('>').Append(E(ResultViewList.Title(node))).Append("</").Append(tag).Append(">\n")
+         .Append("<p class=\"muted\">").Append(E(node.Line)).Append("</p>\n");
+        if (node.Note is { } note)
+            h.Append("<p class=\"which-code\">").Append(E(note)).Append("</p>\n");
+        if (node.Scope is { } scope)
+            h.Append("<p class=\"scope\">").Append(E(scope)).Append("</p>\n");
+        var rows = node.Rows.Concat(node.Children.Where(c => c.Level == CodeLevel.Rule && !c.Greyed).SelectMany(c => c.Rows)).ToList();
+        if (rows.Count > 0)
+        {
+            Table(h, rows, appendix: true, first: order.Count);   // each row numbered as its law in the appendix
+            order.AddRange(rows);
+        }
+        foreach (var child in node.Children.Where(c => c.Level != CodeLevel.Rule || c.Greyed))
+            Node(h, child, depth + 1, order);
+    }
+
+    private static void Row(StringBuilder h, ResultRow row, bool appendix, int law = 0)
     {
         var status = StatusLook.Of(row.Tone, stale: false);
         var word = StatusLook.Word(status);
         h.Append("<tr data-row=\"").Append(E(row.Id)).Append("\" data-status=\"").Append(status.ToString().ToLowerInvariant()).Append("\">");
         // the rule, and why when it isn't a pass (the checker's reason, its advice)
-        h.Append("<td>").Append(E(row.Name));
+        h.Append("<td>");
+        // in By code order: the row's number, a link to its law's words in the appendix (review round 2)
+        if (law > 0)
+            h.Append("<a class=\"law-ref\" href=\"#law-").Append(law.ToString(CultureInfo.InvariantCulture)).Append("\">")
+             .Append(law.ToString(CultureInfo.InvariantCulture)).Append(".</a> ");
+        h.Append(E(row.Name));
         if (status is PanelStatus.Fails or PanelStatus.Review)
         {
             if (row.Reason is { Length: > 0 } reason && !row.ReasonIsFigures)
@@ -171,8 +244,20 @@ public static class ComplianceSummary
         if (row.HowFar is { Length: > 0 } far && status != PanelStatus.Complies)
             h.Append("<div class=\"why muted\">").Append(E(far)).Append("</div>");
         h.Append("</td>");
-        // the law's exact words, each with where it is; its section when no quote says where; the checker's links
+        if (appendix)
+        {
+            h.Append("</tr>\n");                                // the law's words: in the appendix, in the same order
+            return;
+        }
         h.Append("<td class=\"law\">");
+        Law(h, row);
+        h.Append("</td></tr>\n");
+    }
+
+    /// <summary>A row's law: its exact words, each with where it is; its section when no quote says where; the
+    /// checker's links.</summary>
+    private static void Law(StringBuilder h, ResultRow row)
+    {
         foreach (var q in row.Quotes)
             h.Append("<p>“").Append(E(q.Text)).Append("”").Append(q.Where is null ? "" : " (" + E(q.Where) + ")").Append("</p>");
         if (row.Section is { Length: > 0 } section && !row.Quotes.Any(q => q.Where?.Contains(section, StringComparison.Ordinal) == true))
@@ -181,7 +266,6 @@ public static class ComplianceSummary
             h.Append("<p class=\"muted\">The checker sent no words of the law for this result.</p>");
         if (row.Links.Count > 0)
             h.Append("<p>").AppendJoin(" · ", row.Links.Select(l => $"<a href=\"{E(l.Url)}\">{E(l.Citation)}</a>")).Append("</p>");
-        h.Append("</td></tr>\n");
     }
 
     private static string Lines(IEnumerable<string> lines)

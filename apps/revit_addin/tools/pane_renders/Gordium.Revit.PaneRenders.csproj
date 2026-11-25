@@ -31,6 +31,7 @@
     <Compile Include="../../src/Gordium.Revit.Addin/DetailView.cs" Link="Addin/DetailView.cs" />
     <Compile Include="../../src/Gordium.Revit.Addin/SetupView.cs" Link="Addin/SetupView.cs" />
     <Compile Include="../../src/Gordium.Revit.Addin/PanelLook.cs" Link="Addin/PanelLook.cs" />
+    <Compile Include="../../src/Gordium.Revit.Addin/SelectionStrip.cs" Link="Addin/SelectionStrip.cs" />
     <Page Remove="**/*.xaml" />
     <EmbeddedResource Include="../../src/Gordium.Revit.Addin/PanelStyles.xaml" LogicalName="Gordium.Revit.Addin.PanelStyles.xaml" Link="Addin/PanelStyles.xaml" />
   </ItemGroup>
