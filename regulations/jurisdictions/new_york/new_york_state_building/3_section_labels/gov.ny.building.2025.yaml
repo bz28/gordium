@@ -4180,8 +4180,8 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'A landing at a door as wide as the stairway or door, whichever is greater, at least 44 inches long (36 in Groups
-      R-3 and U and within Group R-2 units), not reduced by a door beyond 7 inches or, serving 50 or more, below half its
-      width: landings aren''t in the model, a person''s check.'
+      R-3 and U and within Group R-2 units), a required dimension not reduced by a fully open door by more than 7 inches and,
+      serving 50 or more, the landing not reduced by a door in any position to less than half its required width: landings aren''t in the model, a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 324
@@ -4229,7 +4229,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Two doors in a series at least 48 inches apart plus a door swinging into the space, swinging the same way or
-      away from it: vestibules aren''t in the model, a person''s check.'
+      away from it: doors in a series aren''t in the model, a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 324

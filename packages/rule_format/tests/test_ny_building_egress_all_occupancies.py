@@ -1070,3 +1070,9 @@ def test_the_6c_flags_state_each_exceptions_own_conditions(rules):
     series = note("general.bc_1010_1_7_door_arrangement")
     assert "need not be 48 inches from the other door (they still swing as above)" in series  # exception 2
     assert "other than within Type A units" in series                                          # exception 3
+    # review round 2: 1010.1.3's 5 pounds is for any interior manual swinging door not REQUIRED to be fire rated
+    # (p.323 lines 32-34), and 1010.1.7 is any two doors in a series, not only a vestibule's (p.324 line 26)
+    forces = note("general.bc_1010_1_3_door_forces")
+    assert "and one required to be fire rated, is set in motion by at most 30 pounds" in forces
+    assert "a fire-rated one" not in forces
+    assert "(in a vestibule or anywhere else on the way out)" in series
