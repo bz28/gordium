@@ -60,9 +60,14 @@ public static class CountBar
         title is not null && title.IndexOf(" (", StringComparison.Ordinal) is var i and > 0 ? title[..i] : title;
 }
 
-/// <summary>One segment of the results' proportion bar (UI polish change 18): a status and how many of the checker's
-/// rows it stands for.</summary>
-public sealed record BarSegment(PanelStatus Status, int Count);
+/// <summary>One segment of the results' proportion bar (UI polish change 18): the status it is drawn in, how many of
+/// the checker's rows it stands for, and their verdict in words ("1 complies": review round 1, a complying slice drawn
+/// neutral was called "Not applicable" on hover).</summary>
+public sealed record BarSegment(PanelStatus Status, int Count)
+{
+    /// <summary>What the slice is, in the checker's verdict: "98 need review", "1 complies".</summary>
+    public string Words { get; init; } = "";
+}
 
 /// <summary>
 /// The proportion bar under the results' summary line (UI polish change 18): one segment per verdict, as long as its
@@ -88,6 +93,9 @@ public static class ProportionBar
         ArgumentNullException.ThrowIfNull(verdicts);
         var unsettled = verdicts.Any(v => v is Gordium.Worker.Verdict.DoesNotComply or Gordium.Worker.Verdict.NeedsReview or Gordium.Worker.Verdict.NotChecked);
         return [.. Order.Select(o => (o, n: verdicts.Count(v => v == o.Verdict))).Where(x => x.n > 0).Select(x => new BarSegment(
-            stale ? PanelStatus.Stale : x.o.Status == PanelStatus.Complies && unsettled ? PanelStatus.NotApplicable : x.o.Status, x.n))];
+            stale ? PanelStatus.Stale : x.o.Status == PanelStatus.Complies && unsettled ? PanelStatus.NotApplicable : x.o.Status, x.n)
+        {
+            Words = (stale ? ResultViews.SummaryPast(Enumerable.Repeat(x.o.Verdict, x.n)) : ResultViews.Summary(Enumerable.Repeat(x.o.Verdict, x.n))),
+        })];
     }
 }

@@ -17,7 +17,7 @@ internal static class SelectionStrip
     internal const string Tag = "pane.selection";
 
     /// <summary>The strip for <paramref name="answer"/>: <paramref name="open"/> opens a result's detail,
-    /// <paramref name="close"/> puts the strip away; <paramref name="all"/> lists every result, not the first eight;
+    /// <paramref name="close"/> puts the strip away; <paramref name="all"/> lists every result, not the top SelectionMap.Shown (three);
     /// <paramref name="folded"/> (once a result is opened from it, so the detail has the pane) only its title, its line
     /// and "List them" (<paramref name="unfold"/>).</summary>
     internal static W.FrameworkElement Build(SelectionAnswer answer, Action<string> open, Action close, bool all, Action showAll,

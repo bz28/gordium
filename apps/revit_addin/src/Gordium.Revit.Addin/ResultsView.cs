@@ -490,7 +490,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             words.Children.Add(SetUpButton());
             summary.Children.Add(Banner(PanelStatus.Review, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, words, bottom: 6));
         }
-        if (model.Views is not null && _change is { } top)
+        // What changed at the top (change 40), after the stale notice when there is one (review round 1: the notice
+        // that the results may not hold is always read first)
+        if (model.Views is not null && _change is { } top && !parts.Contains(PanelPart.Stale))
             summary.Children.Add(ChangeLine(top, stale));
         foreach (var part in parts)
             switch (part)
@@ -507,6 +509,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     sa.Margin = new W.Thickness(0, 6, 0, 0);
                     sw.Children.Add(sa);
                     summary.Children.Add(Banner(PanelStatus.Stale, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, sw, bottom: 6));
+                    if (model.Views is not null && _change is { } afterStale)
+                        summary.Children.Add(ChangeLine(afterStale, stale));
                     break;
                 // which code and why: By code says it under the book (change 36), so here only without the two views
                 // or while it isn't decided (needs review: the architect must see that before any result)
@@ -591,7 +595,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     {
         var p = new C.StackPanel();
         if (!PaneWords.ChangeIsList(change))                   // no verdict changed: the worker's one line, as it says
+        {
             p.Children.Add(Typed(new C.TextBlock { Text = change.Words, TextWrapping = W.TextWrapping.Wrap }, Caption));
+            if (_factsChanged is { } changed)                  // what the architect changed, said either way (review round 1)
+                p.Children.Add(Small(changed, top: 2));
+        }
         else
         {
             // change 40: "Since 14:32 · 9 results changed", what the architect changed, the first four, "Show all 9"
@@ -642,7 +650,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         for (var i = 0; i < segments.Count; i++)
         {
             grid.ColumnDefinitions.Add(new C.ColumnDefinition { Width = new W.GridLength(segments[i].Count, W.GridUnitType.Star) });
-            var seg = new System.Windows.Shapes.Rectangle { Margin = new W.Thickness(i == 0 ? 0 : 1, 0, 0, 0), ToolTip = StatusLook.Word(segments[i].Status) };
+            var seg = new System.Windows.Shapes.Rectangle { Margin = new W.Thickness(i == 0 ? 0 : 1, 0, 0, 0), ToolTip = segments[i].Words };
             seg.SetResourceReference(System.Windows.Shapes.Shape.FillProperty,
                                      segments[i].Status == PanelStatus.Stale ? PanelLook.StaleHatch : StatusLook.Colour(segments[i].Status));
             C.Grid.SetColumn(seg, i);
