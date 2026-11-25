@@ -265,3 +265,24 @@ def test_a_foyer_or_a_space_with_its_own_door_into_an_exit_is_never_a_no():
     got = _story(_into_exit(("none", "marked", "marked"), [0, 1]))
     assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_into_exit"].format(name="r0", door="se")
     assert _story(_into_exit(("none", "none", "marked"), [0, 1]))["measures"][OUTSIDE_FACT] is False   # room 1
+
+
+def test_a_space_with_any_way_out_besides_the_shared_corridor_is_never_a_no():
+    """Review round 4 (PR 2): a living room on the shared corridor whose own foyer (a lobby or a corridor, with the
+    front door marked) also opens into a coat closet read "no" (the foyer, touching two spaces, wasn't merged into
+    it); and a space joined to a stair enclosure by an opening with no door read "no". "No" stands only where the
+    shared corridor is the space's one way out of itself."""
+    for hall in ("lobby", "corridor"):
+        desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+        desc["doors"] = [d for d in desc["doors"] if d["id"] != "o0"]
+        desc["rooms"].append(room("f", rect(0, -6.5, 10, -0.5), use=hall, lockable=False, pass_through=True))
+        desc["rooms"].append(room("k", rect(10.5, -6.5, 14, -0.5), use="closet", lockable=False, pass_through=False))
+        desc["doors"] += [door("fa", (5, -0.25), (1, 0), ("r0", "f")),
+                          door("fo", (-0.25, -3.5), (0, 1), ("f", "outside"), exit_id="fo"),
+                          door("fk", (10.25, -3.5), (0, 1), ("f", "k"))]
+        assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False, hall
+    desc = _into_exit(("none", "marked", "marked"), [0, 1])
+    desc["doors"] = [d for d in desc["doors"] if d["id"] != "se"]
+    desc["passages"] = [{"rooms": ["r0", "s"], "line": [[0, 0], [10, 0]]}]
+    desc["rooms"][-1]["floor"] = [list(p) for p in rect(0, -6, 10, 0)]
+    assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False

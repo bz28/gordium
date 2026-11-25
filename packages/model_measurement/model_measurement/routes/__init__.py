@@ -509,6 +509,7 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
     groups = [set(g) for g in found]
     residential = {i for i, g in enumerate(found) if any((items.get(r) or {}).get("function") == "residential" for r in g)}
     within_units = (building or {}).get("corridors_within_dwelling_units") if isinstance(building, dict) else None
+    shared_rooms = {}                                    # each common space: the rooms of the shared corridor it opens into
     common, private = set(), set()                       # spaces opening into a corridor shared between dwelling units
     for rooms, touched in halls:                         # (common), or into one that may be a space's own (private)
         if len(touched) == 1:                            # a vestibule: part of the one space it opens into
@@ -519,6 +520,8 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
                 len(touched & residential) >= 2 and any(
                 OUTSIDE in d.sides or any(s != r and _is_exit(story, s) for s in d.sides if s in story.rooms)
                 for d in story.doors.values() for r in rooms if r in d.sides):
+            for k in touched & residential:
+                shared_rooms[k] = shared_rooms.get(k, set()) | set(rooms)
             common |= touched & residential
             private |= touched - residential
         else:
@@ -535,12 +538,15 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
         if outside:
             unclear = unclear or Stop("outside_door_not_marked", name=names, door=outside[0].name)
         elif i in common:
-            into = sorted((d for d in story.doors.values() if group & set(d.sides)
-                           and any(s not in group and s in story.rooms and _is_exit(story, s) for s in d.sides)),
-                          key=lambda d: d.id)
-            if into:                                     # its own door into an exit too: whether that is "directly
-                unclear = unclear or Stop("outside_into_exit", name=names, door=into[0].name)    # outside" isn't
-                continue                                                                           # settled here
+            # "no" only where the shared corridor is the space's one way out of itself: any other door or opening
+            # (into an exit, or into another hall, a vestibule shared with a closet) may be its own direct way out
+            links = [(d.name, set(d.sides)) for d in story.doors.values()] + \
+                [(f"{a} to {b}", {a, b}) for a, b, _ in story.passages]
+            other = sorted(name for name, sides in links if sides & group and sides - group
+                           and not (sides - group) <= shared_rooms[i])
+            if other:
+                unclear = unclear or Stop("outside_into_exit", name=names, door=other[0])
+                continue
             return False
         elif i in private:
             unclear = unclear or Stop("outside_hall_unclear", name=names)
