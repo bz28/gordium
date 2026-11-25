@@ -918,7 +918,7 @@ public static class SetupChecklist
                 foreach (var id in new[] { s.FromRoom, s.ToRoom })
                     if (id is not null)
                         enclosed.Add(id);
-        bool Set(MarkedElement r) => RoomFunctions.Table.Of(Marks.Text(MarkReading.Value(r, Marks.RoomFunction))) is not null;
+        bool Set(MarkedElement r) => RoomFunctions.Of(Marks.Text(MarkReading.Value(r, Marks.RoomFunction))) is not null;
         var suggestions = new List<Suggestion>();
         foreach (var r in rooms.Where(r => Marks.Text(MarkReading.Value(r, Marks.RoomFunction)) is null && !enclosed.Contains(r.UniqueId)))
         {

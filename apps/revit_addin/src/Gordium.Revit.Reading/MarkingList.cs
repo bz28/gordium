@@ -72,7 +72,7 @@ public static class MarkReading
                                        RoomUses.Table.Of(Marks.Text(Get(e, Marks.Use))), Marks.Text(Get(e, Marks.Use)),
                                        Marks.YesNo(Get(e, Marks.CanBeLocked)), Marks.YesNo(Get(e, Marks.PassThrough)),
                                        Marks.YesNo(Get(e, Marks.NotOccupied)),
-                                       RoomFunctions.Table.Of(Marks.Text(Get(e, Marks.RoomFunction))), Marks.Text(Get(e, Marks.RoomFunction)))).ToList();
+                                       RoomFunctions.Of(Marks.Text(Get(e, Marks.RoomFunction))), Marks.Text(Get(e, Marks.RoomFunction)))).ToList();
 
     public static IReadOnlyList<OpeningMarks> Openings(RevitModel model) =>
         InDesign(model).Where(e => KindOf(e) is MarkedKind.Window or MarkedKind.Door)

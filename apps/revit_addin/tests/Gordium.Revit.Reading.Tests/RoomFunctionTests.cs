@@ -38,6 +38,10 @@ public sealed class RoomFunctionTests
         Assert.Equal(41, RoomFunctions.Words.Distinct(StringComparer.OrdinalIgnoreCase).Count());
         // the table's Decks row sits under "Skating rinks, swimming pools": a rink's deck too (review round 1)
         Assert.Equal("pool_deck", RoomFunctions.Table.Of("Rink or pool deck"));
+        // a row's own id, in any case, is that row (review round 8): never sent as typed, nor said to be unlisted
+        Assert.Equal(("business", "day_care", "courtroom"), (RoomFunctions.Of("business"), RoomFunctions.Of(" Day_Care "), RoomFunctions.Of("COURTROOM")));
+        Assert.Null(RoomFunctions.Of("office"));
+        Assert.Null(RoomFunctions.Of(null));
         foreach (var w in RoomFunctions.Words)
             Assert.Contains(w, m.Description, StringComparison.Ordinal);       // the tooltip lists each
         // once group 3's factors are in this tree, its rows are exactly these (the names are fixed: group 3's review)
@@ -56,12 +60,14 @@ public sealed class RoomFunctionTests
         floor.SetMark("A", Marks.RoomFunction, new(true, Text: " business area "));      // any case, trimmed
         floor.SetMark("B", Marks.RoomFunction, new(true, Text: "office"));               // not a row: said, sent as typed
         floor.SetMark("L", Marks.RoomFunction, new(false, Text: ""));                    // never set
+        floor.SetMark("S", Marks.RoomFunction, new(true, Text: "Business"));              // the row's id, capitals: its row
         var read = InteriorReader.Read(floor.Model());
         Assert.Equal("business", FakeFloor.Part(read, "rooms", "A")!["function"]!.GetValue<string>());
         // review round 7: never dropped (the checker would read a closet so marked as holding no load): sent as typed,
         // which the checker says and leaves at needs review
         Assert.Equal("office", FakeFloor.Part(read, "rooms", "B")!["function"]!.GetValue<string>());
         Assert.Null(FakeFloor.Part(read, "rooms", "L")!["function"]);
+        Assert.Equal("business", FakeFloor.Part(read, "rooms", "S")!["function"]!.GetValue<string>());
         Assert.Null(FakeFloor.Part(read, "rooms", "C")!["function"]);                     // no mark at all
         var said = read.RouteNotes.Concat(read.Notes).Where(n => n.Field == "function").ToList();
         var note = Assert.Single(said);                                                  // blank is the usual answer: no note

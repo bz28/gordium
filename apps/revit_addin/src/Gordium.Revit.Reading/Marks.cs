@@ -664,6 +664,13 @@ public static class RoomFunctions
 
     public static IReadOnlyList<string> Words => Table.Words;
 
+    /// <summary>The row a typed word names: one of the words, or the row's own id ("business", "day_care"), in any case;
+    /// null for anything else. The id is read as its row (review round 8: sent as typed, the checker matched it to its
+    /// row while the add-in said it wasn't one, and "Business" in capitals didn't match), and always sent as the id.</summary>
+    public static string? Of(string? word) =>
+        Table.Of(word) ?? (word is null ? null
+            : Table.Words.Select(w => Table.Of(w)!).FirstOrDefault(id => string.Equals(id, word.Trim(), StringComparison.OrdinalIgnoreCase)));
+
     /// <summary>The words in a sentence: separated by semicolons, since some hold a comma.</summary>
     public static string Listed => string.Join("; ", Table.Words);
 }
