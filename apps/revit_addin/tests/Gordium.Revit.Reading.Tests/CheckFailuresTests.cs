@@ -74,6 +74,14 @@ public sealed class CheckFailuresTests
         Assert.Equal("Gordium's checker didn't start", CheckFailures.OfRead(new WorkerTimeoutException("t") { Command = "hello" }, Details).Title);
         Assert.Equal(FailureKind.CheckerStopped, CheckFailures.OfRead(new AggregateException(new WorkerExitedException("e", 1, "")), Details).Kind);
         Assert.Equal(FailureKind.ReadFailed, CheckFailures.OfRead(new InvalidOperationException("Revit"), Details).Kind);
+        // review round 6: the worker that couldn't be started, and a malformed left-out answer, are the checker's too
+        Assert.NotEqual(FailureKind.ReadFailed, CheckFailures.OfRead(new WorkerUnavailableException("no clone"), Details).Kind);
+        var objects = new System.Text.Json.Nodes.JsonArray(new System.Text.Json.Nodes.JsonObject { ["id"] = "a" });
+        var bad = Assert.Throws<WorkerProtocolException>(() => WorkerLeftOut.Read(objects, System.Text.Json.JsonDocument.Parse("[]").RootElement,
+                                                                                  System.Text.Json.JsonDocument.Parse("[]").RootElement));
+        Assert.Equal(FailureKind.Unreadable, CheckFailures.OfRead(bad, Details).Kind);
+        var started = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckProject.cs"));
+        Assert.Contains("throw new WorkerUnavailableException(", started, StringComparison.Ordinal);
         // change 16: the read failure is in the pane, never a dialog that blocks Revit
         var check = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckProject.cs"));
         Assert.Contains("ResultsPane.Failed(CheckFailures.OfRead(e, ", check, StringComparison.Ordinal);

@@ -318,9 +318,21 @@ public sealed class CheckProjectCommand : IExternalCommand
     private sealed class StartedLeftOut(Task<WorkerClient> worker) : ILeftOutAsker
     {
         public Task<IReadOnlyList<LeftOutDecision>> AskAsync(JsonObject? lot, JsonArray objects, JsonArray buildings,
-                                                             JsonObject definitions, CancellationToken cancel) =>
-            new WorkerLeftOut(ReadSteps.Time("worker_wait", () => worker.GetAwaiter().GetResult()))
-                .AskAsync(lot, objects, buildings, definitions, cancel);
+                                                             JsonObject definitions, CancellationToken cancel)
+        {
+            WorkerClient client;
+            try
+            {
+                client = ReadSteps.Time("worker_wait", () => worker.GetAwaiter().GetResult());
+            }
+            catch (Exception e) when (e is not WorkerException and not OperationCanceledException)
+            {
+                // the worker couldn't be started (no Gordium folder, Revit closing): the checker's failure, said as such
+                // in the pane, never as Revit's read (UI polish PR 5 review round 6)
+                throw new WorkerUnavailableException($"The Gordium checker couldn't be started: {e.Message}", e);
+            }
+            return new WorkerLeftOut(client).AskAsync(lot, objects, buildings, definitions, cancel);
+        }
     }
 
     /// <summary>The answer in words and rows (each element's label and the phase read here, on Revit's thread), and

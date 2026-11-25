@@ -7,6 +7,13 @@ public class WorkerException : Exception
     public WorkerException(string message, Exception? inner = null) : base(message, inner) { }
 }
 
+/// <summary>The worker couldn't be started at all (no Gordium folder found, Revit closing): the checker's failure,
+/// never the model read's, though the read is what was waiting for it.</summary>
+public sealed class WorkerUnavailableException : WorkerException
+{
+    public WorkerUnavailableException(string message, Exception? inner = null) : base(message, inner) { }
+}
+
 /// <summary>The worker answered <c>"ok": false</c>: it refused the request (a bad field, an unknown command, facts
 /// it can't read) and gave its words. The worker is still in step and keeps serving.</summary>
 public sealed class WorkerRefusedException : WorkerException
