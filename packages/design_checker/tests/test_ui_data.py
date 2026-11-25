@@ -588,3 +588,17 @@ def test_a_fact_the_code_choice_cant_use_is_asked_for_by_its_mark(key, how):
     got = code_scope.decide(values, building)
     assert got["code"] is None and got["ask"] != code_scope.BY_HAND, got
     assert key in got["ask_facts"], (got["ask"], got["ask_facts"])
+
+
+def test_every_plain_measure_name_reads_inside_each_asks_headline():
+    # PR #181 review round 9: a name that was a "whether" clause read "Fix the model so the whether the space is
+    # itself an exit can be measured"; each name is a noun phrase, so every headline template reads
+    from design_checker import each_part
+    # story_first_above_or_below_grade's name is main's, read by the Revit add-in's saved answer: a to-do (PR #181)
+    for measure, name in each_part.MEASURE_NAMES.items():
+        if measure == "story_first_above_or_below_grade":
+            continue
+        assert not name.lower().startswith(("whether", "if ", "is ", "the ")), (measure, name)
+    got = ui_data._from_cause({"kind": "fix_model", "key": "model:space:space_is_exit:x", "words": "w",
+                               "measure": "space_is_exit"}, "space")["headline"]
+    assert got == "Fix the model so the exit status (whether the space is itself an exit) can be measured"

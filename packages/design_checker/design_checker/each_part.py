@@ -482,7 +482,7 @@ MEASURE_NAMES = {
     "assembly_fixed_seating": "fixed assembly seating (whether any room has it)",
     "special_egress_spaces": "special egress spaces (whether the building has any with their own egress sections)",
     "merchandise_pads": "merchandise pads (whether a store has any)",
-    "space_is_exit": "whether the space is itself an exit",
+    "space_is_exit": "exit status (whether the space is itself an exit)",
     "space_occupant_load": "occupant load",
     "story_first_above_or_below_grade": "whether the story is the first above or below grade",
     "space_exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
