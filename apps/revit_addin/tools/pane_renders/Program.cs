@@ -178,20 +178,25 @@ internal static class Program
                     // UI polish PR 4b: What changed with what the architect changed (change 40; two checks of one
                     // project, the second after the sprinkler system and corner lot were answered), the proportion bar
                     // (18), the selection strip (41), the printable summary in By code order (38)
-                    var answeredModel = new RevitModel
+                    // the house (106 Ithaca Rd) before and after its lot facts were answered: its two real answers, and its
+                    // Setup facts before and after (no ADU, no stream nearby, a garage for 2 cars)
+                    var (_, houseModel, houseSides) = Fixture(Path.Combine(fix, "setup_ithaca106.json"));
+                    var houseAnswered = new RevitModel
                     {
-                        Document = setupModel.Document, Marked = setupModel.Marked, DisplayUnits = setupModel.DisplayUnits,
-                        ProjectMarks = new Dictionary<Guid, MarkValue>(setupModel.ProjectMarks)
+                        Document = houseModel.Document, Marked = houseModel.Marked, DisplayUnits = houseModel.DisplayUnits,
+                        ProjectMarks = new Dictionary<Guid, MarkValue>(houseModel.ProjectMarks)
                         {
-                            [Marks.SprinklerSystem.Guid] = new(true, Text: SprinklerWords.Table.Words[0]),
-                            [Marks.CornerLot.Guid] = new(true, 0),
+                            [Marks.AccessoryDwellingUnit.Guid] = new(true, 0),
+                            [Marks.StreamNearLot.Guid] = new(true, 0),
+                            [Marks.GarageCars.Guid] = new(true, 2),
                         },
                     };
-                    var answered = SetupScreen.Build(answeredModel, setupSides, options).Fields;
-                    Step(make(theme, []), "19_what_changed_apartment", 900, dark, p =>
+                    Step(make(theme, []), "19_what_changed_house", 900, dark, p =>
                     {
-                        p.Show(title, when, ResultRows.Build(houseAfter, "New Construction", [], null), Labels(houseAfter), questions, key: "render:what-changed");
-                        p.Show(title, when.AddMinutes(9), rows, Labels(apartment), answered, key: "render:what-changed");
+                        p.Show("106 Ithaca Rd", when, ResultRows.Build(house, "New Construction", [], null), Labels(house),
+                               SetupScreen.Build(houseModel, houseSides, options).Fields, key: "render:what-changed");
+                        p.Show("106 Ithaca Rd", when.AddMinutes(9), ResultRows.Build(houseAfter, "New Construction", [], null), Labels(houseAfter),
+                               SetupScreen.Build(houseAnswered, houseSides, options).Fields, key: "render:what-changed");
                         Settle(p.View);
                         Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, ResultsView.ChangeTag)), "19: What changed sits at the top");
                         Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t).StartsWith("You changed: ", StringComparison.Ordinal)), "19: it says what you changed");
