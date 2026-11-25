@@ -143,6 +143,8 @@ STOPS = {
                               "grades are each building's ground isn't known",
     # whether the story's rooms exit directly outside (BCNYS 1006.3.4 item 2: __init__.rooms_exit_outside)
     "outside_no_rooms": "the story has no room besides its exits and the closets they serve",
+    "outside_way_unclear": "the rooms {name} have no door to the outside and open into no corridor or lobby shared "
+                           "with other rooms: whether they exit directly outside isn't known",
     "outside_door_not_marked": "the room {name} has a door to the outside ({door}) not marked as an exit door at the "
                                "level of exit discharge: whether it is one isn't known (exits are marked, never "
                                "guessed)",
