@@ -23,6 +23,9 @@ that reads it; a row that would comply on it needs review until the reading is c
 `architect_stated`, {measure: words}, says a figure leaves out rooms the architect marks `not_occupied` (decision 1b:
 NFPA's `egress_travel_distance_occupied`, `common_path_of_travel_occupied` and the room-door travel; the IBC's
 figures never leave a room out), shown beside each row that reads it, never holding a pass: the architect's statement.
+`rests_on`, {measure: words}, says a figure stands on Gordium's reading and on another requirement being met (the
+dwelling units on a story, dwelling_units.py: 1016.2.1, a flag in the same answer), shown beside each row that reads
+it, never holding a pass.
 
 The pieces (decision 11): floor.py reads each story's floor, zones and rings (decisions 1, 1a, 10); paths.py draws
 decision 2's routes; remote.py gives decision 3's travel figure; common_path.py decision 5's; dead_ends.py decision
@@ -143,7 +146,8 @@ def _story_parts(story, uses, items, unknown, parts, r) -> None:
         sp["not_measured"][OUTSIDE_FACT] = s.reason
     try:
         sp["measures"][UNITS_FACT] = dwelling_units.units_on(story, items, _is_exit)
-        sp["more"][UNITS_FACT] = {"reading": dwelling_units.READING}      # said with the figure (1016.2.1)
+        if sp["measures"][UNITS_FACT]:                   # the reading the count stands on, beside every row reading it
+            sp.setdefault("rests_on", {})[UNITS_FACT] = dwelling_units.RESTS_ON
     except Stop as s:
         sp["not_measured"][UNITS_FACT] = s.reason
     for m in ("story_occupant_load",):

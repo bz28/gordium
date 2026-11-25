@@ -17,7 +17,9 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md, step 3):
   Gordium: Function). A group whose rooms that could be lived in (not a toilet, closet or storeroom) all state
   another function is no dwelling unit; one where such a room states none may be one: not measured.
 - A dwelling unit reaches the exits without passing through another (1016.2.1), so a group with one door to a shared
-  space is one unit: Gordium's reading, said with the figure (1016.2.1 is a person's check, always shown). A group with
+  space is one unit: Gordium's reading, to confirm, said with every row reading the count (`rests_on`, RESTS_ON),
+  which also says the count holds only if 1016.2.1 is met (a flag, a person's check, in every Group R-2 answer). It
+  never holds a pass: a second unit drawn with no door of its own would break 1016.2.1 itself. A group with
   two or more such doors may be two units joined by a door (a lock-off): not measured. One with none reaches the
   exits only through another story (a unit on two stories) or not at all: not measured.
 - Not measured either where the story's routes aren't read (a room or door not read, an enclosed space with no room
@@ -26,13 +28,17 @@ Never a guess: a count too low could pass a one-exit story Table 1006.3.4(1) all
 """
 
 from model_measurement.routes.floor import OUTSIDE
+from model_measurement.routes.spaces import spaces
 from model_measurement.routes.stops import Stop
 
-SHARED_USES = ("corridor", "lobby")
 NOT_LIVED_IN = ("toilet", "closet", "accessory_storage")
 RESIDENTIAL = "residential"
-READING = ("Gordium's reading: a group of rooms with one door to the corridors, exits or outside is one dwelling unit "
-           "(1016.2.1: each dwelling unit reaches the exits without passing through another)")
+QUOTE_1016_2_1 = ("each tenant space, dwelling unit and sleeping unit shall be provided with access to the required "
+                  "exits without passing through adjacent tenant spaces, dwelling units and sleeping units")
+# said with every row reading the count (parts.yaml `rests_on`): the reading it stands on, and the rule that must hold
+# for it (shown always, a person's check: general.bc_1016_2_1_multiple_tenants), never holding a pass
+RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with one door to the corridors, exits or outside is "
+            "one dwelling unit. This count holds only if BCNYS 1016.2.1 (p.341) is met: \"" + QUOTE_1016_2_1 + "\"")
 
 
 def units_on(story, items: dict, is_exit) -> int:
@@ -40,25 +46,14 @@ def units_on(story, items: dict, is_exit) -> int:
     `function`); `is_exit(story, room id)`: whether the room is itself an exit (routes._is_exit, Stop where unclear)."""
     if story.stops:
         raise Stop("story_not_measured", reasons="; ".join(story.stops))
-    shared = set()
     for rid, room in sorted(story.rooms.items()):
-        if room.use is None:
+        if room.use is None:                             # it may be a corridor joining two units into one group
             raise Stop("units_use_unknown", name=room.name)
-        if room.use in SHARED_USES or is_exit(story, rid):
-            shared.add(rid)
-    group = {rid: {rid} for rid in story.rooms if rid not in shared}
-
-    def join(a, b):
-        if a in group and b in group and group[a] is not group[b]:
-            both = group[a] | group[b]
-            for r in both:
-                group[r] = both
-    for d in story.doors.values():
-        join(*d.sides)
-    for a, b, _ in story.passages:
-        join(a, b)
+    found, halls = spaces(story, is_exit)
+    grouped = set().union(*found) if found else set()
+    shared = (set(story.rooms) - grouped) | {OUTSIDE}    # the corridors, lobbies and exits, and the outside
     count = 0
-    for g in sorted({frozenset(v) for v in group.values()}, key=sorted):
+    for g in found:
         names = ", ".join(sorted(story.rooms[r].name for r in g))
         lived = [r for r in g if story.rooms[r].use not in NOT_LIVED_IN]
         functions = [(items.get(r) or {}).get("function") for r in lived]
@@ -67,7 +62,7 @@ def units_on(story, items: dict, is_exit) -> int:
         if RESIDENTIAL not in functions:
             raise Stop("units_function_unknown", name=names)
         entrances = sorted((d for d in story.doors.values()
-                            if set(d.sides) & g and set(d.sides) - g and set(d.sides) - g <= shared | {OUTSIDE}),
+                            if set(d.sides) & g and set(d.sides) - g and set(d.sides) - g <= shared),
                            key=lambda d: d.id)
         if not entrances:
             raise Stop("units_no_entrance", name=names)

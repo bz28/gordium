@@ -1,0 +1,96 @@
+"""The dwelling units on a story (model_measurement/routes/dwelling_units.py) through the Building Code check: the
+count rests on Gordium's reading that each group of rooms with one door to the corridors, exits or outside is one
+dwelling unit, which holds only if BCNYS 1016.2.1 is met (p.341: "each tenant space, dwelling unit and sleeping unit
+shall be provided with access to the required exits without passing through adjacent tenant spaces, dwelling units
+and sleeping units"). The count never holds a pass back, so wherever it lets Table 1006.3.4(1)'s row pass, the
+answer must also ask a person about 1016.2.1 (its flag), and the row's own line must say the reading.
+
+The building: the four-unit apartment (as the Revit reader reads it once marked) with its east stair's doors unmarked
+(one exit a story; the east stair a storeroom), stated Group R-2 of dwelling units, flat ground at 0."""
+
+import copy
+import itertools
+import sys
+
+import pytest
+
+from design_checker import egress
+from model_measurement.routes.dwelling_units import QUOTE_1016_2_1
+from rule_format.rulebook import REPO, Context, load
+
+sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
+import make_ny_build_data as build  # noqa: E402
+
+PLACE = "regulations/jurisdictions/new_york/ithaca_city"
+ROW = "general.bc_table_1006_3_4_1__r2_dwelling_units"
+FLAG = "general.bc_1016_2_1_multiple_tenants"
+UNITS = "story_dwelling_units"
+VALUES = {"use": "multiple_family", "dwelling_units": 4}
+RULES = REPO / "regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/general.yaml"
+
+
+def _check(interior):
+    allowed = Context.for_jurisdiction(REPO / PLACE).allowed()
+    return egress.check(egress.laws(PLACE), copy.deepcopy(interior), VALUES, allowed, ground={"flat": 0.0})
+
+
+def test_the_r2_row_passes_on_the_measured_count_saying_the_reading_and_1016_2_1_is_asked():
+    """One exit a story, 2 units each (measured), 53.95 ft of travel, an NFPA 13R system and escape openings: Table
+    1006.3.4(1) allows it; the row's line says the reading and 1016.2.1, and the 1016.2.1 flag is in the answer."""
+    interior = build.interior_of()
+    got = _check({**interior, **_one_exit_building(interior, "nfpa_13r")})
+    assert got["results"][ROW] == "pass"
+    rows = [r for r in got["rows"] if r["rule"] == ROW]
+    assert [r["outcome"] for r in rows] == ["pass", "pass"]
+    assert all(any("1016.2.1 (p.341)" in w and QUOTE_1016_2_1 in w for w in r["rests_on"]) for r in rows)
+    lines = [i for i in got["items"] if i.get("rule") == ROW]
+    assert lines and all(QUOTE_1016_2_1 in str(i) for i in lines)          # the panel's line says it too
+    assert got["results"][FLAG] == "needs_review"
+
+
+def _one_exit_building(interior, sprinkler):
+    """The one-exit apartment's keys (the fixture's, with `sprinkler`), for a walk over its settings."""
+    i = copy.deepcopy(interior)
+    names = {r["id"]: r["name"].upper() for r in i["rooms"]}
+    for d in i["doors"]:
+        if d.get("exit_id") and "EAST" in names.get(d["exit_id"], ""):
+            d.pop("exit_kind"), d.pop("exit_id")
+    for r in i["rooms"]:
+        if "STAIR EAST" in r["name"].upper():
+            r["function"] = "accessory_storage_mechanical"
+    i["building"] = {**i["building"], "occupancy_groups": ["R-2"], "sprinkler_system": sprinkler,
+                     "assembly_fixed_seating": False, "special_egress_spaces": False, "occupant_load_increased": False,
+                     "r2_sleeping_units": False, "emergency_escape_openings_1031": True,
+                     "corridors_within_dwelling_units": False}
+    return {k: i[k] for k in ("doors", "rooms", "building")}
+
+
+@pytest.mark.parametrize("sprinkler,residential", list(itertools.product(("none", "nfpa_13r", "nfpa_13"), (0, 1, 2))))
+def test_wherever_a_measured_count_lets_the_r2_row_pass_1016_2_1_is_asked_in_the_same_answer(sprinkler,
+                                                                                             residential):
+    """The pin: over the sprinkler system and how many apartments state their function (none, one, both), every
+    passing Table 1006.3.4(1) row whose story's count was measured comes with the 1016.2.1 flag needing review in the
+    same answer, and the count's reading in the row."""
+    interior = build.interior_of()
+    interior.update(_one_exit_building(interior, sprinkler))
+    apartments = [r for r in interior["rooms"] if "APARTMENT" in r["name"].upper()]
+    for k, r in enumerate(sorted(apartments, key=lambda r: r["name"])):
+        if k % 2 >= residential:                         # the first `residential` of each story's pair keep it
+            r.pop("function", None)
+    got = _check(interior)
+    measured = {s["id"] for s in got["interior"]["parts"]["story"] if UNITS in s["measures"]}
+    passing = [r for r in got["rows"] if r["rule"] == ROW and r["outcome"] == "pass"]
+    for r in passing:
+        assert r["id"] in measured or UNITS not in r["values"] or r["values"][UNITS] is None, r
+        if r["values"].get(UNITS) is not None:
+            assert got["results"][FLAG] == "needs_review", (sprinkler, residential)
+            assert any(QUOTE_1016_2_1 in w for w in r.get("rests_on") or []), r
+    if sprinkler == "nfpa_13r" and residential == 2:
+        assert passing, "the walk must reach a pass on a measured count"
+
+
+def test_the_1016_2_1_flag_is_never_set_aside_in_group_r2():
+    """The flag the count rests on applies whatever the building states: no applies_when, or one true for Group R-2
+    under every setting (so no building fact can drop the question while the count passes the row)."""
+    rule = next(r for r in load(RULES)["rules"] if r["id"] == FLAG)
+    assert rule["kind"] == "flag" and not rule.get("applies_when"), rule.get("applies_when")
