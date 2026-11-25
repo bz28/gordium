@@ -441,16 +441,21 @@ internal static class Program
     private static string TextOf(TextBlock t) =>
         t.Text is { Length: > 0 } x ? x : new System.Windows.Documents.TextRange(t.ContentStart, t.ContentEnd).Text;
 
+    // a question of the questions card, by the pane's own rule (a "mark" ask is a project question only with a facts. or
+    // building. field; review after #202: a door's field-less mark, or rooms[].function, is a per-element mark)
+    private static bool Asked(System.Text.Json.Nodes.JsonNode? ask) =>
+        ResultViews.KindOf((string?)ask!["kind"], (string?)ask["field"]) == FixKind.Answer;
+
     internal static CheckResult LoadSaying(string path)
     {
         var node = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8))!;
         var items = node["result"]!["view"]!["items"]!.AsArray();
         var picked = items.Where(i => (string?)i!["in_code"]?["chapter"] == "10"
                                       && ((string?)i!["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true
-                                      && i!["asks"] is System.Text.Json.Nodes.JsonArray a && a.All(x => (string?)x!["kind"] != "mark")).Take(2)
+                                      && i!["asks"] is System.Text.Json.Nodes.JsonArray a && !a.Any(Asked)).Take(2)
                           .Concat(items.Where(i => (string?)i!["in_code"]?["chapter"] == "10"
                                                    && ((string?)i!["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true
-                                                   && i!["asks"] is System.Text.Json.Nodes.JsonArray a && a.Any(x => (string?)x!["kind"] == "mark")).Take(1));
+                                                   && i!["asks"] is System.Text.Json.Nodes.JsonArray a && a.Any(Asked)).Take(1));
         foreach (var i in picked)
             i!["reason"] = "the building holds another occupancy: this rulebook's rules are " + ResultViews.DraftedFor + ", so a person checks";
         var doc = JsonDocument.Parse(node.ToJsonString());
