@@ -13999,8 +13999,11 @@ rules:
   notes: 'Section group 6b: every door the model gives; one that isn''t swinging complies (1010.1.2.1 asks it nothing), one
     whose operation is other or not stated may be swinging. Whether it swings with egress travel: the side it swings into,
     as the description states it (no Revit mark yet), against the side egress travel goes into through it, as the routes find
-    it (an exit door: into its exit; a door with outside on one side: outside; any other: away from the one room it is an
-    exit access door of). Its occupant load is two readings, none and the whole building''s (every story''s upper load added):
+    it, known only where travel crosses the door one way alone (into an exit stair or passageway where it can''t be the exit''s
+    discharge; outside through an exit door, or any door to outside where the building states no occupied outdoor areas;
+    else away from the one room it is an exit access door of, where no route crosses that room; review round 1). Its occupant
+    load is two readings, none and the whole building''s, only where no occupied outdoor areas are stated (1004.7; every
+    story''s upper load added):
     the routes don''t split the building''s occupants between its doors, and a door may serve more than its story (a stair''s
     discharge door). So it complies swinging with egress travel, or where the whole building holds under 50 and the building
     is one group other than H; it fails only swinging against egress travel in a building stated Group H; else it needs review.
