@@ -145,7 +145,8 @@ internal static class Program
                         Check(combos >= 2 && yesNo >= 2, $"16 questions: asked in the card ({combos} dropdowns, {yesNo} Yes/No buttons)");
                         var save = FindAll<Button>(p.View).SingleOrDefault(b => b.IsVisible && b.Content as string == ProjectQuestions.SaveWords(0));
                         Check(save is { IsEnabled: false }, "16 questions: Save is off until an answer is chosen (nothing is written before)");
-                        Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, EntryView.ScopeTag)), "16 questions: the scope note is in the card");
+                        var cardScoped = answerGroup.Rows.Any(r => views.Scoped.Contains(r.Id));
+                        Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, EntryView.ScopeTag)) == cardScoped, $"16 questions: the scope note is in the card only when its own results say it ({cardScoped})");
                     });
                     var exits = rows.Groups.SelectMany(g => g.AllRows).First(r => r.Name.Contains("Two exits", StringComparison.Ordinal) && r.Name.Contains("APARTMENT SOUTH L1", StringComparison.Ordinal));
                     foreach (var why in new[] { false, true })

@@ -146,7 +146,10 @@ public static class ResultViewList
                     }
                     if (questions.Count > ProjectQuestions.ShownAtFirst)
                         entries.Add(new MoreQuestionsEntry(MoreQuestionsKey, questions.Count - ProjectQuestions.ShownAtFirst, more));
-                    entries.Add(new AnswerFootEntry(g, questions, model.Scope));
+                    // the scope note, said of the questions' own results only (short review after #181: the rows it
+                    // counts can sit elsewhere, with no question of their own)
+                    var scopedHere = g.Rows.Count(r => model.Scoped.Contains(r.Id));
+                    entries.Add(new AnswerFootEntry(g, questions, scopedHere == 0 ? null : ResultViews.ScopeWords(scopedHere)));
                     continue;
                 }
                 foreach (var c in g.Cards)
