@@ -456,10 +456,19 @@ def test_the_panel_never_asks_for_a_mark_revit_does_not_have():
     import json
     from design_checker.__main__ import answer
     request = REPO / "test_data/test_sites/new_york/ithaca_city/four_unit_apartment/revit_check_site_request.json"
-    text = json.dumps(answer(json.loads(request.read_text(encoding="utf-8"))), ensure_ascii=False)
+    sent = json.loads(request.read_text(encoding="utf-8"))
+    text = json.dumps(answer(sent), ensure_ascii=False)
     assert "Mark the occupant load in the model" not in text
     assert "Fix the model so the occupant load can be measured" not in text
     assert "Work out the occupant load by hand" in text                  # asked for by hand, honestly
+    for use in ("closet", "toilet"):                     # round 5: a closet or toilet Revit marks, with no function
+        marked = copy.deepcopy(sent)
+        marked["interior"]["rooms"][0]["use"] = use
+        got = json.dumps(answer(marked), ensure_ascii=False)
+        assert f"a {use} with no function stated" in got, use
+        assert "Fix the model so the occupant load can be measured" not in got, use
+        assert "Mark the occupant load in the model" not in got, use
+    text += got
     marks = set(re.findall(r'"(Gordium: [^"]+)"',
                            (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")))
     words = " ".join([text, *(v for v in vars(occupant_load).values() if isinstance(v, str)),
@@ -467,3 +476,23 @@ def test_the_panel_never_asks_for_a_mark_revit_does_not_have():
     named = set(re.findall(r"Gordium: [A-Z][A-Za-z ]*[a-z]", words))
     assert {"Gordium: Use", "Gordium: Exit"} <= named        # the waiting sentence names the marks it means
     assert all(any(n == m or n.startswith(m + " ") for m in marks) for n in named), named
+
+
+def test_a_story_names_a_missing_function_only_where_a_room_lacks_one():
+    """Group 3 review round 5 (P3, 2026-11-24): a story whose rooms are open for another reason (a floor area not
+    measured, a function the table sends elsewhere) never says a function is what's missing; one with a room of no
+    function does, in the routes' words (asked by hand)."""
+    stated = occupant_load.FUNCTION_STATED
+    def story_words(rooms, measures):
+        parts = {"story": [{"id": "L1", "measures": {"story_gross_floor_area": 1000}, "not_measured": {}}],
+                 "space": [{"id": r["id"], "within": "L1", "measures": dict(m, space_is_exit=False), "not_measured": {}}
+                           for r, m in zip(rooms, measures)]}
+        occupant_load.apply(parts, {"rooms": rooms}, FACTORS, {"occupant_load_increased": False})
+        return parts["story"][0]["not_measured"]["story_occupant_load"]
+    other = story_words([{"id": "a", "use": "other", "function": "business"},
+                         {"id": "b", "use": "other", "function": "assembly_fixed_seats"}],
+                        [{}, {"space_floor_area": 100}])
+    assert "a, b" in other and stated not in other
+    missing = story_words([{"id": "a", "use": "other", "function": "business"}, {"id": "c", "use": "other"}],
+                          [{"space_floor_area": 100}, {"space_floor_area": 100}])
+    assert "(c)" in missing and missing.endswith(stated)
