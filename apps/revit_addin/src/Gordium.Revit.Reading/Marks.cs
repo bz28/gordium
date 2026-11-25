@@ -161,14 +161,14 @@ public static class Marks
     /// <summary>A room's function as BCNYS Table 1004.5 lists them (<c>rooms[].function</c>), one of
     /// <see cref="RoomFunctions.Words"/>: the Building Code's occupant loads are worked out from it (its factor, gross or
     /// net). Stated by the architect, never guessed: the Setup form may suggest one from the room's name, written only
-    /// when the architect accepts it. Blank, or a word not in the list: not sent, and the room's occupant load (and its
-    /// story's) needs review.</summary>
+    /// when the architect accepts it. Blank: not stated, and the room's occupant load (and its story's) needs review; a
+    /// word not in the list: sent as typed, which the checker says and reads as needs review, never as no function.</summary>
     public static readonly MarkDefinition RoomFunction = new(
         "Gordium: Function", new("de595662-5386-4cab-9245-600eefb9462d"), MarkValueKind.Text, MarkBinding.Instance,
         [Rooms], "rooms[].function",
         "The room's function as the 2025 Building Code of New York State's Table 1004.5 lists them (its occupant load factor is read from it), one of: " +
         RoomFunctions.Listed + ". Leave it blank on an exit stair enclosure or exit passageway and on a room whose Gordium: Use is Corridor, Closet or Toilet. " +
-        "Blank on any other room, or a word not in the list: the room's occupant load and its story's need review.");
+        "Blank on any other room, or a word not in the list (sent as typed, and said): the room's occupant load and its story's need review.");
 
     public static readonly MarkDefinition LotSurveyed = new(
         "Gordium: Lot surveyed", new("133d30e3-832f-4956-88c3-6b48989ac3f7"), MarkValueKind.YesNo, MarkBinding.Instance,

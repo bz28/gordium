@@ -954,9 +954,13 @@ public static class SetupChecklist
         var clear = counted.Where(Contradicts).Select(r =>
             $"{RoomName(r)}: clear its {Marks.RoomFunction.Name} ({What(r)} holds no occupant load of its own; with one " +
             "stated, its story's load isn't worked out)").ToList();
+        // on a corridor or the exit a word is to clear whatever it is (a listed one would be listed to clear: review round 7)
+        bool ClearOnly(MarkedElement r) => exits.ContainsKey(r.UniqueId)
+            || RoomUses.Table.Of(Marks.Text(MarkReading.Value(r, Marks.Use))) == "corridor";
         var notes = clear.Concat(unlisted.Select(r =>
-            $"{RoomName(r)}: its {Marks.RoomFunction.Name} is \"{Typed(r)}\", not one of Table 1004.5's words, so it isn't " +
-            "sent: choose one from the list, or clear it")).ToList();
+            $"{RoomName(r)}: its {Marks.RoomFunction.Name} is \"{Typed(r)}\", not one of Table 1004.5's words, so its load " +
+            (ClearOnly(r) ? $"and its story's need review: clear it ({What(r)} holds no occupant load of its own)"
+                          : "and its story's need review: choose one from the list, or clear it"))).ToList();
         var done = counted.Count(Done);
         var line = new ChecklistLine("room_function", Marks.RoomFunction, "Room function (occupant loads)", "rooms", done, counted.Count,
                    counted.Where(r => !Done(r)).Select(r => r.UniqueId).ToList(), false, false,

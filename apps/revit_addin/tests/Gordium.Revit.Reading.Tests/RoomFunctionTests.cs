@@ -50,21 +50,23 @@ public sealed class RoomFunctionTests
     }
 
     [Fact]
-    public void A_function_is_sent_only_as_one_of_the_tables_words()
+    public void A_listed_word_is_sent_as_its_row_and_any_other_as_typed_never_dropped()
     {
         var floor = new FakeFloor();
         floor.SetMark("A", Marks.RoomFunction, new(true, Text: " business area "));      // any case, trimmed
-        floor.SetMark("B", Marks.RoomFunction, new(true, Text: "office"));               // not a row: said, not sent
+        floor.SetMark("B", Marks.RoomFunction, new(true, Text: "office"));               // not a row: said, sent as typed
         floor.SetMark("L", Marks.RoomFunction, new(false, Text: ""));                    // never set
         var read = InteriorReader.Read(floor.Model());
         Assert.Equal("business", FakeFloor.Part(read, "rooms", "A")!["function"]!.GetValue<string>());
-        Assert.Null(FakeFloor.Part(read, "rooms", "B")!["function"]);
+        // review round 7: never dropped (the checker would read a closet so marked as holding no load): sent as typed,
+        // which the checker says and leaves at needs review
+        Assert.Equal("office", FakeFloor.Part(read, "rooms", "B")!["function"]!.GetValue<string>());
         Assert.Null(FakeFloor.Part(read, "rooms", "L")!["function"]);
         Assert.Null(FakeFloor.Part(read, "rooms", "C")!["function"]);                     // no mark at all
         var said = read.RouteNotes.Concat(read.Notes).Where(n => n.Field == "function").ToList();
         var note = Assert.Single(said);                                                  // blank is the usual answer: no note
         Assert.Equal(FakeFloor.Uid("B"), note.Part);
-        Assert.Contains("\"office\", not one of Table 1004.5's functions", note.Why, StringComparison.Ordinal);
+        Assert.Contains("\"office\", not one of Table 1004.5's functions Gordium lists: sent as typed, so its occupant load and its story's need review", note.Why, StringComparison.Ordinal);
     }
 
     // ---- the suggestions --------------------------------------------------------------------------------------
@@ -298,6 +300,11 @@ public sealed class RoomFunctionTests
         Assert.Contains(line.Notes, n => n.Contains("is \"Storage\", not one of Table 1004.5's words", StringComparison.Ordinal));
         Assert.Contains(line.Notes, n => n.Contains("is \"Office\", not one of Table 1004.5's words", StringComparison.Ordinal));
         Assert.Equal("Room function: 2 of 4 rooms set, 2 with a word not in the list (Office 101 (A), Corridor (C)).", SetupSteps.LineCount(line));
+        // on a corridor a word is to clear, never to choose (a listed one would be listed to clear: review round 7)
+        floor.SetMark("C", Marks.Use, new(true, Text: "Corridor"));
+        var corridor = Line(Model(floor, "B"))!.Notes.Single(n => n.StartsWith("Corridor (C)", StringComparison.Ordinal));
+        Assert.Contains("clear it (a corridor holds no occupant load of its own)", corridor, StringComparison.Ordinal);
+        Assert.DoesNotContain("choose one", corridor, StringComparison.Ordinal);
     }
 
     /// <summary>Review round 2: what stays blank is said by the Use mark, the one the count and the occupant loads read:
