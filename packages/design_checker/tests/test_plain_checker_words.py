@@ -201,7 +201,13 @@ def test_the_code_choice_quotes_the_architects_value_as_typed_and_says_blank_yes
     it, R101.2's "two-family dwelling" kept for the verdict lines."""
     from design_checker import code_scope
     why = code_scope.decide({"use": "one_family_detached"}, {"sprinkler_system": "nfpa_13x"})["why"]
-    assert why == "the building's sprinkler system is “nfpa_13x”, which Gordium can't read"
+    assert why == "Gordium: Sprinkler system is “nfpa_13x”, which Gordium can't read"
+    # every fact of the building block by its mark (review round 1: "the building's building has atrium is 2")
+    for key in code_scope.FACTS:
+        if key in code_scope.MARK:
+            got = code_scope.decide({"use": "one_family_detached"}, {key: "not a value"})["why"]
+            assert got.startswith(code_scope.MARK[key] + " is “not a value”"), (key, got)
+            assert key.replace("_", " ") not in got, (key, got)
     assert "[“R_3”]" in code_scope.decide({"use": "two_family"}, {"occupancy_groups": ["R_3"]})["why"]
     assert [code_scope.value_words(v) for v in (None, True, False, 3, ["R_3", None])] == [
         "blank", "Yes", "No", "3", "[“R_3”, blank]"]

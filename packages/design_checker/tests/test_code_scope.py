@@ -113,7 +113,7 @@ def test_the_exception_lets_the_architect_apply_the_building_code_to_a_house():
 
 def test_a_building_fact_gordium_cant_read_is_said_never_used():
     c, _, got = code({"use": "one_family_detached", "stories": 2}, {"stories_above_grade_plane": "three"})
-    assert c is None and "stories above grade plane is “three”" in got["why"]
+    assert c is None and "Gordium: Stories above grade plane is “three”" in got["why"]      # by its mark
     assert code_scope.building_measures({"occupancy_groups": ["R-2", "office"]}) == {}
 
 
