@@ -141,7 +141,11 @@ public sealed class PanelThemeTests(ITestOutputHelper output)
         Assert.True(PanelTokens.TypeOf("type.state").SemiBold);
         Assert.Equal(12, PanelTokens.TypeOf("type.body").Size);
         Assert.False(PanelTokens.TypeOf("type.body").SemiBold);
-        Assert.Equal(10, PanelTokens.TypeOf("type.overline").Size);
+        // the UI polish's scale (change 43): four sizes (15 title, 12.5 heading, 12 body, 11 caption) and the 10.5 overline
+        Assert.Equal(10.5, PanelTokens.TypeOf("type.overline").Size);
+        Assert.Equal(12.5, PanelTokens.TypeOf("type.title").Size);
+        Assert.True(PanelTokens.TypeOf("type.title").SemiBold);
+        Assert.Equal([10.5, 11, 12, 12.5, 15], PanelTokens.Type.Select(t => t.Size).Distinct().Order());
         Assert.True(PanelTokens.TypeOf("type.figure").Tabular);
         Assert.StartsWith("Georgia", PanelTokens.TypeOf("type.quote").Family, StringComparison.Ordinal);
         Assert.All(PanelTokens.Type.Where(t => t.Name != "type.quote"), t => Assert.Equal("Segoe UI", t.Family));

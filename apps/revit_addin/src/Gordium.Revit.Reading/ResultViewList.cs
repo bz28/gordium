@@ -41,6 +41,22 @@ public static class ResultViewList
 
     public static string GroupKey(FixGroup g) => "fix:" + g.Kind;
 
+    /// <summary>The kind of work a group is, as its icon (change 46: scan by kind of work): a form for questions, a pin
+    /// for marks, a pencil for the model, a map for a survey, a ruler for a hand measure, scales for a judgment, a
+    /// question for the law; null for what fails, isn't checked or is settled (their status glyph says it). Drawn in the
+    /// text's colour, never a status colour.</summary>
+    public static PaneIcon? IconOf(FixKind kind) => kind switch
+    {
+        FixKind.Answer => PaneIcon.Form,
+        FixKind.Mark => PaneIcon.Pin,
+        FixKind.FixModel => PaneIcon.Pencil,
+        FixKind.Survey => PaneIcon.Map,
+        FixKind.Measure => PaneIcon.Ruler,
+        FixKind.Decide => PaneIcon.Scales,
+        FixKind.OpenQuestion => PaneIcon.Question,
+        _ => null,
+    };
+
     public static string CardKey(FixCard c) => "card:" + c.Kind + ":" + c.Key;
 
     /// <summary>What a group's heading looks like: what fails is fails; a group of questions, marks, fixes, hand checks

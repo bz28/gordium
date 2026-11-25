@@ -29,11 +29,15 @@ internal sealed class Pane
     public void Progress(CheckStage stage, DateTime since) => _view.Progress(stage, since);
 
     public void Show(string project, DateTime when, ResultModel model, IReadOnlyDictionary<string, string> labels,
-                     IReadOnlyList<SetupField>? questions = null)
+                     IReadOnlyList<SetupField>? questions = null, string? key = null)
     {
         _view.EndProgress();
-        _view.Show(new PanelContent(project, when, model, [], 0, labels, "", "", Questions: questions));
+        _view.Show(new PanelContent(project, when, model, [], 0, labels, "", "", Questions: questions, Key: key));
     }
+
+    /// <summary>The selection strip in its slot (as PaneExtras puts it there when something is selected in Revit).</summary>
+    public void Strip(SelectionAnswer answer) =>
+        _view.SelectionSlot.Child = SelectionStrip.Build(answer, _ => { }, () => _view.SelectionSlot.Child = null, all: false, showAll: () => { });
 
     /// <summary>The detail's "Answer N questions": back to the questions card.</summary>
     public void Answer() => _view.Answer();
