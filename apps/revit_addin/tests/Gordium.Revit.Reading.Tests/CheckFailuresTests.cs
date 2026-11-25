@@ -76,6 +76,16 @@ public sealed class CheckFailuresTests
         Assert.Equal(FailureKind.ReadFailed, CheckFailures.OfRead(new InvalidOperationException("Revit"), Details).Kind);
         // review round 6: the worker that couldn't be started, and a malformed left-out answer, are the checker's too
         Assert.NotEqual(FailureKind.ReadFailed, CheckFailures.OfRead(new WorkerUnavailableException("no clone"), Details).Kind);
+        // review round 7: as thrown, with the start's own error inside it, and a non-JSON answer with its JsonException
+        // inside: the worker's failure is found from the outside in, never dug past
+        var notStarted = CheckFailures.OfRead(new WorkerUnavailableException("x", new InvalidOperationException("no pyproject")), Details);
+        Assert.Equal("Gordium's checker didn't start", notStarted.Title);
+        var notJson = new WorkerProtocolException("not JSON", new System.Text.Json.JsonException("bad"));
+        Assert.Equal(FailureKind.Unreadable, CheckFailures.OfRead(notJson, Details).Kind);
+        Assert.Equal(FailureKind.Unreadable, CheckFailures.Of(new AggregateException(notJson), Details).Kind);
+        Assert.Equal(FailureKind.Unreadable, CheckFailures.Of(Task.FromException(notJson).Exception!, Details).Kind);
+        var answered = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckProject.cs"));
+        Assert.Contains("var why = sent.Exception is { } failed ? CheckFailures.Unwrap(failed)", answered, StringComparison.Ordinal);
         var objects = new System.Text.Json.Nodes.JsonArray(new System.Text.Json.Nodes.JsonObject { ["id"] = "a" });
         var bad = Assert.Throws<WorkerProtocolException>(() => WorkerLeftOut.Read(objects, System.Text.Json.JsonDocument.Parse("[]").RootElement,
                                                                                   System.Text.Json.JsonDocument.Parse("[]").RootElement));

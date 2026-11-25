@@ -221,7 +221,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             {
                 End("failed");
                 // one message per failure (UI polish change 13), from what the wait ended with
-                var why = sent.Exception?.GetBaseException() ?? new OperationCanceledException("the check was cancelled");
+                var why = sent.Exception is { } failed ? CheckFailures.Unwrap(failed) : new OperationCanceledException("the check was cancelled");
                 ResultsPane.Failed(CheckFailures.Of(why, CheckWords.CheckerStopped((string)log["error"]!) + $" (logged to {Trial.LogPath()})"));
                 return;
             }

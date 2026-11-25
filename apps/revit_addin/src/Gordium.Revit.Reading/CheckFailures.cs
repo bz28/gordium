@@ -69,8 +69,12 @@ public static class CheckFailures
     {
         ArgumentNullException.ThrowIfNull(e);
         ArgumentNullException.ThrowIfNull(details);
-        return e switch
+        return Unwrap(e) switch
         {
+            // the worker couldn't be started at all (no Gordium folder, Python missing, Revit closing)
+            WorkerUnavailableException => new(FailureKind.CheckerStopped, "Gordium's checker didn't start",
+                $"It couldn't be started. {Safe}", "Restart Revit and try again; if it happens again, send the details to support.",
+                FailureAction.TryAgain, details),
             // the checker didn't start (its hello timed out): more time for the check wouldn't help (review round 4)
             WorkerTimeoutException { Command: "hello" } => new(FailureKind.CheckerStopped, "Gordium's checker didn't start",
                 $"It didn't start in time. {Safe}", "Try again; if it happens again, restart Revit, then send the details to support.",
@@ -108,7 +112,21 @@ public static class CheckFailures
     public static CheckFailure OfRead(Exception e, string details)
     {
         ArgumentNullException.ThrowIfNull(e);
-        return e.GetBaseException() is WorkerException w ? Of(w, details) : ReadFailed(details);
+        return Unwrap(e) is WorkerException w ? Of(w, details) : ReadFailed(details);
+    }
+
+    /// <summary>The failure an exception stands for: a task's AggregateException opened (one inner each time), then the
+    /// outermost WorkerException along the inner exceptions, else the exception itself (review round 7: never
+    /// GetBaseException, which digs past a WorkerException to the JsonException or the start's own error inside it).</summary>
+    public static Exception Unwrap(Exception e)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+        while (e is AggregateException { InnerExceptions.Count: 1 } a)
+            e = a.InnerExceptions[0];
+        for (var x = e; x is not null; x = x.InnerException is AggregateException { InnerExceptions.Count: 1 } ai ? ai.InnerExceptions[0] : x.InnerException)
+            if (x is WorkerException)
+                return x;
+        return e;
     }
 
     /// <summary>Reading the model in Revit failed (change 16: in the pane, never a dialog): nothing was sent.</summary>
