@@ -81,8 +81,9 @@ CORRIDOR_QUESTION, CORRIDOR_NONE, CORRIDOR_STORY = "corridor_occupants_served", 
 CORRIDOR_BY_HAND = STOPS["stated_not_given"].format(what="the occupant load the corridor serves, worked out by hand")
 CORRIDOR_NOT_RULED_OUT = ("the building doesn't say whether another level's occupants reach its corridors (an "
                           "unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: "
-                          "1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit "
-                          "has no mark for that yet): " + CORRIDOR_BY_HAND)
+                          "1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say "
+                          "on the building that none do (" + OTHER_LEVELS + " in the interior description; Revit has no "
+                          "mark for it yet), or " + CORRIDOR_BY_HAND)
 CORRIDOR_OTHER_LEVELS = ("another level's occupants reach the building's corridors (an unenclosed stairway or ramp, a "
                          "mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the "
                          "story's occupant load doesn't bound the corridor's: " + CORRIDOR_BY_HAND)
