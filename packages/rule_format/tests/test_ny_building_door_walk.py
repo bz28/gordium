@@ -22,6 +22,7 @@ law here, never from the rules:
 
 So a door whose size rules pass is one the law can't fault on size, and one they fail is one no reading excuses."""
 
+import ast
 import itertools
 
 import pytest
@@ -169,27 +170,86 @@ def _height_wrong(outcome, sides, height, within):
     return None
 
 
-@pytest.mark.parametrize("group", GROUPS + ["mixed", U], ids=lambda g: "unstated" if g is U else g)
-def test_no_door_size_passes_short_of_the_law_or_fails_within_it(rules, ctx, group):
-    got = walked(rules)
-    width, height = got["general.bc_1010_1_1_door_width"], got["general.bc_1010_1_1_door_height"]
+ALL = GROUPS + ["mixed", U]
+WIDTH_RULE, HEIGHT_RULE = "general.bc_1010_1_1_door_width", "general.bc_1010_1_1_door_height"
+
+
+def group_classes(rule):
+    """The groups the rule can't tell apart, each class with one to walk: a rule that reads the group only by
+    membership in printed lists (`occupancy_group in [...]`, `== "X"`) answers alike for two groups in the same
+    lists, so walking one walks both (the oracle is still asked of every group). A rule reading it any other way,
+    or not at all, gets one class per group, or one class."""
+    texts = [rule.get("applies_when"), rule.get("check")] + [w["when"] for w in rule.get("review_when") or []]
+    lists = []
+    for text in filter(None, texts):
+        for node in ast.walk(ast.parse(text, mode="eval")):
+            if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "occupancy_group":
+                for op, right in zip(node.ops, node.comparators):
+                    if isinstance(op, (ast.In, ast.NotIn)) and isinstance(right, (ast.List, ast.Tuple)):
+                        lists.append(frozenset(e.value for e in right.elts))
+                    elif isinstance(op, (ast.Eq, ast.NotEq)) and isinstance(right, ast.Constant):
+                        lists.append(frozenset([right.value]))
+                    else:
+                        return {g: [g] for g in ALL}
+    uses = sum(1 for text in filter(None, texts) for n in ast.walk(ast.parse(text, mode="eval"))
+               if isinstance(n, ast.Name) and n.id == "occupancy_group")
+    if uses != len(lists):                       # read somewhere other than a plain comparison: no collapsing
+        return {g: [g] for g in ALL}
+    out = {}
+    for g in ALL:
+        key = "unstated" if g is U else tuple(g in s for s in lists)
+        out.setdefault(key, []).append(g)
+    return {members[0]: members for members in out.values()}
+
+
+def test_the_walks_collapse_keeps_the_groups_the_law_tells_apart(rules):
+    """The width rule's classes must keep apart every group 1010.1.1 treats differently (Group I-2's beds; I-3's
+    28 in; R-2, R-3, I-1 and R-4's units; a building of two or more groups; not stated)."""
+    classes = group_classes(walked(rules)[WIDTH_RULE])
+    where = {g: rep for rep, members in classes.items() for g in members}
+    for a, b in (("I-2", "B"), ("I-3", "B"), ("R-2", "B"), ("R-2", "R-1"), ("I-1", "B"), ("mixed", "B"), (U, "B"),
+                 ("I-2", "mixed"), ("I-3", "R-2")):
+        assert where[a] is not where[b], (a, b)
+    assert where["R-3"] == where["R-2"] == where["R-4"] == where["I-1"]
+    assert set(where) == {g if g is not U else U for g in ALL}
+
+
+@pytest.mark.parametrize("rep", [g for g in ALL], ids=lambda g: "unstated" if g is U else g)
+def test_no_door_width_passes_short_of_the_law_or_fails_within_it(rules, ctx, rep):
+    rule = walked(rules)[WIDTH_RULE]
+    classes = group_classes(rule)
+    if rep not in classes:
+        pytest.skip("walked with its class's first group")
     bad, seen = [], set()
     for within in TRI:
-        given = _given(group, within)
+        given = _given(rep, within)
         for sides in itertools.product(TRI, TRI, TRI, TRI):
             for leaves in (1, 2, U):
                 for w in WIDTHS:
-                    out = _row(width, _part(sides, leaves, w, U), given, ctx)
+                    out = _row(rule, _part(sides, leaves, w, U), given, ctx)
                     seen.add(out)
-                    if why := _width_wrong(out, group, sides, leaves, w, within):
-                        bad.append(("width", within, sides, leaves, w, out, why))
-            for h in HEIGHTS:
-                out = _row(height, _part(sides, U, U, h), given, ctx)
-                if why := _height_wrong(out, sides, h, within):
-                    bad.append(("height", within, sides, h, out, why))
+                    for group in classes[rep]:
+                        if why := _width_wrong(out, group, sides, leaves, w, within):
+                            bad.append((group, within, sides, leaves, w, out, why))
     assert not bad, (len(bad), bad[:5])
-    assert "needs_review" in seen and "fail" in seen
-    assert "pass" in seen
+    assert {"needs_review", "fail", "pass"} <= seen
+
+
+def test_no_door_height_passes_short_of_the_law_or_fails_within_it(rules, ctx):
+    rule = walked(rules)[HEIGHT_RULE]
+    classes = group_classes(rule)
+    bad, seen = [], set()
+    for rep, members in classes.items():
+        for within in TRI:
+            given = _given(rep, within)
+            for sides in itertools.product(TRI, TRI, TRI, TRI):
+                for h in HEIGHTS:
+                    out = _row(rule, _part(sides, U, U, h), given, ctx)
+                    seen.add(out)
+                    if why := _height_wrong(out, sides, h, within):
+                        bad.append((members, within, sides, h, out, why))
+    assert not bad, (len(bad), bad[:5])
+    assert {"needs_review", "fail", "pass"} <= seen
 
 
 def test_the_hard_condition_a_door_with_no_stated_clear_opening_never_passes(rules, ctx):
