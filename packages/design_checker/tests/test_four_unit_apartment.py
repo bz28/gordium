@@ -213,7 +213,7 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
                          "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")}}
 
 
-def test_group_2s_marks_stated_choose_the_r2_table_and_never_pass_on_their_own(got, laws):
+def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(got, laws):
     """The two Revit marks for Table 1006.3.4's notes (Gordium: R-2 sleeping units, Gordium: 1031 escape openings) on
     the apartment (Group R-2, no sprinkler system): stated dwelling units, the sleeping-units table (1006.3.4(2)) is
     not applicable and the dwelling-units row passes on the story's two exits (its occupant loads, read since group 3,
