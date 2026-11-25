@@ -143,7 +143,12 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         # group 2's: which Table 1006.3.4 a Group R-2 story reads, and its 1031 escape openings
         "r2_sleeping_units": "Gordium: R-2 sleeping units", "emergency_escape_openings_1031": "Gordium: 1031 escape openings",
         # group 3's: outdoor areas the occupants use (1004.7), and 1004.5.1's increased occupant load
-        "occupied_outdoor_areas": "Gordium: Occupied outdoor areas", "occupant_load_increased": "Gordium: Occupant load increased"}
+        "occupied_outdoor_areas": "Gordium: Occupied outdoor areas", "occupant_load_increased": "Gordium: Occupant load increased",
+        # groups 4 and 5's: corridors (1020) and egress capacity (1005.3)
+        "other_level_egress_into_corridors": "Gordium: Other levels reach corridors",
+        "ambulatory_care_facility": "Gordium: Ambulatory care facility",
+        "corridors_within_dwelling_units": "Gordium: Corridors within dwelling units",
+        "emergency_voice_alarm_system": "Gordium: Emergency voice/alarm system"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
