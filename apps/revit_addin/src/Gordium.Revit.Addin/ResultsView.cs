@@ -633,7 +633,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         };
         b.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
         b.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
-        W.Automation.AutomationProperties.SetName(b, PaneWords.ChangesAll(change));
+        // the words a screen reader says are the ones on screen (review round 3): a list's every change, else the line
+        // shown and what the architect changed
+        W.Automation.AutomationProperties.SetName(b, PaneWords.ChangeIsList(change) ? PaneWords.ChangesAll(change)
+            : string.Join(" ", new[] { PaneWords.ChangeWords(change, _factsChanged is not null), _factsChanged }.OfType<string>()));
         return b;
     }
 

@@ -358,6 +358,8 @@ public sealed class PaneTests
         Assert.Equal("No result changed since 14:32.", PaneWords.ChangeWords(none, factsChanged: true));
         Assert.StartsWith("Nothing changed", PaneWords.ChangeWords(none, factsChanged: false), StringComparison.Ordinal);
         Assert.Contains("PaneWords.ChangeWords(change, _factsChanged is not null)", Read("ResultsView.cs"), StringComparison.Ordinal);
+        // review round 3: and a screen reader hears the same words, not the checker's "Nothing changed"
+        Assert.Contains(": string.Join(\" \", new[] { PaneWords.ChangeWords(change, _factsChanged is not null), _factsChanged }.OfType<string>())", Read("ResultsView.cs"), StringComparison.Ordinal);
         var cleared = PaneWords.FactsChanged(after, F(M()));
         Assert.Contains("cleared", cleared, StringComparison.Ordinal);
     }
