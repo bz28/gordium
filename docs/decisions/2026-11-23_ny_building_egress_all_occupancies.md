@@ -70,7 +70,7 @@ Two P0 findings (a fixed-seat assembly space passing on Table 1006.2.1's 75 ft; 
 | 1006.3.4 (note a) | a one-exit story's 75 or 125 ft | the story-exit rules (`bc_1006_3_3_story_exits`; every group in section group 2) |
 | Routes `_is_exit` (P1) | a horizontal exit's far room counted as an exit | only `exit_enclosure` and `exit_passageway` doors make the room they enter an exit |
 
-Checked on purpose and found loosening, not tightening: 1017.2.1 (balcony), 1017.2.2 (F-1, S-1), 1017.2.3 (H-5), 412.6 (aircraft manufacturing), 1030.7's exceptions, 1006.2.1's exceptions 1 and 3, Table 1006.2.1 note f; each already needs review only within the increase. New stated facts: `sprinklered_903_3_1_3` (from `sprinkler_system: nfpa_13d`), `special_egress_spaces`, `merchandise_pads` (the interior format's building block); the Revit add-in has no marks for the last two yet, so a Revit check leaves them unstated and the rows they guard need review.
+Checked on purpose and found loosening, not tightening: 1017.2.1 (balcony), 1017.2.2 (F-1, S-1), 1017.2.3 (H-5), 412.6 (aircraft manufacturing), 1030.7's exceptions, 1006.2.1's exceptions 1 and 3, Table 1006.2.1 note f; each already needs review only within the increase. New stated facts: `sprinklered_903_3_1_3` (from `sprinkler_system: nfpa_13d`), `special_egress_spaces`, `merchandise_pads` (the interior format's building block); the Revit add-in has no marks yet for these or for `assembly_fixed_seating`, `egress_balcony_increase_taken` and `building_has_atrium` (review round 13, 2026-11-24), so a Revit check leaves them unstated and the rows they guard need review; their Project Information marks follow in the Revit-fields PR stacked on this one.
 
 ## Review round 2 (2026-11-23)
 
