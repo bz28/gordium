@@ -31,7 +31,8 @@ WALL_SPOTS = [(20, -1), (41, 15), (20, 31), (-1, 15)]                        # 1
 PLACE_KEYS = {"no_ground", "ground_existing", "ground_assumed", "ground_spots_not_read", "ground_no_outline",
               "ground_wall_bare", "place_no_rooms", "place_story_no_rooms", "place_floor_not_read",
               "place_level_not_read", "place_split_level", "place_either", "place_either_levels",
-              "place_too_many_levels", "ground_buildings_apart", "place_levels_not_all", "place_description"}
+              "place_too_many_levels", "ground_buildings_apart", "place_levels_not_all", "place_description",
+              "ground_spots_not_finished", "ground_disagrees", "ground_openings_not_read"}
 
 
 def building(floors, extra_levels=(), outline=BOX):
@@ -243,7 +244,8 @@ def test_106_ithaca_rd_its_levels_and_spot_grades():
 
 def test_ground_of_takes_only_ground_the_architect_stated():
     assert ground_of({"ground_is_flat": True, "grade_elevation": 3}) == {"flat": 3.0}
-    assert ground_of({"grade_points": [[0, 0, 1]], "grade_from": "spot"}) == {"spots": [[0, 0, 1]]}
+    assert ground_of({"grade_points": [[0, 0, 1]], "grade_from": "finished_spots"}) == {"spots": [[0, 0, 1]]}
+    assert ground_of({"grade_points": [[0, 0, 1]], "grade_is": "finished"}) == {"spots": [[0, 0, 1]]}
     assert ground_of({}) == {"none": STOPS["no_ground"]}
     assert ground_of({"grade_is": "existing", "grade_points": [[0, 0, 1]]}) == {"none": STOPS["ground_existing"]}
     got = ground_of({"ground_is_flat": True, "grade_elevation": 0, "ground_assumed": "flat"}, "the lot slopes 3 ft")
@@ -266,6 +268,12 @@ def test_each_reason_a_place_isnt_measured():
 
     said("no_ground", _reason(placed([[0], [10]], ground_of({}))))
     said("ground_existing", ground_of({"grade_is": "existing"})["none"])
+    said("ground_spots_not_finished", ground_of({"grade_points": [[0, 0, 1]]})["none"])
+    desc, stories = building([[0], [10]])
+    desc["openings"] = [{"id": "w", "ground_outside": 2}]
+    said("ground_disagrees", _reason(places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})))
+    desc["openings"] = [{"id": "w", "ground_outside": "low"}]
+    said("ground_openings_not_read", _reason(places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})))
     said("ground_assumed", ground_of({"ground_is_flat": True, "grade_elevation": 0, "ground_assumed": "flat"})["none"])
     said("ground_spots_not_read", _reason(placed([[0]], {"spots": [[1, 2]]})))
     said("ground_no_outline", _reason(placed([[0]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS]}, outline=None)))
@@ -427,3 +435,30 @@ def test_a_room_on_no_level_read_places_nothing():
     got = measure(interior, ground={"flat": 0.0})
     for s in got["parts"]["story"]:
         assert not set(FACTS) & set(s["measures"]), s["name"]
+
+
+# --- review round 3 (2026-11-25): each finding's pin --------------------------------------------------------------
+
+@pytest.mark.parametrize("opening", [{"id": "w", "ground_outside": -8},
+                                     {"id": "w", "ground_outside": [0, -8]},
+                                     {"id": "w", "ground_outside": 0, "area_well": {"floor_elevation": -8}}])
+def test_lower_ground_at_an_opening_never_proves_a_basement_on_flat_ground(opening):
+    """Flat ground at 0 but finished ground 8 ft down at a window (or a well's floor): Level 1's floor at 5 ft is more
+    than 12 ft over that point (item 2), so Level 0 may be a story above grade plane. Before, Level 0 was proven a
+    basement and Level 2 the second story (a one-exit Group B story passing where the third is Not Permitted)."""
+    desc, stories = building([[-8], [5], [15]])
+    desc["openings"] = [opening]
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert FIRST not in got["L1"]["measures"] and SECOND not in got["L2"]["measures"]
+    del desc["openings"]
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert got["L2"]["measures"][SECOND] is True                    # with no such opening, as before
+
+
+def test_revits_plain_spot_grades_are_existing_ground():
+    """Revit's "Spot grades" (grade_from spot, no grade_is) are the existing ground, as Rhino's Grade layer: fill
+    could make the stories over them basements. Only finished spot grades place a story."""
+    spots = [[x, y, 0] for x, y in WALL_SPOTS]
+    assert "none" in ground_of({"grade_from": "spot", "grade_points": spots})
+    assert "none" in ground_of({"grade_points": spots})
+    assert ground_of({"grade_from": "finished_spots", "grade_points": spots}) == {"spots": spots}

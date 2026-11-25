@@ -121,6 +121,12 @@ STOPS = {
     "ground_existing": "the ground given is the existing ground, not the finished ground the grade plane is "
                        "measured from (the Building Code's grade plane, 202)",
     "ground_assumed": "the ground is assumed flat, not stated ({why}): where the grade plane is isn't known",
+    "ground_spots_not_finished": "the spot grades aren't stated as finished ground (Revit's Ground from mark set to "
+                                 "Finished spot grades, or no regrading near the house): the grade plane is measured "
+                                 "from the finished ground",
+    "ground_disagrees": "the ground is stated flat at {flat} but finished ground at an opening is stated higher "
+                        "({high}): which is right isn't known",
+    "ground_openings_not_read": "the finished ground stated at an opening or an area well's floor can't be read",
     "ground_spots_not_read": "the spot grades can't be read (each is a point with an elevation)",
     "ground_no_outline": "the stories' outlines aren't all given, so which spot grades are at the building's walls "
                          "isn't known",
