@@ -143,14 +143,16 @@ public static class PanelTokens
     ];
 
     /// <summary>The type tokens of section 2.5 (Segoe UI, Revit's own; the law's words in a serif, so they read as the
-    /// law's). <c>type.overline</c>'s +4% tracking is not drawn: WPF's TextBlock has no letter spacing.</summary>
+    /// law's), on the UI polish's scale of four sizes (change 43): 15 semibold title (<c>type.state</c>), 12.5
+    /// semibold heading (<c>type.title</c>), 12 body (the law's words and figures too), 11 caption, and the overline
+    /// at 10.5 in capitals. <c>type.overline</c>'s +4% tracking is not drawn: WPF's TextBlock has no letter spacing.</summary>
     public static IReadOnlyList<TypeToken> Type { get; } =
     [
         new("type.state", 15, true, Sans),
-        new("type.title", 13, true, Sans),
+        new("type.title", 12.5, true, Sans),
         new("type.body", 12, false, Sans),
         new("type.caption", 11, false, Sans),
-        new("type.overline", 10, true, Sans),
+        new("type.overline", 10.5, true, Sans),
         new("type.quote", 12, false, "Georgia, Cambria, Times New Roman"),
         new("type.figure", 12, true, Sans, Tabular: true),
     ];

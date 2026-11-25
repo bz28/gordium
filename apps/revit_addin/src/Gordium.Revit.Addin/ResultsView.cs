@@ -109,9 +109,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private readonly HashSet<string> _openCards = new(StringComparer.Ordinal);
     private LookedAt _looked = new();
     private CheckChange? _change;
+    private string? _factsChanged;                            // "You changed: …" since the check before (change 40)
+    private bool _changesAll;                                 // What changed's "Show all" opened
     private (string Project, DateTime When)? _shownCheck;     // the check shown (a stale redraw is the same check)
     // per project: the last check that arrived current (what the next is compared with), and the last check's ticks
-    private readonly Dictionary<string, (DateTime When, ResultModel Model)> _compared = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, (DateTime When, ResultModel Model, IReadOnlyList<SetupField>? Fields)> _compared = new(StringComparer.Ordinal);
     private readonly Dictionary<string, (ResultModel Model, LookedAt Looked, IReadOnlyDictionary<string, string> Labels)> _ticked = new(StringComparer.Ordinal);
 
     internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action projectInformation,
@@ -448,14 +450,19 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         if (content.Model is not { } model)
         {
             _change = null;
+            _factsChanged = null;
             _looked = new LookedAt();
             return;
         }
         // by the document's identity, never its title (a Save As renames it); none known: nothing compared or carried
         var key = content.Key;
-        _change = key is not null && _compared.TryGetValue(key, out var before) ? CheckChanges.Between(before.Model, before.When, model) : null;
+        (DateTime When, ResultModel Model, IReadOnlyList<SetupField>? Fields)? before =
+            key is not null && _compared.TryGetValue(key, out var was) ? was : null;
+        _change = before is { } b ? CheckChanges.Between(b.Model, b.When, model) : null;
+        _factsChanged = _change is { Compared: true } ? PaneWords.FactsChanged(before?.Fields, content.Questions) : null;
+        _changesAll = false;
         if (key is not null && model.Stale is null)
-            _compared[key] = (content.When, model);
+            _compared[key] = (content.When, model, content.Questions);
         // the fixes' ticks too (by fix key, made with each check's own element names), where the fix is the same;
         // by the document's identity (none known: nothing carried)
         _looked = key is not null && _ticked.TryGetValue(key, out var t)
@@ -483,6 +490,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             words.Children.Add(SetUpButton());
             summary.Children.Add(Banner(PanelStatus.Review, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, words, bottom: 6));
         }
+        // What changed at the top (change 40), after the stale notice when there is one (review round 1: the notice
+        // that the results may not hold is always read first)
+        if (model.Views is not null && _change is { } top && !parts.Contains(PanelPart.Stale))
+            summary.Children.Add(ChangeLine(top, stale));
         foreach (var part in parts)
             switch (part)
             {
@@ -498,6 +509,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     sa.Margin = new W.Thickness(0, 6, 0, 0);
                     sw.Children.Add(sa);
                     summary.Children.Add(Banner(PanelStatus.Stale, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, sw, bottom: 6));
+                    if (model.Views is not null && _change is { } afterStale)
+                        summary.Children.Add(ChangeLine(afterStale, stale));
                     break;
                 // which code and why: By code says it under the book (change 36), so here only without the two views
                 // or while it isn't decided (needs review: the architect must see that before any result)
@@ -531,7 +544,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                         TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 2, 0, 2),
                     }, Body));
                     if (model.Views is { } sv)
+                    {
+                        summary.Children.Add(ProportionBarView(model, stale));
                         summary.Children.Add(Small(sv.Summary, bottom: 2));
+                    }
                     break;
                 case PanelPart.State:
                     var state = StatusLook.Of(model.StateTone, stale);
@@ -562,7 +578,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     if (byLaw)
                         foreach (var line in model.Counts)
                             summary.Children.Add(CountLineView(line, stale, CountBar.Keep));
-                    if (_change is { } change)
+                    if (_change is { } change && model.Views is null)
                         summary.Children.Add(ChangeLine(change, stale));
                     break;
             }
@@ -575,34 +591,81 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     /// <summary>What changed since the check before (CheckChanges; the intuitive pane, change 9), under the counts: a
     /// short list, each result with its new verdict's glyph (the worker's; green only for its complies), the rest
     /// counted; the whole sentence on hover.</summary>
-    private static C.Border ChangeLine(CheckChange change, bool stale)
+    private C.Border ChangeLine(CheckChange change, bool stale)
     {
         var p = new C.StackPanel();
         if (!PaneWords.ChangeIsList(change))                   // no verdict changed: the worker's one line, as it says
-            p.Children.Add(Typed(new C.TextBlock { Text = change.Words, TextWrapping = W.TextWrapping.Wrap }, Caption));
+        {
+            p.Children.Add(Typed(new C.TextBlock { Text = PaneWords.ChangeWords(change, _factsChanged is not null), TextWrapping = W.TextWrapping.Wrap }, Caption));
+            if (_factsChanged is { } changed)                  // what the architect changed, said either way (review round 1)
+                p.Children.Add(Small(changed, top: 2));
+        }
         else
         {
-            p.Children.Add(Ink(Typed(new C.TextBlock { Text = PaneWords.ChangeHeading(change), TextWrapping = W.TextWrapping.Wrap }, "type.overline"), PanelTokens.TextMuted));
-            foreach (var r in PaneWords.ChangesShown(change))
+            // change 40: "Since 14:32 · 9 results changed", what the architect changed, the first four, "Show all 9"
+            p.Children.Add(Typed(new C.TextBlock { Text = PaneWords.ChangeHeading(change), TextWrapping = W.TextWrapping.Wrap, FontWeight = W.FontWeights.SemiBold }, Body));
+            if (_factsChanged is { } facts)
+                p.Children.Add(Small(facts, top: 2));
+            foreach (var r in PaneWords.ChangesShown(change, _changesAll))
             {
                 var w = Typed(new C.TextBlock { Text = r.Words, TextWrapping = W.TextWrapping.Wrap }, Caption);
                 var line = WithGlyph(PaneWords.ChangeStatus(r, stale), w, size: 11, gap: 5);     // stale: the clock, never green
-                line.Margin = new W.Thickness(0, 3, 0, 0);
+                line.Margin = new W.Thickness(0, 4, 0, 0);
                 p.Children.Add(line);
             }
-            if (PaneWords.ChangesMore(change) is { } more)
-                p.Children.Add(Small(more, top: 3));
+            if (PaneWords.ChangesSaid(change) is { } said)
+                p.Children.Add(Small(said, top: 4));
+            if (PaneWords.ChangesMore(change, _changesAll) is { } more)
+            {
+                var all = CauseCardsView.Link(more, () =>
+                {
+                    _changesAll = !_changesAll;
+                    Relayout();
+                });
+                all.Margin = new W.Thickness(0, 4, 0, 0);
+                p.Children.Add(all);
+            }
         }
         var b = new C.Border
         {
             Child = p, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),
-            Padding = new W.Thickness(8, 5, 8, 6), Margin = new W.Thickness(0, 6, 0, 0), ToolTip = PaneWords.ChangesAll(change),
+            Padding = new W.Thickness(8, 4, 8, 8), Margin = new W.Thickness(0, 4, 0, 8), Tag = ChangeTag,
         };
         b.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
         b.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
-        W.Automation.AutomationProperties.SetName(b, PaneWords.ChangesAll(change));
+        // the words a screen reader says are the ones on screen (review round 3): a list's every change, else the line
+        // shown and what the architect changed
+        W.Automation.AutomationProperties.SetName(b, PaneWords.ChangeIsList(change)
+            ? string.Join(" ", new[] { PaneWords.ChangeHeading(change) + ".", _factsChanged, PaneWords.ChangesAll(change) }.OfType<string>())
+            : string.Join(" ", new[] { PaneWords.ChangeWords(change, _factsChanged is not null), _factsChanged }.OfType<string>()));
         return b;
     }
+
+    /// <summary>What changed's card tag (the renders find it by it).</summary>
+    internal const string ChangeTag = "pane.changed";
+
+    /// <summary>The proportion bar (change 18; ProportionBar decides every segment's status: never green while anything
+    /// is unsettled, the clock once stale), its words for a screen reader the summary line's.</summary>
+    private static W.UIElement ProportionBarView(ResultModel model, bool stale)
+    {
+        var verdicts = model.Groups.SelectMany(g => g.AllRows).Select(r => r.Verdict).ToList();
+        var grid = new C.Grid { Height = 6, Margin = new W.Thickness(0, 4, 0, 4), Tag = BarTag };
+        var segments = ProportionBar.Segments(verdicts, stale);
+        for (var i = 0; i < segments.Count; i++)
+        {
+            grid.ColumnDefinitions.Add(new C.ColumnDefinition { Width = new W.GridLength(segments[i].Count, W.GridUnitType.Star) });
+            var seg = new System.Windows.Shapes.Rectangle { Margin = new W.Thickness(i == 0 ? 0 : 1, 0, 0, 0), ToolTip = segments[i].Words };
+            seg.SetResourceReference(System.Windows.Shapes.Shape.FillProperty,
+                                     segments[i].Status == PanelStatus.Stale ? PanelLook.StaleHatch : StatusLook.Colour(segments[i].Status));
+            C.Grid.SetColumn(seg, i);
+            grid.Children.Add(seg);
+        }
+        W.Automation.AutomationProperties.SetName(grid, model.Views?.Summary ?? "");
+        return grid;
+    }
+
+    /// <summary>The proportion bar's tag (the renders find it by it).</summary>
+    internal const string BarTag = "pane.bar";
 
     /// <summary>A law's line of the count bar (CountBar.Row): its short name, the counts kept, "+N" (opens every
     /// count in place; all of them in the tooltip). A line that wraps at the pane's width is made again keeping one
