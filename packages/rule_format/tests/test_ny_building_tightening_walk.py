@@ -35,7 +35,7 @@ SPRINKLERS = {"nfpa_13": (True, False, False), "nfpa_13r": (False, True, False),
               "none": (False, False, False), UNSTATED: None}
 # the building facts the walk varies (each yes, no, not stated), beside the group and the sprinkler system
 FACTS = ("assembly_fixed_seating", "special_egress_spaces", "merchandise_pads", "building_has_atrium",
-         "egress_balcony_increase_taken")
+         "egress_balcony_increase_taken", "r2_sleeping_units", "emergency_escape_openings_1031")
 DERIVED = ("occupancy_group", "occupancy_group_i4", "other_occupancy_present", "sprinklered_903_3_1_1",
            "sprinklered_903_3_1_2", "sprinklered_903_3_1_3")
 
