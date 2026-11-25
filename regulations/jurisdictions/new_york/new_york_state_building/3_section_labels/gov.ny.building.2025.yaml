@@ -1173,7 +1173,7 @@ labels:
       quote: '[BE] HANDRAIL. A horizontal or sloping rail intended for grasping by the hand for guidance or support.'
     piece_sha256: 0ce1373e166a619f3105ceaadfb040ff3891c9bd39a34ac89392d54bdc089212
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group 5c
-      (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term 1005.7.2 uses, by the book''s italics.'
+      (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term TRIM''s definition uses, by the book''s italics (1005.7.2 prints Handrail in roman).'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:hardware:

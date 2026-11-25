@@ -857,3 +857,19 @@ def test_more_than_one_reads_the_same_comparison_in_every_piece():
             if str(n).startswith("more than "):
                 seen.append((pid, n, comp))
     assert seen and all(comp == ">" for _, _, comp in seen), [x for x in seen if x[2] != ">"]
+
+
+def test_the_readmes_not_brought_in_list_names_no_section_brought_in():
+    """Review round 1 of group 5c (P3): the README listed 1005.7 as not brought in after this group brought it in.
+    Every section number in its 'References in the brought-in sections that are not brought in' list is neither a
+    brought-in section nor one under it."""
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    listed = readme.split("## References in the brought-in sections that are not brought in", 1)[1].split("\n## ", 1)[0]
+    brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
+    ids = [str(x) for x in brought["sections"] + brought["alone"] if not str(x).startswith("Table")]
+    listed = re.sub(r"\([^()]*\)", "", listed)             # what a reference is for, in brackets, may name a section
+    listed = re.sub(r"\d{3,4}(?:\.\d+)*'s parts", "", listed)   # the parts under a section brought in alone
+    listed = re.sub(r"Tables? \d{3,4}(?:\.\d+)*(?:\(\d\))?(?: and \d{3,4}(?:\.\d+)*)?", "", listed)  # tables: by name
+    bad = [n for n in re.findall(r"\b\d{3,4}(?:\.\d+)*\b", listed)
+           if any(n == b or (n.startswith(b + ".") and b not in brought["alone"]) for b in ids)]
+    assert not bad, bad
