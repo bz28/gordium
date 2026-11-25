@@ -122,6 +122,15 @@ internal static class Program
                         var bc = views.Code.Select((d, i) => (d, i)).First(x => x.d.Title.StartsWith("2025 Building Code", StringComparison.Ordinal));
                         var ch10 = bc.d.Children.Select((c, i) => (c, i)).First(x => x.c.Number == "10");
                         p.Toggle($"/{bc.i}/{ch10.i}");
+                        // review round 5: the list item the keyboard focuses carries the words a screen reader says and
+                        // the tooltip (which code governs, the law's quoted words), not only the drawing inside it
+                        Settle(p.View);
+                        var items = FindAll<ListBoxItem>(p.View).ToList();
+                        var book = items.FirstOrDefault(i => System.Windows.Automation.AutomationProperties.GetName(i).Contains("Governs this building", StringComparison.Ordinal));
+                        Check(book is not null && (book.ToolTip as string ?? "").Contains("R101.2", StringComparison.Ordinal),
+                              "14 By code: the governing book's list item says which code governs, with the law's words in its tooltip");
+                        Check(items.Where(i => i.DataContext is CodeNodeItem).All(i => System.Windows.Automation.AutomationProperties.GetName(i).Length > 0),
+                              "14 By code: every node's list item has words for a screen reader");
                     });
                     Step(make(theme, []), "15_by_code_stale_apartment", 900, dark, p =>
                     {

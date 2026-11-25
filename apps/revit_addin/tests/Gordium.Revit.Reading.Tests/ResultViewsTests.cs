@@ -222,9 +222,14 @@ public sealed class ResultViewsTests
         Assert.Contains("R101.2", governing.NoteTooltip, StringComparison.Ordinal);
         var list = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs"));
         Assert.Contains("ToolTip = n.NoteTooltip", list, StringComparison.Ordinal);
-        // and to a screen reader and the keyboard (review round 4): the book's name says it, the focused line shows it
-        Assert.Contains("SetName(line, n.Note is { } said ? $\"{title}, {said}, ", list, StringComparison.Ordinal);
-        Assert.Contains("line.ToolTip = n.NoteTooltip is { } quotes ? $\"{why}\\n\\n{quotes}\" : why;", list, StringComparison.Ordinal);
+        // and to a screen reader and the keyboard (review rounds 4, 5): on the list item the keyboard focuses
+        var entry = ResultViewList.Layout(m, [], ResultsViewKind.ByCode, new HashSet<string>(), null, null, false)
+                                  .OfType<CodeNodeEntry>().Single(n => n.Node.Note is not null);
+        Assert.Contains("Governs this building", ResultViewList.Spoken(entry), StringComparison.Ordinal);
+        Assert.Contains("R101.2", ResultViewList.Tip(entry), StringComparison.Ordinal);
+        var select = list[list.IndexOf("public override W.Style SelectStyle(", StringComparison.Ordinal)..];
+        Assert.Contains("if (item is ListItem { Spoken: { } spoken } li)\n        {\n            W.Automation.AutomationProperties.SetName(c, spoken);\n            c.ToolTip = li.Tip;", select, StringComparison.Ordinal);
+        Assert.Contains("internal override string? Spoken => ResultViewList.Spoken(Entry);", list, StringComparison.Ordinal);
         var none = Answer();
         none["view"]!["contents"] = new JsonArray();
         Assert.False(ResultViews.Build(Parse(none)).ShowsWhichCode);

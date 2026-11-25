@@ -151,6 +151,30 @@ public static class ResultViewList
         };
     }
 
+    /// <summary>What a screen reader says for an opener (review round 5: on the list item the keyboard is on, not
+    /// inside it): its title, which code governs (a book's note), its status, and its counts; null for other entries.</summary>
+    public static string? Spoken(ListEntry e) => e switch
+    {
+        FixGroupEntry g => $"{g.Group.Title}, {StatusLook.Word(g.Status)}, {g.Group.SeeWords}" + (g.Open ? ", open" : ", folded"),
+        FixCardEntry c => $"{c.Card.Headline}, {(c.Card.Rows.Count == 1 ? "1 result" : $"{c.Card.Rows.Count} results")}" + (c.Open ? ", open" : ", folded"),
+        CodeNodeEntry n => string.Join(", ", new[] { Title(n.Node), n.Node.Note, StatusLook.Word(n.Status), n.Node.Line }.OfType<string>())
+                           + (n.CanOpen ? n.Open ? ", open" : ", folded" : ""),
+        _ => null,
+    };
+
+    /// <summary>An opener's tooltip, shown on hover and on the item the keyboard is on: a card's headline and the
+    /// checker's words behind it ("Why"); a book's note and the law's quoted words behind which code governs; null for
+    /// the rest.</summary>
+    public static string? Tip(ListEntry e) => e switch
+    {
+        FixCardEntry c => c.Card.Why is { } why ? $"{c.Card.Headline}\n\nWhy: {why}" : c.Card.Headline,
+        CodeNodeEntry { Node.Note: { } note } n => n.Node.NoteTooltip is { } quotes ? $"{note}\n\n{quotes}" : note,
+        _ => null,
+    };
+
+    /// <summary>A node's title as shown: its number and title ("10 MEANS OF EGRESS"), a fold's title alone.</summary>
+    public static string Title(CodeNode n) => n.Number is { Length: > 0 } number && n.Level != CodeLevel.Others ? $"{number} {n.Title}" : n.Title;
+
     /// <summary>The keys to open so a row shows in a view (its group and card, or its document, chapter, section
     /// and rule): what "show this result" opens, so no row is ever out of reach.</summary>
     public static IReadOnlyList<string> PathTo(ResultViewsModel model, ResultsViewKind view, string rowId)

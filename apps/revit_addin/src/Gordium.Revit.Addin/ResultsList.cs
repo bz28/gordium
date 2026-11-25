@@ -30,6 +30,12 @@ internal abstract class ListItem
     protected ListItem(IListHost host) => Host = host;
 
     internal IListHost Host { get; }
+
+    /// <summary>What a screen reader says for this item and its tooltip, set on its list item (the container the
+    /// keyboard focuses) by <see cref="EntryStyles"/>; null: the item's own words inside say it.</summary>
+    internal virtual string? Spoken => null;
+
+    internal virtual string? Tip => null;
 }
 
 internal sealed class HeadingItem(IListHost host, ListHeading heading) : ListItem(host)
@@ -52,18 +58,28 @@ internal sealed class RowItem(IListHost host, ListRow row) : ListItem(host)
 internal sealed class FixGroupItem(IListHost host, FixGroupEntry entry) : ListItem(host)
 {
     internal FixGroupEntry Entry { get; } = entry;
+
+    internal override string? Spoken => ResultViewList.Spoken(Entry);
 }
 
 /// <summary>One card of an open "What to fix" group.</summary>
 internal sealed class FixCardItem(IListHost host, FixCardEntry entry) : ListItem(host)
 {
     internal FixCardEntry Entry { get; } = entry;
+
+    internal override string? Spoken => ResultViewList.Spoken(Entry);
+
+    internal override string? Tip => ResultViewList.Tip(Entry);
 }
 
 /// <summary>One node of "By code".</summary>
 internal sealed class CodeNodeItem(IListHost host, CodeNodeEntry entry) : ListItem(host)
 {
     internal CodeNodeEntry Entry { get; } = entry;
+
+    internal override string? Spoken => ResultViewList.Spoken(Entry);
+
+    internal override string? Tip => ResultViewList.Tip(Entry);
 }
 
 /// <summary>The list's first entry: the worker's state and counts, made afresh each time it scrolls into view.</summary>
@@ -93,13 +109,28 @@ internal sealed class FoldItem(IListHost host, string title, Func<W.UIElement> b
 /// (list.row); a heading, a sub-heading or a fold is plain, never selected or focused (list.heading).</summary>
 internal sealed class EntryStyles : C.StyleSelector
 {
-    public override W.Style SelectStyle(object item, W.DependencyObject container) =>
-        (W.Style)((W.FrameworkElement)container).FindResource(item switch
+    public override W.Style SelectStyle(object item, W.DependencyObject container)
+    {
+        var c = (W.FrameworkElement)container;
+        // the words on the list item itself, the element the keyboard focuses and a screen reader reads (review round
+        // 5); set every time, so a container reused for another item never keeps the last one's words
+        if (item is ListItem { Spoken: { } spoken } li)
+        {
+            W.Automation.AutomationProperties.SetName(c, spoken);
+            c.ToolTip = li.Tip;
+        }
+        else
+        {
+            c.ClearValue(W.Automation.AutomationProperties.NameProperty);
+            c.ClearValue(W.FrameworkElement.ToolTipProperty);
+        }
+        return (W.Style)c.FindResource(item switch
         {
             RowItem => "list.row",
             FixGroupItem or FixCardItem or CodeNodeItem => "list.opener",   // reached and opened by the keyboard too
             _ => "list.heading",
         });
+    }
 }
 
 /// <summary>
@@ -187,7 +218,7 @@ public sealed class EntryView : C.Border
         if (e.Group.Sub is { } sub)
             words.Children.Add(Ink(Typed(new C.TextBlock { Text = sub, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
         line.Children.Add(words);
-        W.Automation.AutomationProperties.SetName(line, $"{e.Group.Title}, {StatusLook.Word(e.Status)}, {e.Group.SeeWords}");
+        // its words for a screen reader are on its list item (EntryStyles: ResultViewList.Spoken)
         return line;
     }
 
@@ -201,9 +232,9 @@ public sealed class EntryView : C.Border
         line.Children.Add(count);
         // the headline on one line (change 25), the checker's words behind it on hover ("Why?")
         var head = Typed(new C.TextBlock { Text = e.Card.Headline, TextTrimming = W.TextTrimming.CharacterEllipsis }, "type.body");
-        line.ToolTip = e.Card.Why is { } why ? $"{e.Card.Headline}\n\nWhy: {why}" : e.Card.Headline;
+        line.ToolTip = ResultViewList.Tip(e);
         line.Children.Add(head);
-        W.Automation.AutomationProperties.SetName(line, $"{e.Card.Headline}, {PaneWords.Results(e.Card.Rows.Count)}");
+        // its words for a screen reader are on its list item (EntryStyles: ResultViewList.Spoken)
         return line;
     }
 
@@ -215,7 +246,7 @@ public sealed class EntryView : C.Border
         var line = Opener(item.Host, e.Key, e.CanOpen, e.Open, e.Status, e.Depth == 0 ? 14 : 11,
                           new W.Thickness(14 * e.Depth, top, 0, 2));
         var words = new C.StackPanel();
-        var title = n.Number is { Length: > 0 } number && n.Level != CodeLevel.Others ? $"{number} {n.Title}" : n.Title;
+        var title = ResultViewList.Title(n);
         words.Children.Add(Ink(Typed(new C.TextBlock
         {
             Text = title, TextWrapping = W.TextWrapping.Wrap,
@@ -225,11 +256,9 @@ public sealed class EntryView : C.Border
             words.Children.Add(Ink(Typed(new C.TextBlock { Text = note, TextWrapping = W.TextWrapping.Wrap, ToolTip = n.NoteTooltip }, "type.caption"), PanelTokens.TextMuted));
         words.Children.Add(Ink(Typed(new C.TextBlock { Text = n.Line, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
         line.Children.Add(words);
-        // which code governs is said with the book (review round 4): to a screen reader, and on the focused line's tooltip
-        W.Automation.AutomationProperties.SetName(line, n.Note is { } said ? $"{title}, {said}, {StatusLook.Word(e.Status)}, {n.Line}"
-                                                                           : $"{title}, {StatusLook.Word(e.Status)}, {n.Line}");
-        if (n.Note is { } why)
-            line.ToolTip = n.NoteTooltip is { } quotes ? $"{why}\n\n{quotes}" : why;
+        // which code governs and the law's words: said and shown on its list item (EntryStyles: ResultViewList.Spoken,
+        // Tip, review round 5), and on hover here
+        line.ToolTip = ResultViewList.Tip(e);
         return line;
     }
 
