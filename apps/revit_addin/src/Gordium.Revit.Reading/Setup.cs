@@ -309,8 +309,11 @@ public static class SetupFacts
                 case MarkValueKind.YesNo:
                 {
                     var yes = Marks.YesNo(v);
+                    // a building fact set to neither Yes nor No: BuildingFacts asks it again, so the form says so and waits
+                    var unread = yes is null && v is { HasValue: true } && m.Feeds.StartsWith("building.", StringComparison.Ordinal)
+                                 ? "It holds a value that isn't Yes or No. Choose Yes or No." : null;
                     fields.Add(new(m, label, FieldKind.YesNo, group, required, [new("Yes", "Yes"), new("No", "No")],
-                                   yes is null ? null : yes.Value ? "Yes" : "No", law, null));
+                                   yes is null ? null : yes.Value ? "Yes" : "No", law, unread));
                     break;
                 }
                 case MarkValueKind.Integer:
