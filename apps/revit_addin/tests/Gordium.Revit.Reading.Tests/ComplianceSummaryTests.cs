@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+using System.Text;
 using System.Net;
 using System.Text.RegularExpressions;
 using Xunit;
@@ -25,20 +27,73 @@ public sealed class ComplianceSummaryTests
                        required: "20'-0\"", sign: "≥", quote: "No new structure shall be located nearer than 20 feet to an inlet wall", where: "§325-8, p.12"),
         UxAnswers.Item("evil", "needs_review", "<script>alert(1)</script> & “quotes”", reason: null)));
 
+    private static readonly Regex LawTag = new("<div class=\"law appendix\" id=\"law-(?<n>[0-9]+)\" data-law=\"(?<id>[^\"]*)\">(?<body>.*?)</div>",
+                                               RegexOptions.Singleline | RegexOptions.CultureInvariant);
+
+    /// <summary>The four-unit apartment's real answer (answers/four_unit_apartment_check_answer.json): By code's tree
+    /// with the City's zoning chapter and the 2025 Building Code's contents.</summary>
+    private static ResultModel Apartment() => UxAnswers.Model(UxAnswers.Parse(JsonNode.Parse(File.ReadAllText(
+        Path.Combine(UxAnswers.Here, "answers", "four_unit_apartment_check_answer.json"), Encoding.UTF8))!["result"]!.AsObject()));
+
+    /// <summary>UI polish change 38: every row once, in By code's order (each document's tables in its chapters' and
+    /// sections' order), the law's words of every row in an appendix in the same order.</summary>
     [Fact]
-    public void The_summary_holds_exactly_the_checkers_rows_each_once_in_its_groups_order()
+    public void The_summary_holds_exactly_the_checkers_rows_each_once_in_the_by_code_order()
     {
-        foreach (var model in new[] { UxAnswers.Model(UxAnswers.Odyssey()), Zoning() })
+        foreach (var model in new[] { UxAnswers.Model(UxAnswers.Odyssey()), Zoning(), Apartment() })
         {
             var html = ComplianceSummary.Html(model, "Children's Odyssey", At, Made);
             var ids = RowTag.Matches(html).Select(m => WebUtility.HtmlDecode(m.Groups["id"].Value)).ToList();
-            Assert.Equal(model.Groups.SelectMany(g => g.AllRows).Select(r => r.Id), ids);
+            Assert.Equal(model.Groups.SelectMany(g => g.AllRows).Select(r => r.Id).Order(StringComparer.Ordinal), ids.Order(StringComparer.Ordinal));
             Assert.Equal(ids.Count, ids.Distinct().Count());
-            // each group of the checker's is a heading, with its count
-            foreach (var g in model.Groups.Where(g => g.AllRows.Any()))
-                Assert.Contains($"<h2>{WebUtility.HtmlEncode(g.Title)} ({g.AllRows.Count()})</h2>", html, StringComparison.Ordinal);
+            // By code's order: the rows as the tree holds them, depth first
+            IEnumerable<ResultRow> Walk(CodeNode n) => n.Rows.Concat(n.Children.Where(c => c.Level == CodeLevel.Rule && !c.Greyed).SelectMany(c => c.Rows))
+                                                         .Concat(n.Children.Where(c => c.Level != CodeLevel.Rule || c.Greyed).SelectMany(Walk));
+            Assert.Equal(model.Views!.Code.SelectMany(Walk).Select(r => r.Id), ids);
+            // the appendix: every row's law, in the same order, each table row numbered and linked to its law (review
+            // round 2)
+            Assert.Equal(ids, LawTag.Matches(html).Select(m => WebUtility.HtmlDecode(m.Groups["id"].Value)));
+            var rows = RowTag.Matches(html).ToList();
+            for (var i = 0; i < rows.Count; i++)
+                Assert.Contains($"<a class=\"law-ref\" href=\"#law-{i + 1}\">{i + 1}.</a> ", rows[i].Groups["body"].Value, StringComparison.Ordinal);
+            Assert.True(html.IndexOf(WebUtility.HtmlEncode(ComplianceSummary.AppendixTitle), StringComparison.Ordinal) > html.LastIndexOf("<tr data-row=", StringComparison.Ordinal));
         }
         Assert.Equal(190, RowTag.Matches(ComplianceSummary.Html(UxAnswers.Model(UxAnswers.Odyssey()), "o", At, Made)).Count);
+    }
+
+    /// <summary>The apartment by code: each document a heading, the Building Code's "Governs this building" and scope
+    /// note under it, and the chapters Gordium hasn't checked listed greyed, never left out (change 35).</summary>
+    [Fact]
+    public void The_apartment_by_code_lists_its_greyed_chapters_and_why_the_building_code_governs()
+    {
+        var model = Apartment();
+        var html = ComplianceSummary.Html(model, "Four-unit apartment", At, Made);
+        foreach (var doc in model.Views!.Code)
+            Assert.Contains($"<h2>{WebUtility.HtmlEncode(doc.Title)}</h2>", html, StringComparison.Ordinal);
+        Assert.Contains("<p class=\"which-code\">Governs this building:", html, StringComparison.Ordinal);
+        // each book's scope note, when it has one (since #182 none of the apartment's results says it: then none at all)
+        foreach (var doc in model.Views!.Code)
+            if (doc.Scope is { } scope)
+                Assert.Contains($"<p class=\"scope\">{WebUtility.HtmlEncode(scope)}</p>", html, StringComparison.Ordinal);
+        Assert.Equal(model.Views.Code.Count(d => d.Scope is not null), Regex.Matches(html, "<p class=\"scope\">").Count);
+        // two Building Code results saying their rules are drafted for Group I-4 only: one paragraph, under that book
+        var node = JsonNode.Parse(File.ReadAllText(Path.Combine(UxAnswers.Here, "answers", "four_unit_apartment_check_answer.json"), Encoding.UTF8))!["result"]!;
+        foreach (var item in node["view"]!["items"]!.AsArray().Where(i => ((string?)i!["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true).Take(2))
+            item!["reason"] = "this rulebook's rules are " + ResultViews.DraftedFor + ", so a person checks";
+        var scoped = UxAnswers.Model(UxAnswers.Parse(node.AsObject()));
+        var scopedHtml = ComplianceSummary.Html(scoped, "Four-unit apartment", At, Made);
+        Assert.Single(Regex.Matches(scopedHtml, "<p class=\"scope\">"));
+        // under the Building Code's heading, before the next document's (short review after #182)
+        var bookAt = scopedHtml.IndexOf("<h2>2025 Building Code", StringComparison.Ordinal);
+        var scopeAt = scopedHtml.IndexOf("<p class=\"scope\">", StringComparison.Ordinal);
+        var nextBook = scopedHtml.IndexOf("<h2>", bookAt + 4, StringComparison.Ordinal);
+        Assert.InRange(scopeAt, bookAt, nextBook < 0 ? int.MaxValue : nextBook);
+        Assert.StartsWith("2025 Building Code", scoped.Views!.Code.Single(d => d.Scope is not null).Title, StringComparison.Ordinal);
+        Assert.Contains($"<p class=\"scope\">{WebUtility.HtmlEncode(ResultViews.ScopeWords(2))}</p>", scopedHtml, StringComparison.Ordinal);
+        var greyed = Regex.Matches(html, "<p class=\"muted greyed\" data-greyed=\"(?<s>[A-Za-z]+)\">(?<t>.*?)</p>").ToList();
+        Assert.NotEmpty(greyed);
+        Assert.All(greyed, g => Assert.Contains(g.Groups["s"].Value, new[] { "NotCheckedYet", "NothingToCheck" }));
+        Assert.Contains(greyed, g => g.Groups["t"].Value.Contains("Not checked yet by Gordium", StringComparison.Ordinal));
     }
 
     /// <summary>The pin on the words: every row's name, status word and every quote of the law (with where it is) as the
@@ -46,14 +101,16 @@ public sealed class ComplianceSummaryTests
     [Fact]
     public void The_summary_says_the_checkers_words_and_no_figure_of_its_own()
     {
-        foreach (var model in new[] { UxAnswers.Model(UxAnswers.Odyssey()), Zoning() })
+        foreach (var model in new[] { UxAnswers.Model(UxAnswers.Odyssey()), Zoning(), Apartment() })
         {
             var html = ComplianceSummary.Html(model, "P", At, Made);
             var rows = model.Groups.SelectMany(g => g.AllRows).ToDictionary(r => r.Id, StringComparer.Ordinal);
+            var laws = LawTag.Matches(html).ToDictionary(m => WebUtility.HtmlDecode(m.Groups["id"].Value), m => m.Groups["body"].Value, StringComparer.Ordinal);
             foreach (Match m in RowTag.Matches(html))
             {
                 var row = rows[WebUtility.HtmlDecode(m.Groups["id"].Value)];
-                var body = m.Groups["body"].Value;
+                // the summary's own numbering (the appendix's "12. ", the row's link to it) is its place, not a figure
+                var body = Regex.Replace(laws[row.Id] + m.Groups["body"].Value, "<a class=\"law-ref\"[^>]*>[0-9]+\\.</a>|<b>[0-9]+\\. ", "<b>");
                 var text = WebUtility.HtmlDecode(Regex.Replace(Regex.Replace(body, "<svg.*?</svg>", "", RegexOptions.Singleline), "<[^>]+>", " "));
                 Assert.Contains(row.Name, text, StringComparison.Ordinal);
                 Assert.Equal(StatusLook.Of(row.Tone, false).ToString().ToLowerInvariant(), m.Groups["status"].Value);
@@ -64,6 +121,7 @@ public sealed class ComplianceSummaryTests
                                                 .Concat(row.Quotes.SelectMany(q => new[] { q.Text, q.Where }))
                                                 .Concat(row.FigureLines.SelectMany(l => new[] { l.What, l.Measured, l.Limit }))
                                                 .Concat(row.Links.Select(l => l.Citation)).Where(s => s is not null));
+                // the appendix's own numbering ("12. ") is the summary's place, not a figure
                 foreach (Match n in Regex.Matches(text, @"[0-9]+(?:[.,][0-9]+)*"))
                     Assert.True(own.Contains(n.Value, StringComparison.Ordinal), $"{row.Id}: {n.Value} is not the checker's");
             }
