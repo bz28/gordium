@@ -80,8 +80,10 @@ def pytest_collection_modifyitems(config, items):
 # phase) takes a second or more; a part fails only for an unlisted test whose run takes TOO_SLOW or more. Only the run
 # counts: a module fixture's setup lands on whichever of its tests runs first, which changes with the order the
 # workers take tests (review round 6), and the machines CI runs on are slower or faster than the one the list was
-# recorded on, so a test near a second would otherwise fail by chance.
-TOO_SLOW = 3.0
+# recorded on, so a test near a second would otherwise fail by chance. A test of a few seconds hardly moves a part's
+# time, and its time on CI's machines varies run to run (PR #190, 2026-11-24: four tests of 3.0 to 3.6 s failed two
+# parts that had passed before), so a part fails only for an unlisted test of TOO_SLOW, 10 s, or more.
+TOO_SLOW = 10.0
 _took = {}
 
 
