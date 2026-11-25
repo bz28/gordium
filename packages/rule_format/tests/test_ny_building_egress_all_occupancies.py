@@ -867,9 +867,19 @@ def test_the_readmes_not_brought_in_list_names_no_section_brought_in():
     listed = readme.split("## References in the brought-in sections that are not brought in", 1)[1].split("\n## ", 1)[0]
     brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
     ids = [str(x) for x in brought["sections"] + brought["alone"] if not str(x).startswith("Table")]
+    tables = {str(x) for x in brought["sections"] if str(x).startswith("Table")}
+    # round 2: tables by name first ("Table 1006.3.4(1)", "Tables 705.5 and 705.9"), before brackets are dropped
+    named = []
+    # ("Table 1017.2's note a lists": a brought-in table named as the source of a reference, not as one)
+    for m in re.finditer(r"Tables? (\d{3,4}(?:\.\d+)*(?:\(\d\))?)(?: and (\d{3,4}(?:\.\d+)*(?:\(\d\))?))?(?!'s)",
+                         listed):
+        named += [f"Table {g}" for g in m.groups() if g]
+    bad = [t for t in named if t in tables]
+    listed = re.sub(r"Tables? \d{3,4}(?:\.\d+)*(?:\(\d\))?(?: and \d{3,4}(?:\.\d+)*(?:\(\d\))?)?", "", listed)
     listed = re.sub(r"\([^()]*\)", "", listed)             # what a reference is for, in brackets, may name a section
-    listed = re.sub(r"\d{3,4}(?:\.\d+)*'s parts", "", listed)   # the parts under a section brought in alone
-    listed = re.sub(r"Tables? \d{3,4}(?:\.\d+)*(?:\(\d\))?(?: and \d{3,4}(?:\.\d+)*)?", "", listed)  # tables: by name
-    bad = [n for n in re.findall(r"\b\d{3,4}(?:\.\d+)*\b", listed)
-           if any(n == b or (n.startswith(b + ".") and b not in brought["alone"]) for b in ids)]
-    assert not bad, bad
+    # the parts under a section brought in alone ("903.3.1.2's parts"); a section brought in whole has its parts in
+    listed = re.sub(r"(\d{3,4}(?:\.\d+)*)'s parts", lambda m: "" if m.group(1) in brought["alone"] else m.group(1),
+                    listed)
+    bad += [n for n in re.findall(r"\b\d{3,4}(?:\.\d+)*\b", listed)
+            if any(n == b or (n.startswith(b + ".") and b not in brought["alone"]) for b in ids)]
+    assert named and not bad, bad
