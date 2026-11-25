@@ -26,10 +26,13 @@ internal sealed record CardRequest(CauseCard Card, CardAction Action, IReadOnlyL
 /// (SetupWords.SentWithout), shown first, with Set up the facts.</param>
 /// <param name="Key">The document checked by identity (DocKeys.Of), never its title (a Save As changes it): what a
 /// check is compared with and its ticks carried by; null for the Setup form (UI changes 13-15, review round 2).</param>
+/// <param name="Questions">The project's facts as the Setup form's fields (SetupRun.Questions), read when the answer was
+/// shown: what "Answer N questions about the project" asks with (UI polish changes 22, 23); null when not read.</param>
 internal sealed record PanelContent(string Project, DateTime When, ResultModel? Model, IReadOnlyList<string> Missing,
                                     int MarksAdded, IReadOnlyDictionary<string, string> Labels, string Files,
                                     string ClearWords, IReadOnlyDictionary<string, long>? Ids = null,
-                                    IReadOnlyList<string>? NotStated = null, string? Key = null);
+                                    IReadOnlyList<string>? NotStated = null, string? Key = null,
+                                    IReadOnlyList<SetupField>? Questions = null);
 
 /// <summary>
 /// The results panel itself (a WPF view in Revit's dockable pane, beside Properties), matching the agreed mockup
@@ -53,6 +56,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private readonly Action _checkAgain;
     private readonly Action _projectInformation;
     private readonly Action _setUp;
+    private readonly Action<IReadOnlyList<MarkWrite>> _saveAnswers;
+    // UI polish changes 22, 23: the answers chosen in the questions card, not saved yet (each new check starts afresh)
+    private SetupDraft _answers = new();
     private readonly C.TextBlock _sub = Small("");
     private readonly C.TextBlock _title;
     private readonly C.Button _again;
@@ -109,8 +115,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private readonly Dictionary<string, (ResultModel Model, LookedAt Looked, IReadOnlyDictionary<string, string> Labels)> _ticked = new(StringComparer.Ordinal);
 
     internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action projectInformation,
-                         Action<CardRequest> card, Action setUp, PanelTheme theme)
+                         Action<CardRequest> card, Action setUp, PanelTheme theme, Action<IReadOnlyList<MarkWrite>>? saveAnswers = null)
     {
+        _saveAnswers = saveAnswers ?? (_ => { });
         _zoom = zoom;
         _card = card;
         _select = select;
@@ -169,6 +176,29 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _list.ItemContainerStyleSelector = new EntryStyles();
         _list.SelectionChanged += (_, _) => Selected();
         _list.PreviewKeyDown += ListKeys;
+        // the keyboard going into an entry's control (a click into a question's dropdown or Yes / No): that entry is
+        // selected too (quietly: never sent to Revit), so the selection is always the line the keyboard is on (review
+        // round 3: a stale selection on the card's foot let Enter on a question's line save)
+        _list.PreviewGotKeyboardFocus += (_, e) =>
+        {
+            // only focus going into a control inside a question, "+ N more" or the card's foot, never onto a list item
+            // itself (review round 4: a click on a row gives it focus first, and a quiet selection then kept the click
+            // from sending the row to Revit)
+            if (Within<C.ListBoxItem>(e.NewFocus) is { DataContext: QuestionItem or MoreQuestionsItem or AnswerFootItem } item
+                && !ReferenceEquals(e.NewFocus, item) && !ReferenceEquals(item, _list.ItemContainerGenerator.ContainerFromItem(_list.SelectedItem))
+                && _list.ItemContainerGenerator.IndexFromContainer(item) is var i and >= 0)
+            {
+                _quiet = true;
+                try
+                {
+                    _list.SelectedIndex = i;
+                }
+                finally
+                {
+                    _quiet = false;
+                }
+            }
+        };
         _list.MouseDoubleClick += (_, e) =>
         {
             if (Within<C.Button>(e.OriginalSource) is not null || Within<C.ListBoxItem>(e.OriginalSource)?.DataContext is not RowItem row)
@@ -407,6 +437,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         if (_shownCheck == (content.Key ?? content.Project, content.When))
             return;
         _shownCheck = (content.Key ?? content.Project, content.When);
+        _answers = new SetupDraft();
         _openCards.Clear();
         _openView.Clear();
         if (content.Model?.Views is { } views)
@@ -988,7 +1019,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var labels = _content?.Labels;
         var stale = _content?.Model?.Stale is not null;
         var layout = _content?.Model?.Views is { } views
-            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale)
+            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale, _content?.Questions)
             : ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),
                                     _summary is not null && AllCards.Count > 0, _filter, _search.Text);
         _entries = _summary is null ? layout : ResultList.WithSummary(layout);
@@ -1017,6 +1048,15 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     break;
                 case CodeNodeEntry n:
                     items.Add(new CodeNodeItem(this, n));
+                    break;
+                case QuestionEntry q:
+                    items.Add(new QuestionItem(this, q));
+                    break;
+                case MoreQuestionsEntry m:
+                    items.Add(new MoreQuestionsItem(this, m));
+                    break;
+                case AnswerFootEntry f:
+                    items.Add(new AnswerFootItem(this, f));
                     break;
                 case ListRowEntry r:
                     var row = new RowItem(this, r.Row);
@@ -1056,7 +1096,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         if (_list.SelectedItem is not RowItem row)
         {
             // a heading is never the selection; an opener of the two views is (the keyboard is on it), sent to Revit never
-            if (!_quiet && _list.SelectedItem is not null and not (FixGroupItem or FixCardItem or CodeNodeItem))
+            if (!_quiet && _list.SelectedItem is not null and not (FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem or AnswerFootItem))
                 _list.SelectedItem = null;
             return;
         }
@@ -1081,13 +1121,64 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private void ListKeys(object sender, I.KeyEventArgs e)
     {
         // only a key on a row, or on the list itself: never one meant for a fold after the rows (Space on Details)
+        // an open dropdown's own item (a ComboBoxItem is a ListBoxItem, in the dropdown's popup): its keys are the
+        // dropdown's, never the list's (review round 2: Enter, Up and Down were taken from an open question's dropdown)
+        if (OwnKeys(e.OriginalSource))
+        {
+            if (Within<C.ComboBoxItem>(e.OriginalSource) is not null)
+                return;
+        }
         var on = Within<C.ListBoxItem>(e.OriginalSource)?.DataContext;
-        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem,
+        // in a question's controls: Tab and Shift+Tab move between them (Yes, No), Esc goes back to its line in the list
+        // (the list takes Tab once: without this the keyboard could never reach No; review round 1)
+        if (on is QuestionItem && OwnKeys(e.OriginalSource) && Within<C.ListBoxItem>(e.OriginalSource) is { } inItem)
+        {
+            if (e.Key == I.Key.Escape)
+            {
+                FocusEntry(_list.ItemContainerGenerator.IndexFromContainer(inItem));   // selected and focused, together
+                e.Handled = true;
+                return;
+            }
+            if (e.Key == I.Key.Tab)
+            {
+                var controls = Controls(inItem);
+                var here = controls.FindIndex(c => c.IsKeyboardFocusWithin);
+                var shift = (I.Keyboard.Modifiers & I.ModifierKeys.Shift) != 0;
+                var to = here + (shift ? -1 : 1);
+                if (here >= 0 && to >= 0 && to < controls.Count)
+                {
+                    controls[to].Focus();
+                    e.Handled = true;
+                    return;
+                }
+            }
+        }
+        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem or AnswerFootItem,
                                      onList: ReferenceEquals(e.OriginalSource, _list)))
             return;
+        // a key in a question's own control (its dropdown, its box, its Yes / No) is the control's: never the list's
+        // (UI polish changes 22, 23: Up and Down choose in a dropdown, Space presses a button)
+        if (OwnKeys(e.OriginalSource))
+            return;
         var ctrl = (I.Keyboard.Modifiers & I.ModifierKeys.Control) != 0;
+        // a question: Enter or Space goes into its control; the card's foot: Enter or Space saves (review round 1)
+        // the entry the key is on: the list item it came from (never a selection left elsewhere), else the selected one
+        var at = Within<C.ListBoxItem>(e.OriginalSource) is { } from && _list.ItemContainerGenerator.IndexFromContainer(from) is var fi and >= 0
+            ? fi : _list.SelectedIndex;
+        if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.EntersControl(_entries[at], e.Key.ToString())
+            && _list.ItemContainerGenerator.ContainerFromIndex(at) is C.ListBoxItem item)
+        {
+            Controls(item).FirstOrDefault()?.Focus();
+            e.Handled = true;
+            return;
+        }
+        if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.Saves(_entries[at], e.Key.ToString()) && _entries[at] is AnswerFootEntry foot)
+        {
+            SaveAnswers(foot.Questions);
+            e.Handled = true;
+            return;
+        }
         // an opener of the two views: the key opens or folds it, as a click does, and the keyboard stays on it
-        var at = _list.SelectedIndex;
         if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.KeyToggles(_entries[at], e.Key.ToString()) is { } toggles)
         {
             ToggleOpen(toggles);
@@ -1098,7 +1189,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         switch (e.Key)
         {
             case I.Key.Down or I.Key.Up when !ctrl:
-                FocusEntry(ResultList.Next(_entries, _list.SelectedIndex, e.Key == I.Key.Down ? 1 : -1));
+                FocusEntry(ResultList.Next(_entries, at, e.Key == I.Key.Down ? 1 : -1));
                 e.Handled = true;
                 break;
             case I.Key.Enter when SelectedRow is { } row:
@@ -1115,6 +1206,16 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                 break;
         }
     }
+
+    /// <summary>A question's own controls, in order (its dropdown, its Yes and No, its box).</summary>
+    private static List<C.Control> Controls(W.DependencyObject item) =>
+        [.. Descendants(item).OfType<C.Control>().Where(c => c is C.ComboBox or C.Primitives.ToggleButton or C.TextBox && c.TemplatedParent is null && c.IsVisible && c.Focusable)];
+
+    /// <summary>Whether a key's source is a control inside an entry that takes keys itself (a dropdown or an item of
+    /// its open list, a text box, a button): the list leaves the key to it.</summary>
+    internal static bool OwnKeys(object? source) =>
+        Within<C.ComboBoxItem>(source) is not null || Within<C.ComboBox>(source) is not null || Within<C.TextBox>(source) is not null
+        || Within<C.Primitives.ButtonBase>(source) is not null;
 
     private void SearchKeys(object sender, I.KeyEventArgs e)
     {
@@ -1265,6 +1366,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _selectedId = id;
         var stale = _content?.Model?.Stale is not null ? _content.When : (DateTime?)null;
         var detail = Details.Of(rows[index], index, rows.Count, _content?.Labels, stale, _content?.Ids, _content?.Model?.StaleKind ?? StaleReason.ModelChanged);
+        // UI polish changes 28 to 32: the page laid out from the checker's asks for this result (an answer without the
+        // two views keeps the page as before)
+        if (_content?.Model?.Views is { } views)
+            detail = detail with { Page = DetailPages.Of(detail, rows[index], ResultViews.CardsOf(views, id)) };
         _detail = DetailView.Build(detail, this, canStepBack: index > 0, canStepOn: index < rows.Count - 1);
         _bodyHost.Child = _detail;
         _detail.Focus();
@@ -1340,6 +1445,60 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     }
 
     public void CheckAgain() => _checkAgain();
+
+    /// <summary>The detail's "Answer N questions" (change 28): back to What to fix, its questions card open and the
+    /// keyboard on it (the view chosen for the project is not changed by this).</summary>
+    public void Answer()
+    {
+        if (_content?.Model?.Views is not { } views || _detailId is not { } id || ResultViewList.AnswerKeys(views, id) is not { Count: > 0 } keys)
+            return;
+        _detailId = null;
+        _bodyHost.Child = _results;
+        _view = ResultsViewKind.WhatToFix;
+        _openView.UnionWith(keys);
+        ShowSearch(false);
+        Chips(Stale);
+        Relayout();
+        // the keyboard on the result's first question (review round 1), else the group
+        var first = _items.FindIndex(i => i is QuestionItem q && q.Entry.Question.Card.Rows.Any(r => r.Id == id));
+        FocusEntry(first >= 0 ? first : _items.FindIndex(i => i is FixGroupItem g && g.Entry.Group.Kind == FixKind.Answer));
+    }
+
+    // ---- the questions card (UI polish changes 22, 23; IListHost) --------------------------------------------
+
+    public SetupDraft Answers => _answers;
+
+    /// <summary>A question answered (in the draft only): the card's Save says how many answers it would write.</summary>
+    public void Answered()
+    {
+        foreach (var e in Descendants(_list))
+            if (e is C.Button { Tag: AnswerFootItem foot } save)
+            {
+                var n = ProjectQuestions.Unsaved(foot.Entry.Questions, _answers);
+                save.Content = ProjectQuestions.SaveWords(n);
+                save.IsEnabled = n > 0;
+            }
+    }
+
+    /// <summary>"Save and check again": the answers chosen written as one undo (on Revit's thread), then the check;
+    /// an answer that isn't one of its field's values is said and nothing is written.</summary>
+    public void SaveAnswers(IReadOnlyList<ProjectQuestion> questions)
+    {
+        var (writes, problems) = ProjectQuestions.Writes(questions, _answers);
+        if (problems.Count > 0)
+        {
+            Say(string.Join(" ", problems));
+            return;
+        }
+        if (writes.Count == 0)
+        {
+            Say("Nothing to save yet: choose an answer first.");
+            return;
+        }
+        _saveAnswers(writes);
+    }
+
+    public void OpenProjectInformation() => _projectInformation();
 
     private static T? Find<T>(W.DependencyObject root) where T : W.DependencyObject
     {

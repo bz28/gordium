@@ -28,6 +28,20 @@ public static class PaneWords
         return s.Length == 0 ? s : char.ToUpperInvariant(s[0]) + s[1..];
     }
 
+    /// <summary>What the questions card's Save says when Revit didn't take every answer (a write refused, or the
+    /// transaction not committed): what was saved, if anything (one Ctrl+Z undoes it: review round 1, a partly saved
+    /// set was said as "weren't saved" while Project Information had changed), what wasn't, and that nothing was
+    /// checked.</summary>
+    public static string AnswersNotSaved(IReadOnlyList<string> refused, int applied, string status)
+    {
+        ArgumentNullException.ThrowIfNull(refused);
+        var saved = applied > 0 && status == "Committed";
+        var why = refused.Count > 0 ? string.Join("; ", refused) : $"Revit didn't take the change ({status})";
+        return saved
+            ? $"Saved {applied} (Ctrl+Z undoes it), but not written: {why}. Nothing was checked: fix that on Project Information, or click Check again."
+            : $"Your answers weren't saved, so nothing was checked: {why}. They are still chosen in the card: try Save again.";
+    }
+
     /// <summary>"a", "a and b", "a, b and c".</summary>
     public static string And(IReadOnlyList<string> items)
     {

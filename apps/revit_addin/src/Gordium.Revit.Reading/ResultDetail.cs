@@ -62,6 +62,10 @@ public sealed record ResultDetail(string Position, PanelStatus Status, string Ve
     /// <summary>The worker's row id (what its tick is kept by).</summary>
     public string Id { get; init; } = "";
 
+    /// <summary>The page as the UI polish lays it out (changes 28 to 32), or null for an answer without the two views
+    /// (an older checker: the page as before).</summary>
+    public DetailPage? Page { get; init; }
+
     /// <summary>The generic "What to do" step of a row in review with no advice of its own: the pane shows the fix the
     /// row waits on in its place (<see cref="Fixes.Step"/>), when there is one.</summary>
     public const string ResolveStep =
