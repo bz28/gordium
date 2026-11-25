@@ -1021,7 +1021,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                 case ListRowEntry r:
                     var row = new RowItem(this, r.Row);
                     if (r.Row.Row.Id == _selectedId)
-                        selected = row;
+                        selected ??= row;                        // its first place (a result can be listed twice)
                     items.Add(row);
                     break;
             }
@@ -1280,7 +1280,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _results.UpdateLayout();
         if (Find<C.ScrollViewer>(_list) is { } sv)
             sv.ScrollToVerticalOffset(_listOffset);
-        var at = _items.FindIndex(i => i is RowItem r && r.Row.Row.Id == id);
+        // the place it was opened from when the list still has it there (a result listed under two open cards: the
+        // card it was opened from, review round 2), else its first place
+        var at = _list.SelectedItem is RowItem s && s.Row.Row.Id == id ? _list.SelectedIndex
+            : _items.FindIndex(i => i is RowItem r && r.Row.Row.Id == id);
         if (at < 0)
             return;
         _quiet = true;                                            // already selected in Revit

@@ -364,13 +364,26 @@
 
   <!-- an opener of the two results views (a group, a card, a node of the law's tree): plain like a heading, but the
        keyboard stops on it (Up/Down) and opens it (Enter, Space, Right) or folds it (Left); UI polish PR 3 -->
+  <!-- where the keyboard is shows as list.row's does (review round 2): an accent frame when focused or selected -->
   <Style x:Key="list.opener" TargetType="ListBoxItem">
     <Setter Property="Foreground" Value="{DynamicResource text}" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ListBoxItem">
-          <ContentPresenter HorizontalAlignment="Stretch" />
+          <Border x:Name="Frame" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="4"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Stretch" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource accent}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource accent}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>
     </Setter>

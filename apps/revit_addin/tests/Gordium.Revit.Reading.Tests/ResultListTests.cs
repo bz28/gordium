@@ -344,6 +344,24 @@ public sealed class ResultListTests
                         "        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem,\n" +
                         "                                     onList: ReferenceEquals(e.OriginalSource, _list)))\n            return;", keys, StringComparison.Ordinal);
         Assert.DoesNotContain("FoldItem", keys[..keys.IndexOf("return;", StringComparison.Ordinal)], StringComparison.Ordinal);
+        // the add-in half of the keyboard fix (review round 2): an opener is focusable and drawn where the keyboard is,
+        // it stays selected (never sent to Revit), and a key on it opens or folds it with the keyboard kept on it
+        Assert.Contains("var at = _list.SelectedIndex;\n" +
+                        "        if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.KeyToggles(_entries[at], e.Key.ToString()) is { } toggles)\n" +
+                        "        {\n            ToggleOpen(toggles);\n            FocusEntry(at);", keys, StringComparison.Ordinal);
+        var selected = view[view.IndexOf("    private void Selected()", StringComparison.Ordinal)..];
+        Assert.Contains("_list.SelectedItem is not null and not (FixGroupItem or FixCardItem or CodeNodeItem)", selected[..selected.IndexOf("_select(", StringComparison.Ordinal)], StringComparison.Ordinal);
+        Assert.Contains("FixGroupItem or FixCardItem or CodeNodeItem => \"list.opener\"", Addin("ResultsList.cs"), StringComparison.Ordinal);
+        var stylesText = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "PanelStyles.xaml"));
+        var opener = stylesText[stylesText.IndexOf("x:Key=\"list.opener\"", StringComparison.Ordinal)..];
+        opener = opener[..opener.IndexOf("</Style>", StringComparison.Ordinal)];
+        Assert.DoesNotContain("Focusable", opener, StringComparison.Ordinal);
+        Assert.Contains("<Trigger Property=\"IsKeyboardFocused\" Value=\"True\">\n              <Setter TargetName=\"Frame\" Property=\"BorderBrush\" Value=\"{DynamicResource accent}\" />", opener, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"FocusVisualStyle\" Value=\"{x:Null}\" />", opener, StringComparison.Ordinal);
+        // Back returns to the place the detail was opened from, a relayout to a result's first place
+        var back = view[view.IndexOf("    public void Back()", StringComparison.Ordinal)..];
+        Assert.Contains("var at = _list.SelectedItem is RowItem s && s.Row.Row.Id == id ? _list.SelectedIndex", back, StringComparison.Ordinal);
+        Assert.Contains("selected ??= row;", view, StringComparison.Ordinal);
         // a sub-heading's status is drawn, as its doc says (its place's glyph; the clock once stale)
         var entries = Addin("ResultsList.cs");
         var sub = entries[entries.IndexOf("    private static W.UIElement Sub(SubItem item)", StringComparison.Ordinal)..];
