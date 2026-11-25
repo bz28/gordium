@@ -638,3 +638,13 @@ def test_the_r2_sleeping_units_ask_never_reads_as_either_or_for_a_mixed_building
     from design_checker import each_part
     assert "all sleeping units, all dwelling units, or both" in ui_data.FIELD_HEADLINES["building.r2_sleeping_units"]
     assert "every Group R-2 unit is a sleeping unit" in each_part.MEASURE_NAMES["r2_sleeping_units"]
+
+
+def test_the_plan_never_says_a_marked_facts_revit_mark_is_still_to_come():
+    # PR #195 review round 7: after PR #194 the plan still said groups 2 and 3's marks were a follow-up
+    import re
+    doc = (REPO / "docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md").read_text(encoding="utf-8")
+    for sentence in re.split(r"(?<=[.;])\s", doc):
+        if re.search(r"Revit mark\S* (is|are) a follow-up|marks? join group", sentence):
+            named = [k for k in code_scope.MARK if k in sentence]
+            assert not named, (named, sentence[:200])
