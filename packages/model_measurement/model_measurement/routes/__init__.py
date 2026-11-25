@@ -42,7 +42,7 @@ from model_measurement.interior.read import name_of
 from model_measurement.routes import areas, dead_ends, straight
 from model_measurement.routes.common_path import _TravelOnly, at_point, story_figure
 from model_measurement.routes.doors import door_parts
-from model_measurement.routes.floor import CLEARANCE, READING, read, region
+from model_measurement.routes.floor import CLEARANCE, OUTSIDE as OUTSIDE_SIDE, READING, read, region
 from model_measurement.routes.paths import FOOT, StoryRoutes, _Leg
 from model_measurement.routes.remote import farthest
 from model_measurement.routes.stops import Stop
@@ -76,11 +76,12 @@ def measure(description, clearance: float = CLEARANCE) -> dict:
     items = {r["id"]: r for r in description.get("rooms") or [] if isinstance(r, dict) and isinstance(r.get("id"), str)}
     unknown = [u for u in description.get("unknown_spaces") or [] if isinstance(u, dict)]
     parts = {k: [] for k in KINDS}
+    toward = {}                                     # door id -> the side egress travel goes into, or why not known
     for level, story in floor.stories.items():
         uses = {rid: (items.get(rid) or {}).get("use") for rid in story.rooms}
         here = [u for u in unknown if u.get("level") == level]
-        _story_parts(story, uses, items, here, parts, clearance)
-    parts["means_of_egress_door"] = door_parts(description, floor)   # every door given (section group 6a)
+        toward.update(_egress_sides(story, _story_parts(story, uses, items, here, parts, clearance)))
+    parts["means_of_egress_door"] = door_parts(description, floor, toward)   # every door given (section group 6a)
     if floor.stops:                                      # a part that can't be placed on a story: none is "none"
         for u in unknown:
             if u.get("level") not in floor.stories:
@@ -108,7 +109,9 @@ def _readings(part, name, readings, words) -> None:
     part["not_measured"][name] = Stop("readings", question=question, words=words).reason
 
 
-def _story_parts(story, uses, items, unknown, parts, r) -> None:
+def _story_parts(story, uses, items, unknown, parts, r):
+    """The story's parts; returns its rooms' exit access ({room id: {door id: ...}} or a Stop), None where its routes
+    aren't measured."""
     sp = _part(story.level, story.name)
     parts["story"].append(sp)
     routes = None
@@ -148,6 +151,35 @@ def _story_parts(story, uses, items, unknown, parts, r) -> None:
             parts["corridor"].append(cp)
     for u in unknown:
         _maybe_parts(u, story.level, parts)
+    return access if routes is not None else None
+
+
+def _egress_sides(story, access) -> dict:
+    """{door id: the side (a room id, or "outside") egress travel goes into through it, or the Stop why that isn't
+    known} for each door the story's routes read (section group 6b, 1010.1.2.1: "swing in the direction of egress
+    travel"). An exit door: into its exit (the room it enters, or outside). Any other door with outside on one side:
+    outside. Any other: away from the one room whose exit access it is (a door from which a route reaches an exit
+    without coming back into the room); where both rooms or neither have it so (or a room's access isn't worked
+    out), not known. A story whose routes aren't measured: every door not known."""
+    out = {}
+    for d in story.doors.values():
+        if access is None:
+            out[d.id] = Stop("story_not_measured", reasons="; ".join(story.stops))
+            continue
+        if d.exit_kind:
+            out[d.id] = d.exit_id if d.exit_id in d.sides else OUTSIDE_SIDE if OUTSIDE_SIDE in d.sides else                 Stop("egress_side_unclear", name=d.name)
+            continue
+        if OUTSIDE_SIDE in d.sides:
+            out[d.id] = OUTSIDE_SIDE
+            continue
+        rooms = [s for s in d.sides if s != OUTSIDE_SIDE]
+        if any(isinstance(access.get(s), Stop) for s in rooms):
+            out[d.id] = Stop("egress_side_unclear", name=d.name)
+            continue
+        from_ = [s for s in rooms if d.id in (access.get(s) or {})]
+        out[d.id] = next(s for s in rooms if s != from_[0]) if len(from_) == 1 else Stop("egress_side_unclear",
+                                                                                          name=d.name)
+    return out
 
 
 def _maybe_parts(u, level, parts) -> None:
