@@ -470,7 +470,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     break;
                 // which code and why: By code says it under the book (change 36), so here only without the two views
                 // or while it isn't decided (needs review: the architect must see that before any result)
-                case PanelPart.Code when model.Code is { } code && (model.Views is null || !code.Decided):
+                case PanelPart.Code when model.Code is { } code && (model.Views is not { ShowsWhichCode: true } || !code.Decided):
                     // which code and why, the worker's words: plain when decided (never green), needs review when not,
                     // the clock once stale; the law's quoted words on hover; at most two lines (the whole on hover)
                     var codeStatus = code.Status(stale);

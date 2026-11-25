@@ -210,6 +210,25 @@ public sealed class ResultViewsTests
         Assert.All(s318.Children.Where(c => c.Level == CodeLevel.Others), f => Assert.DoesNotContain("–", f.Title, StringComparison.Ordinal));
     }
 
+    /// <summary>By code says which code governs only where it can (review round 3): the apartment's answer does; with no
+    /// contents, or no reason sent, it doesn't, so the pane keeps the which-code line at its top.</summary>
+    [Fact]
+    public void By_code_says_which_code_governs_only_when_it_has_the_book_and_the_reason()
+    {
+        var m = ResultViews.Build(Apartment());
+        Assert.True(m.ShowsWhichCode);
+        // the law's own words behind the choice are where it is shown (the governing book's note, on hover)
+        var governing = m.Code.Single(d => d.Note is not null);
+        Assert.Contains("R101.2", governing.NoteTooltip, StringComparison.Ordinal);
+        Assert.Contains("ToolTip = n.NoteTooltip", File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs")), StringComparison.Ordinal);
+        var none = Answer();
+        none["view"]!["contents"] = new JsonArray();
+        Assert.False(ResultViews.Build(Parse(none)).ShowsWhichCode);
+        var noWhy = Answer();
+        noWhy["which_code"]!.AsObject().Remove("why");
+        Assert.False(ResultViews.Build(Parse(noWhy)).ShowsWhichCode);
+    }
+
     /// <summary>The class rule of change 34, over every node: complies only when every row inside complies or doesn't
     /// apply and nothing inside is not checked yet; fails or review whenever a row inside does.</summary>
     [Fact]

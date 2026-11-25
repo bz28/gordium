@@ -64,6 +64,11 @@ public sealed record CodeNode(CodeLevel Level, string? Number, string Title, str
     /// <summary>What the document calls it, from its contents: "chapter", "article", "appendix", "section", or
     /// "part" (a piece of a section); a fold's is its nodes' when they share one, else "part".</summary>
     public string Kind { get; init; } = "part";
+
+    /// <summary>The law's own words behind the governing book's <see cref="Note"/> (which_code's cited sections and
+    /// quotes, as the which-code line's tooltip says them: <see cref="WhichCode.Tooltip"/>), or null (review round 3:
+    /// the quotes are shown where the choice is).</summary>
+    public string? NoteTooltip { get; init; }
 }
 
 /// <summary>Both views of one answer, and the words at the top of either.</summary>
@@ -71,7 +76,13 @@ public sealed record CodeNode(CodeLevel Level, string? Number, string Title, str
 /// <param name="Headline">What the state means (change 19).</param>
 /// <param name="Fix">"What to fix": the groups in their order, only the ones with rows.</param>
 /// <param name="Code">"By code": one node per document.</param>
-public sealed record ResultViewsModel(string Summary, string Headline, IReadOnlyList<FixGroup> Fix, IReadOnlyList<CodeNode> Code);
+public sealed record ResultViewsModel(string Summary, string Headline, IReadOnlyList<FixGroup> Fix, IReadOnlyList<CodeNode> Code)
+{
+    /// <summary>Whether By code says which code governs and why (a document's "Governs this building: …"): only then may
+    /// the pane leave the which-code line off its top (UI polish PR 3 review round 3: with no contents, or no reason
+    /// sent, the code choice would otherwise be shown nowhere).</summary>
+    public bool ShowsWhichCode => Code.Any(d => d.Note is not null);
+}
 
 public static class ResultViews
 {
@@ -358,7 +369,10 @@ public static class ResultViews
                 used.UnionWith(g.Select(p => p.Row));
             }
             var note = isGoverning && why is not null ? $"Governs this building: {why}" : null;
-            docs.Add(Node(CodeLevel.Document, null, doc.Document, note, Fold(chapters), []));
+            docs.Add(Node(CodeLevel.Document, null, doc.Document, note, Fold(chapters), []) with
+            {
+                NoteTooltip = note is null ? null : Gordium.Revit.Reading.WhichCode.Read(result.Raw)?.Tooltip,
+            });
         }
         // a row the contents can't place (no in_code, or a document they don't list): its own document node, last
         var left = placed.Where(p => !used.Contains(p.Row)).ToList();

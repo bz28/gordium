@@ -221,8 +221,8 @@ public sealed class EntryView : C.Border
             Text = title, TextWrapping = W.TextWrapping.Wrap,
             FontWeight = e.Depth == 0 ? W.FontWeights.SemiBold : W.FontWeights.Normal,
         }, "type.body"), n.Greyed ? PanelTokens.TextMuted : PanelTokens.Text));
-        if (n.Note is { } note)
-            words.Children.Add(Ink(Typed(new C.TextBlock { Text = note, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
+        if (n.Note is { } note)                                  // which code governs, the law's quoted words on hover
+            words.Children.Add(Ink(Typed(new C.TextBlock { Text = note, TextWrapping = W.TextWrapping.Wrap, ToolTip = n.NoteTooltip }, "type.caption"), PanelTokens.TextMuted));
         words.Children.Add(Ink(Typed(new C.TextBlock { Text = n.Line, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
         line.Children.Add(words);
         W.Automation.AutomationProperties.SetName(line, $"{title}, {StatusLook.Word(e.Status)}, {n.Line}");

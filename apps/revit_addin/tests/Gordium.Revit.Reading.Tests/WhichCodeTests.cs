@@ -100,7 +100,8 @@ public sealed class WhichCodeTests
     {
         var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
         // shown at the top without the two views, or while the code isn't decided (UI polish PR 3: By code says it otherwise)
-        var at = view.IndexOf("case PanelPart.Code when model.Code is { } code && (model.Views is null || !code.Decided):", StringComparison.Ordinal);
+        // review round 3: left off the top only when By code says it (a document's "Governs this building")
+        var at = view.IndexOf("case PanelPart.Code when model.Code is { } code && (model.Views is not { ShowsWhichCode: true } || !code.Decided):", StringComparison.Ordinal);
         Assert.True(at > 0);
         var block = view[at..view.IndexOf("case PanelPart.State:", at, StringComparison.Ordinal)];
         Assert.Contains("var codeStatus = code.Status(stale);", block, StringComparison.Ordinal);
