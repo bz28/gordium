@@ -83,6 +83,12 @@ public sealed class ComplianceSummaryTests
         var scoped = UxAnswers.Model(UxAnswers.Parse(node.AsObject()));
         var scopedHtml = ComplianceSummary.Html(scoped, "Four-unit apartment", At, Made);
         Assert.Single(Regex.Matches(scopedHtml, "<p class=\"scope\">"));
+        // under the Building Code's heading, before the next document's (short review after #182)
+        var bookAt = scopedHtml.IndexOf("<h2>2025 Building Code", StringComparison.Ordinal);
+        var scopeAt = scopedHtml.IndexOf("<p class=\"scope\">", StringComparison.Ordinal);
+        var nextBook = scopedHtml.IndexOf("<h2>", bookAt + 4, StringComparison.Ordinal);
+        Assert.InRange(scopeAt, bookAt, nextBook < 0 ? int.MaxValue : nextBook);
+        Assert.StartsWith("2025 Building Code", scoped.Views!.Code.Single(d => d.Scope is not null).Title, StringComparison.Ordinal);
         Assert.Contains($"<p class=\"scope\">{WebUtility.HtmlEncode(ResultViews.ScopeWords(2))}</p>", scopedHtml, StringComparison.Ordinal);
         var greyed = Regex.Matches(html, "<p class=\"muted greyed\" data-greyed=\"(?<s>[A-Za-z]+)\">(?<t>.*?)</p>").ToList();
         Assert.NotEmpty(greyed);
