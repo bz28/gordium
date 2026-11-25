@@ -211,3 +211,15 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
                          "bc_1006_2_2_3_refrigerated_rooms", "bc_1006_2_2_4_electrical_rooms",
                          "bc_1006_2_2_5_vehicular_ramps", "bc_table_1017_2_note_a", "bc_1017_2_1_balcony_increase",
                          "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")}}
+
+
+def test_a_rooms_function_changes_no_result_until_the_occupant_loads_read_it(got, laws):
+    """The Revit add-in sends a room's Table 1004.5 function (Gordium: Function, rooms[].function) before the checker
+    reads it: group 3 (feat/ny-building-egress-g3) works the occupant loads out from it. Until then a stated function
+    changes no result, so a host sending one can't move a verdict. Group 3's merge replaces this with its own tests of
+    the loads it gives (this test then fails, on purpose)."""
+    interior = build.interior_of()
+    for room in interior["rooms"]:
+        room["function"] = "residential"
+    now = egress.check(laws, interior, VALUES, ALLOWED)
+    assert now["results"] == got["results"]
