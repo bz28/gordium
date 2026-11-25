@@ -61,3 +61,27 @@ def test_a_test_of_a_few_seconds_never_fails_a_part_by_chance():
     c = _conftest()
     took = {"a::few": {"call": 3.6}, "a::nine": {"call": 9.9}, "a::ten": {"call": 10.0}}
     assert c.unlisted_slow(took, {}) == [(10.0, "a::ten")]
+
+
+def test_only_a_linux_part_fails_for_an_unlisted_slow_test():
+    # #192 (2026-11-25): Windows CI runs about twice as slow, so two 5 s tests failed two Windows parts; the list is
+    # Linux's, and only Linux parts fail for a test missing from it
+    c = _conftest()
+    assert c.guard_fails("linux") and not c.guard_fails("win32") and not c.guard_fails("darwin")
+
+
+def test_the_part_itself_fails_on_linux_and_only_names_the_test_on_windows(monkeypatch, tmp_path):
+    # review round 1 (#197): the hook that sets the part's result, not only guard_fails, is what's pinned
+    import types
+    import pytest
+    c = _conftest()
+    listed = tmp_path / "durations.json"
+    listed.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(c, "DURATIONS", listed)
+    monkeypatch.setattr(c, "_took", {"a::slow_unlisted": {"call": 10.0}})
+    for platform, failed in (("linux", True), ("win32", False)):
+        monkeypatch.setattr(c.sys, "platform", platform)
+        config = types.SimpleNamespace(getoption=lambda name: "1/4")
+        session = types.SimpleNamespace(config=config, exitstatus=pytest.ExitCode.OK)
+        c.pytest_sessionfinish(session, 0)
+        assert (session.exitstatus == pytest.ExitCode.TESTS_FAILED) is failed, platform
