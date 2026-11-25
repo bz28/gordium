@@ -329,43 +329,63 @@ public sealed class DetailPageTests
         Assert.Equal("m", stream.LengthUnit.Symbol);
     }
 
+    /// <summary>The apartment's answer with <paramref name="count"/> rows matching <paramref name="pick"/> saying their
+    /// rules are drafted for Group I-4 only (the checker's words: since #182 no rule of the apartment's still says it,
+    /// so the note is tested on the real answer changed one way).</summary>
+    private static ResultModel ApartmentSaying(Func<System.Text.Json.Nodes.JsonNode, bool> pick, int count)
+    {
+        var file = Path.Combine(Env.Repo, "apps", "revit_addin", "tests", "Gordium.Revit.Reading.Tests", "answers", "four_unit_apartment_check_answer.json");
+        var node = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(file, Encoding.UTF8))!["result"]!;
+        foreach (var item in node["view"]!["items"]!.AsArray().Where(i => pick(i!)).Take(count))
+            item!["reason"] = "the building holds another occupancy: this rulebook's rules are " + ResultViews.DraftedFor + ", so a person checks";
+        return ResultRows.Build(CheckResult.Parse(new WorkerAnswer(JsonDocument.Parse(node.ToJsonString()).RootElement.Clone(), About)),
+                                "New Construction", [], null);
+    }
+
+    private static int SaysIt(ResultModel m) => ResultList.Place(m).Count(p => p.Row.Reason?.Contains(ResultViews.DraftedFor, StringComparison.Ordinal) == true
+        || ResultViews.CardsOf(m.Views!, p.Row.Id).Any(c => c.Why?.Contains(ResultViews.DraftedFor, StringComparison.Ordinal) == true));
+
     /// <summary>The questions card's scope note is said of the card's own results only, with their count (short review
-    /// after #181): none on the apartment (its two I-4-only results ask no question), and the card's own count when
-    /// one of its questions' results says it.</summary>
+    /// after #181): none when no question's result says it, and the card's own count when one does.</summary>
     [Fact]
     public void The_cards_scope_note_counts_the_cards_own_results()
     {
-        var m = Apartment();
-        Assert.Equal(2, m.Views!.Scoped.Count);                                  // #181's answer: two results say it
         var fields = Fields();
         IReadOnlyList<ListEntry> Lay(ResultModel model) => ResultViewList.Layout(model.Views!, ResultList.Place(model), ResultsViewKind.WhatToFix,
             new HashSet<string> { ResultViewList.GroupKey(Answers(model)) }, null, null, false, fields);
+        // the real answer: since #182 no result says it, so no note anywhere
+        var m = Apartment();
+        Assert.Equal(SaysIt(m), m.Views!.Scoped.Count);
         Assert.Null(Lay(m).OfType<AnswerFootEntry>().Single().Scope);
-        // the same answer with one question's result saying it: the card says it, for that one result
-        var file = Path.Combine(Env.Repo, "apps", "revit_addin", "tests", "Gordium.Revit.Reading.Tests", "answers", "four_unit_apartment_check_answer.json");
-        var node = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(file, Encoding.UTF8))!["result"]!;
-        var item = node["view"]!["items"]!.AsArray().First(i => i!["asks"] is System.Text.Json.Nodes.JsonArray a
-            && a.Any(x => (string?)x!["field"] == "facts.corner_lot"))!;
-        item["reason"] = "the building holds another occupancy: this rulebook's rules are " + ResultViews.DraftedFor + ", so a person checks";
-        var changed = ResultRows.Build(CheckResult.Parse(new WorkerAnswer(JsonDocument.Parse(node.ToJsonString()).RootElement.Clone(), About)),
-                                       "New Construction", [], null);
-        Assert.Equal(3, changed.Views!.Scoped.Count);
-        Assert.Equal(ResultViews.ScopeWords(1), Lay(changed).OfType<AnswerFootEntry>().Single().Scope);
+        // two egress results (no question of their own) say it: the book says it, the card doesn't
+        var inCard = Answers(m).Rows.Select(r => r.Id).ToHashSet(StringComparer.Ordinal);
+        bool Egress(System.Text.Json.Nodes.JsonNode i) => ((string?)i["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true
+            && !inCard.Contains((string)i["id"]!);
+        var two = ApartmentSaying(Egress, 2);
+        Assert.Equal(2, two.Views!.Scoped.Count);
+        Assert.Null(Lay(two).OfType<AnswerFootEntry>().Single().Scope);
+        // one question's result says it too: the card says it, for that one result
+        var corner = Answers(m).Cards.Single(c => c.Field == "facts.corner_lot").Rows[0].Id;
+        var firstTwo = ApartmentSaying(Egress, 2).Views!.Scoped;
+        var three = ApartmentSaying(i => firstTwo.Contains((string)i["id"]!) || (string)i["id"]! == corner, 3);
+        Assert.Equal(3, three.Views!.Scoped.Count);
+        Assert.Equal(ResultViews.ScopeWords(1), Lay(three).OfType<AnswerFootEntry>().Single().Scope);
     }
 
     [Fact]
     public void The_scope_note_is_said_once_where_the_rows_say_the_rules_are_drafted_for_one_group()
     {
-        var m = Apartment();
-        var scoped = m.Views!.Code.Where(d => d.Scope is not null).ToList();
-        var book = Assert.Single(scoped);
+        // the real answer since #182: no result says it, so no note (never a note about all egress)
+        Assert.Null(Apartment().Views!.Scope);
+        Assert.All(Apartment().Views!.Code, d => Assert.Null(d.Scope));
+        // two Building Code results say it: one note, under that book, with their count
+        var m = ApartmentSaying(i => ((string?)i["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true, 2);
+        var book = Assert.Single(m.Views!.Code, d => d.Scope is not null);
         Assert.StartsWith("2025 Building Code", book.Title, StringComparison.Ordinal);
         Assert.Equal(m.Views.Scope, book.Scope);                                 // every such row is under that book
+        Assert.Equal(2, SaysIt(m));
+        Assert.Equal(ResultViews.ScopeWords(2), m.Views.Scope);
         Assert.Contains("Group I-4", m.Views.Scope, StringComparison.Ordinal);
-        // said of the results that say it, with how many: never of all egress
-        var scopedRows = ResultList.Place(m).Count(p => p.Row.Reason?.Contains(ResultViews.DraftedFor, StringComparison.Ordinal) == true
-                                                  || ResultViews.CardsOf(m.Views, p.Row.Id).Any(c => c.Why?.Contains(ResultViews.DraftedFor, StringComparison.Ordinal) == true));
-        Assert.Equal(ResultViews.ScopeWords(scopedRows), m.Views.Scope);
         Assert.StartsWith("1 Building Code result is", ResultViews.ScopeWords(1), StringComparison.Ordinal);
         // a house whose rows say nothing of the kind: no note
         Assert.Null(House().Views!.Scope);

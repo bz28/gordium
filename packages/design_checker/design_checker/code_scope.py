@@ -46,6 +46,8 @@ FACTS = {
     "egress_balcony_increase_taken": "yes_no",
     "building_has_atrium": "yes_no",
     "assembly_fixed_seating": "yes_no",       # rooms used for assembly with fixed seating (Table 1006.2.1 note c)
+    "r2_sleeping_units": "yes_no",            # Group R-2 of sleeping units, not dwelling units (Table 1006.3.4(1) note b)
+    "emergency_escape_openings_1031": "yes_no",   # emergency escape and rescue openings per 1031 (Table 1006.3.4 note a)
     "special_egress_spaces": "yes_no",        # a space with its own exits or travel limit (1006.2.2, Table 1017.2 note a)
     "merchandise_pads": "yes_no",             # Group M merchandise pads (1018.4: their own common path)
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
@@ -257,7 +259,7 @@ def _given(building) -> tuple[dict, list[str]]:
              (kind == "names" and isinstance(v, list) and all(isinstance(x, str) for x in v))
         if kind is None:
             bad.append(f"the building block sends {value_words(k)}, which is no fact Gordium reads (it reads "
-                       f"{', '.join(MARK[f] for f in FACTS if f in MARK)})")
+                       f"{', '.join(fact_words(f) for f in FACTS if f != 'facts_not_sent')})")   # each, marked or not
         elif ok:
             out[k] = v
         else:
@@ -271,7 +273,7 @@ def _given(building) -> tuple[dict, list[str]]:
 def building_measures(building: dict | None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the five stated yes/no facts. A fact
+    groups, the three sprinkler systems the limits name from the system, and the seven stated yes/no facts. A fact
     not stated is left out (its rules need review)."""
     facts, _ = _given(building)
     return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
@@ -294,6 +296,8 @@ DERIVED = {
     "assembly_fixed_seating": ("assembly_fixed_seating", lambda v: v),
     "special_egress_spaces": ("special_egress_spaces", lambda v: v),
     "merchandise_pads": ("merchandise_pads", lambda v: v),
+    "r2_sleeping_units": ("r2_sleeping_units", lambda v: v),
+    "emergency_escape_openings_1031": ("emergency_escape_openings_1031", lambda v: v),
 }
 
 

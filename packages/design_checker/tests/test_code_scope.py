@@ -196,11 +196,11 @@ def test_a_building_code_flag_for_the_whole_building_is_its_own_needs_review_lin
     bcnys = next(law for law in found["laws"] if law["scope"] == code_scope.BUILDING)
     flag = next(r for r in bcnys["rules"] if r["id"] == "general.bc_table_1006_3_4_2__other_occupancies")
     out = {}
-    item = egress._flag_item(bcnys, flag, flag["id"], {"other_occupancy_present": True}, bcnys["kinds"], out)
+    item = egress._flag_item(bcnys, flag, flag["id"], {"occupancy_group": "mixed"}, bcnys["kinds"], out)
     assert item["status"] == present.REVIEW and item["reason"].startswith("A person checks this")
     assert item["code"]["section"] and out[flag["id"]] == "needs_review"
-    item = egress._flag_item(bcnys, flag, flag["id"], {"other_occupancy_present": False}, bcnys["kinds"], {})
-    assert item["status"] == present.NOT_APPLICABLE and "other_occupancy_present: False" in item["reason"]
+    item = egress._flag_item(bcnys, flag, flag["id"], {"occupancy_group": "B"}, bcnys["kinds"], {})
+    assert item["status"] == present.NOT_APPLICABLE and "occupancy_group: B" in item["reason"]
 
 
 # ---- the quotes are the books' own words -------------------------------------------------------------------------------
@@ -487,3 +487,14 @@ def test_only_a_place_inheriting_a_law_that_splits_buildings_lists_building_code
     assert building_code_uses(names, {"../y/state.yaml": b"name: Somewhere\n"}) == []
     assert building_code_uses(names, {"../y/state.yaml": b"scope: building_code\n"}) == ["multiple_family"]
     assert building_code_uses(names, {"../y/state.yaml": None}) == []
+
+
+def test_a_misspelled_fact_is_told_every_fact_gordium_reads_marked_or_not():
+    """Group 2 review round 8 (P3, 2026-11-25): the message for a fact Gordium doesn't read names each fact it does,
+    by its Revit mark where it has one and in words where it hasn't one yet (group 2's R-2 sleeping units and 1031
+    escape openings), so the fact meant is always in the list."""
+    for key in code_scope.FACTS:
+        if key == "facts_not_sent":
+            continue
+        why = code_scope.decide({"use": "one_family_detached"}, {key + "x": True})["why"]
+        assert code_scope.fact_words(key) in why, (key, why)

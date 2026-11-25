@@ -40,6 +40,10 @@ sprinklered_903_3_1_1:
   - general.bc_table_1006_2_1_r3_r4
   - general.bc_table_1006_2_1_s
   - general.bc_table_1006_2_1_u
+  - general.bc_table_1006_3_4_1__r2_dwelling_units
+  - general.bc_table_1006_3_4_2__a_b_e_f_m_u
+  - general.bc_table_1006_3_4_2__h_i_r
+  - general.bc_table_1006_3_4_2__s
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1017_2_b
   - general.bc_table_1017_2_f2_s2_u
@@ -69,6 +73,8 @@ sprinklered_903_3_1_2:
   - general.bc_table_1006_2_1_r3_r4
   - general.bc_table_1006_2_1_s
   - general.bc_table_1006_2_1_u
+  - general.bc_table_1006_3_4_1__r2_dwelling_units
+  - general.bc_table_1006_3_4_2__h_i_r
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1017_2_i1
 sprinklered_903_3_1_3:
@@ -86,10 +92,8 @@ other_occupancy_present:
   unit: yes_no
   needed_by:
   - general.bc_1006_3_3_story_exits
-  - general.bc_1006_3_4_1_mixed_occupancies
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
-  - general.bc_table_1006_3_4_2__other_occupancies
 occupancy_group:
   meaning: 'The building''s one occupancy group (2025 BCNYS Chapter 3: A-1 to U), as the architect classifies it, or mixed
     where the architect states two or more (each portion then follows its own occupancy, 1004.4, and which room is which isn''t
@@ -125,6 +129,10 @@ occupancy_group:
   - mixed
   needed_by:
   - general.bc_1006_2_2_6_r3_r4_nfpa_13d
+  - general.bc_1006_3_3_story_exits
+  - general.bc_1006_3_4_1_mixed_occupancies
+  - general.bc_1007_1_1_remoteness
+  - general.bc_1007_1_1_space_remoteness
   - general.bc_1016_2_intervening_spaces_other_groups
   - general.bc_1016_2_other_occupancies
   - general.bc_1017_2_2_f1_s1_increase
@@ -146,6 +154,11 @@ occupancy_group:
   - general.bc_table_1006_2_1_r3_r4
   - general.bc_table_1006_2_1_s
   - general.bc_table_1006_2_1_u
+  - general.bc_table_1006_3_4_1__r2_dwelling_units
+  - general.bc_table_1006_3_4_2__a_b_e_f_m_u
+  - general.bc_table_1006_3_4_2__h_i_r
+  - general.bc_table_1006_3_4_2__other_occupancies
+  - general.bc_table_1006_3_4_2__s
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1017_2_b
   - general.bc_table_1017_2_f2_s2_u
@@ -180,6 +193,10 @@ assembly_fixed_seating:
   - general.bc_table_1006_2_1_r3_r4
   - general.bc_table_1006_2_1_s
   - general.bc_table_1006_2_1_u
+  - general.bc_table_1006_3_4_1__r2_dwelling_units
+  - general.bc_table_1006_3_4_2__a_b_e_f_m_u
+  - general.bc_table_1006_3_4_2__h_i_r
+  - general.bc_table_1006_3_4_2__s
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1017_2_b
   - general.bc_table_1017_2_f2_s2_u
@@ -221,6 +238,10 @@ special_egress_spaces:
   - general.bc_table_1006_2_1_r3_r4
   - general.bc_table_1006_2_1_s
   - general.bc_table_1006_2_1_u
+  - general.bc_table_1006_3_4_1__r2_dwelling_units
+  - general.bc_table_1006_3_4_2__a_b_e_f_m_u
+  - general.bc_table_1006_3_4_2__h_i_r
+  - general.bc_table_1006_3_4_2__s
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1017_2_b
   - general.bc_table_1017_2_f2_s2_u
@@ -266,3 +287,17 @@ building_has_atrium:
   - general.bc_table_1017_2_b
   - general.bc_table_1017_2_f2_s2_u
   - general.bc_table_1017_2_i1
+r2_sleeping_units:
+  meaning: 'The building''s Group R-2 consists of sleeping units, not dwelling units (2025 BCNYS Table 1006.3.4(1) note b:
+    dwelling units use Table 1006.3.4(1), sleeping units Table 1006.3.4(2)), as the architect states it'
+  unit: yes_no
+  needed_by:
+  - general.bc_table_1006_3_4_1__r2_dwelling_units
+  - general.bc_table_1006_3_4_2__h_i_r
+emergency_escape_openings_1031:
+  meaning: The building is provided with emergency escape and rescue openings in accordance with 2025 BCNYS Section 1031 (Tables
+    1006.3.4(1) and (2) note a, for Group R-2), as the architect states it
+  unit: yes_no
+  needed_by:
+  - general.bc_table_1006_3_4_1__r2_dwelling_units
+  - general.bc_table_1006_3_4_2__h_i_r
