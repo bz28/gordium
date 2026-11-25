@@ -223,7 +223,7 @@ public sealed class DetailPageTests
         Assert.Equal(answers.Cards.Count - ProjectQuestions.ShownAtFirst, more.Hidden);
         var foot = Assert.Single(first.OfType<AnswerFootEntry>());
         Assert.Equal(answers.Cards.Count, foot.Questions.Count);                // Save covers every question, shown or not
-        // the card's scope note counts only its own results (the apartment's two I-4-only rows ask no question)
+        // the card's scope note counts only its own results (none of them says it on the real answer)
         var scopedInCard = answers.Rows.Count(r => m.Views!.Scoped.Contains(r.Id));
         Assert.Equal(scopedInCard == 0 ? null : ResultViews.ScopeWords(scopedInCard), foot.Scope);
         Assert.Equal(answers.Cards.Count, Lay(open.Append(ResultViewList.MoreQuestionsKey)).OfType<QuestionEntry>().Count());
@@ -357,10 +357,10 @@ public sealed class DetailPageTests
         var m = Apartment();
         Assert.Equal(SaysIt(m), m.Views!.Scoped.Count);
         Assert.Null(Lay(m).OfType<AnswerFootEntry>().Single().Scope);
-        // two egress results (no question of their own) say it: the book says it, the card doesn't
+        // two Chapter 10 egress results (no question of their own) say it: the book says it, the card doesn't
         var inCard = Answers(m).Rows.Select(r => r.Id).ToHashSet(StringComparer.Ordinal);
         bool Egress(System.Text.Json.Nodes.JsonNode i) => ((string?)i["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true
-            && !inCard.Contains((string)i["id"]!);
+            && (string?)i["in_code"]?["chapter"] == "10" && !inCard.Contains((string)i["id"]!);
         var two = ApartmentSaying(Egress, 2);
         Assert.Equal(2, two.Views!.Scoped.Count);
         Assert.Null(Lay(two).OfType<AnswerFootEntry>().Single().Scope);
@@ -370,6 +370,9 @@ public sealed class DetailPageTests
         var three = ApartmentSaying(i => firstTwo.Contains((string)i["id"]!) || (string)i["id"]! == corner, 3);
         Assert.Equal(3, three.Views!.Scoped.Count);
         Assert.Equal(ResultViews.ScopeWords(1), Lay(three).OfType<AnswerFootEntry>().Single().Scope);
+        // each book says its own count (the corner-lot result is the zoning chapter's)
+        Assert.Equal(ResultViews.ScopeWords(2), three.Views.Code.Single(d => d.Title.StartsWith("2025 Building Code", StringComparison.Ordinal)).Scope);
+        Assert.Equal(ResultViews.ScopeWords(1), three.Views.Code.Single(d => d.Title.StartsWith("City of Ithaca", StringComparison.Ordinal)).Scope);
     }
 
     [Fact]
