@@ -127,6 +127,9 @@ STOPS = {
     "ground_wall_bare": "{count} wall(s) of the building have no spot grade within 2 ft: the ground there, and so the "
                         "grade plane, isn't known",
     "place_no_rooms": "no story has rooms with a floor elevation",
+    "place_description": "the model isn't read whole ({reasons}): a story may be missing",
+    "place_levels_not_all": "the model doesn't list every one of its levels (one with nothing drawn on it, an open "
+                            "parking story, may be a story): which story is the first above grade plane isn't known",
     "place_story_no_rooms": "the level {name} has no rooms: it isn't placed as a story",
     "place_floor_not_read": "the floor elevation of the room {name} isn't read: {reason}",
     "place_level_not_read": "the elevation of the level {name} isn't read",
