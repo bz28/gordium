@@ -293,16 +293,24 @@ public static class ProjectFacts
         (Marks.UnrelatedPersons, "unrelated_persons", 0), (Marks.OwnerOccupied, "owner_occupied", 0),
         (Marks.FunctionalFamilyUnit, "functional_family_unit", 0), (Marks.GarageCars, "garage_cars", 0),
         (Marks.PrivateGarages, "private_garages", 1),
+        // the lot facts the worker's cards asked for with no mark to set (an area in square feet, a count, a yes/no)
+        (Marks.AbutsR1, "abuts_r1_district", 0), (Marks.Conversion, "conversion", 0),
+        (Marks.PrimaryBuildings, "primary_buildings", 1), (Marks.PrimaryBuildingsSameUse, "primary_buildings_same_use", 0),
+        (Marks.HomeOccupationArea, "home_occupation_area", 0), (Marks.HomeOccupationUnitArea, "home_occupation_unit_area", 0),
+        (Marks.AduExistingBuilding, "adu_existing_building", 0), (Marks.AduBedrooms, "adu_bedrooms", 0),
+        (Marks.AduFloorArea, "adu_floor_area", 0), (Marks.MainBuildingFloorArea, "primary_floor_area", 0),
     ];
 
     /// <summary>Adds each house fact set to <paramref name="facts"/>, and returns the ones holding what Gordium can't
     /// send, each with why in plain words: a value of another kind than the mark's (a Yes/No that isn't 1 or 0, text in
-    /// a number), a count under its least, a length under 0 or not a number. A blank one is neither: not stated.</summary>
+    /// a number), a count under its least, a length or an area under 0 or not a number. A blank one is neither: not
+    /// stated.</summary>
     public static IReadOnlyList<(MarkDefinition Mark, string Problem)> HouseFacts(RevitModel model, JsonObject? facts = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         var problems = new List<(MarkDefinition, string)>();
         var unit = LengthUnits.Of(model.DisplayUnits);          // a length's messages in the project's units, as it is typed
+        var areaUnit = AreaUnits.Of(model.AreaDisplayUnits);    // an area's, likewise
         foreach (var (mark, key, least) in HouseFactMarks)
         {
             if (!model.ProjectMarks.TryGetValue(mark.Guid, out var v) || !v.HasValue)
@@ -329,6 +337,16 @@ public static class ProjectFacts
                     break;
                 case MarkValueKind.Length when Marks.Length(v) is { } feet:
                     problems.Add((mark, $"is {LengthUnits.Shown(feet, unit)} {unit.Symbol}: type a length of 0 {unit.Symbol} or more, or leave it blank"));
+                    break;
+                // an area: square feet as Revit holds it (its internal unit), sent as is, never rounded
+                case MarkValueKind.Area when Marks.Area(v) is { } squareFeet && squareFeet >= 0:
+                    if (facts is not null) facts[key] = squareFeet;
+                    break;
+                case MarkValueKind.Area when Marks.Area(v) is { } squareFeet:
+                    problems.Add((mark, $"is {LengthUnits.Shown(squareFeet, areaUnit)} {areaUnit.Symbol}: type an area of 0 {areaUnit.Symbol} or more, or leave it blank"));
+                    break;
+                case MarkValueKind.Area:
+                    problems.Add((mark, $"holds a value that isn't an area: type an area in {areaUnit.Words}, or leave it blank"));
                     break;
                 default:
                     problems.Add((mark, $"holds a value that isn't a length: type a length in {unit.Words}, or leave it blank"));
