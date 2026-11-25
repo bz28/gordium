@@ -13875,6 +13875,11 @@ rules:
     reason: 'A door to outside that isn''t an exit, in a building whose occupants use outdoor areas (stated, or not ruled
       out): a patio''s or roof''s occupants may come in through it (1004.7), so which way egress travel goes through it isn''t
       known: a person checks.'
+  - when: moe_door_swinging and not moe_door_swings_with_egress and occupancy_group not in ["H-1", "H-2", "H-3", "H-4", "H-5"]
+      and not moe_door_occupant_load >= 50 and not moe_door_occupant_load < 50
+    reason: 'Swinging against egress travel (or which way isn''t known), but 1010.1.2.1 asks it to swing with egress travel
+      only where it serves 50 or more or a Group H occupancy, and how many each door serves isn''t worked out (a door may
+      serve other stories, or outdoor areas, the model doesn''t hold): a person checks.'
   - when: occupancy_group == "mixed" and moe_door_occupant_load < 50 and moe_door_swinging and not moe_door_swings_with_egress
     reason: 'Swinging against egress travel and serving under 50, in a building of two or more groups: it must swing with
       egress travel only if a Group H occupancy is among them or it serves one, which isn''t shown: a person checks.'
@@ -14028,15 +14033,15 @@ rules:
     note: 'No door read: a person checks.'
   notes: 'Section group 6b: every door the model gives; one that isn''t swinging complies (1010.1.2.1 asks it nothing), one
     whose operation is other or not stated may be swinging. Whether it swings with egress travel: the side it swings into,
-    as the description states it (no Revit mark yet), against the side egress travel goes into through it, as the routes find
-    it, known only where travel crosses the door one way alone (into an exit stair or passageway where it can''t be the exit''s
-    discharge; outside through an exterior exit door at discharge only (any door to outside not marked an exterior exit door at discharge, a stair''s own included, not known: it may be a patio''s, a walkway''s or a balcony''s way in), not known through any other exit door to outside (a stair''s door onto a roof);
-    else away from the one room it is an exit access door of, where that room is stated end-only (a horizontal exit: not known); review round 1). Its occupant
-    load is two readings, none and the whole building''s, only where no occupied outdoor areas are stated (1004.7; every
-    story''s upper load added):
-    the routes don''t split the building''s occupants between its doors, and a door may serve more than its story (a stair''s
-    discharge door). So it complies swinging with egress travel, or where the whole building holds under 50 and the building
-    is one group other than H; it fails only swinging against egress travel in a building stated Group H; else it needs review.
-    Hand-drafted in a Claude Code session (2026-11-25).'
+    as the description states it (no Revit mark yet), against the side egress travel goes into through it, as the routes
+    find it, known only where travel crosses the door one way alone (into an exit stair or passageway where its room has
+    its own door marked an exterior exit door at discharge on the story, or the story has none to outside; outside through
+    a door marked an exterior exit door at discharge only: any unmarked door to outside, a stair''s own included, may be
+    a patio''s, a walkway''s or a balcony''s way in; a horizontal exit is used both ways; else away from the one room it
+    is an exit access door of, where that room is stated end-only; review rounds 1 to 7). How many people each door serves
+    isn''t worked out (the routes don''t split occupants between doors, a door may serve other stories, outdoor areas
+    1004.7 adds, or stories the model doesn''t hold: review rounds 1 and 7), so it complies swinging with egress travel,
+    or under 50 only where that is stated by hand; it fails swinging against egress travel in a building stated Group H,
+    or serving 50 or more as stated; else it needs review. Hand-drafted in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

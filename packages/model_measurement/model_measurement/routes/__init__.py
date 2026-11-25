@@ -161,16 +161,16 @@ def _egress_sides(story, access) -> dict:
     travel"). Known only where the door can carry egress one way alone (review round 1 of section group 6b):
 
     - A door into an exit enclosure or passageway (the room it enters): into the exit, only where that room has its own
-      door to outside on this story or the story has no door to outside at all, so the door can't be the exit's
-      discharge (1028.1's discharge through a lobby or corridor runs out of the stair through it). A horizontal exit:
+      door to outside on this story marked an exterior exit door at discharge (an unmarked one may be a way in: review
+      round 7), or the story has no door to outside at all, so the door can't be the exit's discharge (1028.1's
+      discharge through a lobby or corridor runs out of the stair through it). A horizontal exit:
       not known (the routes count it an exit for the rooms on both its sides; it is often used both ways, 1026). An
       exterior exit door at the level of exit discharge: outside; any other exit door with outside on one side (a
       stair's door onto an occupiable roof, whose occupants egress into the stair: 1004.7): not known.
     - Any other door to outside (not marked an exit): not known. Only a door marked an exterior exit door at the level
       of exit discharge surely leads out (exits are marked, never guessed); an unmarked one may be a patio's, an
       exterior walkway's or a balcony's way in, on any story, the building's lowest included where the model holds only
-      some of its stories (review rounds 4 to 6). Whether an occupied patio or roof egresses back in through even an exit's way out
-      (1004.7) is the swing rule's own condition (the building's occupied outdoor areas), so the panel asks that fact.
+      some of its stories (review rounds 4 to 6).
     - Any other: away from the one room whose exit access it is (a door from which a route reaches an exit without
       coming back into the room), only where that room is stated end-only (sleeping, an end-only use, lockable, or
       pass_through stated false: `end_only_stated`), so no one else's route runs back through the door into it (a
@@ -189,7 +189,8 @@ def _egress_sides(story, access) -> dict:
             if OUTSIDE_SIDE in d.sides:              # only an exterior exit door at discharge surely leads out (round 3:
                 out[d.id] = OUTSIDE_SIDE if d.exit_kind == "exterior_at_discharge" else unclear(d)   # a roof's door
             elif d.exit_kind in ("exit_enclosure", "exit_passageway") and d.exit_id in d.sides:
-                own_outside = any(d.exit_id in story.doors[o].sides for o in outside_doors)
+                own_outside = any(d.exit_id in story.doors[o].sides and story.doors[o].exit_kind == "exterior_at_discharge"
+                                  for o in outside_doors)       # round 7: an unmarked one may be a way in
                 out[d.id] = d.exit_id if own_outside or not outside_doors else unclear(d)
             else:
                 out[d.id] = unclear(d)

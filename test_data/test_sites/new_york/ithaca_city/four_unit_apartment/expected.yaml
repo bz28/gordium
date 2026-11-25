@@ -134,8 +134,7 @@ results:
   general.bc_1010_1_doors_general: needs_review
   # section group 6b: every door is side-hinged (eval_marks.yaml door_types, Gordium: Operation): 1010.1.2's flag for a
   # door of another kind sets each aside; 1010.1.2.1's swing needs review: which side each door swings into isn't
-  # stated (no Revit mark yet), and each door's occupant load is none to the whole building's 514.3 (2 x 1800 / 7),
-  # 50 or more at its upper reading
+  # stated (no Revit mark yet), and how many people each door serves isn't worked out (50 or more can't be ruled out)
   general.bc_1010_1_2_door_types: not_applicable
   general.bc_1010_1_2_1_direction_of_swing: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group

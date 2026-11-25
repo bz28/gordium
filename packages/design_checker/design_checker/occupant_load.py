@@ -78,16 +78,6 @@ AREAS_OVER = ("the story's rooms add up to more than its gross floor area (insid
 # a corridor's load (section group 4): the story's bounds it only where no other level's occupants reach it
 OTHER_LEVELS = "other_level_egress_into_corridors"   # the building block's fact (no Revit mark yet: asked by hand)
 CORRIDOR_QUESTION, CORRIDOR_NONE, CORRIDOR_STORY = "corridor_occupants_served", "none", "whole_story"
-DOOR_QUESTION, DOOR_NONE, DOOR_BUILDING = "door_occupants_served", "none", "whole_building"   # section group 6b
-DOOR_BY_HAND = STOPS["stated_not_given"].format(what="the occupant load the door serves, worked out by hand")
-DOOR_NO_STORY = "a story's occupant load isn't worked out, so the building's, which bounds each door's, isn't either: "     + DOOR_BY_HAND
-OUTDOOR = "occupied_outdoor_areas"     # the building block's fact (Revit: Gordium: Occupied outdoor areas)
-DOOR_OUTDOOR = ("the building doesn't say it has no occupied outdoor areas (1004.7: the occupants of yards, patios and "
-                "occupiable roofs whose egress passes through the building add to its load), so its stories' load "
-                "doesn't bound a door's: say on the building that it has none, or " + DOOR_BY_HAND)
-DOOR_READINGS = ("given as two readings (none, the least it can serve; {load:.1f}, the whole building's, the most it "
-                 "can serve): the routes don't split the building's occupants between its doors, and a door may serve "
-                 "more than its own story: a rule reading it complies only if it complies at both")
 CORRIDOR_BY_HAND = STOPS["stated_not_given"].format(what="the occupant load the corridor serves, worked out by hand")
 CORRIDOR_NOT_RULED_OUT = ("the building doesn't say whether another level's occupants reach its corridors (an "
                           "unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: "
@@ -203,46 +193,7 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
         else:
             story["not_measured"]["story_occupant_load"] = STORY_NONE
         _corridor_loads(story, [c for c in corridors.values() if c.get("within") == story["id"]], building)
-    _door_loads(parts, building)
     return parts
-
-
-def _upper(part: dict, name: str):
-    """A part's load, or the larger of its two readings; None where it isn't worked out."""
-    got = part["measures"].get(name)
-    if got is not None:
-        return got
-    vals = [r["value"] for r in (part.get("readings") or {}).get(name) or [] if isinstance(r.get("value"), (int, float))]
-    return max(vals) if vals else None
-
-
-def _door_loads(parts: dict, building: dict | None) -> None:
-    """Each door's occupant load (section group 6b, 1010.1.2.1: "serving a room or area containing an occupant load
-    of 50 or more"): the routes don't split a building's occupants between its doors, and a door may serve more than
-    its own story (a stair's discharge door serves every story above), so two readings: none (the least it can
-    serve) and the whole building's (every story's upper load added: the most any door can serve). A rule reading
-    it passes only at the whole building's load and fails only at none. The building's stories bound it only where
-    the building states it has no occupied outdoor areas: 1004.7 adds the occupants of yards, patios and occupiable
-    roofs whose egress passes through the building (review round 1). Not worked out where that isn't stated, or a
-    story's isn't (or no story is read), with why; never one story's load as the door's."""
-    doors = parts.get("means_of_egress_door") or []
-    stories = parts.get("story") or []
-    uppers = [_upper(s, "story_occupant_load") for s in stories]
-    outdoor_ruled_out = isinstance(building, dict) and building.get(OUTDOOR) is False
-    for d in doors:
-        d["measures"].pop("moe_door_occupant_load", None)
-        (d.get("readings") or {}).pop("moe_door_occupant_load", None)
-        if not outdoor_ruled_out:
-            d["not_measured"]["moe_door_occupant_load"] = DOOR_OUTDOOR
-            continue
-        if not stories or any(u is None for u in uppers):
-            d["not_measured"]["moe_door_occupant_load"] = DOOR_NO_STORY
-            continue
-        total = sum(uppers)
-        d.setdefault("readings", {})["moe_door_occupant_load"] = [
-            {"value": 0, "named": {DOOR_QUESTION: DOOR_NONE}},
-            {"value": total, "named": {DOOR_QUESTION: DOOR_BUILDING}}]
-        d["not_measured"]["moe_door_occupant_load"] = DOOR_READINGS.format(load=total)
 
 
 def _corridor_loads(story: dict, mine: list, building: dict | None) -> None:

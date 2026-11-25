@@ -291,8 +291,7 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
     """The two Revit marks for group 3's building facts on the apartment: Gordium: Occupied outdoor areas No makes 1004.7's
     flag not applicable and moves nothing else (Yes leaves it a person's check); Gordium: Occupant load increased, either
     way, moves nothing here (an increase not ruled out keeps each room's larger reading at its area / 7 or more:
-    occupant_load.py); with both stated, 1010.1.2.1's swing (section group 6b), which the building's smaller load
-    settles."""
+    occupant_load.py)."""
     moved = {}
     for fact, value in (("occupied_outdoor_areas", False), ("occupied_outdoor_areas", True),
                         ("occupant_load_increased", False), ("occupant_load_increased", True)):
@@ -302,15 +301,6 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
         moved[(fact, value)] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
     assert moved[("occupied_outdoor_areas", False)] == {"general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable")}
     assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", False)] ==         moved[("occupant_load_increased", True)] == {}
-    # section group 6b: both stated (no outdoor areas, no increase), the whole building holds at most 18 (two stories
-    # of 1800 / 200), so no door serves 50 and, in Group R-2, 1010.1.2.1 asks no door's swing: it complies, and only
-    # it and 1004.7's flag move (review round 1: the increase alone leaves outdoor occupants unbounded)
-    interior = build.interior_of()
-    interior["building"] = {**interior["building"], "occupied_outdoor_areas": False, "occupant_load_increased": False}
-    now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
-    assert {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]} == {
-        "general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable"),
-        "general.bc_1010_1_2_1_direction_of_swing": ("needs_review", "pass")}
 
 
 # ---- section group 6a (2026-11-25): door size, 1010.1.1, from each door's maker's stated clear opening ----------------
@@ -354,11 +344,12 @@ KIND, SWING = "general.bc_1010_1_2_door_types", "general.bc_1010_1_2_1_direction
 
 def test_door_swing_as_sent_and_with_each_doors_swing_stated(got):
     """Before: every door is side-hinged, so 1010.1.2's flag sets it aside, and the swing rule needs review (the side
-    each swings into isn't stated; each serves none to the whole building's 514.3, 50 or more at the upper reading).
-    After, each stated to swing into the side egress travel goes into (the corridor from an apartment, the stair
-    from the corridor, outside from the stair) with no occupied outdoor areas stated: every door complies but the
-    stairs' unmarked outside doors (not known which way: review rounds 5 and 6), and nothing else changes; the other way
-    round, it still needs review (it fails only at 50 or more at the least a door serves, none here), never a pass."""
+    each swings into isn't stated). After, each stated to swing into the side egress travel goes into (the corridor
+    from an apartment, the stair from the corridor, outside from the stair) with no occupied outdoor areas stated:
+    every door complies but Level 1's stair doors (their stairs' outside doors unmarked: either may be a way in, so the
+    corridor door may be the discharge, review round 7) and those outside doors (not known which way: rounds 5 and 6),
+    and nothing else changes; the other way round, it needs review (how many each door serves isn't worked out, so
+    under 50 can't be ruled out), never a pass and never a fail."""
     assert got["results"][KIND] == "not_applicable" and got["results"][SWING] == present.REVIEW
     desc = build.interior_of()
     for d in desc["doors"]:
@@ -370,14 +361,15 @@ def test_door_swing_as_sent_and_with_each_doors_swing_stated(got):
     # review rounds 5 and 6: the stairs' outside doors aren't marked exits (the eval marks the exit at the stair door), so
     # which way egress goes through them isn't known: they need review; every other door complies
     rows = {r["id"]: r["outcome"] for r in stated["rows"] if r["rule"] == SWING}
-    assert {k for k, v in rows.items() if v != "pass"} == {"L1WO", "L1EO"}
+    assert {k for k, v in rows.items() if v != "pass"} == {"L1WO", "L1EO", "L1W", "L1E"}
     assert {rows[k] for k in ("L1WO", "L1EO")} == {present.REVIEW} and stated["results"][SWING] == present.REVIEW
     assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {
         "general.bc_1004_7_outdoor_areas"}
     for d in desc["doors"]:
         d["swings_into"] = d["sides"][0]
-    wrong = _check(desc, egress.measure_routes(desc))                          # (no outdoor areas stated, as above)
+    wrong = _check(desc, egress.measure_routes(desc))
     assert wrong["results"][SWING] == present.REVIEW
+    assert {r["outcome"] for r in wrong["rows"] if r["rule"] == SWING} == {present.REVIEW}
 
 
 def test_a_stair_that_may_discharge_through_the_corridor_never_passes_on_its_door_swinging_in(got):
@@ -396,19 +388,18 @@ def test_a_stair_that_may_discharge_through_the_corridor_never_passes_on_its_doo
     assert rows["L2W"] == "pass"
 
 
-def test_a_swing_waiting_on_outdoor_areas_asks_for_that_fact_never_a_model_fix(got):
-    """Review round 2 of group 6b (P3): a door swing that waits on whether the occupants use outdoor areas (a door to
-    outside that isn't an exit; a door's load, which 1004.7 leaves unbounded) asks the building's fact, which has a
-    Revit mark (Gordium: Occupied outdoor areas), never 'fix the model'."""
+def test_a_door_to_outside_asks_whether_the_occupants_use_outdoor_areas(got):
+    """Review round 2 of group 6b (P3): a door to outside that isn't an exit may be an occupied patio's or roof's way in
+    (1004.7): its swing row asks the building's fact, which has a Revit mark (Gordium: Occupied outdoor areas), beside
+    marking the door an exit where it is one (round 7: an unmarked door to outside is never taken as leading out)."""
     from design_checker import ui_data
     desc = build.interior_of()
     for d in desc["doors"]:
         d["swings_into"] = d["sides"][1]
     for case in (_check(desc, egress.measure_routes(desc)), got):          # swings stated; nothing stated
-        items = [i for i in case["items"] if i.get("rule") == SWING and i["status"] == present.REVIEW]
-        assert items
+        items = [i for i in case["items"] if i.get("rule") == SWING and i["status"] == present.REVIEW
+                 and "outside door" in i["name"]]
+        assert len(items) == 2
         for i in items:
             asks = [ui_data._from_cause(c, "means_of_egress_door") for c in i.get("causes") or []]
             assert "building.occupied_outdoor_areas" in {a.get("field") for a in asks}, i["name"]
-            if "outside door" not in i["name"]:   # rounds 5-6: an unmarked door to outside may rightly ask to mark it
-                assert not any(a["headline"].startswith("Fix the model") for a in asks), (i["name"], asks)
