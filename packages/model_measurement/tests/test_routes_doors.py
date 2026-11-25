@@ -109,9 +109,9 @@ def test_leaves_stated_or_not():
 
 def test_the_leaves_meaning_gives_the_mullioned_pair_reading():
     """A pair with a mullion is two openings, each needing the 32 in: 1 only at the narrower leaf's own clear width.
-    The part's meaning (what the rulebook and spreadsheet show) and this module's own account both say so, as the
-    interior format and the Revit mark do; a "no mullion" reading alone would let a mullioned pair be stated 1 at
-    the pair's whole width."""
+    The part's meanings (what the rulebook and spreadsheet show), this module's own account and the width rule's
+    reason and notes (the notes recording it as Gordium's reading of 1010.1.1's "each door opening") all say so; a
+    "no mullion" reading alone would let a mullioned pair be stated 1 at the pair's whole width."""
     import yaml
 
     import model_measurement.routes.doors as doors
@@ -127,6 +127,8 @@ def test_the_leaves_meaning_gives_the_mullioned_pair_reading():
     rule = next(r for r in yaml.safe_load(rules.read_text(encoding="utf-8"))["rules"]
                 if r["id"] == "general.bc_1010_1_1_door_width")
     assert "a mullioned pair not stated at its narrower leaf's own opening" in rule["review_when"][0]["reason"]
+    assert "Gordium's reading" in rule["notes"] and "a pair with a mullion between its leaves is two door openings" in " ".join(
+        rule["notes"].split())
 
 
 def test_an_exit_kind_not_read_is_not_measured():
