@@ -182,6 +182,25 @@ public sealed class LotFactFieldsTests(RealWorker worker) : IClassFixture<RealWo
         Assert.Contains($"isn't an area in {AreaUnits.Of(units).Words}", Assert.Single(draft.Writes(SetupScreen.Build(model, [], null, null).Fields).Problems), StringComparison.Ordinal);
     }
 
+    /// <summary>Review round 1: the form shows the law as quoted, never in "the building's words" (§325-8B(1)'s "one
+    /// family house" in a multiple dwelling's form), and an area left out is named with its area unit, never the length one.</summary>
+    [Fact]
+    public void The_laws_words_are_never_changed_and_an_area_is_said_in_its_own_unit()
+    {
+        foreach (var m in Marks.All)
+            foreach (System.Text.RegularExpressions.Match q in System.Text.RegularExpressions.Regex.Matches(m.Description, "\"[^\"]+\""))
+                Assert.Contains(q.Value, SetupWords.InBuildingWords(m.Description, "building"), StringComparison.Ordinal);
+        var marks = Needed();
+        marks[Marks.Use.Guid] = new(true, Text: "multiple_family");
+        var law = SetupScreen.Build(Model(marks), [], null, null).Fields.Single(f => f.Mark == Marks.PrimaryBuildingsSameUse).Law;
+        Assert.Contains("an area of 3,000 square feet is required for a one family house or a two-family house", law, StringComparison.Ordinal);
+        Assert.Contains("(Gordium: Use)", law, StringComparison.Ordinal);
+        Assert.DoesNotContain("one family building", law, StringComparison.Ordinal);
+        Assert.Contains("home occupation area (m²)", SetupWords.NothingSent(StreetRefusal.None, [Marks.HomeOccupationArea], "house", "mm", "m²"), StringComparison.Ordinal);
+        Assert.StartsWith("Home occupation area (m²):", SetupWords.SentWithout(Marks.HomeOccupationArea, "house", "mm", "m²"), StringComparison.Ordinal);
+        Assert.Contains("(8)(b), its setbacks", Marks.AduExistingBuilding.Description, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void Each_sits_under_its_heading_of_the_setup_form()
     {

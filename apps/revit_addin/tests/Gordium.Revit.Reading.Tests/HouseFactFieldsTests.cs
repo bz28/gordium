@@ -186,7 +186,8 @@ public sealed class HouseFactFieldsTests
                 foreach (var claim in new[] { "In square feet", "in square feet", "(sq ft)" })
                     Assert.DoesNotContain(claim, m.Description, StringComparison.Ordinal);
                 Assert.EndsWith(" (sq ft)", SetupWords.Label(m, "house"), StringComparison.Ordinal);
-                Assert.EndsWith(" (m²)", SetupWords.Label(m, "house", "m²"), StringComparison.Ordinal);
+                Assert.EndsWith(" (m²)", SetupWords.Label(m, "house", areaUnit: "m²"), StringComparison.Ordinal);
+                Assert.EndsWith(" (sq ft)", SetupWords.Label(m, "house", "mm"), StringComparison.Ordinal);   // never the length unit
             }
             else
             {

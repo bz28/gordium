@@ -341,7 +341,7 @@ public static class Marks
     public static readonly MarkDefinition AduExistingBuilding = new(
         "Gordium: ADU in existing building", new("acd7b1f8-d8f1-4001-8a07-362db5e75524"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "facts.adu_existing_building",
-        "For a detached accessory dwelling unit: Yes when it is in an accessory building that already exists; No when it is new construction (§325-28C(7)(b) and (c): its size and setbacks differ). " +
+        "For a detached accessory dwelling unit: Yes when it is in an accessory building that already exists; No when it is new construction (§325-28C(7)(b) and (c), its size, and (8)(b), its setbacks, differ). " +
         "§325-28C(7)(b)[1]: \"An existing accessory building may be altered or expanded, provided that it does not exceed the size limitations for new construction.\" Blank: the rules that turn on it need review.");
 
     /// <summary>The bedrooms in the accessory dwelling unit (<c>facts.adu_bedrooms</c>, §325-28C(3)).</summary>

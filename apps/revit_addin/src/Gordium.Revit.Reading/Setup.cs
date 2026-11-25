@@ -368,7 +368,8 @@ public static class SetupFacts
                     var note = unit.Known ? ""
                         : area ? $" This project's area units ({model.AreaDisplayUnits}) aren't ones Gordium reads: type square feet here."
                         : $" This project's length units ({model.DisplayUnits}) aren't ones Gordium reads: type feet here.";
-                    fields.Add(new(m, SetupWords.Label(m, noun, unit.Symbol), FieldKind.Feet, group, required, [], shown, law + note, null)
+                    fields.Add(new(m, area ? SetupWords.Label(m, noun, areaUnit: unit.Symbol) : SetupWords.Label(m, noun, unit.Symbol),
+                                   FieldKind.Feet, group, required, [], shown, law + note, null)
                     {
                         LengthUnit = unit,
                         HeldFeet = Marks.Length(v),
@@ -616,36 +617,42 @@ public static class SetupWords
     private static readonly Regex HouseCap = new(@"\bHouse\b", RegexOptions.CultureInvariant);
 
     /// <summary>Words written for a house, said for this building ("This house has no stairs" → "This building has no
-    /// stairs" on a day care).</summary>
+    /// stairs" on a day care). The law's words, quoted ("..."), are never changed (review round 1: §325-8B(1)'s "a one
+    /// family house or a two-family house" was shown as "a one family building").</summary>
     public static string InBuildingWords(string words, string noun)
     {
         ArgumentNullException.ThrowIfNull(words);
         if (noun == "house")
             return words;
-        return HouseCap.Replace(House.Replace(words, noun), char.ToUpperInvariant(noun[0]) + noun[1..]);
+        var parts = words.Split('"');
+        for (var i = 0; i < parts.Length; i += 2)                 // the even parts are outside the quotes
+            parts[i] = HouseCap.Replace(House.Replace(parts[i], noun), char.ToUpperInvariant(noun[0]) + noun[1..]);
+        return string.Join('"', parts);
     }
 
     /// <summary>A mark's name in the form: without "Gordium: ", in the building's words, with what its number is:
     /// "(count)", or a length's unit as the form takes it (<paramref name="lengthUnit"/>, the project's: "(mm)"; feet
-    /// when not given).</summary>
-    public static string Label(MarkDefinition m, string noun, string? lengthUnit = null)
+    /// when not given), an area's likewise (<paramref name="areaUnit"/>: "(m²)"; square feet when not given; review
+    /// round 1: an area was labelled with the length unit, "(mm)").</summary>
+    public static string Label(MarkDefinition m, string noun, string? lengthUnit = null, string? areaUnit = null)
     {
         var name = m.Name.StartsWith("Gordium: ", StringComparison.Ordinal) ? m.Name["Gordium: ".Length..] : m.Name;
         var unit = m.Kind == MarkValueKind.Length ? lengthUnit ?? LengthUnits.Feet.Symbol
-            : m.Kind == MarkValueKind.Area ? lengthUnit ?? AreaUnits.SquareFeet.Symbol : Marks.Unit(m);
+            : m.Kind == MarkValueKind.Area ? areaUnit ?? AreaUnits.SquareFeet.Symbol : Marks.Unit(m);
         return InBuildingWords(name, noun) + (unit is not null ? $" ({unit})" : "");
     }
 
     /// <summary>The form's notice when a check sent nothing, in plain words from what is missing (never the marks'
     /// typing instructions): the street edge kept no longer on the lot (or matching two edges), or the facts not set.</summary>
-    public static string NothingSent(StreetRefusal refused, IReadOnlyList<MarkDefinition> notSet, string noun, string? lengthUnit = null)
+    public static string NothingSent(StreetRefusal refused, IReadOnlyList<MarkDefinition> notSet, string noun, string? lengthUnit = null,
+                                     string? areaUnit = null)
     {
         ArgumentNullException.ThrowIfNull(notSet);
         if (refused == StreetRefusal.NoLongerAnEdge)
             return "The property line changed, so the street edge needs picking again. Nothing was checked.";
         if (refused == StreetRefusal.Ambiguous)
             return "The street edge matches two edges of the lot (an arc and its chord), so it needs picking again. Nothing was checked.";
-        var names = notSet.Select(m => SetupSteps.Title(m, Label(m, noun, lengthUnit)).ToLowerInvariant()).ToList();
+        var names = notSet.Select(m => SetupSteps.Title(m, Label(m, noun, lengthUnit, areaUnit)).ToLowerInvariant()).ToList();
         if (notSet.Contains(Marks.Zone))
             return "Choose the zoning district first: it decides which rules apply. Nothing was checked" +
                    (names.Count > 1 ? $"; also not set: {string.Join(", ", names.Where(n => n != "zoning district"))}." : ".");
@@ -654,13 +661,13 @@ public static class SetupWords
     }
 
     /// <summary>What a fact not set leaves when the architect checks anyway: each is needs review, never a pass.</summary>
-    public static string SentWithout(MarkDefinition m, string noun, string? lengthUnit = null) =>
+    public static string SentWithout(MarkDefinition m, string noun, string? lengthUnit = null, string? areaUnit = null) =>
         m == Marks.Use ? "Use not set: every rule that turns on the use needs review."
         : m == Marks.LotSurveyed ? "Lot surveyed not set: the property line is read as traced from the tax map (its 2 ft accuracy), never as surveyed."
         : m == Marks.StreetEdge ? "Street edge not picked: the front yard, the yards measured from it and the lot width need review."
         : m == Marks.Zone ? "Zone not set: the district chooses the rules, so nothing can be checked without it."
         : m == Marks.Stories ? "Stories holds a count under 1 (a count is 1 or more), so it wasn't sent: height and stories need review."
-        : $"{Label(m, noun, lengthUnit)}: what it holds isn't one of Gordium's words, so it wasn't sent: the rows it decides need review.";
+        : $"{Label(m, noun, lengthUnit, areaUnit)}: what it holds isn't one of Gordium's words, so it wasn't sent: the rows it decides need review.";
 }
 
 /// <summary>The facts inside the building, as the checklist's lines.</summary>
