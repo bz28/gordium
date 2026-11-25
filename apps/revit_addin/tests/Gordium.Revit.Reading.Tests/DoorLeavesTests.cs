@@ -69,6 +69,18 @@ public sealed class DoorLeavesTests
         Assert.Equal((FixKind.Mark, "Set how many leaves each door type has (1, or 2 for a pair with no mullion)"), (card.Kind, card.Headline));
         Assert.Equal(Marks.DoorLeaves, Marks.All.Single(k => k.Feeds == card.Field));
         Assert.DoesNotContain(cards, c => c.Headline.Contains("door leaves in the model", StringComparison.Ordinal));
+        // the button selects the doors and opens Properties, where a type's mark is reached by Edit Type (review round
+        // 1: "set Gordium: Leaves there" named a field the instance palette doesn't hold)
+        var cause = Assert.Single(ResultRows.Build(CheckResult.Parse(new WorkerAnswer(doc.RootElement.GetProperty("result").Clone(), about)),
+                                                   null, [], null).Causes, c => c.Fields.Contains("doors[].leaves"));
+        var labels = cause.Elements.ToDictionary(e => e, e => "door " + e, StringComparer.Ordinal);   // the doors are in the model
+        Assert.Equal(CardAction.ShowAndProperties, CauseCards.Action(cause, labels));
+        Assert.Contains("Edit Type", CauseCards.Note(cause, labels), StringComparison.Ordinal);
+        Assert.Contains("Edit Type", CauseCards.AfterProperties(cause, 10), StringComparison.Ordinal);
+        var fix = Assert.Single(Fixes.Of([cause], labels));
+        Assert.Contains("Edit Type", Fixes.Note(fix), StringComparison.Ordinal);
+        // an element's own mark says nothing of types
+        Assert.Equal("", CauseCards.OnType([Marks.ExitDoor]));
         // every card that asks for a mark's field has the mark that feeds it (no dead end)
         var fed = Marks.All.SelectMany(m => m.Feeds.Split(", ").Select(p => p.Split(' ')[0])).ToHashSet(StringComparer.Ordinal);
         Assert.All(cards.Where(c => c.Kind is FixKind.Mark or FixKind.Answer && c.Field is not null), c => Assert.Contains(c.Field!, fed));
