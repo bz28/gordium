@@ -1373,7 +1373,7 @@
     "Egress · Group I-2 corridors: A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.",
     "Egress · Elevator hoistway doors protected: A person checks this (Gordium doesn't decide it): Elevator hoistway doors in rated enclosures: Sections 716 and 3006.2 (not brought in), a person's check.",
     "Egress · Corridor width in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
-    "Egress · Corridor width kept clear: A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+    "Egress · Corridor width kept clear: A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (its own flags since section group 5c) are a person's check.",
     "Egress · Corridors not used as air ducts: A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
     "Egress · Stairway capacity: A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
     "Egress · Other components' capacity: A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
@@ -60170,11 +60170,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (its own flags since section group 5c) are a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (its own flags since section group 5c) are a person's check.",
       "quotes": [
        {
         "text": "1020.4 Obstruction. The minimum width or required capacity of corridors shall be unobstructed. Exception: Encroachments complying with Section 1005.7.",
@@ -60199,14 +60199,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1020_4_obstruction",
-       "words": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (its own flags since section group 5c) are a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1020_4_obstruction",
-       "why": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (its own flags since section group 5c) are a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -65652,7 +65652,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Corridor width kept clear (BCNYS 1020.4): A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+       "title": "Egress · Corridor width kept clear (BCNYS 1020.4): A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (its own flags since section group 5c) are a person's check.",
        "mark": "?",
        "name": "Egress · Corridor width kept clear (BCNYS 1020.4)"
       },
@@ -66420,7 +66420,7 @@
       {
        "key": "reason:egress.general.bc_1020_4_obstruction",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (its own flags since section group 5c) are a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1020_4_obstruction"
@@ -93424,7 +93424,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "26af5fc0490effa2fd5607aa88c11166314d82d8300d10e9f531042926fb5a86",
   "rulebook": {
-   "new_york/ithaca_city": "95879657bab990f05fdf7a6f3d049a60936c0a09012fd39b89c9873b53660efa"
+   "new_york/ithaca_city": "6507d89bda747494009d4d7833c33e411c0a09a2e0d98fd785719df11160fd82"
   }
  }
 }
