@@ -13,7 +13,8 @@ public enum MarkedKind { Room, Window, Door, Level, SiteSlab, SiteObject }
 /// <summary>A room's marks, read: each null when not stated. <see cref="Use"/> is the description's word (null for a
 /// word not in <see cref="RoomUses"/>), <see cref="UseWord"/> what the architect typed.</summary>
 public sealed record RoomMarks(string Id, string? Name, bool? Sleeping, string? Use = null, string? UseWord = null,
-                               bool? Lockable = null, bool? PassThrough = null, bool? NotOccupied = null);
+                               bool? Lockable = null, bool? PassThrough = null, bool? NotOccupied = null,
+                               string? Function = null, string? FunctionWord = null);
 
 /// <summary>A window's or door's marks as an opening: null when not stated (an operation word not in the list, or a
 /// door's word that isn't a door's, is not stated).</summary>
@@ -70,7 +71,8 @@ public static class MarkReading
             .Select(e => new RoomMarks(e.UniqueId, e.Name, Marks.YesNo(Get(e, Marks.SleepingRoom)),
                                        RoomUses.Table.Of(Marks.Text(Get(e, Marks.Use))), Marks.Text(Get(e, Marks.Use)),
                                        Marks.YesNo(Get(e, Marks.CanBeLocked)), Marks.YesNo(Get(e, Marks.PassThrough)),
-                                       Marks.YesNo(Get(e, Marks.NotOccupied)))).ToList();
+                                       Marks.YesNo(Get(e, Marks.NotOccupied)),
+                                       RoomFunctions.Of(Marks.Text(Get(e, Marks.RoomFunction))), Marks.Text(Get(e, Marks.RoomFunction)))).ToList();
 
     public static IReadOnlyList<OpeningMarks> Openings(RevitModel model) =>
         InDesign(model).Where(e => KindOf(e) is MarkedKind.Window or MarkedKind.Door)
@@ -452,6 +454,68 @@ public static class MarkingList
     /// the one table both the marking list and the Setup checklist suggest from.</summary>
     internal static string? UseFromName(string? name) =>
         name is { } n && UseNames.FirstOrDefault(u => u.Name.IsMatch(n)) is { Name: not null } hit ? RoomUses.Table.WordFor(hit.Use) : null;
+
+    /// <summary>Room names a Table 1004.5 function is suggested from (BCNYS occupant loads), the first that matches, each
+    /// with the function and when it may be offered. Only a suggestion, only on a room whose function is unset, written
+    /// only when the architect accepts it (SetupWrites.Accept). Never one for a corridor, an exit enclosure, a closet or
+    /// a toilet (FunctionFromName's caller rules those out first). Each is the whole name, the room type alone with at
+    /// most a number or a letter after it ("Bedroom 2", "Mechanical Rm 3"), never a word inside a longer name (review
+    /// round 1: "Mechanical Engineering Lab", "The Boiler Room" bar and "Community Living Room" are other rows, with
+    /// smaller factors: a larger load).</summary>
+    private static readonly (Regex Name, string Function, string Rooms)[] FunctionNames =
+    [
+        (Whole(@"(mechanical|mech\.?|boiler|furnace)(\s*(room|rm\.?))?"), "accessory_storage_mechanical", "any"),
+        (Whole(@"(storage|store\s*room|stock\s*room)(\s*(room|rm\.?))?"), "storage_stock_shipping", "any"),
+        // Residential only in a building of dwelling units (DwellingUses, Group R-2 or R-3): a dormitory's or a
+        // fraternity's bedroom is Dormitories (50 gross) and its living room a shared lounge (assembly, 15 net), and an
+        // R-1 or R-4 one so named is often a guest or care room or a lounge (review rounds 1 and 2)
+        (Whole(@"(bed\s*room|bedrm|bdrm)"), "residential", "dwelling"),
+        (Whole(@"living(\s*room)?"), "residential", "dwelling"),
+    ];
+
+    /// <summary>The project uses (Gordium: Use on Project Information, the place's own words) whose building is made of
+    /// dwelling units, where a bedroom or a living room is Table 1004.5's Residential: Ithaca's one- and two-family and
+    /// multiple dwellings (never its dormitory or fraternity, sorority or group house, a congregate residence). A use
+    /// not listed (another place's, or none) is offered no Residential.</summary>
+    internal static readonly IReadOnlySet<string> DwellingUses = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached", "one_family_attached",
+        "two_family", "multiple_family",
+    };
+
+    /// <summary>A room type as the whole name, with an optional number or single letter after it.</summary>
+    private static Regex Whole(string type) =>
+        new(@"^\s*" + type + @"(\s*[#.\-]?\s*(\d+[A-Za-z]?|[A-Za-z]))?\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    /// <summary>Rooms a function is never suggested for, by name: a corridor, a closet, a toilet (and the stairs, which
+    /// an exit enclosure holds).</summary>
+    private static readonly Regex NoFunctionName =
+        new(@"\b(corridor|hall\s*way|hall|circulation|passage|closet|janitor|custodial|toilet|restroom|rest\s*room|wc|lavatory|bath\s*room|bath|stair(s|way|well)?)\b",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    /// <summary>The Table 1004.5 function a room's name suggests, as the description's word, or null. <paramref name="use"/>:
+    /// the room's use as marked (the description's word): an accessory storage room is Table 1004.5's accessory storage
+    /// row whatever its name; a corridor, a closet or a toilet is offered none. <paramref name="groups"/>: the building's
+    /// groups as stated (null when not stated or not read), <paramref name="projectUse"/> the project's use: Residential is
+    /// offered only for a use of <see cref="DwellingUses"/> whose every group is R-2 or R-3; never otherwise.</summary>
+    internal static string? FunctionFromName(string? name, string? use, IReadOnlyList<string>? groups, string? projectUse = null)
+    {
+        if (use is "corridor" or "closet" or "toilet")
+            return null;
+        if (use == "accessory_storage")
+            return "accessory_storage_mechanical";
+        if (name is not { } n || NoFunctionName.IsMatch(n))
+            return null;
+        foreach (var (rx, function, rooms) in FunctionNames)
+        {
+            if (!rx.IsMatch(n))
+                continue;
+            var allowed = rooms == "any" || projectUse is not null && DwellingUses.Contains(projectUse)
+                && groups is { Count: > 0 } && groups.All(g => g is "R-2" or "R-3");
+            return allowed ? function : null;
+        }
+        return null;
+    }
 
     /// <summary>A word mark read through its table: given, not a word Gordium reads (to mark), or blank, whose meaning
     /// is said (nothing to mark: a house never needs it).</summary>
