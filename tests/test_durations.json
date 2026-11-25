@@ -893,6 +893,7 @@
 "packages/model_measurement/tests/test_routes_dead_end_cross_check.py::test_the_fuzz_never_crashes_and_no_dead_end_is_shorter_than_the_bound[94]": 1.5,
 "packages/model_measurement/tests/test_routes_doors.py::test_a_doors_kind_from_its_stated_operation": 5.0,
 "packages/model_measurement/tests/test_routes_doors.py::test_a_malformed_stated_clear_opening_gives_neither_size": 3.3,
+"packages/model_measurement/tests/test_routes_doors.py::test_egress_direction_is_known_only_where_travel_can_cross_the_door_one_way_alone": 17.2,
 "packages/model_measurement/tests/test_routes_doors.py::test_leaves_stated_or_not": 4.7,
 "packages/model_measurement/tests/test_routes_not_occupied.py::test_21_a_marked_corridor_is_still_crossed_and_only_its_points_are_left_out": 9.2,
 "packages/model_measurement/tests/test_routes_not_occupied.py::test_21_every_room_marked_leaves_no_point_to_measure_from": 7.9,
