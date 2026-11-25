@@ -199,9 +199,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     Section group 4c adds 1020.4's and 1020.6's (26); 1020.7's is a corridor's row. Section group 5a adds 1005.3.1's
     stairways and 1005.3.2's doors, ramps and passageways (28); section group 5b 1005.4, 1005.5 and 1005.6 (31); section group 5c 1005.7.1 to 1005.7.3 (34);
     section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37); section group 6c 1010.1.3, 1010.1.4, 1010.1.5,
-    1010.1.6 and 1010.1.7 (42; 1010.1.3.2's is a door's row, not a building line)."""
+    1010.1.6 and 1010.1.7 (42; 1010.1.3.2's is a door's row, not a building line); section group 6d 1010.2 to
+    1010.2.6 and Table 1010.2.4 (50; 1010.2.7's is for Groups E, B and I-4)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 42 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 50 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
