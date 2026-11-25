@@ -160,8 +160,12 @@ public static class CheckFailures
         "Nothing was checked. Open it and click Check project.", null, FailureAction.None, details);
 
     /// <summary>Revit didn't take the check's next step (its ExternalEvent was refused).</summary>
-    public static CheckFailure NotStarted(string details) => new(FailureKind.NotStarted, "Revit was busy and didn't start the check",
-        "Nothing was checked. Click Try again.", null, FailureAction.TryAgain, details);
+    public static CheckFailure NotStarted(string details, bool afterRead = false) => afterRead
+        // the read had run (and may have written marks and drafts): Revit didn't take the step that shows the answer
+        ? new(FailureKind.NotStarted, "Revit was busy and didn't show the check's answer",
+              "Nothing from this check is shown, so nothing here passes or fails. Click Try again.", null, FailureAction.TryAgain, details)
+        : new(FailureKind.NotStarted, "Revit was busy and didn't start the check",
+              "Nothing was checked. Click Try again.", null, FailureAction.TryAgain, details);
 
     /// <summary>"60 seconds", "2 minutes".</summary>
     private static string Seconds(TimeSpan? limit)

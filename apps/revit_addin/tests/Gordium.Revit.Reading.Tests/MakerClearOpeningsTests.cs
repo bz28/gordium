@@ -410,7 +410,14 @@ public sealed class MakerClearOpeningsTests
         foreach (var call in calls)
             Assert.Contains(".After(ClearPrefills.StatusLine(", call[..call.IndexOf(';')], StringComparison.Ordinal);
         Assert.Equal(3, check.Split("ResultsPane.Reveal(ui);").Length - 1);
-        Assert.Contains("internal static void Reveal(UIApplication ui) => ui.GetDockablePane(Id).Show();", Src("ResultsPane.cs"));
+        var reveal = Src("ResultsPane.cs");
+        reveal = reveal[reveal.IndexOf("internal static void Reveal(UIApplication ui)", StringComparison.Ordinal)..];
+        reveal = reveal[..reveal.IndexOf("\n    }\n", StringComparison.Ordinal)];
+        Assert.Contains("ui.GetDockablePane(Id).Show();", reveal, StringComparison.Ordinal);     // best effort: never stops the card
+        Assert.Contains("catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)", reveal, StringComparison.Ordinal);
+        // the fourth failure card, Revit not taking the next step after the read, says what the read wrote too
+        Assert.Contains(".After(ClearPrefills.StatusLine(MarksAdded, Clear), Wrote));", Src("CheckRun.cs"), StringComparison.Ordinal);
+        Assert.Contains("CheckFailures.NotStarted($\"Revit didn't take {what}: nothing was checked.\", afterRead: Prepared is not null)", Src("CheckRun.cs"), StringComparison.Ordinal);
         foreach (var wrote in new[] { "check.Wrote = added.Count > 0;", "check.Wrote |= filled.Count > 0;", "check.Wrote = true;" })
             Assert.Contains(wrote, check);
         Assert.Equal(2, check.Split("check.Wrote = true;").Length - 1);                 // each street pick

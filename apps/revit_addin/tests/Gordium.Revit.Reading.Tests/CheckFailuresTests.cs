@@ -70,6 +70,11 @@ public sealed class CheckFailuresTests
         Assert.Equal(FailureAction.None, closed.Action);                                // nothing to try until it's open
         Assert.Null(closed.ActionWords);
         Assert.Equal("Revit was busy and didn't start the check", CheckFailures.NotStarted(Details).Title);
+        // after the read (review after 4077716d): the check did start; nothing of it shown, never a pass
+        var after = CheckFailures.NotStarted(Details, afterRead: true);
+        Assert.Equal("Revit was busy and didn't show the check's answer", after.Title);
+        Assert.Contains("nothing here passes or fails", after.Words, StringComparison.Ordinal);
+        Assert.Equal(FailureAction.TryAgain, after.Action);
         // review round 5: the read waits for the checker too; its failures there are the checker's, never Revit's read
         Assert.Equal("Gordium's checker didn't start", CheckFailures.OfRead(new WorkerTimeoutException("t") { Command = "hello" }, Details).Title);
         Assert.Equal(FailureKind.CheckerStopped, CheckFailures.OfRead(new AggregateException(new WorkerExitedException("e", 1, "")), Details).Kind);

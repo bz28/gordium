@@ -429,8 +429,8 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         var readAndSend = Between(check, "    internal static void ReadAndSend(", "\n    }\n");
         Assert.Contains("bool Active() => ui.ActiveUIDocument?.Document.Equals(doc) == true;", readAndSend, StringComparison.Ordinal);
         Assert.Contains("var view = Active() && ShowsPropertyLine(ui.ActiveUIDocument!);", readAndSend, StringComparison.Ordinal);
-        Assert.Contains("if (ask == StreetAsk.Pick && Active())\n                check.Clock.Architect(\"street_pick\", () => PickStreet(", readAndSend, StringComparison.Ordinal);
-        Assert.Contains("if (ask == StreetAsk.Pick && Active() && check.Clock.Architect(\"street_pick\", () => PickStreet(", readAndSend, StringComparison.Ordinal);
+        // each pick behind the guard (UI polish PR 5: both written one way, so a pick that wrote is known: CheckRun.Wrote)
+        Assert.Equal(2, readAndSend.Split("if (ask == StreetAsk.Pick && Active() && check.Clock.Architect(\"street_pick\", () => PickStreet(").Length - 1);
         Assert.Equal(2, readAndSend.Split("PickStreet(").Length - 1);
         Assert.Equal(2, readAndSend.Split(", Active());").Length - 1);            // both asks told whether it is active
     }

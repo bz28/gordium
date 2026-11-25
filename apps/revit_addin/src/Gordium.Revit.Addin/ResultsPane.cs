@@ -177,8 +177,19 @@ internal sealed class ResultsPane : IDockablePaneProvider
     internal static PanelHad Had() => _view?.Had ?? PanelHad.Nothing;
 
     /// <summary>A check's failure (Revit's thread, in an API context): the pane brought into view, so its error card is
-    /// seen even when the architect hid the pane during the check (the read failure's dialog did this before PR 5).</summary>
-    internal static void Reveal(UIApplication ui) => ui.GetDockablePane(Id).Show();
+    /// seen even when the architect hid the pane during the check (the read failure's dialog did this before PR 5). Best
+    /// effort: Revit refusing to show it never keeps the error card from being drawn (confirm round after 4077716d).</summary>
+    internal static void Reveal(UIApplication ui)
+    {
+        try
+        {
+            ui.GetDockablePane(Id).Show();
+        }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)
+        {
+            // the card is still drawn in the pane; the architect opens it from the ribbon
+        }
+    }
 
     /// <summary>A check began (Revit's thread, in an API context): the pane brought up, saying "Reading the
     /// model...", its button Cancel.</summary>

@@ -189,7 +189,8 @@ internal sealed class CheckRun
             return;
         }
         End("failed");
-        ResultsPane.Failed(CheckFailures.NotStarted($"Revit didn't take {what}: nothing was checked."));
+        ResultsPane.Failed(CheckFailures.NotStarted($"Revit didn't take {what}: nothing was checked.", afterRead: Prepared is not null)
+                                         .After(ClearPrefills.StatusLine(MarksAdded, Clear), Wrote));   // after a read: what it wrote
     });
 
     /// <summary>Cancels the running check (the panel's Cancel, or the project read closing; on Revit's thread, no API
