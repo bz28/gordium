@@ -141,7 +141,11 @@ public static class BuildingFacts
                      // what the Building Code's Chapter 10 rules read of the whole building (code_scope.FACTS)
                      (Marks.AssemblyFixedSeating, "assembly_fixed_seating"), (Marks.SpecialEgressSpaces, "special_egress_spaces"),
                      (Marks.MerchandisePads, "merchandise_pads"), (Marks.EgressBalconyIncrease, "egress_balcony_increase_taken"),
-                     (Marks.Atrium, "building_has_atrium") })
+                     (Marks.Atrium, "building_has_atrium"),
+                     // group 2's (Table 1006.3.4 note a): a Group R-2's escape openings per 1031
+                     (Marks.EscapeOpenings1031, "emergency_escape_openings_1031"),
+                     // group 3's: outdoor areas the occupants use (1004.7), and 1004.5.1's increased occupant load
+                     (Marks.OccupiedOutdoorAreas, "occupied_outdoor_areas"), (Marks.OccupantLoadIncreased, "occupant_load_increased") })
         {
             var v = Get(mark);
             if (Marks.YesNo(v) is { } yes)
@@ -175,6 +179,22 @@ public static class BuildingFacts
                 notRead.Add(Marks.OccupancyGroups);
                 missing.Add($"{Marks.OccupancyGroups.Name} is \"{groups}\": type the Building Code's groups separated by " +
                             $"commas ({OccupancyGroupWords.Listed}), or leave it blank{Where}.");
+            }
+        }
+        // what a Group R-2's units are (Table 1006.3.4's notes b and c): all sleeping units true, all dwelling units
+        // false, both nothing (not stated: both tables' rows need review); another word asked again, sent as typed
+        if (Marks.Text(Get(Marks.R2SleepingUnits)) is { } units)
+        {
+            if (R2UnitWords.Table.Of(units) is { } word)
+            {
+                if (word != R2UnitWords.Both)
+                    b["r2_sleeping_units"] = word == "true";
+            }
+            else
+            {
+                b["r2_sleeping_units"] = units;
+                notRead.Add(Marks.R2SleepingUnits);
+                missing.Add($"{Marks.R2SleepingUnits.Name} is \"{units}\": type one of {R2UnitWords.Table.Listed}, or leave it blank{Where}.");
             }
         }
         if (Marks.Text(Get(Marks.SprinklerSystem)) is { } system)
