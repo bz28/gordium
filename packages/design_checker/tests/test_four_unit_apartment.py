@@ -85,6 +85,24 @@ def test_the_story_figures_are_the_hand_worked_ones(got, expected):
                for p in got["interior"]["parts"]["space"])
 
 
+def test_the_r2_story_rows_wait_only_on_whether_its_units_are_dwelling_units(routes, got):
+    """Group 3 review round 12 (2026-11-25): what expected.yaml says of the R-2 story rows and 508.2.3 holds. The
+    story's occupant load is at most 500 at both readings (so its two exits satisfy either table), and stating the
+    R-2 is of dwelling units settles Table 1006.3.4(1)'s row on both stories; 508.2.3 reads the story's measured gross
+    floor area (1,800 sq ft), its net still not measured."""
+    for s in got["interior"]["parts"]["story"]:
+        values = [r["value"] for r in s["readings"]["story_occupant_load"]]
+        assert len(values) == 2 and max(values) <= 500 and s["measures"]["story_gross_floor_area"] == pytest.approx(1800)
+    rows = [r for r in got["rows"] if r["rule"] == "general.bc_508_2_3_accessory_area"]
+    assert rows and all(r["values"]["story_gross_floor_area"] == pytest.approx(1800)
+                        and r["values"].get("story_net_floor_area") is None for r in rows)
+    desc = build.interior_of()
+    desc["building"] = {**(desc.get("building") or {}), "r2_sleeping_units": False}
+    stated = _check(desc, routes)
+    assert stated["results"]["general.bc_table_1006_3_4_1__r2_dwelling_units"] == "pass"
+    assert stated["results"]["general.bc_table_1006_3_4_2__h_i_r"] == "not_applicable"
+
+
 def test_the_occupant_loads_come_from_each_rooms_function(got):
     """Section group 3 (2026-11-23): each apartment's stated function (residential, 200 gross) gives its occupant
     load as two readings, 690 / 200 from its own area and 690 / 7 while 1004.5.1's increase isn't ruled out; both at
