@@ -14,16 +14,17 @@ second_reading:
     name), a seventh for 1030.7 and SMOKE-PROTECTED ASSEMBLY SEATING (review round 2, 2026-11-23), an eighth for
     the 27 pieces of section group 3 (1004, Table 1004.5 and 12 definitions), a ninth for the 9 pieces of section
     group 4's corridor width (1005.3.2, 1020.1, 1020.3, Table 1020.3 and 5 definitions, 2026-11-25), a tenth for the 6
-    pieces of its corridor rating (1020.2, 1020.2.1, Table 1020.2 and 3 definitions, 2026-11-25), and a helper for the
-    comparison words)
+    pieces of its corridor rating (1020.2, 1020.2.1, Table 1020.2 and 3 definitions, 2026-11-25), an eleventh for the 5
+    pieces of the rest of Section 1020 (1020.4, 1020.6, 1020.6.1, 1020.7 and 1 definition, 2026-11-25), and a helper for
+    the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), and 4 pages, 6 boxes as step_9 (section group 4b); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), and 3 pages, 6 boxes as step_10 (section group 4c); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 225 pieces, 577 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 230 pieces, 587 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -1106,6 +1107,12 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:smoke_detector:
+    piece_sha256: 522da15a335b767701eedf42bdfb4c346aca491af705eb998bf698ea50e567df
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:smoke_protected_assembly_seating:
     piece_sha256: fb68075e4b9bd65132ea95a5b3147bbf7f2b766e7e38c63146f6a1ca096c0c3e
     numbers: []
@@ -3136,6 +3143,18 @@ pieces:
       which the text reader joins to the next row''s first word ''In'' and so reads with a unit; each is that row''s
       width in inches, the least a corridor may have, as the other width cells. Recorded ''none''; the second reading
       is right.'
+  '1020.4':
+    piece_sha256: 03d09568a1997d6f4328ec97063c07e1911171614a193f032fc130f032ad3027
+    numbers:
+    - '1020.4'
+    - '1005.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1020.4'
+    - '1005.7'
+    second_reading_comparisons:
+    - none
+    - none
   '1020.5':
     piece_sha256: 3a8020bc52c9e2bd47f823c3c37f59c86f78c5c113ec84325a82e8dacdf2d3cc
     numbers:
@@ -3192,6 +3211,51 @@ pieces:
     - <
     - none
     - <=
+    - none
+  '1020.6':
+    piece_sha256: 71a26e3ae139a2491a5d852a9cced0d51053be16462c8de09c6000028a2e47a3
+    numbers:
+    - '1020.6'
+    - 1,000 square foot or less
+    - 93 m or less
+    - '170'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1020.6'
+    - 1,000 square foot or less
+    - 93 m or less
+    - '170'
+    second_reading_comparisons:
+    - none
+    - <=
+    - none
+    - none
+    flags:
+    - '''93 m or less'' (none): the metric conversion of 1,000 square feet, which the recorded words read with the
+      ''or less'' that follows it; a conversion is never a limit here. The second reading (none) is right.'
+  1020.6.1:
+    piece_sha256: f15fb692dc8545d1e29ff9ff7be9735452486ac2ae89041066d093de0548cb41
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  '1020.7':
+    piece_sha256: 2abf7d30247757062a31d45f1ca4f943c412ce6f997e12d0516ebb3db9113581
+    numbers:
+    - '1020.7'
+    - '1'
+    - '1016.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1020.7'
+    - '1'
+    - '1016.2'
+    second_reading_comparisons:
+    - none
+    - none
     - none
   '1030.7':
     piece_sha256: 0dedbb8deaa95cfacfefff8ad82fb14eb63468c3e6c595eb4bc7e45d398a2fc6

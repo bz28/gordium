@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 50 to review · 20 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 52 to review · 20 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1333,6 +1333,8 @@
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
     "Egress · Group I-4: A person checks this (Gordium doesn't decide it): Which group the building is in decides every limit below; the architect states it, a person confirms.",
     "Egress · Child day care classified Group E: A person checks this (Gordium doesn't decide it): More than five but not more than 100 children 2 1/2 or younger, in rooms on a level of exit discharge each with an exit door directly outside: Group E, not I-4; the architect states it.",
     "Egress · Care during religious functions: A person checks this (Gordium doesn't decide it): Part of the primary occupancy: the architect states it.",
@@ -1370,7 +1372,9 @@
     "Egress · Corridor rating in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent; which room is which occupancy isn't marked yet, so a person checks.",
     "Egress · Group I-2 corridors: A person checks this (Gordium doesn't decide it): Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.",
     "Egress · Elevator hoistway doors protected: A person checks this (Gordium doesn't decide it): Elevator hoistway doors in rated enclosures: Sections 716 and 3006.2 (not brought in), a person's check.",
-    "Egress · Corridor width in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks."
+    "Egress · Corridor width in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
+    "Egress · Corridor width kept clear: A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+    "Egress · Corridors not used as air ducts: A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check."
    ]
   },
   "red": [],
@@ -57053,6 +57057,308 @@
      }
     },
     {
+     "id": "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+     "rule": "general.bc_1020_7_continuity",
+     "name": "Level 1 › CORRIDOR L1 (3) · A rated corridor is continuous to the exit (BCNYS 1020.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+     "use_detail": false,
+     "part": {
+      "part": "corridor",
+      "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+      "name": "CORRIDOR L1 (3)",
+      "within": null
+     },
+     "detail": {
+      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+      "quotes": [
+       {
+        "text": "1020.7 Corridor continuity. Fire-resistance-rated corridors shall be continuous from the point of entry to an exit, and shall not be interrupted by intervening rooms. Where the path of egress travel within a fire-resistance-rated corridor to the exit includes travel along unenclosed exit access stairways or ramps, the fire-resistance rating shall be continuous for the length of the stairway or ramp and for the length of the connecting corridor on the adjacent floor leading to the exit.",
+        "where": "1020.7, 2025 Building Code of New York State (BCNYS), PDF p.345",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 345,
+        "lines": [
+         17,
+         20
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1. Foyers, lobbies or reception rooms constructed as required for corridors shall not be construed as intervening rooms. 2. Enclosed elevator lobbies as permitted by Item 1 of Section 1016.2 shall not be construed as intervening rooms.",
+        "where": "1020.7, 2025 Building Code of New York State (BCNYS), PDF p.345",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 345,
+        "lines": [
+         22,
+         23
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1020.7, 2025 Building Code of New York State (BCNYS), PDF p.345",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 345,
+        "lines": [
+         17,
+         20
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 345,
+        "lines": [
+         22,
+         23
+        ]
+       }
+      ]
+     },
+     "element": "Level 1 › CORRIDOR L1 (3)",
+     "open": {
+      "gordium": null,
+      "measures": [
+       "corridor fire rating hours"
+      ],
+      "gaps": [],
+      "worked": [],
+      "inputs": [
+       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "mark:corridor:corridor_fire_rating_hours",
+       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
+       ],
+       "measure": "corridor_fire_rating_hours"
+      },
+      {
+       "kind": "decide",
+       "key": "flag",
+       "words": "a flag rule: a person decides, even once it is measured",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
+       ]
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1020.7",
+      "quote": "1020.7 Corridor continuity. Fire-resistance-rated corridors shall be continuous from the point of entry to an exit, and shall not be interrupted by intervening rooms. Where the path of egress travel within a fire-resistance-rated corridor to the exit includes travel along unenclosed exit access stairways or ramps, the fire-resistance rating shall be continuous for the length of the stairway or ramp and for the length of the connecting corridor on the adjacent floor leading to the exit."
+     },
+     "asks": [
+      {
+       "key": "mark:corridor:corridor_fire_rating_hours",
+       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
+       ],
+       "measure": "corridor_fire_rating_hours",
+       "kind": "measure",
+       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+      },
+      {
+       "key": "flag",
+       "why": "a flag rule: a person decides, even once it is measured",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
+       ],
+       "kind": "decide",
+       "headline": "The code leaves this to judgment: read the words and decide"
+      }
+     ],
+     "rule_name": "A rated corridor is continuous to the exit",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1020",
+      "section_title": "Corridors",
+      "piece": "1020.7",
+      "piece_title": "Corridor continuity"
+     }
+    },
+    {
+     "id": "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+     "rule": "general.bc_1020_7_continuity",
+     "name": "Level 2 › CORRIDOR L2 (8) · A rated corridor is continuous to the exit (BCNYS 1020.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+     "use_detail": false,
+     "part": {
+      "part": "corridor",
+      "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+      "name": "CORRIDOR L2 (8)",
+      "within": null
+     },
+     "detail": {
+      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+      "quotes": [
+       {
+        "text": "1020.7 Corridor continuity. Fire-resistance-rated corridors shall be continuous from the point of entry to an exit, and shall not be interrupted by intervening rooms. Where the path of egress travel within a fire-resistance-rated corridor to the exit includes travel along unenclosed exit access stairways or ramps, the fire-resistance rating shall be continuous for the length of the stairway or ramp and for the length of the connecting corridor on the adjacent floor leading to the exit.",
+        "where": "1020.7, 2025 Building Code of New York State (BCNYS), PDF p.345",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 345,
+        "lines": [
+         17,
+         20
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1. Foyers, lobbies or reception rooms constructed as required for corridors shall not be construed as intervening rooms. 2. Enclosed elevator lobbies as permitted by Item 1 of Section 1016.2 shall not be construed as intervening rooms.",
+        "where": "1020.7, 2025 Building Code of New York State (BCNYS), PDF p.345",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 345,
+        "lines": [
+         22,
+         23
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1020.7, 2025 Building Code of New York State (BCNYS), PDF p.345",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 345,
+        "lines": [
+         17,
+         20
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 345,
+        "lines": [
+         22,
+         23
+        ]
+       }
+      ]
+     },
+     "element": "Level 2 › CORRIDOR L2 (8)",
+     "open": {
+      "gordium": null,
+      "measures": [
+       "corridor fire rating hours"
+      ],
+      "gaps": [],
+      "worked": [],
+      "inputs": [
+       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "mark:corridor:corridor_fire_rating_hours",
+       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ],
+       "measure": "corridor_fire_rating_hours"
+      },
+      {
+       "kind": "decide",
+       "key": "flag",
+       "words": "a flag rule: a person decides, even once it is measured",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ]
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1020.7",
+      "quote": "1020.7 Corridor continuity. Fire-resistance-rated corridors shall be continuous from the point of entry to an exit, and shall not be interrupted by intervening rooms. Where the path of egress travel within a fire-resistance-rated corridor to the exit includes travel along unenclosed exit access stairways or ramps, the fire-resistance rating shall be continuous for the length of the stairway or ramp and for the length of the connecting corridor on the adjacent floor leading to the exit."
+     },
+     "asks": [
+      {
+       "key": "mark:corridor:corridor_fire_rating_hours",
+       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ],
+       "measure": "corridor_fire_rating_hours",
+       "kind": "measure",
+       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+      },
+      {
+       "key": "flag",
+       "why": "a flag rule: a person decides, even once it is measured",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ],
+       "kind": "decide",
+       "headline": "The code leaves this to judgment: read the words and decide"
+      }
+     ],
+     "rule_name": "A rated corridor is continuous to the exit",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1020",
+      "section_title": "Corridors",
+      "piece": "1020.7",
+      "piece_title": "Corridor continuity"
+     }
+    },
+    {
      "id": "egress.general.bc_308_5_classification",
      "rule": "general.bc_308_5_classification",
      "name": "Egress · Group I-4, day care facilities (BCNYS 308.5)",
@@ -59738,6 +60044,158 @@
       "section_title": "Corridors",
       "piece": "Table 1020.3",
       "piece_title": "MINIMUM CORRIDOR WIDTH"
+     }
+    },
+    {
+     "id": "egress.general.bc_1020_4_obstruction",
+     "rule": "general.bc_1020_4_obstruction",
+     "name": "Egress · Corridor width kept clear (BCNYS 1020.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+      "quotes": [
+       {
+        "text": "1020.4 Obstruction. The minimum width or required capacity of corridors shall be unobstructed. Exception: Encroachments complying with Section 1005.7.",
+        "where": "1020.4, 2025 Building Code of New York State (BCNYS), PDF p.344"
+       }
+      ],
+      "citation": "1020.4, 2025 Building Code of New York State (BCNYS), PDF p.344",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1020.4",
+      "quote": "1020.4 Obstruction. The minimum width or required capacity of corridors shall be unobstructed. Exception: Encroachments complying with Section 1005.7."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1020_4_obstruction",
+       "words": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1020_4_obstruction",
+       "why": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Corridor width kept clear",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1020",
+      "section_title": "Corridors",
+      "piece": "1020.4",
+      "piece_title": "Obstruction"
+     }
+    },
+    {
+     "id": "egress.general.bc_1020_6_air_movement",
+     "rule": "general.bc_1020_6_air_movement",
+     "name": "Egress · Corridors not used as air ducts (BCNYS 1020.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
+      "quotes": [
+       {
+        "text": "1020.6 Air movement in corridors. Corridors shall not serve as supply, return, exhaust, relief or ventilation air ducts.",
+        "where": "1020.6, 2025 Building Code of New York State (BCNYS), PDF p.344"
+       },
+       {
+        "text": "1. Use of a corridor as a source of makeup air for exhaust systems in rooms that open directly onto such corridors, including toilet rooms, bathrooms, dressing rooms, smoking lounges and janitor closets, shall be permitted, provided that each such corridor is directly supplied with outdoor air at a rate greater than the rate of makeup air taken from the corridor. 2. Where located within a dwelling unit, the use of corridors for conveying return air shall not be prohibited.",
+        "where": "1020.6, 2025 Building Code of New York State (BCNYS), PDF p.344"
+       },
+       {
+        "text": "3. Where located within tenant spaces of 1,000 square feet (93 m[fn2]) or less in area, utilization of corridors for conveying return air is permitted. 4. Transfer air movement required to maintain the pressurization difference within health care facilities in accordance with ASHRAE 170.",
+        "where": "1020.6, 2025 Building Code of New York State (BCNYS), PDF p.345"
+       },
+       {
+        "text": "1020.6.1 Corridor ceiling. Use of the space between the corridor ceiling and the floor or roof structure above as a return air plenum is permitted for one or more of the following conditions:",
+        "where": "1020.6.1, 2025 Building Code of New York State (BCNYS), PDF p.345"
+       }
+      ],
+      "citation": "1020.6, 2025 Building Code of New York State (BCNYS), PDF p.344",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1020.6",
+      "quote": "1020.6 Air movement in corridors. Corridors shall not serve as supply, return, exhaust, relief or ventilation air ducts."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1020_6_air_movement",
+       "words": "A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1020_6_air_movement",
+       "why": "A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Corridors not used as air ducts",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1020",
+      "section_title": "Corridors",
+      "piece": "1020.6",
+      "piece_title": "Air movement in corridors"
      }
     },
     {
@@ -63124,7 +63582,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 50 to review · 20 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 52 to review · 20 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -63597,6 +64055,7 @@
       "general.bc_1020_2_fire_partitions@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
       "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
       "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+      "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
       "general.bc_1020_5_dead_end@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
       "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
       "general.bc_table_1020_2_h1_h2_h3@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
@@ -63609,6 +64068,7 @@
       "general.bc_1020_2_fire_partitions@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
       "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
       "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+      "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
       "egress.general.bc_308_5_classification",
       "egress.general.bc_308_5_1_group_e",
       "egress.general.bc_308_5_2_religious_worship",
@@ -63646,7 +64106,9 @@
       "egress.general.bc_table_1020_2_other_occupancies",
       "egress.general.bc_table_1020_2_note_a_group_i2",
       "egress.general.bc_1020_2_1_hoistway_protection",
-      "egress.general.bc_table_1020_3_other_occupancies"
+      "egress.general.bc_table_1020_3_other_occupancies",
+      "egress.general.bc_1020_4_obstruction",
+      "egress.general.bc_1020_6_air_movement"
      ],
      "lines": [
       {
@@ -63948,12 +64410,13 @@
         "general.bc_table_1020_2_i4@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
         "general.bc_1020_2_fire_partitions@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
         "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
-        "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
+        "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+        "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
        "folded": true,
        "status": "needs_review",
-       "rules": 12,
-       "title": "Level 1 › CORRIDOR L1 (3): 12 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
+       "rules": 13,
+       "title": "Level 1 › CORRIDOR L1 (3): 13 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
        "mark": "?",
        "name": "Level 1 › CORRIDOR L1 (3)"
       },
@@ -63972,12 +64435,13 @@
         "general.bc_table_1020_2_i4@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_1020_2_fire_partitions@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
-        "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+        "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+        "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
        "folded": true,
        "status": "needs_review",
-       "rules": 12,
-       "title": "Level 2 › CORRIDOR L2 (8): 12 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
+       "rules": 13,
+       "title": "Level 2 › CORRIDOR L2 (8): 13 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
        "mark": "?",
        "name": "Level 2 › CORRIDOR L2 (8)"
       },
@@ -64474,9 +64938,35 @@
        "title": "Egress · Corridor width in a building of two or more groups (BCNYS Table 1020.3): A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
        "mark": "?",
        "name": "Egress · Corridor width in a building of two or more groups (BCNYS Table 1020.3)"
+      },
+      {
+       "key": "review#3114361e42",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1020_4_obstruction"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Corridor width kept clear (BCNYS 1020.4): A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+       "mark": "?",
+       "name": "Egress · Corridor width kept clear (BCNYS 1020.4)"
+      },
+      {
+       "key": "review#1c5486c3a4",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1020_6_air_movement"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Corridors not used as air ducts (BCNYS 1020.6): A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
+       "mark": "?",
+       "name": "Egress · Corridors not used as air ducts (BCNYS 1020.6)"
       }
      ],
-     "count": 50,
+     "count": 52,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -64696,6 +65186,22 @@
        "rules": 1
       },
       {
+       "key": "mark:corridor:corridor_fire_rating_hours",
+       "kind": "mark",
+       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ],
+       "items": [
+        "general.bc_1020_2_fire_partitions@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+        "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+        "general.bc_1020_2_fire_partitions@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+        "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ],
+       "rules": 2
+      },
+      {
        "key": "fact:sprinklered_903_3_1_1",
        "kind": "mark",
        "words": "sprinkler system (NFPA 13): not stated for the project",
@@ -64706,20 +65212,6 @@
        ],
        "rules": 1,
        "field": "facts.sprinklered_903_3_1_1"
-      },
-      {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "kind": "mark",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
-       "elements": [
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
-       ],
-       "items": [
-        "general.bc_1020_2_fire_partitions@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
-        "general.bc_1020_2_fire_partitions@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
-       ],
-       "rules": 1
       },
       {
        "key": "mark:corridor:corridor_occupant_load",
@@ -65128,6 +65620,26 @@
         "egress.general.bc_table_1020_3_other_occupancies"
        ],
        "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1020_4_obstruction",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1020_4_obstruction"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1020_6_air_movement",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1020_6_air_movement"
+       ],
+       "rules": 1
       }
      ]
     },
@@ -65341,7 +65853,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "50 to review · 20 comply"
+     "summary": "52 to review · 20 comply"
     }
    ],
    "contents": [
@@ -77608,7 +78120,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 149
+          "not_for_checking": 150
          },
          "pieces": [
           {
@@ -78352,6 +78864,12 @@
           {
            "id": "202:sleeping_unit",
            "title": "SLEEPING UNIT",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:smoke_detector",
+           "title": "SMOKE DETECTOR",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -80267,8 +80785,8 @@
          "whole": false,
          "counts": {
           "rules": 5,
-          "flag": 1,
-          "not_for_checking": 1
+          "flag": 4,
+          "not_for_checking": 2
          },
          "pieces": [
           {
@@ -80321,6 +80839,14 @@
            ]
           },
           {
+           "id": "1020.4",
+           "title": "Obstruction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1020_4_obstruction"
+           ]
+          },
+          {
            "id": "1020.5",
            "title": "Dead ends",
            "coverage": "rules",
@@ -80331,8 +80857,30 @@
            ]
           },
           {
+           "id": "1020.6",
+           "title": "Air movement in corridors",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1020_6_air_movement"
+           ]
+          },
+          {
+           "id": "1020.7",
+           "title": "Corridor continuity",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1020_7_continuity"
+           ]
+          },
+          {
            "id": "1020.1",
            "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1020.6.1",
+           "title": "Corridor ceiling",
            "coverage": "not_for_checking",
            "rules": []
           }
@@ -84260,6 +84808,8 @@
    "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc": "needs_review",
    "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1": "needs_review",
    "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc": "needs_review",
+   "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1": "needs_review",
+   "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc": "needs_review",
    "egress.general.bc_308_5_classification": "needs_review",
    "egress.general.bc_308_5_1_group_e": "needs_review",
    "egress.general.bc_308_5_2_religious_worship": "needs_review",
@@ -84298,6 +84848,8 @@
    "egress.general.bc_table_1020_2_note_a_group_i2": "needs_review",
    "egress.general.bc_1020_2_1_hoistway_protection": "needs_review",
    "egress.general.bc_table_1020_3_other_occupancies": "needs_review",
+   "egress.general.bc_1020_4_obstruction": "needs_review",
+   "egress.general.bc_1020_6_air_movement": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7da": "complies",
@@ -84332,7 +84884,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "50 to review · 20 comply"
+    "summary": "52 to review · 20 comply"
    }
   ],
   "egress": {
@@ -88190,6 +88742,38 @@
      "unknown": [],
      "home": "Level 2",
      "line": "Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable)"
+    },
+    {
+     "rule": "general.bc_1020_7_continuity",
+     "part": "corridor",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+     "name": "CORRIDOR L1 (3)",
+     "within": null,
+     "outcome": "needs_review",
+     "reason": null,
+     "values": {
+      "corridor_fire_rating_hours": null
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 1",
+     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+    },
+    {
+     "rule": "general.bc_1020_7_continuity",
+     "part": "corridor",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+     "name": "CORRIDOR L2 (8)",
+     "within": null,
+     "outcome": "needs_review",
+     "reason": null,
+     "values": {
+      "corridor_fire_rating_hours": null
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 2",
+     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
     }
    ],
    "results": {
@@ -88243,6 +88827,7 @@
     "general.bc_1020_2_fire_partitions": "needs_review",
     "general.bc_1020_3_corridor_capacity": "needs_review",
     "general.bc_table_1020_3_corridor_width": "needs_review",
+    "general.bc_1020_7_continuity": "needs_review",
     "general.bc_308_5_classification": "needs_review",
     "general.bc_308_5_1_group_e": "needs_review",
     "general.bc_308_5_2_religious_worship": "needs_review",
@@ -88280,7 +88865,9 @@
     "general.bc_table_1020_2_other_occupancies": "needs_review",
     "general.bc_table_1020_2_note_a_group_i2": "needs_review",
     "general.bc_1020_2_1_hoistway_protection": "needs_review",
-    "general.bc_table_1020_3_other_occupancies": "needs_review"
+    "general.bc_table_1020_3_other_occupancies": "needs_review",
+    "general.bc_1020_4_obstruction": "needs_review",
+    "general.bc_1020_6_air_movement": "needs_review"
    },
    "interior": {
     "parts": {
@@ -91848,9 +92435,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "294bf14bfe25c5865c745206c16efd2ee845c3d6e40a383209675223bffce04f",
+  "worker_fingerprint": "7d6564600af46806fb8b76507a2359dea3b5193acca8089507dd38107b92ff68",
   "rulebook": {
-   "new_york/ithaca_city": "1c298a86962682214c6efde0cc1b63d3ebb68dfa9070987568908259ed072768"
+   "new_york/ithaca_city": "1bcc2a40bbf3d74c6858685c16f6e9f81c9c8107f4f283e26945bb98f3aa39f4"
   }
  }
 }

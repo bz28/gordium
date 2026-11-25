@@ -273,7 +273,8 @@ import re
 SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2.1": (315, 3, 13),
          "1017.2": (341, 23, 23), "1020.5": (344, 37, 47),
          # section group 4: the corridor sections and tables drafted
-         "1020.2": (343, 40, 53), "Table 1020.2": (344, 7, 18), "1020.3": (344, 21, 24), "Table 1020.3": (344, 27, 34)}
+         "1020.2": (343, 40, 53), "Table 1020.2": (344, 7, 18), "1020.3": (344, 21, 24), "Table 1020.3": (344, 27, 34),
+         "1020.4": (344, 35, 36), "1020.6": (344, 48, 53), "1020.6 (part 2)": (345, 3, 6), "1020.7": (345, 17, 23)}
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -303,12 +304,15 @@ HANDLERS = {
     "408.8": ("general.bc_table_1020_2_i1_i3", "408.8"),
     "903.2.8": ("general.bc_table_1020_2_r", "903.2.8"),
     "1005.1": ("general.bc_1020_3_corridor_capacity", "1005.1"),
+    # section group 4c: the rest of Section 1020
+    "1005.7": ("general.bc_1020_4_obstruction", "1005.7"), "1016.2": ("general.bc_1020_7_continuity", "1016.2"),
 }
-NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3"}          # the piece naming itself
+NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
-            (343, 42), (344, 34)}       # group 4: 1020.2's 'Exceptions:', Table 1020.3's 'For SI'
+            (343, 42), (344, 34),       # group 4: 1020.2's 'Exceptions:', Table 1020.3's 'For SI'
+            (344, 49), (345, 21)}       # group 4c: 1020.6's and 1020.7's 'Exceptions:'
 
 
 def _quoted(book, page, a, b):
