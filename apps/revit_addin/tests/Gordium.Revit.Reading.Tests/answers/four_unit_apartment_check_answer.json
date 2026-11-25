@@ -1259,18 +1259,18 @@
     "Level 1 › APARTMENT NORTH L1: Level 1 › APARTMENT NORTH L1 (5): occupant load not measured: the room's function (Table 1004.5) isn't stated, so its occupant load isn't worked out: set the room's Table 1004.5 function (the room mark Gordium: Function)",
     "Level 2 › APARTMENT SOUTH L2: Level 2 › APARTMENT SOUTH L2 (6): occupant load not measured: the room's function (Table 1004.5) isn't stated, so its occupant load isn't worked out: set the room's Table 1004.5 function (the room mark Gordium: Function)",
     "Level 2 › APARTMENT NORTH L2: Level 2 › APARTMENT NORTH L2 (10): occupant load not measured: the room's function (Table 1004.5) isn't stated, so its occupant load isn't worked out: set the room's Table 1004.5 function (the room mark Gordium: Function)",
-    "Level 1 · Exits per story by occupant load: Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
-    "Level 2 · Exits per story by occupant load: Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
-    "Level 1 · A story's one exit: Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
-    "Level 2 · A story's one exit: Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
-    "Level 1 · A story's one exit: Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
-    "Level 2 · A story's one exit: Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
-    "Level 1 · A story's one exit: Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
-    "Level 2 · A story's one exit: Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
-    "Level 1 · A story's one exit: Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
-    "Level 2 · A story's one exit: Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
-    "Level 1 · Two exits at least 1/2 the diagonal apart: Level 1: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
-    "Level 2 · Two exits at least 1/2 the diagonal apart: Level 2: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+    "Level 1 · Exits per story by occupant load: Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+    "Level 2 · Exits per story by occupant load: Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+    "Level 1 · A story's one exit: Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+    "Level 2 · A story's one exit: Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+    "Level 1 · A story's one exit: Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+    "Level 2 · A story's one exit: Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+    "Level 1 · A story's one exit: Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+    "Level 2 · A story's one exit: Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+    "Level 1 · A story's one exit: Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+    "Level 2 · A story's one exit: Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+    "Level 1 · Two exits at least 1/2 the diagonal apart: Level 1: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+    "Level 2 · Two exits at least 1/2 the diagonal apart: Level 2: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
     "Level 1 › APARTMENT SOUTH L1: Level 1 › APARTMENT SOUTH L1 (1): occupancy group (whether Group I-4) not measured (or not usable); egress sleeping through sleeping or toilet not measured: Gordium doesn't measure this yet; egress through electrically locked lobby not measured: Gordium doesn't measure this yet; egress through kitchen storage not measured: Gordium doesn't measure this yet; egress through locked room not measured: Gordium doesn't measure this yet; egress through other room not measured: Gordium doesn't measure this yet",
     "Level 1 › STAIR WEST L1: Level 1 › STAIR WEST L1 (2): occupancy group (whether Group I-4) not measured (or not usable); egress sleeping through sleeping or toilet not measured: Gordium doesn't measure this yet; egress through electrically locked lobby not measured: Gordium doesn't measure this yet; egress through kitchen storage not measured: Gordium doesn't measure this yet; egress through locked room not measured: Gordium doesn't measure this yet; egress through other room not measured: Gordium doesn't measure this yet",
     "Level 1 › STAIR EAST L1: Level 1 › STAIR EAST L1 (4): occupancy group (whether Group I-4) not measured (or not usable); egress sleeping through sleeping or toilet not measured: Gordium doesn't measure this yet; egress through electrically locked lobby not measured: Gordium doesn't measure this yet; egress through kitchen storage not measured: Gordium doesn't measure this yet; egress through locked room not measured: Gordium doesn't measure this yet; egress through other room not measured: Gordium doesn't measure this yet",
@@ -38427,7 +38427,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+     "reason": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -38436,7 +38436,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+      "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
       "quotes": [
        {
         "text": "1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps providing access to exits, from any",
@@ -38546,7 +38546,6 @@
        "rooms exit directly outside"
       ],
       "gaps": [
-       "whether the story is the first above or below grade",
        "rooms exit directly outside"
       ],
       "worked": [],
@@ -38556,6 +38555,7 @@
        "occupancy group (whether Group I-4) not measured (or not usable)",
        "occupancy group (whether any group besides I-4) not measured (or not usable)",
        "special egress spaces (whether the building has any with their own egress sections) not measured (or not usable)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
        "a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
       ],
       "decide": false
@@ -38680,7 +38680,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+     "reason": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -38689,7 +38689,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+      "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
       "quotes": [
        {
         "text": "1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps providing access to exits, from any",
@@ -38799,7 +38799,6 @@
        "rooms exit directly outside"
       ],
       "gaps": [
-       "whether the story is the first above or below grade",
        "rooms exit directly outside"
       ],
       "worked": [],
@@ -38809,6 +38808,7 @@
        "occupancy group (whether Group I-4) not measured (or not usable)",
        "occupancy group (whether any group besides I-4) not measured (or not usable)",
        "special egress spaces (whether the building has any with their own egress sections) not measured (or not usable)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
        "a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
       ],
       "decide": false
@@ -38933,7 +38933,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+     "reason": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -38942,7 +38942,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+      "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
       "quotes": [
        {
         "text": "1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps providing access to exits, from any",
@@ -39073,9 +39073,7 @@
        "story's place (whether it is the second story above grade plane)"
       ],
       "gaps": [
-       "whether the story is the first above or below grade",
-       "rooms exit directly outside",
-       "story's place (whether it is the second story above grade plane)"
+       "rooms exit directly outside"
       ],
       "worked": [],
       "inputs": [
@@ -39083,7 +39081,9 @@
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "special egress spaces (whether the building has any with their own egress sections) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
-       "a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+       "a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
       ],
       "decide": false
      },
@@ -39199,7 +39199,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+     "reason": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -39208,7 +39208,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+      "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
       "quotes": [
        {
         "text": "1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps providing access to exits, from any",
@@ -39339,9 +39339,7 @@
        "story's place (whether it is the second story above grade plane)"
       ],
       "gaps": [
-       "whether the story is the first above or below grade",
-       "rooms exit directly outside",
-       "story's place (whether it is the second story above grade plane)"
+       "rooms exit directly outside"
       ],
       "worked": [],
       "inputs": [
@@ -39349,7 +39347,9 @@
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "special egress spaces (whether the building has any with their own egress sections) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
-       "a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+       "a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
       ],
       "decide": false
      },
@@ -39465,7 +39465,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+     "reason": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -39474,7 +39474,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+      "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
       "quotes": [
        {
         "text": "1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps providing access to exits, from any",
@@ -39607,7 +39607,6 @@
        "rooms exit directly outside"
       ],
       "gaps": [
-       "whether the story is the first above or below grade",
        "rooms exit directly outside"
       ],
       "worked": [],
@@ -39619,6 +39618,7 @@
        "special egress spaces (whether the building has any with their own egress sections) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
        "sprinkler system (NFPA 13R) not measured (or not usable)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
        "a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
       ],
       "decide": false
@@ -39735,7 +39735,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+     "reason": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -39744,7 +39744,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+      "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
       "quotes": [
        {
         "text": "1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps providing access to exits, from any",
@@ -39877,7 +39877,6 @@
        "rooms exit directly outside"
       ],
       "gaps": [
-       "whether the story is the first above or below grade",
        "rooms exit directly outside"
       ],
       "worked": [],
@@ -39889,6 +39888,7 @@
        "special egress spaces (whether the building has any with their own egress sections) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
        "sprinkler system (NFPA 13R) not measured (or not usable)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
        "a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
       ],
       "decide": false
@@ -40005,7 +40005,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+     "reason": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -40014,7 +40014,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+      "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
       "quotes": [
        {
         "text": "1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps providing access to exits, from any",
@@ -40145,9 +40145,7 @@
        "story's place (whether it is the second story above grade plane)"
       ],
       "gaps": [
-       "whether the story is the first above or below grade",
-       "rooms exit directly outside",
-       "story's place (whether it is the second story above grade plane)"
+       "rooms exit directly outside"
       ],
       "worked": [],
       "inputs": [
@@ -40155,7 +40153,9 @@
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "special egress spaces (whether the building has any with their own egress sections) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
-       "a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+       "a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
       ],
       "decide": false
      },
@@ -40271,7 +40271,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+     "reason": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -40280,7 +40280,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+      "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
       "quotes": [
        {
         "text": "1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps providing access to exits, from any",
@@ -40411,9 +40411,7 @@
        "story's place (whether it is the second story above grade plane)"
       ],
       "gaps": [
-       "whether the story is the first above or below grade",
-       "rooms exit directly outside",
-       "story's place (whether it is the second story above grade plane)"
+       "rooms exit directly outside"
       ],
       "worked": [],
       "inputs": [
@@ -40421,7 +40419,9 @@
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "special egress spaces (whether the building has any with their own egress sections) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
-       "a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+       "a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
       ],
       "decide": false
      },
@@ -40537,7 +40537,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+     "reason": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -40546,7 +40546,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+      "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
       "quotes": [
        {
         "text": "1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps providing access to exits, from any",
@@ -40681,7 +40681,6 @@
       ],
       "gaps": [
        "dwelling units on the story",
-       "story's place (whether it is the fourth story above grade plane or higher)",
        "rooms exit directly outside"
       ],
       "worked": [],
@@ -40693,6 +40692,7 @@
        "special egress spaces (whether the building has any with their own egress sections) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
        "sprinkler system (NFPA 13R) not measured (or not usable)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
        "a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
       ],
       "decide": false
@@ -40809,7 +40809,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+     "reason": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -40818,7 +40818,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
+      "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet",
       "quotes": [
        {
         "text": "1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps providing access to exits, from any",
@@ -40953,7 +40953,6 @@
       ],
       "gaps": [
        "dwelling units on the story",
-       "story's place (whether it is the fourth story above grade plane or higher)",
        "rooms exit directly outside"
       ],
       "worked": [],
@@ -40965,6 +40964,7 @@
        "special egress spaces (whether the building has any with their own egress sections) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
        "sprinkler system (NFPA 13R) not measured (or not usable)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
        "a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
       ],
       "decide": false
@@ -41081,7 +41081,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+     "reason": "Level 1: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -41090,7 +41090,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+      "line": "Level 1: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
       "quotes": [
        {
         "text": "1007.1.1 Two exits or exit access doorways. Where two exits, exit access doorways, exit access stairways or ramps, or any combi- nation thereof, are required from any portion of the exit access, they shall be placed a distance apart equal to not less than one- half of the length of the maximum overall diagonal dimension of the building or area to be served measured in a straight line",
@@ -41267,10 +41267,7 @@
       ],
       "gaps": [
        "dwelling units on the story",
-       "whether the story is the first above or below grade",
-       "story's place (whether it is the fourth story above grade plane or higher)",
-       "rooms exit directly outside",
-       "story's place (whether it is the second story above grade plane)"
+       "rooms exit directly outside"
       ],
       "worked": [],
       "inputs": [
@@ -41279,7 +41276,10 @@
        "occupancy group (whether any group besides I-4) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
        "sprinkler system (NFPA 13R) not measured (or not usable)",
-       "a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+       "a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
       ],
       "decide": false
      },
@@ -41347,7 +41347,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+     "reason": "Level 2: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
      "use_detail": false,
      "part": {
       "part": "story",
@@ -41356,7 +41356,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet",
+      "line": "Level 2: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
       "quotes": [
        {
         "text": "1007.1.1 Two exits or exit access doorways. Where two exits, exit access doorways, exit access stairways or ramps, or any combi- nation thereof, are required from any portion of the exit access, they shall be placed a distance apart equal to not less than one- half of the length of the maximum overall diagonal dimension of the building or area to be served measured in a straight line",
@@ -41533,10 +41533,7 @@
       ],
       "gaps": [
        "dwelling units on the story",
-       "whether the story is the first above or below grade",
-       "story's place (whether it is the fourth story above grade plane or higher)",
-       "rooms exit directly outside",
-       "story's place (whether it is the second story above grade plane)"
+       "rooms exit directly outside"
       ],
       "worked": [],
       "inputs": [
@@ -41545,7 +41542,10 @@
        "occupancy group (whether any group besides I-4) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
        "sprinkler system (NFPA 13R) not measured (or not usable)",
-       "a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)"
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+       "a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
+       "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
       ],
       "decide": false
      },
@@ -68059,7 +68059,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 20,
-       "title": "Level 1: 20 need review: whether a storage room's area is measured inside its walls or to their outer faces is an open question (question 3): under either reading it doesn't comply or can't be told (the storage rooms' area is measured inside their walls; the storage rooms' area is measured to the walls' outer faces) · to give: occupancy group (the building's one group, or mixed) not measured (or not usable), special egress spaces (whether the building has any with their own egress sections) not measured (or not usable), fixed assembly seating (whether any room has it) not measured (or not usable), sprinkler system (NFPA 13D) not measured (or not usable), occupancy group (whether Group I-4) not measured (or not usable), occupancy group (whether any group besides I-4) not measured (or not usable), a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function), sprinkler system (NFPA 13) not measured (or not usable), emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable), R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable), sprinkler system (NFPA 13R) not measured (or not usable), egress balcony travel increase (whether the design takes it) not measured (or not usable), atrium (whether the building has one) not measured (or not usable) · not read yet: whether the story is the first above or below grade, rooms exit directly outside and 3 more",
+       "title": "Level 1: 20 need review: whether a storage room's area is measured inside its walls or to their outer faces is an open question (question 3): under either reading it doesn't comply or can't be told (the storage rooms' area is measured inside their walls; the storage rooms' area is measured to the walls' outer faces) · to give: occupancy group (the building's one group, or mixed) not measured (or not usable), special egress spaces (whether the building has any with their own egress sections) not measured (or not usable), fixed assembly seating (whether any room has it) not measured (or not usable), sprinkler system (NFPA 13D) not measured (or not usable), occupancy group (whether Group I-4) not measured (or not usable), occupancy group (whether any group besides I-4) not measured (or not usable), no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known, a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function), sprinkler system (NFPA 13) not measured (or not usable), emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable), R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable), sprinkler system (NFPA 13R) not measured (or not usable), egress balcony travel increase (whether the design takes it) not measured (or not usable), atrium (whether the building has one) not measured (or not usable) · not read yet: rooms exit directly outside, dwelling units on the story",
        "mark": "?",
        "name": "Level 1"
       },
@@ -68091,7 +68091,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 20,
-       "title": "Level 2: 20 need review: whether a storage room's area is measured inside its walls or to their outer faces is an open question (question 3): under either reading it doesn't comply or can't be told (the storage rooms' area is measured inside their walls; the storage rooms' area is measured to the walls' outer faces) · to give: occupancy group (the building's one group, or mixed) not measured (or not usable), special egress spaces (whether the building has any with their own egress sections) not measured (or not usable), fixed assembly seating (whether any room has it) not measured (or not usable), sprinkler system (NFPA 13D) not measured (or not usable), occupancy group (whether Group I-4) not measured (or not usable), occupancy group (whether any group besides I-4) not measured (or not usable), a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function), sprinkler system (NFPA 13) not measured (or not usable), emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable), R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable), sprinkler system (NFPA 13R) not measured (or not usable), egress balcony travel increase (whether the design takes it) not measured (or not usable), atrium (whether the building has one) not measured (or not usable) · not read yet: whether the story is the first above or below grade, rooms exit directly outside and 3 more",
+       "title": "Level 2: 20 need review: whether a storage room's area is measured inside its walls or to their outer faces is an open question (question 3): under either reading it doesn't comply or can't be told (the storage rooms' area is measured inside their walls; the storage rooms' area is measured to the walls' outer faces) · to give: occupancy group (the building's one group, or mixed) not measured (or not usable), special egress spaces (whether the building has any with their own egress sections) not measured (or not usable), fixed assembly seating (whether any room has it) not measured (or not usable), sprinkler system (NFPA 13D) not measured (or not usable), occupancy group (whether Group I-4) not measured (or not usable), occupancy group (whether any group besides I-4) not measured (or not usable), no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known, a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function), sprinkler system (NFPA 13) not measured (or not usable), emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable), R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable), sprinkler system (NFPA 13R) not measured (or not usable), egress balcony travel increase (whether the design takes it) not measured (or not usable), atrium (whether the building has one) not measured (or not usable) · not read yet: rooms exit directly outside, dwelling units on the story",
        "mark": "?",
        "name": "Level 2"
       },
@@ -91780,7 +91780,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
+     "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
     },
     {
      "rule": "general.bc_1006_3_3_story_exits",
@@ -91800,7 +91800,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
+     "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
     },
     {
      "rule": "general.bc_table_1006_3_4_2__a_b_e_f_m_u",
@@ -91821,7 +91821,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet"
+     "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
     },
     {
      "rule": "general.bc_table_1006_3_4_2__a_b_e_f_m_u",
@@ -91842,7 +91842,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet"
+     "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
     },
     {
      "rule": "general.bc_table_1006_3_4_2__h_i_r",
@@ -91862,7 +91862,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
+     "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
     },
     {
      "rule": "general.bc_table_1006_3_4_2__h_i_r",
@@ -91882,7 +91882,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
+     "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
     },
     {
      "rule": "general.bc_table_1006_3_4_2__s",
@@ -91903,7 +91903,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet"
+     "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
     },
     {
      "rule": "general.bc_table_1006_3_4_2__s",
@@ -91924,7 +91924,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet"
+     "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
     },
     {
      "rule": "general.bc_table_1006_3_4_1__r2_dwelling_units",
@@ -91945,7 +91945,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
+     "line": "Level 1: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
     },
     {
      "rule": "general.bc_table_1006_3_4_1__r2_dwelling_units",
@@ -91966,7 +91966,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
+     "line": "Level 2: fixed assembly seating (whether any room has it) not measured (or not usable); emergency escape openings (whether every sleeping room has one, per 1031) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit) not measured (or not usable); special egress spaces (whether the building has any with their own egress sections) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet"
     },
     {
      "rule": "general.bc_1007_1_1_remoteness",
@@ -91990,7 +91990,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 1: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet"
+     "line": "Level 1: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
     },
     {
      "rule": "general.bc_1007_1_1_remoteness",
@@ -92014,7 +92014,7 @@
      "none": false,
      "unknown": [],
      "home": null,
-     "line": "Level 2: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: Gordium doesn't measure this yet; story's place (whether it is the fourth story above grade plane or higher) not measured: Gordium doesn't measure this yet; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: Gordium doesn't measure this yet"
+     "line": "Level 2: occupancy group (the building's one group, or mixed) not measured (or not usable); occupancy group (whether Group I-4) not measured (or not usable); occupancy group (whether any group besides I-4) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); dwelling units on the story not measured: Gordium doesn't measure this yet; whether the story is the first above or below grade not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; story's place (whether it is the fourth story above grade plane or higher) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known; occupant load not measured: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function); rooms exit directly outside not measured: Gordium doesn't measure this yet; story's place (whether it is the second story above grade plane) not measured: no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known"
     },
     {
      "rule": "general.bc_1007_1_1_space_remoteness",
@@ -93957,10 +93957,10 @@
         "story_building_area": "given as two readings for open question 3 of the route note (1800.0 sf inside the exterior walls; 1891.0 sf to the outer faces of the exterior walls): a rule reading it complies only if it complies under both, fails only if it fails under both, else needs review",
         "story_accessory_area": "given as two readings for open question 3 of the route note (0.0 sf inside their walls; 0.0 sf to the outer faces of their walls): a rule reading it complies only if it complies under both, fails only if it fails under both, else needs review",
         "story_occupant_load": "a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
+        "story_first_above_or_below_grade": "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+        "story_second_above_grade_plane": "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+        "story_fourth_or_higher_above_grade_plane": "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
         "story_other_use_area": "Gordium doesn't measure this yet",
-        "story_first_above_or_below_grade": "Gordium doesn't measure this yet",
-        "story_second_above_grade_plane": "Gordium doesn't measure this yet",
-        "story_fourth_or_higher_above_grade_plane": "Gordium doesn't measure this yet",
         "story_dwelling_units": "Gordium doesn't measure this yet",
         "story_rooms_exit_directly_outside": "Gordium doesn't measure this yet",
         "story_net_floor_area": "Gordium doesn't measure this yet"
@@ -95511,10 +95511,10 @@
         "story_building_area": "given as two readings for open question 3 of the route note (1800.0 sf inside the exterior walls; 1891.0 sf to the outer faces of the exterior walls): a rule reading it complies only if it complies under both, fails only if it fails under both, else needs review",
         "story_accessory_area": "given as two readings for open question 3 of the route note (0.0 sf inside their walls; 0.0 sf to the outer faces of their walls): a rule reading it complies only if it complies under both, fails only if it fails under both, else needs review",
         "story_occupant_load": "a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
+        "story_first_above_or_below_grade": "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+        "story_second_above_grade_plane": "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
+        "story_fourth_or_higher_above_grade_plane": "no ground is stated (flat ground, or spot grades at the walls): where the grade plane is, and so which story is above or below it, isn't known",
         "story_other_use_area": "Gordium doesn't measure this yet",
-        "story_first_above_or_below_grade": "Gordium doesn't measure this yet",
-        "story_second_above_grade_plane": "Gordium doesn't measure this yet",
-        "story_fourth_or_higher_above_grade_plane": "Gordium doesn't measure this yet",
         "story_dwelling_units": "Gordium doesn't measure this yet",
         "story_rooms_exit_directly_outside": "Gordium doesn't measure this yet",
         "story_net_floor_area": "Gordium doesn't measure this yet"
@@ -97475,8 +97475,8 @@
        "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01)",
        "within": "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
        "measures": {
-        "moe_door_clear_height": 80.0,
         "moe_door_clear_width": 34.0,
+        "moe_door_clear_height": 80.0,
         "moe_door_exit": true,
         "moe_door_exterior": false,
         "moe_door_to_corridor": true,
@@ -97510,8 +97510,8 @@
        "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02)",
        "within": "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
        "measures": {
-        "moe_door_clear_height": 80.0,
         "moe_door_clear_width": 34.0,
+        "moe_door_clear_height": 80.0,
         "moe_door_exit": true,
         "moe_door_exterior": false,
         "moe_door_to_corridor": true,
@@ -97545,8 +97545,8 @@
        "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03)",
        "within": "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
        "measures": {
-        "moe_door_clear_height": 80.0,
         "moe_door_clear_width": 34.0,
+        "moe_door_clear_height": 80.0,
         "moe_door_exit": false,
         "moe_door_exterior": false,
         "moe_door_to_corridor": true,
@@ -97579,8 +97579,8 @@
        "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04)",
        "within": "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
        "measures": {
-        "moe_door_clear_height": 80.0,
         "moe_door_clear_width": 34.0,
+        "moe_door_clear_height": 80.0,
         "moe_door_exit": false,
         "moe_door_exterior": false,
         "moe_door_to_corridor": true,
@@ -97613,8 +97613,8 @@
        "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05)",
        "within": "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
        "measures": {
-        "moe_door_clear_height": 80.0,
         "moe_door_clear_width": 34.0,
+        "moe_door_clear_height": 80.0,
         "moe_door_exit": false,
         "moe_door_exterior": true,
         "moe_door_to_corridor": false,
@@ -97647,8 +97647,8 @@
        "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06)",
        "within": "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
        "measures": {
-        "moe_door_clear_height": 80.0,
         "moe_door_clear_width": 34.0,
+        "moe_door_clear_height": 80.0,
         "moe_door_exit": false,
         "moe_door_exterior": true,
         "moe_door_to_corridor": false,
@@ -97681,8 +97681,8 @@
        "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07)",
        "within": "6341822b-d4f3-11d3-a039-0000863f1523-000026da",
        "measures": {
-        "moe_door_clear_height": 80.0,
         "moe_door_clear_width": 34.0,
+        "moe_door_clear_height": 80.0,
         "moe_door_exit": true,
         "moe_door_exterior": false,
         "moe_door_to_corridor": true,
@@ -97716,8 +97716,8 @@
        "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08)",
        "within": "6341822b-d4f3-11d3-a039-0000863f1523-000026da",
        "measures": {
-        "moe_door_clear_height": 80.0,
         "moe_door_clear_width": 34.0,
+        "moe_door_clear_height": 80.0,
         "moe_door_exit": true,
         "moe_door_exterior": false,
         "moe_door_to_corridor": true,
@@ -97751,8 +97751,8 @@
        "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09)",
        "within": "6341822b-d4f3-11d3-a039-0000863f1523-000026da",
        "measures": {
-        "moe_door_clear_height": 80.0,
         "moe_door_clear_width": 34.0,
+        "moe_door_clear_height": 80.0,
         "moe_door_exit": false,
         "moe_door_exterior": false,
         "moe_door_to_corridor": true,
@@ -97785,8 +97785,8 @@
        "name": "Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10)",
        "within": "6341822b-d4f3-11d3-a039-0000863f1523-000026da",
        "measures": {
-        "moe_door_clear_height": 80.0,
         "moe_door_clear_width": 34.0,
+        "moe_door_clear_height": 80.0,
         "moe_door_exit": false,
         "moe_door_exterior": false,
         "moe_door_to_corridor": true,
@@ -97847,9 +97847,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "3291da2a38b22322e74e14ed31b6dce32ed00ed387ad7fdb28b79a52002ab455",
+  "worker_fingerprint": "baa8c6c84eb322f5cfcd9ae6c862e348f250d078d62560aecf5da6a93fa9b93d",
   "rulebook": {
-   "new_york/ithaca_city": "ab74de6aa02e68c77323b9ff75c06829c54c469984f6c94bcd060182fe3df3fc"
+   "new_york/ithaca_city": "9cf1d8db2f468d5cda2e7a5aeb791de17bb24a22b83bc7c30355049a2563aaf3"
   }
  }
 }
