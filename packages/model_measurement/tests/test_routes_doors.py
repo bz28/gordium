@@ -116,6 +116,7 @@ def test_a_swing_not_given_never_says_why_it_is_missing():
     # symbol at all: the reason never claims the model draws none
     words = STOPS["door_swing_not_given"].format(name="d")
     assert "draws no swing" not in words and "no mark" not in words
+    assert "notes" not in words              # round 2: the reading's notes aren't shown to the architect
     assert _why(_parts(_office())["d"], "moe_door_swings_with_egress") == words
 
 

@@ -132,7 +132,7 @@ STOPS = {
                            "both ways (two rooms that both lead out through it, a room others' routes cross, an exit "
                            "stair that may discharge through it, an outdoor area whose way out is back inside)",
     "door_swing_not_given": "the door {name} doesn't say which side it swings into (in Revit, read from the swing arc "
-                            "its plan symbol draws: the reading's notes say why it isn't)",
+                            "its plan symbol draws, where that settles it)",
     "door_swing_not_read": "the door {name} says it swings into {got}, not one of the two sides it joins",
     "door_not_on_routes": "the door {name} isn't one the routes read (its story's routes need review, or it isn't "
                           "placed): which way egress travel goes through it isn't known",

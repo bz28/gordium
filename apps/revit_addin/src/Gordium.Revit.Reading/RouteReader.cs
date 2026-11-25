@@ -583,11 +583,11 @@ public static class RouteReader
 
     /// <summary>The Revit trial's swing check (SwingCheck.cs): each door given a built swing direction (internal plan
     /// vector, by <c>UniqueId</c>), its read side beside its built one. Plain reading code: the same
-    /// <see cref="SwingSide"/> the check uses.</summary>
-    public static List<SwingCheckRow> CheckSwings(RevitModel model, IReadOnlyDictionary<string, Xyz> built,
-                                                  IReadOnlyDictionary<string, double>? clearWidths = null)
+    /// <see cref="SwingSide"/> the check uses, with the door's type width only (the check's own reading also takes a
+    /// stamped clear width): the side alone. SwingCheck's room rows are the whole reading's own (InteriorReader.Read),
+    /// held against Revit's room on the built side.</summary>
+    public static List<SwingCheckRow> CheckSwings(RevitModel model, IReadOnlyDictionary<string, Xyz> built)
     {
-        var clear = clearWidths ?? new Dictionary<string, double>();
         var rows = new List<SwingCheckRow>();
         foreach (var rec in model.Interior?.Openings ?? [])
         {
@@ -600,8 +600,7 @@ public static class RouteReader
             }
             var d = InteriorReader.Turned(model, dir);
             var b = Math.Sign(P2Dot(new P2(d.X, d.Y), place.Normal));
-            rows.Add(new(rec.UniqueId, SwingSide(model, rec, place, Math.Max(rec.TypeWidth ?? 0, clear.GetValueOrDefault(rec.UniqueId)), out why),
-                         b == 0 ? null : b, why));
+            rows.Add(new(rec.UniqueId, SwingSide(model, rec, place, rec.TypeWidth ?? 0, out why), b == 0 ? null : b, why));
         }
         return rows;
     }
