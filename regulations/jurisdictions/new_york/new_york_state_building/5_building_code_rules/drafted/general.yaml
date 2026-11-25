@@ -12767,8 +12767,8 @@ rules:
     or not ruled out. The occupant load is the one the corridor serves: Gordium gives two readings, none and its whole story''s,
     only where the building says no other level''s occupants reach its corridors (1004.2.2, 1004.2.3: another story''s
     load is added only at a convergence, 1005.6), so it passes only at its whole story''s load and fails only at none.
-    1020.3''s capacity (1005.1) is the flag “Corridor narrower than 0.2 in per occupant (BCNYS
-    1020.3)”. The table''s "occupant load" is read as the corridor''s own, as its Group E row
+    1020.3''s capacity (1005.1) is the rule “Corridor capacity, 0.2 or 0.15 in per occupant (BCNYS 1020.3,
+    1005.3.2)”. The table''s "occupant load" is read as the corridor''s own, as its Group E row
     says ("a corridor having an occupant load") and 1020.3 sizes "the required capacity of corridors". Hand-drafted
     in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
