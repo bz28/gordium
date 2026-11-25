@@ -326,6 +326,12 @@ public sealed class PaneTests
         Assert.Contains("foreach (var r in PaneWords.ChangesShown(change, _changesAll))", view, StringComparison.Ordinal);
         Assert.DoesNotContain("ToolTip = PaneWords.ChangesAll(change)", view, StringComparison.Ordinal);
         Assert.DoesNotContain("hover for all", string.Join("\n", PaneWords.ChangesMore(change), PaneWords.ChangesSaid(change)), StringComparison.Ordinal);
+        // review round 1: what the architect changed is said even when no verdict changed, and the stale notice comes
+        // before What changed
+        var line = Between(view, "    private C.Border ChangeLine(CheckChange change, bool stale)", "\n    }\n");
+        Assert.Equal(2, System.Text.RegularExpressions.Regex.Matches(line, @"_factsChanged is \{ \} ").Count);
+        Assert.Contains("_change is { } top && !parts.Contains(PanelPart.Stale)", view, StringComparison.Ordinal);
+        Assert.Contains("summary.Children.Add(ChangeLine(afterStale, stale));", view, StringComparison.Ordinal);
     }
 
     /// <summary>"You changed: …" (change 40) says each project fact that differs between the two checks, by its name and
@@ -358,12 +364,16 @@ public sealed class PaneTests
     {
         Verdict[] apartment = [.. Enumerable.Repeat(Verdict.NeedsReview, 98), .. Enumerable.Repeat(Verdict.NotChecked, 8), Verdict.Complies, Verdict.NotApplicable];
         var bar = ProportionBar.Segments(apartment, stale: false);
-        Assert.Equal([new BarSegment(PanelStatus.Review, 98), new BarSegment(PanelStatus.NotChecked, 8), new BarSegment(PanelStatus.NotApplicable, 1),
-                      new BarSegment(PanelStatus.NotApplicable, 1)], bar);
+        Assert.Equal([(PanelStatus.Review, 98), (PanelStatus.NotChecked, 8), (PanelStatus.NotApplicable, 1), (PanelStatus.NotApplicable, 1)],
+                     bar.Select(b => (b.Status, b.Count)));
+        // review round 1: each slice says its own verdict on hover, the complying one drawn neutral still "1 complies"
+        Assert.Equal(["98 need review", "8 not checked yet", "1 complies", "1 doesn't apply"], bar.Select(b => b.Words));
+        Assert.Contains("ToolTip = segments[i].Words", Read("ResultsView.cs"), StringComparison.Ordinal);
         Assert.Equal(apartment.Length, bar.Sum(b => b.Count));
         Assert.DoesNotContain(bar, b => b.Status == PanelStatus.Complies);
-        Assert.Equal([new BarSegment(PanelStatus.Complies, 2), new BarSegment(PanelStatus.NotApplicable, 1)],
-                     ProportionBar.Segments([Verdict.Complies, Verdict.Complies, Verdict.NotApplicable], stale: false));
+        Assert.Equal([(PanelStatus.Complies, 2), (PanelStatus.NotApplicable, 1)],
+                     ProportionBar.Segments([Verdict.Complies, Verdict.Complies, Verdict.NotApplicable], stale: false).Select(b => (b.Status, b.Count)));
+        Assert.Equal("1 complied", ProportionBar.Segments([Verdict.Complies, Verdict.NeedsReview], stale: true)[1].Words);
         Assert.All(ProportionBar.Segments([Verdict.Complies, Verdict.DoesNotComply], stale: true), b => Assert.Equal(PanelStatus.Stale, b.Status));
         Assert.Equal(PanelStatus.Fails, ProportionBar.Segments([Verdict.Complies, Verdict.DoesNotComply], stale: false)[0].Status);
     }
