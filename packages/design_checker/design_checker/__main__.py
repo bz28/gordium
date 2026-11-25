@@ -28,7 +28,7 @@ docs/protocol/worker_protocol_v1.md. Answers:
 also gets {"id": 1, "step": "Measuring the building…"} lines before its answer, one as each stage starts (the
 plugin's progress line; the answer is always the request's last line), and the same line again, marked
 {"again": true}, every HEARTBEAT seconds while a stage runs, so a host that stops a check only when the worker falls
-silent (the Revit add-in) never stops a long check that is still working; a host that shows or records stages (Rhino,
+silent (the Revit add-in, which also has a ceiling on the whole check) never stops a long check for being long; a host that shows or records stages (Rhino,
 the recorded sessions) skips the repeats. The process stays up, so a
 check after an edit doesn't pay for starting Python and loading the rules again.
 """
