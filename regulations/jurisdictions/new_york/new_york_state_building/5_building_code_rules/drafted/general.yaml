@@ -332,6 +332,72 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1004_7_outdoor_areas
+  kind: flag
+  topic: means_of_egress
+  title: 'Outdoor areas: means of egress and occupant load (BCNYS 1004.7)'
+  applies_when: occupied_outdoor_areas
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 313
+    lines:
+    - 29
+    - 36
+    quote: '1004.7 Outdoor areas. Yards, patios, occupiable roofs, courts and similar outdoor areas accessible to and usable
+      by the building occupants shall be provided with means of egress as required by this chapter. The occupant load of such
+      outdoor areas shall be assigned by the building official in accordance with the anticipated use. Where outdoor areas
+      are to be used by persons in addition to the occupants of the building, and the path of egress travel from the outdoor
+      areas passes through the building, means of egress requirements for the building shall be based on the sum of the occupant
+      loads of the building plus the outdoor areas. Exceptions: 1. Outdoor areas used exclusively for service of the building
+      need only have one means of egress. 2. Both outdoor areas associated with Group R-3 and individual dwelling units of
+      Group R-2.'
+  examples:
+  - given:
+      occupied_outdoor_areas: true
+    expect: needs_review
+    note: 'Yards, patios, occupiable roofs or courts the occupants use: their means of egress and the occupant load the building
+      official assigns are a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupied_outdoor_areas: false
+    expect: not_applicable
+    note: 'None, as the architect states it: not applicable.'
+  notes: '1004.7: outdoor areas usable by the occupants need means of egress per Chapter 10, their occupant load assigned
+    by the building official, added to the building''s where their egress passes through it; exception 1 (service-only areas:
+    one means of egress) and 2 (Group R-3''s and Group R-2 dwelling units'' own outdoor areas) loosen it. Outdoor areas aren''t
+    drawn in the interior description. Hand-drafted in a Claude Code session (2026-11-23, section group 3).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1004_9_posting
+  kind: flag
+  topic: means_of_egress
+  title: An assembly room's occupant load posted (BCNYS 1004.9)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 313
+    lines:
+    - 41
+    - 43
+    quote: 1004.9 Posting of occupant load. Every room or space that is an assembly occupancy shall have the occupant load
+      of the room or space posted in a conspicuous place, near the main exit or exit access doorway from the room or space,
+      for the intended configurations. Posted signs shall be of an approved legible permanent design and shall be maintained
+      by the owner or the owner’s authorized agent.
+  examples:
+  - given:
+      occupancy_group: A-2
+    expect: needs_review
+    note: 'A sign near the main exit of each assembly room giving its occupant load: a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Not an assembly occupancy: not applicable.'
+  notes: '1004.9: every room or space that is an assembly occupancy posts its occupant load near its main exit or exit access
+    doorway; a sign isn''t in the model. Hand-drafted in a Claude Code session (2026-11-23, section group 3).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_407_4_2_sleeping_room_travel
   kind: rule
   topic: means_of_egress
@@ -687,13 +753,12 @@ rules:
     two exits where the common path exceeds it, so a space with two exits and a common path over 75 ft (or any, unsprinklered)
     needs review (the open question), never a pass. Exception 1 (foyers and lobbies counted without the loads discharging
     through them) and exception 3 (unoccupied mechanical rooms and penthouses need not meet the common path) only loosen the
-    test: a person''s check where they apply. The cumulative occupant load (1004.2, not brought in) is in the occupant load
-    the architect states for the space. Most restrictive where the 2009 IBC applied (Maine): 1015.1 and Table 1015.1 set the
-    same 10 for day care. Hand-drafted in a Claude Code session (2026-11-21). Review round 2 (2026-11-23): a room with fixed
-    seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft); a one-exit space where a 1006.2.2
-    room is stated or not ruled out needs review (as its siblings). Review round 3 (2026-11-23): with fixed seating stated
-    or not ruled out, the row needs review at any common path, as its travel does (202, 1030.7), where it would otherwise
-    pass.'
+    test: a person''s check where they apply. The cumulative occupant load (1004.2) is in the space''s occupant load. Most
+    restrictive where the 2009 IBC applied (Maine): 1015.1 and Table 1015.1 set the same 10 for day care. Hand-drafted in
+    a Claude Code session (2026-11-21). Review round 2 (2026-11-23): a room with fixed seating, in any group, stated or not
+    ruled out, needs review over 1030.8''s 30 ft (75 ft); a one-exit space where a 1006.2.2 room is stated or not ruled out
+    needs review (as its siblings). Review round 3 (2026-11-23): with fixed seating stated or not ruled out, the row needs
+    review at any common path, as its travel does (202, 1030.7), where it would otherwise pass.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_other_occupancies
@@ -5278,6 +5343,20 @@ rules:
     note: 'Over 1,000: four needed.'
   - given: {}
     parts:
+      space:
+      - id: p9
+        name: Exit stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+    rows:
+    - part: p9
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it (section group 3, 2026-11-23).'
+  - given: {}
+    parts:
       space: []
     rows:
     - outcome: needs_review
@@ -5285,7 +5364,8 @@ rules:
     note: 'No space: with none, the rule needs review.'
   notes: For every occupancy. The 500 is Table 1006.3.3's printed two-exit band ('1-500', a story's), used for a space by
     analogy; a fractional load over 500 needs three (the finding on loads over 500). Hand-drafted in a Claude Code session
-    (2026-11-21).
+    (2026-11-21). Since 2026-11-23 a space that is itself an exit (an exit stair enclosure, which holds no occupant load of
+    its own) is not one it counts, as Table 1006.2.1's rows.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   findings:
@@ -11114,5 +11194,2005 @@ rules:
     turn on a condition the architect doesn''t state yet, so within them it needs review, never a pass. As the I-4 rule: it
     applies where more than one exit or exit access doorway is required, and with one there is no limit, so it may only be
     stricter there. Hand-drafted in a Claude Code session (2026-11-23).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_2_h1_h2_h3
+  kind: rule
+  topic: means_of_egress
+  title: Corridor rating, H-1, H-2, H-3 (BCNYS Table 1020.2)
+  applies_when: occupancy_group in ["H-1", "H-2", "H-3"]
+  check: (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours >= 1
+  review_when:
+  - when: sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - &id001
+    file: gov.ny.building.2025.pdf
+    page: 343
+    lines:
+    - 40
+    - 41
+    quote: 1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls
+      required to be fire- resistance rated shall comply with Section 708 for fire partitions.
+  - &id002
+    file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 4
+    - 6
+    quote: REQUIRED FIRE-RESISTANCE RATING (hours) OCCUPANCY OCCUPANT LOAD SERVED BY CORRIDOR Without automatic sprinkler
+      system With automatic sprinkler system
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 7
+    - 7
+    quote: H-1, H-2, H-3 All Not Permitted 1[fnc]
+  - &id003
+    file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 16
+    - 16
+    quote: c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2
+      where allowed.
+  examples:
+  - given:
+      occupancy_group: H-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor at 1 hour
+        measures:
+          corridor_occupant_load: 5
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'NFPA 13: 1 hour, any occupant load.'
+  - given:
+      occupancy_group: H-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor at half an hour
+        measures:
+          corridor_occupant_load: 5
+          corridor_fire_rating_hours: 0.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Under 1 hour.
+  - given:
+      occupancy_group: H-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: No sprinkler system
+        measures:
+          corridor_occupant_load: 5
+          corridor_fire_rating_hours: 2
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Not Permitted without a sprinkler system, whatever the rating.
+  - given:
+      occupancy_group: H-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: NFPA 13R only
+        measures:
+          corridor_occupant_load: 5
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Note c: 903.3.1.2 only where allowed.'
+  - given:
+      occupancy_group: H-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: 'Table 1020.2''s row for Groups H-1, H-2 and H-3: every corridor, whatever its occupant load; Not Permitted without
+    a sprinkler system (fails whatever its rating), 1 hour with one (note c). Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_2_h4_h5
+  kind: rule
+  topic: means_of_egress
+  title: Corridor rating, H-4, H-5 (BCNYS Table 1020.2)
+  applies_when: occupancy_group in ["H-4", "H-5"]
+  check: corridor_occupant_load <= 30 or ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours
+    >= 1)
+  review_when:
+  - when: corridor_occupant_load > 30 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - *id001
+  - *id002
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 8
+    - 8
+    quote: H-4, H-5 Greater than 30 Not Permitted 1[fnc]
+  - *id003
+  examples:
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: 30 occupants, unrated
+        measures:
+          corridor_occupant_load: 30
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: '30 or fewer: no rating.'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: 31 occupants, no sprinkler system
+        measures:
+          corridor_occupant_load: 31
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Greater than 30: Not Permitted without a sprinkler system.'
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: 31 occupants, NFPA 13, 1 hour
+        measures:
+          corridor_occupant_load: 31
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 1 hour with NFPA 13.
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: 31 occupants, NFPA 13, half an hour
+        measures:
+          corridor_occupant_load: 31
+          corridor_fire_rating_hours: 0.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Under 1 hour.
+  - given:
+      occupancy_group: H-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: 'Table 1020.2''s row for Groups H-4 and H-5: a corridor serving more than 30 occupants is Not Permitted without a
+    sprinkler system and 1 hour with one (note c); 30 or fewer, no rating. Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_2_a_b_e_f_m_s_u
+  kind: rule
+  topic: means_of_egress
+  title: Corridor rating, A, B, E, F, M, S, U (BCNYS Table 1020.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "M", "S-1", "S-2", "U"]
+  check: corridor_occupant_load <= 30 or sprinklered_903_3_1_1 or corridor_fire_rating_hours >= 1
+  review_when:
+  - when: occupancy_group in ["B", "E", "S-2"] and corridor_occupant_load > 30 and not sprinklered_903_3_1_1 and corridor_fire_rating_hours
+      < 1
+    reason: 'Under the table''s 1 hour, but within an exception the model can''t show: Group E where each classroom has a
+      door straight outside at ground level and assembly rooms half their exit doors (exception 1); an open parking garage,
+      Group S-2 (exception 3); a Group B space needing only one means of egress (exception 4): a person checks.'
+  - when: corridor_occupant_load > 30 and not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3) and
+      corridor_fire_rating_hours < 1
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - *id001
+  - *id002
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 9
+    - 9
+    quote: A, B, E, F, M, S, U Greater than 30 1 0
+  - file: gov.ny.building.2025.pdf
+    page: 343
+    lines:
+    - 43
+    - 46
+    quote: 1. A fire-resistance rating is not required for corridors in an occupancy in Group E where each room that is used
+      for instruc- tion has not less than one door opening directly to the exterior and rooms for assembly purposes have not
+      less than one- half of the required means of egress doors opening directly to the exterior. Exterior doors specified
+      in this exception are required to be at ground level.
+  - file: gov.ny.building.2025.pdf
+    page: 343
+    lines:
+    - 49
+    - 49
+    quote: 3. A fire-resistance rating is not required for corridors in open parking garages.
+  - file: gov.ny.building.2025.pdf
+    page: 343
+    lines:
+    - 50
+    - 51
+    quote: 4. A fire-resistance rating is not required for corridors in an occupancy in Group B that is a space requiring
+      only a single means of egress complying with Section 1006.2.
+  examples:
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Store corridor, 30 occupants, unrated
+        measures:
+          corridor_occupant_load: 30
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: '30 or fewer: no rating.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Store corridor, 31 occupants, unrated
+        measures:
+          corridor_occupant_load: 31
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Greater than 30 without a sprinkler system: 1 hour.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Store corridor, 31 occupants, 1 hour
+        measures:
+          corridor_occupant_load: 31
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 1 hour.
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Store corridor, NFPA 13, unrated
+        measures:
+          corridor_occupant_load: 300
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'With NFPA 13: 0 hours, whatever the rating (not stated here).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor, 31 occupants, unrated
+        measures:
+          corridor_occupant_load: 31
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: Exception 4 (a Group B space with one means of egress) is a person's check.
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: NFPA 13R only, unrated
+        measures:
+          corridor_occupant_load: 31
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The column''s system: a person''s check.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: 'Table 1020.2''s row for Groups A, B, E, F, M, S and U: more than 30 occupants, 1 hour without a sprinkler system
+    and 0 with one; 30 or fewer, none. The row''s cell names no system: NFPA 13 (903.3.1.1) counts, an NFPA 13R or 13D system
+    (not allowed for these groups by their own scope) needs review, never a pass. Exceptions 1, 3 and 4 need review where
+    the rating falls short. Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_2_r
+  kind: rule
+  topic: means_of_egress
+  title: Corridor rating, R (BCNYS Table 1020.2)
+  applies_when: occupancy_group in ["R-1", "R-2", "R-3", "R-4"]
+  check: corridor_occupant_load <= 10 or ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours
+    >= 0.5) or (occupancy_group in ["R-3", "R-4"] and sprinklered_903_3_1_3 and corridor_fire_rating_hours >= 1)
+  review_when:
+  - when: corridor_occupant_load > 10 and not ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours
+      >= 0.5) and not (occupancy_group in ["R-3", "R-4"] and sprinklered_903_3_1_3 and corridor_fire_rating_hours >= 1) and
+      corridors_within_dwelling_units
+    reason: 'Unless the corridor is within a dwelling unit or sleeping unit (exception 2: no rating required there), which
+      the building states or doesn''t rule out, the table''s rating isn''t met: a person checks.'
+  - when: occupancy_group == "R-4" and sprinklered_903_3_1_3 and not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and
+      corridor_occupant_load > 10 and corridor_fire_rating_hours >= 1
+    reason: 'Group R-4 with an NFPA 13D system and a 1-hour corridor: note d sends to 903.2.8, which permits 903.3.1.3 in
+      Group R-4 only in Condition 1 (903.2.8.2); in Condition 1 the 1 hour is met, in Condition 2 the system isn''t one 903.3.1.3
+      allows and the table''s Not Permitted applies. The condition isn''t stated: a person checks.'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - *id001
+  - *id002
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 10
+    - 10
+    quote: R Greater than 10 Not Permitted 0.5[fnc]/1[fnd]
+  - *id003
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 17
+    - 18
+    quote: d.Group R-3 and R-4 buildings equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.3. See Section 903.2.8 for occupancies where auto- matic sprinkler systems are permitted in accordance with
+      Section 903.3.1.3.
+  - file: gov.ny.building.2025.pdf
+    page: 343
+    lines:
+    - 47
+    - 48
+    quote: 2. A fire-resistance rating is not required for corridors contained within a dwelling unit or sleeping unit in
+      an occupancy in Groups I-1 and R.
+  examples:
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+      corridors_within_dwelling_units: false
+    parts:
+      corridor:
+      - id: p1
+        name: 10 occupants, unrated
+        measures:
+          corridor_occupant_load: 10
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: '10 or fewer: no rating.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+      corridors_within_dwelling_units: false
+    parts:
+      corridor:
+      - id: p1
+        name: 11 occupants, no sprinkler system
+        measures:
+          corridor_occupant_load: 11
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Greater than 10: Not Permitted without a sprinkler system.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      sprinklered_903_3_1_3: false
+      corridors_within_dwelling_units: false
+    parts:
+      corridor:
+      - id: p1
+        name: NFPA 13R, half an hour
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 0.5
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Note c: 0.5 hour with 903.3.1.1 or 903.3.1.2.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+      corridors_within_dwelling_units: false
+    parts:
+      corridor:
+      - id: p1
+        name: NFPA 13, unrated
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Under half an hour.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: true
+      corridors_within_dwelling_units: false
+    parts:
+      corridor:
+      - id: p1
+        name: R-3, NFPA 13D, 1 hour
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Note d: 1 hour for Group R-3 or R-4 with 903.3.1.3.'
+  - given:
+      occupancy_group: R-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: true
+      corridors_within_dwelling_units: false
+    parts:
+      corridor:
+      - id: p1
+        name: R-4, NFPA 13D, 1 hour
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Note d''s 903.2.8 permits 13D in Group R-4 only in Condition 1 (903.2.8.2), not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: true
+      corridors_within_dwelling_units: false
+    parts:
+      corridor:
+      - id: p1
+        name: R-2, NFPA 13D
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Note d is Groups R-3 and R-4 only: an R-2 with 13D has the column without a sprinkler system, Not Permitted.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+      corridors_within_dwelling_units: true
+    parts:
+      corridor:
+      - id: p1
+        name: Maybe within a unit
+        measures:
+          corridor_occupant_load: 11
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: a corridor within a dwelling unit needs no rating; a person checks which it is.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: 'Table 1020.2''s row for Group R: more than 10 occupants, Not Permitted without a sprinkler system, 0.5 hour with
+    903.3.1.1 or 903.3.1.2 (note c) and 1 hour for Groups R-3 and R-4 with 903.3.1.3 (note d); 10 or fewer, none. Exception
+    2 (a corridor within a dwelling or sleeping unit needs no rating) needs review where it falls short while the building
+    states it has such corridors or doesn''t rule them out. Note d''s 13D in Group R-4 (903.2.8.2: Condition 1 only) needs
+    review. Note c''s 903.3.1.2 ''where allowed'' (903.3.1.2''s own limits: stories, height) is taken on the architect''s
+    statement of the system, as the other tables'' rules take it. Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_2_i2
+  kind: rule
+  topic: means_of_egress
+  title: Corridor rating, I-2 (BCNYS Table 1020.2)
+  applies_when: occupancy_group in ["I-2"]
+  check: sprinklered_903_3_1_1
+  review_when:
+  - when: not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - *id001
+  - *id002
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 11
+    - 11
+    quote: I-2[fna] All Not Permitted 0
+  examples:
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Hospital corridor, NFPA 13
+        measures:
+          corridor_occupant_load: 200
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 0 hours with a sprinkler system.
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Hospital corridor, no sprinkler system
+        measures:
+          corridor_occupant_load: 200
+          corridor_fire_rating_hours: 2
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Not Permitted without a sprinkler system.
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: 'Table 1020.2''s row for Group I-2: Not Permitted without a sprinkler system, 0 hours with one. Note a''s 407.2 and
+    407.3 (not brought in) are the flag of their own. Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_2_i1_i3
+  kind: rule
+  topic: means_of_egress
+  title: Corridor rating, I-1, I-3 (BCNYS Table 1020.2)
+  applies_when: occupancy_group in ["I-1", "I-3"]
+  check: (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours >= 1
+  review_when:
+  - when: sprinklered_903_3_1_2 and not sprinklered_903_3_1_1
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
+  - when: occupancy_group == "I-3" and sprinklered_903_3_1_1 and corridor_fire_rating_hours < 1
+    reason: 'Group I-3 under 1 hour: note b''s reduction (408.8, not brought in) may allow less: a person checks.'
+  - when: occupancy_group == "I-1" and not ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours
+      >= 1) and corridors_within_dwelling_units
+    reason: 'Unless the corridor is within a dwelling unit or sleeping unit (exception 2: no rating required there), which
+      the building states or doesn''t rule out, the table''s rating isn''t met: a person checks.'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - *id001
+  - *id002
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 12
+    - 12
+    quote: I-1, I-3 All Not Permitted 1[fnb,] [fnc]
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 15
+    - 15
+    quote: b.For a reduction in the fire-resistance rating for occupancies in Group I-3, see Section 408.8.
+  - *id003
+  - file: gov.ny.building.2025.pdf
+    page: 343
+    lines:
+    - 47
+    - 48
+    quote: 2. A fire-resistance rating is not required for corridors contained within a dwelling unit or sleeping unit in
+      an occupancy in Groups I-1 and R.
+  examples:
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Detention corridor, 1 hour
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 1 hour with a sprinkler system.
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Detention corridor, no sprinkler system
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Not Permitted without a sprinkler system.
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Detention corridor, half an hour
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 0.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Note b: 408.8''s reduction is a person''s check.'
+  - given:
+      occupancy_group: I-1
+      corridors_within_dwelling_units: false
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Assisted living corridor, half an hour
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 0.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Under 1 hour.
+  - given:
+      occupancy_group: I-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: 'Table 1020.2''s row for Groups I-1 and I-3: every corridor; Not Permitted without a sprinkler system, 1 hour with
+    one (notes b and c). Note b (Group I-3, 408.8) and exception 2 (Group I-1, a corridor within a dwelling or sleeping unit)
+    need review where the rating falls short. Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_2_i4
+  kind: rule
+  topic: means_of_egress
+  title: Corridor rating, I-4 (BCNYS Table 1020.2)
+  applies_when: occupancy_group in ["I-4"]
+  check: sprinklered_903_3_1_1 or corridor_fire_rating_hours >= 1
+  review_when:
+  - when: not sprinklered_903_3_1_1 and (sprinklered_903_3_1_2 or sprinklered_903_3_1_3) and corridor_fire_rating_hours <
+      1
+    reason: 'Stated with an NFPA 13R or 13D system and no NFPA 13: note c counts 903.3.1.2 only where allowed, which the sprinkler
+      sections decide for each group and Gordium doesn''t check, and the table''s other cells name no system, so whether this
+      system is the one the column means is a person''s check (never a pass on it).'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - *id001
+  - *id002
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 13
+    - 13
+    quote: I-4 All 1 0
+  examples:
+  - given:
+      occupancy_group: I-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Day care corridor, NFPA 13
+        measures:
+          corridor_occupant_load: 40
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 0 hours with a sprinkler system.
+  - given:
+      occupancy_group: I-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Day care corridor, 1 hour
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 1 hour without one.
+  - given:
+      occupancy_group: I-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor:
+      - id: p1
+        name: Day care corridor, unrated
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Under 1 hour.
+  - given:
+      occupancy_group: I-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: 'Table 1020.2''s row for Group I-4: every corridor; 1 hour without a sprinkler system, 0 with one. Hand-drafted in
+    a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_2_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Corridor rating in a building of two or more groups (BCNYS Table 1020.2)
+  applies_when: occupancy_group == "mixed"
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 7
+    - 13
+    quote: H-1, H-2, H-3 All Not Permitted 1[fnc] H-4, H-5 Greater than 30 Not Permitted 1[fnc] A, B, E, F, M, S, U Greater
+      than 30 1 0 R Greater than 10 Not Permitted 0.5[fnc]/1[fnd] I-2[fna] All Not Permitted 0 I-1, I-3 All Not Permitted
+      1[fnb,] [fnc] I-4 All 1 0
+  examples:
+  - given:
+      occupancy_group: mixed
+    expect: needs_review
+    note: 'A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy,
+      and a corridor two occupancies share meets the more stringent; which room is which occupancy isn''t marked yet, so a
+      person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'One group: its row''s rule.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 4b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_2_note_a_group_i2
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2 corridors, 407.2 and 407.3 (BCNYS Table 1020.2 note a)
+  applies_when: occupancy_group == "I-2"
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 11
+    - 11
+    quote: I-2[fna] All Not Permitted 0
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 14
+    - 14
+    quote: a.For requirements for occupancies in Group I-2, see Sections 407.2 and 407.3.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Note a sends Group I-2 corridors to 407.2 and 407.3 (not brought in): a person checks.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: Not Group I-2.
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 4b: note a''s sections set Group I-2''s own corridor
+    requirements beside the table''s rating.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1020_2_fire_partitions
+  kind: flag
+  topic: means_of_egress
+  title: A rated corridor's walls are fire partitions (BCNYS 1020.2)
+  applies_when: corridor_fire_rating_hours > 0
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 343
+    lines:
+    - 40
+    - 41
+    quote: 1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls
+      required to be fire- resistance rated shall comply with Section 708 for fire partitions.
+  - file: gov.ny.building.2025.pdf
+    page: 343
+    lines:
+    - 52
+    - 53
+    quote: 5. Corridors adjacent to the exterior walls of buildings shall be permitted to have unprotected openings on unrated
+      exterior walls where unrated walls are permitted by Table 705.5 and unprotected openings are permitted by Table 705.9.
+  examples:
+  - given: {}
+    parts:
+      corridor:
+      - id: p1
+        name: Rated corridor
+        measures:
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Rated walls comply with Section 708 for fire partitions (not brought in): a person checks.'
+  - given: {}
+    parts:
+      corridor:
+      - id: p1
+        name: Unrated corridor
+        measures:
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Stated unrated: no fire partition to check.'
+  - given: {}
+    parts:
+      corridor:
+      - id: p1
+        name: Rating not stated
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The rating isn''t stated: a person checks.'
+  - given: {}
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the flag doesn''t apply.'
+  notes: '1020.2''s second sentence: corridor walls required to be rated comply with Section 708 (fire partitions: continuity,
+    openings, doors), not brought in; exception 5 permits unprotected openings on unrated exterior walls (Tables 705.5 and
+    705.9, not brought in). Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1020_2_1_hoistway_protection
+  kind: flag
+  topic: means_of_egress
+  title: Elevator hoistway doors protected (BCNYS 1020.2.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 19
+    - 20
+    quote: 1020.2.1 Hoistway protection. Elevator hoistway doors in elevators hoistway enclosures required to be fire-resistance
+      rated shall be protected in accordance with Section 716. Elevator hoistway doors shall also be protected in accordance
+      with Section 3006.2.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Elevator hoistway doors in rated enclosures: Sections 716 and 3006.2 (not brought in), a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 4b: the elevators and their doors aren''t drawn.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1020_3_corridor_capacity
+  kind: rule
+  topic: means_of_egress
+  title: Corridor capacity, 0.2 or 0.15 in per occupant (BCNYS 1020.3, 1005.3.2)
+  check: corridor_width >= (corridor_occupant_load * 0.15 if occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E",
+    "F-1", "F-2", "I-1", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"] and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
+    and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and emergency_voice_alarm_system else corridor_occupant_load * 0.2)
+  review_when:
+  - when: assembly_fixed_seating and corridor_width < (corridor_occupant_load * 0.15 if occupancy_group in ["A-1", "A-2",
+      "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "I-1", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"]
+      and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and emergency_voice_alarm_system
+      else corridor_occupant_load * 0.2)
+    reason: 'Narrower than the factor, but the building may have smoke-protected or open-air assembly seating (fixed seating
+      stated or not ruled out), whose factors (Table 1030.6.2, 1030.6.3) may ask less: a person checks.'
+  - when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "I-1", "I-3", "I-4", "M", "S-1",
+      "S-2", "U"] and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and corridor_width >= corridor_occupant_load * 0.15
+      and corridor_width < corridor_occupant_load * 0.2 and emergency_voice_alarm_system
+    reason: 'Between 0.15 and 0.2 in per occupant, with an NFPA 13R system and a voice/alarm system outside Group R: exception
+      1 counts a 903.3.1.2 system, but 903.3.1.2 allows it in Group R occupancies, so whether the building''s system is one
+      that counts is a person''s check (as Table 1006.2.1''s rows take it).'
+  - when: occupancy_group == "mixed" and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_width >= corridor_occupant_load
+      * 0.15 and corridor_width < corridor_occupant_load * 0.2 and emergency_voice_alarm_system
+    reason: 'Between 0.15 and 0.2 in per occupant in a building of two or more groups with a sprinkler system and a voice/alarm
+      system: each portion follows its own occupancy and a shared corridor the more stringent (1004.4), so 0.15 holds unless
+      a Group H or I-2 portion uses the corridor, which isn''t shown: a person checks.'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 21
+    - 22
+    quote: 1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1,
+      but the minimum width shall be not less than that specified in Table 1020.3.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 14
+    - 16
+    quote: 1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways shall
+      be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.2
+      inch (5.1 mm) per occupant.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 18
+    - 22
+    quote: 1. For other than Group H and I-2 occupancies, the capacity, in inches, of means of egress components other than
+      stair- ways shall be calculated by multiplying the occupant load served by such component by a means of egress capacity
+      factor of 0.15 inch (3.8 mm) per occupant in buildings equipped throughout with an automatic sprinkler system installed
+      in accordance with Section 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm communication system in accordance with
+      Section 907.5.2.2.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 23
+    - 28
+    quote: 2. Facilities with smoke-protected assembly seating shall be permitted to use the capacity factors in Table 1030.6.2
+      indi- cated for level or ramped aisles for means of egress components other than stairways where the entire path for
+      means of egress from the seating to the exit discharge is provided with a smoke control system complying with Section
+      909. 3. Facilities with open-air assembly seating shall be permitted to the capacity factors in Section 1030.6.3 indicated
+      for level or ramped aisles for means of egress components other than stairways where the entire path for means of egress
+      from the seating to the exit discharge is open to the outdoors.
+  examples:
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: false
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor at 44 in, 220 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 220
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: '0.2 in each: 44 in.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: false
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor at 44 in, 221 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 221
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: '0.2 in each: 44.2 in.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: NFPA 13 and voice alarm, 290 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 290
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Exception 1: 0.15 in each, 43.5 in.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: NFPA 13 and voice alarm, 294 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 294
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Exception 1: 0.15 in each, 44.1 in.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: Office, NFPA 13R and voice alarm
+        measures:
+          corridor_width: 45
+          corridor_occupant_load: 300
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: '903.3.1.2 allows a 13R system in Group R: whether this office''s system counts for exception 1 is a person''s check.'
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: Hospital, NFPA 13 and voice alarm
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 290
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group I-2 is outside exception 1: 0.2 in each, 58 in.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: Two groups, NFPA 13 and voice alarm
+        measures:
+          corridor_width: 45
+          corridor_occupant_load: 300
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: 0.15 in each holds unless a Group H or I-2 portion uses the corridor (1004.4), not shown: a
+      person checks.'
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: true
+    parts:
+      corridor:
+      - id: p1
+        name: Hall corridor, fixed seating
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Fixed seating may be smoke-protected or open-air: its own factors are a person''s check.'
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: false
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: Group not stated, 0.2 in each met
+        measures:
+          corridor_width: 80
+          corridor_occupant_load: 400
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: '0.2 in each, the most 1005.3.2 asks in any group: passes whatever the group.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: false
+      assembly_fixed_seating: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: '1020.3''s capacity, determined by 1005.1: for a corridor, a component other than a stairway, 0.2 in for each occupant
+    it serves (1005.3.2); 0.15 in exception 1''s buildings (a sprinkler system per 903.3.1.1, or 903.3.1.2 in Group R where
+    that system is allowed, and an emergency voice/alarm system per 907.5.2.2, both stated, in one group other than H and
+    I-2; a 13R system outside Group R, or a building of two or more groups, needs review between 0.15 and 0.2); assembly seating''s
+    factors (exceptions 2 and 3, Table 1030.6.2 and 1030.6.3, not brought in) need review while fixed seating is stated or
+    not ruled out. The occupant load is the corridor''s, two readings (none and the whole story''s) only where the building
+    says no other level''s occupants reach its corridors (1004.2.2, 1004.2.3): it passes only at the whole story''s load.
+    How the load splits between exits (1005.5) is section group 5b''s. Section group 5a (2026-11-25) made this a rule; it
+    was 4a''s flag. Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_3_corridor_width
+  kind: rule
+  topic: means_of_egress
+  title: Corridor width at least Table 1020.3's, every group (BCNYS 1020.3)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2", "H-3", "H-4",
+    "H-5", "I-1", "I-2", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"]
+  check: corridor_width >= (96 if occupancy_group == "I-2" else 72 if occupancy_group == "E" and corridor_occupant_load
+    >= 100 else 36 if corridor_occupant_load < 50 else 44)
+  review_when:
+  - when: corridor_width >= 24 and corridor_width < 36
+    reason: 'Under 36 in, but within Table 1020.3''s 24 in for a corridor that gives access to and use of mechanical, plumbing
+      or electrical systems or equipment, which the model doesn''t show: a person checks what the corridor serves.'
+  - when: corridor_width >= 36 and corridor_width < 44 and corridor_occupant_load >= 50 and corridors_within_dwelling_units
+    reason: 'Under 44 in, but within Table 1020.3''s 36 in for a corridor within a dwelling unit, which the building states
+      it has or doesn''t rule out and the model doesn''t show: a person checks whether the corridor is within one.'
+  - when: occupancy_group == "I-2" and corridor_width >= (36 if corridor_occupant_load < 50 else 44) and corridor_width
+      < 96
+    reason: 'Group I-2: under the 96 in Table 1020.3 asks where beds are moved, but 1020.3''s exception doesn''t ask it in
+      areas without stretcher or bed movement for access to care or the defend-in-place strategy, which the model doesn''t
+      show: a person checks.'
+  - when: occupancy_group == "B" and ambulatory_care_facility and corridor_width >= (36 if corridor_occupant_load < 50
+      else 44) and corridor_width < 72
+    reason: 'Group B in an ambulatory care facility (stated, or not ruled out): Table 1020.3 asks 72 in for corridors serving
+      stretcher traffic in one, and which corridors do isn''t shown: a person checks.'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 21
+    - 22
+    quote: 1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1,
+      but the minimum width shall be not less than that specified in Table 1020.3.
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 23
+    - 24
+    quote: 'Exception: In Group I-2 occupancies, corridors are not required to have a clear width of 96 inches (2438 mm) in
+      areas where there will not be stretcher or bed movement for access to care or as part of the defend-in-place strategy.'
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 27
+    - 33
+    quote: Any facility not listed in this table 44 Access to and utilization of mechanical, plumbing or electrical systems
+      or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having
+      an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72
+      Group I-2 in areas where required for bed movement 96
+  examples:
+  - given:
+      occupancy_group: R-2
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Apartment corridor at 44 in, 60 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Any facility not listed: 44 in.'
+  - given:
+      occupancy_group: R-2
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Just under 44 in, 60 occupants
+        measures:
+          corridor_width: 43.5
+          corridor_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Under 44 in with 50 or more occupants, but within the 36 in a corridor within a dwelling unit takes (not shown):
+      a person checks.'
+  - given:
+      occupancy_group: B
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor at 36 in, 49 occupants
+        measures:
+          corridor_width: 36
+          corridor_occupant_load: 49
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Fewer than 50 occupants: 36 in.'
+  - given:
+      occupancy_group: B
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Just under 36 in
+        measures:
+          corridor_width: 35.5
+          corridor_occupant_load: 49
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Under 36 in, within the 24 in a corridor to mechanical, plumbing or electrical equipment takes (not shown).'
+  - given:
+      occupancy_group: B
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Under 24 in
+        measures:
+          corridor_width: 23.5
+          corridor_occupant_load: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Under every width Table 1020.3 gives.
+  - given:
+      occupancy_group: E
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: School corridor at 72 in, 100 occupants
+        measures:
+          corridor_width: 72
+          corridor_occupant_load: 100
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group E with 100 or more occupants: 72 in.'
+  - given:
+      occupancy_group: E
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: School corridor at 71.5 in, 100 occupants
+        measures:
+          corridor_width: 71.5
+          corridor_occupant_load: 100
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group E with 100 or more occupants: under 72 in fails.'
+  - given:
+      occupancy_group: E
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: School corridor at 44 in, 99 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 99
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group E under 100 occupants: 44 in.'
+  - given:
+      occupancy_group: I-2
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Hospital corridor at 96 in
+        measures:
+          corridor_width: 96
+          corridor_occupant_load: 200
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group I-2 where beds are moved: 96 in.'
+  - given:
+      occupancy_group: I-2
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Hospital corridor at 95.5 in
+        measures:
+          corridor_width: 95.5
+          corridor_occupant_load: 200
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Under 96 in: 1020.3''s exception (no bed movement) is a person''s check.'
+  - given:
+      occupancy_group: B
+      ambulatory_care_facility: true
+    parts:
+      corridor:
+      - id: p1
+        name: Clinic corridor at 71.5 in
+        measures:
+          corridor_width: 71.5
+          corridor_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'An ambulatory care facility: under 72 in, whether it serves stretcher traffic is a person''s check.'
+  - given:
+      occupancy_group: B
+      ambulatory_care_facility: true
+    parts:
+      corridor:
+      - id: p1
+        name: Clinic corridor at 72 in
+        measures:
+          corridor_width: 72
+          corridor_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'An ambulatory care facility: 72 in serves stretcher traffic too.'
+  - given:
+      occupancy_group: mixed
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor in a building of two groups
+        measures:
+          corridor_width: 60
+          corridor_occupant_load: 20
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'A building of two or more groups is the flag''s (1004.4): not applicable.'
+  - given:
+      occupancy_group: R-2
+      ambulatory_care_facility: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: 'Table 1020.3 for every group (section group 4 of the plan, docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md):
+    44 in for any facility the table doesn''t list, 36 in with fewer than 50 occupants, 72 in in Group E with 100 or more,
+    96 in in Group I-2 where beds are moved. Where the table loosens it for a corridor the model can''t tell apart (24 in
+    to mechanical, plumbing or electrical equipment; 36 in within a dwelling unit; Group I-2 areas without bed movement,
+    1020.3''s exception) it needs review, never a pass on the looser width; where it tightens it for one (72 in for stretcher
+    traffic in an ambulatory care facility, Group B, 304.1) it needs review short of 72 in while the facility is stated
+    or not ruled out. The occupant load is the one the corridor serves: Gordium gives two readings, none and its whole story''s,
+    only where the building says no other level''s occupants reach its corridors (1004.2.2, 1004.2.3: another story''s
+    load is added only at a convergence, 1005.6), so it passes only at its whole story''s load and fails only at none.
+    1020.3''s capacity (1005.1) is the rule “Corridor capacity, 0.2 or 0.15 in per occupant (BCNYS 1020.3,
+    1005.3.2)”. The table''s "occupant load" is read as the corridor''s own, as its Group E row
+    says ("a corridor having an occupant load") and 1020.3 sizes "the required capacity of corridors". Hand-drafted
+    in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_3_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Corridor width in a building of two or more groups (BCNYS Table 1020.3)
+  applies_when: occupancy_group == "mixed"
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 27
+    - 33
+    quote: Any facility not listed in this table 44 Access to and utilization of mechanical, plumbing or electrical systems
+      or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having
+      an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72
+      Group I-2 in areas where required for bed movement 96
+  examples:
+  - given:
+      occupancy_group: mixed
+    expect: needs_review
+    note: 'A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own
+      occupancy, and a corridor two occupancies share meets the more stringent (Group E''s 72 in, Group I-2''s 96 in); which
+      room is which occupancy isn''t marked yet, so a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'One group: the rule for every group checks it.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 4: the one-group corridors are a rule.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1020_4_obstruction
+  kind: flag
+  topic: means_of_egress
+  title: Corridor width kept clear (BCNYS 1020.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 35
+    - 36
+    quote: '1020.4 Obstruction. The minimum width or required capacity of corridors shall be unobstructed. Exception: Encroachments
+      complying with Section 1005.7.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The corridor''s width is measured between its walls and what the model draws in it; a door swinging into it,
+      furniture or equipment the model doesn''t show, and 1005.7''s encroachments (its own flags since section group 5c) are a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 4c. The corridor width rules read the least
+    clear width the routes measure between the walls and the obstructions drawn (decision 6 of the route measuring); what
+    isn''t drawn, and whether an encroachment meets 1005.7 (doors: 7 inches fully open, half the width in any position;
+    trim 1 1/2 inches; handrails per 1014.9), is a person''s check: 1005.7.1 to 1005.7.3''s flags (section group 5c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1020_6_air_movement
+  kind: flag
+  topic: means_of_egress
+  title: Corridors not used as air ducts (BCNYS 1020.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 48
+    - 48
+    quote: 1020.6 Air movement in corridors. Corridors shall not serve as supply, return, exhaust, relief or ventilation air
+      ducts.
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 50
+    - 53
+    quote: 1. Use of a corridor as a source of makeup air for exhaust systems in rooms that open directly onto such corridors,
+      including toilet rooms, bathrooms, dressing rooms, smoking lounges and janitor closets, shall be permitted, provided
+      that each such corridor is directly supplied with outdoor air at a rate greater than the rate of makeup air taken from
+      the corridor. 2. Where located within a dwelling unit, the use of corridors for conveying return air shall not be prohibited.
+  - file: gov.ny.building.2025.pdf
+    page: 345
+    lines:
+    - 3
+    - 6
+    quote: 3. Where located within tenant spaces of 1,000 square feet (93 m[fn2]) or less in area, utilization of corridors
+      for conveying return air is permitted. 4. Transfer air movement required to maintain the pressurization difference
+      within health care facilities in accordance with ASHRAE 170.
+  - file: gov.ny.building.2025.pdf
+    page: 345
+    lines:
+    - 7
+    - 8
+    quote: '1020.6.1 Corridor ceiling. Use of the space between the corridor ceiling and the floor or roof structure above
+      as a return air plenum is permitted for one or more of the following conditions:'
+  - file: gov.ny.building.2025.pdf
+    page: 345
+    lines:
+    - 9
+    - 16
+    quote: 1. The corridor is not required to be of fire-resistance-rated construction. 2. The corridor is separated from
+      the plenum by fire-resistance-rated construction. 3. The air-handling system serving the corridor is shut down upon
+      activation of the air-handling unit smoke detectors required by the Mechanical Code of New York State. 4. The air-handling
+      system serving the corridor is shut down upon detection of sprinkler water flow where the building is equipped throughout
+      with an automatic sprinkler system. 5. The space between the corridor ceiling and the floor or roof structure above
+      the corridor is used as a component of an approved engineered smoke control system.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The air system isn''t in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation
+      duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 4c. Its exceptions (makeup air with outdoor air
+    supplied, return air within a dwelling unit or a tenant space of 1,000 square feet or less, health care pressurization)
+    and 1020.6.1''s five conditions for a return air plenum above the ceiling are the mechanical design''s, which Gordium
+    doesn''t read.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1020_7_continuity
+  kind: flag
+  topic: means_of_egress
+  title: A rated corridor is continuous to the exit (BCNYS 1020.7)
+  applies_when: corridor_fire_rating_hours > 0
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 345
+    lines:
+    - 17
+    - 20
+    quote: 1020.7 Corridor continuity. Fire-resistance-rated corridors shall be continuous from the point of entry to an exit,
+      and shall not be interrupted by intervening rooms. Where the path of egress travel within a fire-resistance-rated corridor
+      to the exit includes travel along unenclosed exit access stairways or ramps, the fire-resistance rating shall be continuous
+      for the length of the stairway or ramp and for the length of the connecting corridor on the adjacent floor leading to
+      the exit.
+  - file: gov.ny.building.2025.pdf
+    page: 345
+    lines:
+    - 22
+    - 23
+    quote: 1. Foyers, lobbies or reception rooms constructed as required for corridors shall not be construed as intervening
+      rooms. 2. Enclosed elevator lobbies as permitted by Item 1 of Section 1016.2 shall not be construed as intervening rooms.
+  examples:
+  - given: {}
+    parts:
+      corridor:
+      - id: p1
+        name: Rated corridor
+        measures:
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A rated corridor: whether its rating runs unbroken to the exit, with no intervening room (foyers, lobbies and reception
+      rooms built as corridors, and enclosed elevator lobbies per 1016.2 item 1, aside), is a person''s check.'
+  - given: {}
+    parts:
+      corridor:
+      - id: p1
+        name: Unrated corridor
+        measures:
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Stated unrated: 1020.7 asks continuity of rated corridors only.'
+  - given: {}
+    parts:
+      corridor:
+      - id: p1
+        name: Rating not stated
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The rating isn''t stated: a person checks.'
+  - given: {}
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the flag doesn''t apply.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 4c. The routes measure each corridor on its own
+    story and don''t follow a rating through rooms, foyers or open stairs, so continuity is a person''s check wherever a
+    corridor is rated or its rating isn''t stated.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_3_1_stairway_capacity
+  kind: flag
+  topic: means_of_egress
+  title: Stairway capacity, 0.3 or 0.2 in per occupant (BCNYS 1005.3.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 313
+    lines:
+    - 51
+    - 54
+    quote: 1005.3.1 Stairways. The capacity, in inches, of means of egress stairways shall be calculated by multiplying the
+      occupant load served by such stairways by a means of egress capacity factor of 0.3 inch (7.6 mm) per occupant. Where
+      stairways serve more than one story, only the occupant load of each story considered individually shall be used in calculating
+      the required capacity of the stairways serving that story.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 3
+    - 13
+    quote: 1. For other than Group H and I-2 occupancies, the capacity, in inches, of means of egress stairways shall be calculated
+      by multiplying the occupant load served by such stairways by a means of egress capacity factor of 0.2 inch (5.1 mm)
+      per occupant in buildings equipped throughout with an automatic sprinkler system installed in accordance with Section
+      903.3.1.1 or 903.3.1.2 and an emergency voice/alarm communication system in accordance with Section 907.5.2.2. 2. Facilities
+      with smoke-protected assembly seating shall be permitted to use the capacity factors in Table 1030.6.2 indi- cated for
+      stepped aisles for exit access or exit stairways where the entire path for means of egress from the seating to the exit
+      discharge is provided with a smoke control system complying with Section 909. 3. Facilities with open-air assembly seating
+      shall be permitted to the capacity factors in Section 1030.6.3 indicated for stepped aisles for exit access or exit
+      stairways where the entire path for means of egress from the seating to the exit discharge is open to the outdoors.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The stairways'' clear widths aren''t measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler
+      system and a voice/alarm system, other than Groups H and I-2; assembly seating''s own factors) is a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 5a: the route measuring doesn''t give a stairway''s
+    width; each story''s load is its own (1005.3.1''s second sentence), converging stairs are 1005.6''s (section group 5b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_3_2_other_components
+  kind: flag
+  topic: means_of_egress
+  title: Other components' capacity, doors and ramps included (BCNYS 1005.3.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 14
+    - 16
+    quote: 1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways shall
+      be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.2
+      inch (5.1 mm) per occupant.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 18
+    - 22
+    quote: 1. For other than Group H and I-2 occupancies, the capacity, in inches, of means of egress components other than
+      stair- ways shall be calculated by multiplying the occupant load served by such component by a means of egress capacity
+      factor of 0.15 inch (3.8 mm) per occupant in buildings equipped throughout with an automatic sprinkler system installed
+      in accordance with Section 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm communication system in accordance with
+      Section 907.5.2.2.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Doors, ramps and exit passageways aren''t measured for capacity: 0.2 in for each occupant they serve (0.15 with
+      a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person''s check. Corridors are the rule
+      of their own.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 5a: 1005.3.2 for the components the Building Code
+    check doesn''t read yet (section group 6 brings in the doors).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_4_continuity
+  kind: flag
+  topic: means_of_egress
+  title: Egress width never reduced toward the public way (BCNYS 1005.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 29
+    - 30
+    quote: 1005.4 Continuity. The minimum width or required capacity of the means of egress required from any story of a building
+      shall not be reduced along the path of egress travel until arrival at the public way.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The width or capacity required from a story never narrows along the path of egress travel to the public way: the
+      routes measure each story''s spaces and corridors, not the exits and discharge beyond them, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 5b. The corridors' own widths and capacities are
+    their rules (Table 1020.3, 1020.3's capacity); that nothing narrows after them (exits, exit passageways, discharge) isn't
+    measured.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_5_distribution
+  kind: flag
+  topic: means_of_egress
+  title: Losing one exit leaves half the capacity (BCNYS 1005.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 31
+    - 33
+    quote: 1005.5 Distribution of minimum width and required capacity. Where more than one exit, or access to more than one
+      exit, is required, the means of egress shall be configured such that the loss of any one exit, or access to one exit,
+      shall not reduce the avail- able capacity or width to less than 50 percent of the required capacity or width.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where more than one exit is required, losing any one exit (or access to it) leaves at least half the required capacity
+      or width: the exits'' widths aren''t measured, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 5b. The routes count each story's exits but don't
+    measure their widths; the corridors' capacity rule doesn't split a story's occupants between exits either.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_6_convergence
+  kind: flag
+  topic: means_of_egress
+  title: Converging stairways' capacity added (BCNYS 1005.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 34
+    - 36
+    quote: 1005.6 Egress convergence. Where the means of egress from stories above and below converge at an intermediate level,
+      the capac- ity of the means of egress from the point of convergence shall be not less than the largest minimum width
+      or the sum of the required capacities for the stairways or ramps serving the two adjacent stories, whichever is larger.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where egress from the stories above and below meets at an intermediate level, the capacity from there on is the
+      larger of the widest minimum or the two stories'' stairways'' or ramps'' required capacities added: the stairways aren''t
+      measured, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 5b. The routes measure each story on its own (1004.2.3
+    adds no other story''s load but at a convergence: this section''s).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_7_1_door_encroachment
+  kind: flag
+  topic: means_of_egress
+  title: Doors take at most 7 in, or half, of the width (BCNYS 1005.7.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 37
+    - 38
+    quote: 1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions
+      of this section.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 39
+    - 40
+    quote: 1005.7.1 Doors. Doors, when fully opened, shall not reduce the required width by more than 7 inches (178 mm). Doors
+      in any position shall not reduce the required width by more than one-half.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 42
+    - 49
+    quote: '1. Surface-mounted latch release hardware shall be exempt from inclusion in the 7-inch maximum (178 mm) encroach-
+      ment where both of the following conditions exist: 1.1. The hardware is mounted to the side of the door facing away
+      from the adjacent wall where the door is in the open position. 1.2. The hardware is mounted not less than 34 inches
+      (865 mm) nor more than 48 inches (1219 mm) above the finished floor. 2. The restrictions on door swing shall not apply
+      to doors within individual dwelling units and sleeping units of Group R-2 occupancies and dwelling units of Group R-3
+      occupancies.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34
+      to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors'' swing into
+      a corridor isn''t drawn, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 5c. The corridor width rules read the least clear
+    width between the walls and what is drawn; a door swinging into the corridor isn't in the interior description (route
+    measuring decision 6), so its encroachment, and exception 1's latch hardware, are a person's check. Exception 2 (doors
+    within R-2 dwelling or sleeping units and R-3 dwelling units) only loosens it.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_7_2_projections
+  kind: flag
+  topic: means_of_egress
+  title: Trim at most 1 1/2 in each side into the width (BCNYS 1005.7.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 37
+    - 38
+    quote: 1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions
+      of this section.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 50
+    - 53
+    quote: '1005.7.2 Other projections. Handrail projections shall be in accordance with the provisions of Section 1014.9.
+      Other nonstruc- tural projections such as trim and similar decorative features shall be permitted to project into the
+      required width not more than 1 1/2 inches (38 mm) on each side. Exception: Projections are permitted in corridors within
+      Group I-2, Condition 1 in accordance with Section 407.4.3.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors
+      per 407.4.3): projections aren''t drawn, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 5c. Projections aren''t drawn: the corridor''s
+    measured width is between its finished walls and what is drawn in it, so trim within 1 1/2 inches each side and handrails
+    as 1014.9 allows (not brought in) are a person''s check; Group I-2 Condition 1 corridors'' projections per 407.4.3 (not
+    brought in) too.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_7_3_protruding_objects
+  kind: flag
+  topic: means_of_egress
+  title: Protruding objects per 1003.3 (BCNYS 1005.7.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 37
+    - 38
+    quote: 1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions
+      of this section.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 54
+    - 54
+    quote: 1005.7.3 Protruding objects. Protruding objects shall comply with the applicable requirements of Section 1003.3.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Protruding objects meet 1003.3 (not brought in): a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 5c. 1003.3's protruding-object limits (not brought
+    in) aren't measured.
   drafted_by: claude_code/claude-opus-5-5
   status: draft

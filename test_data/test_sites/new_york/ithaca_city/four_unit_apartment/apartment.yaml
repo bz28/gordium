@@ -24,12 +24,15 @@ wall: 0.5                         # ft, every wall
 door: {leaf_in: 36, height_in: 84, clear_width_in: 34, clear_height_in: 80}   # every door's type
 
 # each room on every story (its id prefixed with the level's: L1S, L2S...), inside its walls
+# (function: the room's Table 1004.5 function, BCNYS 1004.5: a Gordium: Function room mark, not in the Revit add-in yet)
 rooms:
-  - {id: S, name: Apartment South, rect: [0, 0, 60, 11.5], use: Other, lockable: true, pass_through: false}
+  - {id: S, name: Apartment South, rect: [0, 0, 60, 11.5], use: Other, lockable: true, pass_through: false,
+     function: residential}
   - {id: SW, name: Stair West, rect: [0, 12, 9, 18], use: Other, lockable: false, pass_through: false}
   - {id: C, name: Corridor, rect: [9.5, 12, 50.5, 18], use: Corridor, lockable: false, pass_through: true}
   - {id: SE, name: Stair East, rect: [51, 12, 60, 18], use: Other, lockable: false, pass_through: false}
-  - {id: N, name: Apartment North, rect: [0, 18.5, 60, 30], use: Other, lockable: true, pass_through: false}
+  - {id: N, name: Apartment North, rect: [0, 18.5, 60, 30], use: Other, lockable: true, pass_through: false,
+     function: residential}
 
 # interior walls (centre lines), on every story
 partitions:

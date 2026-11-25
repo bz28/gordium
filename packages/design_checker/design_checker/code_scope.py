@@ -50,6 +50,19 @@ FACTS = {
     "emergency_escape_openings_1031": "yes_no",   # emergency escape and rescue openings per 1031 (Table 1006.3.4 note a)
     "special_egress_spaces": "yes_no",        # a space with its own exits or travel limit (1006.2.2, Table 1017.2 note a)
     "merchandise_pads": "yes_no",             # Group M merchandise pads (1018.4: their own common path)
+    "occupied_outdoor_areas": "yes_no",       # outdoor areas the occupants use (1004.7)
+    "occupant_load_increased": "yes_no",      # the design takes 1004.5.1's increased occupant load (up to 1 per 7 sq ft)
+    # section group 4 (corridors): another level's occupants reach a corridor (an unenclosed stairway or ramp, a
+    # mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's load doesn't
+    # bound the corridor's; and the building is (or holds) an ambulatory care facility (Table 1020.3's 72 in)
+    "other_level_egress_into_corridors": "yes_no",
+    "ambulatory_care_facility": "yes_no",
+    # section group 4b: the building has corridors within a dwelling or sleeping unit (1020.2 exception 2; Table
+    # 1020.3's 36 in within a dwelling unit)
+    "corridors_within_dwelling_units": "yes_no",
+    # section group 5a: an emergency voice/alarm communication system per 907.5.2.2 (1005.3.1 and 1005.3.2's
+    # exception 1: the smaller capacity factors, with a sprinkler system per 903.3.1.1 or 903.3.1.2)
+    "emergency_voice_alarm_system": "yes_no",
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -126,7 +139,11 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         # what the Building Code's Chapter 10 rules read of the whole building (Revit: each a Yes/No on Project Information)
         "assembly_fixed_seating": "Gordium: Fixed assembly seating", "special_egress_spaces": "Gordium: Special egress spaces",
         "merchandise_pads": "Gordium: Merchandise pads", "egress_balcony_increase_taken": "Gordium: Egress balcony increase",
-        "building_has_atrium": "Gordium: Atrium"}
+        "building_has_atrium": "Gordium: Atrium",
+        # group 2's: which Table 1006.3.4 a Group R-2 story reads, and its 1031 escape openings
+        "r2_sleeping_units": "Gordium: R-2 sleeping units", "emergency_escape_openings_1031": "Gordium: 1031 escape openings",
+        # group 3's: outdoor areas the occupants use (1004.7), and 1004.5.1's increased occupant load
+        "occupied_outdoor_areas": "Gordium: Occupied outdoor areas", "occupant_load_increased": "Gordium: Occupant load increased"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
@@ -273,7 +290,7 @@ def _given(building) -> tuple[dict, list[str]]:
 def building_measures(building: dict | None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the seven stated yes/no facts. A fact
+    groups, the three sprinkler systems the limits name from the system, and the eleven stated yes/no facts. A fact
     not stated is left out (its rules need review)."""
     facts, _ = _given(building)
     return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
@@ -298,6 +315,10 @@ DERIVED = {
     "merchandise_pads": ("merchandise_pads", lambda v: v),
     "r2_sleeping_units": ("r2_sleeping_units", lambda v: v),
     "emergency_escape_openings_1031": ("emergency_escape_openings_1031", lambda v: v),
+    "occupied_outdoor_areas": ("occupied_outdoor_areas", lambda v: v),
+    "ambulatory_care_facility": ("ambulatory_care_facility", lambda v: v),
+    "corridors_within_dwelling_units": ("corridors_within_dwelling_units", lambda v: v),
+    "emergency_voice_alarm_system": ("emergency_voice_alarm_system", lambda v: v),
 }
 
 
