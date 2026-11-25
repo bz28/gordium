@@ -550,6 +550,7 @@
 "packages/design_checker/tests/test_panel_data.py::test_every_zoning_row_with_a_delta_says_its_direction": 1.7,
 "packages/design_checker/tests/test_panel_data.py::test_room_causes_sharing_a_room_are_one_card_keyed_and_named_by_all_its_rooms": 53.7,
 "packages/design_checker/tests/test_panel_data.py::test_the_measuring_names_the_room_it_stops_at_by_id_for_the_room_door_travel_and_a_rooms_common_path": 56.1,
+"packages/design_checker/tests/test_panel_data.py::test_the_odyssey_answers_route_join_never_adds_the_building_codes_door_parts": 20.0,
 "packages/design_checker/tests/test_panel_data.py::test_the_remoteness_limit_is_said_as_a_length": 27.2,
 "packages/design_checker/tests/test_plain_checker_words.py::test_a_list_left_out_is_said_in_plain_words": 3.3,
 "packages/design_checker/tests/test_plain_checker_words.py::test_an_adu_on_a_corner_lot_shows_no_engineers_word": 3.6,
