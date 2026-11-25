@@ -1065,6 +1065,8 @@ def test_the_6c_flags_state_each_exceptions_own_conditions(rules):
     assert "with an impervious surface up to 4 inches lower" in floor                       # exception 5
     assert "other than an exterior storm or screen door, not swinging over it" in floor       # exception 2
     assert "storm and screen doors included, may swing over either landing" in floor          # exception 3
+    # review round 4: exception 3 is for dwelling AND sleeping units (p.323 line 49), as round 3 wrote it
+    assert "Group R-2 and R-3 dwelling or sleeping units not required to be Accessible, Type A or Type B" in floor
     sill = note("general.bc_1010_1_6_thresholds")
     assert "4 3/4 inches for a sliding door and 4 1/2 inches for others" in sill               # exception 2
     series = note("general.bc_1010_1_7_door_arrangement")
