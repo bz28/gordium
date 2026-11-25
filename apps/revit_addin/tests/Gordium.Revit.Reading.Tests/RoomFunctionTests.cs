@@ -259,7 +259,9 @@ public sealed class RoomFunctionTests
         var floor = new FakeFloor();
         foreach (var id in new[] { "A", "B", "L" })
             floor.SetMark(id, Marks.RoomFunction, new(true, Text: "Business area"));
-        Assert.True(Line(Model(floor, "B"))!.Done);                                   // the three occupied rooms: done
+        var before = Line(Model(floor, "B"))!;
+        Assert.True(before.Done);                                                     // the three occupied rooms: done
+        Assert.DoesNotContain("to clear", SetupSteps.LineCount(before), StringComparison.Ordinal);
         floor.SetMark("C", Marks.RoomFunction, new(true, Text: "Business area"));      // the corridor (its Use)
         floor.SetMark("S", Marks.RoomFunction, new(true, Text: "Business area"));      // the stair dS enters
         var line = Line(Model(floor, "B"))!;
@@ -269,6 +271,12 @@ public sealed class RoomFunctionTests
         Assert.Equal(2, line.Notes.Count);
         Assert.Contains(line.Notes, n => n.Contains("a corridor holds no occupant load of its own", StringComparison.Ordinal));
         Assert.Contains(line.Notes, n => n.Contains("an exit stair enclosure holds no occupant load of its own", StringComparison.Ordinal));
+        // said in the count itself, never only behind "Why?" (review round 4)
+        Assert.Equal("Room function: 3 of 5 rooms set, 2 to clear (a function on corridors or exits: Corridor (C), Stair 1 (S)).",
+                     SetupSteps.LineCount(line));
+        // an exit passageway is named for what it is (review round 4)
+        floor.SetMark("dS", Marks.Exit, new(true, Text: "Exit passageway"));
+        Assert.Contains(Line(Model(floor, "B"))!.Notes, n => n.Contains("an exit passageway holds no occupant load of its own", StringComparison.Ordinal));
     }
 
     /// <summary>Review round 2: what stays blank is said by the Use mark, the one the count and the occupant loads read:
@@ -282,7 +290,7 @@ public sealed class RoomFunctionTests
         var line = Line(Model(floor, "R-2"))!;
         Assert.Contains(FakeFloor.Uid("A"), line.Unset);
         Assert.DoesNotContain(FakeFloor.Uid("A"), Suggested(line).Keys);             // never a suggestion for it
-        Assert.Contains("A room whose Gordium: Use is Corridor, Closet or Toilet, and an exit stair enclosure, stay blank", line.IfBlank, StringComparison.Ordinal);
+        Assert.Contains("A room whose Gordium: Use is Corridor, Closet or Toilet, and an exit stair enclosure or exit passageway, stay blank (they aren't counted here unless one holds a function)", line.IfBlank, StringComparison.Ordinal);
         Assert.Contains("on a room whose Gordium: Use is Corridor, Closet or Toilet", Marks.RoomFunction.Description, StringComparison.Ordinal);
     }
 

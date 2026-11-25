@@ -936,36 +936,47 @@ public static class SetupChecklist
         // counted: every room but those left blank by design (a room whose Use is a corridor, a closet or a toilet, and
         // the exit enclosure itself), unless it has one set (review round 1: the line never read done)
         var exits = EnteredExits(doors, side);
-        bool BlankByDesign(MarkedElement r) => exits.Contains(r.UniqueId)
+        bool BlankByDesign(MarkedElement r) => exits.ContainsKey(r.UniqueId)
             || RoomUses.Table.Of(Marks.Text(MarkReading.Value(r, Marks.Use))) is "corridor" or "closet" or "toilet";
         var counted = rooms.Where(r => Set(r) || !BlankByDesign(r)).ToList();
         // a function on a corridor or on the exit enclosure contradicts it (it holds no load of its own: the story's load
         // is then not worked out), so it is still to clear, never set (review round 3: the line read done)
-        bool Contradicts(MarkedElement r) => Set(r) && (exits.Contains(r.UniqueId)
+        bool Contradicts(MarkedElement r) => Set(r) && (exits.ContainsKey(r.UniqueId)
             || RoomUses.Table.Of(Marks.Text(MarkReading.Value(r, Marks.Use))) == "corridor");
         bool Done(MarkedElement r) => Set(r) && !Contradicts(r);
+        // what each is, in the words of the door that enters it (review round 4: an exit passageway isn't a stair)
+        string What(MarkedElement r) => exits.TryGetValue(r.UniqueId, out var kind)
+            ? (kind == ExitKinds.Passageway ? "an exit passageway" : "an exit stair enclosure") : "a corridor";
         var clear = counted.Where(Contradicts).Select(r =>
-            $"{RoomName(r)}: clear its {Marks.RoomFunction.Name} ({(exits.Contains(r.UniqueId) ? "an exit stair enclosure" : "a corridor")} " +
-            "holds no occupant load of its own; with one stated, its story's load isn't worked out)").ToList();
-        return new("room_function", Marks.RoomFunction, "Room function (occupant loads)", "rooms", counted.Count(Done), counted.Count,
+            $"{RoomName(r)}: clear its {Marks.RoomFunction.Name} ({What(r)} holds no occupant load of its own; with one " +
+            "stated, its story's load isn't worked out)").ToList();
+        var done = counted.Count(Done);
+        var line = new ChecklistLine("room_function", Marks.RoomFunction, "Room function (occupant loads)", "rooms", done, counted.Count,
                    counted.Where(r => !Done(r)).Select(r => r.UniqueId).ToList(), false, false,
                    "What each room is used for, in Table 1004.5's words, gives its occupant load factor; Revit doesn't record it.",
-                   $"A room whose {Marks.Use.Name} is Corridor, Closet or Toilet, and an exit stair enclosure, stay blank (they " +
-                   "aren't counted here); any other room left blank has its occupant load, and its story's, at needs review.",
+                   $"A room whose {Marks.Use.Name} is Corridor, Closet or Toilet, and an exit stair enclosure or exit passageway, " +
+                   "stay blank (they aren't counted here unless one holds a function); any other room left blank has its occupant " +
+                   "load, and its story's, at needs review.",
                    suggestions, clear);
+        // the rooms to clear said in the count itself, never only behind "Why?" (review round 4: "Select 2" read as to set)
+        return clear.Count == 0 ? line : line with
+        {
+            CountWords = $"Room function: {done} of {counted.Count} rooms set, {clear.Count} to clear " +
+                         $"(a function on {(clear.Count == 1 ? "a corridor or an exit" : "corridors or exits")}: {string.Join(", ", counted.Where(Contradicts).Select(RoomName))})",
+        };
     }
 
     /// <summary>The rooms an exit stair enclosure or exit passageway door enters, as the route reader reads it
     /// (RouteReader.ExitId): of the two rooms it joins, the one whose every door between two rooms is an exit of that
     /// kind; none where both or neither are (never a guess: both stay counted). Review round 2: the occupied room on
     /// the door's other side was left uncounted.</summary>
-    private static HashSet<string> EnteredExits(List<MarkedElement> doors, Dictionary<string, OpeningSides> side)
+    private static Dictionary<string, string> EnteredExits(List<MarkedElement> doors, Dictionary<string, OpeningSides> side)
     {
         string? KindOf(MarkedElement d) => ExitKinds.Table.Of(Marks.Text(MarkReading.Value(d, Marks.Exit)));
         bool Only(string room, string kind) => doors
             .Where(d => side.TryGetValue(d.UniqueId, out var s) && (s.FromRoom == room || s.ToRoom == room))
             .All(d => side[d.UniqueId] is { FromRoom: null } or { ToRoom: null } || KindOf(d) == kind);
-        var entered = new HashSet<string>(StringComparer.Ordinal);
+        var entered = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var d in doors)
             if (KindOf(d) is ExitKinds.Enclosure or ExitKinds.Passageway && side.TryGetValue(d.UniqueId, out var s)
                 && s.FromRoom is { } a && s.ToRoom is { } b)
@@ -973,7 +984,7 @@ public static class SetupChecklist
                 var kind = KindOf(d)!;
                 var enters = new[] { a, b }.Where(x => Only(x, kind)).ToList();
                 if (enters.Count == 1)
-                    entered.Add(enters[0]);
+                    entered[enters[0]] = kind;
             }
         return entered;
     }
