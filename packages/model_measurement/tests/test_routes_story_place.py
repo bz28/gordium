@@ -31,7 +31,7 @@ WALL_SPOTS = [(20, -1), (41, 15), (20, 31), (-1, 15)]                        # 1
 PLACE_KEYS = {"no_ground", "ground_existing", "ground_assumed", "ground_spots_not_read", "ground_no_outline",
               "ground_wall_bare", "place_no_rooms", "place_story_no_rooms", "place_floor_not_read",
               "place_level_not_read", "place_split_level", "place_either", "place_either_levels",
-              "place_too_many_levels", "ground_buildings_apart"}
+              "place_too_many_levels", "ground_buildings_apart", "place_levels_not_all", "place_description"}
 
 
 def building(floors, extra_levels=(), outline=BOX):
@@ -46,7 +46,7 @@ def building(floors, extra_levels=(), outline=BOX):
         s.outer = outline
         s.rooms = {r["id"]: None for r in rooms if r["level"] == lv["id"]}
         stories[lv["id"]] = s
-    return {"units": "ft", "levels": levels, "rooms": rooms}, stories
+    return {"units": "ft", "levels": levels, "all_levels": [dict(lv) for lv in levels], "rooms": rooms}, stories
 
 
 def placed(floors, ground, **kw):
@@ -180,8 +180,13 @@ APARTMENT = REPO / "test_data/test_sites/new_york/ithaca_city/four_unit_apartmen
 ITHACA_RD = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 
 
-def _apartment_places(ground):
-    got = measure(json.loads(APARTMENT.read_text(encoding="utf-8"))["interior"], ground=ground)
+def _apartment_places(ground, every=True):
+    """The apartment as Revit sent it, with every level listed (`all_levels`, as the reader sends it since this PR:
+    the recorded request predates it; its two levels are all it has)."""
+    interior = json.loads(APARTMENT.read_text(encoding="utf-8"))["interior"]
+    if every:
+        interior["all_levels"] = [dict(lv) for lv in interior["levels"]]
+    got = measure(interior, ground=ground)
     return {s["name"]: s for s in got["parts"]["story"]}
 
 
@@ -213,25 +218,25 @@ def test_106_ithaca_rd_its_levels_and_spot_grades():
     """The Revit eval's own levels (Level 1 at 0, Roof at 35 with no rooms) and its four spot grades at 0, 1 ft
     outside each wall of the 53 by 35 ft outline (revit_build_data.json), with one room drawn over the outline (the
     eval draws none: its egress waits): Level 1 is the first story above or below grade in every world (a one-story
-    house: its roof isn't a floor), never the second or the fourth; the Roof isn't a story placed."""
+    house: its roof isn't a floor; the Roof level, sent only in all_levels, tried as a story and not), never the
+    second or the fourth."""
     build = json.loads((ITHACA_RD / "revit_build_data.json").read_text(encoding="utf-8"))
     (x0, y0), (x1, y1) = build["floors"][0]["outline"][0], build["floors"][0]["outline"][2]
     outline = Polygon([(x0 * FT, y0 * FT), (x1 * FT, y0 * FT), (x1 * FT, y1 * FT), (x0 * FT, y1 * FT)])
-    levels = [{"id": lv["name"], "name": lv["name"], "elevation": lv["elevation_ft"]} for lv in build["levels"]]
-    desc = {"units": "ft", "levels": levels,
+    every = [{"id": lv["name"], "name": lv["name"], "elevation": lv["elevation_ft"]} for lv in build["levels"]]
+    levels = every[:1]                    # the reader sends in levels only a level with something drawn on it
+    desc = {"units": "ft", "levels": levels, "all_levels": every,
             "rooms": [{"id": "r", "name": "House", "level": "Level 1", "floor_elevation": 0}]}
-    stories = {}
-    for lv in levels:
-        s = Story(lv["id"], lv["name"])
-        s.outer, s.rooms = outline, ({"r": None} if lv["id"] == "Level 1" else {})
-        stories[lv["id"]] = s
+    s = Story("Level 1", "Level 1")
+    s.outer, s.rooms = outline, {"r": None}
+    stories = {"Level 1": s}
     spots = {"spots": [list(p["at"]) for p in build["spot_grades"]]}
     facts = json.loads(json.dumps(__import__("yaml").safe_load(
         (ITHACA_RD / "spreadsheet_design_model_facts.yaml").read_text(encoding="utf-8"))["lot_facts"]))
     for ground in (spots, ground_of(facts)):
         got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, ground)
         assert {k: got["Level 1"]["measures"][k] for k in FACTS} == {FIRST: True, SECOND: False, FOURTH: False}
-        assert got["Roof"]["not_measured"][FIRST] == STOPS["place_story_no_rooms"].format(name="Roof")
+        assert got["Level 1"]["more"]["story_place"]["levels_maybe_stories"] == ["Roof"]
 
 
 # --- every reason ---------------------------------------------------------------------------------------------------
@@ -267,6 +272,12 @@ def test_each_reason_a_place_isnt_measured():
     said("ground_wall_bare", _reason(placed([[0]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS[:3]]})))
     said("place_story_no_rooms", _reason(placed([[0]], {"flat": 0}, extra_levels=(30,)), "X0"))
     said("place_either_levels", _reason(placed([[10], [20]], {"flat": 0}, extra_levels=(0,))))
+    desc, stories = building([[0]])
+    del desc["all_levels"]
+    said("place_levels_not_all", _reason(places(desc, Reader("ft"), {"L0": "Level 0"}, stories, {"flat": 0})))
+    desc, stories = building([[0]])
+    said("place_description", _reason(places(desc, Reader("ft"), {"L0": "Level 0"}, stories, {"flat": 0},
+                                             ["the room R is on level 'L9', not one of the model's levels"])))
     said("place_too_many_levels", _reason(placed([[0]], {"flat": 0}, extra_levels=tuple(range(10, 100, 10)))))
     two = BOX.union(Polygon([(60 * FT, 0), (80 * FT, 0), (80 * FT, 20 * FT), (60 * FT, 20 * FT)]))
     said("ground_buildings_apart", _reason(placed([[0]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS]}, outline=two)))
@@ -276,7 +287,7 @@ def test_each_reason_a_place_isnt_measured():
     desc["rooms"][0]["floor_elevation"] = "low"
     said("place_floor_not_read", _reason(places(desc, Reader("ft"), {"L0": "Level 0"}, stories, {"flat": 0})))
     desc, stories = building([[0]])
-    desc["levels"][0]["elevation"] = None
+    desc["all_levels"][0]["elevation"] = None
     said("place_level_not_read", _reason(places(desc, Reader("ft"), {"L0": "Level 0"}, stories, {"flat": 0})))
     desc, stories = building([[0]])
     desc["rooms"] = []
@@ -294,7 +305,7 @@ def test_a_levels_own_elevation_is_part_of_its_floor():
     Level 0's floor next above may be only 4 ft up, so Level 0 may be a basement and Level 1 the first or second."""
     desc, stories = building([[0], [10]])
     assert places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})["L1"]["measures"][SECOND] is True
-    desc["levels"][1]["elevation"] = 4
+    desc["levels"][1]["elevation"] = desc["all_levels"][1]["elevation"] = 4
     got = places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})
     assert SECOND not in got["L1"]["measures"]
 
@@ -359,6 +370,60 @@ def test_a_courtyards_walls_need_spots_too():
     plane isn't known (its ground could be higher than every spot outside)."""
     ring = BOX.difference(Polygon([(15 * FT, 10 * FT), (25 * FT, 10 * FT), (25 * FT, 20 * FT), (15 * FT, 20 * FT)]))
     spots = [[x, y, 0] for x, y in WALL_SPOTS]
-    assert _reason(placed([[0], [10]], {"spots": spots}, outline=ring)).startswith("4 wall(s)")
+    assert _reason(placed([[0], [10]], {"spots": spots}, outline=ring)) == STOPS["ground_wall_bare"].format(count=8)
     court = spots + [[20, 11, 0], [24, 15, 0], [20, 19, 0], [16, 15, 0]]
     assert placed([[0], [10]], {"spots": court}, outline=ring)["L1"]["measures"][SECOND] is True
+
+
+# --- review round 2 (2026-11-25): each finding's pin --------------------------------------------------------------
+
+def test_a_story_with_nothing_drawn_is_never_missing():
+    """The Revit reader sent only levels with something drawn on them: an open parking story at 0 under the apartment
+    (its first rooms at 10 ft) never arrived, and the rooms' level measured the first story above. Now every level
+    is listed (all_levels, RouteReader.cs) and, without that list, nothing is placed."""
+    desc, stories = building([[10], [20]], extra_levels=(0,))
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert FIRST not in got["L0"]["measures"]
+    del desc["all_levels"]
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert not set(FACTS) & set(got["L0"]["measures"])
+    s = _apartment_places({"flat": 0.0}, every=False)
+    assert s["Level 2"]["not_measured"][SECOND] == STOPS["place_levels_not_all"]
+
+
+def _overhang(spots):
+    """B at -10 ft and G at 0 ft, 40 by 30 ft; U at 8 ft, 60 by 40 ft, overhanging 10 ft north, east and west."""
+    small = BOX
+    big = Polygon([(-10 * FT, 0), (50 * FT, 0), (50 * FT, 40 * FT), (-10 * FT, 40 * FT)])
+    desc, stories = building([[-10], [0], [8]])
+    stories["L2"].outer = big
+    return places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"spots": spots}), small
+
+
+def test_spots_at_the_ground_floors_walls_under_an_overhang_count():
+    """Ground 8 ft up at the ground floor's north, east and west walls (under the overhang) and 0 at the overhang's
+    edges: the grade plane may be well above 0, so G may be a basement and B the second story below. Before, the
+    spots under the overhang fell inside the outlines' union and were dropped: B measured the first."""
+    spots = [[20, -1, 0], [41, 15, 8], [20, 31, 8], [-1, 15, 8],                  # 1 ft outside G's walls
+             [20, 41, 0], [51, 20, 0], [-11, 20, 0], [45, -1, 0], [-5, -1, 0]]    # outside the overhang's edges
+    got, _ = _overhang(spots)
+    assert FIRST not in got["L0"]["measures"]
+    assert got["L0"]["more"]["story_place"]["grade_plane_ft"][1] == 8
+
+
+def test_a_low_spot_is_never_item_2s_ground_at_any_point():
+    """A spot 2 ft out at -13 ft (it may stand in an areaway): it no longer proves the story at -10 above grade plane
+    by item 2, so the story at -20 isn't measured the first below (open question 4.6)."""
+    spots = [[x, y, 0] for x, y in WALL_SPOTS] + [[10, -2, -13]]
+    got = placed([[-20], [-10], [0], [10]], {"spots": spots})
+    assert FIRST not in got["L0"]["measures"]
+
+
+def test_a_room_on_no_level_read_places_nothing():
+    """measure(): the apartment with Level 1 left out of levels (its rooms on a level not read): nothing placed."""
+    interior = json.loads(APARTMENT.read_text(encoding="utf-8"))["interior"]
+    interior["all_levels"] = [dict(lv) for lv in interior["levels"]][1:]
+    interior["levels"] = interior["levels"][1:]
+    got = measure(interior, ground={"flat": 0.0})
+    for s in got["parts"]["story"]:
+        assert not set(FACTS) & set(s["measures"]), s["name"]

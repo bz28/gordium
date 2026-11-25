@@ -127,6 +127,9 @@ STOPS = {
     "ground_wall_bare": "{count} wall(s) of the building have no spot grade within 2 ft: the ground there, and so the "
                         "grade plane, isn't known",
     "place_no_rooms": "no story has rooms with a floor elevation",
+    "place_description": "the model isn't read whole ({reasons}): a story may be missing",
+    "place_levels_not_all": "the model doesn't list every one of its levels (one with nothing drawn on it, an open "
+                            "parking story, may be a story): which story is the first above grade plane isn't known",
     "place_story_no_rooms": "the level {name} has no rooms: it isn't placed as a story",
     "place_floor_not_read": "the floor elevation of the room {name} isn't read: {reason}",
     "place_level_not_read": "the elevation of the level {name} isn't read",
@@ -143,6 +146,8 @@ STOPS = {
                               "grades are each building's ground isn't known",
     # whether the story's rooms exit directly outside (BCNYS 1006.3.4 item 2: __init__.rooms_exit_outside)
     "outside_no_rooms": "the story has no room besides its exits and the closets they serve",
+    "outside_way_unclear": "the rooms {name} have no door to the outside and open into no corridor or lobby shared "
+                           "with other rooms: whether they exit directly outside isn't known",
     "outside_door_not_marked": "the room {name} has a door to the outside ({door}) not marked as an exit door at the "
                                "level of exit discharge: whether it is one isn't known (exits are marked, never "
                                "guessed)",
