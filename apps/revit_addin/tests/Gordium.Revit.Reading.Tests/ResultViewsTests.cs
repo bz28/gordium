@@ -36,8 +36,8 @@ public sealed class ResultViewsTests
     public void The_top_says_the_checker_s_counts_and_what_they_mean()
     {
         var m = ResultViews.Build(Apartment());
-        Assert.Equal("98 need review · 8 not checked yet · 1 complies · 1 doesn't apply", m.Summary);
-        Assert.Equal("Nothing fails yet. 98 results can't be decided until the questions below are answered.", m.Headline);
+        Assert.Equal("225 need review · 8 not checked yet · 21 comply · 1 doesn't apply", m.Summary);   // group 2's story exits: +8
+        Assert.Equal("Nothing fails yet. 225 results can't be decided until the questions below are answered.", m.Headline);
         Assert.Equal("1 fails · 2 need review", ResultViews.Summary([Verdict.NeedsReview, Verdict.DoesNotComply, Verdict.NeedsReview]));
         Assert.Equal("1 rule fails. Fix it first; 2 results also need review.",
                      ResultViews.Headline([(Verdict.NeedsReview, "a"), (Verdict.DoesNotComply, "b"), (Verdict.NeedsReview, "c")]));
@@ -75,8 +75,13 @@ public sealed class ResultViewsTests
     {
         var m = ResultViews.Build(Apartment());
         var answer = m.Fix.Single(g => g.Kind == FixKind.Answer);
-        Assert.Equal(["building.sprinkler_system", "building.occupancy_groups"], answer.Cards.Take(2).Select(c => c.Field));
-        Assert.Equal([28, 22], answer.Cards.Take(2).Select(c => c.Rows.Count));
+        // the cards most results wait on come first: the occupancy group, then (NY Building Code egress for every
+        // group, PR #181) the special egress spaces and fixed seating, then the sprinkler system
+        Assert.Equal("building.occupancy_groups", answer.Cards[0].Field);
+        Assert.Equal(160, answer.Cards[0].Rows.Count);                 // group 2's story-exit rules read it too
+        Assert.Equal(52, answer.Cards.Single(c => c.Field == "building.sprinkler_system").Rows.Count);
+        Assert.Equal(82, answer.Cards.Single(c => c.Field == "building.special_egress_spaces").Rows.Count);
+        Assert.Equal(82, answer.Cards.Single(c => c.Field == "building.assembly_fixed_seating").Rows.Count);
         Assert.Equal($"Answer {answer.Cards.Count} questions about the project", answer.Title);
         Assert.DoesNotContain(m.Fix.Where(g => g.Kind != FixKind.Answer).SelectMany(g => g.Cards),
                               c => c.Field is { } f && (f.StartsWith("facts.", StringComparison.Ordinal) || f.StartsWith("building.", StringComparison.Ordinal)));
@@ -208,6 +213,34 @@ public sealed class ResultViewsTests
         Assert.DoesNotContain(folds, f => f.Title.StartsWith("Parts", StringComparison.Ordinal) || f.Title.Contains(" –", StringComparison.Ordinal));
         var s318 = Walk(m.Code).Single(n => n.Level == CodeLevel.Section && n.Number == "325-18");
         Assert.All(s318.Children.Where(c => c.Level == CodeLevel.Others), f => Assert.DoesNotContain("–", f.Title, StringComparison.Ordinal));
+    }
+
+    /// <summary>By code says which code governs only where it can (review round 3): the apartment's answer does; with no
+    /// contents, or no reason sent, it doesn't, so the pane keeps the which-code line at its top.</summary>
+    [Fact]
+    public void By_code_says_which_code_governs_only_when_it_has_the_book_and_the_reason()
+    {
+        var m = ResultViews.Build(Apartment());
+        Assert.True(m.ShowsWhichCode);
+        // the law's own words behind the choice are where it is shown (the governing book's note, on hover)
+        var governing = m.Code.Single(d => d.Note is not null);
+        Assert.Contains("R101.2", governing.NoteTooltip, StringComparison.Ordinal);
+        var list = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs"));
+        Assert.Contains("ToolTip = n.NoteTooltip", list, StringComparison.Ordinal);
+        // and to a screen reader and the keyboard (review rounds 4, 5): on the list item the keyboard focuses
+        var entry = ResultViewList.Layout(m, [], ResultsViewKind.ByCode, new HashSet<string>(), null, null, false)
+                                  .OfType<CodeNodeEntry>().Single(n => n.Node.Note is not null);
+        Assert.Contains("Governs this building", ResultViewList.Spoken(entry), StringComparison.Ordinal);
+        Assert.Contains("R101.2", ResultViewList.Tip(entry), StringComparison.Ordinal);
+        var select = list[list.IndexOf("public override W.Style SelectStyle(", StringComparison.Ordinal)..];
+        Assert.Contains("if (item is ListItem { Spoken: { } spoken } li)\n        {\n            W.Automation.AutomationProperties.SetName(c, spoken);\n            c.ToolTip = li.Tip;", select, StringComparison.Ordinal);
+        Assert.Contains("internal override string? Spoken => ResultViewList.Spoken(Entry);", list, StringComparison.Ordinal);
+        var none = Answer();
+        none["view"]!["contents"] = new JsonArray();
+        Assert.False(ResultViews.Build(Parse(none)).ShowsWhichCode);
+        var noWhy = Answer();
+        noWhy["which_code"]!.AsObject().Remove("why");
+        Assert.False(ResultViews.Build(Parse(noWhy)).ShowsWhichCode);
     }
 
     /// <summary>The class rule of change 34, over every node: complies only when every row inside complies or doesn't

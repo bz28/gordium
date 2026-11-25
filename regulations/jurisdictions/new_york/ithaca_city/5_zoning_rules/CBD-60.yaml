@@ -364,13 +364,13 @@ rules:
     expect: fail
     note: on the residential chart (p.2) only; the commercial chart (p.4) omits it
   notes: >-
-    Chart p.4 has one column for every CBD sub-district, headed "CBD-50, -60, -85, -100, -120, -140" (note 1: see §325-8(D));
-    CBD-60 is one of them. Its marks: • permitted (25 uses), SP a special permit (6), - not permitted (3). The chart has no
-    legend; • and SP are read as for the residential chart (R-1b.use's finding chart_marks). A use the commercial chart doesn't
-    list at all (a fraternity, a zero-lot-line house, an adult day care home) fails: §325-8B(3) makes permitted uses cumulative
-    "except where otherwise indicated by specific prohibition or omission", and the chart omits them (Gordium's reading, the
-    same as the B districts'). A permitted use may still be barred from a storefront at street level (§325-8D(3): the active_street_level_use
-    flag).
+    Chart p.4 has one column for every CBD sub-district, headed "CBD-50, -60, -85, -100, -120, -140" (note 1: see
+    §325-8(D)); CBD-60 is one of them. Its marks: • permitted (25 uses), SP a special permit (6), - not permitted (3).
+    The chart has no legend; • and SP are read as for the residential chart (the finding on the chart's marks, in R-1b's
+    permitted uses). A use the commercial chart doesn't list at all (a fraternity, a zero-lot-line house, an adult day
+    care home) fails: §325-8B(3) makes permitted uses cumulative "except where otherwise indicated by specific
+    prohibition or omission", and the chart omits them (Gordium's reading, the same as the B districts'). A permitted
+    use may still be barred from a storefront at street level (§325-8D(3): the street-level active use flag).
   drafted_by: claude
   status: draft
 - id: CBD-60.lot_area_hotel_motel
@@ -707,10 +707,10 @@ rules:
   - given: {building_height: 12, building_area: 500.01}
     expect: fail
   notes: >-
-    building_area (every building on the lot, porches and decks included) is at least the new building's footprint, so a lot
-    whose buildings cover 500 sf or less is exempt. An addition of 500 sf or less to a larger building is exempt too, but
-    Gordium checks the building as drawn and can't tell an addition: it may say does not comply where the exception applies
-    (never the other way).
+    The area the lot's buildings cover (every building on the lot, porches and decks included) is at least the new
+    building's footprint, so a lot whose buildings cover 500 sf or less is exempt. An addition of 500 sf or less to a
+    larger building is exempt too, but Gordium checks the building as drawn and can't tell an addition: it may say does
+    not comply where the exception applies (never the other way).
   drafted_by: claude
   status: draft
 - id: CBD-60.lot_coverage
@@ -755,8 +755,8 @@ rules:
   - given: {building_area: 10000.01, lot_area: 10000}
     expect: fail
   notes: >-
-    The CBD column allows buildings to cover the whole lot, note 8: "Except as required for rear yard or side yard, as applicable":
-    the 10 ft rear yard (rear_yard) and, next to a residential lot, that district's yards (transition_yards, a flag) still
+    The CBD column allows buildings to cover the whole lot, note 8: "Except as required for rear yard or side yard, as
+    applicable": the 10 ft rear yard (its own rule) and, next to a residential lot, that district's yards (a flag) still
     hold.
   drafted_by: claude
   status: draft

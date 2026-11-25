@@ -34,6 +34,10 @@ def rules():
 
 
 def _rows(rule, kind, measures, given, ctx):
+    # these spaces are rooms exit access serves, never an exit themselves: said, since a space's exit rules let an
+    # exit be and so need review where it isn't known (PR #181)
+    if kind == "space":
+        measures = {"space_is_exit": False, **measures}
     return [r["outcome"] for r in parts.rows(rule, {kind: [{"id": "p1", "measures": measures}]}, given, ctx.allowed())]
 
 

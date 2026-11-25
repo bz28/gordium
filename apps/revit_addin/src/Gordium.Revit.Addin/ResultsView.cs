@@ -90,6 +90,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private readonly HashSet<string> _openCounts = new(StringComparer.Ordinal);   // laws whose "+N more" is open
     private readonly HashSet<string> _openFolds = new(StringComparer.Ordinal);
     private string? _selectedId;
+    // UI polish PR 3: the two views of one answer, the one shown remembered per project (change 17), and what is open
+    private ResultsViewKind _view = ResultsViewKind.WhatToFix;
+    private static readonly ViewChoices Views = new(ViewChoices.DefaultFile);      // per project, across sessions
+    private readonly HashSet<string> _openView = new(StringComparer.Ordinal);
     private string? _detailId;                                // the row whose detail is shown, or null for the list
     private double _listOffset;                               // where the list was scrolled when the detail opened
     private bool _quiet;                                      // a selection the panel makes itself: never sent to Revit
@@ -404,6 +408,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             return;
         _shownCheck = (content.Key ?? content.Project, content.When);
         _openCards.Clear();
+        _openView.Clear();
+        if (content.Model?.Views is { } views)
+            _openView.UnionWith(ResultViewList.OpenAtFirst(views));
+        _view = content.Key is { } k ? Views.Of(k) : ResultsViewKind.WhatToFix;
         _allCards = false;
         _groups = null;
         if (content.Model is not { } model)
@@ -460,7 +468,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     sw.Children.Add(sa);
                     summary.Children.Add(Banner(PanelStatus.Stale, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, sw, bottom: 6));
                     break;
-                case PanelPart.Code when model.Code is { } code:
+                // which code and why: By code says it under the book (change 36), so here only without the two views
+                // or while it isn't decided (needs review: the architect must see that before any result)
+                case PanelPart.Code when model.Code is { } code && (model.Views is not { ShowsWhichCode: true } || !code.Decided):
                     // which code and why, the worker's words: plain when decided (never green), needs review when not,
                     // the clock once stale; the law's quoted words on hover; at most two lines (the whole on hover)
                     var codeStatus = code.Status(stale);
@@ -486,9 +496,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     summary.Children.Add(WithGlyph(st, Ink(Typed(new C.TextBlock { Text = ResultText.StateWords(model.State), TextWrapping = W.TextWrapping.Wrap }, "type.state"), StatusLook.Colour(st)), size: 18));
                     summary.Children.Add(Typed(new C.TextBlock
                     {
-                        Text = PaneWords.StartHere(fails, Groups.Count),
+                        Text = model.Views is { } v ? v.Headline : PaneWords.StartHere(fails, Groups.Count),
                         TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 2, 0, 2),
                     }, Body));
+                    if (model.Views is { } sv)
+                        summary.Children.Add(Small(sv.Summary, bottom: 2));
                     break;
                 case PanelPart.State:
                     var state = StatusLook.Of(model.StateTone, stale);
@@ -504,8 +516,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     // counts (every failure), the rest behind "+N more" (opened in place), all of them in the tooltip
                     // (the intuitive pane, change 7) the filters above carry the counts, so the count by law is one fold
                     // away, open once stale (the clock on every count says the results may not hold)
-                    var byLaw = _openCounts.Contains(ByLaw) || stale;
-                    if (!stale)
+                    var byLaw = (_openCounts.Contains(ByLaw) || stale) && model.Views is null;   // By code is the count by law
+                    if (!stale && model.Views is null)
                     {
                         var fold = CauseCardsView.Link(PaneWords.CountsByLaw(model.Counts.Select(c => CountBar.Short(c.Title)), byLaw), () =>
                         {
@@ -886,6 +898,25 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private void Chips(bool stale)
     {
         _chips.Children.Clear();
+        if (_content?.Model?.Views is not null)
+        {
+            // change 17: one switch, What to fix (the default) · By code; filters go (change 20), Search stays
+            _filter = ListFilter.All;
+            foreach (var view in new[] { ResultsViewKind.WhatToFix, ResultsViewKind.ByCode })
+            {
+                var b = new C.Primitives.ToggleButton
+                {
+                    Content = Typed(new C.TextBlock { Text = ResultViewList.Words(view) }, Caption), IsChecked = view == _view,
+                    Padding = new W.Thickness(9, 2, 9, 2), Margin = new W.Thickness(0, 0, 0, 4),
+                    ToolTip = view == ResultsViewKind.WhatToFix ? "The results grouped by what you can do next" : "The results in the order of the code's own chapters and sections",
+                };
+                W.Automation.AutomationProperties.SetName(b, ResultViewList.Words(view));
+                b.Click += (_, _) => UseView(view);
+                _chips.Children.Add(b);
+            }
+            _chips.Children.Add(SearchToggle(new W.Thickness(8, 0, 0, 4)));
+            return;
+        }
         foreach (var chip in ResultList.Chips(_placed, stale))
         {
             // each filter says how many results it shows (the intuitive pane, change 7)
@@ -912,9 +943,14 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             };
             _chips.Children.Add(button);
         }
+        _chips.Children.Add(SearchToggle(new W.Thickness(0, 0, 4, 4)));
+    }
+
+    private C.Primitives.ToggleButton SearchToggle(W.Thickness margin)
+    {
         var search = new C.Primitives.ToggleButton
         {
-            Content = Typed(new C.TextBlock { Text = "Search" }, Caption), Padding = new W.Thickness(7, 1, 8, 1), Margin = new W.Thickness(0, 0, 4, 4),
+            Content = Typed(new C.TextBlock { Text = "Search" }, Caption), Padding = new W.Thickness(7, 1, 8, 1), Margin = margin,
             ToolTip = "Search rules, sections and elements (Ctrl+F)", IsChecked = _searchBox?.Visibility == W.Visibility.Visible, Tag = SearchTag,
         };
         W.Automation.AutomationProperties.SetName(search, "Search");
@@ -924,7 +960,25 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             if (search.IsChecked == true)
                 _search.Focus();
         };
-        _chips.Children.Add(search);
+        return search;
+    }
+
+    /// <summary>The switch (change 17): the view shown, remembered for this project.</summary>
+    internal void UseView(ResultsViewKind view)
+    {
+        _view = view;
+        if (_content?.Key is { } key)                             // by the document's identity, never its title
+            Views.Set(key, view);
+        Chips(Stale);
+        Relayout();
+    }
+
+    /// <summary>A group, card or node opened or folded (UI polish PR 3).</summary>
+    public void ToggleOpen(string key)
+    {
+        if (!_openView.Remove(key))
+            _openView.Add(key);
+        Relayout();
     }
 
     /// <summary>The list again, from the rows placed, the filter, the search and the folds; the selected row kept
@@ -933,8 +987,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     {
         var labels = _content?.Labels;
         var stale = _content?.Model?.Stale is not null;
-        var layout = ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),
-                                           _summary is not null && AllCards.Count > 0, _filter, _search.Text);
+        var layout = _content?.Model?.Views is { } views
+            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale)
+            : ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),
+                                    _summary is not null && AllCards.Count > 0, _filter, _search.Text);
         _entries = _summary is null ? layout : ResultList.WithSummary(layout);
         var items = new List<ListItem>(_entries.Count + 2);
         RowItem? selected = null;
@@ -953,10 +1009,19 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                 case ListSubheading s:
                     items.Add(new SubItem(this, s));
                     break;
+                case FixGroupEntry g:
+                    items.Add(new FixGroupItem(this, g));
+                    break;
+                case FixCardEntry c:
+                    items.Add(new FixCardItem(this, c));
+                    break;
+                case CodeNodeEntry n:
+                    items.Add(new CodeNodeItem(this, n));
+                    break;
                 case ListRowEntry r:
                     var row = new RowItem(this, r.Row);
                     if (r.Row.Row.Id == _selectedId)
-                        selected = row;
+                        selected ??= row;                        // its first place (a result can be listed twice)
                     items.Add(row);
                     break;
             }
@@ -990,8 +1055,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     {
         if (_list.SelectedItem is not RowItem row)
         {
-            if (!_quiet && _list.SelectedItem is not null)
-                _list.SelectedItem = null;                       // a heading is never the selection
+            // a heading is never the selection; an opener of the two views is (the keyboard is on it), sent to Revit never
+            if (!_quiet && _list.SelectedItem is not null and not (FixGroupItem or FixCardItem or CodeNodeItem))
+                _list.SelectedItem = null;
             return;
         }
         _selectedId = row.Row.Row.Id;                            // kept while a filter or a search hides it
@@ -1015,10 +1081,20 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private void ListKeys(object sender, I.KeyEventArgs e)
     {
         // only a key on a row, or on the list itself: never one meant for a fold after the rows (Space on Details)
-        if (!ResultList.ListTakesKey(onRow: Within<C.ListBoxItem>(e.OriginalSource)?.DataContext is RowItem,
+        var on = Within<C.ListBoxItem>(e.OriginalSource)?.DataContext;
+        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem,
                                      onList: ReferenceEquals(e.OriginalSource, _list)))
             return;
         var ctrl = (I.Keyboard.Modifiers & I.ModifierKeys.Control) != 0;
+        // an opener of the two views: the key opens or folds it, as a click does, and the keyboard stays on it
+        var at = _list.SelectedIndex;
+        if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.KeyToggles(_entries[at], e.Key.ToString()) is { } toggles)
+        {
+            ToggleOpen(toggles);
+            FocusEntry(at);
+            e.Handled = true;
+            return;
+        }
         switch (e.Key)
         {
             case I.Key.Down or I.Key.Up when !ctrl:
@@ -1204,7 +1280,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _results.UpdateLayout();
         if (Find<C.ScrollViewer>(_list) is { } sv)
             sv.ScrollToVerticalOffset(_listOffset);
-        var at = _items.FindIndex(i => i is RowItem r && r.Row.Row.Id == id);
+        // the place it was opened from when the list still has it there (a result listed under two open cards: the
+        // card it was opened from, review round 2), else its first place
+        var at = _list.SelectedItem is RowItem s && s.Row.Row.Id == id ? _list.SelectedIndex
+            : _items.FindIndex(i => i is RowItem r && r.Row.Row.Id == id);
         if (at < 0)
             return;
         _quiet = true;                                            // already selected in Revit
@@ -1360,6 +1439,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         {
             _filter = ListFilter.All;
             _opened.Add(ListSection.Complies);
+            if (_content?.Model?.Views is { } views)
+                _openView.UnionWith(ResultViewList.PathTo(views, _view, id));
             _search.Text = "";
             Chips(_content?.Model?.Stale is not null);
             Relayout();

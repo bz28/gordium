@@ -338,8 +338,30 @@ public sealed class ResultListTests
         var view = Addin("ResultsView.cs");
         var keys = view[view.IndexOf("    private void ListKeys(", StringComparison.Ordinal)..];
         Assert.StartsWith("    private void ListKeys(object sender, I.KeyEventArgs e)\n    {\n        // only a key on a row, or on the list itself", keys, StringComparison.Ordinal);
-        Assert.Contains("if (!ResultList.ListTakesKey(onRow: Within<C.ListBoxItem>(e.OriginalSource)?.DataContext is RowItem,\n" +
+        // a row, or an opener of the two results views (UI polish PR 3 review round 1: the keyboard opens what a click does);
+        // never a fold after the rows
+        Assert.Contains("var on = Within<C.ListBoxItem>(e.OriginalSource)?.DataContext;\n" +
+                        "        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem,\n" +
                         "                                     onList: ReferenceEquals(e.OriginalSource, _list)))\n            return;", keys, StringComparison.Ordinal);
+        Assert.DoesNotContain("FoldItem", keys[..keys.IndexOf("return;", StringComparison.Ordinal)], StringComparison.Ordinal);
+        // the add-in half of the keyboard fix (review round 2): an opener is focusable and drawn where the keyboard is,
+        // it stays selected (never sent to Revit), and a key on it opens or folds it with the keyboard kept on it
+        Assert.Contains("var at = _list.SelectedIndex;\n" +
+                        "        if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.KeyToggles(_entries[at], e.Key.ToString()) is { } toggles)\n" +
+                        "        {\n            ToggleOpen(toggles);\n            FocusEntry(at);", keys, StringComparison.Ordinal);
+        var selected = view[view.IndexOf("    private void Selected()", StringComparison.Ordinal)..];
+        Assert.Contains("_list.SelectedItem is not null and not (FixGroupItem or FixCardItem or CodeNodeItem)", selected[..selected.IndexOf("_select(", StringComparison.Ordinal)], StringComparison.Ordinal);
+        Assert.Contains("FixGroupItem or FixCardItem or CodeNodeItem => \"list.opener\"", Addin("ResultsList.cs"), StringComparison.Ordinal);
+        var stylesText = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "PanelStyles.xaml"));
+        var opener = stylesText[stylesText.IndexOf("x:Key=\"list.opener\"", StringComparison.Ordinal)..];
+        opener = opener[..opener.IndexOf("</Style>", StringComparison.Ordinal)];
+        Assert.DoesNotContain("Focusable", opener, StringComparison.Ordinal);
+        Assert.Contains("<Trigger Property=\"IsKeyboardFocused\" Value=\"True\">\n              <Setter TargetName=\"Frame\" Property=\"BorderBrush\" Value=\"{DynamicResource accent}\" />", opener, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"FocusVisualStyle\" Value=\"{x:Null}\" />", opener, StringComparison.Ordinal);
+        // Back returns to the place the detail was opened from, a relayout to a result's first place
+        var back = view[view.IndexOf("    public void Back()", StringComparison.Ordinal)..];
+        Assert.Contains("var at = _list.SelectedItem is RowItem s && s.Row.Row.Id == id ? _list.SelectedIndex", back, StringComparison.Ordinal);
+        Assert.Contains("selected ??= row;", view, StringComparison.Ordinal);
         // a sub-heading's status is drawn, as its doc says (its place's glyph; the clock once stale)
         var entries = Addin("ResultsList.cs");
         var sub = entries[entries.IndexOf("    private static W.UIElement Sub(SubItem item)", StringComparison.Ordinal)..];
@@ -425,8 +447,12 @@ public sealed class ResultListTests
         var styles = Addin("PanelStyles.xaml");
         // the rows, their order, filters, search, keys and copy are ResultList's (tested here), never the view's own
         Assert.Contains("_placed = ResultList.Place(model);", view, StringComparison.Ordinal);
-        Assert.Contains("var layout = ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),\n" +
-                        "                                           _summary is not null && AllCards.Count > 0, _filter, _search.Text);\n" +
+        // the two results views' entries are ResultViewList's (UI polish PR 3, tested in ResultViewListTests); the plain
+        // list (an answer without them) is ResultList's
+        Assert.Contains("var layout = _content?.Model?.Views is { } views\n" +
+                        "            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale)\n" +
+                        "            : ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),\n" +
+                        "                                    _summary is not null && AllCards.Count > 0, _filter, _search.Text);\n" +
                         "        _entries = _summary is null ? layout : ResultList.WithSummary(layout);", view, StringComparison.Ordinal);
         Assert.Contains("FocusEntry(ResultList.Next(_entries, _list.SelectedIndex, e.Key == I.Key.Down ? 1 : -1));", view, StringComparison.Ordinal);
         Assert.Contains("ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When,", view, StringComparison.Ordinal);

@@ -4,6 +4,8 @@
 
 name: City of Ithaca                  # as the architect reads it ("Gordium checks City of Ithaca lots only")
 
+plain_words: true                     # the words an architect reads carry no engineer's key (rule_format/rulebook.py)
+
 inherits:                             # state law folders whose law applies here too (each <state>/<name>, a folder
   - new_york/new_york_state           # with a state.yaml): New York's Residential Code (egress, R318-R321)
   - new_york/new_york_state_building  # the 2025 Building Code of New York State, for every other building: each

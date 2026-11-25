@@ -177,11 +177,13 @@ public static class Details
     }
 
     /// <summary>The row the detail's Back returns to and the neighbours Previous / Next go to: the rows the list shows,
-    /// in order (headings and sub-headings skipped), and where <paramref name="id"/> is among them (−1 if not shown).</summary>
+    /// in order (headings and sub-headings skipped), each once (What to fix lists a row under every open card that asks
+    /// for it: stepping by its first place, never back to it; UI polish PR 3 review round 1), and where
+    /// <paramref name="id"/> is among them (−1 if not shown).</summary>
     public static (IReadOnlyList<ListRow> Rows, int Index) Among(IReadOnlyList<ListEntry> entries, string id)
     {
         ArgumentNullException.ThrowIfNull(entries);
-        var rows = entries.OfType<ListRowEntry>().Select(e => e.Row).ToList();
+        var rows = entries.OfType<ListRowEntry>().Select(e => e.Row).DistinctBy(r => r.Row.Id, StringComparer.Ordinal).ToList();
         return (rows, rows.FindIndex(p => p.Row.Id == id));
     }
 }
