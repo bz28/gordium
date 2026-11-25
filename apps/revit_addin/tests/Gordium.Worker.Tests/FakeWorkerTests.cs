@@ -69,6 +69,7 @@ public sealed class FakeWorkerTests
         Assert.True(clock.Elapsed < TimeSpan.FromSeconds(20), $"took {clock.Elapsed}");
         Assert.True(e.Silent);
         Assert.Equal(TimeSpan.FromSeconds(1), e.Limit);
+        Assert.Equal("check_site", e.Command);
         Assert.True(client.IsStopped);
         Assert.True(Exited(pid), "the silent worker was not stopped");
     }
@@ -282,7 +283,8 @@ public sealed class FakeWorkerTests
             Arguments = options.Arguments, StartTimeout = TimeSpan.FromSeconds(2),
         };
         var clock = Stopwatch.StartNew();
-        await Assert.ThrowsAsync<WorkerTimeoutException>(() => WorkerClient.StartAsync(options));
+        var e = await Assert.ThrowsAsync<WorkerTimeoutException>(() => WorkerClient.StartAsync(options));
+        Assert.Equal("hello", e.Command);                    // the pane says the checker didn't start (UI polish PR 5)
         Assert.True(clock.Elapsed < TimeSpan.FromSeconds(20), $"took {clock.Elapsed}");
     }
 

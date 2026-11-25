@@ -71,6 +71,10 @@ public static class CheckFailures
         ArgumentNullException.ThrowIfNull(details);
         return e switch
         {
+            // the checker didn't start (its hello timed out): more time for the check wouldn't help (review round 4)
+            WorkerTimeoutException { Command: not "check_site" } => new(FailureKind.CheckerStopped, "Gordium's checker didn't start",
+                $"It didn't start in time. {Safe}", "Try again; if it happens again, restart Revit, then send the details to support.",
+                FailureAction.TryAgain, details),
             WorkerTimeoutException t => new(FailureKind.TookTooLong, "The check took too long",
                 $"Gordium stopped waiting after {Seconds(t.Limit)}{(t.Silent ? " without a word from the checker" : "")}. {Safe}",
                 "Large models can take longer. Try again with more time; if it keeps stopping, send the details to support.",

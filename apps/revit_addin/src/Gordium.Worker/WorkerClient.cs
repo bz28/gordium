@@ -386,7 +386,8 @@ public sealed class WorkerClient : IDisposable
         {
             Stop($"{command} couldn't be sent in {limit.TotalSeconds:0} s");
             throw new WorkerTimeoutException(
-                $"The Gordium checker didn't take {command} in {limit.TotalSeconds:0} s, so it was stopped and nothing from it is shown");
+                $"The Gordium checker didn't take {command} in {limit.TotalSeconds:0} s, so it was stopped and nothing from it is shown")
+            { Limit = limit, Command = command };
         }
         catch (OperationCanceledException) when (cancel.IsCancellationRequested)
         {
@@ -429,14 +430,14 @@ public sealed class WorkerClient : IDisposable
             Stop($"no word from the checker on {command} for {limit.TotalSeconds:0} s");
             throw new WorkerTimeoutException(
                 $"The Gordium checker said nothing for {limit.TotalSeconds:0} s while answering {command}, so it was stopped and nothing from it is shown")
-            { Limit = limit, Silent = true };
+            { Limit = limit, Silent = true, Command = command };
         }
         catch (OperationCanceledException)
         {
             Stop($"no answer to {command} in {limit.TotalSeconds:0} s");
             throw new WorkerTimeoutException(
                 $"The Gordium checker gave no answer to {command} in {limit.TotalSeconds:0} s, so it was stopped and nothing from it is shown")
-            { Limit = limit };
+            { Limit = limit, Command = command };
         }
     }
 
