@@ -2,11 +2,13 @@ using Xunit;
 
 namespace Gordium.Revit.Reading.Tests;
 
-/// <summary>Group 2's two building facts (BCNYS Tables 1006.3.4(1) and (2), a story's one exit): whether the building's
-/// Group R-2 is of sleeping units (which table it reads, notes b and c) and whether it has emergency escape and rescue
-/// openings per Section 1031 (note a). Each a Yes/No on Project Information, sent in the building block only when set
-/// (blank is not stated, never No); one holding neither Yes nor No is asked again; each quotes the table's own note;
-/// the Setup form lists each; a card for either opens Project Information on its mark.</summary>
+/// <summary>Group 2's two building facts (BCNYS Tables 1006.3.4(1) and (2), a story's one exit): what the building's
+/// Group R-2 units are (which table it reads, notes b and c), as three words, All sleeping units, All dwelling units or
+/// Both (review round 3: a Yes/No once set can't be cleared, and a building of both kinds, which neither table fits,
+/// must send nothing); and whether it has emergency escape and rescue openings per Section 1031 (note a), a Yes/No.
+/// Each sent in the building block only when it says something (blank and Both are not stated, never false); a value
+/// Gordium can't read is asked again; each quotes the table's note; the Setup form lists each; a card for either opens
+/// Project Information on its mark.</summary>
 public sealed class GroupTwoFactsTests
 {
     private static readonly (MarkDefinition Mark, string Key)[] Each =
@@ -19,36 +21,46 @@ public sealed class GroupTwoFactsTests
     private static RevitModel Model(Dictionary<Guid, MarkValue> marks) => new() { Document = "b.rvt", ProjectMarks = marks };
 
     [Fact]
-    public void Each_is_a_yes_no_project_information_mark_quoting_its_tables_note()
+    public void Each_is_a_project_information_mark_quoting_its_tables_note()
     {
         foreach (var (m, key) in Each)
         {
             Assert.Contains(m, Marks.All);
             Assert.Equal([Marks.ProjectInformation], m.Categories);
-            Assert.Equal((MarkValueKind.YesNo, MarkBinding.Instance, "building." + key), (m.Kind, m.Binding, m.Feeds));
+            Assert.Equal((MarkBinding.Instance, "building." + key), (m.Binding, m.Feeds));
             Assert.Contains("Blank:", m.Description, StringComparison.Ordinal);
         }
+        Assert.Equal((MarkValueKind.Text, MarkValueKind.YesNo), (Marks.R2SleepingUnits.Kind, Marks.EscapeOpenings1031.Kind));
         Assert.Contains("\"This table is used for Group R-2 occupancies consisting of dwelling units. For Group R-2 occupancies consisting of sleeping units, use Table 1006.3.4(2).\"",
                         Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
+        Assert.Contains("one of: All sleeping units, All dwelling units, Both.", Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
+        Assert.Contains("Both: neither table fits every story, so both tables' one-exit rows need review", Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
         Assert.Contains("and provided with emergency escape and rescue openings in accordance with Section 1031.\"", Marks.EscapeOpenings1031.Description, StringComparison.Ordinal);
-        // one building-wide fact: Yes or No only when every unit is that kind; a building with both leaves it blank, so
-        // both tables' rows need review (review rounds 1 and 2: No sent its sleeping-unit stories to Table 1006.3.4(1)'s
-        // looser travel limit, and Yes its apartment stories past Table (1)'s four-unit limit, which Table (2) lacks)
-        Assert.Contains("Yes only when every Group R-2 unit is a sleeping unit", Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
-        Assert.Contains("No only when every one is a dwelling unit", Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
-        Assert.Contains("A building with both: leave it blank", Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
-        // Gordium doesn't check 1031's openings under the Building Code: Yes is the architect's statement, said so
         Assert.Contains("Gordium doesn't check them under the Building Code", Marks.EscapeOpenings1031.Description, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public void Each_set_is_sent_as_ticked_and_blank_never()
+    /// <summary>All sleeping units is true, all dwelling units false (any case), Both nothing: never false for a building of
+    /// both kinds (review rounds 1 to 3: false sent its sleeping-unit stories to Table 1006.3.4(1)'s looser travel limit,
+    /// true its apartment stories past Table (1)'s four-unit limit).</summary>
+    [Theory]
+    [InlineData("All sleeping units", "true")]
+    [InlineData(" all dwelling units ", "false")]
+    [InlineData("Both", null)]
+    public void What_the_units_are_is_sent_as_the_table_reads_it_and_both_never(string typed, string? sent)
     {
-        var read = BuildingFacts.Read(Model(new() { [Marks.R2SleepingUnits.Guid] = new(true, 0), [Marks.EscapeOpenings1031.Guid] = new(true, 1) }));
+        var read = BuildingFacts.Read(Model(new() { [Marks.R2SleepingUnits.Guid] = new(true, Text: typed), [Marks.SprinklerSystem.Guid] = new(true, Text: "None") }));
         Assert.Empty(read.Missing);
-        Assert.Equal("{\"r2_sleeping_units\":false,\"emergency_escape_openings_1031\":true}", read.Building!.ToJsonString());
+        Assert.Equal(sent, read.Building!["r2_sleeping_units"]?.ToJsonString());
+        Assert.Equal(sent is not null, read.Building.ContainsKey("r2_sleeping_units"));
+    }
+
+    [Fact]
+    public void The_escape_openings_are_sent_as_ticked_and_blank_never()
+    {
+        var read = BuildingFacts.Read(Model(new() { [Marks.EscapeOpenings1031.Guid] = new(true, 1) }));
+        Assert.Equal("{\"emergency_escape_openings_1031\":true}", read.Building!.ToJsonString());
         foreach (var (m, key) in Each)
-            foreach (var blank in new MarkValue?[] { null, new(false, 0), new(false) })
+            foreach (var blank in new MarkValue?[] { null, new(false, 0), new(false), new(false, Text: "") })
             {
                 var marks = new Dictionary<Guid, MarkValue> { [Marks.SprinklerSystem.Guid] = new(true, Text: "None") };
                 if (blank is { } b)
@@ -59,26 +71,39 @@ public sealed class GroupTwoFactsTests
     }
 
     [Theory]
-    [MemberData(nameof(Keys))]
-    public void One_holding_neither_yes_nor_no_is_asked_again_and_the_form_waits(string key)
+    [InlineData("r2_sleeping_units")]
+    [InlineData("emergency_escape_openings_1031")]
+    public void One_holding_what_gordium_cant_read_is_asked_again_and_the_form_waits(string key)
     {
         var (mark, _) = Each.Single(e => e.Key == key);
-        var model = Model(new() { [mark.Guid] = new(true, 3) });
+        var model = Model(new() { [mark.Guid] = mark.Kind == MarkValueKind.Text ? new(true, Text: "mostly dorms") : new(true, 3) });
         var read = BuildingFacts.Read(model);
         Assert.Equal([mark], read.NotRead);
-        Assert.StartsWith($"{mark.Name} holds a value that isn't Yes or No", Assert.Single(read.Missing), StringComparison.Ordinal);
+        Assert.StartsWith($"{mark.Name} ", Assert.Single(read.Missing), StringComparison.Ordinal);
         Assert.Contains(mark.Name, SetupScreen.Build(model, [], null, null).Needed);
+        // sent anyway as held, so the code decision says it can't read it (never read as not stated or as No)
+        Assert.NotNull(read.Building![key]);
     }
 
-    [Theory]
-    [MemberData(nameof(Keys))]
-    public void The_setup_form_lists_each_and_a_card_opens_project_information_on_it(string key)
+    [Fact]
+    public void The_setup_form_offers_the_three_words_and_a_card_opens_project_information()
     {
-        var (mark, _) = Each.Single(e => e.Key == key);
-        var f = SetupScreen.Build(Model([]), [], null, null).Fields.Single(x => x.Mark == mark);
-        Assert.Equal((FieldKind.YesNo, SetupFacts.CodeGroup, false), (f.Kind, f.Group, f.Required));
-        var card = new CauseCard($"field:building.{key}", CauseKind.Mark, "Say whether", [], ["r"], null, "review") { Fields = [$"building.{key}"] };
-        Assert.Equal([mark], CauseCards.MarksOf(card));
-        Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(card, null));
+        var fields = SetupScreen.Build(Model([]), [], null, null).Fields;
+        var units = fields.Single(x => x.Mark == Marks.R2SleepingUnits);
+        Assert.Equal((FieldKind.Choice, SetupFacts.CodeGroup, false), (units.Kind, units.Group, units.Required));
+        Assert.Equal(["All sleeping units", "All dwelling units", "Both"], units.Choices.Select(c => c.Value));
+        Assert.Equal(FieldKind.YesNo, fields.Single(x => x.Mark == Marks.EscapeOpenings1031).Kind);
+        // a choice already made can be changed to Both, so a building that becomes mixed can say so
+        var marks = new Dictionary<Guid, MarkValue> { [Marks.R2SleepingUnits.Guid] = new(true, Text: "All dwelling units") };
+        var draft = new SetupDraft();
+        draft.Choose(Marks.R2SleepingUnits, "Both");
+        var w = Assert.Single(draft.Writes(SetupScreen.Build(Model(marks), [], null, null).Fields).Writes);
+        Assert.Equal("Both", w.Value.Text);
+        foreach (var (mark, key) in Each)
+        {
+            var card = new CauseCard($"field:building.{key}", CauseKind.Mark, "Say whether", [], ["r"], null, "review") { Fields = [$"building.{key}"] };
+            Assert.Equal([mark], CauseCards.MarksOf(card));
+            Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(card, null));
+        }
     }
 }

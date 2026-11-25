@@ -299,10 +299,12 @@ public static class Marks
 
     /// <summary>Whether the building's Group R-2 consists of sleeping units, not dwelling units
     /// (<c>building.r2_sleeping_units</c>, BCNYS Tables 1006.3.4(1) and (2), notes b and c).</summary>
+    /// Three words, never a Yes/No (review round 3: a Yes/No once set can't be cleared back to blank, so a building of
+    /// both kinds, which neither table fits, had no answer to give): see <see cref="R2UnitWords"/>.
     public static readonly MarkDefinition R2SleepingUnits = new(
-        "Gordium: R-2 sleeping units", new("4ea5ab97-6e4a-4bb9-a137-b6cb88838f9c"), MarkValueKind.YesNo,
+        "Gordium: R-2 sleeping units", new("b8d986fc-ae44-428a-8740-0937a6a8197a"), MarkValueKind.Text,
         MarkBinding.Instance, [ProjectInformation], "building.r2_sleeping_units",
-        "For a Group R-2 building: Yes only when every Group R-2 unit is a sleeping unit (a dormitory, a boarding house); No only when every one is a dwelling unit (apartments). It chooses which table limits a Group R-2 story with one exit. A building with both: leave it blank (neither table fits every story, so both tables' one-exit rows need review). " +
+        "For a Group R-2 building, what its Group R-2 units are, one of: " + R2UnitWords.Table.Listed + ". It chooses which table limits a Group R-2 story with one exit: All sleeping units (a dormitory, a boarding house), Table 1006.3.4(2); All dwelling units (apartments), Table 1006.3.4(1); Both: neither table fits every story, so both tables' one-exit rows need review. " +
         "BCNYS Table 1006.3.4(1) note b: \"This table is used for Group R-2 occupancies consisting of dwelling units. For Group R-2 occupancies consisting of sleeping units, use Table 1006.3.4(2).\" " +
         "Blank: the one-exit rows for Group R-2 need review, under both tables.");
 
@@ -794,6 +796,16 @@ public static class OccupancyGroupWords
             .Select(p => Words.FirstOrDefault(w => string.Equals(w, p, StringComparison.OrdinalIgnoreCase))).ToList();
         return got.Count > 0 && got.All(g => g is not null) ? got.Select(g => g!).Distinct().ToList() : null;
     }
+}
+
+/// <summary>What a Group R-2's units are (<c>Gordium: R-2 sleeping units</c>) → <c>building.r2_sleeping_units</c>: all
+/// sleeping units sends true, all dwelling units false, both sends nothing (not stated: both tables' rows need review).</summary>
+public static class R2UnitWords
+{
+    public const string Both = "both";
+
+    public static WordTable Table { get; } = new(
+        ("All sleeping units", "true"), ("All dwelling units", "false"), ("Both", Both));
 }
 
 /// <summary>The sprinkler systems <c>Gordium: Sprinkler system</c> takes → <c>building.sprinkler_system</c>.</summary>

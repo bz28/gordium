@@ -220,6 +220,7 @@ public static class SetupFacts
         [Marks.GroundFrom.Guid] = () => Marks.GroundWords.Select(w => new FieldChoice(w.Word, w.Word)).ToList(),
         [Marks.OccupancyGroups.Guid] = () => OccupancyGroupWords.Words.Select(w => new FieldChoice(w, w)).ToList(),
         [Marks.SprinklerSystem.Guid] = () => SprinklerWords.Table.Words.Select(w => new FieldChoice(w, w)).ToList(),
+        [Marks.R2SleepingUnits.Guid] = () => R2UnitWords.Table.Words.Select(w => new FieldChoice(w, w)).ToList(),
     };
 
     /// <summary>What a project mark holds, or null.</summary>

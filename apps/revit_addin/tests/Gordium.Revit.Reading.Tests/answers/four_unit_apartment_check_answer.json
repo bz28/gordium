@@ -86313,7 +86313,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "07bc07ac93b26863e5844c44aa61890bd47c74cef7dfa508672f2dc29d463b00",
+  "worker_fingerprint": "97ed63cb3346e5ed55d2f97498caf50d6a161e673d1d6609d196acc50f77693a",
   "rulebook": {
    "new_york/ithaca_city": "9b85b5cd390e5047ffe8bdfd56eb9f1dc699a768dd3335ed1ca80599009db0e8"
   }
