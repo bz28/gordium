@@ -186,9 +186,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     mixed-occupancy single-exit flags not applicable since section group 2; 1030.8's on its fact alone since round
     2): those narrowed to a building of two or more groups, or to another group (F-1 and S-1's increase, H-5's,
     Group H's sprinkler system), are not applicable to a one-group R-2. Section group 4b adds 1020.2.1's elevator
-    hoistway doors (24); its per-corridor flag (a rated corridor's walls) is a corridor's row, not a building line."""
+    hoistway doors (24); its per-corridor flag (a rated corridor's walls) is a corridor's row, not a building line.
+    Section group 4c adds 1020.4's and 1020.6's (26); 1020.7's is a corridor's row."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 24 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 26 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):

@@ -103,6 +103,11 @@ results:
   # check; elevator hoistway doors (1020.2.1) always are
   general.bc_1020_2_fire_partitions: needs_review
   general.bc_1020_2_1_hoistway_protection: needs_review
+  # the rest of Section 1020 (section group 4c): flags, a person's check (the corridor's continuity because its
+  # rating isn't stated)
+  general.bc_1020_4_obstruction: needs_review
+  general.bc_1020_6_air_movement: needs_review
+  general.bc_1020_7_continuity: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

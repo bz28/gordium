@@ -71,12 +71,13 @@ documents:
       # section group 4), and 1005.3.2 alone (other egress components' capacity, 0.2 inch per occupant, p.314, with
       # 1005.4 after: Table 1020.3's width passes only where the corridor's capacity can't need more). 1020.2 with
       # 1020.2.1 and Table 1020.2 (corridor fire-resistance rating, pp.343-344, with 1020.3 after; 2026-11-25, section
-      # group 4b).
-      pages: 32-68, 79, 99, 147, 273-274, 311-318, 340-344, 354-355
+      # group 4b). 1020.4 (obstruction, p.344, with 1020.5 after), 1020.6 with 1020.6.1 (air movement, pp.344-345) and
+      # 1020.7 (continuity, p.345, with SECTION 1021 after): section group 4c, the rest of Section 1020.
+      pages: 32-68, 79, 99, 147, 273-274, 311-318, 340-345, 354-355
       sections: ['308.5', '508.2', '1004', Table 1004.5, '1006.2.1', Table 1006.2.1, '1006.2.2', '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(1),
                  Table 1006.3.4(2),
                  '1007.1', '1016.2', '1017', Table 1017.2, '1018.4', '1020.1', '1020.2', Table 1020.2, '1020.3', Table 1020.3,
-                 '1020.5']
+                 '1020.4', '1020.5', '1020.6', '1020.7']
       alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1005.3.2', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
@@ -219,6 +220,13 @@ documents:
             (p.355, line 18), and the defined term is SMOKE-PROTECTED ASSEMBLY SEATING, which the word does not
             name whole (OPEN-AIR ASSEMBLY SEATING, named whole, is brought in). Exception 2 loosens the limit (50
             ft), and the rule''s review covers it.'
+        '1020.6.1':
+          fire-resistance-rated: 'The book prints "fire-resistance-rated" in italics (p.345, line 9: "fire-resistance-rated
+            construction"); Section 202 defines FIRE-RESISTANCE RATING (brought in, 202:fire_resistance_rating), which
+            the adjective names but not whole. 1020.6.1 is a permission, part of 1020.6''s flag.'
+        '1020.7':
+          fire-resistance-rated: 'As 1020.6.1 ("Fire-resistance-rated corridors", p.345, line 17): the defined term is
+            FIRE-RESISTANCE RATING, brought in. 1020.7 is a flag on a rated corridor.'
     contents: >
       Commercial egress step 1 (2026-11-21), the limits Gordium's route measures feed, as the Maine rulebook drafted
       them for a day-care centre (regulations/jurisdictions/maine/maine_state/): 1017 and Table 1017.2 (exit access
