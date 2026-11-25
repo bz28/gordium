@@ -291,7 +291,7 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
     """The two Revit marks for group 3's building facts on the apartment: Gordium: Occupied outdoor areas No makes 1004.7's
     flag not applicable and moves nothing else (Yes leaves it a person's check); Gordium: Occupant load increased, either
     way, moves nothing here (an increase not ruled out keeps each room's larger reading at its area / 7 or more:
-    occupant_load.py)."""
+    occupant_load.py), except 1010.1.2.1's swing (section group 6b), which the building's smaller load settles."""
     moved = {}
     for fact, value in (("occupied_outdoor_areas", False), ("occupied_outdoor_areas", True),
                         ("occupant_load_increased", False), ("occupant_load_increased", True)):
@@ -300,8 +300,11 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
         now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
         moved[(fact, value)] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
     assert moved[("occupied_outdoor_areas", False)] == {"general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable")}
-    assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", False)] == \
-        moved[("occupant_load_increased", True)] == {}
+    assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", True)] == {}
+    # section group 6b: the increase ruled out, the whole building holds at most 18 (two stories of 1800 / 200), so no
+    # door serves 50 and, in Group R-2, 1010.1.2.1 asks no door's swing: its rule complies; nothing else moves
+    assert moved[("occupant_load_increased", False)] == {
+        "general.bc_1010_1_2_1_direction_of_swing": ("needs_review", "pass")}
 
 
 # ---- section group 6a (2026-11-25): door size, 1010.1.1, from each door's maker's stated clear opening ----------------
@@ -336,3 +339,28 @@ def test_a_door_with_no_stated_clear_opening_is_never_sized_from_its_leaf(got):
     mine = [r for r in stated["rows"] if r["rule"] in (WIDTH, HEIGHT) and r["id"] == desc["doors"][0]["id"]]
     assert len(mine) == 2 and {r["outcome"] for r in mine} == {"needs_review"}
     assert stated["results"][WIDTH] == present.REVIEW and stated["results"][HEIGHT] == present.REVIEW
+
+
+# ---- section group 6b (2026-11-25): door kind and swing --------------------------------------------------------------
+
+KIND, SWING = "general.bc_1010_1_2_door_types", "general.bc_1010_1_2_1_direction_of_swing"
+
+
+def test_door_swing_as_sent_and_with_each_doors_swing_stated(got):
+    """Before: every door is side-hinged, so 1010.1.2's flag sets it aside, and the swing rule needs review (the side
+    each swings into isn't stated; each serves none to the whole building's 514.3, 50 or more at the upper reading).
+    After, each stated to swing into the side egress travel goes into (the corridor from an apartment, the stair
+    from the corridor, outside from the stair): the swing complies, and nothing else changes; stated the other way
+    round, it still needs review (it fails only at 50 or more at the least a door serves, none here), never a pass."""
+    assert got["results"][KIND] == "not_applicable" and got["results"][SWING] == present.REVIEW
+    desc = build.interior_of()
+    for d in desc["doors"]:
+        d["swings_into"] = d["sides"][1]
+    stated = _check(desc, egress.measure_routes(desc))
+    assert stated["results"][SWING] == "pass"
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {SWING}
+    for d in desc["doors"]:
+        d["swings_into"] = d["sides"][0]
+    wrong = _check(desc, egress.measure_routes(desc))
+    assert wrong["results"][SWING] == present.REVIEW
+

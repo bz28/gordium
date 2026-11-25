@@ -13870,6 +13870,10 @@ rules:
   title: Door swings with egress travel at 50 or more, or Group H (BCNYS 1010.1.2.1)
   check: not moe_door_swinging or moe_door_swings_with_egress or (moe_door_occupant_load < 50 and occupancy_group not in ["H-1",
     "H-2", "H-3", "H-4", "H-5", "mixed"])
+  review_when:
+  - when: occupancy_group == "mixed" and moe_door_occupant_load < 50 and moe_door_swinging and not moe_door_swings_with_egress
+    reason: 'Swinging against egress travel and serving under 50, in a building of two or more groups: it must swing with
+      egress travel only if a Group H occupancy is among them or it serves one, which isn''t shown: a person checks.'
   for_each: means_of_egress_door
   when_none: needs_review
   sources:
@@ -13942,6 +13946,21 @@ rules:
       outcome: fail
     expect: fail
     note: 'Group H: with egress travel whatever the load.'
+  - given:
+      occupancy_group: mixed
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door swinging against egress, serving 5, in a building of two groups
+        measures:
+          moe_door_swinging: true
+          moe_door_swings_with_egress: false
+          moe_door_occupant_load: 5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether a Group H occupancy is among them isn''t shown.'
   - given:
       occupancy_group: B
     parts:
