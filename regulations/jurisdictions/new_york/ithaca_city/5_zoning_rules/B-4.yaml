@@ -364,11 +364,11 @@ rules:
     expect: fail
     note: on the residential chart (p.2) only; the commercial chart (p.4) omits it
   notes: >-
-    Chart p.4, B-4's column: • permitted (28 uses), SP a special permit (6), - not permitted (0). The chart has no legend;
-    • and SP are read as for the residential chart (R-1b.use's finding chart_marks). A use the commercial chart doesn't
-    list at all (a fraternity, a zero-lot-line house, an adult day care home) fails: §325-8B(3) makes permitted uses cumulative
-    "except where otherwise indicated by specific prohibition or omission", and the chart omits them (Gordium's reading,
-    the same as the residential districts').
+    Chart p.4, B-4's column: • permitted (28 uses), SP a special permit (6), - not permitted (0). The chart has no
+    legend; • and SP are read as for the residential chart (the finding on the chart's marks, in R-1b's permitted uses).
+    A use the commercial chart doesn't list at all (a fraternity, a zero-lot-line house, an adult day care home) fails:
+    §325-8B(3) makes permitted uses cumulative "except where otherwise indicated by specific prohibition or omission",
+    and the chart omits them (Gordium's reading, the same as the residential districts').
   drafted_by: claude
   status: draft
 - id: B-4.lot_area
@@ -418,7 +418,7 @@ rules:
     expect: fail
   - given: {use: hotel_motel, lot_area: 1}
     expect: not_applicable
-    note: held to the motel row (lot_area_hotel_motel)
+    note: "held to the motel row (the motel lot-size rule)"
   notes: >-
     Every row but the motel's is 3,000 sf in B-4, conversion or new construction alike, with no note (chart p.5); a lot's
     area does not grow with its units here.
@@ -871,9 +871,10 @@ rules:
     expect: fail
     note: only the wider side can be the 10 ft one, and its eave is 5 ft into it
   notes: >-
-    The yards themselves are measured to the walls; this rule measures the same yards to the outermost part, eaves included,
-    and lets that be up to 2 ft less. Which side carries the 10 ft minimum follows the walls: only a side whose walls are
-    at least 10 ft from its line can; where both can, or neither, the eaves must fit both ways, else needs review (as R-3a.yard_projections).
+    The yards themselves are measured to the walls; this rule measures the same yards to the outermost part, eaves
+    included, and lets that be up to 2 ft less. Which side carries the 10 ft minimum follows the walls: only a side
+    whose walls are at least 10 ft from its line can; where both can, or neither, the eaves must fit both ways, else
+    needs review (as R-3a's rule “Eaves into required yards, at most 2 ft (§325-18B)”).
   drafted_by: claude
   status: draft
 - id: B-4.accessory_buildings

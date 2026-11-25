@@ -84,7 +84,11 @@ def test_the_rules_notes_and_the_architects_page_say_the_architect_states_it():
     from rule_format.rulebook import REPO, load
     rule = next(r for r in load(REPO / "regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/R-3a.yaml")["rules"]
                 if r["id"] == RULE)
-    assert "abuts_r1_district" in rule["notes"] and "doesn't know the zoning" not in rule["notes"]
+    # in plain words (Ithaca's plain_words): the note names the fact by the field the architect fills in, not its key
+    from design_checker.host_core.facts import ABOUT_LABELS
+    label = ABOUT_LABELS["abuts_r1_district"]
+    assert f"“{label}” in Setup" in rule["notes"] and "stated by the architect" in rule["notes"]
+    assert "abuts_r1_district" not in rule["notes"] and "doesn't know the zoning" not in rule["notes"]
     doc = (REPO / "docs/questions_for_architects.md").read_text(encoding="utf-8")
     for tag in ("[R-3a.abutting_r1#1]", "[R-3a.abutting_r1#2]"):
         section = doc.split(tag, 1)[1].split("\n### ", 1)[0]

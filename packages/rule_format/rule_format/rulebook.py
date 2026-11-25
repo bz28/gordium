@@ -12,6 +12,7 @@ import datetime
 import hashlib
 import itertools
 import json
+import os
 import pickle
 import re
 import sys
@@ -1515,10 +1516,36 @@ def term_file_problems(jurisdiction, ctx: Context) -> dict[Path, list[str]]:
 
 # The words an architect reads (a rule's title, notes, review reasons, worked examples' notes: the checker shows
 # them) carry no engineer's key: no snake_case name of a measure or fact, no rule id (review round 2, 2026-11-23).
-# A file path or a URL is a reference, not a key, so it is set aside first. Required where the law's settings say
-# `plain_words: true` (state.yaml).
-_PATHLIKE = re.compile(r"https?://\S+|[\w.-]+(?:/[\w.-]+)+/?|\b[\w-]+\.(?:py|yaml|md|json|jsonl)\b")
-_ENGINEER_KEY = re.compile(r"\bgeneral\.[a-z0-9_.]*[a-z0-9_]|\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
+# A file path or a URL is a reference, not a key, so it is set aside first: a URL, a path from one of the repo's top
+# folders, or a file name the repo holds. Anything else joined by a slash (front_yard/side_yard) or ending like a file
+# (lot_area.md) is still read for keys (review round 2, 2026-11-24). Required where the law's settings say
+# `plain_words: true` (state.yaml, or a place's jurisdiction.yaml).
+_TOP_FOLDERS = ("apps", "docs", "packages", "regulations", "test_data")
+_PATHLIKE = re.compile(rf"https?://\S+|\b(?:{'|'.join(_TOP_FOLDERS)})(?:/[\w.-]+)+/?")
+_FILE_NAME = re.compile(r"\b[\w-]+\.(?:py|yaml|md|json|jsonl)\b")
+_repo_file_names: set[str] | None = None
+
+
+def _in_repo(name: str) -> bool:
+    """Whether a file of this name is in the repo's top folders (read once, skipping build and hidden folders)."""
+    global _repo_file_names
+    if _repo_file_names is None:
+        names = set()
+        for top in _TOP_FOLDERS:
+            for _, dirs, files in os.walk(REPO / top):
+                dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("bin", "obj", "__pycache__")]
+                names.update(files)
+        _repo_file_names = names
+    return name in _repo_file_names
+
+
+def _set_aside_references(text: str) -> str:
+    text = _PATHLIKE.sub(" ", text)
+    return _FILE_NAME.sub(lambda m: " " if _in_repo(m.group(0)) else m.group(0), text)
+# a district rule's id is one even with no underscore (R-1a.height, RU.use: round 1 of the Ithaca review, 2026-11-24)
+_ENGINEER_KEY = re.compile(r"\b(?:[A-Z]{1,4}-\d+[A-Za-z]*|[A-Z]{2,4})\.[a-z][a-z0-9_]*[a-z0-9]\b|"
+                           r"\bgeneral\.[a-z0-9_.]*[a-z0-9_]|\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
+PLACE_SETTINGS = "jurisdiction.yaml"   # a place's settings (place.py SETTINGS, which imports this module)
 
 
 def plain_words_problems(book: dict) -> list[str]:
@@ -1533,7 +1560,7 @@ def plain_words_problems(book: dict) -> list[str]:
                   if isinstance(e, dict)]
         for where, t in texts:
             if isinstance(t, str):
-                keys = sorted(set(_ENGINEER_KEY.findall(_PATHLIKE.sub(" ", t))))
+                keys = sorted(set(_ENGINEER_KEY.findall(_set_aside_references(t))))
                 if keys:
                     out.append(f"{r.get('id')}: its {where} shows an engineer's key to the architect: {', '.join(keys)} "
                                f"(say it in plain words)")
@@ -1541,11 +1568,13 @@ def plain_words_problems(book: dict) -> list[str]:
 
 
 def _plain_words_law(path: Path) -> bool:
-    """Whether the law folder the rulebook is in asks for plain words (state.yaml `plain_words: true`)."""
+    """Whether the law folder the rulebook is in asks for plain words (state.yaml `plain_words: true`, or the place's
+    jurisdiction.yaml for its own rulebooks). The nearest settings file decides; an answer key (test_data/) has none."""
     for folder in path.parents:
-        settings = folder / STATE_SETTINGS
-        if settings.is_file():
-            return (load(settings) or {}).get("plain_words") is True
+        for name in (STATE_SETTINGS, PLACE_SETTINGS):
+            settings = folder / name
+            if settings.is_file():
+                return (load(settings) or {}).get("plain_words") is True
     return False
 
 
