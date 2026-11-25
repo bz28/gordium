@@ -1,7 +1,8 @@
 """The Building Code eval (test_data/test_sites/new_york/ithaca_city/four_unit_apartment): Gordium's two-story,
 four-unit building, as the Revit reader reads it once built from revit_build_data.json and marked by eval_marks.yaml
 (make_ny_build_data.interior_of), checked against its hand-worked expected.yaml: the Building Code governs, its rules
-run on the routes' stories and spaces, the occupant-load rules say they need a figure not read yet, its group's
+run on the routes' stories and spaces, each apartment's occupant load is worked out from its stated function (Table
+1004.5, two readings: section group 3) so 1006.2.1.1 passes, and with no function stated it needs review, its group's
 table rows give real verdicts (2026-11-23), and every flag is its own needs-review line. Never a pass the hand-work
 doesn't give."""
 
