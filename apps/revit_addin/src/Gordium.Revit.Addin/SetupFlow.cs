@@ -61,8 +61,19 @@ internal static class SetupRun
     /// <summary>The project's facts as the Setup form's fields (Revit's thread, when a check's answer is shown): what
     /// "Answer N questions about the project" asks with in the results (UI polish changes 22, 23), read now from the
     /// marks, with the place's options when known. Nothing is written here.</summary>
-    internal static IReadOnlyList<SetupField> Questions(Document doc) =>
-        SetupScreen.Build(RevitMarks.Model(doc), null, _options).Fields;
+    internal static IReadOnlyList<SetupField>? Questions(Document doc)
+    {
+        try
+        {
+            return SetupScreen.Build(RevitMarks.Model(doc), null, _options).Fields;
+        }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException or ArgumentException)
+        {
+            // the results are shown all the same: the questions card then lists the questions as cards, to set in Setup
+            Trial.Log("answers", new Dictionary<string, object?> { ["questions"] = $"{e.GetType().Name}: {e.Message}" });
+            return null;
+        }
+    }
 
     /// <summary>Check project's gate (Revit's thread, during the check's read): the form's screen, and what to do
     /// (SetupGate.Decide: show the form, send anyway for what was already checked anyway, or send).</summary>
