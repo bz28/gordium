@@ -72,8 +72,13 @@ public static class CheckFailures
         return e switch
         {
             // the checker didn't start (its hello timed out): more time for the check wouldn't help (review round 4)
-            WorkerTimeoutException { Command: not "check_site" } => new(FailureKind.CheckerStopped, "Gordium's checker didn't start",
+            WorkerTimeoutException { Command: "hello" } => new(FailureKind.CheckerStopped, "Gordium's checker didn't start",
                 $"It didn't start in time. {Safe}", "Try again; if it happens again, restart Revit, then send the details to support.",
+                FailureAction.TryAgain, details),
+            // any other request than the check itself (the read's question about what is left out): it stopped
+            // answering; more time for the check wouldn't help either (review round 5)
+            WorkerTimeoutException { Command: not "check_site" } => new(FailureKind.CheckerStopped, "Gordium's checker stopped answering",
+                $"It stopped answering before the check began. {Safe}", "Try again; if it happens again, send the details to support.",
                 FailureAction.TryAgain, details),
             WorkerTimeoutException t => new(FailureKind.TookTooLong, "The check took too long",
                 $"Gordium stopped waiting after {Seconds(t.Limit)}{(t.Silent ? " without a word from the checker" : "")}. {Safe}",
@@ -96,6 +101,14 @@ public static class CheckFailures
             _ => new(FailureKind.Other, "Gordium couldn't finish this check",
                 "Nothing was checked, so nothing here passes or fails. Your model wasn't changed.", null, FailureAction.TryAgain, details),
         };
+    }
+
+    /// <summary>What a failure during the model's read says (review round 5: the read waits for the checker too, so a
+    /// checker that didn't start or crashed then is said as the checker's failure, never as Revit's read).</summary>
+    public static CheckFailure OfRead(Exception e, string details)
+    {
+        ArgumentNullException.ThrowIfNull(e);
+        return e.GetBaseException() is WorkerException w ? Of(w, details) : ReadFailed(details);
     }
 
     /// <summary>Reading the model in Revit failed (change 16: in the pane, never a dialog): nothing was sent.</summary>

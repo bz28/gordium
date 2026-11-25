@@ -185,7 +185,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             check.End("failed");
             // the last check's rows taken down: never left showing as if they were this one's; in the pane, never a
             // dialog that blocks Revit (UI polish change 16), the technical words only behind Copy details
-            ResultsPane.Failed(CheckFailures.ReadFailed(clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})"));
+            ResultsPane.Failed(CheckFailures.OfRead(e, clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})"));
         }
     }
 

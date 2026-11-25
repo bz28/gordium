@@ -19,6 +19,8 @@ public sealed class CheckFailuresTests
             (new WorkerTimeoutException("t") { Limit = TimeSpan.FromSeconds(60), Silent = true, Command = "check_site" }, FailureKind.TookTooLong, FailureAction.TryAgainWithMoreTime),
             // review round 4: a checker that didn't start isn't a long check: plain Try again
             (new WorkerTimeoutException("t") { Limit = TimeSpan.FromSeconds(60), Command = "hello" }, FailureKind.CheckerStopped, FailureAction.TryAgain),
+            // review round 5: another request (the read's question) or none named: stopped answering, plain Try again
+            (new WorkerTimeoutException("t") { Limit = TimeSpan.FromSeconds(60), Command = "objects.left_out" }, FailureKind.CheckerStopped, FailureAction.TryAgain),
             (new WorkerExitedException("e", 1, ""), FailureKind.CheckerStopped, FailureAction.TryAgain),
             (new WorkerStoppedException("s"), FailureKind.CheckerStopped, FailureAction.TryAgain),
             (new WorkerProtocolException("p"), FailureKind.Unreadable, FailureAction.TryAgain),
@@ -43,14 +45,17 @@ public sealed class CheckFailuresTests
             Assert.Matches("[Nn]othing", f.Words);
             titles.Add(f.Title);
         }
-        Assert.Equal(7, titles.Count);                                                  // one per cause (the two crashes and the start differ)
+        Assert.Equal(8, titles.Count);                                                  // one per cause (the crashes, the start and a stopped answer differ)
+        Assert.Equal("Gordium's checker didn't start", CheckFailures.Of(all[1].E, Details).Title);
+        Assert.Equal("Gordium's checker stopped answering", CheckFailures.Of(all[2].E, Details).Title);
+        Assert.Equal("Gordium's checker stopped answering", CheckFailures.Of(new WorkerTimeoutException("t"), Details).Title);
         Assert.DoesNotContain("Large models", CheckFailures.Of(all[1].E, Details).Next, StringComparison.Ordinal);
         var timeout = CheckFailures.Of(all[0].E, Details);
         Assert.Equal("The check took too long", timeout.Title);
         Assert.StartsWith("Gordium stopped waiting after 60 seconds without a word from the checker.", timeout.Words, StringComparison.Ordinal);
         Assert.Equal("Try again with more time", timeout.ActionWords);
-        Assert.Equal("The checker couldn't use what was sent", CheckFailures.Of(all[5].E, Details).Title);
-        Assert.StartsWith("Facts: zone is missing.", CheckFailures.Of(all[5].E, Details).Words, StringComparison.Ordinal);
+        Assert.Equal("The checker couldn't use what was sent", CheckFailures.Of(all[6].E, Details).Title);
+        Assert.StartsWith("Facts: zone is missing.", CheckFailures.Of(all[6].E, Details).Words, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -65,9 +70,13 @@ public sealed class CheckFailuresTests
         Assert.Equal(FailureAction.None, closed.Action);                                // nothing to try until it's open
         Assert.Null(closed.ActionWords);
         Assert.Equal("Revit was busy and didn't start the check", CheckFailures.NotStarted(Details).Title);
+        // review round 5: the read waits for the checker too; its failures there are the checker's, never Revit's read
+        Assert.Equal("Gordium's checker didn't start", CheckFailures.OfRead(new WorkerTimeoutException("t") { Command = "hello" }, Details).Title);
+        Assert.Equal(FailureKind.CheckerStopped, CheckFailures.OfRead(new AggregateException(new WorkerExitedException("e", 1, "")), Details).Kind);
+        Assert.Equal(FailureKind.ReadFailed, CheckFailures.OfRead(new InvalidOperationException("Revit"), Details).Kind);
         // change 16: the read failure is in the pane, never a dialog that blocks Revit
         var check = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckProject.cs"));
-        Assert.Contains("ResultsPane.Failed(CheckFailures.ReadFailed(", check, StringComparison.Ordinal);
+        Assert.Contains("ResultsPane.Failed(CheckFailures.OfRead(e, ", check, StringComparison.Ordinal);
         Assert.DoesNotContain("TaskDialog.Show(Title, clear + $\"Nothing was checked", check, StringComparison.Ordinal);
     }
 

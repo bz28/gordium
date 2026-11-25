@@ -236,7 +236,7 @@ internal static class Program
                     });
                     var failures = new (string Name, CheckFailure Failure)[]
                     {
-                        ("23_error_timeout", CheckFailures.Of(new WorkerTimeoutException("t") { Limit = TimeSpan.FromSeconds(60), Silent = true },
+                        ("23_error_timeout", CheckFailures.Of(new WorkerTimeoutException("t") { Limit = TimeSpan.FromSeconds(60), Silent = true, Command = "check_site" },
                             "WorkerTimeoutException: The Gordium checker said nothing for 60 s while answering check_site (logged to C:\\x\\results.jsonl)")),
                         ("24_error_read", CheckFailures.ReadFailed("Nothing was checked: InvalidOperationException: boom (logged to C:\\x\\results.jsonl)")),
                         ("25_error_closed", CheckFailures.Closed()),
@@ -252,6 +252,8 @@ internal static class Program
                             Check(!FindAll<TextBlock>(p.View).Any(t => t.IsVisible && (TextOf(t).Contains("Exception", StringComparison.Ordinal) || TextOf(t).Contains("results.jsonl", StringComparison.Ordinal))),
                                   $"{name}: no raw text on screen");
                             Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t) == failure.Title), $"{name}: its own title");
+                            if (name == "23_error_timeout")
+                                Check(failure.Title == "The check took too long" && failure.Action == FailureAction.TryAgainWithMoreTime, "23: the check's own time-out, with more time");
                         });
                     Step(make(theme, []), "27_stale_slim_apartment", 740, dark, p =>
                     {
