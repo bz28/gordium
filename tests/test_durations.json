@@ -378,6 +378,8 @@
 "packages/design_checker/tests/test_four_unit_apartment.py::test_an_exit_stair_is_never_held_to_the_exits_of_the_spaces_it_serves[none]": 11.3,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_before_and_after_the_functions_only_rules_reading_an_occupant_load_change_and_only_from_needs_review": 2.3,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_the_building_code_governs_it": 42.6,
+"packages/design_checker/tests/test_four_unit_apartment.py::test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them[False]": 22.1,
+"packages/design_checker/tests/test_four_unit_apartment.py::test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them[True]": 19.1,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_the_story_figures_are_the_hand_worked_ones": 51.2,
 "packages/design_checker/tests/test_goldens.py::test_a_changed_answer_is_caught_and_says_which_part_and_value_changed": 6.5,
 "packages/design_checker/tests/test_goldens.py::test_a_shape_moved_farther_than_the_tolerance_or_any_other_value_changed_still_fails": 4.6,

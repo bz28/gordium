@@ -24,6 +24,11 @@ ALLOWED = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/it
 
 
 @pytest.fixture(scope="module")
+def laws():
+    return egress.laws("regulations/jurisdictions/new_york/ithaca_city")
+
+
+@pytest.fixture(scope="module")
 def routes():
     """The building's routes, measured once (a room's function changes no geometry)."""
     return egress.measure_routes(build.interior_of())
@@ -160,3 +165,30 @@ def test_an_exit_stair_is_never_held_to_the_exits_of_the_spaces_it_serves(sprink
     stairs = [r for r in got["rows"] if r["rule"] in SPACE_EXIT_RULES and r["name"].startswith("Stair")]
     assert {r["rule"] for r in stairs} >= {"general.bc_1006_2_1_two_exits"}
     assert {(r["rule"], r["outcome"]) for r in stairs} == {(r["rule"], "pass") for r in stairs}
+
+
+# the five Project Information Yes/No marks Revit sends for the Building Code's Chapter 10 (Marks.cs: Fixed assembly
+# seating, Special egress spaces, Merchandise pads, Egress balcony increase, Atrium), by their building block keys
+CH10_BUILDING_MARKS = ("assembly_fixed_seating", "special_egress_spaces", "merchandise_pads",
+                       "egress_balcony_increase_taken", "building_has_atrium")
+
+
+@pytest.mark.parametrize("stated", [False, True])
+def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got, laws, stated):
+    """The apartment as built, with the five marks set: No moves exactly the ten rules that wait on them (travel's
+    54 ft within Table 1017.2's 200 ft now passes; each flag of a space the building states it hasn't is not
+    applicable), and Yes leaves every rule as it was with them blank (needs review: a person checks those spaces),
+    never a pass. Left blank they are not sent (the add-in's BuildingFacts), so `got` is the unset reading."""
+    interior = build.interior_of()
+    interior["building"] = {**interior["building"], **{k: stated for k in CH10_BUILDING_MARKS}}
+    now = egress.check(laws, interior, VALUES, ALLOWED)
+    moved = {k: (got["results"][k], now["results"][k]) for k in got["results"] if got["results"][k] != now["results"][k]}
+    if stated:
+        assert moved == {}
+        return
+    assert moved == {"general.bc_table_1017_2_a_e_f1_m_r_s1": ("needs_review", "pass"),
+                     **{f"general.{r}": ("needs_review", "not_applicable") for r in (
+                         "bc_1006_2_2_1_boiler_rooms", "bc_1006_2_2_2_refrigeration_machinery_rooms",
+                         "bc_1006_2_2_3_refrigerated_rooms", "bc_1006_2_2_4_electrical_rooms",
+                         "bc_1006_2_2_5_vehicular_ramps", "bc_table_1017_2_note_a", "bc_1017_2_1_balcony_increase",
+                         "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")}}

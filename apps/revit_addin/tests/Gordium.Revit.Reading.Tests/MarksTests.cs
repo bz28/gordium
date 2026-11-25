@@ -80,6 +80,12 @@ public sealed class MarksTests
             ("Gordium: Care facility", "58d76f42-7618-4c1c-8765-3af6c45b31d2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Occupancy groups", "ea50d05c-05a2-46b3-aafc-6cbb22bf19ac", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Sprinkler system", "4b542577-d04e-463a-87fa-019dbc102374", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // what the Building Code's Chapter 10 rules read of the whole building (code_scope.FACTS)
+            ("Gordium: Fixed assembly seating", "717d4f32-6264-46b4-95e7-ffd7668518c4", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Special egress spaces", "8efde5e2-df14-4f88-b8ce-da46285b930d", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Merchandise pads", "90d6a3a4-6f52-487c-b98b-21ea864dee45", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Egress balcony increase", "3f260842-2450-44da-902d-3e066984a521", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Atrium", "8c3211a5-546b-463e-8d8c-b70fd753c1b6", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // the dwelling's own facts the code decision reads (review round 1: an ask named marks Revit didn't have)
             ("Gordium: Dwelling units", "aa32131a-e757-47a3-abf8-9deb81d7a09a", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Units in the attached building", "bccb088a-c087-475f-9ff9-53fd10133d0e", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
