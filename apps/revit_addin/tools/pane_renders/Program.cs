@@ -39,7 +39,7 @@ internal static class Program
         var houseAfter = Load(Path.Combine(answers, "ithaca_106_house_after_check_answer.json"));
         var childcare = Load(Path.Combine(answers, "children_odyssey_check_answer.json"));
         var apartment = Load(Path.Combine(answers, "four_unit_apartment_check_answer.json"));
-        // the same answer with two Chapter 10 results and the corner-lot question's result saying their rules are drafted
+        // the same answer with three Chapter 10 results (one of them a question's) saying their rules are drafted
         // for Group I-4 only (since #182 no real result says it): what the scope note looks like where it shows
         var apartmentScoped = LoadSaying(Path.Combine(answers, "four_unit_apartment_check_answer.json"));
         // the four-unit apartment's Setup records (Ben's Revit trial, 2026-11-23): the Building Code governs its use
@@ -189,7 +189,7 @@ internal static class Program
                         p.UseView(ResultsViewKind.ByCode);
                         Settle(p.View);
                         var notes = FindAll<Border>(p.View).Where(b => b.IsVisible && Equals(b.Tag, EntryView.ScopeTag)).ToList();
-                        Check(notes.Count == 2, $"14s: the scope note under each book whose results say it ({notes.Count})");
+                        Check(notes.Count == 1, $"14s: the scope note once, under the Building Code whose results say it ({notes.Count})");
                     });
                     Step(make(theme, []), "16s_questions_scope_note_apartment", 1100, dark, p =>
                     {
@@ -492,7 +492,9 @@ internal static class Program
         var picked = items.Where(i => (string?)i!["in_code"]?["chapter"] == "10"
                                       && ((string?)i!["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true
                                       && i!["asks"] is System.Text.Json.Nodes.JsonArray a && a.All(x => (string?)x!["kind"] != "mark")).Take(2)
-                          .Concat(items.Where(i => i!["asks"] is System.Text.Json.Nodes.JsonArray a && a.Any(x => (string?)x!["field"] == "facts.corner_lot")).Take(1));
+                          .Concat(items.Where(i => (string?)i!["in_code"]?["chapter"] == "10"
+                                                   && ((string?)i!["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true
+                                                   && i!["asks"] is System.Text.Json.Nodes.JsonArray a && a.Any(x => (string?)x!["kind"] == "mark")).Take(1));
         foreach (var i in picked)
             i!["reason"] = "the building holds another occupancy: this rulebook's rules are " + ResultViews.DraftedFor + ", so a person checks";
         var doc = JsonDocument.Parse(node.ToJsonString());

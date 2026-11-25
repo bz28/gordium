@@ -342,6 +342,8 @@ public sealed class DetailPageTests
                                 "New Construction", [], null);
     }
 
+    private static bool Contains(CodeNode n, string id) => n.Rows.Any(r => r.Id == id) || n.Children.Any(c => Contains(c, id));
+
     private static int SaysIt(ResultModel m) => ResultList.Place(m).Count(p => p.Row.Reason?.Contains(ResultViews.DraftedFor, StringComparison.Ordinal) == true
         || ResultViews.CardsOf(m.Views!, p.Row.Id).Any(c => c.Why?.Contains(ResultViews.DraftedFor, StringComparison.Ordinal) == true));
 
@@ -365,14 +367,16 @@ public sealed class DetailPageTests
         Assert.Equal(2, two.Views!.Scoped.Count);
         Assert.Null(Lay(two).OfType<AnswerFootEntry>().Single().Scope);
         // one question's result says it too: the card says it, for that one result
-        var corner = Answers(m).Cards.Single(c => c.Field == "facts.corner_lot").Rows[0].Id;
+        // one Chapter 10 question's result too (a Building Code row in the card)
+        var question = Answers(m).Rows.First(r => m.Views!.Code.Single(d => d.Title.StartsWith("2025 Building Code", StringComparison.Ordinal))
+                                                      .Children.Any(c => Contains(c, r.Id))).Id;
         var firstTwo = ApartmentSaying(Egress, 2).Views!.Scoped;
-        var three = ApartmentSaying(i => firstTwo.Contains((string)i["id"]!) || (string)i["id"]! == corner, 3);
+        var three = ApartmentSaying(i => firstTwo.Contains((string)i["id"]!) || (string)i["id"]! == question, 3);
         Assert.Equal(3, three.Views!.Scoped.Count);
         Assert.Equal(ResultViews.ScopeWords(1), Lay(three).OfType<AnswerFootEntry>().Single().Scope);
-        // each book says its own count (the corner-lot result is the zoning chapter's)
-        Assert.Equal(ResultViews.ScopeWords(2), three.Views.Code.Single(d => d.Title.StartsWith("2025 Building Code", StringComparison.Ordinal)).Scope);
-        Assert.Equal(ResultViews.ScopeWords(1), three.Views.Code.Single(d => d.Title.StartsWith("City of Ithaca", StringComparison.Ordinal)).Scope);
+        // the book says its own count (all three are the Building Code's), the zoning book none
+        Assert.Equal(ResultViews.ScopeWords(3), three.Views.Code.Single(d => d.Title.StartsWith("2025 Building Code", StringComparison.Ordinal)).Scope);
+        Assert.Null(three.Views.Code.Single(d => d.Title.StartsWith("City of Ithaca", StringComparison.Ordinal)).Scope);
     }
 
     [Fact]
