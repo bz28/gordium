@@ -295,16 +295,16 @@ public static class PaneWords
 
     /// <summary>What a screen reader says for What changed: every changed result, each on its line in the worker's
     /// order (the ones listed and the ones "Show all" opens: never a count of its own), then the results that say
-    /// something new. A change that is no list: the worker's one line.</summary>
+    /// something new, in the card's own words (<see cref="ChangesSaid"/>; the count is the heading's, said before it:
+    /// review round 5). A change that is no list: the worker's one line.</summary>
     public static string ChangesAll(CheckChange change)
     {
         ArgumentNullException.ThrowIfNull(change);
         if (!ChangeIsList(change))
             return change.Words;
-        var lines = new List<string> { $"{change.Rows.Count} result{(change.Rows.Count == 1 ? "" : "s")} changed:" };
-        lines.AddRange(change.Rows.Select(r => "• " + r.Words));
-        if (change.Said > 0)
-            lines.Add($"{change.Said} more say something new");
+        var lines = change.Rows.Select(r => "• " + r.Words).ToList();
+        if (ChangesSaid(change) is { } said)
+            lines.Add(said);
         return string.Join("\n", lines);
     }
 
