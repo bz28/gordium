@@ -297,6 +297,42 @@ public static class Marks
         "Yes when the design relies on BCNYS 1017.2.1's exterior egress balcony increase: up to 100 ft more exit access travel where the last portion of the exit access leading to the exit is on an exterior egress balcony. " +
         "Yes: a travel distance over the table's limit but within the increase is checked by a person. No: the design doesn't take it, so Table 1017.2's limits apply as they are. Blank: the rules that turn on it need review.");
 
+    /// <summary>Whether the building's Group R-2 consists of sleeping units, not dwelling units
+    /// (<c>building.r2_sleeping_units</c>, BCNYS Tables 1006.3.4(1) and (2), notes b and c).</summary>
+    /// Three words, never a Yes/No (review round 3: a Yes/No once set can't be cleared back to blank, so a building of
+    /// both kinds, which neither table fits, had no answer to give): see <see cref="R2UnitWords"/>.
+    public static readonly MarkDefinition R2SleepingUnits = new(
+        "Gordium: R-2 sleeping units", new("b8d986fc-ae44-428a-8740-0937a6a8197a"), MarkValueKind.Text,
+        MarkBinding.Instance, [ProjectInformation], "building.r2_sleeping_units",
+        "For a Group R-2 building, what its Group R-2 units are, one of: " + R2UnitWords.Table.Listed + ". It chooses which table limits a Group R-2 story with one exit: All sleeping units (a dormitory, a boarding house), Table 1006.3.4(2); All dwelling units (apartments), Table 1006.3.4(1); Both: neither table fits every story, so both tables' one-exit rows need review. " +
+        "BCNYS Table 1006.3.4(1) note b: \"This table is used for Group R-2 occupancies consisting of dwelling units. For Group R-2 occupancies consisting of sleeping units, use Table 1006.3.4(2).\" " +
+        "Blank: the one-exit rows for Group R-2 need review, under both tables.");
+
+    /// <summary>Whether the building has emergency escape and rescue openings per BCNYS 1031
+    /// (<c>building.emergency_escape_openings_1031</c>, Tables 1006.3.4(1) and (2) note a).</summary>
+    public static readonly MarkDefinition EscapeOpenings1031 = new(
+        "Gordium: 1031 escape openings", new("298cd307-3a3f-4c2f-a12d-e8fe3d31b4f6"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.emergency_escape_openings_1031",
+        "For a Group R-2 building: Yes only when it is provided with emergency escape and rescue openings in accordance with Section 1031 (every sleeping room and basement the section asks for has one that complies with it; Gordium doesn't check them under the Building Code). " +
+        "BCNYS Table 1006.3.4(1) note a: \"Buildings classified as Group R-2 equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 and provided with emergency escape and rescue openings in accordance with Section 1031.\" " +
+        "Yes: a Group R-2 story may then have one exit within the table's limits. No: it may not under that row. Blank: those rows need review.");
+
+    /// <summary>Whether the building has outdoor areas its occupants use (<c>building.occupied_outdoor_areas</c>,
+    /// BCNYS 1004.7).</summary>
+    public static readonly MarkDefinition OccupiedOutdoorAreas = new(
+        "Gordium: Occupied outdoor areas", new("5be49bb1-7c0f-4eea-a360-c6b47d2e9dad"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.occupied_outdoor_areas",
+        "Yes when the building has yards, patios, occupiable roofs, courts or similar outdoor areas its occupants can reach and use. " +
+        "BCNYS 1004.7: \"Yards, patios, occupiable roofs, courts and similar outdoor areas accessible to and usable by the building occupants shall be provided with means of egress as required by this chapter.\" " +
+        "Yes: their means of egress and the occupant load the building official assigns them are a person's check (outdoor areas aren't drawn for Gordium). No: there are none. Blank: that check needs review.");
+
+    /// <summary>Whether the design takes BCNYS 1004.5.1's increased occupant load (<c>building.occupant_load_increased</c>).</summary>
+    public static readonly MarkDefinition OccupantLoadIncreased = new(
+        "Gordium: Occupant load increased", new("64b5a6c7-d4ae-4424-b7e1-2c041b09d02a"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.occupant_load_increased",
+        "Yes when the design takes BCNYS 1004.5.1's increased occupant load: more occupants than Table 1004.5's factors give, every other requirement met for that number, at most one occupant per 7 sq ft of occupiable floor space. " +
+        "No: the design takes no increase, so each room's occupant load is Table 1004.5's alone. Yes or blank: each room's larger reading is at least its area / 7 (the most 1004.5.1 allows), so a rule an increase could fail needs review or fails, never passes.");
+
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
         "Gordium: Atrium", new("8c3211a5-546b-463e-8d8c-b70fd753c1b6"), MarkValueKind.YesNo,
@@ -594,7 +630,8 @@ public static class Marks
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
         CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
-        SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, Atrium,
+        SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
+        EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
@@ -775,6 +812,16 @@ public static class OccupancyGroupWords
             .Select(p => Words.FirstOrDefault(w => string.Equals(w, p, StringComparison.OrdinalIgnoreCase))).ToList();
         return got.Count > 0 && got.All(g => g is not null) ? got.Select(g => g!).Distinct().ToList() : null;
     }
+}
+
+/// <summary>What a Group R-2's units are (<c>Gordium: R-2 sleeping units</c>) → <c>building.r2_sleeping_units</c>: all
+/// sleeping units sends true, all dwelling units false, both sends nothing (not stated: both tables' rows need review).</summary>
+public static class R2UnitWords
+{
+    public const string Both = "both";
+
+    public static WordTable Table { get; } = new(
+        ("All sleeping units", "true"), ("All dwelling units", "false"), ("Both", Both));
 }
 
 /// <summary>The sprinkler systems <c>Gordium: Sprinkler system</c> takes → <c>building.sprinkler_system</c>.</summary>

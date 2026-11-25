@@ -482,7 +482,7 @@ MEASURE_NAMES = {
     "assembly_fixed_seating": "fixed assembly seating (whether any room has it)",
     "special_egress_spaces": "special egress spaces (whether the building has any with their own egress sections)",
     "merchandise_pads": "merchandise pads (whether a store has any)",
-    "r2_sleeping_units": "R-2 sleeping units (whether the Group R-2 is of sleeping units, not dwelling units)",
+    "r2_sleeping_units": "R-2 sleeping units (whether every Group R-2 unit is a sleeping unit, not a dwelling unit)",
     "emergency_escape_openings_1031": "emergency escape openings (whether every sleeping room has one, per 1031)",
     "occupied_outdoor_areas": "occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7)",
     "ambulatory_care_facility": "ambulatory care facility (whether the building is or holds one, per Table 1020.3)",
