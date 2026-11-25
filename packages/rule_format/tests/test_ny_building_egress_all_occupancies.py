@@ -632,12 +632,13 @@ def test_no_text_calls_a_brought_in_section_not_brought_in():
     never called 'not brought in' in the words an architect reads, nor in sources.yaml's own notes."""
     import re
     brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
-    secs = [str(x) for x in brought["sections"] + brought["alone"] if not str(x).startswith("Table")]
+    secs = [str(x) for x in brought["sections"] if not str(x).startswith("Table")]
+    alone = [str(x) for x in brought["alone"]]     # brought in without the parts under them (1010.2 without 1010.2.14)
     pat = re.compile(r"(?:Section )?(\d{3,4}(?:\.\d+)*)(?:'s)?[^.;]{0,40}?(?:\(|, )[^()]{0,40}?not brought in")
 
     def stale(t):
-        return [m.group(0) for m in pat.finditer(t) if any(m.group(1) == s or m.group(1).startswith(s + ".")
-                                                         for s in secs)]
+        return [m.group(0) for m in pat.finditer(t) if m.group(1) in alone or any(
+            m.group(1) == s or m.group(1).startswith(s + ".") for s in secs)]
     bad = []
     for r in load(RULEBOOK)["rules"]:
         texts = [r.get("title"), r.get("notes")] + [w["reason"] for w in r.get("review_when") or []] + \
