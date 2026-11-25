@@ -496,3 +496,46 @@ def test_a_story_names_a_missing_function_only_where_a_room_lacks_one():
     missing = story_words([{"id": "a", "use": "other", "function": "business"}, {"id": "c", "use": "other"}],
                           [{"space_floor_area": 100}, {"space_floor_area": 100}])
     assert "(c)" in missing and missing.endswith(stated)
+
+
+def _asked(why):
+    """The panel's ask for a one-door space whose occupant load isn't worked out for `why` (panel_data.causes, then
+    ui_data's headline), on 1006.2.1.1, a rule that reads it."""
+    from design_checker import panel_data, ui_data
+    from design_checker.each_part import GORDIUM_GAPS
+    rule = next(r for r in load(NY / "5_building_code_rules/drafted/general.yaml")["rules"]
+                if r["id"] == "general.bc_1006_2_1_1_three_or_more_exits")
+    part = {"id": "p", "measures": {"space_is_exit": False, "space_exit_count": 2},
+            "not_measured": {"space_occupant_load": why}}
+    row = {"outcome": "needs_review", "id": "p", "values": dict(part["measures"])}
+    found = panel_data.causes(rule, row, None, part, None, part["not_measured"],
+                              {}, ALLOWED, GORDIUM_GAPS)
+    return [ui_data._from_cause(c, "space")["headline"] for c in found]
+
+
+def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answered():
+    """Group 3 review round 6 (P2, 2026-11-25): a load Gordium or a person must work out (a room others pass through,
+    one a loaded room is served through, a function the table sends elsewhere, a room or closet with no function) is
+    asked for by hand; only what the model itself can fix (an outline, a floor area, a mark against a function) is a
+    model fix. The class: every reason occupant_load.py gives."""
+    ol = occupant_load
+    by_hand = [ol.NOT_GIVEN, ol.NO_LOAD.format(use="closet"), ol.THROUGH, ol.ELSEWHERE.format(f="mall", where="402.8.2"),
+               ol.SERVED.format(names="st", es="es", their="its"), ol.IS_EXIT]
+    model = [ol.GROSS_NOT_MEASURED, ol.AREAS_OVER, "the room's floor area isn't measured"]
+    for why in by_hand:
+        heads = _asked(why)
+        assert heads and not any(h.startswith(("Fix the model", "Mark the")) for h in heads), (why, heads)
+    for why in model:
+        assert any(h.startswith("Fix the model") for h in _asked(why)), why
+    assert "its function is stated" not in ol.NO_LOAD          # round 6, P3: it reads as not yet stated
+    # the reviewer's layout: a closet with no function, a storeroom behind it, off a kitchen: asked by hand
+    desc = description([CORRIDOR, room("k", rect(10, 6.5, 20, 16.5), use="kitchen", lockable=False),
+                        room("s13", rect(10, 17, 20, 27), use="closet", lockable=False),
+                        room("st", rect(13, 27.5, 17, 30.5), use="accessory_storage", lockable=True)],
+                       [EXIT, door("kc", (15, 6.25), (1, 0), ("k", "c")), door("s13", (15, 16.75), (1, 0), ("s13", "k")),
+                        door("sts13", (15, 27.25), (1, 0), ("st", "s13"))])
+    parts = measure(desc)["parts"]
+    occupant_load.apply(parts, desc, FACTORS, {"occupant_load_increased": False})
+    closet = _space(parts, "s13")["not_measured"]["space_occupant_load"]
+    assert "st egresses through it" in closet
+    assert not any(h.startswith(("Fix the model", "Mark the")) for h in _asked(closet)), closet

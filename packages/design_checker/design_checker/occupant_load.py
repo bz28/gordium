@@ -40,11 +40,15 @@ LOWER, UPPER = "room_area", "grossed_up_or_increased"
 # mark: group 3 review round 4), so the panel asks for it by hand, never for a mark that can't be set
 FUNCTION_STATED = STOPS["stated_not_given"].format(what="each room's Table 1004.5 function")
 NOT_GIVEN = "the room's function (Table 1004.5) isn't stated, so its occupant load isn't worked out: " + FUNCTION_STATED
+# the same words for a load Gordium (or a person) must work out and no mark carries (round 6): a room others pass
+# through (their loads aren't summed yet), a function the table sends elsewhere; asked by hand, never as a model fix
+LOAD_STATED = STOPS["stated_not_given"].format(what="the room's occupant load, worked out by hand")
 UNKNOWN = "the room's function {f!r} is none of Table 1004.5's (docs/interior/interior_description_format.md)"
-ELSEWHERE = "the function {f} takes its occupant load from {where}, not a factor: a person states it"
+ELSEWHERE = "the function {f} takes its occupant load from {where}, not a factor: " + LOAD_STATED
 THROUGH = ("other rooms' egress passes through it (1004.2: their occupant loads add to its own), which isn't summed "
-           "yet")
-SERVED = ("{names} egress{es} through it (1004.2: {their} occupant load adds to its own), which isn't summed yet")
+           "yet: ") + LOAD_STATED
+SERVED = ("{names} egress{es} through it (1004.2: {their} occupant load adds to its own), which isn't summed yet: "
+          + LOAD_STATED)
 STORY_OPEN = "a room on the story has no occupant load worked out ({names}), so the story's isn't either"
 # where a room is open for want of a stated function, the story says so in the routes' words (asked by hand); where
 # every open room is so for another reason (its floor area, a function the table sends elsewhere), not (round 5)
@@ -52,9 +56,9 @@ STORY_FUNCTION = ": " + FUNCTION_STATED
 EXIT_FUNCTION = ("{name} is itself an exit (a door into it is marked an exit enclosure or passageway), yet states "
                  "the function {f!r}: an exit holds no occupant load of its own, so which it is isn't known")
 IS_EXIT = ("it is itself an exit (an exit stair's enclosure, an exit passageway): it holds no occupant load of its own, "
-           "so a rule that reads one for it is a person's check")
+           "so a rule that reads one for it is a person's check: ") + LOAD_STATED
 NO_LOAD = ("a {use} with no function stated holds no occupant load of its own (202 FLOOR AREA, NET leaves closets and "
-           "toilet rooms out); if people use it, its function is ") + FUNCTION_STATED
+           "toilet rooms out); if people use it, its function needs to be ") + FUNCTION_STATED
 STORY_NONE = "no room on the story holds an occupant load of its own (its spaces are exits, closets or toilets)"
 GROSS_NOT_MEASURED = "the story's gross floor area isn't measured, so the gross-function rooms' share of it can't be"
 AREAS_OVER = ("the story's rooms add up to more than its gross floor area (inside its exterior walls), so the "
