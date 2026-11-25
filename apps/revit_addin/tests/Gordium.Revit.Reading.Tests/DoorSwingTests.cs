@@ -122,6 +122,18 @@ public sealed class DoorSwingTests
     }
 
     [Fact]
+    public void An_arc_hinged_in_the_wall_away_from_a_jamb_is_not_a_swing()
+    {
+        // a centre-pivot door's arc: centred in the wall at the middle of the opening, half the door's width, drawn on
+        // one side (door swing review round 1: only the jamb test turns it away)
+        var floor = new FakeFloor();
+        floor.AddArc("dA", new SwingArc(floor.Fake.Place(10, 9.75, 0), FakeFloor.Frame / 2, floor.Fake.Place(10, 9.75 + FakeFloor.Frame / 2, 0)));
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(Into(read, "dA"));
+        Assert.Contains("none of the 1 arcs its plan symbol draws is a leaf's swing from a jamb", FakeFloor.Note(read, "dA", "doors.swings_into"));
+    }
+
+    [Fact]
     public void A_swing_that_ends_within_its_wall_leaves_it_unstated()
     {
         var floor = new FakeFloor();

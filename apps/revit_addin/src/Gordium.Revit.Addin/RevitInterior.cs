@@ -41,9 +41,9 @@ internal static class RevitInterior
         List<StairCandidate> candidates;
         List<RailingRecord>? railings;
         // each element's geometry worked out once for the rooms, openings, stairs and railings (the same element over
-        // many rooms was read again for each): kept only until the enclosed areas below, the first step that changes
-        // the model (a Room placed for the moment, rolled back); nothing before it changes anything, so what is kept
-        // is what would be read again
+        // many rooms was read again for each): kept only until the door swings and the enclosed areas below, the
+        // first steps that change the model (a plan view, a Room placed for the moment, each rolled back); nothing
+        // before them changes anything, so what is kept is what would be read again
         using (FacesKept.Open(Hits("inside.cache.faces")))
         using (BandPiecesKept.Open(Hits("inside.cache.band_pieces")))
         using (NearKept.Open(Hits("inside.cache.near")))
@@ -270,8 +270,8 @@ internal static class RevitInterior
             foreach (var o in g)
                 switch (o)
                 {
-                    case GeometryInstance gi:
-                        Walk(gi.GetInstanceGeometry());
+                    case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
+                        Walk(inner);
                         break;
                     case Arc { IsBound: true } a when Math.Abs(Math.Abs(a.Normal.Z) - 1) < 1e-6:
                         arcs.Add(new SwingArc(P(a.Center), a.Radius, P(a.Evaluate(0.5, true))));

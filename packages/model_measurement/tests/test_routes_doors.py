@@ -110,6 +110,15 @@ def test_leaves_stated_or_not():
         assert _why(_parts(_office(leaves=bad))["d"], "moe_door_leaves").startswith("the door d gives its leaves as")
 
 
+def test_a_swing_not_given_never_says_why_it_is_missing():
+    # door swing review round 1: the Revit reader leaves swings_into out for many reasons where a swing is drawn (both
+    # sides, an arc in the wall, rooms not found, a read-only model), and a description from another host has no plan
+    # symbol at all: the reason never claims the model draws none
+    words = STOPS["door_swing_not_given"].format(name="d")
+    assert "draws no swing" not in words and "no mark" not in words
+    assert _why(_parts(_office())["d"], "moe_door_swings_with_egress") == words
+
+
 def test_an_exit_kind_not_read_is_not_measured():
     d = _office()
     d["doors"][0]["exit_kind"] = "fire_escape"

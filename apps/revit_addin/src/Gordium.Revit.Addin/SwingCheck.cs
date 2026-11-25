@@ -44,6 +44,7 @@ internal static class SwingCheck
             }
             log["doors"] = built.Count;
             log["as_built"] = Rows(doc, built, how);
+            log["rooms"] = Rooms(doc, built, how);
             // what Revit itself draws, to look at: each level's plan as a picture beside the model, and each door's
             // arcs as read (centre and middle, plan feet)
             log["pictures"] = Pictures(doc, Path.GetDirectoryName(modelPath)!);
@@ -93,6 +94,37 @@ internal static class SwingCheck
             .Select(r => $"{how[r.Id]}: read {Side(r.Read)}, built {Side(r.Built)}{(r.Read is not null && r.Read == r.Built ? " (agrees)" : " (DIFFERS)")}" +
                          (r.Why is null ? "" : $"; {r.Why}"))
             .OrderBy(x => x, StringComparer.Ordinal).ToList();
+    }
+
+    /// <summary>Each door's <c>swings_into</c> as the check's own reading sends it (InteriorReader.Read: its room's
+    /// name, or outside, or the note why it isn't sent) beside the room Revit itself finds 1 ft past the wall's face
+    /// on the side the door was built to swing (<c>Document.GetRoomAtPoint</c>, the last phase; none: outside).</summary>
+    private static List<string> Rooms(Document doc, Dictionary<string, Xyz> built, Dictionary<string, string> how)
+    {
+        var read = InteriorReader.Read(RevitInterior.Model(doc));
+        var phase = doc.Phases.Cast<Phase>().LastOrDefault();
+        var names = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType()
+            .Cast<Element>().ToDictionary(r => r.UniqueId, r => r.Name, StringComparer.Ordinal);
+        var doors = (read.Interior["doors"] as JsonArray ?? []).OfType<JsonObject>()
+            .ToDictionary(d => d["id"]!.GetValue<string>(), StringComparer.Ordinal);
+        var rows = new List<string>();
+        foreach (var (id, dir) in built)
+        {
+            var fi = (FamilyInstance)doc.GetElement(id);
+            var at = (fi.Location as LocationPoint)!.Point;
+            var half = fi.Host is Wall w ? w.Width / 2 : 0.25;
+            var level = doc.GetElement(fi.LevelId) as Level;
+            var probe = new XYZ(at.X + dir.X * (half + 1), at.Y + dir.Y * (half + 1), (level?.ProjectElevation ?? at.Z) + 1);
+            var there = phase is null ? null : doc.GetRoomAtPoint(probe, phase);
+            var expected = there is null ? "outside" : there.Name;
+            string got;
+            if (doors.TryGetValue(id, out var d) && d["swings_into"]?.GetValue<string>() is { } into)
+                got = into == RouteReader.Outside ? "outside" : names.GetValueOrDefault(into, into);
+            else
+                got = "not sent (" + (read.RouteNotes.FirstOrDefault(n => n.Part == id && n.Field == "doors.swings_into")?.Why ?? "no note") + ")";
+            rows.Add($"{how[id][..3]}: swings_into {got}; Revit's room on the built side {expected}{(got == expected ? " (agrees)" : " (DIFFERS)")}");
+        }
+        return rows.OrderBy(x => x, StringComparer.Ordinal).ToList();
     }
 
     /// <summary>Each floor plan (not a template) exported as a PNG beside the model, to look at.</summary>

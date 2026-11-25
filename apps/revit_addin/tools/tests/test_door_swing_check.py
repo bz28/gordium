@@ -51,6 +51,15 @@ def test_every_door_is_read_on_the_side_it_was_built_to_swing_in_every_facing_an
     assert run["swing_check"]["subcategories_hidden"] > 0
 
 
+def test_each_door_swings_into_the_room_revit_finds_on_the_side_it_was_built_to_swing():
+    # the whole reading (InteriorReader.Read: the side, then the room or outside found past the wall's face) beside
+    # Revit's own GetRoomAtPoint 1 ft past the face on the built side (door swing review round 1)
+    rooms = RECORDED["runs"][1]["swing_check"]["rooms"]
+    assert len(rooms) == 10 and all(r.endswith("(agrees)") for r in rooms), rooms
+    assert any("swings_into outside;" in r for r in rooms)
+    assert len({r.split("swings_into ")[1].split(";")[0] for r in rooms}) >= 4
+
+
 def test_the_reading_follows_what_revit_draws_not_the_builds_flip_convention():
     # built with the build's defaults, every template door stood turned from the data (the plan pictures showed each
     # swing where the reader read it); the reader never agreed with the data there, and agreed with Gordium's own double

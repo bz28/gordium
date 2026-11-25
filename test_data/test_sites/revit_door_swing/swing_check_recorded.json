@@ -75,7 +75,7 @@
    }
   },
   {
-   "why": "built with swing_opposite_facing and hinge_opposite_hand false (the template's Single-Flush in Revit 2027 swings toward its facing and hinges on its hand's side): every door as the data",
+   "why": "built with swing_opposite_facing and hinge_opposite_hand false (the template's Single-Flush in Revit 2027 swings toward its facing and hinges on its hand's side): every door as the data; read again after review round 1 with each door's swings_into as the full reading sends it, beside the room Revit finds on the built side",
    "build": {
     "request": {
      "data": "test_data/test_sites/revit_door_swing/revit_build_data.json",
@@ -112,6 +112,18 @@
      "D08 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (1, -0) flipped True, hand (0, 1) flipped False, mirrored True: read -, built - (agrees)",
      "D09 (Gordium double door 36 x 84 in (swing check): Door 36\" x 84\" (swing check); double): facing (-0, -1) flipped True, hand (1, 0) flipped False, mirrored True: read +, built + (agrees)",
      "D10 (Single-Flush: Door 36\" x 84\" (swing check); single): facing (-0, 1) flipped False, hand (-1, 0) flipped True, mirrored True: read +, built + (agrees)"
+    ],
+    "rooms": [
+     "D01: swings_into CORRIDOR L1 3; Revit's room on the built side CORRIDOR L1 3 (agrees)",
+     "D02: swings_into CORRIDOR L1 3; Revit's room on the built side CORRIDOR L1 3 (agrees)",
+     "D03: swings_into CORRIDOR L1 3; Revit's room on the built side CORRIDOR L1 3 (agrees)",
+     "D04: swings_into CORRIDOR L1 3; Revit's room on the built side CORRIDOR L1 3 (agrees)",
+     "D05: swings_into outside; Revit's room on the built side outside (agrees)",
+     "D06: swings_into STAIR EAST L1 4; Revit's room on the built side STAIR EAST L1 4 (agrees)",
+     "D07: swings_into STAIR WEST L2 7; Revit's room on the built side STAIR WEST L2 7 (agrees)",
+     "D08: swings_into STAIR EAST L2 9; Revit's room on the built side STAIR EAST L2 9 (agrees)",
+     "D09: swings_into CORRIDOR L2 8; Revit's room on the built side CORRIDOR L2 8 (agrees)",
+     "D10: swings_into APARTMENT NORTH L2 10; Revit's room on the built side APARTMENT NORTH L2 10 (agrees)"
     ],
     "subcategories_hidden": 63,
     "views_coarse_swings_hidden": [
