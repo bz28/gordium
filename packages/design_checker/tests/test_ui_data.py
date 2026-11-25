@@ -293,7 +293,8 @@ def test_the_contents_list_every_chapter_and_never_hide_a_rows_section(apartment
     assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] >= 20
     sections = {s["number"]: s for s in egress["sections"]}
     assert sections["1006"]["coverage"] == "rules" and sections["1006"]["whole"] is False
-    assert sections["1017"]["whole"] is True and sections["1010"]["coverage"] == "not_brought_in"
+    assert sections["1017"]["whole"] is True and sections["1011"]["coverage"] == "not_brought_in"
+    assert sections["1010"]["coverage"] == "rules" and sections["1010"]["whole"] is False   # group 6a: 1010.1, 1010.1.1
     # every row's section is in its book's contents, never as not brought in
     listed = {(b["key"], s["number"]): s for b in apartment["view"]["contents"] for c in b["chapters"]
               for s in c["sections"]}
