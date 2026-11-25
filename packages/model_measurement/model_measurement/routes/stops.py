@@ -164,6 +164,8 @@ STOPS = {
                             "known",
     "outside_into_exit": "the space of {name} has a way out besides the shared corridor ({door}): whether it exits "
                          "directly outside isn't known",
+    "outside_stair": "the space of {name} has a stair within it besides the shared corridor (to another story, maybe "
+                     "to its own door out): whether it exits directly outside isn't known",
     "outside_door_not_marked": "the space of {name} has a door to the outside ({door}) not marked as an exit door at "
                                "the level of exit discharge: whether it is one isn't known (exits are marked, never "
                                "guessed)",
