@@ -606,3 +606,18 @@ def test_every_plain_measure_name_reads_inside_each_asks_headline():
     got = ui_data._from_cause({"kind": "fix_model", "key": "model:space:space_is_exit:x", "words": "w",
                                "measure": "space_is_exit"}, "space")["headline"]
     assert got == "Fix the model so the exit status (whether the space is itself an exit) can be measured"
+
+
+def test_every_story_fact_a_story_exit_rule_reads_and_nothing_measures_is_a_question_in_words():
+    """Group 2's review round 4 (P3, 2026-11-24): the story facts Tables 1006.3.4(1) and (2) read and no measuring
+    gives (the story's place, its dwelling units) each ask a plain question, as the first story's does; their names
+    read as whole clauses."""
+    from design_checker import each_part
+    for m in ("story_first_above_or_below_grade", "story_second_above_grade_plane",
+              "story_fourth_or_higher_above_grade_plane", "story_dwelling_units"):
+        cause = {"kind": "measure_by_hand", "key": f"gap:story:{m}", "measure": m, "words": f"{m}: not measured",
+                 "elements": []}
+        head = ui_data._from_cause(cause, "story")["headline"]
+        assert head.startswith("Check by hand:") and head.endswith("?") and "_" not in head, (m, head)
+    for m in ("story_second_above_grade_plane", "story_fourth_or_higher_above_grade_plane"):
+        assert "story above grade plane" in each_part.MEASURE_NAMES[m] and "(whether it is the" in each_part.MEASURE_NAMES[m]

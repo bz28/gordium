@@ -94,6 +94,9 @@ BY_HAND_QUESTIONS = {
     "space_egress_sleeping_through_sleeping_or_toilet":
         "Check by hand: does the path from a sleeping area pass through another sleeping area or a toilet room?",
     "story_first_above_or_below_grade": "Check by hand: is this the first story above or below grade?",
+    "story_second_above_grade_plane": "Check by hand: is this the second story above grade plane?",
+    "story_fourth_or_higher_above_grade_plane": "Check by hand: is this the fourth story above grade plane or higher?",
+    "story_dwelling_units": "Check by hand: how many dwelling units are on this story?",
     "space_exit_remoteness_ratio": "Check by hand: are the exits far enough apart (1/2 or 1/3 of the diagonal)?",
     "exit_remoteness_ratio": "Check by hand: are the exits far enough apart (1/2 or 1/3 of the diagonal)?",
 }
