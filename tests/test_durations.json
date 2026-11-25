@@ -500,6 +500,7 @@
 "packages/design_checker/tests/test_occupancy_display.py::test_the_occupancy_row_shows_the_laws_limit[R-3b-True]": 7.4,
 "packages/design_checker/tests/test_occupancy_display.py::test_the_occupancy_row_shows_the_laws_limit[RU-False]": 8.2,
 "packages/design_checker/tests/test_occupancy_display.py::test_the_occupancy_row_shows_the_laws_limit[RU-True]": 7.2,
+"packages/design_checker/tests/test_occupant_load.py::test_a_function_on_a_room_marked_a_corridor_or_an_exit_is_said_never_dropped": 12.1,
 "packages/design_checker/tests/test_occupant_load.py::test_a_load_served_through_a_chain_reaches_every_room_on_it": 55.4,
 "packages/design_checker/tests/test_occupant_load.py::test_a_net_function_is_one_value_and_a_function_sent_elsewhere_is_a_persons": 11.9,
 "packages/design_checker/tests/test_occupant_load.py::test_a_room_a_loaded_closet_is_served_through_carries_it_so_its_own_load_isnt_given": 55.4,
