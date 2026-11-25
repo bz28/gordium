@@ -521,9 +521,9 @@ public static class RouteReader
 
     /// <summary>The shortest arc read as a leaf's swing: 9 in, whatever the door's width, under the narrowest leaf a
     /// pair is made with (12 in, or 300 mm, which is 11.8 in, drawn to its panel a little less), so a pair's narrow
-    /// leaf is always counted and a pair hung opposite ways is seen to swing both ways; a handle's or a hardware arc
-    /// is shorter (about 6 in at most). An arc counted that isn't a leaf's can only add a side, which leaves the swing
-    /// unstated, never a wrong one.</summary>
+    /// leaf is always counted and a pair hung opposite ways is seen to swing both ways; a lever's arc is shorter (about
+    /// 5 in). An arc counted that isn't a leaf's (a closer's arm, drawn rarely, on the push side) can only add a side
+    /// beside the leaf's own, which leaves the swing unstated.</summary>
     internal const double LeastLeaf = 9.0 / 12;
 
     /// <summary>The side of its wall a door's plan symbol draws its swing on, as the sign along the wall's normal
