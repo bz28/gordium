@@ -390,6 +390,141 @@ def test_a_space_with_its_own_limit_stated_or_not_ruled_out_never_passes_a_trave
         "needs_review"                                                                 # over 407.4.2's 50 ft
 
 
+# ---- section group 2 (2026-11-23): a story's exits and exit separation for every group -----------------------------
+
+FIRST, SECOND, FOURTH = ("story_first_above_or_below_grade", "story_second_above_grade_plane",
+                         "story_fourth_or_higher_above_grade_plane")
+# Table 1006.3.4(2), p.317 lines 39-43: (groups, the story, most occupants, travel without / with NFPA 13 per note b,
+# which is printed on the first story's B, F and S only: group 2's review round 1, 2026-11-24)
+TABLE_1006_3_4_2 = [
+    (A + ["E", "M", "U"], FIRST, 49, 75, 75), (["B", "F-1", "F-2"], FIRST, 49, 75, 100),
+    (["H-2", "H-3"], FIRST, 3, 25, 25), (["H-4", "H-5", "I-1", "I-2", "I-3", "R-1"], FIRST, 10, 75, 75),
+    (["S-1"], FIRST, 29, 75, 100), (["M"], SECOND, 29, 75, 75), (["B", "F-1", "F-2", "S-1"], SECOND, 29, 75, 75)]
+STORY_FACTS = {"emergency_escape_openings_1031": True, "r2_sleeping_units": False} | STATED
+
+
+def _story_rule(rules, g):
+    fam = ("a_b_e_f_m_u" if g in A + ["B", "E", "F-1", "F-2", "M", "U"] else "s" if g.startswith("S") else "h_i_r")
+    return rules[f"general.bc_table_1006_3_4_2__{fam}"]
+
+
+def _story(where, load, travel, exits=1, **more):
+    return {"story_exit_count": exits, "story_occupant_load": load, "egress_travel_distance": travel,
+            FIRST: where == FIRST, SECOND: where == SECOND, FOURTH: False, "story_rooms_exit_directly_outside": False,
+            **more}
+
+
+def test_table_1006_3_4_2_each_row_at_its_limits_and_just_past(ctx, rules):
+    for groups, where, most, without, with_ in TABLE_1006_3_4_2:
+        for g in groups:
+            r = _story_rule(rules, g)
+            given = {"occupancy_group": g} | STORY_FACTS
+            ok = "needs_review" if g == "I-3" else "pass"      # 408.6.1's smoke-barrier distances aren't drawn
+            assert _one(r, "story", _story(where, most, with_), given | NFPA13, ctx) == ok, (g, where)
+            assert _one(r, "story", _story(where, most + 0.5, 10), given | NFPA13, ctx) == "fail", (g, where)
+            assert _one(r, "story", _story(where, 1, with_ + 0.01), given | NFPA13, ctx) == "fail", (g, where)
+            assert _one(r, "story", _story(where, most, without), given | NONE, ctx) == ok, (g, where)
+            assert _one(r, "story", _story(where, most, without + 0.01), given | NONE, ctx) == "fail", (g, where)
+    for g in ("A-2", "E", "U", "H-4", "I-1", "R-1"):                         # not in the second-story row
+        r = _story_rule(rules, g)
+        assert _one(r, "story", _story(SECOND, 1, 10), {"occupancy_group": g} | STORY_FACTS | NFPA13, ctx) == "fail", g
+    for g in ("B", "F-1", "F-2", "S-1"):            # note b's 100 ft never reaches the second story (p.317 line 43)
+        r = _story_rule(rules, g)
+        assert _one(r, "story", _story(SECOND, 29, 90), {"occupancy_group": g} | STORY_FACTS | NFPA13, ctx) == "fail", g
+        assert _one(r, "story", _story(FIRST, 29, 90), {"occupancy_group": g} | STORY_FACTS | NFPA13, ctx) == "pass", g
+    third = _story(None, 1, 10)
+    assert _one(_story_rule(rules, "B"), "story", third, {"occupancy_group": "B"} | NFPA13, ctx) == "fail"  # NP
+
+
+def test_group_i3_allowed_one_exit_by_its_travel_needs_review_and_a_measured_fail_still_fails(ctx, rules):
+    """408.6.1 (Table 1017.2 note a) also limits Group I-3's travel to a door in a smoke barrier, which isn't drawn:
+    the single-exit allowance never passes I-3 on the routes' travel (review round 5's walk, 2026-11-24)."""
+    h = rules["general.bc_table_1006_3_4_2__h_i_r"]
+    i3 = {"occupancy_group": "I-3"} | STORY_FACTS | NFPA13
+    assert _one(h, "story", _story(FIRST, 10, 75), i3, ctx) == "needs_review"
+    assert _one(h, "story", _story(FIRST, 10, 75.01), i3, ctx) == "fail"
+    assert _one(h, "story", _story(FIRST, 10, 300, exits=2), i3, ctx) == "pass"       # Table 1006.3.3's two exits
+    assert _one(h, "story", _story(FIRST, 10, 75), {"occupancy_group": "I-1"} | STORY_FACTS | NFPA13, ctx) == "pass"
+
+
+def test_two_exits_by_table_1006_3_3_and_r3_r4_with_one(ctx, rules):
+    r = _story_rule(rules, "B")
+    b = {"occupancy_group": "B"} | NFPA13
+    assert _one(r, "story", _story(FIRST, 500, 300, exits=2), b, ctx) == "pass"
+    assert _one(r, "story", _story(FIRST, 500.5, 300, exits=2), b, ctx) == "fail"           # 501-1,000: three
+    assert _one(r, "story", _story(FIRST, 1000, 300, exits=3), b, ctx) == "pass"
+    assert _one(r, "story", _story(FIRST, 1000.5, 300, exits=3), b, ctx) == "fail"          # more: four
+    h = rules["general.bc_table_1006_3_4_2__h_i_r"]
+    assert _one(h, "story", _story(SECOND, 40, 200), {"occupancy_group": "R-3"} | NFPA13 | STATED, ctx) == "pass"
+    assert _one(h, "story", _story(FIRST, 2, 10), {"occupancy_group": "H-1"} | NFPA13, ctx) == "fail"  # no H-1 row
+
+
+def test_table_1006_3_4_1_group_r2_of_dwelling_units(ctx, rules):
+    """p.317 lines 21-24: a basement or first to third story, 4 dwelling units, 125 ft, only with note a's system
+    and escape openings; the fourth story and higher NP. Sleeping units are Table 1006.3.4(2)'s (note b)."""
+    r = rules["general.bc_table_1006_3_4_1__r2_dwelling_units"]
+    du = {"occupancy_group": "R-2", "r2_sleeping_units": False, "emergency_escape_openings_1031": True} | STATED
+    one = {"story_exit_count": 1, "story_occupant_load": 16, "egress_travel_distance": 125, FOURTH: False,
+           "story_dwelling_units": 4, "story_rooms_exit_directly_outside": False}
+    assert _one(r, "story", one, du | NFPA13, ctx) == "pass"
+    assert _one(r, "story", one, du | {S1: False, S2: True}, ctx) == "pass"                 # NFPA 13R
+    assert _one(r, "story", one | {"story_dwelling_units": 5}, du | NFPA13, ctx) == "fail"
+    assert _one(r, "story", one | {"egress_travel_distance": 125.01}, du | NFPA13, ctx) == "fail"
+    assert _one(r, "story", one | {FOURTH: True}, du | NFPA13, ctx) == "fail"
+    assert _one(r, "story", one, du | NONE, ctx) == "fail"                                   # note a: sprinklered
+    assert _one(r, "story", one, du | NFPA13 | {"emergency_escape_openings_1031": False}, ctx) == "fail"
+    assert _one(r, "story", one, {"occupancy_group": "R-2"} | NFPA13, ctx) == "needs_review"  # units not stated
+    two = one | {"story_exit_count": 2, "story_dwelling_units": 9}
+    assert _one(r, "story", two, du | NONE, ctx) == "pass"
+    sleeping = rules["general.bc_table_1006_3_4_2__h_i_r"]
+    su = du | {"r2_sleeping_units": True}
+    assert _one(sleeping, "story", _story(FIRST, 10, 75), su | NFPA13, ctx) == "pass"
+    assert _one(sleeping, "story", _story(FIRST, 10, 75), su | NONE, ctx) == "fail"          # note a
+
+
+def test_a_close_pair_fails_in_another_group_where_two_are_required(ctx, rules):
+    """1007.1.1 for every group (group 2): a close pair fails where the group's own row can't allow one exit, and
+    needs review where it could (read loosely), never failing a story or space one exit would serve."""
+    story = rules["general.bc_1007_1_1_remoteness"]
+    b = {"occupancy_group": "B", "occupancy_group_i4": False, "other_occupancy_present": True} | NFPA13
+    close = {"exit_remoteness_ratio": 0.2, "story_exit_count": 2, "story_dwelling_units": 0}
+    assert _one(story, "story", close | _story(FIRST, 120, 90, exits=2), b, ctx) == "fail"
+    assert _one(story, "story", close | _story(FIRST, 40, 90, exits=2), b, ctx) == "needs_review"
+    space = rules["general.bc_1007_1_1_space_remoteness"]
+    room = {"space_exit_count": 2, "space_exit_remoteness_ratio": 0.2, "space_common_path": 40, "space_is_exit": False}
+    assert _one(space, "space", room | {"space_occupant_load": 60}, b, ctx) == "fail"
+    assert _one(space, "space", room | {"space_occupant_load": 30}, b, ctx) == "needs_review"
+    mixed = b | {"occupancy_group": "mixed"}
+    assert _one(space, "space", room | {"space_occupant_load": 60}, mixed, ctx) == "needs_review"
+    # group 2's review round 1 (2026-11-24): an S-2 story may have one exit at any load (1006.3.4 item 3, a
+    # mechanically parked garage), and a one-group R-3 or R-4 space of 20 or fewer at any common path (Table 1006.2.1
+    # note e): a close pair needs review there, never a fail; S-1 and R-2 past their rows still fail
+    s2, s1 = b | {"occupancy_group": "S-2"}, b | {"occupancy_group": "S-1"}
+    assert _one(story, "story", close | _story(FIRST, 120, 90, exits=2), s2, ctx) == "needs_review"
+    assert _one(story, "story", close | _story(FIRST, 120, 90, exits=2), s1, ctx) == "fail"
+    far = room | {"space_common_path": 150, "space_occupant_load": 15}
+    for g in ("R-3", "R-4"):
+        assert _one(space, "space", far, b | {"occupancy_group": g}, ctx) == "needs_review", g
+    assert _one(space, "space", far, b | {"occupancy_group": "R-2"}, ctx) == "fail"
+
+
+def test_a_close_pair_on_a_story_follows_each_table_row_exactly_where_one_exit_could_do(ctx, rules):
+    """Group 2's review round 2 (2026-11-24): 1007.1.1's loose one-exit test reads each Table 1006.3.4(2) row at its
+    own larger column, as the story-exit rules do (the table above): at the row's limit a close pair needs review
+    (one exit could do); just past it, where the row fails one exit, the close pair fails, sprinklered."""
+    story = rules["general.bc_1007_1_1_remoteness"]
+    close = {"exit_remoteness_ratio": 0.2, "story_dwelling_units": 0}
+    for groups, where, most, without, with_ in TABLE_1006_3_4_2:
+        for g in groups:
+            given = {"occupancy_group": g, "occupancy_group_i4": False, "other_occupancy_present": True} | NFPA13
+            at = close | _story(where, most, with_, exits=2)
+            assert _one(story, "story", at, given, ctx) == "needs_review", (g, where)
+            for past in (_story(where, most, with_ + 0.01, exits=2), _story(where, most + 0.5, 10, exits=2)):
+                assert _one(story, "story", close | past, given, ctx) == "fail", (g, where, past)
+            assert _one(_story_rule(rules, g), "story", _story(where, most, with_ + 0.01), given | STORY_FACTS,
+                        ctx) == "fail", (g, where)                      # the row itself fails one exit there
+
+
 def test_the_readme_counts_the_pieces_and_numbers_the_second_reading_holds():
     """Review round 2 (P3): the folder's README states how many pieces are brought in and how many numbers were
     read twice; both must be the second reading's own counts, so a piece brought in can't leave them stale."""

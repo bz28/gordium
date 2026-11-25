@@ -118,11 +118,19 @@ pieces:
     heading: Egress based on occupant load
     rules:
     - general.bc_1006_3_3_story_exits
+  Table 1006.3.4(1):
+    label: rule
+    heading: Stories and occupiable roofs with one exit or access to one exit for r-2 occupancies
+    rules:
+    - general.bc_table_1006_3_4_1__r2_dwelling_units
   Table 1006.3.4(2):
     label: rule
     heading: Stories and occupiable roofs with one exit or access to one exit for other occupancies
     rules:
     - general.bc_table_1006_3_4_2__other_occupancies
+    - general.bc_table_1006_3_4_2__a_b_e_f_m_u
+    - general.bc_table_1006_3_4_2__h_i_r
+    - general.bc_table_1006_3_4_2__s
   1006.3.4.1:
     label: flag
     heading: Single exits › Mixed occupancies

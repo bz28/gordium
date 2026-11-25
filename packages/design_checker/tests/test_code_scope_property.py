@@ -57,6 +57,8 @@ BUILDING = {
     "assembly_fixed_seating": (None, True, False, "no"),
     "special_egress_spaces": (None, True, False, "no"),
     "merchandise_pads": (None, True, False, "no"),
+    "emergency_escape_openings_1031": (None, True, False, "no"),
+    "r2_sleeping_units": (None, True, False, "no"),
     "facts_not_sent": (None, [], ["dwelling_units"], ["sprinkler_system"], "use"),
 }
 DOMAIN = {**VALUES, **BUILDING}
@@ -71,7 +73,8 @@ BASE = {"use": "one_family_detached", "dwelling_units": 1, "attached_units_in_bu
         "follows_building_code": None, "separate_means_of_egress": True, "townhouse_units": None,
         "stories_above_grade_plane": None, "occupancy_groups": None, "sprinkler_system": None,
         "egress_balcony_increase_taken": None, "building_has_atrium": None, "assembly_fixed_seating": None,
-        "special_egress_spaces": None, "merchandise_pads": None, "facts_not_sent": None}
+        "special_egress_spaces": None, "merchandise_pads": None,
+        "emergency_escape_openings_1031": None, "r2_sleeping_units": None, "facts_not_sent": None}
 
 
 def count(v, least=0):
@@ -89,7 +92,8 @@ def law(f):
     kinds = [yes_no(f[k]) for k in ("accessory_dwelling_unit", "adu_detached", "home_occupation", "care_facility",
                                     "follows_building_code", "separate_means_of_egress", "townhouse_units",
                                     "egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating",
-                                    "special_egress_spaces", "merchandise_pads")]
+                                    "special_egress_spaces", "merchandise_pads", "emergency_escape_openings_1031",
+                                    "r2_sleeping_units")]
     kinds += [f[k] is None or count(f[k]) for k in ("dwelling_units", "attached_units_in_building", "adus_on_parcel",
                                                     "rooms_let_for_profit", "stories")]
     kinds += [f["stories_above_grade_plane"] is None or count(f["stories_above_grade_plane"], 1),

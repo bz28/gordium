@@ -425,8 +425,8 @@ rules:
   topic: means_of_egress
   title: Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)
   applies_when: occupancy_group_i4
-  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and space_common_path
-    <= 75)
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
+    and space_common_path <= 75)
   review_when:
   - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2))
     reason: 'Two exits or more, and a common path over 75 ft (or a building not sprinklered throughout, where the table gives
@@ -5216,7 +5216,8 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Three exits from 501-1,000 occupants, four above (BCNYS 1006.2.1.1)
-  check: space_is_exit or (space_occupant_load <= 500 or space_exit_count >= 3) and (space_occupant_load <= 1000 or space_exit_count >= 4)
+  check: space_is_exit or (space_occupant_load <= 500 or space_exit_count >= 3) and (space_occupant_load <= 1000 or space_exit_count
+    >= 4)
   for_each: space
   when_none: needs_review
   sources:
@@ -5399,6 +5400,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: false
     parts:
@@ -5420,6 +5422,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: false
     parts:
@@ -5442,6 +5445,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: false
     parts:
@@ -5464,6 +5468,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: false
     parts:
@@ -5486,6 +5491,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
       assembly_fixed_seating: false
       special_egress_spaces: false
     parts:
@@ -5508,6 +5514,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       story:
       - id: p6
@@ -5529,6 +5536,7 @@ rules:
       other_occupancy_present: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      occupancy_group: mixed
     parts:
       story:
       - id: p5
@@ -5558,17 +5566,21 @@ rules:
     above or below grade plane, at most 10 occupants and 75 ft of exit access travel; Group I is not in the second-story row,
     and the third story and higher are NP), and gives needs review, never fail, where item 2 is stated, on any story (rooms
     that exit directly outside at the level of exit discharge, which on a sloping site may be an upper story), or left blank
-    or the building is in another occupancy (its rows are the rule “Table 1006.3.4(2)''s rows for other occupancies (BCNYS)”).
-    Items 3 to 5 (mechanical parking, Groups R-3 and R-4, dwelling units) are for other groups. Hand-drafted in a Claude Code
-    session (2026-11-21). Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed
-    seating (1030.7) or a space the code gives its own exits or travel limit is stated or not ruled out.'
+    or the building is in another occupancy (its rows are the rule “Tables 1006.3.4(1) and (2) in a building of two or more
+    groups (BCNYS)”). Items 3 to 5 (mechanical parking, Groups R-3 and R-4, dwelling units) are for other groups. Hand-drafted
+    in a Claude Code session (2026-11-21). Since 2026-11-23 it applies to Group I-4 and a building of two or more groups (or
+    one whose groups aren''t stated: needs review); every other group is the rules for its rows or, Group R-2 of dwelling
+    units, the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”. Review round 4 (2026-11-23): a story
+    allowed one exit only by its travel needs review while fixed seating (1030.7) or a space the code gives its own exits
+    or travel limit is stated or not ruled out.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  applies_when: occupancy_group_i4 or occupancy_group == "mixed"
 - id: general.bc_1006_3_4_1_mixed_occupancies
   kind: flag
   topic: means_of_egress
   title: Single exits in mixed occupancies (BCNYS 1006.3.4.1)
-  applies_when: other_occupancy_present
+  applies_when: occupancy_group == "mixed"
   sources:
   - file: gov.ny.building.2025.pdf
     page: 317
@@ -5581,22 +5593,24 @@ rules:
       for that occupancy. Where
   examples:
   - given:
-      other_occupancy_present: true
+      occupancy_group: mixed
     expect: needs_review
-    note: 'The building holds another occupancy (as the architect states it): this rulebook''s rules are drafted for Group
-      I-4 only, so the rows and allowances for other groups need a person.'
+    note: 'Two or more groups: 1006.3.4.1 sums each occupancy''s share of its row''s load, a person''s check.'
   - given:
-      other_occupancy_present: false
+      occupancy_group: B
     expect: not_applicable
-    note: 'The architect states it doesn''t apply: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-21).
+    note: 'One group, whose rows are rules: not applicable.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21). Narrowed 2026-11-23 to a building of two or more groups.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_3_4_2__other_occupancies
   kind: flag
   topic: means_of_egress
-  title: Table 1006.3.4(2)'s rows for other occupancies (BCNYS)
-  applies_when: other_occupancy_present
+  title: Tables 1006.3.4(1) and (2) in a building of two or more groups (BCNYS)
+  applies_when: occupancy_group == "mixed"
   sources:
   - file: gov.ny.building.2025.pdf
     page: 317
@@ -5612,15 +5626,1077 @@ rules:
     quote: S[fnb,] [fnd] 29 75 Second story above grade plane B, F, M, S[fnd] 29 75
   examples:
   - given:
-      other_occupancy_present: true
+      occupancy_group: mixed
     expect: needs_review
-    note: 'The building holds another occupancy (as the architect states it): this rulebook''s rules are drafted for Group
-      I-4 only, so the rows and allowances for other groups need a person.'
+    note: 'Two or more groups: 1006.3.4.1 sums each occupancy''s share of its row''s load, a person''s check.'
   - given:
-      other_occupancy_present: false
+      occupancy_group: B
     expect: not_applicable
-    note: 'The architect states it doesn''t apply: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-21).
+    note: 'One group, whose rows are rules: not applicable.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21). Narrowed 2026-11-23 to a building of two or more groups (one
+    group's rows are the rules for its rows and the rule “A story's one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_3_4_2__a_b_e_f_m_u
+  kind: rule
+  topic: means_of_egress
+  title: A story's one exit, A, B, E, F, M, U (BCNYS Table 1006.3.4(2))
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "M", "U"]
+  check: story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
+    > 0 and (story_first_above_or_below_grade and story_occupant_load <= 49 and egress_travel_distance <= (100 if occupancy_group
+    in ["B", "F-1", "F-2"] and sprinklered_903_3_1_1 else 75) or story_second_above_grade_plane and occupancy_group in ["B",
+    "F-1", "F-2", "M"] and story_occupant_load <= 29 and egress_travel_distance <= 75)
+  review_when:
+  - when: story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) and story_exit_count
+      > 0 and story_rooms_exit_directly_outside
+    reason: 'Fewer exits than Table 1006.3.3 gives, and the story''s rooms exit directly outside at the level of exit discharge
+      (1006.3.4 item 2, stated or not ruled out): one exit may do, a person checks.'
+  - when: assembly_fixed_seating and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or story_exit_count > 0 and (story_first_above_or_below_grade and story_occupant_load <= 49 and egress_travel_distance
+      <= (100 if occupancy_group in ["B", "F-1", "F-2"] and sprinklered_903_3_1_1 else 75) or story_second_above_grade_plane
+      and occupancy_group in ["B", "F-1", "F-2", "M"] and story_occupant_load <= 29 and egress_travel_distance <= 75))
+    reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
+      may have a room used for assembly purposes with fixed seating (stated or not ruled out): 1030.7 measures travel along
+      the aisles, never over the seats the routes measure across, so the figure can''t be trusted: a person checks. (Only
+      where the story would otherwise pass: a measured fail still fails.)'
+  - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
+      else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
+      > 0 and (story_first_above_or_below_grade and story_occupant_load <= 49 and egress_travel_distance <= (100 if occupancy_group
+      in ["B", "F-1", "F-2"] and sprinklered_903_3_1_1 else 75) or story_second_above_grade_plane and occupancy_group in ["B",
+      "F-1", "F-2", "M"] and story_occupant_load <= 29 and egress_travel_distance <= 75))
+    reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
+      may hold, stated or not ruled out, a space the code gives its own exits or exit access travel limit: a covered or open
+      mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6),
+      a boiler, incinerator or furnace room, refrigeration machinery room, refrigerated room or electrical room (1006.2.2.1
+      to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
+      space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
+      pass.)'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 48
+    - 50
+    quote: 1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate
+      and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall
+      be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps
+      providing access to exits, from any
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 55
+    - 57
+    quote: 1-500 2 501-1,000 3 More than 1,000 4
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 3
+    - 16
+    quote: '1006.3.4 Single exits. A single exit or access to a single exit shall be permitted from any story or occupiable
+      roof where one of the following conditions exists: 1. The occupant load, number of dwelling units and exit access travel
+      distance do not exceed the values in Table 1006.3.4(1) or 1006.3.4(2). 2. Rooms, areas and spaces complying with Section
+      1006.2.1 with exits that discharge directly to the exterior at the level of exit discharge, are permitted to have one
+      exit or access to a single exit. 3. Parking garages where vehicles are mechanically parked shall be permitted to have
+      one exit or access to a single exit. 4. Group R-3 and R-4 occupancies shall be permitted to have one exit or access
+      to a single exit. 5. Individual single-story or multistory dwelling units shall be permitted to have a single exit or
+      access to a single exit from the dwelling unit provided that both of the following criteria are met: 5.1. The dwelling
+      unit complies with Section 1006.2.1 as a space with one means of egress. 5.2. Either the exit from the dwelling unit
+      discharges directly to the exterior at the level of exit discharge, or the exit access outside the dwelling unit’s entrance
+      door provides access to not less than two approved independent exits.'
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 39
+    - 44
+    quote: A, B[fnb], E, F[fnb], M, U 49 75 First story above or below grade plane and occupiable H-2, H-3 3 25 roofs over
+      the first story above grade plane H-4, H-5, I, R-1, R-2a, c 10 75 S[fnb,] [fnd] 29 75 Second story above grade plane
+      B, F, M, S[fnd] 29 75 Third story above grade plane and higher NP NA NA
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 48
+    - 53
+    quote: a.Buildings classified as Group R-2 equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.1 or 903.3.1.2 and provided with emergency escape and rescue openings in accordance with Section 1031. b.Group
+      B, F and S occupancies in buildings equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.1 or an occupiable roof of such build- ings shall have a maximum exit access travel distance of 100 feet. c.
+      This table is used for Group R-2 occupancies consisting of sleeping units. For Group R-2 occupancies consisting of dwelling
+      units, use Table 1006.3.4(1). d.The length of exit access travel distance in a Group S-2 open parking garage shall be
+      not more than 100 feet.
+  examples:
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Office floor, two exits
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 2
+          story_occupant_load: 120
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Two exits, 120 occupants: Table 1006.3.3''s two.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Office floor of 600, two exits
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 2
+          story_occupant_load: 600
+          story_first_above_or_below_grade: true
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: '501 to 1,000 occupants: three exits (Table 1006.3.3); one or two only within Table 1006.3.4(2).'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Small office, one exit, NFPA 13
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 49
+          egress_travel_distance: 100
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'First story, 49 occupants, 100 ft: note b''s 100 ft for Group B with NFPA 13.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Small office, one exit, no sprinkler system
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 49
+          egress_travel_distance: 76
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'No sprinkler system: 75 ft (note b''s 100 ft needs NFPA 13).'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Shop, one exit, 50 occupants
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 50
+          egress_travel_distance: 30
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 49 occupants: two exits.'
+  - given:
+      occupancy_group: M
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Shop upstairs, one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 29
+          egress_travel_distance: 75
+          story_first_above_or_below_grade: false
+          story_second_above_grade_plane: true
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Second story, Group M: 29 and 75 ft.'
+  - given:
+      occupancy_group: A-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Restaurant upstairs, one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 20
+          egress_travel_distance: 40
+          story_first_above_or_below_grade: false
+          story_second_above_grade_plane: true
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Second story: Group A isn''t in the second-story row, so two exits.'
+  - given:
+      occupancy_group: E
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Classroom floor, third story, one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 10
+          egress_travel_distance: 30
+          story_first_above_or_below_grade: false
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Third story and higher: Not Permitted with one exit.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: with none, the rule needs review.'
+  - given:
+      occupancy_group: I-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+    parts:
+      story:
+      - id: p1
+        name: Day care floor
+        measures:
+          story_exit_count: 1
+          story_occupant_load: 5
+          egress_travel_distance: 10
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not this rule''s groups (Group I-4: the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS
+      1006.3.3)”).'
+  - given:
+      occupancy_group: A-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: with none, the rule needs review.'
+  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (the
+    rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling units (Table
+    1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with 1006.3.4''s single exits:
+    item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants and 75
+    ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units 10 and
+    75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13; the
+    second story: B, F, M and S 29 and 75 ft (note b''s 100 ft is printed on the first story''s rows only, p.317); the third
+    story and higher NP), and item 4 (Groups R-3 and R-4). Item 2 (rooms exiting directly outside, stated or not ruled out)
+    and Group S-2''s items 3 and note d need review where they could allow one exit. Item 5 (a dwelling unit''s own single
+    exit) is a unit''s, not a story''s. Occupiable roofs are not measured. The story''s place (first, second, fourth or higher
+    above grade plane) and its occupant load are the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23).
+    Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed seating (1030.7) or
+    a space the code gives its own exits or travel limit is stated or not ruled out. Group 2 review round 1 (2026-11-24):
+    the second story''s travel is 75 ft in B and F too, sprinklered or not (note b is printed on the first story''s rows only).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_3_4_2__h_i_r
+  kind: rule
+  topic: means_of_egress
+  title: A story's one exit, H, I-1 to I-3, R (BCNYS Table 1006.3.4(2))
+  applies_when: occupancy_group in ["H-1", "H-2", "H-3", "H-4", "H-5", "I-1", "I-2", "I-3", "R-1", "R-3", "R-4"] or occupancy_group
+    == "R-2" and r2_sleeping_units
+  check: story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
+    > 0 and (occupancy_group in ["R-3", "R-4"] or story_first_above_or_below_grade and (occupancy_group in ["H-2", "H-3"]
+    and story_occupant_load <= 3 and egress_travel_distance <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "I-3",
+    "R-1", "R-2"] and story_occupant_load <= 10 and egress_travel_distance <= 75) and (occupancy_group != "R-2" or (sprinklered_903_3_1_1
+    or sprinklered_903_3_1_2) and emergency_escape_openings_1031))
+  review_when:
+  - when: story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) and story_exit_count
+      > 0 and story_rooms_exit_directly_outside
+    reason: 'Fewer exits than Table 1006.3.3 gives, and the story''s rooms exit directly outside at the level of exit discharge
+      (1006.3.4 item 2, stated or not ruled out): one exit may do, a person checks.'
+  - when: assembly_fixed_seating and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or story_exit_count > 0 and (occupancy_group in ["R-3", "R-4"] or story_first_above_or_below_grade and (occupancy_group
+      in ["H-2", "H-3"] and story_occupant_load <= 3 and egress_travel_distance <= 25 or occupancy_group in ["H-4", "H-5",
+      "I-1", "I-2", "I-3", "R-1", "R-2"] and story_occupant_load <= 10 and egress_travel_distance <= 75) and (occupancy_group
+      != "R-2" or (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)))
+    reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
+      may have a room used for assembly purposes with fixed seating (stated or not ruled out): 1030.7 measures travel along
+      the aisles, never over the seats the routes measure across, so the figure can''t be trusted: a person checks. (Only
+      where the story would otherwise pass: a measured fail still fails.)'
+  - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
+      else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
+      > 0 and (occupancy_group in ["R-3", "R-4"] or story_first_above_or_below_grade and (occupancy_group in ["H-2", "H-3"]
+      and story_occupant_load <= 3 and egress_travel_distance <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "I-3",
+      "R-1", "R-2"] and story_occupant_load <= 10 and egress_travel_distance <= 75) and (occupancy_group != "R-2" or (sprinklered_903_3_1_1
+      or sprinklered_903_3_1_2) and emergency_escape_openings_1031)))
+    reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
+      may hold, stated or not ruled out, a space the code gives its own exits or exit access travel limit: a covered or open
+      mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6),
+      a boiler, incinerator or furnace room, refrigeration machinery room, refrigerated room or electrical room (1006.2.2.1
+      to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
+      space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
+      pass.)'
+  - when: occupancy_group == "I-3" and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or story_exit_count > 0 and (occupancy_group in ["R-3", "R-4"] or story_first_above_or_below_grade and (occupancy_group
+      in ["H-2", "H-3"] and story_occupant_load <= 3 and egress_travel_distance <= 25 or occupancy_group in ["H-4", "H-5",
+      "I-1", "I-2", "I-3", "R-1", "R-2"] and story_occupant_load <= 10 and egress_travel_distance <= 75) and (occupancy_group
+      != "R-2" or (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)))
+    reason: 'Group I-3 allowed fewer exits than Table 1006.3.3 gives only by 1006.3.4''s single-exit travel limit: 408.6.1
+      (Table 1017.2 note a) also limits travel to a door in a smoke barrier (150 ft from a room''s door, 200 ft from any point),
+      and smoke barriers aren''t drawn: a person checks. (Only where the story would otherwise pass: a measured fail still
+      fails.)'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 48
+    - 50
+    quote: 1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate
+      and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall
+      be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps
+      providing access to exits, from any
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 55
+    - 57
+    quote: 1-500 2 501-1,000 3 More than 1,000 4
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 3
+    - 16
+    quote: '1006.3.4 Single exits. A single exit or access to a single exit shall be permitted from any story or occupiable
+      roof where one of the following conditions exists: 1. The occupant load, number of dwelling units and exit access travel
+      distance do not exceed the values in Table 1006.3.4(1) or 1006.3.4(2). 2. Rooms, areas and spaces complying with Section
+      1006.2.1 with exits that discharge directly to the exterior at the level of exit discharge, are permitted to have one
+      exit or access to a single exit. 3. Parking garages where vehicles are mechanically parked shall be permitted to have
+      one exit or access to a single exit. 4. Group R-3 and R-4 occupancies shall be permitted to have one exit or access
+      to a single exit. 5. Individual single-story or multistory dwelling units shall be permitted to have a single exit or
+      access to a single exit from the dwelling unit provided that both of the following criteria are met: 5.1. The dwelling
+      unit complies with Section 1006.2.1 as a space with one means of egress. 5.2. Either the exit from the dwelling unit
+      discharges directly to the exterior at the level of exit discharge, or the exit access outside the dwelling unit’s entrance
+      door provides access to not less than two approved independent exits.'
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 39
+    - 44
+    quote: A, B[fnb], E, F[fnb], M, U 49 75 First story above or below grade plane and occupiable H-2, H-3 3 25 roofs over
+      the first story above grade plane H-4, H-5, I, R-1, R-2a, c 10 75 S[fnb,] [fnd] 29 75 Second story above grade plane
+      B, F, M, S[fnd] 29 75 Third story above grade plane and higher NP NA NA
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 48
+    - 53
+    quote: a.Buildings classified as Group R-2 equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.1 or 903.3.1.2 and provided with emergency escape and rescue openings in accordance with Section 1031. b.Group
+      B, F and S occupancies in buildings equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.1 or an occupiable roof of such build- ings shall have a maximum exit access travel distance of 100 feet. c.
+      This table is used for Group R-2 occupancies consisting of sleeping units. For Group R-2 occupancies consisting of dwelling
+      units, use Table 1006.3.4(1). d.The length of exit access travel distance in a Group S-2 open parking garage shall be
+      not more than 100 feet.
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Group R-3 floor, one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 40
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: '1006.3.4 item 4: Group R-3 and R-4 may have one exit.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Dormitory floor (sleeping units), one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 10
+          egress_travel_distance: 75
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'R-2 of sleeping units with NFPA 13 and escape openings per 1031 (note a): 10 and 75 ft.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: false
+      r2_sleeping_units: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Dormitory floor without escape openings
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 10
+          egress_travel_distance: 75
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Note a also asks for emergency escape and rescue openings per 1031 (stated none).
+  - given:
+      occupancy_group: I-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+    parts:
+      story:
+      - id: p1
+        name: Day care floor
+        measures:
+          story_exit_count: 1
+          story_occupant_load: 5
+          egress_travel_distance: 10
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not this rule''s groups (Group I-4: the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS
+      1006.3.3)”).'
+  - given:
+      occupancy_group: H-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: with none, the rule needs review.'
+  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (the
+    rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling units (Table
+    1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with 1006.3.4''s single exits:
+    item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants and 75
+    ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units 10 and
+    75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13; the
+    second story: B, F, M and S 29 and 75 ft (note b''s 100 ft is printed on the first story''s rows only, p.317); the third
+    story and higher NP), and item 4 (Groups R-3 and R-4). Item 2 (rooms exiting directly outside, stated or not ruled out)
+    and Group S-2''s items 3 and note d need review where they could allow one exit. Item 5 (a dwelling unit''s own single
+    exit) is a unit''s, not a story''s. Occupiable roofs are not measured. The story''s place (first, second, fourth or higher
+    above grade plane) and its occupant load are the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23).
+    Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed seating (1030.7) or
+    a space the code gives its own exits or travel limit is stated or not ruled out. Review round 5 (2026-11-24): Group I-3
+    allowed one exit by its travel needs review (408.6.1''s smoke-barrier distances aren''t drawn).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_3_4_2__s
+  kind: rule
+  topic: means_of_egress
+  title: A story's one exit, S (BCNYS Table 1006.3.4(2))
+  applies_when: occupancy_group in ["S-1", "S-2"]
+  check: story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
+    > 0 and ((story_first_above_or_below_grade and egress_travel_distance <= (100 if sprinklered_903_3_1_1 else 75) or story_second_above_grade_plane
+    and egress_travel_distance <= 75) and story_occupant_load <= 29)
+  review_when:
+  - when: story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) and story_exit_count
+      > 0 and story_rooms_exit_directly_outside
+    reason: 'Fewer exits than Table 1006.3.3 gives, and the story''s rooms exit directly outside at the level of exit discharge
+      (1006.3.4 item 2, stated or not ruled out): one exit may do, a person checks.'
+  - when: story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) and story_exit_count
+      > 0 and occupancy_group == "S-2"
+    reason: 'Group S-2 with fewer exits than Table 1006.3.3 gives: a mechanically parked garage may have one exit (1006.3.4
+      item 3), and an open parking garage 100 ft (note d), neither marked: a person checks.'
+  - when: assembly_fixed_seating and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or story_exit_count > 0 and ((story_first_above_or_below_grade and egress_travel_distance <= (100 if sprinklered_903_3_1_1
+      else 75) or story_second_above_grade_plane and egress_travel_distance <= 75) and story_occupant_load <= 29))
+    reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
+      may have a room used for assembly purposes with fixed seating (stated or not ruled out): 1030.7 measures travel along
+      the aisles, never over the seats the routes measure across, so the figure can''t be trusted: a person checks. (Only
+      where the story would otherwise pass: a measured fail still fails.)'
+  - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
+      else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
+      > 0 and ((story_first_above_or_below_grade and egress_travel_distance <= (100 if sprinklered_903_3_1_1 else 75) or story_second_above_grade_plane
+      and egress_travel_distance <= 75) and story_occupant_load <= 29))
+    reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
+      may hold, stated or not ruled out, a space the code gives its own exits or exit access travel limit: a covered or open
+      mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6),
+      a boiler, incinerator or furnace room, refrigeration machinery room, refrigerated room or electrical room (1006.2.2.1
+      to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
+      space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
+      pass.)'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 48
+    - 50
+    quote: 1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate
+      and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall
+      be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps
+      providing access to exits, from any
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 55
+    - 57
+    quote: 1-500 2 501-1,000 3 More than 1,000 4
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 3
+    - 16
+    quote: '1006.3.4 Single exits. A single exit or access to a single exit shall be permitted from any story or occupiable
+      roof where one of the following conditions exists: 1. The occupant load, number of dwelling units and exit access travel
+      distance do not exceed the values in Table 1006.3.4(1) or 1006.3.4(2). 2. Rooms, areas and spaces complying with Section
+      1006.2.1 with exits that discharge directly to the exterior at the level of exit discharge, are permitted to have one
+      exit or access to a single exit. 3. Parking garages where vehicles are mechanically parked shall be permitted to have
+      one exit or access to a single exit. 4. Group R-3 and R-4 occupancies shall be permitted to have one exit or access
+      to a single exit. 5. Individual single-story or multistory dwelling units shall be permitted to have a single exit or
+      access to a single exit from the dwelling unit provided that both of the following criteria are met: 5.1. The dwelling
+      unit complies with Section 1006.2.1 as a space with one means of egress. 5.2. Either the exit from the dwelling unit
+      discharges directly to the exterior at the level of exit discharge, or the exit access outside the dwelling unit’s entrance
+      door provides access to not less than two approved independent exits.'
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 39
+    - 44
+    quote: A, B[fnb], E, F[fnb], M, U 49 75 First story above or below grade plane and occupiable H-2, H-3 3 25 roofs over
+      the first story above grade plane H-4, H-5, I, R-1, R-2a, c 10 75 S[fnb,] [fnd] 29 75 Second story above grade plane
+      B, F, M, S[fnd] 29 75 Third story above grade plane and higher NP NA NA
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 48
+    - 53
+    quote: a.Buildings classified as Group R-2 equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.1 or 903.3.1.2 and provided with emergency escape and rescue openings in accordance with Section 1031. b.Group
+      B, F and S occupancies in buildings equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.1 or an occupiable roof of such build- ings shall have a maximum exit access travel distance of 100 feet. c.
+      This table is used for Group R-2 occupancies consisting of sleeping units. For Group R-2 occupancies consisting of dwelling
+      units, use Table 1006.3.4(1). d.The length of exit access travel distance in a Group S-2 open parking garage shall be
+      not more than 100 feet.
+  examples:
+  - given:
+      occupancy_group: S-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+    parts:
+      story:
+      - id: p1
+        name: Parking floor, one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 20
+          egress_travel_distance: 90
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group S-2: a mechanically parked or open parking garage (items 3 and note d) is a person''s check.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Warehouse floor, one exit, NFPA 13
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 29
+          egress_travel_distance: 100
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Group S, 29 occupants, 100 ft with NFPA 13 (note b).
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Warehouse floor, one exit, unsprinklered
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 29
+          egress_travel_distance: 76
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'No sprinkler system: 75 ft.'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Warehouse floor, 30 occupants, one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 30
+          egress_travel_distance: 40
+          story_first_above_or_below_grade: false
+          story_second_above_grade_plane: true
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 29 occupants: two exits.'
+  - given:
+      occupancy_group: I-4
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+    parts:
+      story:
+      - id: p1
+        name: Day care floor
+        measures:
+          story_exit_count: 1
+          story_occupant_load: 5
+          egress_travel_distance: 10
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not this rule''s groups (Group I-4: the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS
+      1006.3.3)”).'
+  - given:
+      occupancy_group: S-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: with none, the rule needs review.'
+  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (the
+    rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling units (Table
+    1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with 1006.3.4''s single exits:
+    item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants and 75
+    ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units 10 and
+    75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13; the
+    second story: B, F, M and S 29 and 75 ft (note b''s 100 ft is printed on the first story''s rows only, p.317); the third
+    story and higher NP), and item 4 (Groups R-3 and R-4). Item 2 (rooms exiting directly outside, stated or not ruled out)
+    and Group S-2''s items 3 and note d need review where they could allow one exit. Item 5 (a dwelling unit''s own single
+    exit) is a unit''s, not a story''s. Occupiable roofs are not measured. The story''s place (first, second, fourth or higher
+    above grade plane) and its occupant load are the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23).
+    Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed seating (1030.7) or
+    a space the code gives its own exits or travel limit is stated or not ruled out. Group 2 review round 1 (2026-11-24):
+    the second story''s travel is 75 ft, sprinklered or not (note b is printed on the first story''s S row only).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_3_4_1__r2_dwelling_units
+  kind: rule
+  topic: means_of_egress
+  title: A story's one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))
+  applies_when: occupancy_group == "R-2" and not r2_sleeping_units
+  check: story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
+    > 0 and not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance <= 125 and
+    (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031
+  review_when:
+  - when: story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) and story_exit_count
+      > 0 and story_rooms_exit_directly_outside
+    reason: 'Fewer exits than Table 1006.3.3 gives, and the story''s rooms exit directly outside at the level of exit discharge
+      (1006.3.4 item 2, stated or not ruled out): one exit may do, a person checks.'
+  - when: assembly_fixed_seating and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or story_exit_count > 0 and not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance
+      <= 125 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)
+    reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
+      may have a room used for assembly purposes with fixed seating (stated or not ruled out): 1030.7 measures travel along
+      the aisles, never over the seats the routes measure across, so the figure can''t be trusted: a person checks. (Only
+      where the story would otherwise pass: a measured fail still fails.)'
+  - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
+      else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
+      > 0 and not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance <= 125
+      and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)
+    reason: 'Fewer exits than Table 1006.3.3 gives, allowed only by 1006.3.4''s single-exit travel limit, in a building that
+      may hold, stated or not ruled out, a space the code gives its own exits or exit access travel limit: a covered or open
+      mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6),
+      a boiler, incinerator or furnace room, refrigeration machinery room, refrigerated room or electrical room (1006.2.2.1
+      to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). That
+      space''s own section, not the single-exit limit alone, decides, so a person checks. (Only where the story would otherwise
+      pass.)'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 48
+    - 50
+    quote: 1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate
+      and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall
+      be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps
+      providing access to exits, from any
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 55
+    - 57
+    quote: 1-500 2 501-1,000 3 More than 1,000 4
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 3
+    - 16
+    quote: '1006.3.4 Single exits. A single exit or access to a single exit shall be permitted from any story or occupiable
+      roof where one of the following conditions exists: 1. The occupant load, number of dwelling units and exit access travel
+      distance do not exceed the values in Table 1006.3.4(1) or 1006.3.4(2). 2. Rooms, areas and spaces complying with Section
+      1006.2.1 with exits that discharge directly to the exterior at the level of exit discharge, are permitted to have one
+      exit or access to a single exit. 3. Parking garages where vehicles are mechanically parked shall be permitted to have
+      one exit or access to a single exit. 4. Group R-3 and R-4 occupancies shall be permitted to have one exit or access
+      to a single exit. 5. Individual single-story or multistory dwelling units shall be permitted to have a single exit or
+      access to a single exit from the dwelling unit provided that both of the following criteria are met: 5.1. The dwelling
+      unit complies with Section 1006.2.1 as a space with one means of egress. 5.2. Either the exit from the dwelling unit
+      discharges directly to the exterior at the level of exit discharge, or the exit access outside the dwelling unit’s entrance
+      door provides access to not less than two approved independent exits.'
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 21
+    - 24
+    quote: Basement, first, second or third story above grade plane and occupi- R-2[fna,] [fnb,] [fnc] 4 dwelling units 125
+      feet able roofs over the first or second story above grade plane Fourth story above grade plane and higher NP NA NA
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 28
+    - 30
+    quote: a.Buildings classified as Group R-2 equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.1 or 903.3.1.2 and provided with emergency escape and rescue openings in accordance with Section 1031. b.This
+      table is used for Group R-2 occupancies consisting of dwelling units. For Group R-2 occupancies consisting of sleeping
+      units, use Table 1006.3.4(2).
+  examples:
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Apartment floor, two exits
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 2
+          story_occupant_load: 9
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Two exits for up to 500 occupants (Table 1006.3.3).
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Four apartments, one exit, at the limits
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 18
+          egress_travel_distance: 125
+          story_fourth_or_higher_above_grade_plane: false
+          story_dwelling_units: 4
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Third story or lower, 4 dwelling units, 125 ft, a sprinkler system and escape openings (note a).
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Five apartments, one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 20
+          egress_travel_distance: 60
+          story_fourth_or_higher_above_grade_plane: false
+          story_dwelling_units: 5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 4 dwelling units: two exits.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Four apartments, one exit, 126 ft
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 18
+          egress_travel_distance: 125.5
+          story_fourth_or_higher_above_grade_plane: false
+          story_dwelling_units: 4
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Over 125 ft: two exits.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Fourth story, one exit
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 8
+          egress_travel_distance: 30
+          story_fourth_or_higher_above_grade_plane: true
+          story_dwelling_units: 2
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Fourth story above grade plane and higher: Not Permitted.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+    parts:
+      story:
+      - id: p1
+        name: Four apartments, one exit, no sprinkler system
+        measures:
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 18
+          egress_travel_distance: 50
+          story_fourth_or_higher_above_grade_plane: false
+          story_dwelling_units: 4
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Note a: only a building sprinklered per 903.3.1.1 or 903.3.1.2 with escape openings per 1031.'
+  - given:
+      occupancy_group: R-2
+      r2_sleeping_units: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+    parts:
+      story:
+      - id: p1
+        name: Dormitory floor
+        measures:
+          story_exit_count: 1
+          story_occupant_load: 5
+          egress_travel_distance: 10
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'R-2 of sleeping units: Table 1006.3.4(2) (note b), the rules for its rows.'
+  - given:
+      occupancy_group: R-2
+      r2_sleeping_units: false
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: with none, the rule needs review.'
+  notes: 'Table 1006.3.4(1) for Group R-2 of dwelling units (note b; one of sleeping units is Table 1006.3.4(2)''s): a basement
+    or the first, second or third story above grade plane may have one exit with at most 4 dwelling units and 125 ft of exit
+    access travel, only in a building sprinklered per 903.3.1.1 or 903.3.1.2 with emergency escape and rescue openings per
+    1031 (note a, the row''s R-2[a]); the fourth story and higher NP. Otherwise Table 1006.3.3''s two, three or four. Item
+    2 as in the other rows. Note c''s occupiable roofs are not measured. Hand-drafted in a Claude Code session (2026-11-23).
+    Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed seating (1030.7) or
+    a space the code gives its own exits or travel limit is stated or not ruled out.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_1_remoteness
@@ -5631,13 +6707,31 @@ rules:
   review_when:
   - when: story_exit_count < 2
     reason: 'Fewer than two exits on the story: whether two are required is the rule “Exits per story by occupant load, one
-      where 1006.3.4 allows (BCNYS 1006.3.3)” rule''s question; a person checks.'
+      where 1006.3.4 allows (BCNYS 1006.3.3)”''s question; a person checks.'
   - when: story_exit_count >= 2 and not (exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
-      else 1 / 2)) and (other_occupancy_present or not occupancy_group_i4 or story_rooms_exit_directly_outside or (story_first_above_or_below_grade
-      and story_occupant_load <= 10 and egress_travel_distance <= 75))
+      else 1 / 2)) and (not (occupancy_group_i4 or other_occupancy_present) or other_occupancy_present and occupancy_group
+      == "mixed" or story_rooms_exit_directly_outside or (occupancy_group_i4 and story_first_above_or_below_grade and story_occupant_load
+      <= 10 and egress_travel_distance <= 75))
     reason: 'The story''s exits are close together, but it may not need two: one exit may do here (1006.3.4: Table 1006.3.4(2)''s
       row, or rooms that exit directly outside), or the building is in another occupancy (or its occupancy isn''t stated).
       Whether 1007.1.1 applies to it is a person''s check.'
+  - when: story_exit_count >= 2 and not exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      else 1 / 2) and other_occupancy_present and (occupancy_group in ["R-3", "R-4", "S-2"] or occupancy_group == "R-2" and
+      not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance <= 125)
+    reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
+      or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
+      (2026-11-23). Elsewhere two are required and a close pair fails.'
+  - when: story_exit_count >= 2 and not exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      else 1 / 2) and other_occupancy_present and (story_first_above_or_below_grade and (occupancy_group in ["A-1", "A-2",
+      "A-3", "A-4", "A-5", "E", "M", "U"] and story_occupant_load <= 49 and egress_travel_distance <= 75 or occupancy_group
+      in ["B", "F-1", "F-2"] and story_occupant_load <= 49 and egress_travel_distance <= 100 or occupancy_group == "S-1" and
+      story_occupant_load <= 29 and egress_travel_distance <= 100 or occupancy_group in ["H-2", "H-3"] and story_occupant_load
+      <= 3 and egress_travel_distance <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "I-3", "R-1", "R-2"] and story_occupant_load
+      <= 10 and egress_travel_distance <= 75) or story_second_above_grade_plane and occupancy_group in ["B", "F-1", "F-2",
+      "M", "S-1"] and story_occupant_load <= 29 and egress_travel_distance <= 75)
+    reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
+      or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
+      (2026-11-23). Elsewhere two are required and a close pair fails.'
   for_each: story
   when_none: needs_review
   sources:
@@ -5673,12 +6767,40 @@ rules:
     - 41
     quote: First story above or below grade plane and occupiable H-2, H-3 3 25 roofs over the first story above grade plane
       H-4, H-5, I, R-1, R-2a, c 10 75
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 21
+    - 24
+    quote: Basement, first, second or third story above grade plane and occupi- R-2[fna,] [fnb,] [fnc] 4 dwelling units 125
+      feet able roofs over the first or second story above grade plane Fourth story above grade plane and higher NP NA NA
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 39
+    - 44
+    quote: A, B[fnb], E, F[fnb], M, U 49 75 First story above or below grade plane and occupiable H-2, H-3 3 25 roofs over
+      the first story above grade plane H-4, H-5, I, R-1, R-2a, c 10 75 S[fnb,] [fnd] 29 75 Second story above grade plane
+      B, F, M, S[fnd] 29 75 Third story above grade plane and higher NP NA NA
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 48
+    - 53
+    quote: a.Buildings classified as Group R-2 equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.1 or 903.3.1.2 and provided with emergency escape and rescue openings in accordance with Section 1031. b.Group
+      B, F and S occupancies in buildings equipped throughout with an automatic sprinkler system in accordance with Section
+      903.3.1.1 or an occupiable roof of such build- ings shall have a maximum exit access travel distance of 100 feet. c.
+      This table is used for Group R-2 occupancies consisting of sleeping units. For Group R-2 occupancies consisting of dwelling
+      units, use Table 1006.3.4(1). d.The length of exit access travel distance in a Group S-2 open parking garage shall be
+      not more than 100 feet.
   examples:
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       story:
       - id: p1
@@ -5697,6 +6819,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       story:
       - id: p2
@@ -5718,6 +6841,7 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       story:
       - id: p1
@@ -5737,6 +6861,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       story:
       - id: p4
@@ -5758,6 +6883,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       story:
       - id: p5
@@ -5777,6 +6903,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       story:
       - id: p3
@@ -5789,7 +6916,33 @@ rules:
       outcome: needs_review
     expect: needs_review
     note: 'One exit: whether two are required is the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS
-      1006.3.3)” rule''s question.'
+      1006.3.3)”''s question.'
+  - given:
+      occupancy_group: B
+      occupancy_group_i4: false
+      other_occupancy_present: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p9
+        name: Office floor of 120, close exits
+        measures:
+          exit_remoteness_ratio: 0.2
+          story_exit_count: 2
+          story_occupant_load: 120
+          egress_travel_distance: 90
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+          story_rooms_exit_directly_outside: false
+          story_dwelling_units: 0
+    rows:
+    - part: p9
+      outcome: fail
+    expect: fail
+    note: 'Group B, 120 occupants: Table 1006.3.4(2)''s 49 can''t allow one exit, so two are needed and a close pair fails
+      (2026-11-23).'
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
@@ -5809,7 +6962,14 @@ rules:
     stairways or ramps joined by a 1-hour corridor complying with Section 1020: measured along the corridor) only loosens
     the test: a person''s check. the exits'' separation is of the two farthest-apart exits or exit access doorways, measured
     to any point of a doorway''s width (1007.1.1.1), so it is the best pair. Each space''s own are the rule “A space''s doorways
-    1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)”. Hand-drafted in a Claude Code session (2026-11-21).'
+    1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)”. Hand-drafted in a Claude Code session (2026-11-21). Every group
+    (2026-11-23): where the building is of one group other than I-4, a close pair fails unless that group''s row of Table
+    1006.3.4(1) or (2) (a story) or Table 1006.2.1 (a space) could allow one exit, read loosely (the larger value of its columns),
+    so it never fails where one could do. Group 2 review round 1 (2026-11-24): a close pair in a one-group S-2 building needs
+    review (1006.3.4 item 3: a mechanically parked garage may have one exit at any load). Group 2 review round 2 (2026-11-24):
+    the loose test reads each Table 1006.3.4(2) row at its own larger column (the first story A, E, M, U 75 ft; S-1 29 occupants;
+    the second story 75 ft), so a close pair fails wherever the row itself fails one exit. The I-4 row''s own test (the first
+    story, 10 occupants, 75 ft) reads Group I-4 only.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_2_three_or_more_exits
@@ -5829,10 +6989,10 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'A story''s count of exits is the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”
-      rule''s (Table 1006.3.3) and the distance between its farthest pair the rule “Two exits at least 1/2 the diagonal apart,
-      1/3 sprinklered (BCNYS 1007.1.1)”''s; whether the others are a reasonable distance apart is a person''s judgment. Each
-      space''s own are the rule “A space needing three exits: two arranged per 1007.1.1 (BCNYS 1007.1.2)”.'
+    note: 'A story''s count of exits is the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”''s
+      (Table 1006.3.3) and the distance between its farthest pair the rule “Two exits at least 1/2 the diagonal apart, 1/3
+      sprinklered (BCNYS 1007.1.1)”''s; whether the others are a reasonable distance apart is a person''s judgment. Each space''s
+      own are the rule “A space needing three exits: two arranged per 1007.1.1 (BCNYS 1007.1.2)”.'
   notes: Hand-drafted in a Claude Code session (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -5840,16 +7000,29 @@ rules:
   kind: rule
   topic: means_of_egress
   title: A space's doorways 1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)
-  check: space_is_exit or space_exit_count < 2 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else
-    1 / 2)
+  check: space_is_exit or space_exit_count < 2 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+    else 1 / 2)
   review_when:
-  - when: not space_is_exit and space_exit_count >= 2 and not (space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
-      else 1 / 2)) and (other_occupancy_present or not occupancy_group_i4 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2) and space_common_path <= 75))
+  - when: not space_is_exit and space_exit_count >= 2 and not (space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
+      or sprinklered_903_3_1_2 else 1 / 2)) and (not (occupancy_group_i4 or other_occupancy_present) or other_occupancy_present
+      and occupancy_group == "mixed" or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and
+      space_common_path <= 75))
     reason: 'The space''s doorways are close together, but it may not need two: Table 1006.2.1''s I-4 row (10 or fewer occupants,
       sprinklered, a common path of 75 ft or less) lets it have one, or the space is in another occupancy (or its occupancy
       isn''t stated), whose row is a flag (the rule “Table 1006.2.1 in a building of two or more groups (BCNYS)”). Whether
       1007.1.1 applies to it is a person''s check.'
+  - when: not space_is_exit and space_exit_count >= 2 and not space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
+      or sprinklered_903_3_1_2 else 1 / 2) and other_occupancy_present and (occupancy_group in ["A-1", "A-2", "A-3", "A-4",
+      "A-5", "E", "M"] and space_occupant_load <= 49 and space_common_path <= 75 or occupancy_group in ["B", "F-1", "F-2",
+      "U"] and space_occupant_load <= 49 and space_common_path <= 100 or occupancy_group in ["H-1", "H-2", "H-3"] and space_occupant_load
+      <= 3 and space_common_path <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "R-1"] and space_occupant_load <=
+      10 and space_common_path <= 75 or occupancy_group == "I-3" and space_occupant_load <= 10 and space_common_path <= 100
+      or occupancy_group == "R-2" and space_occupant_load <= 20 and space_common_path <= 125 or occupancy_group in ["R-3",
+      "R-4"] and space_occupant_load <= 20 or occupancy_group in ["S-1", "S-2"] and space_occupant_load <= 29 and space_common_path
+      <= 100)
+    reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
+      or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
+      (2026-11-23). Elsewhere two are required and a close pair fails.'
   for_each: space
   when_none: needs_review
   sources:
@@ -5899,12 +7072,21 @@ rules:
     - 26
     - 26
     quote: I-1, I-2[fnd], I-4 10 NP NP 75[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 21
+    - 33
+    quote: A[fnc], E, M 49 75 75 75[fna] B 49 100 75 100[fna] F 49 75 75 100[fna] H-1, H-2, H-3 3 NP NP 25[fnb] H-4, H-5 10
+      NP NP 75[fnb] I-1, I-2[fnd], I-4 10 NP NP 75[fna] I-3 10 NP NP 100[fna] R-1 10 NP NP 75[fna] R-2 20 NP NP 125[fna] R-3[fne]
+      20 NP NP 125[fna,] [fng] R-4[fne] 20 NP NP 125[fna,] [fng] S[fnf] 29 100 75 100[fna] U 49 100 75 75[fna]
   examples:
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       space:
       - id: p1
@@ -5925,6 +7107,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       space:
       - id: p2
@@ -5945,6 +7128,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       space:
       - id: p3
@@ -5966,6 +7150,7 @@ rules:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
       other_occupancy_present: false
+      occupancy_group: I-4
     parts:
       space:
       - id: p4
@@ -6002,6 +7187,27 @@ rules:
     note: 'A Group B office of 30: Table 1006.2.1''s B row (not encoded here, a flag) allows 49 with one exit, so its second
       door may not be required: needs review, never fail.'
   - given:
+      occupancy_group: B
+      occupancy_group_i4: false
+      other_occupancy_present: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p9
+        name: Office of 60, close doors
+        measures:
+          space_exit_count: 2
+          space_exit_remoteness_ratio: 0.2
+          space_occupant_load: 60
+          space_common_path: 40
+          space_is_exit: false
+    rows:
+    - part: p9
+      outcome: fail
+    expect: fail
+    note: 'Group B, 60 occupants: over Table 1006.2.1''s 49, so two doors are required and a close pair fails.'
+  - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -6017,7 +7223,11 @@ rules:
     (1006.2.1), and this rulebook encodes only Table 1006.2.1''s I-4 row: a close pair fails only in a Group I-4 building
     with no other occupancy where that row requires two (more than 10 occupants, a common path over 75 ft, or not sprinklered);
     anywhere else (a space that may have one, another occupancy, or an occupancy not stated) it needs review. A space whose
-    ratio isn''t measured needs review. Hand-drafted in a Claude Code session (2026-11-21).'
+    ratio isn''t measured needs review. Hand-drafted in a Claude Code session (2026-11-21). Every group (2026-11-23): where
+    the building is of one group other than I-4, a close pair fails unless that group''s row of Table 1006.3.4(1) or (2) (a
+    story) or Table 1006.2.1 (a space) could allow one exit, read loosely (the larger value of its columns), so it never fails
+    where one could do. Group 2 review round 1 (2026-11-24): in a one-group R-3 or R-4 building a space of 20 or fewer may
+    have one exit whatever its common path (Table 1006.2.1 note e), so its close pair needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_2_space_three_or_more
@@ -6027,8 +7237,8 @@ rules:
   check: space_is_exit or space_exit_count < 3 or space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
     or sprinklered_903_3_1_2 else 1 / 2)
   review_when:
-  - when: not space_is_exit and space_exit_count >= 3 and (space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2 else 1 / 2))
+  - when: not space_is_exit and space_exit_count >= 3 and (space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1
+      / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1 / 2))
     reason: 'Three or more doorways: three aren''t required here (500 occupants or fewer: 1006.2.1.1 asks three from 501,
       Table 1006.3.3''s two-exit band is 1-500), so whether two must be apart is 1007.1.1''s question; or two are far enough
       apart and whether the others are a reasonable distance apart is a person''s judgment.'
@@ -8149,7 +9359,7 @@ rules:
       outcome: pass
     expect: pass
     note: 'NFPA 13 (903.3.1.1): 75 ft complies (at most). Note d''s 903.2.5.1 is the rule “Group H''s sprinkler system, Tables
-      1017.2 note d and 1006.2.1 note b (BCNYS)” rule''s check.'
+      1017.2 note d and 1006.2.1 note b (BCNYS)”''s check.'
   - given:
       occupancy_group: H-1
       sprinklered_903_3_1_1: true
@@ -8340,7 +9550,7 @@ rules:
       outcome: pass
     expect: pass
     note: 'NFPA 13 (903.3.1.1): 100 ft complies (at most). Note d''s 903.2.5.1 is the rule “Group H''s sprinkler system, Tables
-      1017.2 note d and 1006.2.1 note b (BCNYS)” rule''s check.'
+      1017.2 note d and 1006.2.1 note b (BCNYS)”''s check.'
   - given:
       occupancy_group: H-2
       sprinklered_903_3_1_1: true
@@ -8531,7 +9741,7 @@ rules:
       outcome: pass
     expect: pass
     note: 'NFPA 13 (903.3.1.1): 150 ft complies (at most). Note d''s 903.2.5.1 is the rule “Group H''s sprinkler system, Tables
-      1017.2 note d and 1006.2.1 note b (BCNYS)” rule''s check.'
+      1017.2 note d and 1006.2.1 note b (BCNYS)”''s check.'
   - given:
       occupancy_group: H-3
       sprinklered_903_3_1_1: true
@@ -8722,7 +9932,7 @@ rules:
       outcome: pass
     expect: pass
     note: 'NFPA 13 (903.3.1.1): 175 ft complies (at most). Note d''s 903.2.5.1 is the rule “Group H''s sprinkler system, Tables
-      1017.2 note d and 1006.2.1 note b (BCNYS)” rule''s check.'
+      1017.2 note d and 1006.2.1 note b (BCNYS)”''s check.'
   - given:
       occupancy_group: H-4
       sprinklered_903_3_1_1: true
