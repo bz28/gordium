@@ -117,6 +117,10 @@ results:
   general.bc_1005_4_continuity: needs_review
   general.bc_1005_5_distribution: needs_review
   general.bc_1005_6_convergence: needs_review
+  # section group 5c: 1005.7's encroachments are flags (doors' swings and projections aren't drawn)
+  general.bc_1005_7_1_door_encroachment: needs_review
+  general.bc_1005_7_2_projections: needs_review
+  general.bc_1005_7_3_protruding_objects: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

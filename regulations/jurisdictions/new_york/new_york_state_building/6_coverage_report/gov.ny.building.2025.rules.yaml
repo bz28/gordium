@@ -90,6 +90,21 @@ pieces:
     heading: Egress convergence
     rules:
     - general.bc_1005_6_convergence
+  1005.7.1:
+    label: flag
+    heading: Encroachment › Doors
+    rules:
+    - general.bc_1005_7_1_door_encroachment
+  1005.7.2:
+    label: flag
+    heading: Encroachment › Other projections
+    rules:
+    - general.bc_1005_7_2_projections
+  1005.7.3:
+    label: flag
+    heading: Encroachment › Protruding objects
+    rules:
+    - general.bc_1005_7_3_protruding_objects
   1006.2.1:
     label: rule
     heading: Egress based on occupant load and common path of egress travel distance

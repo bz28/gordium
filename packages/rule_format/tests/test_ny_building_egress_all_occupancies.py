@@ -278,7 +278,9 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          "1020.6.1": (345, 7, 16),
          # section group 5a: egress capacity
          "1005.3.1": (313, 51, 55), "1005.3.1 (part 2)": (314, 3, 13), "1005.3.2": (314, 14, 28),
-         "1005.4": (314, 29, 30), "1005.5": (314, 31, 33), "1005.6": (314, 34, 36)}       # section group 5b      # review round 1 of group 4c: its five conditions quoted too
+         "1005.4": (314, 29, 30), "1005.5": (314, 31, 33), "1005.6": (314, 34, 36),       # section group 5b
+         "1005.7": (314, 37, 38), "1005.7.1": (314, 39, 49), "1005.7.2": (314, 50, 53),
+         "1005.7.3": (314, 54, 54)}                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -314,14 +316,19 @@ HANDLERS = {
     "907.5.2.2": ("general.bc_1020_3_corridor_capacity", "907.5.2.2"),
     "1030.6.2": ("general.bc_1020_3_corridor_capacity", "1030.6.2"),
     "1030.6.3": ("general.bc_1020_3_corridor_capacity", "1030.6.3"), "909": ("general.bc_1020_3_corridor_capacity", "909"),
+    # section group 5c: 1005.7's
+    "1014.9": ("general.bc_1005_7_2_projections", "1014.9"), "407.4.3": ("general.bc_1005_7_2_projections", "407.4.3"),
+    "1003.3": ("general.bc_1005_7_3_protruding_objects", "1003.3"),
 }
-NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6"}          # the piece naming itself
+NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
+            "1005.7.1", "1005.7.2", "1005.7.3"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
             (343, 42), (344, 34),       # group 4: 1020.2's 'Exceptions:', Table 1020.3's 'For SI'
             (344, 49), (345, 21),       # group 4c: 1020.6's and 1020.7's 'Exceptions:'
-            (313, 55), (314, 17)}       # group 5a: 1005.3.1's and 1005.3.2's 'Exceptions:'
+            (313, 55), (314, 17),       # group 5a: 1005.3.1's and 1005.3.2's 'Exceptions:'
+            (314, 41)}                  # group 5c: 1005.7.1's 'Exceptions:'
 
 
 def _quoted(book, page, a, b):
@@ -850,3 +857,36 @@ def test_more_than_one_reads_the_same_comparison_in_every_piece():
             if str(n).startswith("more than "):
                 seen.append((pid, n, comp))
     assert seen and all(comp == ">" for _, _, comp in seen), [x for x in seen if x[2] != ">"]
+
+
+def test_the_readmes_not_brought_in_list_names_no_section_brought_in():
+    """Review round 1 of group 5c (P3): the README listed 1005.7 as not brought in after this group brought it in.
+    Every section number in its 'References in the brought-in sections that are not brought in' list is neither a
+    brought-in section nor one under it."""
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    listed = readme.split("## References in the brought-in sections that are not brought in", 1)[1].split("\n## ", 1)[0]
+    brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
+    ids = [str(x) for x in brought["sections"] + brought["alone"] if not str(x).startswith("Table")]
+    tables = {str(x) for x in brought["sections"] if str(x).startswith("Table")}
+    # round 2: tables by name first ("Table 1006.3.4(1)", "Tables 705.5 and 705.9"), before brackets are dropped
+    named = []
+    # ("Table 1017.2's note a lists": a brought-in table named as the source of a reference, not as one)
+    # round 3: "Tables X and Y" names two tables; "Table X and Y" a table and a section (Y stays for the section check)
+    num = r"\d{3,4}(?:\.\d+)*(?:\(\d\))?"
+    plural = rf"Tables ({num}) and ({num})(?!'s)"
+    single = rf"Table ({num})(?![\d.(]|'s)"
+    for m in re.finditer(plural, listed):
+        named += [f"Table {g}" for g in m.groups()]
+    for m in re.finditer(single, listed):
+        named.append(f"Table {m.group(1)}")
+    bad = [t for t in named if t in tables]
+    listed = re.sub(plural, "", listed)
+    listed = re.sub(single, "", listed)
+    listed = re.sub(rf"Table {num}'s", "", listed)       # a table named as a reference's source
+    listed = re.sub(r"\([^()]*\)", "", listed)             # what a reference is for, in brackets, may name a section
+    # the parts under a section brought in alone ("903.3.1.2's parts"); a section brought in whole has its parts in
+    listed = re.sub(r"(\d{3,4}(?:\.\d+)*)'s parts", lambda m: "" if m.group(1) in brought["alone"] else m.group(1),
+                    listed)
+    bad += [n for n in re.findall(r"\b\d{3,4}(?:\.\d+)*\b", listed)
+            if any(n == b or (n.startswith(b + ".") and b not in brought["alone"]) for b in ids)]
+    assert named and not bad, bad
