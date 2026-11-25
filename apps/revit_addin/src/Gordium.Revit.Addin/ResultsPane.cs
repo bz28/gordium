@@ -176,6 +176,10 @@ internal sealed class ResultsPane : IDockablePaneProvider
     /// <summary>What the panel shows now, for a check's Cancel to go back to.</summary>
     internal static PanelHad Had() => _view?.Had ?? PanelHad.Nothing;
 
+    /// <summary>A check's failure (Revit's thread, in an API context): the pane brought into view, so its error card is
+    /// seen even when the architect hid the pane during the check (the read failure's dialog did this before PR 5).</summary>
+    internal static void Reveal(UIApplication ui) => ui.GetDockablePane(Id).Show();
+
     /// <summary>A check began (Revit's thread, in an API context): the pane brought up, saying "Reading the
     /// model...", its button Cancel.</summary>
     internal static void Reading(UIApplication ui)

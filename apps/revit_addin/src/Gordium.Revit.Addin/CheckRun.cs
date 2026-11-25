@@ -57,6 +57,10 @@ internal sealed class CheckRun
 
     internal ProjectPrepared? Prepared { get; private set; }
     internal int MarksAdded { get; private set; }
+
+    /// <summary>Whether this check wrote to the project before it failed (marks added, drafts filled, a street edge
+    /// picked): its failure card then never says the model wasn't changed.</summary>
+    internal bool Wrote { get; set; }
     internal StreetAsk Ask { get; private set; }
     internal string Clear { get; private set; } = "";
 

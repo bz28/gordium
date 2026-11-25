@@ -58,14 +58,22 @@ public sealed record CheckFailure(FailureKind Kind, string Title, string Words, 
 
 public static class CheckFailures
 {
-    /// <summary>The failure with what was already written before it (<paramref name="clear"/>, ClearPrefills.Head's
-    /// words): a check that fails after the drafts were written still says so on screen (review round 7 of the clear
-    /// openings; PR 5 moved the failure from a dialog into the pane, and the words had gone to the clipboard only).</summary>
-    public static CheckFailure After(this CheckFailure failure, string? clear)
+    /// <summary>The failure with what this check had already written to the project before it (<paramref name="done"/>:
+    /// ClearPrefills.StatusLine's words, the marks added and the makers' clear openings filled as drafts), on screen in
+    /// plain words (ClearPrefills.OnScreen: never Revit's exception text, change 14). A check that fails after the drafts
+    /// were written still says so (review round 7 of the clear openings; PR 5 moved the failure from a dialog into the
+    /// pane). When the check <paramref name="wrote"/> anything (marks, drafts, a street edge picked), the card never says
+    /// "your model wasn't changed" (review after main 4077716d).</summary>
+    public static CheckFailure After(this CheckFailure failure, string? done, bool wrote)
     {
         ArgumentNullException.ThrowIfNull(failure);
-        return string.IsNullOrWhiteSpace(clear) ? failure : failure with { Done = clear.Trim() };
+        var words = wrote ? failure.Words.Replace(Safe, NothingChecked, StringComparison.Ordinal)
+                                         .Replace(" Your model wasn't changed.", "", StringComparison.Ordinal) : failure.Words;
+        return failure with { Words = words, Done = string.IsNullOrWhiteSpace(done) ? null : ClearPrefills.OnScreen(done.Trim()) };
     }
+
+    /// <summary><see cref="Safe"/> without its claim about the model, for a check that wrote to it before failing.</summary>
+    public const string NothingChecked = "Nothing was checked.";
 
     public const string TryAgain = "Try again";
 
