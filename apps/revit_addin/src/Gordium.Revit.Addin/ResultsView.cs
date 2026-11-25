@@ -181,7 +181,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         // round 3: a stale selection on the card's foot let Enter on a question's line save)
         _list.PreviewGotKeyboardFocus += (_, e) =>
         {
-            if (Within<C.ListBoxItem>(e.NewFocus) is { } item && !ReferenceEquals(item, _list.ItemContainerGenerator.ContainerFromItem(_list.SelectedItem))
+            // only focus going into a control inside a question, "+ N more" or the card's foot, never onto a list item
+            // itself (review round 4: a click on a row gives it focus first, and a quiet selection then kept the click
+            // from sending the row to Revit)
+            if (Within<C.ListBoxItem>(e.NewFocus) is { DataContext: QuestionItem or MoreQuestionsItem or AnswerFootItem } item
+                && !ReferenceEquals(e.NewFocus, item) && !ReferenceEquals(item, _list.ItemContainerGenerator.ContainerFromItem(_list.SelectedItem))
                 && _list.ItemContainerGenerator.IndexFromContainer(item) is var i and >= 0)
             {
                 _quiet = true;

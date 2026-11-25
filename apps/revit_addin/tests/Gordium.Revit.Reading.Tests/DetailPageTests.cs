@@ -256,6 +256,9 @@ public sealed class DetailPageTests
         Assert.Contains("FocusEntry(_list.ItemContainerGenerator.IndexFromContainer(inItem));", view, StringComparison.Ordinal);
         Assert.DoesNotContain("inItem.Focus();", view, StringComparison.Ordinal);
         Assert.Contains("_list.PreviewGotKeyboardFocus += ", view, StringComparison.Ordinal);
+        // review round 4: never a row, nor focus landing on a list item itself (a click on a row still sends it to Revit)
+        Assert.Contains("Within<C.ListBoxItem>(e.NewFocus) is { DataContext: QuestionItem or MoreQuestionsItem or AnswerFootItem } item", view, StringComparison.Ordinal);
+        Assert.Contains("&& !ReferenceEquals(e.NewFocus, item) &&", view, StringComparison.Ordinal);
         Assert.Contains("FocusEntry(ResultList.Next(_entries, at, ", view, StringComparison.Ordinal);
         Assert.Contains("ResultViewList.Saves(_entries[at], e.Key.ToString())", view, StringComparison.Ordinal);
         Assert.Contains("or AnswerFootItem => \"list.opener\"",
