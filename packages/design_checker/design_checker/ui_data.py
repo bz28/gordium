@@ -62,7 +62,6 @@ FIELD_HEADLINES = {
     "building.emergency_escape_openings_1031": "Say whether every sleeping room has an emergency escape opening (1031)",
     "building.occupied_outdoor_areas": "Say whether the occupants use outdoor areas (yards, patios, roofs: 1004.7)",
     "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
-    "building.other_level_egress_into_corridors": "Say whether another level's occupants reach a corridor (open stairs, mezzanines…)",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",
     "facts.ground_is_flat": "Say whether the ground is flat",
@@ -168,10 +167,6 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
         if key.startswith("mark:") and occupant_load.FUNCTION_STATED in words:   # a room's function: its own mark
             return {**base, "kind": MARK, "key": f"field:{occupant_load.FUNCTION_FIELD}",
                     "field": occupant_load.FUNCTION_FIELD, "headline": "Set the room's function"}
-        if key.startswith("mark:") and occupant_load.CORRIDOR_SAY in words:   # whether other levels reach a corridor
-            return {**base, "kind": MARK, "key": f"field:{occupant_load.CORRIDOR_FIELD}",
-                    "field": occupant_load.CORRIDOR_FIELD,
-                    "headline": FIELD_HEADLINES[occupant_load.CORRIDOR_FIELD]}
         if key.startswith("mark:") and isinstance(measure, str) and stated in words:
             name = _measure_name(measure, rule_kind)
             return {**base, "kind": MEASURE,

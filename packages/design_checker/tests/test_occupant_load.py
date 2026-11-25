@@ -549,11 +549,6 @@ def _asked_corridor(why):
     return [ui_data._from_cause(c, "corridor")["headline"] for c in found]
 
 
-def ui_data_headline(field):
-    from design_checker import ui_data
-    return ui_data.FIELD_HEADLINES[field]
-
-
 def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answered():
     """Group 3 review rounds 6 and 7 (2026-11-25): a load Gordium or a person must work out (no function, a room
     others pass through or a loaded room is served through, a function the table sends elsewhere, an exit, a closet or
@@ -575,13 +570,12 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         "CORRIDOR_FUNCTION": (ol.CORRIDOR_FUNCTION.format(name="c", f="business"), model),
         "GROSS_NOT_MEASURED": (ol.GROSS_NOT_MEASURED, model), "AREAS_OVER": (ol.AREAS_OVER, model),
         # section group 4: a corridor's (asked on the corridor, below: _asked_corridor)
-        "CORRIDOR_NOT_RULED_OUT": (ol.CORRIDOR_NOT_RULED_OUT, "corridor fact"),
+        "CORRIDOR_NOT_RULED_OUT": (ol.CORRIDOR_NOT_RULED_OUT, by_hand),   # no Revit mark yet: never a card
         "CORRIDOR_OTHER_LEVELS": (ol.CORRIDOR_OTHER_LEVELS, by_hand),
         "CORRIDOR_NO_STORY": (ol.CORRIDOR_NO_STORY, by_hand),
     }
     fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "FUNCTION_ROOMS", "LOAD_STATED",
-                 "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "CORRIDOR_FIELD", "CORRIDOR_SAY",
-                 "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
+                 "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
                  "CORRIDOR_READINGS"}     # the readings' own words: a load given, never asked
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
@@ -589,8 +583,9 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     for why, kind in corridor.values():
         heads = _asked_corridor(why)
         assert heads and not any(h.startswith(("Mark the", "Fix the model")) for h in heads), (why, heads)
-        assert (ui_data_headline(ol.CORRIDOR_FIELD) in heads) == (kind == "corridor fact"), (why, kind, heads)
-        assert any(h.startswith("Work out") for h in heads) == (kind == by_hand), (why, kind, heads)
+        # review of group 4a: the fact has no Revit mark yet, so the panel never makes it a card to set (Revit's
+        # ChapterTenFactsTests: every answer card's field is one a mark feeds); asked by hand, in words naming it
+        assert any(h.startswith("Work out") for h in heads) and not any(h.startswith("Say whether") for h in heads),             (why, kind, heads)
         assert "is stated by the architect" not in why, why
     cases = [(w, kind) for k, (w, kind) in reasons.items() if k not in corridor] + [
         ("the room's floor area isn't measured", model),
