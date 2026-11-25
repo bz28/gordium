@@ -1160,6 +1160,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:handrail:
+    label: reference
+    topic: definitions
+    reason: 'Defines HANDRAIL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 15
+      - 15
+      quote: '[BE] HANDRAIL. A horizontal or sloping rail intended for grasping by the hand for guidance or support.'
+    piece_sha256: 0ce1373e166a619f3105ceaadfb040ff3891c9bd39a34ac89392d54bdc089212
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group 5c
+      (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term 1005.7.2 uses, by the book''s italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:hardware:
     label: reference
     topic: definitions
@@ -2276,6 +2292,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:trim:
+    label: reference
+    topic: definitions
+    reason: 'Defines TRIM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 65
+      lines:
+      - 23
+      - 24
+      quote: '[BF] TRIM. Picture molds, chair rails, baseboards, handrails, door and window frames and similar decorative or
+        protective materials used in fixed applications.'
+    piece_sha256: a50c365023e107da8eab8f57defaddf42c7c9a7db84a49d484e64c9ba5f4e6da
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group 5c
+      (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term 1005.7.2 uses, by the book''s italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:underlayment:
     label: reference
     topic: definitions
@@ -3074,6 +3107,85 @@ labels:
         or the sum of the required capacities for the stairways or ramps serving the two adjacent stories, whichever is larger.
     piece_sha256: d067fb3163d47c39f60b4575a5f7b6e290cb80ba252eccdca28c820a1072dff7
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1005.7':
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: encroachments into the required width follow 1005.7.1 to 1005.7.3, each labeled on its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 314
+      lines:
+      - 37
+      - 38
+      quote: 1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions
+        of this section.
+    piece_sha256: 77ed29b26deb179e300625cb7776177ecaadac648a96a13271d01112296bc3c5
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1005.7.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34
+      to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors'' swing into a
+      corridor isn''t drawn, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 314
+      lines:
+      - 39
+      - 40
+      quote: 1005.7.1 Doors. Doors, when fully opened, shall not reduce the required width by more than 7 inches (178 mm). Doors
+        in any position shall not reduce the required width by more than one-half.
+    - file: gov.ny.building.2025.pdf
+      page: 314
+      lines:
+      - 42
+      - 49
+      quote: '1. Surface-mounted latch release hardware shall be exempt from inclusion in the 7-inch maximum (178 mm) encroach-
+        ment where both of the following conditions exist: 1.1. The hardware is mounted to the side of the door facing away
+        from the adjacent wall where the door is in the open position. 1.2. The hardware is mounted not less than 34 inches
+        (865 mm) nor more than 48 inches (1219 mm) above the finished floor. 2. The restrictions on door swing shall not apply
+        to doors within individual dwelling units and sleeping units of Group R-2 occupancies and dwelling units of Group R-3
+        occupancies.'
+    piece_sha256: e941d26448f5206d770fb850688f0d0cabb1f7ce75aeb2c8f6a12c699e5430cc
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1005.7.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors
+      per 407.4.3): projections aren''t drawn, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 314
+      lines:
+      - 50
+      - 53
+      quote: '1005.7.2 Other projections. Handrail projections shall be in accordance with the provisions of Section 1014.9.
+        Other nonstruc- tural projections such as trim and similar decorative features shall be permitted to project into the
+        required width not more than 1 1/2 inches (38 mm) on each side. Exception: Projections are permitted in corridors within
+        Group I-2, Condition 1 in accordance with Section 407.4.3.'
+    piece_sha256: a56b215aaef18aa20be1f5d61366a4c1e9956bc6713a687064c0dd220d3eb8f8
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1005.7.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Protruding objects meet 1003.3 (not brought in): a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 314
+      lines:
+      - 54
+      - 54
+      quote: 1005.7.3 Protruding objects. Protruding objects shall comply with the applicable requirements of Section 1003.3.
+    piece_sha256: 2357aabc494188467e876fdc206b5da747ff8839f24dbd6eaee1a5cce4ce8b18
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1006.2.1:
@@ -3926,8 +4038,8 @@ labels:
   '1020.4':
     label: flag
     topic: means_of_egress
-    reason: 'A corridor''s minimum width or required capacity stays unobstructed, but for encroachments per 1005.7 (not brought
-      in): the width is measured between the walls and what the model draws, so doors, furniture and equipment it doesn''t
+    reason: 'A corridor''s minimum width or required capacity stays unobstructed, but for encroachments per 1005.7 (its own flags since
+      section group 5c): the width is measured between the walls and what the model draws, so doors, furniture and equipment it doesn''t
       draw are a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf

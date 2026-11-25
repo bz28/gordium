@@ -12821,11 +12821,11 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The corridor''s width is measured between its walls and what the model draws in it; a door swinging into it,
-      furniture or equipment the model doesn''t show, and 1005.7''s encroachments (not brought in) are a person''s check.'
+      furniture or equipment the model doesn''t show, and 1005.7''s encroachments (its own flags since section group 5c) are a person''s check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 4c. The corridor width rules read the least
     clear width the routes measure between the walls and the obstructions drawn (decision 6 of the route measuring); what
     isn''t drawn, and whether an encroachment meets 1005.7 (doors: 7 inches fully open, half the width in any position;
-    trim 1 1/2 inches; handrails per 1014.9), is a person''s check until section group 5 brings 1005.7 in.'
+    trim 1 1/2 inches; handrails per 1014.9), is a person''s check: 1005.7.1 to 1005.7.3''s flags (section group 5c).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1020_6_air_movement
@@ -13094,5 +13094,105 @@ rules:
       measured, so a person''s check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 5b. The routes measure each story on its own (1004.2.3
     adds no other story''s load but at a convergence: this section''s).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_7_1_door_encroachment
+  kind: flag
+  topic: means_of_egress
+  title: Doors take at most 7 in, or half, of the width (BCNYS 1005.7.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 37
+    - 38
+    quote: 1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions
+      of this section.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 39
+    - 40
+    quote: 1005.7.1 Doors. Doors, when fully opened, shall not reduce the required width by more than 7 inches (178 mm). Doors
+      in any position shall not reduce the required width by more than one-half.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 42
+    - 49
+    quote: '1. Surface-mounted latch release hardware shall be exempt from inclusion in the 7-inch maximum (178 mm) encroach-
+      ment where both of the following conditions exist: 1.1. The hardware is mounted to the side of the door facing away
+      from the adjacent wall where the door is in the open position. 1.2. The hardware is mounted not less than 34 inches
+      (865 mm) nor more than 48 inches (1219 mm) above the finished floor. 2. The restrictions on door swing shall not apply
+      to doors within individual dwelling units and sleeping units of Group R-2 occupancies and dwelling units of Group R-3
+      occupancies.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34
+      to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors'' swing into
+      a corridor isn''t drawn, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 5c. The corridor width rules read the least clear
+    width between the walls and what is drawn; a door swinging into the corridor isn't in the interior description (route
+    measuring decision 6), so its encroachment, and exception 1's latch hardware, are a person's check. Exception 2 (doors
+    within R-2 dwelling or sleeping units and R-3 dwelling units) only loosens it.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_7_2_projections
+  kind: flag
+  topic: means_of_egress
+  title: Trim at most 1 1/2 in each side into the width (BCNYS 1005.7.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 37
+    - 38
+    quote: 1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions
+      of this section.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 50
+    - 53
+    quote: '1005.7.2 Other projections. Handrail projections shall be in accordance with the provisions of Section 1014.9.
+      Other nonstruc- tural projections such as trim and similar decorative features shall be permitted to project into the
+      required width not more than 1 1/2 inches (38 mm) on each side. Exception: Projections are permitted in corridors within
+      Group I-2, Condition 1 in accordance with Section 407.4.3.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors
+      per 407.4.3): projections aren''t drawn, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 5c. Projections aren''t drawn: the corridor''s
+    measured width is between its finished walls and what is drawn in it, so trim within 1 1/2 inches each side and handrails
+    as 1014.9 allows (not brought in) are a person''s check; Group I-2 Condition 1 corridors'' projections per 407.4.3 (not
+    brought in) too.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_7_3_protruding_objects
+  kind: flag
+  topic: means_of_egress
+  title: Protruding objects per 1003.3 (BCNYS 1005.7.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 37
+    - 38
+    quote: 1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions
+      of this section.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 54
+    - 54
+    quote: 1005.7.3 Protruding objects. Protruding objects shall comply with the applicable requirements of Section 1003.3.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Protruding objects meet 1003.3 (not brought in): a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 5c. 1003.3's protruding-object limits (not brought
+    in) aren't measured.
   drafted_by: claude_code/claude-opus-5-5
   status: draft

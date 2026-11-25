@@ -17,15 +17,16 @@ second_reading:
     pieces of its corridor rating (1020.2, 1020.2.1, Table 1020.2 and 3 definitions, 2026-11-25), an eleventh for the 5
     pieces of the rest of Section 1020 (1020.4, 1020.6, 1020.6.1, 1020.7 and 1 definition, 2026-11-25), a twelfth for
     the 4 pieces of section group 5a (1005.1, 1005.2, 1005.3, 1005.3.1, 2026-11-25), a thirteenth for the 3 of section
-    group 5b (1005.4, 1005.5, 1005.6), and a helper for the comparison words)
+    group 5b (1005.4, 1005.5, 1005.6), a fourteenth for the 6 of section group 5c (1005.7 to 1005.7.3 and 2
+    definitions), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), and 1 page, 3 boxes as step_12 (section group 5b); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), and 3 pages, 6 boxes as step_13 (section group 5c); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 237 pieces, 606 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 243 pieces, 621 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -687,6 +688,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:handrail:
+    piece_sha256: 0ce1373e166a619f3105ceaadfb040ff3891c9bd39a34ac89392d54bdc089212
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:hardware:
     piece_sha256: ff5b277570e5f32c21116daf1a35b416d7469631d31c4a0280bcd4f19d3eceb7
     numbers: []
@@ -1280,6 +1287,12 @@ pieces:
     flags:
     - '''180'' (<=): ''for a period of 180 days or less''; days is no unit numbers.py knows, so its ''or less''
       is missed. The second reading is right. Used by no rule.'
+  202:trim:
+    piece_sha256: a50c365023e107da8eab8f57defaddf42c7c9a7db84a49d484e64c9ba5f4e6da
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:underlayment:
     piece_sha256: 7e463705ab56e892161d1acfe3e92a1f3cd5e96759854afa8695eb38eb405eb5
     numbers:
@@ -2009,6 +2022,75 @@ pieces:
     - two
     second_reading_comparisons:
     - none
+    - none
+  '1005.7':
+    piece_sha256: 77ed29b26deb179e300625cb7776177ecaadac648a96a13271d01112296bc3c5
+    numbers:
+    - '1005.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1005.7'
+    second_reading_comparisons:
+    - none
+  1005.7.1:
+    piece_sha256: e941d26448f5206d770fb850688f0d0cabb1f7ce75aeb2c8f6a12c699e5430cc
+    numbers:
+    - not reduce the required width by more than 7 inch
+    - 178 mm
+    - not reduce the required width by more than one-half
+    - 7 inch
+    - 178 mm
+    - not less than 34 inch
+    - 865 mm
+    - nor more than 48 inch
+    - 1219 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not reduce the required width by more than 7 inch
+    - 178 mm
+    - not reduce the required width by more than one-half
+    - 7 inch
+    - 178 mm
+    - not less than 34 inch
+    - 865 mm
+    - nor more than 48 inch
+    - 1219 mm
+    second_reading_comparisons:
+    - <=
+    - none
+    - <=
+    - none
+    - none
+    - '>='
+    - none
+    - <=
+    - none
+  1005.7.2:
+    piece_sha256: a56b215aaef18aa20be1f5d61366a4c1e9956bc6713a687064c0dd220d3eb8f8
+    numbers:
+    - '1014.9'
+    - not more than 1 1/2 inch
+    - 38 mm
+    - 1 inch
+    second_reading: agrees
+    second_reading_numbers:
+    - '1014.9'
+    - not more than 1 1/2 inch
+    - 38 mm
+    - 1 inch
+    second_reading_comparisons:
+    - none
+    - <=
+    - none
+    - none
+  1005.7.3:
+    piece_sha256: 2357aabc494188467e876fdc206b5da747ff8839f24dbd6eaee1a5cce4ce8b18
+    numbers:
+    - '1003.3'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1003.3'
+    second_reading_comparisons:
     - none
   1006.2.1:
     piece_sha256: 85d4a9fd1b8484c8228e3888e992cbee10ca81d48325c328420fb78e8fa1c65d

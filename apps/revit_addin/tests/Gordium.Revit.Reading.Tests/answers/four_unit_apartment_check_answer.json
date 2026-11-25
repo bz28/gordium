@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 57 to review · 20 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 60 to review · 20 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1379,7 +1379,10 @@
     "Egress · Other components' capacity: A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
     "Egress · Egress width never reduced toward the public way: A person checks this (Gordium doesn't decide it): The width or capacity required from a story never narrows along the path of egress travel to the public way: the routes measure each story's spaces and corridors, not the exits and discharge beyond them, so a person's check.",
     "Egress · Losing one exit leaves half the capacity: A person checks this (Gordium doesn't decide it): Where more than one exit is required, losing any one exit (or access to it) leaves at least half the required capacity or width: the exits' widths aren't measured, so a person's check.",
-    "Egress · Converging stairways' capacity added: A person checks this (Gordium doesn't decide it): Where egress from the stories above and below meets at an intermediate level, the capacity from there on is the larger of the widest minimum or the two stories' stairways' or ramps' required capacities added: the stairways aren't measured, so a person's check."
+    "Egress · Converging stairways' capacity added: A person checks this (Gordium doesn't decide it): Where egress from the stories above and below meets at an intermediate level, the capacity from there on is the larger of the widest minimum or the two stories' stairways' or ramps' required capacities added: the stairways aren't measured, so a person's check.",
+    "Egress · Doors take at most 7 in: A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
+    "Egress · Trim at most 1 1/2 in each side into the width: A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
+    "Egress · Protruding objects per 1003.3: A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check."
    ]
   },
   "red": [],
@@ -60666,6 +60669,232 @@
      }
     },
     {
+     "id": "egress.general.bc_1005_7_1_door_encroachment",
+     "rule": "general.bc_1005_7_1_door_encroachment",
+     "name": "Egress · Doors take at most 7 in, or half, of the width (BCNYS 1005.7.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
+      "quotes": [
+       {
+        "text": "1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions of this section.",
+        "where": "1005.7, 2025 Building Code of New York State (BCNYS), PDF p.314"
+       },
+       {
+        "text": "1005.7.1 Doors. Doors, when fully opened, shall not reduce the required width by more than 7 inches (178 mm). Doors in any position shall not reduce the required width by more than one-half.",
+        "where": "1005.7.1, 2025 Building Code of New York State (BCNYS), PDF p.314"
+       },
+       {
+        "text": "1. Surface-mounted latch release hardware shall be exempt from inclusion in the 7-inch maximum (178 mm) encroach- ment where both of the following conditions exist: 1.1. The hardware is mounted to the side of the door facing away from the adjacent wall where the door is in the open position. 1.2. The hardware is mounted not less than 34 inches (865 mm) nor more than 48 inches (1219 mm) above the finished floor. 2. The restrictions on door swing shall not apply to doors within individual dwelling units and sleeping units of Group R-2 occupancies and dwelling units of Group R-3 occupancies.",
+        "where": "1005.7.1, 2025 Building Code of New York State (BCNYS), PDF p.314"
+       }
+      ],
+      "citation": "1005.7, 2025 Building Code of New York State (BCNYS), PDF p.314",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1005.7",
+      "quote": "1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions of this section."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1005_7_1_door_encroachment",
+       "words": "A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1005_7_1_door_encroachment",
+       "why": "A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Doors take at most 7 in, or half, of the width",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1005",
+      "section_title": "Means of Egress Sizing",
+      "piece": "1005.7",
+      "piece_title": "Encroachment"
+     }
+    },
+    {
+     "id": "egress.general.bc_1005_7_2_projections",
+     "rule": "general.bc_1005_7_2_projections",
+     "name": "Egress · Trim at most 1 1/2 in each side into the width (BCNYS 1005.7.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
+      "quotes": [
+       {
+        "text": "1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions of this section.",
+        "where": "1005.7, 2025 Building Code of New York State (BCNYS), PDF p.314"
+       },
+       {
+        "text": "1005.7.2 Other projections. Handrail projections shall be in accordance with the provisions of Section 1014.9. Other nonstruc- tural projections such as trim and similar decorative features shall be permitted to project into the required width not more than 1 1/2 inches (38 mm) on each side. Exception: Projections are permitted in corridors within Group I-2, Condition 1 in accordance with Section 407.4.3.",
+        "where": "1005.7.2, 2025 Building Code of New York State (BCNYS), PDF p.314"
+       }
+      ],
+      "citation": "1005.7, 2025 Building Code of New York State (BCNYS), PDF p.314",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1005.7",
+      "quote": "1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions of this section."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1005_7_2_projections",
+       "words": "A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1005_7_2_projections",
+       "why": "A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Trim at most 1 1/2 in each side into the width",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1005",
+      "section_title": "Means of Egress Sizing",
+      "piece": "1005.7",
+      "piece_title": "Encroachment"
+     }
+    },
+    {
+     "id": "egress.general.bc_1005_7_3_protruding_objects",
+     "rule": "general.bc_1005_7_3_protruding_objects",
+     "name": "Egress · Protruding objects per 1003.3 (BCNYS 1005.7.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+      "quotes": [
+       {
+        "text": "1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions of this section.",
+        "where": "1005.7, 2025 Building Code of New York State (BCNYS), PDF p.314"
+       },
+       {
+        "text": "1005.7.3 Protruding objects. Protruding objects shall comply with the applicable requirements of Section 1003.3.",
+        "where": "1005.7.3, 2025 Building Code of New York State (BCNYS), PDF p.314"
+       }
+      ],
+      "citation": "1005.7, 2025 Building Code of New York State (BCNYS), PDF p.314",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1005.7",
+      "quote": "1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions of this section."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1005_7_3_protruding_objects",
+       "words": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1005_7_3_protruding_objects",
+       "why": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Protruding objects per 1003.3",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1005",
+      "section_title": "Means of Egress Sizing",
+      "piece": "1005.7",
+      "piece_title": "Encroachment"
+     }
+    },
+    {
      "id": "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf",
      "rule": "general.bc_1006_2_1_1_three_or_more_exits",
      "name": "Level 1 › STAIR WEST L1 (2) · Three exits from 501-1,000 occupants, four above (BCNYS 1006.2.1.1)",
@@ -64049,7 +64278,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 57 to review · 20 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 60 to review · 20 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -64580,7 +64809,10 @@
       "egress.general.bc_1005_3_2_other_components",
       "egress.general.bc_1005_4_continuity",
       "egress.general.bc_1005_5_distribution",
-      "egress.general.bc_1005_6_convergence"
+      "egress.general.bc_1005_6_convergence",
+      "egress.general.bc_1005_7_1_door_encroachment",
+      "egress.general.bc_1005_7_2_projections",
+      "egress.general.bc_1005_7_3_protruding_objects"
      ],
      "lines": [
       {
@@ -65501,9 +65733,48 @@
        "title": "Egress · Converging stairways' capacity added (BCNYS 1005.6): A person checks this (Gordium doesn't decide it): Where egress from the stories above and below meets at an intermediate level, the capacity from there on is the larger of the widest minimum or the two stories' stairways' or ramps' required capacities added: the stairways aren't measured, so a person's check.",
        "mark": "?",
        "name": "Egress · Converging stairways' capacity added (BCNYS 1005.6)"
+      },
+      {
+       "key": "review#1f8260a1c3",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1005_7_1_door_encroachment"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Doors take at most 7 in, or half, of the width (BCNYS 1005.7.1): A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Doors take at most 7 in, or half, of the width (BCNYS 1005.7.1)"
+      },
+      {
+       "key": "review#99c7da733e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1005_7_2_projections"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Trim at most 1 1/2 in each side into the width (BCNYS 1005.7.2): A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Trim at most 1 1/2 in each side into the width (BCNYS 1005.7.2)"
+      },
+      {
+       "key": "review#9361b7a91f",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1005_7_3_protruding_objects"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Protruding objects per 1003.3 (BCNYS 1005.7.3): A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+       "mark": "?",
+       "name": "Egress · Protruding objects per 1003.3 (BCNYS 1005.7.3)"
       }
      ],
-     "count": 57,
+     "count": 60,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -66215,6 +66486,36 @@
         "egress.general.bc_1005_6_convergence"
        ],
        "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1005_7_1_door_encroachment",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1005_7_1_door_encroachment"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1005_7_2_projections",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1005_7_2_projections"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1005_7_3_protruding_objects",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1005_7_3_protruding_objects"
+       ],
+       "rules": 1
       }
      ]
     },
@@ -66428,7 +66729,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "57 to review · 20 comply"
+     "summary": "60 to review · 20 comply"
     }
    ],
    "contents": [
@@ -78695,7 +78996,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 150
+          "not_for_checking": 152
          },
          "pieces": [
           {
@@ -79131,6 +79432,12 @@
            "rules": []
           },
           {
+           "id": "202:handrail",
+           "title": "HANDRAIL",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:hardware",
            "title": "HARDWARE",
            "coverage": "not_for_checking",
@@ -79541,6 +79848,12 @@
           {
            "id": "202:temporary_structure",
            "title": "TEMPORARY STRUCTURE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:trim",
+           "title": "TRIM",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -80883,8 +81196,8 @@
          "whole": false,
          "counts": {
           "rules": 1,
-          "flag": 4,
-          "not_for_checking": 3
+          "flag": 7,
+          "not_for_checking": 4
          },
          "pieces": [
           {
@@ -80928,6 +81241,30 @@
            ]
           },
           {
+           "id": "1005.7.1",
+           "title": "Doors",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1005_7_1_door_encroachment"
+           ]
+          },
+          {
+           "id": "1005.7.2",
+           "title": "Other projections",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1005_7_2_projections"
+           ]
+          },
+          {
+           "id": "1005.7.3",
+           "title": "Protruding objects",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1005_7_3_protruding_objects"
+           ]
+          },
+          {
            "id": "1005.1",
            "title": "General",
            "coverage": "not_for_checking",
@@ -80942,6 +81279,12 @@
           {
            "id": "1005.3",
            "title": "Required capacity based on occupant load",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1005.7",
+           "title": "Encroachment",
            "coverage": "not_for_checking",
            "rules": []
           }
@@ -85483,6 +85826,9 @@
    "egress.general.bc_1005_4_continuity": "needs_review",
    "egress.general.bc_1005_5_distribution": "needs_review",
    "egress.general.bc_1005_6_convergence": "needs_review",
+   "egress.general.bc_1005_7_1_door_encroachment": "needs_review",
+   "egress.general.bc_1005_7_2_projections": "needs_review",
+   "egress.general.bc_1005_7_3_protruding_objects": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7da": "complies",
@@ -85517,7 +85863,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "57 to review · 20 comply"
+    "summary": "60 to review · 20 comply"
    }
   ],
   "egress": {
@@ -89505,7 +89851,10 @@
     "general.bc_1005_3_2_other_components": "needs_review",
     "general.bc_1005_4_continuity": "needs_review",
     "general.bc_1005_5_distribution": "needs_review",
-    "general.bc_1005_6_convergence": "needs_review"
+    "general.bc_1005_6_convergence": "needs_review",
+    "general.bc_1005_7_1_door_encroachment": "needs_review",
+    "general.bc_1005_7_2_projections": "needs_review",
+    "general.bc_1005_7_3_protruding_objects": "needs_review"
    },
    "interior": {
     "parts": {
@@ -93075,7 +93424,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "26af5fc0490effa2fd5607aa88c11166314d82d8300d10e9f531042926fb5a86",
   "rulebook": {
-   "new_york/ithaca_city": "b22710e04304ce8463c5c2aff8f7898255ff57da1c2bb67b0107d2990f77e54c"
+   "new_york/ithaca_city": "95879657bab990f05fdf7a6f3d049a60936c0a09012fd39b89c9873b53660efa"
   }
  }
 }
