@@ -32,7 +32,33 @@ internal sealed class ResultsPane : IDockablePaneProvider
         };
     }
 
-    private static ResultsView View() => _view ??= new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, SetUp, _theme);
+    private static ResultsView View() => _view ??= new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, SetUp, _theme, SaveAnswers);
+
+    /// <summary>"Save and check again" in the questions card (UI polish changes 22, 23): the answers written to Project
+    /// Information in one transaction (one Ctrl+Z, named for Gordium like the Setup form's Save), then the project
+    /// checked again; nothing is checked when a write is refused (the pane says why, and the answers stay chosen).</summary>
+    private static void SaveAnswers(IReadOnlyList<MarkWrite> writes) => Post("Save the answers", ui =>
+    {
+        if (_checked is not { IsValidObject: true } doc)
+        {
+            Say("The project checked is closed: open it and click Check project.");
+            return;
+        }
+        var (applied, refused, status) = RevitMarks.Write(doc, SetupWrites.FactsTransaction, writes);
+        Trial.Log("answers", new Dictionary<string, object?>
+        {
+            ["document"] = doc.Title, ["transaction"] = SetupWrites.FactsTransaction, ["status"] = status,
+            ["applied"] = applied, ["refused"] = refused,
+        });
+        if (refused.Count > 0 || status is not ("Committed" or "Nothing"))
+        {
+            Say(PaneWords.AnswersNotSaved(refused, applied.Count, status));
+            return;
+        }
+        Say(applied.Count == 0 ? "" : $"Saved {applied.Count} (Ctrl+Z undoes it).");
+        if (CheckRun.Start(ui, doc) is { } refusedCheck)
+            Say(refusedCheck);
+    });
 
     /// <summary>Revit's theme as the panel last read it (light until read).</summary>
     private static PanelTheme _theme = PanelTheme.Light;
