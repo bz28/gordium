@@ -227,6 +227,17 @@ pieces:
     heading: Aisle accessways in Group M
     rules:
     - general.bc_1018_4_merchandise_pads
+  '1020.3':
+    label: rule
+    heading: Width and capacity
+    rules:
+    - general.bc_1020_3_corridor_capacity
+  Table 1020.3:
+    label: rule
+    heading: Minimum corridor width
+    rules:
+    - general.bc_table_1020_3_corridor_width
+    - general.bc_table_1020_3_other_occupancies
   '1020.5':
     label: rule
     heading: Dead ends

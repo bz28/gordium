@@ -694,12 +694,13 @@ def test_table_1020_3_every_row_passes_at_its_width_and_not_just_short_of_it(ctx
 
 
 def test_a_corridor_wide_enough_for_the_table_but_not_its_capacity_needs_review(ctx, rules):
-    """1020.3 asks the capacity of 1005.1 too: 0.2 in per occupant (1005.3.2, p.314 lines 14-16). Past 220
-    occupants a 44 in corridor may need more: needs review, never a pass, until section group 5 checks capacity."""
-    r = rules["general.bc_table_1020_3_corridor_width"]
-    assert _cites(r, 314, 15)
-    given = {"occupancy_group": "B", "ambulatory_care_facility": False}
-    assert _one(r, "corridor", _corridor(44, 220), given, ctx) == "pass"
-    assert _one(r, "corridor", _corridor(44, 221), given, ctx) == "needs_review"
-    assert _one(r, "corridor", _corridor(80, 400), given, ctx) == "pass"
-    assert _one(r, "corridor", _corridor(79.5, 400), given, ctx) == "needs_review"
+    """1020.3 asks the capacity of 1005.1 too: 0.2 in per occupant (1005.3.2, p.314 lines 14-16), the most it asks in
+    any group. Past 220 occupants a 44 in corridor may need more: its flag needs review (whatever the group, stated
+    or not), until section group 5 checks capacity in full; within it, not applicable."""
+    flag = rules["general.bc_1020_3_corridor_capacity"]
+    assert flag["kind"] == "flag" and _cites(flag, 314, 15) and _cites(flag, 344, 21)
+    for given in ({"occupancy_group": "B"}, {"occupancy_group": "I-2"}, {"occupancy_group": "mixed"}, {}):
+        assert _one(flag, "corridor", _corridor(44, 220), given, ctx) == "not_applicable", given
+        assert _one(flag, "corridor", _corridor(44, 221), given, ctx) == "needs_review", given
+        assert _one(flag, "corridor", _corridor(80, 400), given, ctx) == "not_applicable", given
+        assert _one(flag, "corridor", _corridor(79.5, 400), given, ctx) == "needs_review", given

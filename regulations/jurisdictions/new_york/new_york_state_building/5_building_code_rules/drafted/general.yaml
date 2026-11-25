@@ -11196,6 +11196,90 @@ rules:
     stricter there. Hand-drafted in a Claude Code session (2026-11-23).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1020_3_corridor_capacity
+  kind: flag
+  topic: means_of_egress
+  title: Corridor narrower than 0.2 in per occupant (BCNYS 1020.3)
+  applies_when: corridor_width < 0.2 * corridor_occupant_load
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 21
+    - 22
+    quote: 1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1,
+      but the minimum width shall be not less than that specified in Table 1020.3.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 14
+    - 16
+    quote: 1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways
+      shall be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor
+      of 0.2 inch (5.1 mm) per occupant.
+  examples:
+  - given:
+      occupancy_group: B
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor at 44 in, 220 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 220
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 220 occupants at 0.2 in each need 44 in, the most 1005.3.2 asks in any group.
+  - given:
+      occupancy_group: B
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor at 44 in, 221 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 221
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 221 occupants at 0.2 in each need 44.2 in; whether an exception lowers it, or the occupants split between
+      corridors, is a person's check.
+  - given: {}
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor, the group not stated
+        measures:
+          corridor_width: 80
+          corridor_occupant_load: 400
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'At 0.2 in each, the most 1005.3.2 asks in any group: wide enough whatever the group.'
+  - given:
+      occupancy_group: B
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the flag doesn''t apply.'
+  notes: '1020.3''s capacity, determined by 1005.1: for a corridor, a component other than a stairway, 0.2 in for each
+    occupant it serves (1005.3.2), the most 1005.3.2 asks in any group; its exceptions only ask less (0.15 in with a sprinkler
+    system per 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm system, other than Groups H and I-2; assembly seating''s
+    own factors). A corridor at least that wide is not applicable here whatever the group or sprinkler system; a narrower
+    one, or one whose occupant load isn''t worked out, is a person''s check until section group 5 checks capacity in full
+    (its exceptions, 1005.5''s distribution between exits). The occupant load is as for Table 1020.3''s rule: two readings,
+    none and the whole story''s, only where the building says no other level''s occupants reach its corridors. Hand-drafted
+    in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_table_1020_3_corridor_width
   kind: rule
   topic: means_of_egress
@@ -11220,11 +11304,6 @@ rules:
       else 44) and corridor_width < 72
     reason: 'Group B in an ambulatory care facility (stated, or not ruled out): Table 1020.3 asks 72 in for corridors serving
       stretcher traffic in one, and which corridors do isn''t shown: a person checks.'
-  - when: corridor_width < 0.2 * corridor_occupant_load and corridor_width >= (96 if occupancy_group == "I-2" else 72
-      if occupancy_group == "E" and corridor_occupant_load >= 100 else 36 if corridor_occupant_load < 50 else 44)
-    reason: 'Wide enough for Table 1020.3, but 1020.3 also asks the capacity of 1005.1, and at 0.2 in per occupant (1005.3.2)
-      the occupants the corridor may serve need more; its exceptions allow 0.15 in with a sprinkler system and an emergency
-      voice/alarm system, and the share each exit takes (1005.5) isn''t checked yet: a person checks.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -11251,14 +11330,6 @@ rules:
       or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having
       an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72
       Group I-2 in areas where required for bed movement 96
-  - file: gov.ny.building.2025.pdf
-    page: 314
-    lines:
-    - 14
-    - 16
-    quote: 1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways
-      shall be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor
-      of 0.2 inch (5.1 mm) per occupant.
   examples:
   - given:
       occupancy_group: R-2
@@ -11274,7 +11345,7 @@ rules:
     - part: p1
       outcome: pass
     expect: pass
-    note: 'Any facility not listed: 44 in; 60 occupants at 0.2 in each need 12 in.'
+    note: 'Any facility not listed: 44 in.'
   - given:
       occupancy_group: R-2
       ambulatory_care_facility: false
@@ -11442,21 +11513,6 @@ rules:
     expect: pass
     note: 'An ambulatory care facility: 72 in serves stretcher traffic too.'
   - given:
-      occupancy_group: A-3
-      ambulatory_care_facility: false
-    parts:
-      corridor:
-      - id: p1
-        name: Hall corridor at 60 in, 400 occupants
-        measures:
-          corridor_width: 60
-          corridor_occupant_load: 400
-    rows:
-    - part: p1
-      outcome: needs_review
-    expect: needs_review
-    note: 'Over 44 in, but 400 occupants at 0.2 in each need 80 in (1005.3.2): a person checks the capacity.'
-  - given:
       occupancy_group: mixed
     parts:
       corridor:
@@ -11488,8 +11544,10 @@ rules:
     or not ruled out. The occupant load is the one the corridor serves: Gordium gives two readings, none and its whole story''s,
     only where the building says no other level''s occupants reach its corridors (1004.2.2, 1004.2.3: another story''s
     load is added only at a convergence, 1005.6), so it passes only at its whole story''s load and fails only at none.
-    1020.3''s capacity (1005.1, 0.2 in per occupant by 1005.3.2) is not checked until section group 5: where it may need
-    more than the width, needs review. Hand-drafted in a Claude Code session (2026-11-25).'
+    1020.3''s capacity (1005.1) is the flag “Corridor narrower than 0.2 in per occupant (BCNYS
+    1020.3)”. The table''s "occupant load" is read as the corridor''s own, as its Group E row
+    says ("a corridor having an occupant load") and 1020.3 sizes "the required capacity of corridors". Hand-drafted
+    in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1020_3_other_occupancies

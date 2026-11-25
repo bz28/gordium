@@ -61,6 +61,8 @@ BUILDING = {
     "r2_sleeping_units": (None, True, False, "no"),
     "occupied_outdoor_areas": (None, True, False, "no"),
     "occupant_load_increased": (None, True, False, "no"),
+    "other_level_egress_into_corridors": (None, True, False, "no"),     # section group 4
+    "ambulatory_care_facility": (None, True, False, "no"),
     "facts_not_sent": (None, [], ["dwelling_units"], ["sprinkler_system"], "use"),
 }
 DOMAIN = {**VALUES, **BUILDING}
@@ -77,7 +79,8 @@ BASE = {"use": "one_family_detached", "dwelling_units": 1, "attached_units_in_bu
         "egress_balcony_increase_taken": None, "building_has_atrium": None, "assembly_fixed_seating": None,
         "special_egress_spaces": None, "merchandise_pads": None,
         "emergency_escape_openings_1031": None, "r2_sleeping_units": None, "occupied_outdoor_areas": None,
-        "occupant_load_increased": None, "facts_not_sent": None}
+        "occupant_load_increased": None, "other_level_egress_into_corridors": None, "ambulatory_care_facility": None,
+        "facts_not_sent": None}
 
 
 def count(v, least=0):
@@ -96,7 +99,8 @@ def law(f):
                                     "follows_building_code", "separate_means_of_egress", "townhouse_units",
                                     "egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating",
                                     "special_egress_spaces", "merchandise_pads", "emergency_escape_openings_1031",
-                                    "r2_sleeping_units", "occupied_outdoor_areas", "occupant_load_increased")]
+                                    "r2_sleeping_units", "occupied_outdoor_areas", "occupant_load_increased",
+                                    "other_level_egress_into_corridors", "ambulatory_care_facility")]
     kinds += [f[k] is None or count(f[k]) for k in ("dwelling_units", "attached_units_in_building", "adus_on_parcel",
                                                     "rooms_let_for_profit", "stories")]
     kinds += [f["stories_above_grade_plane"] is None or count(f["stories_above_grade_plane"], 1),

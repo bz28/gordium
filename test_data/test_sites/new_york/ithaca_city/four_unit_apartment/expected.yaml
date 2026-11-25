@@ -78,6 +78,16 @@ results:
   general.bc_table_1006_2_1_r2: fail
   # 1020.5 for every group but I-4: the corridor runs stair door to stair door, so it has no dead end (0 ft)
   general.bc_1020_5_dead_end_other_groups: pass
+  # Table 1020.3 (section group 4, 2026-11-25): the corridor is 72 in (y 12 to 18), past 44 in, but its occupant
+  # load is bounded by its story's only where the building says no other level's occupants reach its corridors
+  # (1004.2.2, 1004.2.3, 1005.6), which the description doesn't state (no Revit mark yet), so needs review; stated,
+  # it passes at the story's upper reading (its 1,800 sq ft gross / 7 = 257.1 occupants, 1004.5.1's increase not
+  # ruled out: 51.4 in at 0.2 in each, 1005.3.2)
+  general.bc_table_1020_3_corridor_width: needs_review
+  # 1020.3's capacity flag: needs review while the corridor's load isn't worked out; stated, not applicable (72 in
+  # is past 51.4 in)
+  general.bc_1020_3_corridor_capacity: needs_review
+  general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review
   # the other rows: not this building's group

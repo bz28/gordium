@@ -168,6 +168,10 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
         if key.startswith("mark:") and occupant_load.FUNCTION_STATED in words:   # a room's function: its own mark
             return {**base, "kind": MARK, "key": f"field:{occupant_load.FUNCTION_FIELD}",
                     "field": occupant_load.FUNCTION_FIELD, "headline": "Set the room's function"}
+        if key.startswith("mark:") and occupant_load.CORRIDOR_SAY in words:   # whether other levels reach a corridor
+            return {**base, "kind": MARK, "key": f"field:{occupant_load.CORRIDOR_FIELD}",
+                    "field": occupant_load.CORRIDOR_FIELD,
+                    "headline": FIELD_HEADLINES[occupant_load.CORRIDOR_FIELD]}
         if key.startswith("mark:") and isinstance(measure, str) and stated in words:
             name = _measure_name(measure, rule_kind)
             return {**base, "kind": MEASURE,

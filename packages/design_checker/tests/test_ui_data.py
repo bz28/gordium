@@ -27,7 +27,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "assembly_fixed_seating": False, "special_egress_spaces": False,
                                           "merchandise_pads": False, "r2_sleeping_units": False,
                                           "emergency_escape_openings_1031": False,           # group 2's two
-                                          "occupied_outdoor_areas": False})                  # group 3's
+                                          "occupied_outdoor_areas": False,                   # group 3's
+                                          "ambulatory_care_facility": False})                # group 4's
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -572,7 +573,10 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # a follow-up PR from the Revit-fields work (r2_sleeping_units: Table 1006.3.4(1)/(2); 1031 escape openings)
     # and group 3's two (occupied outdoor areas, 1004.7; the 1004.5.1 increase), likewise in that follow-up
     assert keys - set(revit) == {"r2_sleeping_units", "emergency_escape_openings_1031",
-                                 "occupied_outdoor_areas", "occupant_load_increased"}
+                                 "occupied_outdoor_areas", "occupant_load_increased",
+                                 # and group 4's two (Table 1020.3's ambulatory care facility; whether another
+                                 # level's occupants reach a corridor), likewise in that follow-up
+                                 "ambulatory_care_facility", "other_level_egress_into_corridors"}
     for k in ("egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating", "special_egress_spaces",
               "merchandise_pads"):
         assert code_scope.field_of(k) == f"building.{k}" and code_scope.MARK[k] == revit[k], k

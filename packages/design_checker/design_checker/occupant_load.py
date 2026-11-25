@@ -77,16 +77,18 @@ AREAS_OVER = ("the story's rooms add up to more than its gross floor area (insid
               "gross-function rooms' share of it can't be: a room's outline may overlap another's or the walls")
 # a corridor's load (section group 4): the story's bounds it only where no other level's occupants reach it
 OTHER_LEVELS = "other_level_egress_into_corridors"
+CORRIDOR_FIELD = "building." + OTHER_LEVELS     # the field that answers it (ui_data: its own ask)
+CORRIDOR_SAY = "say so on the building"         # the words that ask for it
 CORRIDOR_QUESTION, CORRIDOR_NONE, CORRIDOR_STORY = "corridor_occupants_served", "none", "whole_story"
 CORRIDOR_BY_HAND = STOPS["stated_not_given"].format(what="the occupant load the corridor serves, worked out by hand")
 CORRIDOR_NOT_RULED_OUT = ("the building doesn't say whether another level's occupants reach its corridors (an "
                           "unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: "
                           "1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: "
-                          "say so on the building, or " + CORRIDOR_BY_HAND)
+                          + CORRIDOR_SAY + ", or " + CORRIDOR_BY_HAND)
 CORRIDOR_OTHER_LEVELS = ("another level's occupants reach the building's corridors (an unenclosed stairway or ramp, a "
                          "mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the "
                          "story's occupant load doesn't bound the corridor's: " + CORRIDOR_BY_HAND)
-CORRIDOR_NO_STORY = "the story's occupant load isn't worked out, so the corridor's isn't either"
+CORRIDOR_NO_STORY = "the story's occupant load isn't worked out, so the corridor's isn't either: " + CORRIDOR_BY_HAND
 CORRIDOR_READINGS = ("given as two readings (none, the least it can serve; {load:.1f}, the whole story's, the most it "
                      "can serve): the routes don't split a story's occupants between its corridors, so a rule "
                      "reading it complies only if it complies at the whole story's load, fails only if it fails at "
