@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 52 to review · 20 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 54 to review · 20 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1329,8 +1329,8 @@
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): fixed assembly seating (whether any room has it) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): fixed assembly seating (whether any room has it) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
@@ -1374,7 +1374,9 @@
     "Egress · Elevator hoistway doors protected: A person checks this (Gordium doesn't decide it): Elevator hoistway doors in rated enclosures: Sections 716 and 3006.2 (not brought in), a person's check.",
     "Egress · Corridor width in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
     "Egress · Corridor width kept clear: A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
-    "Egress · Corridors not used as air ducts: A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check."
+    "Egress · Corridors not used as air ducts: A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
+    "Egress · Stairway capacity: A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+    "Egress · Doors: A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own."
    ]
   },
   "red": [],
@@ -56439,7 +56441,7 @@
     {
      "id": "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
      "rule": "general.bc_1020_3_corridor_capacity",
-     "name": "Level 1 › CORRIDOR L1 (3) · Corridor narrower than 0.2 in per occupant (BCNYS 1020.3)",
+     "name": "Level 1 › CORRIDOR L1 (3) · Corridor capacity, 0.2 or 0.15 in per occupant (BCNYS 1020.3, 1005.3.2)",
      "group": "law",
      "status": "needs_review",
      "mark": "?",
@@ -56452,7 +56454,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+     "reason": "Level 1 › CORRIDOR L1 (3): fixed assembly seating (whether any room has it) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -56461,7 +56463,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+      "line": "Level 1 › CORRIDOR L1 (3): fixed assembly seating (whether any room has it) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3.",
@@ -56484,6 +56486,32 @@
         "lines": [
          14,
          16
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1. For other than Group H and I-2 occupancies, the capacity, in inches, of means of egress components other than stair- ways shall be calculated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.15 inch (3.8 mm) per occupant in buildings equipped throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm communication system in accordance with Section 907.5.2.2.",
+        "where": "1005.3.2, 2025 Building Code of New York State (BCNYS), PDF p.314",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         18,
+         22
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "2. Facilities with smoke-protected assembly seating shall be permitted to use the capacity factors in Table 1030.6.2 indi- cated for level or ramped aisles for means of egress components other than stairways where the entire path for means of egress from the seating to the exit discharge is provided with a smoke control system complying with Section 909. 3. Facilities with open-air assembly seating shall be permitted to the capacity factors in Section 1030.6.3 indicated for level or ramped aisles for means of egress components other than stairways where the entire path for means of egress from the seating to the exit discharge is open to the outdoors.",
+        "where": "1005.3.2, 2025 Building Code of New York State (BCNYS), PDF p.314",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         23,
+         28
         ],
         "document": "2025 Building Code of New York State (BCNYS)",
         "url": "https://archive.org/details/gov.ny.building.2025",
@@ -56512,6 +56540,22 @@
          14,
          16
         ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         18,
+         22
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         23,
+         28
+        ]
        }
       ]
      },
@@ -56519,32 +56563,41 @@
      "open": {
       "gordium": null,
       "measures": [
-       "corridor occupant load"
+       "fixed assembly seating (whether any room has it)",
+       "corridor occupant load",
+       "emergency voice/alarm system (whether the building has one per 907.5.2.2)",
+       "occupancy group (the building's one group, or mixed)",
+       "sprinkler system (NFPA 13)",
+       "sprinkler system (NFPA 13R)"
       ],
       "gaps": [],
       "worked": [],
       "inputs": [
-       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+       "fixed assembly seating (whether any room has it) not measured (or not usable)",
+       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable)",
+       "occupancy group (the building's one group, or mixed) not measured (or not usable)",
+       "sprinkler system (NFPA 13) not measured (or not usable)",
+       "sprinkler system (NFPA 13R) not measured (or not usable)"
       ],
       "decide": false
      },
      "causes": [
       {
        "kind": "mark",
-       "key": "mark:corridor:corridor_occupant_load",
-       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
-       "elements": [
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
-       ],
-       "measure": "corridor_occupant_load"
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
       },
       {
-       "kind": "decide",
-       "key": "flag",
-       "words": "a flag rule: a person decides, even once it is measured",
-       "elements": [
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
-       ]
+       "kind": "mark",
+       "key": "fact:assembly_fixed_seating",
+       "words": "fixed assembly seating (whether any room has it): not stated for the project",
+       "elements": [],
+       "measure": "assembly_fixed_seating",
+       "field": "facts.assembly_fixed_seating"
       }
      ],
      "law": "Egress (NY State Building Code 2025)",
@@ -56556,26 +56609,25 @@
      },
      "asks": [
       {
-       "key": "mark:corridor:corridor_occupant_load",
-       "why": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
-       "elements": [
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
-       ],
-       "measure": "corridor_occupant_load",
-       "kind": "measure",
-       "headline": "Work out the corridor occupant load by hand: Gordium has no field for it yet"
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
       },
       {
-       "key": "flag",
-       "why": "a flag rule: a person decides, even once it is measured",
-       "elements": [
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
-       ],
-       "kind": "decide",
-       "headline": "The code leaves this to judgment: read the words and decide"
+       "key": "field:building.assembly_fixed_seating",
+       "why": "fixed assembly seating (whether any room has it): not stated for the project",
+       "elements": [],
+       "measure": "assembly_fixed_seating",
+       "kind": "mark",
+       "field": "building.assembly_fixed_seating",
+       "headline": "Say whether any room has fixed assembly seating"
       }
      ],
-     "rule_name": "Corridor narrower than 0.2 in per occupant",
+     "rule_name": "Corridor capacity, 0.2 or 0.15 in per occupant",
      "in_code": {
       "document": "2025 Building Code of New York State (BCNYS)",
       "file": "gov.ny.building.2025.pdf",
@@ -56590,7 +56642,7 @@
     {
      "id": "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
      "rule": "general.bc_1020_3_corridor_capacity",
-     "name": "Level 2 › CORRIDOR L2 (8) · Corridor narrower than 0.2 in per occupant (BCNYS 1020.3)",
+     "name": "Level 2 › CORRIDOR L2 (8) · Corridor capacity, 0.2 or 0.15 in per occupant (BCNYS 1020.3, 1005.3.2)",
      "group": "law",
      "status": "needs_review",
      "mark": "?",
@@ -56603,7 +56655,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+     "reason": "Level 2 › CORRIDOR L2 (8): fixed assembly seating (whether any room has it) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -56612,7 +56664,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+      "line": "Level 2 › CORRIDOR L2 (8): fixed assembly seating (whether any room has it) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3.",
@@ -56635,6 +56687,32 @@
         "lines": [
          14,
          16
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1. For other than Group H and I-2 occupancies, the capacity, in inches, of means of egress components other than stair- ways shall be calculated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.15 inch (3.8 mm) per occupant in buildings equipped throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm communication system in accordance with Section 907.5.2.2.",
+        "where": "1005.3.2, 2025 Building Code of New York State (BCNYS), PDF p.314",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         18,
+         22
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "2. Facilities with smoke-protected assembly seating shall be permitted to use the capacity factors in Table 1030.6.2 indi- cated for level or ramped aisles for means of egress components other than stairways where the entire path for means of egress from the seating to the exit discharge is provided with a smoke control system complying with Section 909. 3. Facilities with open-air assembly seating shall be permitted to the capacity factors in Section 1030.6.3 indicated for level or ramped aisles for means of egress components other than stairways where the entire path for means of egress from the seating to the exit discharge is open to the outdoors.",
+        "where": "1005.3.2, 2025 Building Code of New York State (BCNYS), PDF p.314",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         23,
+         28
         ],
         "document": "2025 Building Code of New York State (BCNYS)",
         "url": "https://archive.org/details/gov.ny.building.2025",
@@ -56663,6 +56741,22 @@
          14,
          16
         ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         18,
+         22
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         23,
+         28
+        ]
        }
       ]
      },
@@ -56670,32 +56764,41 @@
      "open": {
       "gordium": null,
       "measures": [
-       "corridor occupant load"
+       "fixed assembly seating (whether any room has it)",
+       "corridor occupant load",
+       "emergency voice/alarm system (whether the building has one per 907.5.2.2)",
+       "occupancy group (the building's one group, or mixed)",
+       "sprinkler system (NFPA 13)",
+       "sprinkler system (NFPA 13R)"
       ],
       "gaps": [],
       "worked": [],
       "inputs": [
-       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+       "fixed assembly seating (whether any room has it) not measured (or not usable)",
+       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable)",
+       "occupancy group (the building's one group, or mixed) not measured (or not usable)",
+       "sprinkler system (NFPA 13) not measured (or not usable)",
+       "sprinkler system (NFPA 13R) not measured (or not usable)"
       ],
       "decide": false
      },
      "causes": [
       {
        "kind": "mark",
-       "key": "mark:corridor:corridor_occupant_load",
-       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
-       "elements": [
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
-       ],
-       "measure": "corridor_occupant_load"
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
       },
       {
-       "kind": "decide",
-       "key": "flag",
-       "words": "a flag rule: a person decides, even once it is measured",
-       "elements": [
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
-       ]
+       "kind": "mark",
+       "key": "fact:assembly_fixed_seating",
+       "words": "fixed assembly seating (whether any room has it): not stated for the project",
+       "elements": [],
+       "measure": "assembly_fixed_seating",
+       "field": "facts.assembly_fixed_seating"
       }
      ],
      "law": "Egress (NY State Building Code 2025)",
@@ -56707,26 +56810,25 @@
      },
      "asks": [
       {
-       "key": "mark:corridor:corridor_occupant_load",
-       "why": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
-       "elements": [
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
-       ],
-       "measure": "corridor_occupant_load",
-       "kind": "measure",
-       "headline": "Work out the corridor occupant load by hand: Gordium has no field for it yet"
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
       },
       {
-       "key": "flag",
-       "why": "a flag rule: a person decides, even once it is measured",
-       "elements": [
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
-       ],
-       "kind": "decide",
-       "headline": "The code leaves this to judgment: read the words and decide"
+       "key": "field:building.assembly_fixed_seating",
+       "why": "fixed assembly seating (whether any room has it): not stated for the project",
+       "elements": [],
+       "measure": "assembly_fixed_seating",
+       "kind": "mark",
+       "field": "building.assembly_fixed_seating",
+       "headline": "Say whether any room has fixed assembly seating"
       }
      ],
-     "rule_name": "Corridor narrower than 0.2 in per occupant",
+     "rule_name": "Corridor capacity, 0.2 or 0.15 in per occupant",
      "in_code": {
       "document": "2025 Building Code of New York State (BCNYS)",
       "file": "gov.ny.building.2025.pdf",
@@ -60203,6 +60305,154 @@
      }
     },
     {
+     "id": "egress.general.bc_1005_3_1_stairway_capacity",
+     "rule": "general.bc_1005_3_1_stairway_capacity",
+     "name": "Egress · Stairway capacity, 0.3 or 0.2 in per occupant (BCNYS 1005.3.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+      "quotes": [
+       {
+        "text": "1005.3.1 Stairways. The capacity, in inches, of means of egress stairways shall be calculated by multiplying the occupant load served by such stairways by a means of egress capacity factor of 0.3 inch (7.6 mm) per occupant. Where stairways serve more than one story, only the occupant load of each story considered individually shall be used in calculating the required capacity of the stairways serving that story.",
+        "where": "1005.3.1, 2025 Building Code of New York State (BCNYS), PDF p.313"
+       },
+       {
+        "text": "1. For other than Group H and I-2 occupancies, the capacity, in inches, of means of egress stairways shall be calculated by multiplying the occupant load served by such stairways by a means of egress capacity factor of 0.2 inch (5.1 mm) per occupant in buildings equipped throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm communication system in accordance with Section 907.5.2.2. 2. Facilities with smoke-protected assembly seating shall be permitted to use the capacity factors in Table 1030.6.2 indi- cated for stepped aisles for exit access or exit stairways where the entire path for means of egress from the seating to the exit discharge is provided with a smoke control system complying with Section 909. 3. Facilities with open-air assembly seating shall be permitted to the capacity factors in Section 1030.6.3 indicated for stepped aisles for exit access or exit stairways where the entire path for means of egress from the seating to the exit discharge is open to the outdoors.",
+        "where": "1005.3.1, 2025 Building Code of New York State (BCNYS), PDF p.314"
+       }
+      ],
+      "citation": "1005.3.1, 2025 Building Code of New York State (BCNYS), PDF p.313",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1005.3.1",
+      "quote": "1005.3.1 Stairways. The capacity, in inches, of means of egress stairways shall be calculated by multiplying the occupant load served by such stairways by a means of egress capacity factor of 0.3 inch (7.6 mm) per occupant. Where stairways serve more than one story, only the occupant load of each story considered individually shall be used in calculating the required capacity of the stairways serving that story."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1005_3_1_stairway_capacity",
+       "words": "A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1005_3_1_stairway_capacity",
+       "why": "A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Stairway capacity, 0.3 or 0.2 in per occupant",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1005",
+      "section_title": "Means of Egress Sizing",
+      "piece": "1005.3.1",
+      "piece_title": "Stairways"
+     }
+    },
+    {
+     "id": "egress.general.bc_1005_3_2_other_components",
+     "rule": "general.bc_1005_3_2_other_components",
+     "name": "Egress · Doors, ramps and passageways, 0.2 or 0.15 in per occupant (BCNYS 1005.3.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
+      "quotes": [
+       {
+        "text": "1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways shall be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.2 inch (5.1 mm) per occupant.",
+        "where": "1005.3.2, 2025 Building Code of New York State (BCNYS), PDF p.314"
+       },
+       {
+        "text": "1. For other than Group H and I-2 occupancies, the capacity, in inches, of means of egress components other than stair- ways shall be calculated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.15 inch (3.8 mm) per occupant in buildings equipped throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm communication system in accordance with Section 907.5.2.2.",
+        "where": "1005.3.2, 2025 Building Code of New York State (BCNYS), PDF p.314"
+       }
+      ],
+      "citation": "1005.3.2, 2025 Building Code of New York State (BCNYS), PDF p.314",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1005.3.2",
+      "quote": "1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways shall be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.2 inch (5.1 mm) per occupant."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1005_3_2_other_components",
+       "words": "A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1005_3_2_other_components",
+       "why": "A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Doors, ramps and passageways, 0.2 or 0.15 in per occupant",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1005",
+      "section_title": "Means of Egress Sizing",
+      "piece": "1005.3.2",
+      "piece_title": "Other egress components"
+     }
+    },
+    {
      "id": "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf",
      "rule": "general.bc_1006_2_1_1_three_or_more_exits",
      "name": "Level 1 › STAIR WEST L1 (2) · Three exits from 501-1,000 occupants, four above (BCNYS 1006.2.1.1)",
@@ -63586,7 +63836,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 52 to review · 20 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 54 to review · 20 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -64112,7 +64362,9 @@
       "egress.general.bc_1020_2_1_hoistway_protection",
       "egress.general.bc_table_1020_3_other_occupancies",
       "egress.general.bc_1020_4_obstruction",
-      "egress.general.bc_1020_6_air_movement"
+      "egress.general.bc_1020_6_air_movement",
+      "egress.general.bc_1005_3_1_stairway_capacity",
+      "egress.general.bc_1005_3_2_other_components"
      ],
      "lines": [
       {
@@ -64420,7 +64672,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 13,
-       "title": "Level 1 › CORRIDOR L1 (3): 13 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
+       "title": "Level 1 › CORRIDOR L1 (3): 13 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), fixed assembly seating (whether any room has it) not measured (or not usable), emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
        "mark": "?",
        "name": "Level 1 › CORRIDOR L1 (3)"
       },
@@ -64445,7 +64697,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 13,
-       "title": "Level 2 › CORRIDOR L2 (8): 13 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
+       "title": "Level 2 › CORRIDOR L2 (8): 13 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), fixed assembly seating (whether any room has it) not measured (or not usable), emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
        "mark": "?",
        "name": "Level 2 › CORRIDOR L2 (8)"
       },
@@ -64968,9 +65220,35 @@
        "title": "Egress · Corridors not used as air ducts (BCNYS 1020.6): A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
        "mark": "?",
        "name": "Egress · Corridors not used as air ducts (BCNYS 1020.6)"
+      },
+      {
+       "key": "review#3d761294c1",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1005_3_1_stairway_capacity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Stairway capacity, 0.3 or 0.2 in per occupant (BCNYS 1005.3.1): A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+       "mark": "?",
+       "name": "Egress · Stairway capacity, 0.3 or 0.2 in per occupant (BCNYS 1005.3.1)"
+      },
+      {
+       "key": "review#b5ac0a6006",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1005_3_2_other_components"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Doors, ramps and passageways, 0.2 or 0.15 in per occupant (BCNYS 1005.3.2): A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
+       "mark": "?",
+       "name": "Egress · Doors, ramps and passageways, 0.2 or 0.15 in per occupant (BCNYS 1005.3.2)"
       }
      ],
-     "count": 52,
+     "count": 54,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -65125,6 +65403,7 @@
         "general.bc_table_1020_2_i2@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
         "general.bc_table_1020_2_i1_i3@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
         "general.bc_table_1020_2_i4@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+        "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
         "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
         "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_table_1020_2_h1_h2_h3@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
@@ -65134,9 +65413,10 @@
         "general.bc_table_1020_2_i2@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_table_1020_2_i1_i3@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_table_1020_2_i4@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+        "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
-       "rules": 38,
+       "rules": 39,
        "field": "facts.occupancy_group"
       },
       {
@@ -65216,20 +65496,6 @@
        ],
        "rules": 1,
        "field": "facts.sprinklered_903_3_1_1"
-      },
-      {
-       "key": "mark:corridor:corridor_occupant_load",
-       "kind": "mark",
-       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
-       "elements": [
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
-        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
-       ],
-       "items": [
-        "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
-        "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
-       ],
-       "rules": 1
       },
       {
        "key": "question:accessory_area_face",
@@ -65644,6 +65910,26 @@
         "egress.general.bc_1020_6_air_movement"
        ],
        "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1005_3_1_stairway_capacity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1005_3_1_stairway_capacity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1005_3_2_other_components",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1005_3_2_other_components"
+       ],
+       "rules": 1
       }
      ]
     },
@@ -65857,7 +66143,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "52 to review · 20 comply"
+     "summary": "54 to review · 20 comply"
     }
    ],
    "contents": [
@@ -80308,15 +80594,45 @@
          "number": "1005",
          "title": "Means of Egress Sizing",
          "book_page": 292,
-         "coverage": "not_for_checking",
+         "coverage": "rules",
          "whole": false,
          "counts": {
-          "not_for_checking": 1
+          "rules": 1,
+          "flag": 1,
+          "not_for_checking": 3
          },
          "pieces": [
           {
+           "id": "1005.3.1",
+           "title": "Stairways",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1005_3_1_stairway_capacity"
+           ]
+          },
+          {
            "id": "1005.3.2",
            "title": "Other egress components",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1005_3_2_other_components"
+           ]
+          },
+          {
+           "id": "1005.1",
+           "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1005.2",
+           "title": "Minimum width based on component",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1005.3",
+           "title": "Required capacity based on occupant load",
            "coverage": "not_for_checking",
            "rules": []
           }
@@ -81010,9 +81326,8 @@
        ],
        "coverage": "rules",
        "counts": {
-        "rules": 5,
+        "rules": 6,
         "flag": 3,
-        "not_for_checking": 1,
         "not_brought_in": 22
        }
       },
@@ -84854,6 +85169,8 @@
    "egress.general.bc_table_1020_3_other_occupancies": "needs_review",
    "egress.general.bc_1020_4_obstruction": "needs_review",
    "egress.general.bc_1020_6_air_movement": "needs_review",
+   "egress.general.bc_1005_3_1_stairway_capacity": "needs_review",
+   "egress.general.bc_1005_3_2_other_components": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7da": "complies",
@@ -84888,7 +85205,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "52 to review · 20 comply"
+    "summary": "54 to review · 20 comply"
    }
   ],
   "egress": {
@@ -88694,7 +89011,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+     "line": "Level 1 › CORRIDOR L1 (3): fixed assembly seating (whether any room has it) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1020_3_corridor_capacity",
@@ -88711,7 +89028,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+     "line": "Level 2 › CORRIDOR L2 (8): fixed assembly seating (whether any room has it) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; emergency voice/alarm system (whether the building has one per 907.5.2.2) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_3_corridor_width",
@@ -88871,7 +89188,9 @@
     "general.bc_1020_2_1_hoistway_protection": "needs_review",
     "general.bc_table_1020_3_other_occupancies": "needs_review",
     "general.bc_1020_4_obstruction": "needs_review",
-    "general.bc_1020_6_air_movement": "needs_review"
+    "general.bc_1020_6_air_movement": "needs_review",
+    "general.bc_1005_3_1_stairway_capacity": "needs_review",
+    "general.bc_1005_3_2_other_components": "needs_review"
    },
    "interior": {
     "parts": {
@@ -92439,9 +92758,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "4a7f24c728fa277851f0c47b84f09970433877b0864894ec39852cb1ef628ec9",
+  "worker_fingerprint": "26af5fc0490effa2fd5607aa88c11166314d82d8300d10e9f531042926fb5a86",
   "rulebook": {
-   "new_york/ithaca_city": "844667dcbe92a9d81122eaf39d18f6584509fabe02fff8e98f075b5c8f8e44be"
+   "new_york/ithaca_city": "124ff5b0e60d8d8c7e30400edaf136cf44b31149e170a290b8290a435ae59c31"
   }
  }
 }

@@ -109,14 +109,14 @@ def test_the_corridor_width_waits_only_on_whether_other_levels_reach_the_corrido
     though the corridor is 72 in; with the building stating none do, its load is two readings, none and the story's
     upper (its 1,800 sq ft gross / 7, 1004.5.1's increase not ruled out: 257.1), and it passes (72 in: past 44 in
     and past 0.2 in per occupant, 51.4 in, 1005.3.2). Stating they do
-    leaves it needing review. 1020.3's capacity flag goes the same way (set aside once stated). Nothing else changes
+    leaves it needing review. 1020.3's capacity rule goes the same way (section group 5a: a rule). Nothing else changes
     either way."""
     rule, capacity = "general.bc_table_1020_3_corridor_width", "general.bc_1020_3_corridor_capacity"
     corridors = got["interior"]["parts"]["corridor"]
     assert [c["measures"]["corridor_width"] for c in corridors] == [72.0, 72.0]
     assert all("corridor_occupant_load" in c["not_measured"] and not (c.get("readings") or {}) for c in corridors)
     assert got["results"][rule] == present.REVIEW and got["results"][capacity] == present.REVIEW
-    for others, want, cap in ((False, "pass", "not_applicable"), (True, present.REVIEW, present.REVIEW)):
+    for others, want, cap in ((False, "pass", "pass"), (True, present.REVIEW, present.REVIEW)):
         desc = build.interior_of()
         desc["building"] = {**(desc.get("building") or {}), "other_level_egress_into_corridors": others}
         stated = _check(desc, routes)
@@ -187,9 +187,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     2): those narrowed to a building of two or more groups, or to another group (F-1 and S-1's increase, H-5's,
     Group H's sprinkler system), are not applicable to a one-group R-2. Section group 4b adds 1020.2.1's elevator
     hoistway doors (24); its per-corridor flag (a rated corridor's walls) is a corridor's row, not a building line.
-    Section group 4c adds 1020.4's and 1020.6's (26); 1020.7's is a corridor's row."""
+    Section group 4c adds 1020.4's and 1020.6's (26); 1020.7's is a corridor's row. Section group 5a adds 1005.3.1's
+    stairways and 1005.3.2's doors, ramps and passageways (28)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 26 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 28 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):

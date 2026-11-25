@@ -29,7 +29,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "emergency_escape_openings_1031": False,           # group 2's two
                                           "occupied_outdoor_areas": False,                   # group 3's
                                           "ambulatory_care_facility": False,                 # group 4's
-                                          "corridors_within_dwelling_units": False})
+                                          "corridors_within_dwelling_units": False,
+                                          "emergency_voice_alarm_system": False})            # group 5a's
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -578,7 +579,9 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
                                  # and group 4's two (Table 1020.3's ambulatory care facility; whether another
                                  # level's occupants reach a corridor), likewise in that follow-up
                                  "ambulatory_care_facility", "other_level_egress_into_corridors",
-                                 "corridors_within_dwelling_units"}
+                                 "corridors_within_dwelling_units",
+                                 # group 5a's: an emergency voice/alarm system (1005.3's smaller factors)
+                                 "emergency_voice_alarm_system"}
     for k in ("egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating", "special_egress_spaces",
               "merchandise_pads"):
         assert code_scope.field_of(k) == f"building.{k}" and code_scope.MARK[k] == revit[k], k

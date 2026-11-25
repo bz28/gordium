@@ -12254,10 +12254,19 @@ rules:
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1020_3_corridor_capacity
-  kind: flag
+  kind: rule
   topic: means_of_egress
-  title: Corridor narrower than 0.2 in per occupant (BCNYS 1020.3)
-  applies_when: corridor_width < 0.2 * corridor_occupant_load
+  title: Corridor capacity, 0.2 or 0.15 in per occupant (BCNYS 1020.3, 1005.3.2)
+  check: corridor_width >= (corridor_occupant_load * 0.15 if occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E",
+    "F-1", "F-2", "I-1", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"] and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
+    and emergency_voice_alarm_system else corridor_occupant_load * 0.2)
+  review_when:
+  - when: assembly_fixed_seating and corridor_width < (corridor_occupant_load * 0.15 if occupancy_group in ["A-1", "A-2",
+      "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "I-1", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"]
+      and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_voice_alarm_system else corridor_occupant_load *
+      0.2)
+    reason: 'Narrower than the factor, but the building may have smoke-protected or open-air assembly seating (fixed seating
+      stated or not ruled out), whose factors (Table 1030.6.2, 1030.6.3) may ask less: a person checks.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -12273,12 +12282,37 @@ rules:
     lines:
     - 14
     - 16
-    quote: 1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways
-      shall be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor
-      of 0.2 inch (5.1 mm) per occupant.
+    quote: 1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways shall
+      be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.2
+      inch (5.1 mm) per occupant.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 18
+    - 22
+    quote: 1. For other than Group H and I-2 occupancies, the capacity, in inches, of means of egress components other than
+      stair- ways shall be calculated by multiplying the occupant load served by such component by a means of egress capacity
+      factor of 0.15 inch (3.8 mm) per occupant in buildings equipped throughout with an automatic sprinkler system installed
+      in accordance with Section 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm communication system in accordance with
+      Section 907.5.2.2.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 23
+    - 28
+    quote: 2. Facilities with smoke-protected assembly seating shall be permitted to use the capacity factors in Table 1030.6.2
+      indi- cated for level or ramped aisles for means of egress components other than stairways where the entire path for
+      means of egress from the seating to the exit discharge is provided with a smoke control system complying with Section
+      909. 3. Facilities with open-air assembly seating shall be permitted to the capacity factors in Section 1030.6.3 indicated
+      for level or ramped aisles for means of egress components other than stairways where the entire path for means of egress
+      from the seating to the exit discharge is open to the outdoors.
   examples:
   - given:
       occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: false
+      assembly_fixed_seating: false
     parts:
       corridor:
       - id: p1
@@ -12288,11 +12322,15 @@ rules:
           corridor_occupant_load: 220
     rows:
     - part: p1
-      outcome: not_applicable
-    expect: not_applicable
-    note: 220 occupants at 0.2 in each need 44 in, the most 1005.3.2 asks in any group.
+      outcome: pass
+    expect: pass
+    note: '0.2 in each: 44 in.'
   - given:
       occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: false
+      assembly_fixed_seating: false
     parts:
       corridor:
       - id: p1
@@ -12302,38 +12340,135 @@ rules:
           corridor_occupant_load: 221
     rows:
     - part: p1
-      outcome: needs_review
-    expect: needs_review
-    note: 221 occupants at 0.2 in each need 44.2 in; whether an exception lowers it, or the occupants split between
-      corridors, is a person's check.
-  - given: {}
+      outcome: fail
+    expect: fail
+    note: '0.2 in each: 44.2 in.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: false
     parts:
       corridor:
       - id: p1
-        name: Corridor, the group not stated
+        name: NFPA 13 and voice alarm, 290 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 290
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Exception 1: 0.15 in each, 43.5 in.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: NFPA 13 and voice alarm, 294 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 294
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Exception 1: 0.15 in each, 44.1 in.'
+  - given:
+      occupancy_group: I-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: Hospital, NFPA 13 and voice alarm
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 290
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group I-2 is outside exception 1: 0.2 in each, 58 in.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: Two groups, NFPA 13 and voice alarm
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 290
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Two or more groups: a corridor they share meets the more stringent (1004.4), 0.2 in each.'
+  - given:
+      occupancy_group: A-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: true
+      assembly_fixed_seating: true
+    parts:
+      corridor:
+      - id: p1
+        name: Hall corridor, fixed seating
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 400
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Fixed seating may be smoke-protected or open-air: its own factors are a person''s check.'
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: false
+      assembly_fixed_seating: false
+    parts:
+      corridor:
+      - id: p1
+        name: Group not stated, 0.2 in each met
         measures:
           corridor_width: 80
           corridor_occupant_load: 400
     rows:
     - part: p1
-      outcome: not_applicable
-    expect: not_applicable
-    note: 'At 0.2 in each, the most 1005.3.2 asks in any group: wide enough whatever the group.'
+      outcome: pass
+    expect: pass
+    note: '0.2 in each, the most 1005.3.2 asks in any group: passes whatever the group.'
   - given:
       occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      emergency_voice_alarm_system: false
+      assembly_fixed_seating: false
     parts:
       corridor: []
     rows:
     - outcome: not_applicable
     expect: not_applicable
-    note: 'No corridor: with none, the flag doesn''t apply.'
-  notes: '1020.3''s capacity, determined by 1005.1: for a corridor, a component other than a stairway, 0.2 in for each
-    occupant it serves (1005.3.2), the most 1005.3.2 asks in any group; its exceptions only ask less (0.15 in with a sprinkler
-    system per 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm system, other than Groups H and I-2; assembly seating''s
-    own factors). A corridor at least that wide is not applicable here whatever the group or sprinkler system; a narrower
-    one, or one whose occupant load isn''t worked out, is a person''s check until section group 5 checks capacity in full
-    (its exceptions, 1005.5''s distribution between exits). The occupant load is as for Table 1020.3''s rule: two readings,
-    none and the whole story''s, only where the building says no other level''s occupants reach its corridors. Hand-drafted
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: '1020.3''s capacity, determined by 1005.1: for a corridor, a component other than a stairway, 0.2 in for each occupant
+    it serves (1005.3.2); 0.15 in exception 1''s buildings (a sprinkler system per 903.3.1.1 or 903.3.1.2 and an emergency
+    voice/alarm system per 907.5.2.2, both stated, in one group other than H and I-2); assembly seating''s factors (exceptions
+    2 and 3, Table 1030.6.2 and 1030.6.3, not brought in) need review while fixed seating is stated or not ruled out. The
+    occupant load is the corridor''s, two readings (none and the whole story''s) only where the building says no other level''s
+    occupants reach its corridors (1004.2.2, 1004.2.3): it passes only at the whole story''s load. How the load splits between
+    exits (1005.5) is section group 5b''s. Section group 5a (2026-11-25) made this a rule; it was 4a''s flag. Hand-drafted
     in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -12791,5 +12926,75 @@ rules:
   notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 4c. The routes measure each corridor on its own
     story and don''t follow a rating through rooms, foyers or open stairs, so continuity is a person''s check wherever a
     corridor is rated or its rating isn''t stated.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_3_1_stairway_capacity
+  kind: flag
+  topic: means_of_egress
+  title: Stairway capacity, 0.3 or 0.2 in per occupant (BCNYS 1005.3.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 313
+    lines:
+    - 51
+    - 54
+    quote: 1005.3.1 Stairways. The capacity, in inches, of means of egress stairways shall be calculated by multiplying the
+      occupant load served by such stairways by a means of egress capacity factor of 0.3 inch (7.6 mm) per occupant. Where
+      stairways serve more than one story, only the occupant load of each story considered individually shall be used in calculating
+      the required capacity of the stairways serving that story.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 3
+    - 13
+    quote: 1. For other than Group H and I-2 occupancies, the capacity, in inches, of means of egress stairways shall be calculated
+      by multiplying the occupant load served by such stairways by a means of egress capacity factor of 0.2 inch (5.1 mm)
+      per occupant in buildings equipped throughout with an automatic sprinkler system installed in accordance with Section
+      903.3.1.1 or 903.3.1.2 and an emergency voice/alarm communication system in accordance with Section 907.5.2.2. 2. Facilities
+      with smoke-protected assembly seating shall be permitted to use the capacity factors in Table 1030.6.2 indi- cated for
+      stepped aisles for exit access or exit stairways where the entire path for means of egress from the seating to the exit
+      discharge is provided with a smoke control system complying with Section 909. 3. Facilities with open-air assembly seating
+      shall be permitted to the capacity factors in Section 1030.6.3 indicated for stepped aisles for exit access or exit
+      stairways where the entire path for means of egress from the seating to the exit discharge is open to the outdoors.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The stairways'' clear widths aren''t measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler
+      system and a voice/alarm system, other than Groups H and I-2; assembly seating''s own factors) is a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 5a: the route measuring doesn''t give a stairway''s
+    width; each story''s load is its own (1005.3.1''s second sentence), converging stairs are 1005.6''s (section group 5b).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1005_3_2_other_components
+  kind: flag
+  topic: means_of_egress
+  title: Doors, ramps and passageways, 0.2 or 0.15 in per occupant (BCNYS 1005.3.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 14
+    - 16
+    quote: 1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways shall
+      be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.2
+      inch (5.1 mm) per occupant.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 18
+    - 22
+    quote: 1. For other than Group H and I-2 occupancies, the capacity, in inches, of means of egress components other than
+      stair- ways shall be calculated by multiplying the occupant load served by such component by a means of egress capacity
+      factor of 0.15 inch (3.8 mm) per occupant in buildings equipped throughout with an automatic sprinkler system installed
+      in accordance with Section 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm communication system in accordance with
+      Section 907.5.2.2.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Doors, ramps and exit passageways aren''t measured for capacity: 0.2 in for each occupant they serve (0.15 with
+      a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person''s check. Corridors are the rule
+      of their own.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 5a: 1005.3.2 for the components the Building Code
+    check doesn''t read yet (section group 6 brings in the doors).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

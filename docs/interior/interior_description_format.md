@@ -215,6 +215,8 @@ building:
                                        # Table 1020.3's 72 in for corridors serving stretcher traffic
   corridors_within_dwelling_units: false  # a corridor is inside a dwelling unit or sleeping unit (BCNYS 1020.2
                                        # exception 2: no rating there in Groups I-1 and R; Table 1020.3: 36 in)
+  emergency_voice_alarm_system: false  # an emergency voice/alarm communication system per BCNYS 907.5.2.2 (with a
+                                       # 903.3.1.1 or 903.3.1.2 sprinkler system: 1005.3's smaller capacity factors)
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 

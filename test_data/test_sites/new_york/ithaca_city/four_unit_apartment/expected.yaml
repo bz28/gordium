@@ -84,8 +84,8 @@ results:
   # it passes at the story's upper reading (its 1,800 sq ft gross / 7 = 257.1 occupants, 1004.5.1's increase not
   # ruled out: 51.4 in at 0.2 in each, 1005.3.2)
   general.bc_table_1020_3_corridor_width: needs_review
-  # 1020.3's capacity flag: needs review while the corridor's load isn't worked out; stated, not applicable (72 in
-  # is past 51.4 in)
+  # 1020.3's capacity (a rule since section group 5a): needs review while the corridor's load isn't worked out;
+  # stated, it passes (72 in is past 51.4 in at 0.2 in each)
   general.bc_1020_3_corridor_capacity: needs_review
   # Table 1020.2 (section group 4b): the R row; no sprinkler system, so a corridor serving more than 10 is Not
   # Permitted, but the corridor's load isn't worked out (as above) and whether a corridor is within a dwelling unit
@@ -108,6 +108,10 @@ results:
   general.bc_1020_4_obstruction: needs_review
   general.bc_1020_6_air_movement: needs_review
   general.bc_1020_7_continuity: needs_review
+  # section group 5a: 1020.3's capacity is a rule (as above, its load not worked out: needs review); the stairways'
+  # and the doors' capacity are flags (their widths aren't measured)
+  general.bc_1005_3_1_stairway_capacity: needs_review
+  general.bc_1005_3_2_other_components: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

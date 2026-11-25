@@ -2927,13 +2927,85 @@ labels:
       3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
-  '1005.3.2':
+  '1005.1':
     label: reference
     topic: means_of_egress
-    reason: 'How the capacity of an egress component other than a stairway is worked out: 0.2 inch per occupant served (0.15
-      with a sprinkler system per 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm system, other than Groups H and I-2;
-      assembly seating''s own factors). Brought in for 1020.3''s capacity: a corridor needs review where it may need more
-      than its width; the capacity itself is section group 5''s.'
+    reason: 'Scope: every part of the means of egress is sized by Section 1005 (assembly aisles by Section 1030 instead);
+      the requirements are 1005.3.1 and 1005.3.2''s, each labeled on its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 45
+      - 46
+      quote: '1005.1 General. All portions of the means of egress system shall be sized in accordance with this section. Exception:
+        Aisles and aisle accessways in rooms or spaces used for assembly purposes complying with Section 1030.'
+    piece_sha256: ef156668355d30f9433cb6a3f88c2a2aada7d3a703d34d75ca3af68224a2b47f
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1005.2':
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: each component''s least width is the one its own section gives (a corridor''s, Table 1020.3''s
+      rule), checked there.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 47
+      - 48
+      quote: 1005.2 Minimum width based on component. The minimum width, in inches (mm), of any means of egress components
+        shall be not less than that specified for such component, elsewhere in this code.
+    piece_sha256: a6adba5efb6d8c8d056627f511515faa5c372fbd32811fa74791cca7593696a5
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1005.3':
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: the required capacity is 1005.3.1''s (stairways) and 1005.3.2''s (other components), each labeled
+      on its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 49
+      - 50
+      quote: 1005.3 Required capacity based on occupant load. The required capacity, in inches (mm), of the means of egress
+        for any room, area, space or story shall be not less than that determined in accordance with Sections 1005.3.1 and
+        1005.3.2.
+    piece_sha256: 565d6bbbb724efeffb31d81e9ee70fdb8677d7474e8a9e652796c494c31159cf
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1005.3.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'A stairway''s capacity: 0.3 inch per occupant of the story it serves (0.2 with a sprinkler system per 903.3.1.1
+      or 903.3.1.2 and an emergency voice/alarm system, other than Groups H and I-2; assembly seating''s own factors): the
+      stairways'' widths aren''t measured, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 51
+      - 54
+      quote: 1005.3.1 Stairways. The capacity, in inches, of means of egress stairways shall be calculated by multiplying the
+        occupant load served by such stairways by a means of egress capacity factor of 0.3 inch (7.6 mm) per occupant. Where
+        stairways serve more than one story, only the occupant load of each story considered individually shall be used in
+        calculating the required capacity of the stairways serving that story.
+    piece_sha256: c9d30de4e86ce6c3ee13059c475f519f364c93a20df5eecfa115d0dcebbcdf75
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 5a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1005.3.2':
+    label: rule
+    topic: means_of_egress
+    reason: 'The capacity of an egress component other than a stairway: 0.2 inch per occupant served (0.15 with a sprinkler
+      system per 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm system, other than Groups H and I-2; assembly seating''s
+      own factors): measurable for a corridor (its width and the occupants it serves, the rule "Corridor capacity, 0.2 or
+      0.15 in per occupant"); doors, ramps and exit passageways aren''t measured, a flag.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 314
@@ -2945,8 +3017,8 @@ labels:
         of 0.2 inch (5.1 mm) per occupant.
     piece_sha256: c3ee309be6c7724ad7150d670b51be58d0eb3e1a9f30556cf0853bb831cd34bf
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in alone by section group
-      4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): the corridor width rule needs review wherever
-      0.2 inch per occupant may need more than the width.'
+      4a (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md), whole with 1005.1 to 1005.3.1 by section group
+      5a, which makes 1020.3''s capacity a rule.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1006.2.1:

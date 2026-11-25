@@ -9,9 +9,10 @@ oracle is written from the law here, never from the rules:
   in Group I-2, where beds may move; 72 in in Group E at 100 occupants or more, and in Group B where an ambulatory
   care facility is stated or not ruled out; else 36 in under 50 occupants, 44 in at 50 or more), and only in a
   building of one stated group; it fails only under that strictest width.
-- 1020.3's capacity flag is set aside (not applicable) only where the corridor is at least 0.2 in per occupant
-  (1005.3.2's factor, the most it asks in any group); it never passes or fails.
-So a corridor whose every line complies or is set aside is one the law can't fault on width or capacity. With the
+- 1020.3's capacity (1005.3.2, a rule since section group 5a) passes only where the corridor is at least 0.2 in
+  per occupant here (the walk states no sprinkler or voice/alarm system, so exception 1's 0.15 never applies), and
+  fails only short of 0.15 in (exception 1's, the least a stated building may take) with fixed seating ruled out.
+So a corridor whose every line complies is one the law can't fault on width or capacity. With the
 occupant load given as two readings, none and the whole story's (design_checker/occupant_load.py), the same holds at
 the whole story's load."""
 
@@ -105,17 +106,19 @@ def _wrong(table, capacity, group, amb, w, n_pass, n_fail):
         bad.append("table passes short of the strictest width")
     if table == "fail" and w >= strictest(group, amb, n_fail):
         bad.append("table fails at or past the strictest width")
-    if capacity in ("pass", "fail"):
-        bad.append("the capacity flag passed or failed")
-    if capacity == "not_applicable" and not capacity_met(w, n_pass):
-        bad.append("capacity set aside short of 0.2 in per occupant")
+    if capacity == "pass" and not capacity_met(w, n_pass):
+        bad.append("capacity passes short of 0.2 in per occupant")
+    if capacity == "fail" and w >= 0.15 * n_fail:
+        bad.append("capacity fails at or past 0.15 in per occupant")
+    if capacity == "not_applicable":
+        bad.append("capacity set aside: it applies to every corridor")
     return bad
 
 
 def test_the_walk_finds_the_corridor_width_rule_and_capacity_flag(rules):
     got = walked(rules)
     assert set(got) == {TABLE, CAPACITY}
-    assert got[TABLE]["kind"] == "rule" and got[CAPACITY]["kind"] == "flag"
+    assert got[TABLE]["kind"] == "rule" and got[CAPACITY]["kind"] == "rule"      # a rule since section group 5a
 
 
 @pytest.mark.parametrize("where", GROUPS + ["mixed", "unstated"])
@@ -150,13 +153,13 @@ def test_given_as_none_and_the_whole_story_a_corridor_complies_only_at_the_whole
 
 def test_a_corridor_whose_load_is_not_given_never_passes(ctx, rules):
     """Where another level's occupants may reach the corridor, its load is not given (occupant_load.py): the table's
-    rule never passes and the capacity flag is never set aside, whatever the width."""
+    rule never passes and neither does the capacity rule, whatever the width."""
     r = walked(rules)
     for w in WIDTHS:
         m = {"measures": {"corridor_width": w}, "not_measured": {"corridor_occupant_load": "not ruled out"}}
         given = _given("R-2", False)
         assert _row(r[TABLE], m, given, ctx) != "pass", w
-        assert _row(r[CAPACITY], m, given, ctx) == "needs_review", w
+        assert _row(r[CAPACITY], m, given, ctx) != "pass", w
 
 
 def test_the_plan_states_the_walks_own_grid():
@@ -304,3 +307,46 @@ def test_a_rating_not_stated_passes_only_where_the_table_asks_none(ctx, rules):
     assert _row(r, unstated, _rating_given("M", "nfpa_13", False), ctx) == "pass"
     small = {"measures": {"corridor_occupant_load": 30}, "not_measured": {"corridor_fire_rating_hours": "stated"}}
     assert _row(r, small, _rating_given("M", "none", False), ctx) == "pass"
+
+
+
+# ---- section group 5a: 1005.3.2's factors on a corridor (p.314 lines 14-22; 1020.3, p.344) -------------------------
+
+LESS = ("A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "I-1", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4",
+        "S-1", "S-2", "U")                                    # exception 1: "other than Group H and I-2"
+CAP_WIDTHS = (36, 43.5, 44, 44.2, 58, 60, 80)
+CAP_LOADS = (0, 220, 221, 290, 294, 300, 400)
+
+
+def factors(group, s13, s13r, voice, seating):
+    """(the factor a pass must meet, the factor a fail must miss), from 1005.3.2 alone: 0.2 in per occupant; 0.15 in
+    exception 1's buildings (a 903.3.1.1 or 903.3.1.2 system and a 907.5.2.2 voice/alarm system, other than Groups H
+    and I-2); smoke-protected or open-air seating's own (lower) factors where fixed seating may be there. An unstated
+    fact may be either way."""
+    def may(v):
+        return v is True or v is UNSTATED
+    sure_less = group in LESS and (s13 is True or s13r is True) and voice is True
+    may_less = (group in LESS or group is UNSTATED) and (may(s13) or may(s13r)) and may(voice)
+    return (0.15 if sure_less else 0.2), (0 if may(seating) else 0.15 if may_less else 0.2)
+
+
+@pytest.mark.parametrize("where", ["B", "E", "H-2", "I-2", "R-2", "A-3", "mixed", "unstated"])
+def test_the_corridor_capacity_passes_only_at_the_factor_and_fails_only_past_the_least(ctx, rules, where):
+    group = UNSTATED if where == "unstated" else where
+    r = walked(rules)[CAPACITY]
+    bad = []
+    ways = (True, False, UNSTATED)
+    for s13, s13r, voice, seating in itertools.product(ways, ways, ways, ways):
+        given = _given(group, UNSTATED)
+        for k, v in (("sprinklered_903_3_1_1", s13), ("sprinklered_903_3_1_2", s13r),
+                     ("emergency_voice_alarm_system", voice), ("assembly_fixed_seating", seating)):
+            if v is not UNSTATED:
+                given[k] = v
+        need, least = factors(group, s13, s13r, voice, seating)
+        for w, n in itertools.product(CAP_WIDTHS, CAP_LOADS):
+            got = _row(r, {"measures": {"corridor_width": w, "corridor_occupant_load": n}}, given, ctx)
+            if got == "pass" and w < need * n - 1e-9:
+                bad.append((where, s13, s13r, voice, seating, w, n, "pass"))
+            if got == "fail" and w >= least * n - 1e-9:
+                bad.append((where, s13, s13r, voice, seating, w, n, "fail"))
+    assert not bad, f"{len(bad)} wrong answers, e.g. {bad[:5]}"

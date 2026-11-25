@@ -36,8 +36,8 @@ public sealed class ResultViewsTests
     public void The_top_says_the_checker_s_counts_and_what_they_mean()
     {
         var m = ResultViews.Build(Apartment());
-        Assert.Equal("255 need review · 8 not checked yet · 21 comply · 1 doesn't apply", m.Summary);   // group 2's story exits: +8; group 3's 1004.7 and 1004.9 flags: +2; group 4a's corridor width and capacity (2 corridors each) and the mixed-building flag: +5; group 4b's seven Table 1020.2 rows and the fire-partition flag (2 corridors each), and its mixed, Group I-2 and hoistway flags: +19; group 4c's obstruction and air-movement flags and the continuity flag (2 corridors): +4
-        Assert.Equal("Nothing fails yet. 255 results can't be decided until the questions below are answered.", m.Headline);
+        Assert.Equal("257 need review · 8 not checked yet · 21 comply · 1 doesn't apply", m.Summary);   // group 2's story exits: +8; group 3's 1004.7 and 1004.9 flags: +2; group 4a's corridor width and capacity (2 corridors each) and the mixed-building flag: +5; group 4b's seven Table 1020.2 rows and the fire-partition flag (2 corridors each), and its mixed, Group I-2 and hoistway flags: +19; group 4c's obstruction and air-movement flags and the continuity flag (2 corridors): +4; group 5a's stairway and other-component capacity flags: +2
+        Assert.Equal("Nothing fails yet. 257 results can't be decided until the questions below are answered.", m.Headline);
         Assert.Equal("1 fails · 2 need review", ResultViews.Summary([Verdict.NeedsReview, Verdict.DoesNotComply, Verdict.NeedsReview]));
         Assert.Equal("1 rule fails. Fix it first; 2 results also need review.",
                      ResultViews.Headline([(Verdict.NeedsReview, "a"), (Verdict.DoesNotComply, "b"), (Verdict.NeedsReview, "c")]));
@@ -100,10 +100,10 @@ public sealed class ResultViewsTests
         // the cards most results wait on come first: the occupancy group, then (NY Building Code egress for every
         // group, PR #181) the special egress spaces and fixed seating, then the sprinkler system
         Assert.Equal("building.occupancy_groups", answer.Cards[0].Field);
-        Assert.Equal(176, answer.Cards[0].Rows.Count);                 // group 2's story-exit rules read it too; group 4a's corridor width (2); group 4b's Table 1020.2 rows (7 x 2)
+        Assert.Equal(178, answer.Cards[0].Rows.Count);                 // group 2's story-exit rules read it too; group 4a's corridor width (2); group 4b's Table 1020.2 rows (7 x 2); group 5a's corridor capacity rule (2)
         Assert.Equal(60, answer.Cards.Single(c => c.Field == "building.sprinkler_system").Rows.Count);   // group 4b: Table 1020.2 rows whose answer turns on the system (8)
         Assert.Equal(82, answer.Cards.Single(c => c.Field == "building.special_egress_spaces").Rows.Count);
-        Assert.Equal(82, answer.Cards.Single(c => c.Field == "building.assembly_fixed_seating").Rows.Count);
+        Assert.Equal(84, answer.Cards.Single(c => c.Field == "building.assembly_fixed_seating").Rows.Count);   // group 5a: the corridor capacity rule (2)
         Assert.Equal($"Answer {answer.Cards.Count} questions about the project", answer.Title);
         Assert.DoesNotContain(m.Fix.Where(g => g.Kind != FixKind.Answer).SelectMany(g => g.Cards),
                               c => c.Field is { } f && (f.StartsWith("facts.", StringComparison.Ordinal) || f.StartsWith("building.", StringComparison.Ordinal)));
