@@ -51,9 +51,10 @@ THROUGH = ("other rooms' egress passes through it (1004.2: their occupant loads 
 SERVED = ("{names} egress{es} through it (1004.2: {their} occupant load adds to its own), which isn't summed yet: "
           + LOAD_STATED)
 STORY_OPEN = "a room on the story has no occupant load worked out ({names}), so the story's isn't either"
-# where a room is open for want of a stated function, the story says so in the routes' words; where one is open for
-# a load to work out by hand (a function the table sends elsewhere, a room passed through), the story's is by hand too;
-# where every open room is so for the model's sake (its floor area), it is a model fix (rounds 5 and 7)
+# where a room is open for want of a stated function, or for a function the table sends elsewhere, the story's load
+# is by hand too, in the routes' words (working that room's load out is what settles the story's, whatever else is
+# open); where every open room is so for the model's sake (its floor area, a function no table row has), a model fix
+# (rounds 5, 7 and 8; a room passed through or served through holds its own load in the story's sum, never open)
 STORY_FUNCTION = ": " + FUNCTION_STATED
 EXIT_FUNCTION = ("{name} is itself an exit (a door into it is an exit enclosure's or passageway's), yet states "
                  "the function {f!r}: an exit holds no occupant load of its own, so which it is isn't known")

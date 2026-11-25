@@ -518,7 +518,7 @@ def _asked(why):
 def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answered():
     """Group 3 review rounds 6 and 7 (2026-11-25): a load Gordium or a person must work out (no function, a room
     others pass through or a loaded room is served through, a function the table sends elsewhere, an exit, a story of
-    no loaded room, or one left open by any of these) is asked for by hand; only what the model itself can fix (an
+    no loaded room, or one left open by a room of no function or one sent elsewhere) is asked for by hand; only what the model itself can fix (an
     outline, a floor area, a function value no table row has, a use or exit against a function) is a model fix; none
     is ever a mark to set (no host has an occupant-load mark). The class: every reason occupant_load.py defines, so a
     new one can't slip through unclassified; and none says a function 'is stated' when it isn't."""
@@ -541,7 +541,11 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     cases = [(w, kind) for w, kind in reasons.values()] + [
         ("the room's floor area isn't measured", model),
         (ol.STORY_OPEN.format(names="k") + ol.STORY_FUNCTION, by_hand),             # a room with no function
-        (ol.STORY_OPEN.format(names="k") + ": " + ol.STORY_STATED, by_hand)]       # one sent elsewhere
+        (ol.STORY_OPEN.format(names="k") + ": " + ol.STORY_STATED, by_hand),       # one sent elsewhere
+        # round 8: a name or value a reason quotes never reads as a mark ("Supermarket", a function "market")
+        (ol.STORY_OPEN.format(names="Supermarket"), model), (ol.UNKNOWN.format(f="market"), model),
+        (ol.CORRIDOR_FUNCTION.format(name="Landmark hall", f="business"), model),
+        (ol.EXIT_FUNCTION.format(name="Bookmark stair", f="business"), model)]
     for why, kind in cases:
         heads = _asked(why)
         assert heads and not any(h.startswith("Mark the") for h in heads), (why, heads)
