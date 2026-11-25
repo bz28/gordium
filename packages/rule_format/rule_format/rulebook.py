@@ -57,6 +57,42 @@ MEASURE_KINDS = {name: UNIT_KINDS.get(m["unit"], "number") for name, m in yaml.s
 PROPOSED_MEASURES = "drafted/records/proposed_measures.yaml"   # under the folder's rulebooks (rules_folder)
 
 
+def needed_by_problems(proposed: Path, rulebooks: list) -> list[str]:
+    """A proposed measure's `needed_by` must name exactly the rules whose applies_when, check or review_when read it
+    (worked out from their formulas), so the list can't drift from the rules (review round 2, 2026-11-23)."""
+    listed = load(proposed) or {}
+    reads: dict[str, set] = {}
+    for path in rulebooks:
+        for r in (load(path) or {}).get("rules") or []:
+            if not isinstance(r, dict):
+                continue
+            texts = [r.get("applies_when"), r.get("check")] + [w.get("when") for w in r.get("review_when") or []
+                                                                if isinstance(w, dict)]
+            for t in texts:
+                if isinstance(t, str):
+                    try:
+                        names = formula.names(t)
+                    except formula.FormulaError:
+                        continue
+                    for n in names & set(listed):
+                        reads.setdefault(n, set()).add(r.get("id"))
+    out = []
+    for name, m in listed.items():
+        got = set(m.get("needed_by") or []) if isinstance(m, dict) else set()
+        want = reads.get(name, set())
+        if got - want:
+            out.append(f"{name}: needed_by names {sorted(got - want)}, which don't read it")
+        if want - got:
+            out.append(f"{name}: needed_by misses {sorted(want - got)}, which read it")
+    return out
+
+
+def _listed_values(record: dict) -> set:
+    """The text values a proposed text measure's record lists (`values:`, each a text), else none."""
+    values = record.get("values")
+    return {v for v in values if isinstance(v, str)} if isinstance(values, list) else set()
+
+
 def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
     """allowed: the values each text measure may take, e.g. {"use": the city's use names}.
     Required, so no caller can forget it. A value outside the list, or a text measure with
@@ -356,8 +392,10 @@ class Context:
 
     def allowed(self) -> dict:
         """What outcome() needs here: the text values each text measure may take, and each proposed
-        measure's kind (a proposed text measure has no list of values yet, so it is unrecognized)."""
-        proposed = {n: set() if k == "text" else k for n, k in self.kinds().items() if n in self.proposed}
+        measure's kind (a proposed text measure takes only the values its record lists, `values:`; with none
+        listed, every value is unrecognized)."""
+        proposed = {n: _listed_values(self.proposed[n]) if k == "text" else k for n, k in self.kinds().items()
+                    if n in self.proposed}
         return {"use": self.uses, "district": self.districts} | proposed
 
     def _problem(self, name: str, message: str):
@@ -573,7 +611,7 @@ def district_name(column: str) -> str:
 
 def _text_problems(f: str, allowed: dict[str, set]) -> list[str]:
     """Each quoted value must be one the measure it is compared with can take: a use for `use`, a district
-    for `district`. So `use == "R-2a"` (a district written where a use belongs) can't pass the inspector and
+    for `district`, a listed value for a proposed text measure (its `values:`). So `use == "R-2a"` (a district written where a use belongs) can't pass the inspector and
     then never apply. A quoted value compared with anything else (another measure, or nothing) is refused."""
     out = []
     for name, value in formula.compared_strings(f):
@@ -955,7 +993,8 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p += [f"'{n}' in {f!r} is a measure of a part (rule_format/parts.yaml): only a rule for each "
                   f"{_part_kind_of(n)} may use it" for n in sorted(formula.names(f) & foreign)]
             p += [f"unknown measure '{n}' in {f!r}" for n in unknown]
-            p += _text_problems(f, {"use": ctx.uses, "district": ctx.districts})
+            p += _text_problems(f, {"use": ctx.uses, "district": ctx.districts} | {   # and a proposed text measure's
+                n: v for n, v in ctx.allowed().items() if n in ctx.proposed and isinstance(v, set)})   # listed values
             if not unknown:                 # well-typed for every value, or it is no rule (formula.type_of)
                 formula.type_of(f, kinds)
         except FormulaError as e:

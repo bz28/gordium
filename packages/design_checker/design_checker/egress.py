@@ -309,11 +309,15 @@ def _law_values(law: dict, values: dict, allowed: dict, building) -> tuple[dict,
     """The building values and allowed values a law's rules read: the check's own, and for the Building Code the
     building block's measures (code_scope.building_measures: occupancy group, sprinkler system...). A proposed
     measure's kind (the law's drafted/records/proposed_measures.yaml) is added only for one given a value, so a law
-    reads exactly what it did where none is given."""
-    if law.get("scope") == code_scope.BUILDING:
+    reads exactly what it did where none is given; but the Building Code's every one, so a fact the architect
+    hasn't stated is an unknown its rules read as their worked examples do (rule_format: three-valued, "True or
+    unknown is True"), never a whole formula unread: a travel distance within every limit isn't held for an
+    unstated balcony increase it doesn't need (2026-11-23)."""
+    is_bc = law.get("scope") == code_scope.BUILDING
+    if is_bc:
         given = {k: values[k] for k in code_scope.FACTS if k in values}
         values = {**values, **code_scope.building_measures({**given, **(building if isinstance(building, dict) else {})})}
-    kinds = {k: v for k, v in (law.get("kinds") or {}).items() if k in values and k not in allowed}
+    kinds = {k: v for k, v in (law.get("kinds") or {}).items() if (is_bc or k in values) and k not in allowed}
     return values, ({**allowed, **kinds} if kinds else allowed)
 
 
