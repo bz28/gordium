@@ -302,7 +302,7 @@ public static class Marks
     public static readonly MarkDefinition R2SleepingUnits = new(
         "Gordium: R-2 sleeping units", new("4ea5ab97-6e4a-4bb9-a137-b6cb88838f9c"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.r2_sleeping_units",
-        "For a Group R-2 building: Yes when its Group R-2 consists of sleeping units (a dormitory, a boarding house); No when it consists of dwelling units (apartments). It chooses which table limits a story with one exit. " +
+        "For a Group R-2 building: Yes when any of its Group R-2 consists of sleeping units (a dormitory, a boarding house, dorm-style suites), even beside apartments: Table 1006.3.4(2), the stricter, then limits every Group R-2 story with one exit. No only when every Group R-2 unit is a dwelling unit (apartments). " +
         "BCNYS Table 1006.3.4(1) note b: \"This table is used for Group R-2 occupancies consisting of dwelling units. For Group R-2 occupancies consisting of sleeping units, use Table 1006.3.4(2).\" " +
         "Blank: the one-exit rows for Group R-2 need review.");
 
