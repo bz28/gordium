@@ -31,10 +31,12 @@ public sealed class GroupTwoFactsTests
         Assert.Contains("\"This table is used for Group R-2 occupancies consisting of dwelling units. For Group R-2 occupancies consisting of sleeping units, use Table 1006.3.4(2).\"",
                         Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
         Assert.Contains("and provided with emergency escape and rescue openings in accordance with Section 1031.\"", Marks.EscapeOpenings1031.Description, StringComparison.Ordinal);
-        // one building-wide fact: a building with both kinds says Yes, the stricter table (review round 1: No for a
-        // mostly-apartment building sent its sleeping-unit stories to Table 1006.3.4(1)'s looser limits)
-        Assert.Contains("Yes when any of its Group R-2 consists of sleeping units", Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
-        Assert.Contains("No only when every Group R-2 unit is a dwelling unit", Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
+        // one building-wide fact: Yes or No only when every unit is that kind; a building with both leaves it blank, so
+        // both tables' rows need review (review rounds 1 and 2: No sent its sleeping-unit stories to Table 1006.3.4(1)'s
+        // looser travel limit, and Yes its apartment stories past Table (1)'s four-unit limit, which Table (2) lacks)
+        Assert.Contains("Yes only when every Group R-2 unit is a sleeping unit", Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
+        Assert.Contains("No only when every one is a dwelling unit", Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
+        Assert.Contains("A building with both: leave it blank", Marks.R2SleepingUnits.Description, StringComparison.Ordinal);
         // Gordium doesn't check 1031's openings under the Building Code: Yes is the architect's statement, said so
         Assert.Contains("Gordium doesn't check them under the Building Code", Marks.EscapeOpenings1031.Description, StringComparison.Ordinal);
     }

@@ -624,3 +624,12 @@ def test_every_story_fact_a_story_exit_rule_reads_and_nothing_measures_is_a_ques
         assert head.startswith("Check by hand:") and head.endswith("?") and "_" not in head, (m, head)
     for m in ("story_second_above_grade_plane", "story_fourth_or_higher_above_grade_plane"):
         assert "story above grade plane" in each_part.MEASURE_NAMES[m] and "(whether it is the" in each_part.MEASURE_NAMES[m]
+
+
+def test_the_r2_sleeping_units_ask_never_reads_as_either_or_for_a_mixed_building():
+    # group 2 facts' review rounds 1 and 2: one building-wide fact, so a building with both kinds leaves it blank (both
+    # tables' rows need review); the words the architect reads say so, never "sleeping units (not dwelling units)"
+    from design_checker import each_part
+    assert "every Group R-2 unit is a sleeping unit" in ui_data.FIELD_HEADLINES["building.r2_sleeping_units"]
+    assert "blank if both" in ui_data.FIELD_HEADLINES["building.r2_sleeping_units"]
+    assert "every Group R-2 unit is a sleeping unit" in each_part.MEASURE_NAMES["r2_sleeping_units"]
