@@ -58,7 +58,7 @@ FIELD_HEADLINES = {
     "building.assembly_fixed_seating": "Say whether any room has fixed assembly seating",
     "building.special_egress_spaces": "Say whether the building has special egress spaces (boiler or electrical rooms, malls…)",
     "building.merchandise_pads": "Say whether the store has merchandise pads",
-    "building.r2_sleeping_units": "Say whether the Group R-2 is of sleeping units (not dwelling units)",
+    "building.r2_sleeping_units": "Say whether the Group R-2 units are all sleeping units, all dwelling units, or both",
     "building.emergency_escape_openings_1031": "Say whether every sleeping room has an emergency escape opening (1031)",
     "building.occupied_outdoor_areas": "Say whether the occupants use outdoor areas (yards, patios, roofs: 1004.7)",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
