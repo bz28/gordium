@@ -773,7 +773,8 @@ internal static class ModelBuild
         var data = placed.Where(x => x.D.SwingDir is not null).ToDictionary(
             x => x.Fi.UniqueId,
             x => (new Xyz(x.D.SwingDir!.Value.X, x.D.SwingDir.Value.Y, 0),
-                  x.D.Hinge is { } h ? new Xyz(h.X, h.Y, 0) : (Xyz?)null));
+                  x.D.Hinge is { } h ? new Xyz(h.X, h.Y, 0) : (Xyz?)null,
+                  new Xyz(x.D.Center.X, x.D.Center.Y, 0)));
         Dictionary<string, RouteReader.BuildSwing> Read() =>
             RouteReader.ReadBuildSwings(RevitInterior.DoorsModel(doc), data).ToDictionary(r => r.Id, StringComparer.Ordinal);
         var flips = placed.ToDictionary(x => x.Fi.UniqueId, _ => new List<string>(), StringComparer.Ordinal);

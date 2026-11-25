@@ -636,10 +636,13 @@ public static class RouteReader
         public bool AsTheData => Side is { } s && s == DataSide && (DataHinge is null || DataHinge != 0 && Hinge == DataHinge);
     }
 
-    /// <summary>Each door the build gives a swing (by <c>UniqueId</c>: its <c>swing_dir</c> and, for a single door,
-    /// its hinge point, both internal), read back from its plan symbol (<see cref="SwingSide"/>, the door's type width).
-    /// A door whose place in its wall isn't read has nothing read.</summary>
-    public static List<BuildSwing> ReadBuildSwings(RevitModel model, IReadOnlyDictionary<string, (Xyz Dir, Xyz? Hinge)> data)
+    /// <summary>Each door the build gives a swing (by <c>UniqueId</c>: its <c>swing_dir</c>, its centre and, for a single
+    /// door, its hinge point, all internal), read back from its plan symbol (<see cref="SwingSide"/>, the door's type
+    /// width). The data's side is the sign of its swing across the wall, none within 1e-6 of along it; its hinge, the
+    /// sign along the wall of the hinge from the data's own centre, 0 within 1/16 in (so a turned model's rounding never
+    /// makes a side or a jamb the data didn't give: build review round 3). A door whose place in its wall isn't read has
+    /// nothing read.</summary>
+    public static List<BuildSwing> ReadBuildSwings(RevitModel model, IReadOnlyDictionary<string, (Xyz Dir, Xyz? Hinge, Xyz Centre)> data)
     {
         var rows = new List<BuildSwing>();
         var t = model.InternalToShared;
@@ -653,12 +656,16 @@ public static class RouteReader
                 continue;
             }
             var dir = InteriorReader.Turned(model, d.Dir);
-            var dataSide = Math.Sign(P2Dot(new P2(dir.X, dir.Y), place.Normal));
+            var size = Math.Sqrt(dir.X * dir.X + dir.Y * dir.Y);
+            var across = size > 0 ? P2Dot(new P2(dir.X / size, dir.Y / size), place.Normal) : 0;
+            var dataSide = Math.Abs(across) <= 1e-6 ? 0 : Math.Sign(across);
             int? dataHinge = null;
             if (d.Hinge is { } h)
             {
                 var h3 = t.Apply(h);
-                dataHinge = Math.Sign(P2Dot(new P2(h3.X, h3.Y) - place.Centre, place.Along));
+                var c3 = t.Apply(d.Centre);
+                var off = P2Dot(new P2(h3.X - c3.X, h3.Y - c3.Y), place.Along);
+                dataHinge = Math.Abs(off) <= S ? 0 : Math.Sign(off);
             }
             var side = SwingRead(model, rec, place, rec.TypeWidth ?? 0, out why, out var jambs);
             int? hinge = side is not null && jambs.Count == 1 ? jambs.Single() : null;
