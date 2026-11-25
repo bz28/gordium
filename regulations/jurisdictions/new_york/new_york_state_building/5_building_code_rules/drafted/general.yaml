@@ -11196,3 +11196,389 @@ rules:
     stricter there. Hand-drafted in a Claude Code session (2026-11-23).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1020_3_corridor_capacity
+  kind: flag
+  topic: means_of_egress
+  title: Corridor narrower than 0.2 in per occupant (BCNYS 1020.3)
+  applies_when: corridor_width < 0.2 * corridor_occupant_load
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 21
+    - 22
+    quote: 1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1,
+      but the minimum width shall be not less than that specified in Table 1020.3.
+  - file: gov.ny.building.2025.pdf
+    page: 314
+    lines:
+    - 14
+    - 16
+    quote: 1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways
+      shall be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor
+      of 0.2 inch (5.1 mm) per occupant.
+  examples:
+  - given:
+      occupancy_group: B
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor at 44 in, 220 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 220
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 220 occupants at 0.2 in each need 44 in, the most 1005.3.2 asks in any group.
+  - given:
+      occupancy_group: B
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor at 44 in, 221 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 221
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 221 occupants at 0.2 in each need 44.2 in; whether an exception lowers it, or the occupants split between
+      corridors, is a person's check.
+  - given: {}
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor, the group not stated
+        measures:
+          corridor_width: 80
+          corridor_occupant_load: 400
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'At 0.2 in each, the most 1005.3.2 asks in any group: wide enough whatever the group.'
+  - given:
+      occupancy_group: B
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the flag doesn''t apply.'
+  notes: '1020.3''s capacity, determined by 1005.1: for a corridor, a component other than a stairway, 0.2 in for each
+    occupant it serves (1005.3.2), the most 1005.3.2 asks in any group; its exceptions only ask less (0.15 in with a sprinkler
+    system per 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm system, other than Groups H and I-2; assembly seating''s
+    own factors). A corridor at least that wide is not applicable here whatever the group or sprinkler system; a narrower
+    one, or one whose occupant load isn''t worked out, is a person''s check until section group 5 checks capacity in full
+    (its exceptions, 1005.5''s distribution between exits). The occupant load is as for Table 1020.3''s rule: two readings,
+    none and the whole story''s, only where the building says no other level''s occupants reach its corridors. Hand-drafted
+    in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_3_corridor_width
+  kind: rule
+  topic: means_of_egress
+  title: Corridor width at least Table 1020.3's, every group (BCNYS 1020.3)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2", "H-3", "H-4",
+    "H-5", "I-1", "I-2", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"]
+  check: corridor_width >= (96 if occupancy_group == "I-2" else 72 if occupancy_group == "E" and corridor_occupant_load
+    >= 100 else 36 if corridor_occupant_load < 50 else 44)
+  review_when:
+  - when: corridor_width >= 24 and corridor_width < 36
+    reason: 'Under 36 in, but within Table 1020.3''s 24 in for a corridor that gives access to and use of mechanical, plumbing
+      or electrical systems or equipment, which the model doesn''t show: a person checks what the corridor serves.'
+  - when: corridor_width >= 36 and corridor_width < 44 and corridor_occupant_load >= 50
+    reason: 'Under 44 in, but within Table 1020.3''s 36 in for a corridor within a dwelling unit, which the model doesn''t
+      show: a person checks whether the corridor is within one.'
+  - when: occupancy_group == "I-2" and corridor_width >= (36 if corridor_occupant_load < 50 else 44) and corridor_width
+      < 96
+    reason: 'Group I-2: under the 96 in Table 1020.3 asks where beds are moved, but 1020.3''s exception doesn''t ask it in
+      areas without stretcher or bed movement for access to care or the defend-in-place strategy, which the model doesn''t
+      show: a person checks.'
+  - when: occupancy_group == "B" and ambulatory_care_facility and corridor_width >= (36 if corridor_occupant_load < 50
+      else 44) and corridor_width < 72
+    reason: 'Group B in an ambulatory care facility (stated, or not ruled out): Table 1020.3 asks 72 in for corridors serving
+      stretcher traffic in one, and which corridors do isn''t shown: a person checks.'
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 21
+    - 22
+    quote: 1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1,
+      but the minimum width shall be not less than that specified in Table 1020.3.
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 23
+    - 24
+    quote: 'Exception: In Group I-2 occupancies, corridors are not required to have a clear width of 96 inches (2438 mm) in
+      areas where there will not be stretcher or bed movement for access to care or as part of the defend-in-place strategy.'
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 27
+    - 33
+    quote: Any facility not listed in this table 44 Access to and utilization of mechanical, plumbing or electrical systems
+      or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having
+      an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72
+      Group I-2 in areas where required for bed movement 96
+  examples:
+  - given:
+      occupancy_group: R-2
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Apartment corridor at 44 in, 60 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Any facility not listed: 44 in.'
+  - given:
+      occupancy_group: R-2
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Just under 44 in, 60 occupants
+        measures:
+          corridor_width: 43.5
+          corridor_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Under 44 in with 50 or more occupants, but within the 36 in a corridor within a dwelling unit takes (not shown):
+      a person checks.'
+  - given:
+      occupancy_group: B
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Office corridor at 36 in, 49 occupants
+        measures:
+          corridor_width: 36
+          corridor_occupant_load: 49
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Fewer than 50 occupants: 36 in.'
+  - given:
+      occupancy_group: B
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Just under 36 in
+        measures:
+          corridor_width: 35.5
+          corridor_occupant_load: 49
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Under 36 in, within the 24 in a corridor to mechanical, plumbing or electrical equipment takes (not shown).'
+  - given:
+      occupancy_group: B
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Under 24 in
+        measures:
+          corridor_width: 23.5
+          corridor_occupant_load: 10
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: Under every width Table 1020.3 gives.
+  - given:
+      occupancy_group: E
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: School corridor at 72 in, 100 occupants
+        measures:
+          corridor_width: 72
+          corridor_occupant_load: 100
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group E with 100 or more occupants: 72 in.'
+  - given:
+      occupancy_group: E
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: School corridor at 71.5 in, 100 occupants
+        measures:
+          corridor_width: 71.5
+          corridor_occupant_load: 100
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group E with 100 or more occupants: under 72 in fails.'
+  - given:
+      occupancy_group: E
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: School corridor at 44 in, 99 occupants
+        measures:
+          corridor_width: 44
+          corridor_occupant_load: 99
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group E under 100 occupants: 44 in.'
+  - given:
+      occupancy_group: I-2
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Hospital corridor at 96 in
+        measures:
+          corridor_width: 96
+          corridor_occupant_load: 200
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Group I-2 where beds are moved: 96 in.'
+  - given:
+      occupancy_group: I-2
+      ambulatory_care_facility: false
+    parts:
+      corridor:
+      - id: p1
+        name: Hospital corridor at 95.5 in
+        measures:
+          corridor_width: 95.5
+          corridor_occupant_load: 200
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Under 96 in: 1020.3''s exception (no bed movement) is a person''s check.'
+  - given:
+      occupancy_group: B
+      ambulatory_care_facility: true
+    parts:
+      corridor:
+      - id: p1
+        name: Clinic corridor at 71.5 in
+        measures:
+          corridor_width: 71.5
+          corridor_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'An ambulatory care facility: under 72 in, whether it serves stretcher traffic is a person''s check.'
+  - given:
+      occupancy_group: B
+      ambulatory_care_facility: true
+    parts:
+      corridor:
+      - id: p1
+        name: Clinic corridor at 72 in
+        measures:
+          corridor_width: 72
+          corridor_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'An ambulatory care facility: 72 in serves stretcher traffic too.'
+  - given:
+      occupancy_group: mixed
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor in a building of two groups
+        measures:
+          corridor_width: 60
+          corridor_occupant_load: 20
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'A building of two or more groups is the flag''s (1004.4): not applicable.'
+  - given:
+      occupancy_group: R-2
+      ambulatory_care_facility: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: 'Table 1020.3 for every group (section group 4 of the plan, docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md):
+    44 in for any facility the table doesn''t list, 36 in with fewer than 50 occupants, 72 in in Group E with 100 or more,
+    96 in in Group I-2 where beds are moved. Where the table loosens it for a corridor the model can''t tell apart (24 in
+    to mechanical, plumbing or electrical equipment; 36 in within a dwelling unit; Group I-2 areas without bed movement,
+    1020.3''s exception) it needs review, never a pass on the looser width; where it tightens it for one (72 in for stretcher
+    traffic in an ambulatory care facility, Group B, 304.1) it needs review short of 72 in while the facility is stated
+    or not ruled out. The occupant load is the one the corridor serves: Gordium gives two readings, none and its whole story''s,
+    only where the building says no other level''s occupants reach its corridors (1004.2.2, 1004.2.3: another story''s
+    load is added only at a convergence, 1005.6), so it passes only at its whole story''s load and fails only at none.
+    1020.3''s capacity (1005.1) is the flag “Corridor narrower than 0.2 in per occupant (BCNYS
+    1020.3)”. The table''s "occupant load" is read as the corridor''s own, as its Group E row
+    says ("a corridor having an occupant load") and 1020.3 sizes "the required capacity of corridors". Hand-drafted
+    in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1020_3_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Corridor width in a building of two or more groups (BCNYS Table 1020.3)
+  applies_when: occupancy_group == "mixed"
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 27
+    - 33
+    quote: Any facility not listed in this table 44 Access to and utilization of mechanical, plumbing or electrical systems
+      or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having
+      an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72
+      Group I-2 in areas where required for bed movement 96
+  examples:
+  - given:
+      occupancy_group: mixed
+    expect: needs_review
+    note: 'A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own
+      occupancy, and a corridor two occupancies share meets the more stringent (Group E''s 72 in, Group I-2''s 96 in); which
+      room is which occupancy isn''t marked yet, so a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'One group: the rule for every group checks it.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: needs review.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 4: the one-group corridors are a rule.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft

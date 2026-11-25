@@ -282,9 +282,9 @@ def test_a_room_holding_no_load_says_why_in_words_that_are_true():
 WALK_FUNCTIONS = (None, "residential", "business", "dormitory", "classroom", "assembly_concentrated", "mercantile",
                   "exercise_room", "storage_stock_shipping", "assembly_fixed_seats", "concentrated_business",
                   "no_such_function")
-WALK_GROUPS = (["R-2"], ["B"], ["A-2"], ["M"], ["E"], ["S-1"], ["F-1"], ["R-1"], ["I-1"], ["R-2", "B"])
+WALK_GROUPS = (["R-2"], ["B"], ["A-2"], ["M"], ["E"], ["S-1"], ["F-1"], ["R-1"], ["I-1"], ["I-2"], ["R-2", "B"])
 WALK_CASES = 40
-LOADS = ("space_occupant_load", "story_occupant_load")
+LOADS = ("space_occupant_load", "story_occupant_load", "corridor_occupant_load")
 APARTMENTS = ("S", "N")                                     # each 60 x 11.5 = 690 sq ft inside its walls
 EPS = 1e-9
 
@@ -292,14 +292,14 @@ EPS = 1e-9
 def _load_rules():
     """The Building Code rules that read an occupant load (their check, review_when or applies_when names one)."""
     rules = load(NY / "5_building_code_rules/drafted/general.yaml")["rules"]
-    return {r["id"] for r in rules if re.search(r"(space|story)_occupant_load", str(
+    return {r["id"] for r in rules if re.search(r"(space|story|corridor)_occupant_load", str(
         [r.get(k) for k in ("check", "review_when", "applies_when")]))}
 
 
 def _collapse(parts, how):
     """One reading of the occupant loads: `low` / `high` puts each two-reading load at that end; `zero` / `huge`
     gives each load not worked out 0 or a million (a pass on a load not worked out must hold whatever it is)."""
-    for kind, name in (("space", LOADS[0]), ("story", LOADS[1])):
+    for kind, name in (("space", LOADS[0]), ("story", LOADS[1]), ("corridor", LOADS[2])):
         for p in parts.get(kind) or []:
             rs = (p.get("readings") or {}).get(name)
             if how in ("low", "high") and rs:
@@ -334,9 +334,13 @@ def _walk_case(rng, apartment):
         if r.get("function") is None:
             r.pop("function", None)
     increase = rng.choice((None, True, False))
+    others = rng.choice((None, True, False, False))        # section group 4: other levels reach a corridor
+    amb = rng.choice((None, True, False))                   # Table 1020.3: an ambulatory care facility
     desc["building"] = {"occupancy_groups": rng.choice(WALK_GROUPS),
                         "sprinkler_system": rng.choice(("none", "nfpa_13")),
-                        **({} if increase is None else {"occupant_load_increased": increase})}
+                        **({} if increase is None else {"occupant_load_increased": increase}),
+                        **({} if others is None else {occupant_load.OTHER_LEVELS: others}),
+                        **({} if amb is None else {"ambulatory_care_facility": amb})}
     return desc, increase
 
 
@@ -367,6 +371,13 @@ def _check_the_laws_loads(desc, increase, parts):
         for stair in ("SW", "SE"):
             assert _values(next(q for q in parts["space"] if q["id"] == level + stair), LOADS[0]) == []
         got = _values(story, LOADS[1])
+        # section group 4: the corridor's load is none and the whole story's (its upper end), only where the
+        # building says no other level's occupants reach it (1004.2.2, 1004.2.3, 1005.6); else not worked out
+        corridor = next(c for c in parts["corridor"] if c["id"] == level + "C")
+        if desc["building"].get(occupant_load.OTHER_LEVELS) is False and got:
+            assert _values(corridor, LOADS[2]) == pytest.approx([0, max(got)]), level
+        else:
+            assert _values(corridor, LOADS[2]) == [] and corridor["not_measured"][LOADS[2]], level
         if not all(worked) or any(rooms[level + k].get("function") for k in ("C", "SW", "SE")):
             assert got == [] and story["not_measured"][LOADS[1]], level
             continue
@@ -523,6 +534,21 @@ def _asked(why):
     return [ui_data._from_cause(c, "space")["headline"] for c in found]
 
 
+def _asked_corridor(why):
+    """The panel's ask for a corridor whose occupant load isn't worked out for `why`, on Table 1020.3's rule."""
+    from design_checker import panel_data, ui_data
+    from design_checker.each_part import GORDIUM_GAPS
+    rule = next(r for r in load(NY / "5_building_code_rules/drafted/general.yaml")["rules"]
+                if r["id"] == "general.bc_table_1020_3_corridor_width")
+    part = {"id": "c", "measures": {"corridor_width": 40}, "not_measured": {"corridor_occupant_load": why}}
+    row = {"outcome": "needs_review", "id": "c", "values": {**part["measures"], "occupancy_group": "R-2",
+                                                           "ambulatory_care_facility": False}}
+    found = panel_data.causes(rule, row, None, part, None, part["not_measured"],
+                              {"occupancy_group": "R-2", "ambulatory_care_facility": False}, ALLOWED,
+                              GORDIUM_GAPS)
+    return [ui_data._from_cause(c, "corridor")["headline"] for c in found]
+
+
 def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answered():
     """Group 3 review rounds 6 and 7 (2026-11-25): a load Gordium or a person must work out (no function, a room
     others pass through or a loaded room is served through, a function the table sends elsewhere, an exit, a closet or
@@ -543,12 +569,29 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         "EXIT_FUNCTION": (ol.EXIT_FUNCTION.format(name="s", f="business"), model),
         "CORRIDOR_FUNCTION": (ol.CORRIDOR_FUNCTION.format(name="c", f="business"), model),
         "GROSS_NOT_MEASURED": (ol.GROSS_NOT_MEASURED, model), "AREAS_OVER": (ol.AREAS_OVER, model),
+        # section group 4: a corridor's (asked on the corridor, below: _asked_corridor)
+        "CORRIDOR_NOT_RULED_OUT": (ol.CORRIDOR_NOT_RULED_OUT, by_hand),   # no Revit mark yet: never a card
+        "CORRIDOR_OTHER_LEVELS": (ol.CORRIDOR_OTHER_LEVELS, by_hand),
+        "CORRIDOR_NO_STORY": (ol.CORRIDOR_NO_STORY, by_hand),
     }
     fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "FUNCTION_ROOMS", "LOAD_STATED",
-                 "STORY_STATED", "STORY_FUNCTION"}
+                 "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
+                 "CORRIDOR_READINGS"}     # the readings' own words: a load given, never asked
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
-    cases = [(w, kind) for w, kind in reasons.values()] + [
+    corridor = {k: reasons[k] for k in ("CORRIDOR_NOT_RULED_OUT", "CORRIDOR_OTHER_LEVELS", "CORRIDOR_NO_STORY")}
+    for why, kind in corridor.values():
+        heads = _asked_corridor(why)
+        assert heads and not any(h.startswith(("Mark the", "Fix the model")) for h in heads), (why, heads)
+        # review of group 4a: the fact has no Revit mark yet, so the panel never makes it a card to set (Revit's
+        # ChapterTenFactsTests: every answer card's field is one a mark feeds); asked by hand, in words naming it
+        assert any(h.startswith("Work out") for h in heads) and not any(h.startswith("Say whether") for h in heads), \
+            (why, kind, heads)
+        assert "is stated by the architect" not in why, why
+    # round 2: every host is told the statement that settles it (the command line can state it), not only Revit's gap
+    assert "say on the building that none do" in ol.CORRIDOR_NOT_RULED_OUT
+    assert ol.OTHER_LEVELS in ol.CORRIDOR_NOT_RULED_OUT
+    cases = [(w, kind) for k, (w, kind) in reasons.items() if k not in corridor] + [
         ("the room's floor area isn't measured", model),
         (ol.STORY_OPEN.format(names="k") + ol.STORY_FUNCTION, function),            # a room with no function
         (ol.STORY_OPEN.format(names="k") + ": " + ol.STORY_STATED, by_hand),       # one sent elsewhere

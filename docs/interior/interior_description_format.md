@@ -208,6 +208,12 @@ building:
   merchandise_pads: false              # Group M merchandise pads (BCNYS 1018.4: their own common path)
   occupant_load_increased: false       # the design takes BCNYS 1004.5.1's increased occupant load (up to one per
                                        # 7 sq ft); not stated, the occupant loads' upper reading is at least that
+  other_level_egress_into_corridors: false  # another level's occupants reach a corridor: an unenclosed exit access
+                                       # stairway or ramp (BCNYS 1019), a mezzanine (1004.2.2), stairs converging
+                                       # (1005.6) or an exit stair discharging into one; only where false is a
+                                       # corridor's occupant load bounded by its story's (1004.2.3; Table 1020.3)
+  ambulatory_care_facility: false      # the building is or holds an ambulatory care facility (BCNYS 202, 422):
+                                       # Table 1020.3's 72 in for corridors serving stretcher traffic
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 

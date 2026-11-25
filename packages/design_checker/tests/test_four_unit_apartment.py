@@ -103,6 +103,31 @@ def test_the_r2_story_rows_wait_only_on_whether_its_units_are_dwelling_units(rou
     assert stated["results"]["general.bc_table_1006_3_4_2__h_i_r"] == "not_applicable"
 
 
+def test_the_corridor_width_waits_only_on_whether_other_levels_reach_the_corridor(routes, got):
+    """Section group 4 (2026-11-25), before and after: as sent, the corridor's occupant load isn't worked out
+    (another level's occupants reaching it isn't ruled out: 1004.2.2, 1004.2.3, 1005.6), so Table 1020.3 needs review
+    though the corridor is 72 in; with the building stating none do, its load is two readings, none and the story's
+    upper (its 1,800 sq ft gross / 7, 1004.5.1's increase not ruled out: 257.1), and it passes (72 in: past 44 in
+    and past 0.2 in per occupant, 51.4 in, 1005.3.2). Stating they do
+    leaves it needing review. 1020.3's capacity flag goes the same way (set aside once stated). Nothing else changes
+    either way."""
+    rule, capacity = "general.bc_table_1020_3_corridor_width", "general.bc_1020_3_corridor_capacity"
+    corridors = got["interior"]["parts"]["corridor"]
+    assert [c["measures"]["corridor_width"] for c in corridors] == [72.0, 72.0]
+    assert all("corridor_occupant_load" in c["not_measured"] and not (c.get("readings") or {}) for c in corridors)
+    assert got["results"][rule] == present.REVIEW and got["results"][capacity] == present.REVIEW
+    for others, want, cap in ((False, "pass", "not_applicable"), (True, present.REVIEW, present.REVIEW)):
+        desc = build.interior_of()
+        desc["building"] = {**(desc.get("building") or {}), "other_level_egress_into_corridors": others}
+        stated = _check(desc, routes)
+        assert stated["results"][rule] == want and stated["results"][capacity] == cap, others
+        assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} <= {rule, capacity}, others
+        if not others:
+            for c in stated["interior"]["parts"]["corridor"]:
+                values = [r["value"] for r in c["readings"]["corridor_occupant_load"]]
+                assert values == pytest.approx([0, 1800 / 7])
+
+
 def test_the_occupant_loads_come_from_each_rooms_function(got):
     """Section group 3 (2026-11-23): each apartment's stated function (residential, 200 gross) gives its occupant
     load as two readings, 690 / 200 from its own area and 690 / 7 while 1004.5.1's increase isn't ruled out; both at

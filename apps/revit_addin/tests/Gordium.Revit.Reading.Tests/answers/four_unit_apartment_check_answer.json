@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 46 to review · 20 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 47 to review · 20 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1313,6 +1313,10 @@
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): occupancy group (whether Group I-4) not measured (or not usable)",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): occupancy group (the building's one group, or mixed), sprinkler system (NFPA 13) not measured (or not usable)",
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): occupancy group (the building's one group, or mixed), sprinkler system (NFPA 13) not measured (or not usable)",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Egress · Group I-4: A person checks this (Gordium doesn't decide it): Which group the building is in decides every limit below; the architect states it, a person confirms.",
     "Egress · Child day care classified Group E: A person checks this (Gordium doesn't decide it): More than five but not more than 100 children 2 1/2 or younger, in rooms on a level of exit discharge each with an exit door directly outside: Group E, not I-4; the architect states it.",
     "Egress · Care during religious functions: A person checks this (Gordium doesn't decide it): Part of the primary occupancy: the architect states it.",
@@ -1346,7 +1350,8 @@
     "Egress · Travel within an atrium at most 200 ft: A person checks this (Gordium doesn't decide it): Which part of a path is within an atrium, above or below the level of exit discharge, is not measured from the drawing yet: a person checks.",
     "Egress · Group M merchandise pads: A person checks this (Gordium doesn't decide it): Merchandise pads: their aisle accessways (30 in clear) and the 30 ft common path from any point in a pad (75 ft for not more than 50 occupants) are a person's check.",
     "Egress · Fixed seating's common path: A person checks this (Gordium doesn't decide it): Fixed seating in any group (an E school's auditorium, a B lecture hall): the common path from any seat (30 ft; 75 ft under 50 occupants; 50 ft smoke-protected or open-air) is a person's check.",
-    "Egress · Dead ends in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy isn't marked yet, so a person checks."
+    "Egress · Dead ends in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy isn't marked yet, so a person checks.",
+    "Egress · Corridor width in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks."
    ]
   },
   "red": [],
@@ -52927,6 +52932,622 @@
      }
     },
     {
+     "id": "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+     "rule": "general.bc_1020_3_corridor_capacity",
+     "name": "Level 1 › CORRIDOR L1 (3) · Corridor narrower than 0.2 in per occupant (BCNYS 1020.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+     "use_detail": false,
+     "part": {
+      "part": "corridor",
+      "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+      "name": "CORRIDOR L1 (3)",
+      "within": null
+     },
+     "detail": {
+      "line": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+      "quotes": [
+       {
+        "text": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3.",
+        "where": "1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         21,
+         22
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways shall be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.2 inch (5.1 mm) per occupant.",
+        "where": "1005.3.2, 2025 Building Code of New York State (BCNYS), PDF p.314",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         14,
+         16
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         21,
+         22
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         14,
+         16
+        ]
+       }
+      ]
+     },
+     "element": "Level 1 › CORRIDOR L1 (3)",
+     "open": {
+      "gordium": null,
+      "measures": [
+       "corridor occupant load"
+      ],
+      "gaps": [],
+      "worked": [],
+      "inputs": [
+       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "mark:corridor:corridor_occupant_load",
+       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
+       ],
+       "measure": "corridor_occupant_load"
+      },
+      {
+       "kind": "decide",
+       "key": "flag",
+       "words": "a flag rule: a person decides, even once it is measured",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
+       ]
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1020.3",
+      "quote": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3."
+     },
+     "asks": [
+      {
+       "key": "mark:corridor:corridor_occupant_load",
+       "why": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
+       ],
+       "measure": "corridor_occupant_load",
+       "kind": "measure",
+       "headline": "Work out the corridor occupant load by hand: Gordium has no field for it yet"
+      },
+      {
+       "key": "flag",
+       "why": "a flag rule: a person decides, even once it is measured",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
+       ],
+       "kind": "decide",
+       "headline": "The code leaves this to judgment: read the words and decide"
+      }
+     ],
+     "rule_name": "Corridor narrower than 0.2 in per occupant",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1020",
+      "section_title": "Corridors",
+      "piece": "1020.3",
+      "piece_title": "Width and capacity"
+     }
+    },
+    {
+     "id": "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+     "rule": "general.bc_1020_3_corridor_capacity",
+     "name": "Level 2 › CORRIDOR L2 (8) · Corridor narrower than 0.2 in per occupant (BCNYS 1020.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+     "use_detail": false,
+     "part": {
+      "part": "corridor",
+      "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+      "name": "CORRIDOR L2 (8)",
+      "within": null
+     },
+     "detail": {
+      "line": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+      "quotes": [
+       {
+        "text": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3.",
+        "where": "1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         21,
+         22
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways shall be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor of 0.2 inch (5.1 mm) per occupant.",
+        "where": "1005.3.2, 2025 Building Code of New York State (BCNYS), PDF p.314",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         14,
+         16
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         21,
+         22
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 314,
+        "lines": [
+         14,
+         16
+        ]
+       }
+      ]
+     },
+     "element": "Level 2 › CORRIDOR L2 (8)",
+     "open": {
+      "gordium": null,
+      "measures": [
+       "corridor occupant load"
+      ],
+      "gaps": [],
+      "worked": [],
+      "inputs": [
+       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "mark:corridor:corridor_occupant_load",
+       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ],
+       "measure": "corridor_occupant_load"
+      },
+      {
+       "kind": "decide",
+       "key": "flag",
+       "words": "a flag rule: a person decides, even once it is measured",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ]
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1020.3",
+      "quote": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3."
+     },
+     "asks": [
+      {
+       "key": "mark:corridor:corridor_occupant_load",
+       "why": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ],
+       "measure": "corridor_occupant_load",
+       "kind": "measure",
+       "headline": "Work out the corridor occupant load by hand: Gordium has no field for it yet"
+      },
+      {
+       "key": "flag",
+       "why": "a flag rule: a person decides, even once it is measured",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ],
+       "kind": "decide",
+       "headline": "The code leaves this to judgment: read the words and decide"
+      }
+     ],
+     "rule_name": "Corridor narrower than 0.2 in per occupant",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1020",
+      "section_title": "Corridors",
+      "piece": "1020.3",
+      "piece_title": "Width and capacity"
+     }
+    },
+    {
+     "id": "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+     "rule": "general.bc_table_1020_3_corridor_width",
+     "name": "Level 1 › CORRIDOR L1 (3) · Corridor width at least Table 1020.3's, every group (BCNYS 1020.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "use_detail": false,
+     "part": {
+      "part": "corridor",
+      "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+      "name": "CORRIDOR L1 (3)",
+      "within": null
+     },
+     "detail": {
+      "line": "Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "quotes": [
+       {
+        "text": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3.",
+        "where": "1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         21,
+         22
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Exception: In Group I-2 occupancies, corridors are not required to have a clear width of 96 inches (2438 mm) in areas where there will not be stretcher or bed movement for access to care or as part of the defend-in-place strategy.",
+        "where": "1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         23,
+         24
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Any facility not listed in this table 44 Access to and utilization of mechanical, plumbing or electrical systems or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72 Group I-2 in areas where required for bed movement 96",
+        "where": "Table 1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         27,
+         33
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         21,
+         22
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         23,
+         24
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         27,
+         33
+        ]
+       }
+      ]
+     },
+     "element": "Level 1 › CORRIDOR L1 (3)",
+     "open": {
+      "gordium": null,
+      "measures": [
+       "ambulatory care facility (whether the building is or holds one, per Table 1020.3)",
+       "corridor occupant load",
+       "occupancy group (the building's one group, or mixed)"
+      ],
+      "gaps": [],
+      "worked": [],
+      "inputs": [
+       "ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
+       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "occupancy group (the building's one group, or mixed) not measured (or not usable)"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1020.3",
+      "quote": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      }
+     ],
+     "rule_name": "Corridor width at least Table 1020.3's, every group",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1020",
+      "section_title": "Corridors",
+      "piece": "1020.3",
+      "piece_title": "Width and capacity"
+     }
+    },
+    {
+     "id": "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+     "rule": "general.bc_table_1020_3_corridor_width",
+     "name": "Level 2 › CORRIDOR L2 (8) · Corridor width at least Table 1020.3's, every group (BCNYS 1020.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "use_detail": false,
+     "part": {
+      "part": "corridor",
+      "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+      "name": "CORRIDOR L2 (8)",
+      "within": null
+     },
+     "detail": {
+      "line": "Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "quotes": [
+       {
+        "text": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3.",
+        "where": "1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         21,
+         22
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Exception: In Group I-2 occupancies, corridors are not required to have a clear width of 96 inches (2438 mm) in areas where there will not be stretcher or bed movement for access to care or as part of the defend-in-place strategy.",
+        "where": "1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         23,
+         24
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Any facility not listed in this table 44 Access to and utilization of mechanical, plumbing or electrical systems or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72 Group I-2 in areas where required for bed movement 96",
+        "where": "Table 1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         27,
+         33
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         21,
+         22
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         23,
+         24
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 344,
+        "lines": [
+         27,
+         33
+        ]
+       }
+      ]
+     },
+     "element": "Level 2 › CORRIDOR L2 (8)",
+     "open": {
+      "gordium": null,
+      "measures": [
+       "ambulatory care facility (whether the building is or holds one, per Table 1020.3)",
+       "corridor occupant load",
+       "occupancy group (the building's one group, or mixed)"
+      ],
+      "gaps": [],
+      "worked": [],
+      "inputs": [
+       "ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
+       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "occupancy group (the building's one group, or mixed) not measured (or not usable)"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1020.3",
+      "quote": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      }
+     ],
+     "rule_name": "Corridor width at least Table 1020.3's, every group",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1020",
+      "section_title": "Corridors",
+      "piece": "1020.3",
+      "piece_title": "Width and capacity"
+     }
+    },
+    {
      "id": "egress.general.bc_308_5_classification",
      "rule": "general.bc_308_5_classification",
      "name": "Egress · Group I-4, day care facilities (BCNYS 308.5)",
@@ -55328,6 +55949,76 @@
       "section_title": "Corridors",
       "piece": "1020.5",
       "piece_title": "Dead ends"
+     }
+    },
+    {
+     "id": "egress.general.bc_table_1020_3_other_occupancies",
+     "rule": "general.bc_table_1020_3_other_occupancies",
+     "name": "Egress · Corridor width in a building of two or more groups (BCNYS Table 1020.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
+      "quotes": [
+       {
+        "text": "Any facility not listed in this table 44 Access to and utilization of mechanical, plumbing or electrical systems or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72 Group I-2 in areas where required for bed movement 96",
+        "where": "Table 1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344"
+       }
+      ],
+      "citation": "Table 1020.3, 2025 Building Code of New York State (BCNYS), PDF p.344",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "Table 1020.3",
+      "quote": "Any facility not listed in this table 44 Access to and utilization of mechanical, plumbing or electrical systems or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72 Group I-2 in areas where required for bed movement 96"
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_table_1020_3_other_occupancies",
+       "words": "A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_table_1020_3_other_occupancies",
+       "why": "A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Corridor width in a building of two or more groups",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1020",
+      "section_title": "Corridors",
+      "piece": "Table 1020.3",
+      "piece_title": "MINIMUM CORRIDOR WIDTH"
      }
     },
     {
@@ -58714,7 +59405,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 46 to review · 20 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 47 to review · 20 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -59177,8 +59868,12 @@
       "general.bc_1016_2_intervening_spaces_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0",
       "general.bc_1020_5_dead_end@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
       "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+      "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+      "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
       "general.bc_1020_5_dead_end@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
       "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+      "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+      "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
       "egress.general.bc_308_5_classification",
       "egress.general.bc_308_5_1_group_e",
       "egress.general.bc_308_5_2_religious_worship",
@@ -59212,7 +59907,8 @@
       "egress.general.bc_1017_3_2_3_atrium",
       "egress.general.bc_1018_4_merchandise_pads",
       "egress.general.bc_1030_8_fixed_seating_common_path",
-      "egress.general.bc_1020_5_other_occupancies"
+      "egress.general.bc_1020_5_other_occupancies",
+      "egress.general.bc_table_1020_3_other_occupancies"
      ],
      "lines": [
       {
@@ -59504,12 +60200,14 @@
        "tier": "review",
        "items": [
         "general.bc_1020_5_dead_end@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
-        "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
+        "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+        "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+        "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
        "folded": true,
        "status": "needs_review",
-       "rules": 2,
-       "title": "Level 1 › CORRIDOR L1 (3): 2 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable)",
+       "rules": 4,
+       "title": "Level 1 › CORRIDOR L1 (3): 4 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
        "mark": "?",
        "name": "Level 1 › CORRIDOR L1 (3)"
       },
@@ -59518,12 +60216,14 @@
        "tier": "review",
        "items": [
         "general.bc_1020_5_dead_end@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
-        "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+        "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+        "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+        "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
        "folded": true,
        "status": "needs_review",
-       "rules": 2,
-       "title": "Level 2 › CORRIDOR L2 (8): 2 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable)",
+       "rules": 4,
+       "title": "Level 2 › CORRIDOR L2 (8): 4 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
        "mark": "?",
        "name": "Level 2 › CORRIDOR L2 (8)"
       },
@@ -59968,9 +60668,22 @@
        "title": "Egress · Dead ends in a building of two or more groups (BCNYS 1020.5): A person checks this (Gordium doesn't decide it): A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy isn't marked yet, so a person checks.",
        "mark": "?",
        "name": "Egress · Dead ends in a building of two or more groups (BCNYS 1020.5)"
+      },
+      {
+       "key": "review#c688fa9551",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_table_1020_3_other_occupancies"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Corridor width in a building of two or more groups (BCNYS Table 1020.3): A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
+       "mark": "?",
+       "name": "Egress · Corridor width in a building of two or more groups (BCNYS Table 1020.3)"
       }
      ],
-     "count": 46,
+     "count": 47,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -60118,9 +60831,11 @@
         "general.bc_table_1006_2_1_u@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0",
         "general.bc_1016_2_intervening_spaces_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0",
         "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
-        "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+        "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+        "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+        "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
-       "rules": 30,
+       "rules": 31,
        "field": "facts.occupancy_group"
       },
       {
@@ -60184,6 +60899,20 @@
        ],
        "rules": 1,
        "field": "facts.sprinklered_903_3_1_1"
+      },
+      {
+       "key": "mark:corridor:corridor_occupant_load",
+       "kind": "mark",
+       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "elements": [
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ],
+       "items": [
+        "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+        "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+       ],
+       "rules": 1
       },
       {
        "key": "question:accessory_area_face",
@@ -60538,6 +61267,16 @@
         "egress.general.bc_1020_5_other_occupancies"
        ],
        "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_table_1020_3_other_occupancies",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_table_1020_3_other_occupancies"
+       ],
+       "rules": 1
       }
      ]
     },
@@ -60751,7 +61490,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "46 to review · 20 comply"
+     "summary": "47 to review · 20 comply"
     }
    ],
    "contents": [
@@ -73018,12 +73757,18 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 141
+          "not_for_checking": 146
          },
          "pieces": [
           {
            "id": "202",
            "title": "DEFINITIONS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:24_hour_basis",
+           "title": "24-HOUR BASIS",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -73066,6 +73811,12 @@
           {
            "id": "202:alternating_tread_device",
            "title": "ALTERNATING TREAD DEVICE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:ambulatory_care_facility",
+           "title": "AMBULATORY CARE FACILITY",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -73204,6 +73955,12 @@
           {
            "id": "202:dead_load",
            "title": "DEAD LOAD",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:defend_in_place",
+           "title": "DEFEND-IN-PLACE",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -73438,6 +74195,12 @@
           {
            "id": "202:horizontal_exit",
            "title": "HORIZONTAL EXIT",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:incapable_of_self_preservation",
+           "title": "INCAPABLE OF SELF-PRESERVATION",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -73696,6 +74459,12 @@
           {
            "id": "202:self_closing",
            "title": "SELF-CLOSING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:self_preservation_incapable_of",
+           "title": "SELF-PRESERVATION, INCAPABLE OF",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -75148,10 +75917,19 @@
          "number": "1005",
          "title": "Means of Egress Sizing",
          "book_page": 292,
-         "coverage": "not_brought_in",
+         "coverage": "not_for_checking",
          "whole": false,
-         "counts": {},
-         "pieces": []
+         "counts": {
+          "not_for_checking": 1
+         },
+         "pieces": [
+          {
+           "id": "1005.3.2",
+           "title": "Other egress components",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "1006",
@@ -75619,9 +76397,27 @@
          "coverage": "rules",
          "whole": false,
          "counts": {
-          "rules": 1
+          "rules": 3,
+          "not_for_checking": 1
          },
          "pieces": [
+          {
+           "id": "1020.3",
+           "title": "Width and capacity",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1020_3_corridor_capacity"
+           ]
+          },
+          {
+           "id": "Table 1020.3",
+           "title": "MINIMUM CORRIDOR WIDTH",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_table_1020_3_corridor_width",
+            "general.bc_table_1020_3_other_occupancies"
+           ]
+          },
           {
            "id": "1020.5",
            "title": "Dead ends",
@@ -75631,6 +76427,12 @@
             "general.bc_1020_5_other_occupancies",
             "general.bc_1020_5_dead_end_other_groups"
            ]
+          },
+          {
+           "id": "1020.1",
+           "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
           }
          ]
         },
@@ -75756,7 +76558,8 @@
        "counts": {
         "rules": 5,
         "flag": 3,
-        "not_brought_in": 23
+        "not_for_checking": 1,
+        "not_brought_in": 22
        }
       },
       {
@@ -79535,6 +80338,10 @@
    "general.bc_1020_5_dead_end@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc": "needs_review",
    "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1": "needs_review",
    "general.bc_1020_5_dead_end_other_groups@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc": "needs_review",
+   "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1": "needs_review",
+   "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc": "needs_review",
+   "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1": "needs_review",
+   "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc": "needs_review",
    "egress.general.bc_308_5_classification": "needs_review",
    "egress.general.bc_308_5_1_group_e": "needs_review",
    "egress.general.bc_308_5_2_religious_worship": "needs_review",
@@ -79569,6 +80376,7 @@
    "egress.general.bc_1018_4_merchandise_pads": "needs_review",
    "egress.general.bc_1030_8_fixed_seating_common_path": "needs_review",
    "egress.general.bc_1020_5_other_occupancies": "needs_review",
+   "egress.general.bc_table_1020_3_other_occupancies": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7da": "complies",
@@ -79603,7 +80411,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "46 to review · 20 comply"
+    "summary": "47 to review · 20 comply"
    }
   ],
   "egress": {
@@ -83135,6 +83943,74 @@
      "unknown": [],
      "home": "Level 2",
      "line": "Level 2 › CORRIDOR L2 (8): occupancy group (the building's one group, or mixed), sprinkler system (NFPA 13) not measured (or not usable)"
+    },
+    {
+     "rule": "general.bc_1020_3_corridor_capacity",
+     "part": "corridor",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+     "name": "CORRIDOR L1 (3)",
+     "within": null,
+     "outcome": "needs_review",
+     "reason": null,
+     "values": {
+      "corridor_occupant_load": null,
+      "corridor_width": 72.0
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 1",
+     "line": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+    },
+    {
+     "rule": "general.bc_1020_3_corridor_capacity",
+     "part": "corridor",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+     "name": "CORRIDOR L2 (8)",
+     "within": null,
+     "outcome": "needs_review",
+     "reason": null,
+     "values": {
+      "corridor_occupant_load": null,
+      "corridor_width": 72.0
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 2",
+     "line": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+    },
+    {
+     "rule": "general.bc_table_1020_3_corridor_width",
+     "part": "corridor",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
+     "name": "CORRIDOR L1 (3)",
+     "within": null,
+     "outcome": "needs_review",
+     "reason": null,
+     "values": {
+      "corridor_occupant_load": null,
+      "corridor_width": 72.0
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 1",
+     "line": "Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+    },
+    {
+     "rule": "general.bc_table_1020_3_corridor_width",
+     "part": "corridor",
+     "id": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+     "name": "CORRIDOR L2 (8)",
+     "within": null,
+     "outcome": "needs_review",
+     "reason": null,
+     "values": {
+      "corridor_occupant_load": null,
+      "corridor_width": 72.0
+     },
+     "none": false,
+     "unknown": [],
+     "home": "Level 2",
+     "line": "Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
     }
    ],
    "results": {
@@ -83178,6 +84054,8 @@
     "general.bc_table_1017_2_i2_i3": "needs_review",
     "general.bc_1020_5_dead_end": "needs_review",
     "general.bc_1020_5_dead_end_other_groups": "needs_review",
+    "general.bc_1020_3_corridor_capacity": "needs_review",
+    "general.bc_table_1020_3_corridor_width": "needs_review",
     "general.bc_308_5_classification": "needs_review",
     "general.bc_308_5_1_group_e": "needs_review",
     "general.bc_308_5_2_religious_worship": "needs_review",
@@ -83211,7 +84089,8 @@
     "general.bc_1017_3_2_3_atrium": "needs_review",
     "general.bc_1018_4_merchandise_pads": "needs_review",
     "general.bc_1030_8_fixed_seating_common_path": "needs_review",
-    "general.bc_1020_5_other_occupancies": "needs_review"
+    "general.bc_1020_5_other_occupancies": "needs_review",
+    "general.bc_table_1020_3_other_occupancies": "needs_review"
    },
    "interior": {
     "parts": {
@@ -86698,7 +87577,7 @@
         "corridor_dead_end_least_width": 6.0
        },
        "not_measured": {
-        "corridor_occupant_load": "stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet",
+        "corridor_occupant_load": "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
         "corridor_fire_rating_hours": "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
         "corridor_walls_smoke_partitions": "stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet"
        },
@@ -86727,7 +87606,7 @@
         "corridor_dead_end_least_width": 6.0
        },
        "not_measured": {
-        "corridor_occupant_load": "stated by the architect (the occupant load the corridor serves), and Gordium has no mark for it in the model yet",
+        "corridor_occupant_load": "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
         "corridor_fire_rating_hours": "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
         "corridor_walls_smoke_partitions": "stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet"
        },
@@ -86779,9 +87658,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "e80762a3db5806ec7770f122ca90780bbbf698e199e35bba526befe23ce2e84d",
+  "worker_fingerprint": "88ecf1450120242aaa983a9fb649a05faafba2150664d0ac2d0142a8c654b00b",
   "rulebook": {
-   "new_york/ithaca_city": "f1f442bc800d20d22438be707d9970d7f4ea080ad5195ca6a6957c14e300b438"
+   "new_york/ithaca_city": "db00d735580d931d374ca8fc6194bdd6f57106b65f9abccb08825e1e33bcdb67"
   }
  }
 }

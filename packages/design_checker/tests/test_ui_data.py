@@ -27,7 +27,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "assembly_fixed_seating": False, "special_egress_spaces": False,
                                           "merchandise_pads": False, "r2_sleeping_units": False,
                                           "emergency_escape_openings_1031": False,           # group 2's two
-                                          "occupied_outdoor_areas": False})                  # group 3's
+                                          "occupied_outdoor_areas": False,                   # group 3's
+                                          "ambulatory_care_facility": False})                # group 4's
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -568,9 +569,10 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
             assert k not in code_scope.MARK, k
     # every fact the code choice and the Building Code's rules read has its Revit mark (the BCNYS's balcony, atrium,
     # fixed seating, special egress spaces and merchandise pads were the last without one, PR feat/revit-fields-ch10)
-    # every fact the code choice and the Building Code's rules read has its Revit mark (group 2's two, the last
-    # without one: Table 1006.3.4's notes, PR feat/revit-group2-facts)
-    assert keys - set(revit) == set()
+    # group 4's two Building Code facts have no Revit mark yet (Table 1020.3's ambulatory care facility; whether
+    # another level's occupants reach a corridor): asked for by name, never by a mark; their marks follow in the
+    # Revit-fields work. Groups 2 and 3's facts have theirs (PR #194).
+    assert keys - set(revit) == {"ambulatory_care_facility", "other_level_egress_into_corridors"}
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased"):
         # a fact a rule reads as a measure is answered by its field (field_of); occupant_load_increased is read by the
         # occupant loads themselves, not as a measure
@@ -636,3 +638,13 @@ def test_the_r2_sleeping_units_ask_never_reads_as_either_or_for_a_mixed_building
     from design_checker import each_part
     assert "all sleeping units, all dwelling units, or both" in ui_data.FIELD_HEADLINES["building.r2_sleeping_units"]
     assert "every Group R-2 unit is a sleeping unit" in each_part.MEASURE_NAMES["r2_sleeping_units"]
+
+
+def test_the_plan_never_says_a_marked_facts_revit_mark_is_still_to_come():
+    # PR #195 review round 7: after PR #194 the plan still said groups 2 and 3's marks were a follow-up
+    import re
+    doc = (REPO / "docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md").read_text(encoding="utf-8")
+    for sentence in re.split(r"(?<=[.;])\s", doc):
+        if re.search(r"Revit mark\S* (is|are) a follow-up|marks? join group", sentence):
+            named = [k for k in code_scope.MARK if k in sentence]
+            assert not named, (named, sentence[:200])

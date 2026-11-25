@@ -20,6 +20,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:24_hour_basis:
+    label: reference
+    topic: definitions
+    reason: 'Defines 24-HOUR BASIS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 32
+      lines:
+      - 23
+      - 23
+      quote: '[BG] 24-HOUR BASIS. The actual time that a person is an occupant within a facility for the purpose of receiving care.'
+    piece_sha256: 23ae5d4bd7b80cf273deabadedccc85cc252290d8192c751eb305258112fa020
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
+      4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor sections use, by the book''s
+      italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:accessible:
     label: reference
     topic: definitions
@@ -136,6 +153,23 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
       of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
       table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:ambulatory_care_facility:
+    label: reference
+    topic: definitions
+    reason: 'Defines AMBULATORY CARE FACILITY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 30
+      - 32
+      quote: '[BG] AMBULATORY CARE FACILITY. Buildings or portions thereof used to provide medical, surgical, psychiatric, nursing or similar care on a less than 24-hour basis to persons who are rendered incapable of self-preservation by the services provided or staff has accepted responsibility for care recipients already incapable.'
+    piece_sha256: f8827fc2c2ee2e25dc6a6469174a5fd88f5b9d5b5ed64f8212626f76f38eaf69
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
+      4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor sections use, by the book''s
+      italics.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:approved:
@@ -496,6 +530,23 @@ labels:
         to walls, floors,'
     piece_sha256: c1d0f23943936da7451df4031cad13545ee0ae7fc68a82022e9547f8ec906dbe
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:defend_in_place:
+    label: reference
+    topic: definitions
+    reason: 'Defines DEFEND-IN-PLACE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 40
+      lines:
+      - 29
+      - 31
+      quote: '[BE] DEFEND-IN-PLACE. A method of emergency response that engages building components and trained staff to provide occupant safety during an emergency. Emergency response involves remaining in place, relocating within the building, or both, without evacu- ating the building.'
+    piece_sha256: 1cea632e328d972400a3b32de1eda54e27356b1716305f5b98074704827c2d75
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
+      4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor sections use, by the book''s
+      italics.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:dimensions:
@@ -1120,6 +1171,23 @@ labels:
         intended to'
     piece_sha256: 8fc7ca31651bf9c8156e635c8956075f018c2be5c8cdc5868f41fe560f1f8bf1
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:incapable_of_self_preservation:
+    label: reference
+    topic: definitions
+    reason: 'Defines INCAPABLE OF SELF-PRESERVATION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 42
+      - 43
+      quote: '[BG] INCAPABLE OF SELF-PRESERVATION. Describes persons who, because of age, physical limitations, mental limitations, chemical dependency or medical treatment, cannot respond as an individual to an emergency situation.'
+    piece_sha256: 880ddb9dbc77dfc27fe1035d2d27a00501a3ad3416d559c09ccb2197d91501c9
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
+      4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor sections use, by the book''s
+      italics.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:information_technology_equipment_ite:
@@ -1821,6 +1889,23 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
       of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
       table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:self_preservation_incapable_of:
+    label: reference
+    topic: definitions
+    reason: 'Defines SELF-PRESERVATION, INCAPABLE OF, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 5
+      - 5
+      quote: 'SELF-PRESERVATION, INCAPABLE OF. See “Incapable of self-preservation.”'
+    piece_sha256: 50b8c4cbacb15a3e6a86db2597c2e3ac0f0a18d76cb39b1fa3454c3effef76bf
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
+      4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor sections use, by the book''s
+      italics.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:shaft:
@@ -2775,6 +2860,28 @@ labels:
       3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '1005.3.2':
+    label: reference
+    topic: means_of_egress
+    reason: 'How the capacity of an egress component other than a stairway is worked out: 0.2 inch per occupant served (0.15
+      with a sprinkler system per 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm system, other than Groups H and I-2;
+      assembly seating''s own factors). Brought in for 1020.3''s capacity: a corridor needs review where it may need more
+      than its width; the capacity itself is section group 5''s.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 314
+      lines:
+      - 14
+      - 16
+      quote: 1005.3.2 Other egress components. The capacity, in inches, of means of egress components other than stairways
+        shall be calcu- lated by multiplying the occupant load served by such component by a means of egress capacity factor
+        of 0.2 inch (5.1 mm) per occupant.
+    piece_sha256: c3ee309be6c7724ad7150d670b51be58d0eb3e1a9f30556cf0853bb831cd34bf
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in alone by section group
+      4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): the corridor width rule needs review wherever
+      0.2 inch per occupant may need more than the width.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   1006.2.1:
     label: rule
     topic: means_of_egress
@@ -3500,6 +3607,64 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
       of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
       table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1020.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Scope only: corridors serving as exit access comply with Sections 1020.2 through 1020.7, each labeled on its
+      own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 343
+      lines:
+      - 38
+      - 39
+      quote: 1020.1 General. Corridors serving as an exit access component in a means of egress system shall comply with the
+        requirements of Sections 1020.2 through 1020.7.
+    piece_sha256: e089431fd652d4b812d499e864d0d17a933f666ecabb468e2b49b995348ab6d2
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 4.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1020.3':
+    label: rule
+    topic: means_of_egress
+    reason: 'A corridor''s width is at least Table 1020.3''s, and its capacity that of 1005.1; in Group I-2, 96 inches only
+      where beds or stretchers move (the exception): measurable per corridor from its width and the occupants it serves.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 344
+      lines:
+      - 21
+      - 22
+      quote: 1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1,
+        but the minimum width shall be not less than that specified in Table 1020.3.
+    piece_sha256: b2c136b1270aba75a19b6bed51288c8945bcef9137f11fb204e6a7eda34fed89
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 4: the width is
+      Table 1020.3''s rule (every group; a building of two or more groups is a flag); the capacity, 1005.1''s, is the
+      flag "Corridor narrower than 0.2 in per occupant" until section group 5 checks capacity in full.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1020.3:
+    label: rule
+    topic: means_of_egress
+    reason: 'The widths 1020.3 uses, row by row: 44 inches for any facility not listed, 24 to mechanical, plumbing or electrical
+      equipment, 36 with fewer than 50 occupants or within a dwelling unit, 72 in Group E with 100 or more and for stretcher
+      traffic in ambulatory care facilities, 96 in Group I-2 where beds are moved.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 344
+      lines:
+      - 27
+      - 33
+      quote: Any facility not listed in this table 44 Access to and utilization of mechanical, plumbing or electrical systems
+        or equipment 24 With an occupant load of less than 50 36 Within a dwelling unit 36 In Group E with a corridor having
+        an occupant load of 100 or more 72 In corridors and areas serving stretcher traffic in ambulatory care facilities 72
+        Group I-2 in areas where required for bed movement 96
+    piece_sha256: 4a8a2129be81b04c677060c0e7e069878b587bef4b4754839c39c6d3be72d4af
+    notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Read on the page image: one width
+      a row, no note letters. The rows that loosen it for a corridor the model can''t tell apart (24 and 36 inches) need review
+      short of 44 inches; the rows that tighten it (Group E, Group I-2, ambulatory care) are in the check or need review.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1020.5':
