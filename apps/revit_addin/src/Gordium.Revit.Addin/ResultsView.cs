@@ -818,6 +818,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var card = new C.StackPanel { Tag = ErrorTag };
         card.Children.Add(Typed(new C.TextBlock { Text = failure.Title, FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
         card.Children.Add(Typed(new C.TextBlock { Text = failure.Words, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 4, 0, 0) }, Body));
+        if (failure.Done is { } done)                           // what was already written to the project, on screen
+            card.Children.Add(Small(done, top: 4));
         if (failure.Next is { } next)
             card.Children.Add(Small(next, top: 4));
         var buttons = new C.WrapPanel { Margin = new W.Thickness(0, 8, 0, 0) };

@@ -50,10 +50,23 @@ public sealed record CheckFailure(FailureKind Kind, string Title, string Words, 
         FailureAction.TryAgainWithMoreTime => CheckFailures.MoreTime,
         _ => null,
     };
+
+    /// <summary>What Gordium had already written to the project before it failed (the makers' clear openings filled as
+    /// drafts, or why they couldn't be: ClearPrefills.Head), shown on screen under the words, or null.</summary>
+    public string? Done { get; init; }
 }
 
 public static class CheckFailures
 {
+    /// <summary>The failure with what was already written before it (<paramref name="clear"/>, ClearPrefills.Head's
+    /// words): a check that fails after the drafts were written still says so on screen (review round 7 of the clear
+    /// openings; PR 5 moved the failure from a dialog into the pane, and the words had gone to the clipboard only).</summary>
+    public static CheckFailure After(this CheckFailure failure, string? clear)
+    {
+        ArgumentNullException.ThrowIfNull(failure);
+        return string.IsNullOrWhiteSpace(clear) ? failure : failure with { Done = clear.Trim() };
+    }
+
     public const string TryAgain = "Try again";
 
     public const string MoreTime = "Try again with more time";

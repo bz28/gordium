@@ -186,7 +186,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             check.End("failed");
             // the last check's rows taken down: never left showing as if they were this one's; in the pane, never a
             // dialog that blocks Revit (UI polish change 16), the technical words only behind Copy details
-            ResultsPane.Failed(CheckFailures.OfRead(e, clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})"));
+            ResultsPane.Failed(CheckFailures.OfRead(e, clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})").After(clear));
         }
     }
 
@@ -223,7 +223,7 @@ public sealed class CheckProjectCommand : IExternalCommand
                 End("failed");
                 // one message per failure (UI polish change 13), from what the wait ended with
                 var why = sent.Exception is { } failed ? CheckFailures.Unwrap(failed) : new OperationCanceledException("the check was cancelled");
-                ResultsPane.Failed(CheckFailures.Of(why, CheckWords.CheckerStopped((string)log["error"]!) + $" (logged to {Trial.LogPath()})"));
+                ResultsPane.Failed(CheckFailures.Of(why, CheckWords.CheckerStopped((string)log["error"]!) + $" (logged to {Trial.LogPath()})").After(check.Clear));
                 return;
             }
             var run = Answer(doc, check.Prepared!, sent.Result, log);
@@ -236,7 +236,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             log["error"] = $"{e.GetType().Name}: {e.Message}";
             log["where"] = e.StackTrace?.Split('\n').Take(8).Select(l => l.Trim()).ToList();
             End("failed");
-            ResultsPane.Failed(CheckFailures.Of(e, check.Clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})"));
+            ResultsPane.Failed(CheckFailures.Of(e, check.Clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})").After(check.Clear));
         }
     }
 

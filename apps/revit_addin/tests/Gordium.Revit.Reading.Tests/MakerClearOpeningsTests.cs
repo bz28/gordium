@@ -400,8 +400,16 @@ public sealed class MakerClearOpeningsTests
         var view = Src("ResultsView.cs");
         Assert.Contains("ClearPrefills.PanelStatus(content.MarksAdded, content.ClearWords, stale: content.Model?.Stale is not null)", view);
         // review round 7: a check that fails after the drafts were written still says so, in the panel and the dialog
-        Assert.Contains("ResultsPane.Failed(clear + $\"Nothing was checked", check);
-        Assert.Contains("TaskDialog.Show(Title, clear + $\"Nothing was checked", check);
+        // (UI polish PR 5: the failure is one card in the pane, no dialog; the words written before it are on screen,
+        // under the card's words, for a read that fails, a check that fails, and a checker that stops)
+        Assert.Contains("ResultsPane.Failed(CheckFailures.OfRead(e, clear + $\"Nothing was checked", check);
+        Assert.Contains(").After(clear));", check);
+        Assert.Equal(2, check.Split(").After(check.Clear));").Length - 1);
+        Assert.Equal(check.Split("ResultsPane.Failed(").Length - 1, check.Split(".After(").Length - 1);
+        Assert.Contains("if (failure.Done is { } done)", view);
+        var after = CheckFailures.OfRead(new InvalidOperationException("x"), "d").After(ClearPrefills.Head(2, null));
+        Assert.Equal(ClearPrefills.Head(2, null).Trim(), after.Done);
+        Assert.Null(CheckFailures.OfRead(new InvalidOperationException("x"), "d").After("").Done);
         Assert.True(check.IndexOf("var clear = \"\";", StringComparison.Ordinal) < check.IndexOf("        try", StringComparison.Ordinal));
     }
 
