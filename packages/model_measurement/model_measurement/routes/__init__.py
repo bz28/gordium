@@ -43,7 +43,7 @@ from model_measurement.interior.read import Reader, name_of
 from model_measurement.routes import areas, dead_ends, story_place, straight
 from model_measurement.routes.common_path import _TravelOnly, at_point, story_figure
 from model_measurement.routes.doors import door_parts
-from model_measurement.routes.floor import CLEARANCE, READING, read, region
+from model_measurement.routes.floor import CLEARANCE, OUTSIDE, READING, read, region
 from model_measurement.routes.paths import FOOT, StoryRoutes, _Leg
 from model_measurement.routes.remote import farthest
 from model_measurement.routes.stops import Stop
@@ -136,6 +136,10 @@ def _story_parts(story, uses, items, unknown, parts, r) -> None:
                 f"{story.rooms[k].name} through {story.rooms[h].name}" for k, h in sorted(story.served_by.items())))
             sp["confirm"] = {m: words for m in READ_THROUGH}
     _story_areas(sp, story, uses, [name_of(u) for u in unknown])
+    try:
+        sp["measures"][OUTSIDE_FACT] = rooms_exit_outside(story)
+    except Stop as s:
+        sp["not_measured"][OUTSIDE_FACT] = s.reason
     for m in ("story_occupant_load",):
         sp["not_measured"][m] = Stop("stated_not_given", what=STATED[m]).reason
     found = dead_ends.corridors(story, uses, routes)
@@ -474,6 +478,51 @@ def _in_room(story, routes, rid, doors) -> float:
 
 
 ENTERED_EXITS = ("exit_enclosure", "exit_passageway")    # the exits a door enters as a room (IBC 1016.1's list)
+
+
+OUTSIDE_FACT = "story_rooms_exit_directly_outside"
+
+
+def rooms_exit_outside(story) -> bool:
+    """Whether the story relies on BCNYS 1006.3.4 item 2 ("Rooms, areas and spaces complying with Section 1006.2.1 with
+    exits that discharge directly to the exterior at the level of exit discharge, are permitted to have one exit or
+    access to a single exit", p.317): every room, area and space on it has an exit of its own straight outside.
+
+    The rooms counted: every room on the story but those that are themselves exits (a stair enclosure, an exit
+    passageway: _is_exit) and a closet, storeroom or toilet taken as part of the one room it serves (decision 1a);
+    rooms joined by passages (no wall between them) are one area. True only where each area has a door to the
+    outside marked as an exterior exit door at the level of exit discharge (exits are marked, never guessed); false
+    where an area has no door to the outside at all (its occupants reach the outside only through other rooms, so
+    the story's exits are Table 1006.3.3's); else (a door to the outside not marked so, or marked onto an exterior
+    stair or ramp) not measured (Stop). A story whose routes aren't read isn't measured either: a room or door
+    not read, or an enclosed space with no room drawn in it, may be the one without."""
+    if story.stops:
+        raise Stop("story_not_measured", reasons="; ".join(story.stops))
+    rooms = []
+    for rid, room in sorted(story.rooms.items()):
+        if rid in story.served_by or _is_exit(story, rid):
+            continue
+        rooms.append(rid)
+    if not rooms:
+        raise Stop("outside_no_rooms")
+    area = {rid: {rid} for rid in rooms}                 # rooms joined by passages: one area
+    for a, b, _ in story.passages:
+        if a in area and b in area and area[a] is not area[b]:
+            joined = area[a] | area[b]
+            for rid in joined:
+                area[rid] = joined
+    unclear = None
+    for group in {frozenset(g) for g in area.values()}:
+        outside = [d for d in story.doors.values() if OUTSIDE in d.sides and group & set(d.sides)]
+        names = ", ".join(sorted(story.rooms[r].name for r in group))
+        if any(d.exit_kind == "exterior_at_discharge" for d in outside):
+            continue
+        if not outside:
+            return False
+        unclear = unclear or Stop("outside_door_not_marked", name=names, door=sorted(outside, key=lambda d: d.id)[0].name)
+    if unclear:
+        raise unclear
+    return True
 
 
 def _is_exit(story, rid) -> bool:
