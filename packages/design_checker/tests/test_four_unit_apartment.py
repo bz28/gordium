@@ -356,7 +356,8 @@ def test_door_swing_as_sent_and_with_each_doors_swing_stated(got):
     """Before: every door is side-hinged, so 1010.1.2's flag sets it aside, and the swing rule needs review (the side
     each swings into isn't stated; each serves none to the whole building's 514.3, 50 or more at the upper reading).
     After, each stated to swing into the side egress travel goes into (the corridor from an apartment, the stair
-    from the corridor, outside from the stair): the swing complies, and nothing else changes; stated the other way
+    from the corridor, outside from the stair) with no occupied outdoor areas stated: every door complies but the
+    stairs' unmarked outside doors (not known which way: review rounds 5 and 6), and nothing else changes; the other way
     round, it still needs review (it fails only at 50 or more at the least a door serves, none here), never a pass."""
     assert got["results"][KIND] == "not_applicable" and got["results"][SWING] == present.REVIEW
     desc = build.interior_of()
@@ -366,9 +367,13 @@ def test_door_swing_as_sent_and_with_each_doors_swing_stated(got):
     assert stated["results"][SWING] == present.REVIEW     # round 1: the stairs' outside doors may lead in from a patio
     desc["building"] = {**desc["building"], "occupied_outdoor_areas": False}
     stated = _check(desc, egress.measure_routes(desc))
-    assert stated["results"][SWING] == "pass"
+    # review rounds 5 and 6: the stairs' outside doors aren't marked exits (the eval marks the exit at the stair door), so
+    # which way egress goes through them isn't known: they need review; every other door complies
+    rows = {r["id"]: r["outcome"] for r in stated["rows"] if r["rule"] == SWING}
+    assert {k for k, v in rows.items() if v != "pass"} == {"L1WO", "L1EO"}
+    assert {rows[k] for k in ("L1WO", "L1EO")} == {present.REVIEW} and stated["results"][SWING] == present.REVIEW
     assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {
-        SWING, "general.bc_1004_7_outdoor_areas"}
+        "general.bc_1004_7_outdoor_areas"}
     for d in desc["doors"]:
         d["swings_into"] = d["sides"][0]
     wrong = _check(desc, egress.measure_routes(desc))                          # (no outdoor areas stated, as above)
@@ -405,4 +410,5 @@ def test_a_swing_waiting_on_outdoor_areas_asks_for_that_fact_never_a_model_fix(g
         for i in items:
             asks = [ui_data._from_cause(c, "means_of_egress_door") for c in i.get("causes") or []]
             assert "building.occupied_outdoor_areas" in {a.get("field") for a in asks}, i["name"]
-            assert not any(a["headline"].startswith("Fix the model") for a in asks), (i["name"], asks)
+            if "outside door" not in i["name"]:   # rounds 5-6: an unmarked door to outside may rightly ask to mark it
+                assert not any(a["headline"].startswith("Fix the model") for a in asks), (i["name"], asks)
