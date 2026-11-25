@@ -794,8 +794,8 @@ from what the family draws: for each level with a door, a floor plan is made ins
 subcategories (Plan Swing among them) and every user workset shown, so a coarse view, a filter or a hidden
 subcategory in the architect's own views never drops the arcs. Each door's geometry in that view gives its arcs in
 a horizontal plane (nested families' too). An arc is a leaf's swing when its centre (the hinge) is in the wall (within
-2 in of its faces) at a jamb (within 6 in of half the door's width from its centre) and its radius is a leaf's (12 in,
-so a pair's narrow leaf counts, to the door's width and 6 in); its middle must stand clear of a face of the wall, and that face is
+2 in of its faces) at a jamb (within 6 in of half the door's width from its centre) and its radius is a leaf's (9 in,
+under a pair's narrowest leaf so it always counts, to the door's width and 6 in); its middle must stand clear of a face of the wall, and that face is
 the side it swings into. A pair whose leaves swing the same way swings that way. Anything else leaves `swings_into`
 out with the reason in the notes: the checker's swing rule then needs review, never a pass.
 

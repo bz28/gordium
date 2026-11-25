@@ -519,10 +519,12 @@ public static class RouteReader
     /// thickness, and off a jamb along the wall; how far its middle must stand clear of the wall's face.</summary>
     internal const double HingeOff = 2.0 / 12, JambOff = 6.0 / 12, ClearOfFace = 1.0 / 12;
 
-    /// <summary>The shortest arc read as a leaf's swing: 12 in, whatever the door's width, so a pair's narrow leaf (a
-    /// 16 in leaf beside a 32 in one) is counted and a pair hung opposite ways is seen to swing both ways; a handle's
-    /// or a hardware arc is shorter. Counting more arcs only ever leaves a swing unstated.</summary>
-    internal const double LeastLeaf = 1.0;
+    /// <summary>The shortest arc read as a leaf's swing: 9 in, whatever the door's width, under the narrowest leaf a
+    /// pair is made with (12 in, or 300 mm, which is 11.8 in, drawn to its panel a little less), so a pair's narrow
+    /// leaf is always counted and a pair hung opposite ways is seen to swing both ways; a handle's or a hardware arc
+    /// is shorter (about 6 in at most). An arc counted that isn't a leaf's can only add a side, which leaves the swing
+    /// unstated, never a wrong one.</summary>
+    internal const double LeastLeaf = 9.0 / 12;
 
     /// <summary>The side of its wall a door's plan symbol draws its swing on, as the sign along the wall's normal
     /// (<see cref="DoorPlace.Normal"/>): see <see cref="SwingsInto"/>; null with why where the drawing doesn't settle

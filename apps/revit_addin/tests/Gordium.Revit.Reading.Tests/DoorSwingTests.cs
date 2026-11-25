@@ -83,6 +83,22 @@ public sealed class DoorSwingTests
     }
 
     [Fact]
+    public void A_pairs_narrowest_leaf_drawn_a_little_short_still_counts()
+    {
+        // door swing review round 4: a 300 mm leaf (0.984 ft) and a 12 in leaf drawn to its 11.25 in panel, each beside
+        // a wide one swinging the other way: never dropped, so never read as swinging one way
+        foreach (var narrow in new[] { 0.984, 11.25 / 12 })
+        {
+            var floor = new FakeFloor();
+            floor.Swing("dA", +1, hinge: -1, radius: 26.0 / 12);
+            floor.Swing("dA", -1, hinge: +1, radius: narrow);
+            var read = InteriorReader.Read(floor.Model());
+            Assert.Null(Into(read, "dA"));
+            Assert.Contains("on both sides of its wall", FakeFloor.Note(read, "dA", "doors.swings_into"));
+        }
+    }
+
+    [Fact]
     public void No_swing_drawn_leaves_it_unstated_never_a_door_that_doesnt_swing()
     {
         // the arcs a coarse view, a hidden Plan Swing subcategory or a family's own visibility drops: the plan view the
