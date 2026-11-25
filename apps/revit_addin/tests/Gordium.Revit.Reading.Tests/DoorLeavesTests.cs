@@ -52,7 +52,7 @@ public sealed class DoorLeavesTests
         foreach (var id in new[] { "dS", "dE", "dS2" })                  // dS2: no mark at all
             Assert.Null(FakeFloor.Part(read, "doors", id)!["leaves"]);
         var said = read.Notes.Where(n => n.Field == "doors.leaves").ToDictionary(n => n.Part, n => n.Why);
-        Assert.Equal("Gordium: Leaves is 3 on its type, not 1 or 2 (a pair with no mullion)", said[FakeFloor.Uid("dS")]);
+        Assert.Equal("Gordium: Leaves is 3 on its type, not 1 or 2", said[FakeFloor.Uid("dS")]);
         Assert.Equal("Gordium: Leaves is not set on its type", said[FakeFloor.Uid("dE")]);
     }
 
@@ -67,7 +67,7 @@ public sealed class DoorLeavesTests
         var model = ResultViews.Build(CheckResult.Parse(new WorkerAnswer(doc.RootElement.GetProperty("result").Clone(), about)));
         var cards = model.Fix.SelectMany(g => g.Cards).ToList();
         var card = Assert.Single(cards, c => c.Field == "doors[].leaves");
-        Assert.Equal((FixKind.Mark, "Set how many leaves each door type has (1, or 2 for a pair with no mullion)"), (card.Kind, card.Headline));
+        Assert.Equal((FixKind.Mark, "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"), (card.Kind, card.Headline));
         Assert.Equal(Marks.DoorLeaves, Marks.All.Single(k => k.Feeds == card.Field));
         Assert.DoesNotContain(cards, c => c.Headline.Contains("door leaves in the model", StringComparison.Ordinal));
         // the button selects the doors and opens Properties, where a type's mark is reached by Edit Type (review round
@@ -78,8 +78,13 @@ public sealed class DoorLeavesTests
         Assert.Equal(CardAction.ShowAndProperties, CauseCards.Action(cause, labels));
         Assert.Contains("Edit Type", CauseCards.Note(cause, labels), StringComparison.Ordinal);
         Assert.Contains("Edit Type", CauseCards.AfterProperties(cause, 10), StringComparison.Ordinal);
-        // review round 2: Edit Type is greyed with more than one type selected, so the words say to pick one
-        Assert.Contains("with one type selected", CauseCards.AfterProperties(cause, 10), StringComparison.Ordinal);
+        // review rounds 2 and 3: Edit Type is greyed with more than one type selected, and picking a type in Properties'
+        // Type Selector would retype every selected door: one element of a type, or the type in the Project Browser
+        var after = CauseCards.AfterProperties(cause, 10);
+        Assert.Contains("select one element of a type and click Edit Type", after, StringComparison.Ordinal);
+        Assert.Contains("right-click the type in the Project Browser and choose Type Properties", after, StringComparison.Ordinal);
+        Assert.DoesNotContain("type list", after, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Type Selector", after, StringComparison.Ordinal);
         var fix = Assert.Single(Fixes.Of([cause], labels));
         Assert.Contains("Edit Type", Fixes.Note(fix), StringComparison.Ordinal);
         // an element's own mark says nothing of types

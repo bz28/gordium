@@ -671,5 +671,15 @@ def test_a_door_whose_leaves_arent_given_is_asked_for_by_the_field_its_type_mark
     got = ui_data._from_cause({"kind": "mark", "key": "mark:means_of_egress_door:moe_door_leaves", "words": why,
                                "measure": "moe_door_leaves"}, "means_of_egress_door")
     assert (got["kind"], got["field"], got["key"]) == ("mark", "doors[].leaves", "field:doors[].leaves")
-    assert got["headline"] == "Set how many leaves each door type has (1, or 2 for a pair with no mullion)"
+    assert got["headline"] == "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
     assert "no mark for it" not in STOPS["door_leaves_not_given"]
+
+
+def test_every_restatement_of_the_leaves_rule_carries_the_mullioned_pair():
+    # door leaves review round 3: the card headline and the check's reason restated the rule as "1, or 2 for a pair
+    # with no mullion", which read as 1 for a mullioned pair whose clear width is the wider leaf's (a false pass)
+    from model_measurement.routes.stops import STOPS
+    assert "narrower leaf" in ui_data.FIELD_HEADLINES["doors[].leaves"]
+    assert "narrower leaf" in STOPS["door_leaves_not_given"]
+    fmt = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
+    assert "narrower leaf" in next(line for line in fmt.splitlines() if line.startswith("| `leaves`"))

@@ -846,7 +846,7 @@ public static class InteriorReader
             door["leaves"] = d.Leaves.Value;
         else
             Out("leaves", d.Leaves is { } n
-                ? $"{Marks.DoorLeaves.Name} is {n.ToString(System.Globalization.CultureInfo.InvariantCulture)} on its type, not 1 or 2 (a pair with no mullion)"
+                ? $"{Marks.DoorLeaves.Name} is {n.ToString(System.Globalization.CultureInfo.InvariantCulture)} on its type, not 1 or 2"
                 : Marks.DoorLeaves.Name + " is not set on its type");
         Out("threshold_top", "a door's drawn stops, hinge, leaf, threshold and head stop aren't read from its family (door " +
                              "families don't model them consistently): its maker's clear opening is read instead");

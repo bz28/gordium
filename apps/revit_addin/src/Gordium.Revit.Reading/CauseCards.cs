@@ -219,10 +219,13 @@ public static class CauseCards
 
     /// <summary>Where a type's mark is set: the instance Properties palette doesn't show it, Edit Type does, once for each
     /// type (door leaves review round 1: the card said "set Gordium: Leaves there", which Properties alone doesn't
-    /// hold); "" when every mark is the element's own.</summary>
+    /// hold). Edit Type is greyed with several types selected (round 2), and picking a type in Properties' Type Selector
+    /// would retype every selected element (round 3), so the words name one element of a type, or the type's own
+    /// Type Properties in the Project Browser; "" when every mark is the element's own.</summary>
     internal static string OnType(IReadOnlyList<MarkDefinition> marks) =>
         marks.Any(m => m.Binding == MarkBinding.Type)
-            ? " (a type's mark: with one type selected, picked in Properties' type list, click Edit Type; once for each type)" : "";
+            ? " (a type's mark: select one element of a type and click Edit Type, or right-click the type in the Project " +
+              "Browser and choose Type Properties; once for each type)" : "";
 
     /// <summary>The Gordium marks the card names, each once, in Gordium's list order. When the worker names the
     /// fields the card needs (<see cref="CauseCard.Fields"/>): the mark that feeds each one exactly (doors[].exit:
