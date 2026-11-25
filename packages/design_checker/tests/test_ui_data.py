@@ -572,7 +572,10 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # without one: Table 1006.3.4's notes, PR feat/revit-group2-facts)
     assert keys - set(revit) == set()
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased"):
-        assert code_scope.field_of(k) == f"building.{k}" and code_scope.MARK[k] == revit[k], k
+        # a fact a rule reads as a measure is answered by its field (field_of); occupant_load_increased is read by the
+        # occupant loads themselves, not as a measure
+        assert code_scope.field_of(k) == (f"building.{k}" if k in code_scope.DERIVED else None), k
+        assert code_scope.MARK[k] == revit[k], k
     for k in ("egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating", "special_egress_spaces",
               "merchandise_pads"):
         assert code_scope.field_of(k) == f"building.{k}" and code_scope.MARK[k] == revit[k], k
