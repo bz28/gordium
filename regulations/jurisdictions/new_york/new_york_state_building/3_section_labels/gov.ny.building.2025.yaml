@@ -4442,7 +4442,8 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Two doors in a series at least 48 inches apart plus a door swinging into the space, swinging the same way or
-      away from it: doors in a series aren''t in the model, a person''s check.'
+      away from it, with exceptions for horizontal sliding power-operated doors, Group R-2 and R-3 storm and screen doors,
+      and doors within those units other than Type A units: doors in a series aren''t in the model, a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 324
