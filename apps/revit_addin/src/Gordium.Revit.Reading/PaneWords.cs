@@ -293,15 +293,15 @@ public static class PaneWords
         return said.Count == 0 ? null : "You changed: " + string.Join("; ", said) + ".";
     }
 
-    /// <summary>What "hover for all" shows: every changed verdict, each on its line in the worker's order (the ones
-    /// listed and the ones <see cref="ChangesMore"/> counts: never a count of its own), then the results that say
-    /// something new, counted as <see cref="ChangesMore"/> counts them. A change that is no list: the worker's one line.</summary>
+    /// <summary>What a screen reader says for What changed: every changed result, each on its line in the worker's
+    /// order (the ones listed and the ones "Show all" opens: never a count of its own), then the results that say
+    /// something new. A change that is no list: the worker's one line.</summary>
     public static string ChangesAll(CheckChange change)
     {
         ArgumentNullException.ThrowIfNull(change);
         if (!ChangeIsList(change))
             return change.Words;
-        var lines = new List<string> { $"{change.Rows.Count} changed verdict{(change.Rows.Count == 1 ? "" : "s")}:" };
+        var lines = new List<string> { $"{change.Rows.Count} result{(change.Rows.Count == 1 ? "" : "s")} changed:" };
         lines.AddRange(change.Rows.Select(r => "• " + r.Words));
         if (change.Said > 0)
             lines.Add($"{change.Said} more say something new");
