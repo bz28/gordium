@@ -392,7 +392,7 @@ def test_a_walk_over_group_3s_facts_never_passes_where_a_reading_or_a_load_not_w
     where the load isn't worked out, at no load and at a million), a fail fails at both; the loads themselves are the
     law's (above). 40 seeded cases (the seed fixed, so a failure names its case)."""
     routes = _routes(apartment)
-    monkeypatch.setattr(egress, "measure_routes", lambda interior: copy.deepcopy(routes))
+    monkeypatch.setattr(egress, "measure_routes", lambda interior, **_: copy.deepcopy(routes))
     applied = occupant_load.apply
     laws = egress.laws("regulations/jurisdictions/new_york/ithaca_city")
     rules, rng, seen = _load_rules(), random.Random(1004), set()
@@ -449,7 +449,7 @@ def test_an_exits_reason_never_says_no_rule_asks_for_its_load(apartment, monkeyp
     apartment taken as I-4, with no sprinkler system, each stair enclosure's row passes, never a fail."""
     assert "ask nothing" not in occupant_load.IS_EXIT and "person's check" in occupant_load.IS_EXIT
     routes = _routes(apartment)
-    monkeypatch.setattr(egress, "measure_routes", lambda interior: copy.deepcopy(routes))
+    monkeypatch.setattr(egress, "measure_routes", lambda interior, **_: copy.deepcopy(routes))
     desc = copy.deepcopy(apartment)
     desc["building"] = {"occupancy_groups": ["I-4"], "sprinkler_system": "none"}
     got = egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), desc,
