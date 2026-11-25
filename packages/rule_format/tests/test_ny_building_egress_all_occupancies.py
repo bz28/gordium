@@ -844,3 +844,16 @@ def test_table_1020_3_within_a_dwelling_unit_needs_review_only_while_not_ruled_o
     for units, want in (({"corridors_within_dwelling_units": True}, "needs_review"), ({}, "needs_review"),
                         (NO_UNITS, "fail")):
         assert _one(r, "corridor", _corridor(43.5, 50), base | units, ctx) == want, units
+
+
+def test_more_than_one_reads_the_same_comparison_in_every_piece():
+    """Review round 1 of group 5b (P3): 1005.5's 'Where more than one exit ... is required' was read 'none' while
+    1020.5's same words read '>': the second reading says what the printed sentence says of each number, so 'more
+    than <n>' is '>' everywhere in this book (a condition, but a comparison all the same)."""
+    pieces = load(NY / "text_verification.yaml")["pieces"]
+    seen = []
+    for pid, e in pieces.items():
+        for n, comp in zip(e["second_reading_numbers"], e["second_reading_comparisons"]):
+            if str(n).startswith("more than "):
+                seen.append((pid, n, comp))
+    assert seen and all(comp == ">" for _, _, comp in seen), [x for x in seen if x[2] != ">"]
