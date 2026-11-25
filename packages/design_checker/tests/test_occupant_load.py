@@ -585,8 +585,12 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         assert heads and not any(h.startswith(("Mark the", "Fix the model")) for h in heads), (why, heads)
         # review of group 4a: the fact has no Revit mark yet, so the panel never makes it a card to set (Revit's
         # ChapterTenFactsTests: every answer card's field is one a mark feeds); asked by hand, in words naming it
-        assert any(h.startswith("Work out") for h in heads) and not any(h.startswith("Say whether") for h in heads),             (why, kind, heads)
+        assert any(h.startswith("Work out") for h in heads) and not any(h.startswith("Say whether") for h in heads), \
+            (why, kind, heads)
         assert "is stated by the architect" not in why, why
+    # round 2: every host is told the statement that settles it (the command line can state it), not only Revit's gap
+    assert "say on the building that none do" in ol.CORRIDOR_NOT_RULED_OUT
+    assert ol.OTHER_LEVELS in ol.CORRIDOR_NOT_RULED_OUT
     cases = [(w, kind) for k, (w, kind) in reasons.items() if k not in corridor] + [
         ("the room's floor area isn't measured", model),
         (ol.STORY_OPEN.format(names="k") + ol.STORY_FUNCTION, function),            # a room with no function

@@ -1313,10 +1313,10 @@
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): occupancy group (whether Group I-4) not measured (or not usable)",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): occupancy group (the building's one group, or mixed), sprinkler system (NFPA 13) not measured (or not usable)",
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): occupancy group (the building's one group, or mixed), sprinkler system (NFPA 13) not measured (or not usable)",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Egress · Group I-4: A person checks this (Gordium doesn't decide it): Which group the building is in decides every limit below; the architect states it, a person confirms.",
     "Egress · Child day care classified Group E: A person checks this (Gordium doesn't decide it): More than five but not more than 100 children 2 1/2 or younger, in rooms on a level of exit discharge each with an exit door directly outside: Group E, not I-4; the architect states it.",
     "Egress · Care during religious functions: A person checks this (Gordium doesn't decide it): Part of the primary occupancy: the architect states it.",
@@ -52947,7 +52947,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -52956,7 +52956,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+      "line": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
       "quotes": [
        {
         "text": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3.",
@@ -53019,7 +53019,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
       ],
       "decide": false
      },
@@ -53027,7 +53027,7 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_occupant_load",
-       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
@@ -53052,7 +53052,7 @@
      "asks": [
       {
        "key": "mark:corridor:corridor_occupant_load",
-       "why": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "why": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
@@ -53098,7 +53098,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -53107,7 +53107,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+      "line": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
       "quotes": [
        {
         "text": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3.",
@@ -53170,7 +53170,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
       ],
       "decide": false
      },
@@ -53178,7 +53178,7 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_occupant_load",
-       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
@@ -53203,7 +53203,7 @@
      "asks": [
       {
        "key": "mark:corridor:corridor_occupant_load",
-       "why": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "why": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
@@ -53249,7 +53249,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -53258,7 +53258,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3.",
@@ -53345,7 +53345,7 @@
       "worked": [],
       "inputs": [
        "ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
-       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -53406,7 +53406,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -53415,7 +53415,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.3 Width and capacity. The required capacity of corridors shall be determined as specified in Section 1005.1, but the minimum width shall be not less than that specified in Table 1020.3.",
@@ -53502,7 +53502,7 @@
       "worked": [],
       "inputs": [
        "ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
-       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -60207,7 +60207,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 4,
-       "title": "Level 1 › CORRIDOR L1 (3): 4 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
+       "title": "Level 1 › CORRIDOR L1 (3): 4 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
        "mark": "?",
        "name": "Level 1 › CORRIDOR L1 (3)"
       },
@@ -60223,7 +60223,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 4,
-       "title": "Level 2 › CORRIDOR L2 (8): 4 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
+       "title": "Level 2 › CORRIDOR L2 (8): 4 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
        "mark": "?",
        "name": "Level 2 › CORRIDOR L2 (8)"
       },
@@ -60903,7 +60903,7 @@
       {
        "key": "mark:corridor:corridor_occupant_load",
        "kind": "mark",
-       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+       "words": "corridor occupant load: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
@@ -83959,7 +83959,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+     "line": "Level 1 › CORRIDOR L1 (3): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
     },
     {
      "rule": "general.bc_1020_3_corridor_capacity",
@@ -83976,7 +83976,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
+     "line": "Level 2 › CORRIDOR L2 (8): corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet"
     },
     {
      "rule": "general.bc_table_1020_3_corridor_width",
@@ -83993,7 +83993,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_3_corridor_width",
@@ -84010,7 +84010,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
     }
    ],
    "results": {
@@ -87577,7 +87577,7 @@
         "corridor_dead_end_least_width": 6.0
        },
        "not_measured": {
-        "corridor_occupant_load": "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+        "corridor_occupant_load": "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
         "corridor_fire_rating_hours": "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
         "corridor_walls_smoke_partitions": "stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet"
        },
@@ -87606,7 +87606,7 @@
         "corridor_dead_end_least_width": 6.0
        },
        "not_measured": {
-        "corridor_occupant_load": "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit has no mark for that yet): stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
+        "corridor_occupant_load": "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit has no mark for it yet), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
         "corridor_fire_rating_hours": "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
         "corridor_walls_smoke_partitions": "stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet"
        },
@@ -87658,7 +87658,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "f5d12994eca15bba43bc7f83be4f10d33ac8b625cc6595682ff0a5d64740edd7",
+  "worker_fingerprint": "a78d9d387491f9d98e5f566d3d6a07b46475a3c020fcbff51367be48956b805d",
   "rulebook": {
    "new_york/ithaca_city": "db00d735580d931d374ca8fc6194bdd6f57106b65f9abccb08825e1e33bcdb67"
   }
