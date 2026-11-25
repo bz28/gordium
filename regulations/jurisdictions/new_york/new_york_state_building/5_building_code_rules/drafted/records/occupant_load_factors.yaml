@@ -1,0 +1,436 @@
+# Table 1004.5's occupant load factors (2025 Building Code of New York State, pp.312-313), frozen for the checker's
+# occupant loads (design_checker/occupant_load.py): each function a room's `function` may name
+# (docs/interior/interior_description_format.md), its factor in square feet per occupant (note a) and whether it is
+# of the gross or the net floor area, its row quoted (page, line); a function the table sends elsewhere has no factor
+# (its occupant load is a person's). Every factor is checked against the second reading of Table 1004.5
+# (text_verification.yaml) and every quote word for word where the code cache is (rule_format's
+# test_ny_building_egress_all_occupancies.py). Section
+# group 3 of docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md; hand-written in a Claude Code session
+# (2026-11-23).
+functions:
+  accessory_storage_mechanical:
+    factor: 300
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 11
+      - 11
+      quote: Accessory storage areas, mechanical equipment room 300 gross
+  agricultural:
+    factor: 300
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 12
+      - 12
+      quote: Agricultural building 300 gross
+  aircraft_hangar:
+    factor: 500
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 13
+      - 13
+      quote: Aircraft hangars 500 gross
+  airport_baggage_claim:
+    factor: 20
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 15
+      - 15
+      quote: Baggage claim 20 gross
+  airport_baggage_handling:
+    factor: 300
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 16
+      - 16
+      quote: Baggage handling 300 gross
+  airport_concourse:
+    factor: 100
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 17
+      - 17
+      quote: Concourse 100 gross
+  airport_waiting:
+    factor: 15
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 18
+      - 18
+      quote: Waiting areas 15 gross
+  gaming_floor:
+    factor: 11
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 20
+      - 20
+      quote: Gaming floors (keno, slots, etc.) 11 gross
+  exhibit_gallery_museum:
+    factor: 30
+    area: net
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 21
+      - 21
+      quote: Exhibit gallery and museum 30 net
+  assembly_fixed_seats:
+    factor: null
+    area: null
+    elsewhere: '1004.6'
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 22
+      - 22
+      quote: Assembly with fixed seats See Section 1004.6
+  assembly_concentrated:
+    factor: 7
+    area: net
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 24
+      - 24
+      quote: Concentrated (chairs only—not fixed) 7 net
+  assembly_standing:
+    factor: 5
+    area: net
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 25
+      - 25
+      quote: Standing space 5 net
+  assembly_unconcentrated:
+    factor: 15
+    area: net
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 26
+      - 26
+      quote: Unconcentrated (tables and chairs) 15 net
+  bowling_center:
+    factor: null
+    area: null
+    elsewhere: its row (5 persons a lane)
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 27
+      - 27
+      quote: Bowling centers, allow 5 persons for each lane including 15 feet of runway, and for additional areas 7 net
+  business:
+    factor: 150
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 28
+      - 28
+      quote: Business areas 150 gross
+  concentrated_business:
+    factor: null
+    area: null
+    elsewhere: '1004.8'
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 29
+      - 29
+      quote: Concentrated business use areas See Section 1004.8
+  courtroom:
+    factor: 40
+    area: net
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 30
+      - 30
+      quote: Courtrooms—other than fixed seating areas 40 net
+  day_care:
+    factor: 35
+    area: net
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 31
+      - 31
+      quote: Day care 35 net
+  dormitory:
+    factor: 50
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 32
+      - 32
+      quote: Dormitories 50 gross
+  classroom:
+    factor: 20
+    area: net
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 34
+      - 34
+      quote: Classroom area 20 net
+  vocational_shop:
+    factor: 50
+    area: net
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 35
+      - 35
+      quote: Shops and other vocational room areas 50 net
+  exercise_room:
+    factor: 50
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 36
+      - 36
+      quote: Exercise rooms 50 gross
+  h5_fabrication:
+    factor: 200
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 37
+      - 37
+      quote: Group H-5 fabrication and manufacturing areas 200 gross
+  industrial:
+    factor: 100
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 38
+      - 38
+      quote: Industrial areas 100 gross
+  information_technology:
+    factor: 300
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 39
+      - 39
+      quote: Information technology equipment facilities 300 gross
+  inpatient_treatment:
+    factor: 240
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 41
+      - 41
+      quote: Inpatient treatment areas 240 gross
+  outpatient:
+    factor: 100
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 42
+      - 42
+      quote: Outpatient areas 100 gross
+  institutional_sleeping:
+    factor: 120
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 43
+      - 43
+      quote: Sleeping areas 120 gross
+  commercial_kitchen:
+    factor: 200
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 44
+      - 44
+      quote: Kitchens, commercial 200 gross
+  library_reading_room:
+    factor: 50
+    area: net
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 46
+      - 46
+      quote: Reading rooms 50 net
+  library_stack:
+    factor: 100
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 47
+      - 47
+      quote: Stack area 100 gross
+  locker_room:
+    factor: 50
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 48
+      - 48
+      quote: Locker rooms 50 gross
+  mall:
+    factor: null
+    area: null
+    elsewhere: 402.8.2
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 49
+      - 49
+      quote: Mall buildings—covered and open See Section 402.8.2
+  mercantile:
+    factor: 60
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 50
+      - 50
+      quote: Mercantile 60 gross
+  storage_stock_shipping:
+    factor: 300
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 5
+      - 5
+      quote: Storage, stock, shipping areas 300 gross
+  parking_garage:
+    factor: 200
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 6
+      - 6
+      quote: Parking garages 200 gross
+  residential:
+    factor: 200
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 7
+      - 7
+      quote: Residential 200 gross
+  rink_pool:
+    factor: 50
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 9
+      - 9
+      quote: Rink and pool 50 gross
+  pool_deck:
+    factor: 15
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 10
+      - 10
+      quote: Decks 15 gross
+  stage_platform:
+    factor: 15
+    area: net
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 11
+      - 11
+      quote: Stages and platforms 15 net
+  warehouse:
+    factor: 500
+    area: gross
+    source:
+      file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 12
+      - 12
+      quote: Warehouses 500 gross
+increase_cap:
+  sq_ft_per_occupant: 7
+  source:
+    file: gov.ny.building.2025.pdf
+    page: 313
+    lines:
+    - 15
+    - 17
+    quote: 1004.5.1 Increased occupant load. The occupant load permitted in any building, or portion thereof, is permitted
+      to be increased from that number established for the occupancies in Table 1004.5, provided that all other requirements
+      of the code are met based on such modified number and the occupant load does not exceed one occupant per 7 square feet
+      (0.65 m2) of occupiable floor

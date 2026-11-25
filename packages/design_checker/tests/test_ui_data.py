@@ -26,7 +26,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "egress_balcony_increase_taken": False, "building_has_atrium": False,
                                           "assembly_fixed_seating": False, "special_egress_spaces": False,
                                           "merchandise_pads": False, "r2_sleeping_units": False,
-                                          "emergency_escape_openings_1031": False})          # group 2's two
+                                          "emergency_escape_openings_1031": False,           # group 2's two
+                                          "occupied_outdoor_areas": False})                  # group 3's
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -570,7 +571,7 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # every fact the code choice and the Building Code's rules read has its Revit mark (group 2's two, the last
     # without one: Table 1006.3.4's notes, PR feat/revit-group2-facts)
     assert keys - set(revit) == set()
-    for k in ("r2_sleeping_units", "emergency_escape_openings_1031"):
+    for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased"):
         assert code_scope.field_of(k) == f"building.{k}" and code_scope.MARK[k] == revit[k], k
     for k in ("egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating", "special_egress_spaces",
               "merchandise_pads"):

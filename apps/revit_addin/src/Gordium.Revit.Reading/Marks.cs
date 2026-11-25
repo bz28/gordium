@@ -317,6 +317,22 @@ public static class Marks
         "BCNYS Table 1006.3.4(1) note a: \"Buildings classified as Group R-2 equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 and provided with emergency escape and rescue openings in accordance with Section 1031.\" " +
         "Yes: a Group R-2 story may then have one exit within the table's limits. No: it may not under that row. Blank: those rows need review.");
 
+    /// <summary>Whether the building has outdoor areas its occupants use (<c>building.occupied_outdoor_areas</c>,
+    /// BCNYS 1004.7).</summary>
+    public static readonly MarkDefinition OccupiedOutdoorAreas = new(
+        "Gordium: Occupied outdoor areas", new("5be49bb1-7c0f-4eea-a360-c6b47d2e9dad"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.occupied_outdoor_areas",
+        "Yes when the building has yards, patios, occupiable roofs, courts or similar outdoor areas its occupants can reach and use. " +
+        "BCNYS 1004.7: \"Yards, patios, occupiable roofs, courts and similar outdoor areas accessible to and usable by the building occupants shall be provided with means of egress as required by this chapter.\" " +
+        "Yes: their means of egress and the occupant load the building official assigns them are a person's check (outdoor areas aren't drawn for Gordium). No: there are none. Blank: that check needs review.");
+
+    /// <summary>Whether the design takes BCNYS 1004.5.1's increased occupant load (<c>building.occupant_load_increased</c>).</summary>
+    public static readonly MarkDefinition OccupantLoadIncreased = new(
+        "Gordium: Occupant load increased", new("64b5a6c7-d4ae-4424-b7e1-2c041b09d02a"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.occupant_load_increased",
+        "Yes when the design takes BCNYS 1004.5.1's increased occupant load: more occupants than Table 1004.5's factors give, every other requirement met for that number, at most one occupant per 7 sq ft of occupiable floor space. " +
+        "No: the design takes no increase, so each room's occupant load is Table 1004.5's alone. Yes or blank: each room's larger reading is at least its area / 7 (the most 1004.5.1 allows), so a rule an increase could fail needs review or fails, never passes.");
+
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
         "Gordium: Atrium", new("8c3211a5-546b-463e-8d8c-b70fd753c1b6"), MarkValueKind.YesNo,
@@ -615,7 +631,7 @@ public static class Marks
         CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
-        EscapeOpenings1031, Atrium,
+        EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,

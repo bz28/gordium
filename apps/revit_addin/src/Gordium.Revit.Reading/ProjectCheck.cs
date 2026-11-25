@@ -143,7 +143,9 @@ public static class BuildingFacts
                      (Marks.MerchandisePads, "merchandise_pads"), (Marks.EgressBalconyIncrease, "egress_balcony_increase_taken"),
                      (Marks.Atrium, "building_has_atrium"),
                      // group 2's (Table 1006.3.4 note a): a Group R-2's escape openings per 1031
-                     (Marks.EscapeOpenings1031, "emergency_escape_openings_1031") })
+                     (Marks.EscapeOpenings1031, "emergency_escape_openings_1031"),
+                     // group 3's: outdoor areas the occupants use (1004.7), and 1004.5.1's increased occupant load
+                     (Marks.OccupiedOutdoorAreas, "occupied_outdoor_areas"), (Marks.OccupantLoadIncreased, "occupant_load_increased") })
         {
             var v = Get(mark);
             if (Marks.YesNo(v) is { } yes)

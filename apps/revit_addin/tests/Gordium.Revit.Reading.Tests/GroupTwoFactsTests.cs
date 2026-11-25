@@ -85,6 +85,28 @@ public sealed class GroupTwoFactsTests
         Assert.NotNull(read.Building![key]);
     }
 
+    /// <summary>Group 3's two (BCNYS 1004.7 outdoor areas, 1004.5.1's increased occupant load): Yes/No marks sent only
+    /// when set, never blank as No: No is the statement that can narrow a check (no outdoor areas: 1004.7's check not
+    /// applicable; no increase: each room's load the table's alone), so it is never assumed.</summary>
+    [Fact]
+    public void Group_threes_two_are_yes_no_marks_sent_only_when_set()
+    {
+        foreach (var (m, key) in new[] { (Marks.OccupiedOutdoorAreas, "occupied_outdoor_areas"), (Marks.OccupantLoadIncreased, "occupant_load_increased") })
+        {
+            Assert.Contains(m, Marks.All);
+            Assert.Equal((MarkValueKind.YesNo, "building." + key), (m.Kind, m.Feeds));
+            Assert.Equal("{\"" + key + "\":false}", BuildingFacts.Read(Model(new() { [m.Guid] = new(true, 0) })).Building!.ToJsonString());
+            Assert.Null(BuildingFacts.Read(Model(new() { [m.Guid] = new(false, 0) })).Building);
+            Assert.Equal(FieldKind.YesNo, SetupScreen.Build(Model([]), [], null, null).Fields.Single(f => f.Mark == m).Kind);
+            var card = new CauseCard($"field:building.{key}", CauseKind.Mark, "Say whether", [], ["r"], null, "review") { Fields = [$"building.{key}"] };
+            Assert.Equal([m], CauseCards.MarksOf(card));
+        }
+        Assert.Contains("\"Yards, patios, occupiable roofs, courts and similar outdoor areas accessible to and usable by the building occupants shall be provided with means of egress as required by this chapter.\"",
+                        Marks.OccupiedOutdoorAreas.Description, StringComparison.Ordinal);
+        Assert.Contains("at most one occupant per 7 sq ft of occupiable floor space", Marks.OccupantLoadIncreased.Description, StringComparison.Ordinal);
+        Assert.Contains("Yes or blank: each room's larger reading is at least its area / 7", Marks.OccupantLoadIncreased.Description, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void The_setup_form_offers_the_three_words_and_a_card_opens_project_information()
     {

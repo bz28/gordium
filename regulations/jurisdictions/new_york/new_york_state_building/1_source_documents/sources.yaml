@@ -65,9 +65,10 @@ documents:
       # common path, p.342, with 1018.5 after on p.343, read to show where it ends) and 1030.8 alone (an assembly space's fixed-seat common path, p.355,
       # with 1030.8.1 after), and 407.4.2 alone (a Group I-2 sleeping room's 50 ft to its exit access door,
       # p.99, with 407.4.3 after). Review round 2: 1030.7 alone (assembly seating's travel, measured along the
-      # aisles, pp.354-355, with 1030.8 after).
-      pages: 32-68, 79, 99, 147, 273-274, 315-318, 340-344, 354-355
-      sections: ['308.5', '508.2', '1006.2.1', Table 1006.2.1, '1006.2.2', '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(1),
+      # aisles, pp.354-355, with 1030.8 after). Section 1004 (occupant load, pp.311-313, with SECTION 1005 after)
+      # and Table 1004.5 (2026-11-23, section group 3: a room's function gives its occupant load).
+      pages: 32-68, 79, 99, 147, 273-274, 311-313, 315-318, 340-344, 354-355
+      sections: ['308.5', '508.2', '1004', Table 1004.5, '1006.2.1', Table 1006.2.1, '1006.2.2', '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(1),
                  Table 1006.3.4(2),
                  '1007.1', '1016.2', '1017', Table 1017.2, '1018.4', '1020.5']
       alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
@@ -78,6 +79,7 @@ documents:
       tables:      # each table's lines, checked on the page image (the text doesn't say where a table ends); every
                    # table on the pages read is named, brought in or not
         Table 903.2.11.6: p.273 lines 14-36
+        Table 1004.5: p.312 lines 9-50; p.313 lines 3-14
         Table 1006.2.1: p.315 lines 14-44
         Table 1030.6.2: p.354 lines 10-22
         Table 1006.3.3: p.316 lines 52-57
@@ -188,6 +190,16 @@ documents:
           smoke protected seating: The book prints "smoke protected seating" in italics; the defined term is
             SMOKE-PROTECTED ASSEMBLY SEATING, which the phrase does not name whole, so it is not brought in. Exception
             2 is for assembly seating (Section 1030.7, brought in alone since review round 2), not Group I-4.
+        202:load_factor:
+          load: 'LOAD FACTOR is a structural term (Chapter 16, load and resistance factor design), brought in because
+            Table 1004.5 prints "OCCUPANT LOAD FACTOR"; its italic "load" names the structural loads, which Section
+            202 defines only as LOADS (not brought in). Used by no rule.'
+          load effect: As "load" (LOAD EFFECTS, a Chapter 16 term). Used by no rule.
+          nominal load: As "load" (NOMINAL LOADS, a Chapter 16 term). Used by no rule.
+        '1004.6':
+          fixed seats: 'The book prints "fixed seats" in italics (p.313, line 20); the defined term is FIXED SEATING,
+            brought in by the same words in roman, which "fixed seats" does not name whole. A room whose function is
+            assembly with fixed seats takes its occupant load from its seats, a person''s statement.'
         '1030.8':
           smoke-protected: 'The book prints "smoke-protected" in italics before "or open-air assembly seating"
             (p.355, line 18), and the defined term is SMOKE-PROTECTED ASSEMBLY SEATING, which the word does not

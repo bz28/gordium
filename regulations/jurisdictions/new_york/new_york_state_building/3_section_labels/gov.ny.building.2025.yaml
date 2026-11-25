@@ -37,6 +37,22 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:addition:
+    label: reference
+    topic: definitions
+    reason: 'Defines ADDITION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 32
+      lines:
+      - 37
+      - 37
+      quote: '[A] ADDITION. An extension or increase in floor area, number of stories or height of a building or structure.'
+    piece_sha256: 0efc764c69f61e6f2b28b62f545c3e254cb3104a1a695afb51a4606b5f12f733
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:aggregate:
     label: reference
     topic: definitions
@@ -50,6 +66,25 @@ labels:
       quote: '[BS] AGGREGATE. In roofing, crushed stone, crushed slag or water-worn gravel used for surfacing for roof coverings.'
     piece_sha256: eec9a8499f90c13f08aafd20ba719709b279b84538a5e3fcf3794e5d5a1a122e
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:agricultural_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines AGRICULTURAL BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 4
+      - 6
+      quote: '[NY] AGRICULTURAL BUILDING. A structure designed and constructed to house farm equipment, farm implements, hay,
+        grain, poul- try, livestock or other horticultural products. This structure shall not be a place of human habitation
+        or a place of employment where agricultural products are processed, treated or packaged, nor shall it be a place used
+        by the public.'
+    piece_sha256: c179ca7e57ada8de19086dfe1726efccd47f915eec2ba67018e9aceaa265134d
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:aisle:
@@ -509,6 +544,24 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:dormitory:
+    label: reference
+    topic: definitions
+    reason: 'Defines DORMITORY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 34
+      - 36
+      quote: '[BG] DORMITORY. A space in a building where group sleeping accommodations are provided in one room, or in a
+        series of closely associated rooms, for persons not members of the same family group, under joint occupancy and single
+        management, as in college dormitories or fraternity houses.'
+    piece_sha256: aca6cca14e19824f04f11a752c1026c08a33244abd33028d665663801a1bb629
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:dwelling:
     label: reference
     topic: definitions
@@ -925,6 +978,24 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:gaming:
+    label: reference
+    topic: definitions
+    reason: 'Defines GAMING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 3
+      - 5
+      quote: '[BE] GAMING. To deal, operate, carry on, conduct, maintain or expose for play any game played with cards, dice,
+        equipment or any mechanical, electromechanical or electronic device or machine for money, property, checks, credit
+        or any representative of value except where occurring at private home or operated by a charitable or educational organization.'
+    piece_sha256: 9e34f6a3b1f471878dad116d68edce2c9efbdb91a5057197cf505582ee43a4c0
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:grade_lumber:
     label: reference
     topic: definitions
@@ -1051,6 +1122,40 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:information_technology_equipment_ite:
+    label: reference
+    topic: definitions
+    reason: 'Defines INFORMATION TECHNOLOGY EQUIPMENT (ITE), a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 51
+      - 51
+      quote: '[BG] INFORMATION TECHNOLOGY EQUIPMENT (ITE). Computers, data storage, servers and network communication equipment.'
+    piece_sha256: eb6f7b6c883b3f11a71e15a1629fb12e2560bce41e94867553247c7c6307fb50
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:information_technology_equipment_facilities_itef:
+    label: reference
+    topic: definitions
+    reason: 'Defines INFORMATION TECHNOLOGY EQUIPMENT FACILITIES (ITEF), a word the brought-in sections use: a definition,
+      no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 52
+      - 53
+      quote: '[BG] INFORMATION TECHNOLOGY EQUIPMENT FACILITIES (ITEF). Data centers and computer rooms used primarily to house
+        infor- mation technology equipment.'
+    piece_sha256: 7f4a216aec668d0b146659fca8173bbfdde05a2e2494f8fac71806644df2fb44
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:interior_exit_stairway:
     label: reference
     topic: definitions
@@ -1144,6 +1249,24 @@ labels:
         to the building offi-'
     piece_sha256: 3db02dfd97f3db0efc7185037d7e2ade74cfa5eeabb667cef3b693ac20a7575a
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:load_factor:
+    label: reference
+    topic: definitions
+    reason: 'Defines LOAD FACTOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 44
+      - 45
+      quote: '[BS] LOAD FACTOR. A factor that accounts for deviations of the actual load from the nominal load, for uncertainties
+        in the analysis that transforms the load into a load effect, and for the probability that more than one extreme load
+        will occur simultaneously.'
+    piece_sha256: d9a041f27abe72f6129cbced94a6d69a0f26089a61318f306762ac641f1a7dc0
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:loads:
@@ -1422,6 +1545,25 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:owner:
+    label: reference
+    topic: definitions
+    reason: 'Defines OWNER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 8
+      - 10
+      quote: '[A] OWNER. Any person, agent, operator, entity, firm or corporation having any legal or equitable interest in
+        the property; or recorded in the official records of the state, county or municipality as holding an interest or title
+        to the property; or otherwise having possession or control of the property, including the guardian of the estate of
+        any such person, and the executor or administrator of the estate of'
+    piece_sha256: 70386dd0eeb1c09bcd4e38930757ca37adcd8c68813729a467af9805052e4a11
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:panic_hardware:
     label: reference
     topic: definitions
@@ -1485,6 +1627,25 @@ labels:
       quote: PLACE OF RELIGIOUS WORSHIP. See “Religious worship, place of.”
     piece_sha256: 6563679c6b68f1f9611222d63ac30e3594fa21111365261ee999cf206647b446
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:platform:
+    label: reference
+    topic: definitions
+    reason: 'Defines PLATFORM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 57
+      lines:
+      - 31
+      - 33
+      quote: '[BG] PLATFORM. A raised area within a building used for worship, the presentation of music, plays or other entertainment;
+        the head table for special guests; the raised area for lecturers and speakers; boxing and wrestling rings; theater-in-the-round
+        stages; and similar purposes wherein, other than horizontal sliding curtains, there are no overhead hanging curtains,
+        drops, scenery or stage effects other'
+    piece_sha256: cba47445614836ec18b24c06d1f38091ad465872a996a4a8e81d0bcd4f1654b9
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:public_way:
@@ -1758,6 +1919,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:stage:
+    label: reference
+    topic: definitions
+    reason: 'Defines STAGE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 58
+      - 59
+      quote: '[BG] STAGE. A space within a building utilized for entertainment or presentations, which includes overhead hanging
+        curtains, drops, scenery or stage effects other than lighting and sound.'
+    piece_sha256: 4dfe25009625829756304c737ae3deaac5882ce9d3347d1112b1aad001b025b9
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:stair:
     label: reference
     topic: definitions
@@ -1911,6 +2089,25 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:swimming_pool:
+    label: reference
+    topic: definitions
+    reason: 'Defines SWIMMING POOL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 64
+      lines:
+      - 17
+      - 19
+      quote: '[NY] SWIMMING POOL. Any structure, basin, chamber or tank which is intended for swimming, diving, recreational
+        bathing or wading and which contains, is designated to contain, or is capable of containing water over 24 inches (610
+        mm) deep at any point. This includes in-ground, above-ground and on-ground pools; indoor pools; hot tubs; spas and
+        fixed-in-place wading pools.'
+    piece_sha256: b2aff11d7119b9815f15d5bf5073e6994e0300e991ce82a28de547ced025cc94
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:temporary_structure:
     label: reference
     topic: definitions
@@ -2002,6 +2199,22 @@ labels:
       quote: '[BS] WALL. This definition applies only to Chapter 21.'
     piece_sha256: 73cc15edcea595ba0fe40c4b6515d8449a9ebd5109f400cd832d9e898e0ef17e
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:wheelchair_space:
+    label: reference
+    topic: definitions
+    reason: 'Defines WHEELCHAIR SPACE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 67
+      lines:
+      - 9
+      - 9
+      quote: '[BE] WHEELCHAIR SPACE. A space for a single wheelchair and its occupant.'
+    piece_sha256: 5186bca698ebc356a609c3689bfba26c79acbbe094148bb0b3f67fd54edce4d3
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:winder:
@@ -2282,6 +2495,284 @@ labels:
     piece_sha256: 6875f3b979acb6459c3661f539a488c29bc14cb5573cf9d26df5cc44eca86663
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Brought in without the parts under
       it (balconies, corridors, attics).
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 311
+      lines:
+      - 39
+      - 39
+      quote: SECTION 1004—OCCUPANT LOAD
+    piece_sha256: ca107e7301f29c5c026cdf74f3b4fd5a787aefc056d7a10c0ac5d3367f01dfa1
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Says the number of occupants egress is designed for is determined by this section: a pointer.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 311
+      lines:
+      - 40
+      - 41
+      quote: 1004.1 Design occupant load. In determining means of egress requirements, the number of occupants for whom means
+        of egress facilities are provided shall be determined in accordance with this section.
+    piece_sha256: e9674e39ca920c686f6d3dd271569c1f844a5f9f8ea3cc819c24ae366137e28e
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004.2':
+    label: reference
+    topic: means_of_egress
+    reason: 'Cumulative occupant loads through intervening spaces: how the occupant load is worked out (design_checker/occupant_load.py
+      leaves a room others pass through not measured).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 311
+      lines:
+      - 42
+      - 43
+      quote: 1004.2 Cumulative occupant loads. Where the path of egress travel includes intervening rooms, areas or spaces,
+        cumulative occu- pant loads shall be determined in accordance with this section.
+    piece_sha256: 7e81ce3fb8b15f1a545d23e99e89875410af1af5a32a7ba3e1c58ba2b5e6c7de
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1004.2.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'The combined load of interconnected accessory or intervening spaces: how the occupant load is worked out (a pass-through
+      room''s load is not summed yet: not measured).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 311
+      lines:
+      - 44
+      - 46
+      quote: 1004.2.1 Intervening spaces or accessory areas. Where occupants egress from one or more rooms, areas or spaces
+        through others, the design occupant load shall be the combined occupant load of interconnected accessory or intervening
+        spaces. Design of egress path capacity shall be based on the cumulative portion of occupant loads of all rooms, areas
+        or spaces to that point
+    piece_sha256: 208f32f64c219d0dbd12b764ca7b38fee7f1d3de91060658fa77c7c5a623cbad
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1004.2.2:
+    label: reference
+    topic: means_of_egress
+    reason: 'A mezzanine''s load added to the room it egresses through: how the load is worked out (mezzanines aren''t measured).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 311
+      lines:
+      - 48
+      - 49
+      quote: 1004.2.2 Adjacent levels for mezzanines. That portion of the occupant load of a mezzanine with required egress
+        through a room, area or space on an adjacent level shall be added to the occupant load of that room, area or space.
+    piece_sha256: 09a4130570a07874e34df1f127b3a54cdb2ee9df432f4c39e8dbe6b7835380ef
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1004.2.3:
+    label: reference
+    topic: means_of_egress
+    reason: 'Separate stories'' loads are not added: how the load is worked out (each story''s alone).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 311
+      lines:
+      - 50
+      - 51
+      quote: 1004.2.3 Adjacent stories. Other than for the egress components designed for convergence in accordance with Section
+        1005.6, the occupant load from separate stories shall not be added.
+    piece_sha256: b266ce3c61ecb9bf5774ecded4a9b77f466ef707147376c05b5f3ce78306969c
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004.3':
+    label: reference
+    topic: means_of_egress
+    reason: 'Each function''s floor area calculated on its own: how the load is worked out (one function per room).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 311
+      lines:
+      - 52
+      - 53
+      quote: 1004.3 Multiple function occupant load. Where an area under consideration contains multiple functions having
+        different occupant load factors, the design occupant load for such area shall be based on the floor area of each function
+        calculated independently.
+    piece_sha256: 36685cb1cd063642c6275ec50a158646925b48a3a052c30063ebccc3e2f06336
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004.4':
+    label: reference
+    topic: means_of_egress
+    reason: 'Each portion by its own occupancy, a shared component the more stringent: how the rules read a mixed building
+      (occupancy_group: mixed, a person''s check).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 311
+      lines:
+      - 54
+      - 56
+      quote: 1004.4 Multiple occupancies. Where a building contains two or more occupancies, the means of egress requirements
+        shall apply to each portion of the building based on the occupancy of that space. Where two or more occupancies utilize
+        portions of the same means of egress system, those egress components shall meet the more stringent requirements of
+        all occupancies that are served.
+    piece_sha256: 82bc648bbdf1e9b91d0e1635b992a9b7b77916f71ddcd990dc0187333386101d
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004.5':
+    label: reference
+    topic: means_of_egress
+    reason: 'The occupant load is the floor area divided by Table 1004.5''s factor for the space''s function: how the checker''s
+      occupant loads are worked out (design_checker/occupant_load.py).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 311
+      lines:
+      - 57
+      - 58
+      quote: 1004.5 Areas without fixed seating. The number of occupants shall be computed at the rate of one occupant per
+        unit of area as prescribed in Table 1004.5. For areas without fixed seating, the occupant load shall be not less than
+        that number determined by divid-
+    piece_sha256: 85b366c72bbcd25d8adf0e24227c115d9e45d25995b4e0c69b2a34d173c258db
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1004.5:
+    label: reference
+    topic: means_of_egress
+    reason: 'The occupant load factor of each function, of the gross or the net floor area: the values the checker''s occupant
+      loads use (records/occupant_load_factors.yaml).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 312
+      lines:
+      - 9
+      - 11
+      quote: TABLE 1004.5—MAXIMUM FLOOR AREA ALLOWANCES PER OCCUPANT FUNCTION OF SPACE OCCUPANT LOAD FACTOR[fna] Accessory
+        storage areas, mechanical equipment room 300 gross
+    piece_sha256: 2b60100d4f142c41c111ab9c6e5f3d768dec1c318644cffcb627b705c3487c43
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1004.5.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'An increased occupant load, at most one occupant per 7 square feet: the checker''s upper reading where the increase
+      isn''t ruled out (occupant_load_increased).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 15
+      - 17
+      quote: 1004.5.1 Increased occupant load. The occupant load permitted in any building, or portion thereof, is permitted
+        to be increased from that number established for the occupancies in Table 1004.5, provided that all other requirements
+        of the code are met based on such modified number and the occupant load does not exceed one occupant per 7 square
+        feet (0.65 m2) of occupiable floor
+    piece_sha256: bbc43d9de11a2a919b77683e5ce35c74ec2a7bc5a5ec4bf21ee83758cf448d4e
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004.6':
+    label: reference
+    topic: means_of_egress
+    reason: 'Fixed seating: the occupant load is the number of seats: a room so marked takes its load from the architect (assembly_fixed_seats,
+      not measured).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 20
+      - 22
+      quote: 1004.6 Fixed seating. For areas having fixed seats and aisles, the occupant load shall be determined by the number
+        of fixed seats installed therein. The occupant load for areas in which fixed seating is not installed, such as waiting
+        spaces, shall be determined in accordance with Section 1004.5 and added to the number of fixed seats.
+    piece_sha256: d2f4f94d88ce061148bc07d4d2857d4a0704ceb87f827e6927cc4aabbc0d1e58
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004.7':
+    label: flag
+    topic: means_of_egress
+    reason: 'Outdoor areas (yards, patios, occupiable roofs, courts) need means of egress and an occupant load the building
+      official assigns: not drawn, a person''s check (general.bc_1004_7_outdoor_areas).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 29
+      - 31
+      quote: 1004.7 Outdoor areas. Yards, patios, occupiable roofs, courts and similar outdoor areas accessible to and usable
+        by the building occupants shall be provided with means of egress as required by this chapter. The occupant load of
+        such outdoor areas shall be assigned by the building official in accordance with the anticipated use. Where outdoor
+        areas are to be used by persons in addition to
+    piece_sha256: a368d1c78ab9b87d4f68d04aaf1d12593fa5ae583c304a5803f83f8bc7796dbb
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004.8':
+    label: reference
+    topic: means_of_egress
+    reason: 'Concentrated business use: the actual load, at least one per 50 square feet gross: a room so marked takes its
+      load from the architect (concentrated_business, not measured).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 37
+      - 39
+      quote: '[NY] 1004.8 Concentrated business use areas. The occupant load factor for concentrated business use shall be
+        applied to tele- phone call centers, trading floors, electronic data entry and similar business use areas with a higher
+        density of occupants than would normally be expected in a typical business occupancy environment. The occupant load
+        for concentrated business use areas shall be'
+    piece_sha256: e88fbfdc4a3b1b5fa1f5c37d273f7ad603fa25be15121bd09da440bba606b36f
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004.9':
+    label: flag
+    topic: means_of_egress
+    reason: 'Posting an assembly room''s occupant load: a sign in the building, not in the model: a person''s check (general.bc_1004_9_posting).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 313
+      lines:
+      - 41
+      - 43
+      quote: 1004.9 Posting of occupant load. Every room or space that is an assembly occupancy shall have the occupant load
+        of the room or space posted in a conspicuous place, near the main exit or exit access doorway from the room or space,
+        for the intended configurations. Posted signs shall be of an approved legible permanent design and shall be maintained
+        by the owner or the owner’s authorized agent.
+    piece_sha256: 2836799d1130c317bcf0f9c2fb68df782862d9fc0c90682cf16a2ee391eb3008
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
+      3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1006.2.1:
@@ -2580,8 +3071,8 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Read by position (each cell''s
       characters and x positions on p.317) and on the page image: the I row is H-4, H-5, I, R-1, R-2 (notes a, c) | 10 | 75,
       under ''First story above or below grade plane and occupiable roofs over the first story above grade plane''; Group
-      I is not in the second-story row. Every row has a rule since 2026-11-23 (general.bc_table_1006_3_4_2__<groups>, three by family;
-      Group I-4''s, general.bc_1006_3_3_story_exits); a building of two or more groups is general.bc_table_1006_3_4_2__other_occupancies''s
+      I is not in the second-story row. Every row has a rule since 2026-11-23 (general.bc_table_1006_3_4_2__<groups>, three
+      by family; Group I-4''s, general.bc_1006_3_3_story_exits); a building of two or more groups is general.bc_table_1006_3_4_2__other_occupancies''s
       flag.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft

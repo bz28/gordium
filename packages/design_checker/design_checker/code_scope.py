@@ -50,6 +50,8 @@ FACTS = {
     "emergency_escape_openings_1031": "yes_no",   # emergency escape and rescue openings per 1031 (Table 1006.3.4 note a)
     "special_egress_spaces": "yes_no",        # a space with its own exits or travel limit (1006.2.2, Table 1017.2 note a)
     "merchandise_pads": "yes_no",             # Group M merchandise pads (1018.4: their own common path)
+    "occupied_outdoor_areas": "yes_no",       # outdoor areas the occupants use (1004.7)
+    "occupant_load_increased": "yes_no",      # the design takes 1004.5.1's increased occupant load (up to 1 per 7 sq ft)
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -128,7 +130,9 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         "merchandise_pads": "Gordium: Merchandise pads", "egress_balcony_increase_taken": "Gordium: Egress balcony increase",
         "building_has_atrium": "Gordium: Atrium",
         # group 2's: which Table 1006.3.4 a Group R-2 story reads, and its 1031 escape openings
-        "r2_sleeping_units": "Gordium: R-2 sleeping units", "emergency_escape_openings_1031": "Gordium: 1031 escape openings"}
+        "r2_sleeping_units": "Gordium: R-2 sleeping units", "emergency_escape_openings_1031": "Gordium: 1031 escape openings",
+        # group 3's: outdoor areas the occupants use (1004.7), and 1004.5.1's increased occupant load
+        "occupied_outdoor_areas": "Gordium: Occupied outdoor areas", "occupant_load_increased": "Gordium: Occupant load increased"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
@@ -275,7 +279,7 @@ def _given(building) -> tuple[dict, list[str]]:
 def building_measures(building: dict | None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the seven stated yes/no facts. A fact
+    groups, the three sprinkler systems the limits name from the system, and the eight stated yes/no facts. A fact
     not stated is left out (its rules need review)."""
     facts, _ = _given(building)
     return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
@@ -300,6 +304,7 @@ DERIVED = {
     "merchandise_pads": ("merchandise_pads", lambda v: v),
     "r2_sleeping_units": ("r2_sleeping_units", lambda v: v),
     "emergency_escape_openings_1031": ("emergency_escape_openings_1031", lambda v: v),
+    "occupied_outdoor_areas": ("occupied_outdoor_areas", lambda v: v),
 }
 
 
