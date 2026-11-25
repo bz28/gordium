@@ -82,7 +82,7 @@ public sealed class ComplianceSummaryTests
             item!["reason"] = "this rulebook's rules are " + ResultViews.DraftedFor + ", so a person checks";
         var scoped = UxAnswers.Model(UxAnswers.Parse(node.AsObject()));
         var scopedHtml = ComplianceSummary.Html(scoped, "Four-unit apartment", At, Made);
-        Assert.Equal(1, Regex.Matches(scopedHtml, "<p class=\"scope\">").Count);
+        Assert.Single(Regex.Matches(scopedHtml, "<p class=\"scope\">"));
         Assert.Contains($"<p class=\"scope\">{WebUtility.HtmlEncode(ResultViews.ScopeWords(2))}</p>", scopedHtml, StringComparison.Ordinal);
         var greyed = Regex.Matches(html, "<p class=\"muted greyed\" data-greyed=\"(?<s>[A-Za-z]+)\">(?<t>.*?)</p>").ToList();
         Assert.NotEmpty(greyed);
