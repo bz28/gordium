@@ -94,6 +94,12 @@ documents:
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
           the rule measures the story's floor area by both of the book's own measures of floor area (README).
         202:floor_area_net: As 202:floor_area_gross.
+        202:initiating_device: The head of the italic "fire alarm-initiating device" in FIRE ALARM SIGNAL (p.44,
+          line 56), which no single entry defines (brought_in.italic_not_defined); brought in so the reader sees
+          the defined part. Used by no rule (section group 6d).
+        202:life_safety_systems: The plural entry for the italic "life safety system" in SUPERVISORY
+          SIGNAL-INITIATING DEVICE (p.64, line 15), which the italics reader pairs only with a plural; brought in
+          so the reader sees it. Used by no rule (section group 6d).
       tables:      # each table's lines, checked on the page image (the text doesn't say where a table ends); every
                    # table on the pages read is named, brought in or not
         Table 903.2.11.6: p.273 lines 14-36
@@ -269,16 +275,19 @@ documents:
             Read by 1010.1.7''s flag (section group 6c).'
         202:fire_alarm_signal:
           fire alarm-initiating device: 'The book prints "fire alarm-initiating device" in italics (p.44, line 56);
-            Section 202 defines no such term (it defines MANUAL FIRE ALARM BOX and FIRE DETECTOR, AUTOMATIC, the
-            examples that follow, both brought in). FIRE ALARM SIGNAL is brought in by 1010.2.6''s exception 3.2;
-            used by no rule (section group 6d).'
+            Section 202 has no entry for the whole phrase; it defines its head, INITIATING DEVICE (p.50, lines
+            54-55), brought in by name (brought_in.definitions), and MANUAL FIRE ALARM BOX and FIRE DETECTOR,
+            AUTOMATIC, the examples that follow. FIRE ALARM SIGNAL is brought in by 1010.2.6''s exception 3.2; used by
+            no rule (section group 6d).'
         202:fire_alarm_system:
           fire alarm: 'The book prints "fire alarm" in italics within "fire alarm or supervisory signal-initiating
             devices" (p.44, line 59); Section 202 defines no FIRE ALARM alone (SUPERVISORY SIGNAL-INITIATING DEVICE is
             defined and brought in). Used by no rule (section group 6d).'
         202:supervisory_signal_initiating_device:
-          life safety system: 'The book prints "life safety system" in italics (p.64, line 15); Section 202 defines
-            no such term. Brought in by FIRE ALARM SYSTEM''s words; used by no rule (section group 6d).'
+          life safety system: 'The book prints "life safety system" in italics (p.64, line 15), the singular of
+            LIFE SAFETY SYSTEMS (p.51, lines 53-54), which the italics reader pairs only with a plural; brought in
+            by name (brought_in.definitions). SUPERVISORY SIGNAL-INITIATING DEVICE is brought in by FIRE ALARM
+            SYSTEM''s words; used by no rule (section group 6d).'
         202:permit:
           code enforcement program: 'The [NY] sub-definition "Operating permit" (p.56, lines 53-54) prints "Code
             Enforcement Program" in italics; the defined term is PART 1203-COMPLIANT CODE ENFORCEMENT PROGRAM (brought

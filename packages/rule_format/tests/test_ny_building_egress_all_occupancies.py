@@ -1134,3 +1134,33 @@ def test_1010_2_7_is_asked_wherever_the_building_may_be_group_e_b_or_i4(ctx, rul
         assert outcome(r, given, ctx.allowed()) == "needs_review", g
     for g in ("A-1", "R-2", "I-2", "M", "S-1", "H-3", "F-1", "U", "I-1", "I-3", "R-1"):
         assert outcome(r, {"occupancy_group": g}, ctx.allowed()) == "not_applicable", g
+
+
+def test_the_6d_flags_state_each_permissions_own_conditions(rules):
+    """Review round 1 of group 6d: a flag's note is what a person checks by, so each exception or permission is stated
+    with its own conditions (pp.324-326), never looser or stricter than the page."""
+    note = lambda rid: " ".join(rules[rid]["examples"][0]["note"].split())
+    bolts = note("general.bc_table_1010_2_4_inactive_leaf_bolts")
+    # note b is printed on Group I-2's row whether or not the pair complies with 716 (p.325 lines 52-53)
+    assert "Group I-2 patient care and sleeping rooms, that leaf not needed (constant latching bolts, and automatic flush " \
+           "bolts under note b, whether or not under 716)" in bolts
+    stair = note("general.bc_1010_2_6_stairway_doors")
+    assert "when a fire alarm system is present in an area served by the stairway" in stair           # exception 3.2
+    locks = note("general.bc_1010_2_4_locks_and_latches")
+    assert "or persons receiving care pose a security threat" in locks                                # item 2
+    assert "keys all clinical staff carry at all times" in locks
+    assert "a weatherproof telephone or two-way communication system" in locks                          # item 8.2
+    assert "a key-operated lock readily distinguishable as locked, a clear window" in locks             # item 8.3
+    assert "on the egress side on or adjacent to the door" in locks and "on a contrasting background" in locks  # 3.3
+    unlatch = note("general.bc_1010_2_1_unlatching")
+    assert "each openable from the inside without a key or tool" in unlatch                              # item 5
+    assert "that leaf without a doorknob, panic hardware or similar operating hardware" in unlatch       # item 4
+
+
+def test_the_6d_labels_say_their_section_group():
+    """Review round 1 of group 6d: the labels it adds say section group 6d, not 6c."""
+    labels = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]
+    for pid in ("1010.2", "1010.2.1", "1010.2.4", "Table 1010.2.4", "1010.2.7", "202:manual_bolt", "202:egress_court",
+                "202:initiating_device", "202:life_safety_systems"):
+        assert labels[pid]["notes"].endswith("Section group 6d."), pid
+    assert labels["1010.1.7"]["notes"].endswith("Section group 6c.")

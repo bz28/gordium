@@ -14324,10 +14324,12 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Unlatching any door or leaf for egress takes no more than one motion in a single linear or rotational direction
-      to release every latch and lock, and manual bolts aren''t permitted; except in places of detention or restraint, the
-      bolts 1010.2.4 item 4 permits on a pair''s inactive leaf (Table 1010.2.4), and a Group R unit''s single exit door with
-      a night latch, dead bolt, manual bolt or security chain per 1010.2.4 item 5: hardware isn''t in the model, so a person''s
-      check.'
+      to release every latch and lock, and manual bolts aren''t permitted; except in places of detention or restraint; manual
+      bolts, automatic flush bolts and constant latching bolts on a pair''s inactive leaf as 1010.2.4 item 4 and Table 1010.2.4
+      permit, that leaf without a doorknob, panic hardware or similar operating hardware; and a Group R dwelling or sleeping
+      unit''s single exit door (1006.2.1 or 1006.3.4) with a night latch, dead bolt, manual bolt or security chain that needs
+      a second releasing motion, per 1010.2.4 item 5, each openable from the inside without a key or tool: hardware isn''t
+      in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-25), section group 6d.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -14431,17 +14433,28 @@ rules:
   - given: {}
     expect: needs_review
     note: 'A lock or latch may keep an egress door from opening only where one of 1010.2.4''s ten items applies, each with
-      its own conditions: places of detention or restraint; Group I-1 Condition 2 and I-2 containment with clinical staff
-      able to unlock; the main exterior or tenant doors of Group A (300 or fewer), B, F, M and S and places of religious worship
-      with a key lock readily distinguishable as locked, a sign in 1-inch letters ("THIS DOOR TO REMAIN UNLOCKED WHEN THIS
-      SPACE IS OCCUPIED"), revocable by the building official; bolts on a pair''s inactive leaf per Table 1010.2.4 (that leaf
-      without a doorknob, panic hardware or similar); a Group R unit''s single exit door (1006.2.1 or 1006.3.4) with a night
-      latch, dead bolt, manual bolt or security chain openable from inside without a key or tool; fire doors after their unlatching
-      is disabled by heat; doors to roofs not intended to be occupied, locked against entry; exit access doors from occupied
-      exterior spaces (other than egress courts) with the posted load (1004.9), a two-way communication system (1009.8.1,
-      1009.8.2), a key lock, a clear window or glazing of 5 sq ft or more, a sign and 300 occupants at most; doors to a dwelling
-      or sleeping unit''s balconies, decks or other exterior spaces; and those of 250 sq ft or less serving a private office:
-      how each door locks isn''t in the model, so a person''s check.'
+      its own conditions: 1, places of detention or restraint; 2, Group I-1 Condition 2 and Group I-2 where the clinical needs
+      of persons receiving care require containment or persons receiving care pose a security threat, all clinical staff able
+      to readily unlock the doors at all times, the locks keyed to keys all clinical staff carry at all times or all clinical
+      staff having the codes or other means at all times; 3, in Group A of 300 or fewer, Groups B, F, M and S and places of
+      religious worship, the main exterior doors or the main doors to the tenant space with a key-operated lock from the egress
+      side, readily distinguishable as locked, a readily visible durable sign on the egress side on or adjacent to the door
+      ("THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED") in 1-inch letters on a contrasting background, its use
+      revocable by the building official for due cause; 4, manual bolts, automatic flush bolts and constant latching bolts
+      on a pair''s inactive leaf per Table 1010.2.4, that leaf without a doorknob, panic hardware or similar operating hardware;
+      5, a Group R dwelling or sleeping unit''s single exit door (1006.2.1 or 1006.3.4) with a night latch, dead bolt, manual
+      bolt or security chain that needs a second releasing motion, openable from the inside without a key or tool; 6, fire
+      doors after the minimum elevated temperature has disabled their unlatching per listed fire door test procedures; 7,
+      doors serving roofs not intended to be occupied, locked against entry from the roof; 8, other than egress courts, exit
+      access doors where occupants must egress from an exterior space through the building, with an approved locking device,
+      the maximum occupant load posted where 1004.9 requires it (permanently, inside, conspicuously near every exit access
+      doorway), a weatherproof telephone or two-way communication system (1009.8.1, 1009.8.2) beside at least one required
+      exit access door on the exterior side, a key-operated lock readily distinguishable as locked, a clear window or glazed
+      door opening of at least 5 sq ft at each exit access door, a readily visible durable sign on the interior side on or
+      beside each locked door ("THIS DOOR TO REMAIN UNLOCKED WHEN THE OUTDOOR AREA IS OCCUPIED", letters at least 1 inch high
+      on a contrasting background), and the exterior area''s occupant load at most 300 (1004); 9, doors to balconies, decks
+      or other exterior spaces serving a dwelling or sleeping unit; 10, doors to such spaces of 250 sq ft or less serving
+      a private office: how each door locks isn''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-25), section group 6d. 1010.2.4 permits; it requires only of a door
     that uses a permission. Locks and latches aren't in the model, so whether a door uses one, and meets its conditions, is
     a person's check.
@@ -14476,12 +14489,15 @@ rules:
     expect: needs_review
     note: 'Manual (surface- or flush-mounted) bolts, automatic flush bolts and constant latching bolts on a pair''s inactive
       leaf only as Table 1010.2.4 permits, by use and whether the pair must comply with Section 716 (fire door assemblies,
-      not brought in): Group B, F or S under 50 occupants; Group B, F or S with a 903.3.1.1 sprinkler system where the inactive
-      leaf isn''t needed for egress capacity; Group I-2 patient care and sleeping rooms, that leaf not needed; any occupancy
-      without required panic hardware where both leaves are needed (automatic flush bolts only); storage or equipment rooms,
-      that leaf not needed (note a: no manual bolts on Group I-2 corridor doors required to be positive latching); note b
-      permits automatic flush bolts on a 716 pair with self- or automatic-closing leaves and a coordinator: which doors are
-      pairs, their bolts and their fire rating aren''t in the model, so a person''s check.'
+      not brought in): Group B, F or S under 50 occupants, and Group B, F or S with a 903.3.1.1 sprinkler system where the
+      inactive leaf isn''t needed for egress capacity (a pair not under 716: all three; a 716 pair: constant latching bolts,
+      and automatic flush bolts under note b); Group I-2 patient care and sleeping rooms, that leaf not needed (constant latching
+      bolts, and automatic flush bolts under note b, whether or not under 716); any occupancy where panic hardware isn''t
+      required, the doors used in pairs and both leaves needed for egress capacity (automatic flush bolts only, under note
+      b for a 716 pair); storage or equipment rooms, that leaf not needed (all three; note a: no manual bolts on Group I-2
+      corridor doors required to be positive latching). Note b: automatic flush bolts where both leaves are self-closing or
+      automatic-closing with a coordinator that closes the inactive leaf before the active leaf. Which doors are pairs, their
+      bolts and their fire rating aren''t in the model, so a person''s check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 6d. A pair is the door key leaves: 2 (no Revit
     mark yet), but its bolts aren''t in the model, so the table is a person''s check for every building.'
   drafted_by: claude_code/claude-opus-5-5
@@ -14534,11 +14550,14 @@ rules:
     expect: needs_review
     note: 'Interior stairway egress doors open from both sides without a key or special knowledge or effort; except a stairway''s
       discharge door, openable from the egress side and locked only from the other; doors arranged per 403.5.3 (not brought
-      in); stairway exit doors locked from the side opposite egress only where they open from the egress side and unlock together,
-      without unlatching, on a signal from the fire command center or a single location inside the main entrance, on a fire
-      alarm signal where a fire alarm system serves the stairway, and on loss of power; and in Groups B, F, M and S, and Group
-      R-2, where the only interior access to the tenant space or dwelling unit is from a single exit stairway 1006.3.4 permits,
-      locked only from the side opposite egress: how each door locks isn''t in the model, so a person''s check.'
+      in); stairway exit doors locked from the side opposite egress only where they open from the egress side and can be unlocked
+      together without unlatching by all of these: individually or together on a signal from the fire command center, where
+      present, or by emergency personnel from a single location inside the main entrance; together on a fire alarm signal
+      when a fire alarm system is present in an area served by the stairway; and on failure of power to the electric lock
+      or locking system; and stairway exit doors openable from the egress side and locked only from the other in Groups B,
+      F, M and S where the only interior access to the tenant space is from a single exit stairway 1006.3.4 permits, and in
+      Group R-2 where the only interior access to the dwelling unit is from such a stairway: how each door locks isn''t in
+      the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-25), section group 6d.
   drafted_by: claude_code/claude-opus-5-5
   status: draft

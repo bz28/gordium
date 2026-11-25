@@ -180,7 +180,7 @@ labels:
       quote: '[F] ALARM SIGNAL. A signal indicating an emergency requiring immediate action, such as a signal indicative of
         fire.'
     piece_sha256: 95591167dcd24bc03267be2968375c3b1e8931db1834fea47e2ac1e0a463048c
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:alternating_tread_device:
@@ -329,7 +329,7 @@ labels:
         bolt retracts the bolt or rod, allowing the inactive leaf to be opened (see “Constant latching bolt,” “Dead bolt,”
         “Manual bolt”).'
     piece_sha256: 02cb0c8d5cc25f6cc1920ca4f1f206a6646f49bc91d124a5851a7e9ec421d543
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:automatic_sprinkler_system:
@@ -582,7 +582,7 @@ labels:
         of a bolt that auto- matically latches into the door frame or floor, holding the inactive leaf in a closed position.
         The latch bolt is retracted manually to allow the inactive leaf to be opened.'
     piece_sha256: 3c6e987ea4574d0a1a5c27f277fe97c634db98e26d9d3e8dd1317b8a55f8ec3d
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:corridor:
@@ -661,7 +661,7 @@ labels:
       quote: '[BE] DEAD BOLT. Door locking hardware with a bolt that is extended and retracted by action of the lock mechanism
         (see “Automatic flush bolt,” “Constant latching bolt,” “Manual bolt”).'
     piece_sha256: 318db18308c5f303f672d5d5225ba45e501d216db6fef27cf5b16bf78ebd1e9f
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:dead_load:
@@ -865,7 +865,7 @@ labels:
       - 4
       quote: '[BE] EGRESS COURT. A court or yard which provides access to a public way for one or more exits.'
     piece_sha256: d85feeeb4ad45650b08673f5d6868ceac974b6b026613ae44999bf3e5eb2201c
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:emergency_escape_and_rescue_opening:
@@ -1100,7 +1100,7 @@ labels:
       - 52
       quote: FIRE ALARM BOX, MANUAL. See “Manual fire alarm box.”
     piece_sha256: 86eb8c6a06170095bbe1aaa68657cf2101f6212837fa0e4432c80254f11c970d
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_alarm_signal:
@@ -1117,7 +1117,7 @@ labels:
         automatic fire detector, waterflow switch or other device whose activation is indicative of the presence of a fire
         or fire signature.'
     piece_sha256: 4e0e1ac4569062cadaabf7445efe4a87311446bd0603337ec3e33c46dd44e5f4
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_alarm_system:
@@ -1134,7 +1134,7 @@ labels:
         to monitor and annunciate the status of fire alarm or supervisory signal-initiating devices and to initiate the appropriate
         response to those signals.'
     piece_sha256: 33a8b800345bc2a4672d91c19cf4409e58c17002f0d1953342ee3bb1bce8a85d
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_command_center:
@@ -1150,7 +1150,7 @@ labels:
       quote: '[F] FIRE COMMAND CENTER. The principal attended or unattended location where the status of detection, alarm
         communications and control systems is displayed, and from which the systems can be manually controlled.'
     piece_sha256: 5c6af425e103a36ddcd19bcc03ac123db6dc7b9109b5ee76c18f67d31231ff1d
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_detector_automatic:
@@ -1165,7 +1165,7 @@ labels:
       - 16
       quote: '[F] FIRE DETECTOR, AUTOMATIC. A device designed to detect the presence of a fire signature and to initiate action.'
     piece_sha256: 56399eeb88bc608dba2e29d9dc18fb3d35c48dd4a9b2215857bb69e2c3e0ddf5
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_door:
@@ -1577,6 +1577,22 @@ labels:
       3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:initiating_device:
+    label: reference
+    topic: definitions
+    reason: 'Defines INITIATING DEVICE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 54
+      - 55
+      quote: '[F] INITIATING DEVICE. A system component that originates transmission of a change-of-state condition, such
+        as in a smoke detector, manual fire alarm box or supervisory switch.'
+    piece_sha256: cc894770432afd043a419d391c740984fe3780e2e27c017257e091c958747fa6
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:interior_exit_stairway:
     label: reference
     topic: definitions
@@ -1622,6 +1638,22 @@ labels:
       quote: LEVEL OF EXIT DISCHARGE. See “Exit discharge, level of.”
     piece_sha256: 3367a22223f62a58a98a623bd944d236693a61669fc4a5804e2bc40a62f8afc4
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:life_safety_systems:
+    label: reference
+    topic: definitions
+    reason: 'Defines LIFE SAFETY SYSTEMS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 53
+      - 54
+      quote: '[F] LIFE SAFETY SYSTEMS. Systems, devices and equipment that enhance or facilitate evacuation, smoke control,
+        compartmentation and isolation.'
+    piece_sha256: 3a0a9f98d28757e913e2785beee8f90da8fd0dd025e71af1e90ff2d6db96e096
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:limited_verbal_or_physical_assistance:
@@ -1767,7 +1799,7 @@ labels:
         with a bolt or rod extended and retracted by manual movement of the bolt or rod, such as a manual flush bolt or manual
         surface bolt (see “Automatic flush bolt,” “Constant latching bolt,” “Dead bolt”).'
     piece_sha256: 34efc7a9523a0b1b961196085b3d9d1489265fa0e4fd1f6cc22982ed2c72ba5d
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:manual_fire_alarm_box:
@@ -1782,7 +1814,7 @@ labels:
       - 13
       quote: '[F] MANUAL FIRE ALARM BOX. A manually operated device used to initiate an alarm signal.'
     piece_sha256: 80f811ad2e2cfb6de1214be42ac372f93ab2d10db0e9044cbba3e0b82ca9fbdc
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:masonry:
@@ -2762,7 +2794,7 @@ labels:
         condition and its restoration to normal of a fire protection or life safety system, or a need for action in connection
         with guard tours, fire suppression systems or equipment or maintenance features of related systems.'
     piece_sha256: 6e0e706319eef21505ea4e93da0244898cabec2aaf1e70dc6f478d0b40e6833f
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:swimming_pool:
@@ -4474,7 +4506,7 @@ labels:
       quote: 1010.2 Door operations. Except as specifically permitted by this section, egress doors shall be readily openable
         from the egress side without the use of a key or special knowledge or effort.
     piece_sha256: d4c0c56ed034027e669a63af431a49f6ac8e196755f23f3965c57cb69e2e767b
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1010.2.1:
@@ -4494,7 +4526,7 @@ labels:
         and constant latching bolts as permitted by Section 1010.2.4, Item 4. 3. Doors from individual dwelling units and
         sleeping units of Group R occupancies as permitted by Section 1010.2.4, Item 5.'
     piece_sha256: 352a3b6ad338700a8073217e92eecda799045348320f19313ad9d8bfce7eb9e4
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1010.2.2:
@@ -4511,7 +4543,7 @@ labels:
       quote: '[NY] 1010.2.2 Hardware. Door handles, pulls, latches, locks and other operating devices of doors required to
         be accessible by Chapter 11 shall not require tight grasping, tight pinching or twisting of the wrist to operate.'
     piece_sha256: c4c7f6c90263942a7c52b5bb43963ce99b33c899d63eeec90c9dd389cdd3ca86
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1010.2.3:
@@ -4531,7 +4563,7 @@ labels:
         devices of locks and latches of doors and gates in barriers required to restrict access to a swimming pool, spa, or
         hot tub shall comply with Sections 3109.2.7 and 3109.2.8.'
     piece_sha256: 9a0afdc7f83e0cfccc76c62ee92a3d2badb240c93ee95257be74c86ee294475a
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1010.2.4:
@@ -4587,7 +4619,7 @@ labels:
         on doors to balconies, decks or other exterior spaces of 250 square feet (23.23 m[fn2]) or less serving a private
         office space.'
     piece_sha256: 3625634d6ebf941561332ec7ed1fd2da62ce08918cb91954c8bfddf14d4cd576
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   Table 1010.2.4:
@@ -4616,7 +4648,7 @@ labels:
         where both doors are self closing or automatic closing, and are provided with a coordinator that causes the inactive
         leaf to be closed prior to the active leaf.
     piece_sha256: e09679fb2ae1ba42c144bfcb69d2d14c475749b1c382e8be582bfb2376f9ef42
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1010.2.5:
@@ -4631,7 +4663,7 @@ labels:
       - 3
       quote: 1010.2.5 Closet doors. Closet doors that latch in the closed position shall be openable from inside the closet.
     piece_sha256: d17c82eb93de006535a9ad027b392cadc4dc7ab076978fc5c8e2f91913bbd6fa
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1010.2.6:
@@ -4660,7 +4692,7 @@ labels:
         be locked from the opposite side in Group R- 2 occupancies where the only interior access to the dwelling unit is
         from a single exit stairway where permitted in Section 1006.3.4.'
     piece_sha256: d6485737f24dd534420567ae6c778e850af7b95f013cb559becc362d0c905cc1
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1010.2.7:
@@ -4683,7 +4715,7 @@ labels:
         Remote locking or unlocking of doors from an approved location shall be permitted in addition to the unlocking operation
         in Item 1.'
     piece_sha256: e43fbcf2a0cd0a42d8982d7dc9acb30a4ea5188d3903735fb3b5d14f678f88e0
-    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1016.2':
