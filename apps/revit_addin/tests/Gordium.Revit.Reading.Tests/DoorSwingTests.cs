@@ -70,6 +70,19 @@ public sealed class DoorSwingTests
     }
 
     [Fact]
+    public void An_unequal_pair_hung_opposite_ways_swings_both_ways_so_is_unstated()
+    {
+        // door swing review round 3: a 12.5 in leaf beside a 26 in one, the narrow one swinging the other way; its arc is
+        // shorter than half the opening, yet it is a leaf's swing, and the door may swing against egress travel
+        var floor = new FakeFloor();
+        floor.Swing("dA", +1, hinge: -1, radius: 26.0 / 12);
+        floor.Swing("dA", -1, hinge: +1, radius: 12.5 / 12);
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(Into(read, "dA"));
+        Assert.Contains("on both sides of its wall", FakeFloor.Note(read, "dA", "doors.swings_into"));
+    }
+
+    [Fact]
     public void No_swing_drawn_leaves_it_unstated_never_a_door_that_doesnt_swing()
     {
         // the arcs a coarse view, a hidden Plan Swing subcategory or a family's own visibility drops: the plan view the

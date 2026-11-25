@@ -519,6 +519,11 @@ public static class RouteReader
     /// thickness, and off a jamb along the wall; how far its middle must stand clear of the wall's face.</summary>
     internal const double HingeOff = 2.0 / 12, JambOff = 6.0 / 12, ClearOfFace = 1.0 / 12;
 
+    /// <summary>The shortest arc read as a leaf's swing: 12 in, whatever the door's width, so a pair's narrow leaf (a
+    /// 16 in leaf beside a 32 in one) is counted and a pair hung opposite ways is seen to swing both ways; a handle's
+    /// or a hardware arc is shorter. Counting more arcs only ever leaves a swing unstated.</summary>
+    internal const double LeastLeaf = 1.0;
+
     /// <summary>The side of its wall a door's plan symbol draws its swing on, as the sign along the wall's normal
     /// (<see cref="DoorPlace.Normal"/>): see <see cref="SwingsInto"/>; null with why where the drawing doesn't settle
     /// it. Also what the Revit trial's swing check (SwingCheck) holds against the side the model was built to.</summary>
@@ -551,7 +556,7 @@ public static class RouteReader
             var m = new P2(m3.X, m3.Y) - p.Centre;
             double uC = P2Dot(c, p.Along), nC = P2Dot(c, p.Normal), nM = P2Dot(m, p.Normal);
             var hinge = Math.Abs(nC) <= half + HingeOff && Math.Abs(Math.Abs(uC) - width / 2) <= JambOff;
-            var leaf = arc.Radius >= width / 2 - JambOff && arc.Radius <= width + JambOff;
+            var leaf = arc.Radius >= LeastLeaf && arc.Radius <= width + JambOff;
             if (!hinge || !leaf)
                 continue;
             if (Math.Abs(nM) <= half + ClearOfFace)
@@ -610,7 +615,7 @@ public static class RouteReader
     /// the family's own convention): one of <paramref name="joins"/> (a room's id, or <see cref="Outside"/>), or null
     /// with why. A swing arc is one hinged at a jamb (its centre within <see cref="HingeOff"/> of the wall's middle
     /// band and within <see cref="JambOff"/> of half the door's width from its centre along the wall), as long as a
-    /// leaf (half the door's width to its width, <see cref="JambOff"/> either way), and its middle beyond a face of
+    /// leaf (<see cref="LeastLeaf"/> to the door's width and <see cref="JambOff"/>), and its middle beyond a face of
     /// the wall. Not read: no arc drawn, or none that is a swing (never read as a door that doesn't swing), arcs on
     /// both sides (a double-acting door, or a pair hung opposite ways), an arc whose middle is within the wall, a
     /// stated operation that doesn't swing, or a side whose room isn't found where the arcs are.</summary>
