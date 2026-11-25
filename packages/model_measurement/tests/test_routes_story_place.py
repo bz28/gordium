@@ -32,7 +32,8 @@ PLACE_KEYS = {"no_ground", "ground_existing", "ground_assumed", "ground_spots_no
               "ground_wall_bare", "place_no_rooms", "place_story_no_rooms", "place_floor_not_read",
               "place_level_not_read", "place_split_level", "place_either", "place_either_levels",
               "place_too_many_levels", "ground_buildings_apart", "place_levels_not_all", "place_description",
-              "ground_spots_not_finished", "ground_disagrees", "ground_openings_not_read", "ground_disagrees_spots"}
+              "ground_spots_not_finished", "ground_disagrees", "ground_openings_not_read", "ground_disagrees_spots",
+              "place_story_spread", "place_level_inside_story"}
 
 
 def building(floors, extra_levels=(), outline=BOX):
@@ -114,6 +115,8 @@ def oracle(floors, ground, extra=()):
     """Every combination of facts the stated ground allows, per story with rooms: [set of (first, second, fourth)].
     `extra`: levels with no rooms (feet): each one, unless at a story's floor, a story nobody drew rooms on or not."""
     seen = [set() for _ in floors]
+    if any(min(f) < z < max(f) for z in extra for f in floors):
+        return None                                      # a level within a story's floors: may be a story of its own
     extra = [z for z in extra if not any(min(f) <= z <= max(f) for f in floors)]
     for chosen in itertools.product((False, True), repeat=len(extra)):
         stack = sorted([(f, i) for i, f in enumerate(floors)] + [([z], None) for z, on in zip(extra, chosen) if on],
@@ -153,6 +156,9 @@ def test_every_place_measured_is_the_same_in_every_world_the_ground_stated_allow
             seen = oracle(floors, ground or {}, extra)
             for i, lid in enumerate(f"L{k}" for k in range(len(floors))):
                 for k, fact in enumerate((FIRST, SECOND, FOURTH)):
+                    if seen is None:                         # the oracle can't place it: never measured
+                        assert fact not in got[lid]["measures"], (floors, extra, ground, lid, fact)
+                        continue
                     values = {s[k] for s in seen[i]}
                     if fact in got[lid]["measures"]:
                         assert values == {got[lid]["measures"][fact]}, (floors, extra, ground, lid, fact, values)
@@ -209,8 +215,18 @@ def test_the_four_unit_apartment_on_its_flat_ground_is_first_and_second_above_gr
         assert "Gordium's reading" in s["Level 1"]["more"]["story_place"]["reading"]
 
 
-def test_the_four_unit_apartment_on_ground_5_ft_up_has_a_basement_and_a_first_story_above():
+def test_the_four_unit_apartment_on_ground_5_ft_up():
+    """Ground stated flat at 5 ft: the stair enclosures' doors to the outside are at 0, under it (an areaway: the
+    ground there may be as low, question 4.6), so Level 1 may be above grade plane by item 2: it is the first story
+    above or below either way, and Level 2 the first or the second (not placed). Without those doors Level 1 is a
+    basement and Level 2 the first story above."""
     s = _apartment_places({"flat": 5.0})
+    assert s["Level 1"]["measures"][FIRST] is True
+    assert FIRST not in s["Level 2"]["measures"] and SECOND not in s["Level 2"]["measures"]
+    interior = json.loads(APARTMENT.read_text(encoding="utf-8"))["interior"]
+    interior["all_levels"] = [dict(lv) for lv in interior["levels"]]
+    interior["doors"] = [d for d in interior["doors"] if "outside" not in d["sides"]]
+    s = {p["name"]: p for p in measure(interior, ground={"flat": 5.0})["parts"]["story"]}
     assert s["Level 1"]["measures"][FIRST] is True and s["Level 2"]["measures"][FIRST] is True
     assert s["Level 2"]["measures"][SECOND] is False
 
@@ -293,7 +309,9 @@ def test_each_reason_a_place_isnt_measured():
     said("place_too_many_levels", _reason(placed([[0]], {"flat": 0}, extra_levels=tuple(range(10, 100, 10)))))
     two = BOX.union(Polygon([(60 * FT, 0), (80 * FT, 0), (80 * FT, 20 * FT), (60 * FT, 20 * FT)]))
     said("ground_buildings_apart", _reason(placed([[0]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS]}, outline=two)))
-    said("place_split_level", _reason(placed([[0, 6], [5]], {"flat": 0})))
+    said("place_split_level", _reason(placed([[0, 3], [2]], {"flat": 0})))
+    said("place_story_spread", _reason(placed([[0, 12], [24]], {"flat": 0})))
+    said("place_level_inside_story", _reason(placed([[0, 3], [10]], {"flat": 0}, extra_levels=(1.5,))))
     said("place_either", placed([[-4], [6]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS]})["L1"]["not_measured"][FIRST])
     desc, stories = building([[0]])
     desc["rooms"][0]["floor_elevation"] = "low"
@@ -479,3 +497,40 @@ def test_spot_grades_never_bound_the_grade_plane_below_finished_ground_stated_hi
                  {"spots": [[x, y, 0] for x, y in WALL_SPOTS]})
     assert FIRST not in got["L0"]["measures"]
     assert got["L0"]["not_measured"][FIRST] == STOPS["ground_disagrees_spots"].format(high="0 ft", stated="7 ft")
+
+
+# --- review round 5 (2026-11-25) ----------------------------------------------------------------------------------
+
+def test_an_upper_story_drawn_on_a_lower_level_is_never_one_story():
+    """Rooms at 0 and 12 ft on Level 0 (the second story's drawn there with an offset): before, one story, so the
+    story at 36 ft measured not the fourth (a one-exit R-2 story passing). Now nothing is placed."""
+    got = placed([[0, 12], [24], [36]], {"flat": 0}, extra_levels=(12,))
+    assert FOURTH not in got["L2"]["measures"]
+    got = placed([[0, 3], [10]], {"flat": 0}, extra_levels=(1.5,))
+    assert not set(FACTS) & set(got["L0"]["measures"])
+
+
+def test_a_higher_spot_farther_from_the_walls_raises_the_grade_planes_top_end():
+    """Spots 100 ft at every wall but 120 ft 10 ft out: the ground between them may rise to 120 ft along the walls
+    (Gordium's reading), so the grade plane may be about 110 ft. Before, its top end was 100 ft and the story at 86 ft
+    measured the first below."""
+    outline = Polygon([(0, 0), (100 * FT, 0), (100 * FT, 20 * FT), (0, 20 * FT)])
+    spots = [[1, -1, 100], [101, 21, 100], [50, -1, 100], [50, 21, 100], [-1, 10, 100], [101, 10, 100],
+             [50, -10, 120], [50, 30, 120]]
+    got = placed([[86], [96], [107]], {"spots": spots}, outline=outline)
+    assert FIRST not in got["L0"]["measures"]
+    assert got["L0"]["more"]["story_place"]["grade_plane_ft"][1] == 120
+
+
+@pytest.mark.parametrize("what", ["door", "stair"])
+def test_a_walk_out_door_or_a_stairs_foot_under_flat_ground_proves_no_basement(what):
+    """Flat ground at 0, a room at -9 ft with a door to the outside (or a stair whose foot is at -9 ft): the ground
+    there may be as low as the floor (an areaway: question 4.6), so the story at -9 may be above grade plane by
+    item 2 and the one at 4 ft the second."""
+    desc, stories = building([[-9], [4]])
+    if what == "door":
+        desc["doors"] = [{"id": "d", "sides": ["L0r0", "outside"]}]
+    else:
+        desc["stairs"] = [{"id": "s", "bottom_elevation": -9}]
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert FIRST not in got["L1"]["measures"] and SECOND not in got["L1"]["measures"]

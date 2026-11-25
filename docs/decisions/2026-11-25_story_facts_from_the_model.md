@@ -48,3 +48,7 @@ Two findings, fixed the cautious way: flat ground proved a basement even where t
 ## Review round 4 (2026-11-25)
 
 Round 3's check of finished ground stated at an opening was made for flat ground only: with spot grades, ground stated higher than every spot left the highest spot as the grade plane's top end, though the grade plane could be higher (a second basement measured the first below). Now stated ground above the highest spot places nothing, as for flat ground. One test.
+
+## Review round 5 (2026-11-25)
+
+Three more, each a possible false pass, fixed the cautious way: one level's rooms more than 4 ft apart in height (an upper story's rooms drawn on a lower level with an offset), or a level within a story's floors, now place nothing (before, one story: the fourth story measured not the fourth); with spot grades, the grade plane's top end is the highest finished spot outside the building, not only the ones within 2 ft of the walls (under the reading, ground between a wall's spot and a higher one farther out rises toward it); and on flat ground a door to the outside from a room under the ground, or a stair's foot under it, unsettles the grade plane as an area well does (an areaway, question 4.6). One test each; the walk's oracle refuses a level within a story's floors too.

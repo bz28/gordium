@@ -69,6 +69,8 @@ SAME = 1 / 16                # in: a figure this close to a threshold could be e
 SPOT_REACH = 24.0            # in: a spot grade this close to a wall (in plan) is the ground at that wall (the
 #                              zoning reader's own reach, places/ithaca_city/measure.py SPOT_REACH)
 WALL_LEAST = 12.0            # in: a wall of the outline shorter than this needs no spot of its own
+SPREAD = 48.0               # in: one level's floors this far apart may be two stories (a room drawn on a lower level
+#                              with an offset): nothing placed; a sunken room is less
 MOST_ROOMLESS = 8            # levels with no rooms tried both ways (2 ** 8 combinations); more: not placed
 SPOTS_READING = ("Gordium's reading: the ground between two spot grades lies between their values (the usual "
                  "surveying reading), so the grade plane is at most the highest spot at the walls ({high}); the "
@@ -147,12 +149,18 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
     for lid, (f_lo, f_hi) in list(floors.items()):       # the level's own floor too: an enclosed space with no
         z = elevation[lid]                               # room drawn in it is on it, its floor not given
         floors[lid] = (min(f_lo, z), max(f_hi, z))
+    for lid, (f_lo, f_hi) in floors.items():
+        if f_hi - f_lo > SPREAD:
+            return none(Stop("place_story_spread", name=stories[lid].name, spread=f"{(f_hi - f_lo) / FT:g} ft").reason)
     order = sorted(floors, key=lambda lid: floors[lid][0])
     for a, b in zip(order, order[1:]):
         if floors[a][1] >= floors[b][0] - SAME:
             return none(Stop("place_split_level", a=stories[a].name, b=stories[b].name).reason)
     # a level with no rooms, not at a story's floor: a story nobody drew rooms on, or none (a roof, a datum)
     roomless = sorted(((z, lid) for lid, z in elevation.items() if lid not in floors), key=lambda e: e[0])
+    inside = [lid for z, lid in roomless if any(floors[r][0] + SAME < z < floors[r][1] - SAME for r in order)]
+    if inside:                                           # a level within a story's floors: a story drawn on another
+        return none(Stop("place_level_inside_story", name=names[inside[0]]).reason)
     roomless = [(z, lid) for z, lid in roomless
                 if not any(floors[r][0] - SAME <= z <= floors[r][1] + SAME for r in order)]
     if len(roomless) > MOST_ROOMLESS:
@@ -249,23 +257,39 @@ def _certainly_basement(f_hi, nxt, flat) -> bool:
     return nxt[1] < flat + 6 * FT - SAME                     # items 1 and 3 (and so item 2) fail
 
 
-def _stated_ground(description, reader) -> list | None:
-    """Every finished ground level the description states at an opening (`ground_outside`: one value or a list) and
-    every area well's floor, in inches; None where one is given but can't be read."""
-    out = []
-    for o in (description or {}).get("openings") or []:
+def _stated_ground(description, reader) -> tuple | None:
+    """(ground, lower): every finished ground level the description states at an opening (`ground_outside`: one value
+    or a list) and every area well's floor; and the floors that show ground may be as low (a door to the outside from
+    a room: its floor; a stair's foot), all in inches. None where one is given but can't be read."""
+    ground, lower = [], []
+    desc = description or {}
+    for o in desc.get("openings") or []:
         if not isinstance(o, dict):
             continue
         given = o.get("ground_outside")
         well = o.get("area_well")
         try:
             for v in (given if isinstance(given, list) else [] if given is None else [given]):
-                out.append(reader.length(v, "the ground outside an opening"))
+                ground.append(reader.length(v, "the ground outside an opening"))
             if isinstance(well, dict) and well.get("floor_elevation") is not None:
-                out.append(reader.length(well["floor_elevation"], "an area well's floor"))
+                ground.append(reader.length(well["floor_elevation"], "an area well's floor"))
         except InteriorStop:
             return None
-    return out
+    floor = {r["id"]: r.get("floor_elevation") for r in desc.get("rooms") or []
+             if isinstance(r, dict) and isinstance(r.get("id"), str)}
+    try:
+        for d in desc.get("doors") or []:
+            sides = d.get("sides") if isinstance(d, dict) else None
+            if isinstance(sides, list) and "outside" in sides:
+                for r in sides:
+                    if r != "outside" and floor.get(r) is not None:
+                        lower.append(reader.length(floor[r], "the floor at a door to the outside"))
+        for st in desc.get("stairs") or []:
+            if isinstance(st, dict) and st.get("bottom_elevation") is not None:
+                lower.append(reader.length(st["bottom_elevation"], "a stair's foot"))
+    except InteriorStop:
+        return None
+    return ground, lower
 
 
 def _floors(description, reader, stories) -> tuple:
@@ -297,13 +321,14 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
         return None, ground["none"]
     if "flat" in ground:
         z = ground["flat"] * FT
-        lows = _stated_ground(description, reader)
-        if lows is None:
+        stated = _stated_ground(description, reader)
+        if stated is None:
             return None, Stop("ground_openings_not_read").reason
-        if any(g > z + SAME for g in lows):
-            return None, Stop("ground_disagrees", flat=f"{ground['flat']:g} ft", high=f"{max(lows) / FT:g} ft").reason
-        if any(g < z - SAME for g in lows):
-            return {"low": -math.inf, "high": z, "point": None, "flat": None}, None
+        given, lower = stated
+        if any(g > z + SAME for g in given):
+            return None, Stop("ground_disagrees", flat=f"{ground['flat']:g} ft", high=f"{max(given) / FT:g} ft").reason
+        if any(g < z - SAME for g in given + lower):     # an areaway, a well, a walk-out door or a stair's foot under
+            return {"low": -math.inf, "high": z, "point": None, "flat": None}, None    # the ground (question 4.6)
         return {"low": z, "high": z, "point": z, "flat": z}, None
     spots = [p for p in ground.get("spots") or []
              if isinstance(p, (list, tuple)) and len(p) == 3 and all(_number(v) for v in p)]
@@ -331,12 +356,15 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
         used += near
     if bare or not used:
         return None, Stop("ground_wall_bare", count=bare or 1).reason
-    high = max(used)
-    lows = _stated_ground(description, reader)           # finished ground stated at an opening: above every spot,
-    if lows is None:                                     # the spots don't bound the grade plane (nothing placed)
+    # every spot outside the building counts toward the top end: under the reading, ground between a wall's spot and
+    # a higher one farther out may rise toward it
+    high = max(used + [z for p, z in at if not any(o.buffer(-SAME).contains(p) for o in outlines)])
+    stated = _stated_ground(description, reader)         # finished ground stated at an opening: above every spot,
+    if stated is None:                                   # the spots don't bound the grade plane (nothing placed)
         return None, Stop("ground_openings_not_read").reason
-    if any(g > high + SAME for g in lows):
-        return None, Stop("ground_disagrees_spots", high=f"{high / FT:g} ft", stated=f"{max(lows) / FT:g} ft").reason
+    if any(g > high + SAME for g in stated[0]):
+        return None, Stop("ground_disagrees_spots", high=f"{high / FT:g} ft",
+                          stated=f"{max(stated[0]) / FT:g} ft").reason
     # item 2's "finished ground level at any point": never a spot (it may stand in an areaway or a window well,
     # whose floor as "ground" is an open question: docs/questions_for_architects.md 4.6), only flat ground
     return {"low": -math.inf, "high": high, "point": None, "flat": None,

@@ -64,10 +64,17 @@ def test_on_flat_ground_at_its_floor_level_2_is_the_second_story_and_one_exit_fa
 
 
 def test_on_ground_5_ft_up_level_1_is_a_basement_level_2_the_first_story_and_one_exit_passes(one_exit, monkeypatch):
-    result, stories = _result(one_exit, {"flat": 5.0}, monkeypatch)
+    """Ground at 5 ft with no door to the outside under it (the stair's doors out left off): Level 1 is a basement,
+    Level 2 the first story above, and one exit passes. With the doors out at 0 (an areaway, question 4.6) Level 2
+    may be the second: needs review, never a pass."""
+    bare = {**one_exit, "doors": [d for d in one_exit["doors"] if "outside" not in d["sides"]]}
+    result, stories = _result(bare, {"flat": 5.0}, monkeypatch)
     assert stories["Level 1"]["measures"]["story_first_above_or_below_grade"] is True
     assert stories["Level 2"]["measures"]["story_first_above_or_below_grade"] is True
     assert result == "pass"
+    result, stories = _result(one_exit, {"flat": 5.0}, monkeypatch)
+    assert "story_first_above_or_below_grade" not in stories["Level 2"]["measures"]
+    assert result == "needs_review"
 
 
 @pytest.mark.parametrize("ground", [None, {"none": "none stated"}, {"spots": [p + [4] for p in SPOTS]},
