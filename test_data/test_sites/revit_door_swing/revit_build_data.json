@@ -1,0 +1,1070 @@
+{
+ "project": "Door swing check (Gordium's four-unit eval building, each door given a swing; not a real project)",
+ "units": "feet",
+ "type_suffix": "swing check",
+ "levels": [
+  {
+   "name": "Level 1",
+   "elevation_ft": 0,
+   "source": "apartment.yaml levels[L1]"
+  },
+  {
+   "name": "Level 2",
+   "elevation_ft": 10,
+   "source": "apartment.yaml levels[L2]"
+  }
+ ],
+ "walls": [
+  {
+   "id": 1,
+   "level": "Level 1",
+   "start": [
+    -0.5,
+    -0.25
+   ],
+   "end": [
+    60.5,
+    -0.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": true,
+   "source": "apartment.yaml: the south exterior wall, its inside face on `inside` [0, 0, 60, 30], 6 in thick (`wall`), 10 ft tall (`story_height`)"
+  },
+  {
+   "id": 2,
+   "level": "Level 1",
+   "start": [
+    60.25,
+    -0.5
+   ],
+   "end": [
+    60.25,
+    30.5
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": true,
+   "source": "apartment.yaml: the east exterior wall, its inside face on `inside` [0, 0, 60, 30], 6 in thick (`wall`), 10 ft tall (`story_height`)"
+  },
+  {
+   "id": 3,
+   "level": "Level 1",
+   "start": [
+    60.5,
+    30.25
+   ],
+   "end": [
+    -0.5,
+    30.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": true,
+   "source": "apartment.yaml: the north exterior wall, its inside face on `inside` [0, 0, 60, 30], 6 in thick (`wall`), 10 ft tall (`story_height`)"
+  },
+  {
+   "id": 4,
+   "level": "Level 1",
+   "start": [
+    -0.25,
+    30.5
+   ],
+   "end": [
+    -0.25,
+    -0.5
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": true,
+   "source": "apartment.yaml: the west exterior wall, its inside face on `inside` [0, 0, 60, 30], 6 in thick (`wall`), 10 ft tall (`story_height`)"
+  },
+  {
+   "id": 5,
+   "level": "Level 1",
+   "start": [
+    0,
+    11.75
+   ],
+   "end": [
+    60,
+    11.75
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": false,
+   "source": "apartment.yaml partitions[south corridor wall]"
+  },
+  {
+   "id": 6,
+   "level": "Level 1",
+   "start": [
+    0,
+    18.25
+   ],
+   "end": [
+    60,
+    18.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": false,
+   "source": "apartment.yaml partitions[north corridor wall]"
+  },
+  {
+   "id": 7,
+   "level": "Level 1",
+   "start": [
+    9.25,
+    12
+   ],
+   "end": [
+    9.25,
+    18
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": false,
+   "source": "apartment.yaml partitions[west stair wall]"
+  },
+  {
+   "id": 8,
+   "level": "Level 1",
+   "start": [
+    50.75,
+    12
+   ],
+   "end": [
+    50.75,
+    18
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": false,
+   "source": "apartment.yaml partitions[east stair wall]"
+  },
+  {
+   "id": 9,
+   "level": "Level 2",
+   "start": [
+    -0.5,
+    -0.25
+   ],
+   "end": [
+    60.5,
+    -0.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": true,
+   "source": "apartment.yaml: the south exterior wall, its inside face on `inside` [0, 0, 60, 30], 6 in thick (`wall`), 10 ft tall (`story_height`)"
+  },
+  {
+   "id": 10,
+   "level": "Level 2",
+   "start": [
+    60.25,
+    -0.5
+   ],
+   "end": [
+    60.25,
+    30.5
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": true,
+   "source": "apartment.yaml: the east exterior wall, its inside face on `inside` [0, 0, 60, 30], 6 in thick (`wall`), 10 ft tall (`story_height`)"
+  },
+  {
+   "id": 11,
+   "level": "Level 2",
+   "start": [
+    60.5,
+    30.25
+   ],
+   "end": [
+    -0.5,
+    30.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": true,
+   "source": "apartment.yaml: the north exterior wall, its inside face on `inside` [0, 0, 60, 30], 6 in thick (`wall`), 10 ft tall (`story_height`)"
+  },
+  {
+   "id": 12,
+   "level": "Level 2",
+   "start": [
+    -0.25,
+    30.5
+   ],
+   "end": [
+    -0.25,
+    -0.5
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": true,
+   "source": "apartment.yaml: the west exterior wall, its inside face on `inside` [0, 0, 60, 30], 6 in thick (`wall`), 10 ft tall (`story_height`)"
+  },
+  {
+   "id": 13,
+   "level": "Level 2",
+   "start": [
+    0,
+    11.75
+   ],
+   "end": [
+    60,
+    11.75
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": false,
+   "source": "apartment.yaml partitions[south corridor wall]"
+  },
+  {
+   "id": 14,
+   "level": "Level 2",
+   "start": [
+    0,
+    18.25
+   ],
+   "end": [
+    60,
+    18.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": false,
+   "source": "apartment.yaml partitions[north corridor wall]"
+  },
+  {
+   "id": 15,
+   "level": "Level 2",
+   "start": [
+    9.25,
+    12
+   ],
+   "end": [
+    9.25,
+    18
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": false,
+   "source": "apartment.yaml partitions[west stair wall]"
+  },
+  {
+   "id": 16,
+   "level": "Level 2",
+   "start": [
+    50.75,
+    12
+   ],
+   "end": [
+    50.75,
+    18
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 10,
+   "exterior": false,
+   "source": "apartment.yaml partitions[east stair wall]"
+  }
+ ],
+ "doors": [
+  {
+   "center": [
+    9.25,
+    15
+   ],
+   "width_in": 36,
+   "height_in": 84,
+   "kind": "single",
+   "host_wall": 7,
+   "house_id": "L1W",
+   "exit": false,
+   "operation": "side_hinged",
+   "source": "apartment.yaml doors[W] on Level 1, its leaf apartment.yaml door; swing check: opens to +x, hinged at its - jamb",
+   "swing_dir": [
+    1.0,
+    0.0
+   ],
+   "hinge": [
+    9.25,
+    13.5
+   ]
+  },
+  {
+   "center": [
+    50.75,
+    15
+   ],
+   "width_in": 36,
+   "height_in": 84,
+   "kind": "single",
+   "host_wall": 8,
+   "house_id": "L1E",
+   "exit": false,
+   "operation": "side_hinged",
+   "source": "apartment.yaml doors[E] on Level 1, its leaf apartment.yaml door; swing check: opens to -x, hinged at its + jamb",
+   "swing_dir": [
+    -1.0,
+    0.0
+   ],
+   "hinge": [
+    50.75,
+    16.5
+   ]
+  },
+  {
+   "center": [
+    30,
+    11.75
+   ],
+   "width_in": 36,
+   "height_in": 84,
+   "kind": "single",
+   "host_wall": 5,
+   "house_id": "L1DS",
+   "exit": false,
+   "operation": "side_hinged",
+   "source": "apartment.yaml doors[DS] on Level 1, its leaf apartment.yaml door; swing check: opens to +y, hinged at its + jamb",
+   "swing_dir": [
+    0.0,
+    1.0
+   ],
+   "hinge": [
+    31.5,
+    11.75
+   ]
+  },
+  {
+   "center": [
+    30,
+    18.25
+   ],
+   "width_in": 36,
+   "height_in": 84,
+   "kind": "single",
+   "host_wall": 6,
+   "house_id": "L1DN",
+   "exit": false,
+   "operation": "side_hinged",
+   "source": "apartment.yaml doors[DN] on Level 1, its leaf apartment.yaml door; swing check: opens to -y, hinged at its - jamb",
+   "swing_dir": [
+    0.0,
+    -1.0
+   ],
+   "hinge": [
+    28.5,
+    18.25
+   ]
+  },
+  {
+   "center": [
+    -0.25,
+    15
+   ],
+   "width_in": 36,
+   "height_in": 84,
+   "kind": "single",
+   "host_wall": 4,
+   "house_id": "L1WO",
+   "exit": false,
+   "operation": "side_hinged",
+   "source": "apartment.yaml doors[WO] on Level 1, its leaf apartment.yaml door; swing check: opens to -x, hinged at its - jamb",
+   "swing_dir": [
+    -1.0,
+    0.0
+   ],
+   "hinge": [
+    -0.25,
+    13.5
+   ]
+  },
+  {
+   "center": [
+    60.25,
+    15
+   ],
+   "width_in": 36,
+   "height_in": 84,
+   "kind": "single",
+   "host_wall": 2,
+   "house_id": "L1EO",
+   "exit": false,
+   "operation": "side_hinged",
+   "source": "apartment.yaml doors[EO] on Level 1, its leaf apartment.yaml door; swing check: opens to -x, hinged at its + jamb",
+   "swing_dir": [
+    -1.0,
+    0.0
+   ],
+   "hinge": [
+    60.25,
+    16.5
+   ]
+  },
+  {
+   "center": [
+    9.25,
+    15
+   ],
+   "width_in": 36,
+   "height_in": 84,
+   "kind": "single",
+   "host_wall": 15,
+   "house_id": "L2W",
+   "exit": false,
+   "operation": "side_hinged",
+   "source": "apartment.yaml doors[W] on Level 2, its leaf apartment.yaml door; swing check: opens to -x, hinged at its - jamb",
+   "swing_dir": [
+    -1.0,
+    0.0
+   ],
+   "hinge": [
+    9.25,
+    13.5
+   ]
+  },
+  {
+   "center": [
+    50.75,
+    15
+   ],
+   "width_in": 36,
+   "height_in": 84,
+   "kind": "single",
+   "host_wall": 16,
+   "house_id": "L2E",
+   "exit": false,
+   "operation": "side_hinged",
+   "source": "apartment.yaml doors[E] on Level 2, its leaf apartment.yaml door; swing check: opens to +x, hinged at its + jamb",
+   "swing_dir": [
+    1.0,
+    0.0
+   ],
+   "hinge": [
+    50.75,
+    16.5
+   ]
+  },
+  {
+   "center": [
+    30,
+    11.75
+   ],
+   "width_in": 36,
+   "height_in": 84,
+   "kind": "double",
+   "host_wall": 13,
+   "house_id": "L2DS",
+   "exit": false,
+   "operation": "side_hinged",
+   "source": "apartment.yaml doors[DS] on Level 2, its leaf apartment.yaml door; swing check: opens to +y, a double door",
+   "swing_dir": [
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "center": [
+    30,
+    18.25
+   ],
+   "width_in": 36,
+   "height_in": 84,
+   "kind": "single",
+   "host_wall": 14,
+   "house_id": "L2DN",
+   "exit": false,
+   "operation": "side_hinged",
+   "source": "apartment.yaml doors[DN] on Level 2, its leaf apartment.yaml door; swing check: opens to +y, hinged at its - jamb",
+   "swing_dir": [
+    0.0,
+    1.0
+   ],
+   "hinge": [
+    28.5,
+    18.25
+   ]
+  }
+ ],
+ "windows": [],
+ "rooms": [
+  {
+   "number": "1",
+   "name": "Apartment South L1",
+   "level": "Level 1",
+   "tag_point": [
+    30.0,
+    5.75
+   ],
+   "boundary": [
+    [
+     0,
+     0
+    ],
+    [
+     60,
+     0
+    ],
+    [
+     60,
+     11.5
+    ],
+    [
+     0,
+     11.5
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "L1S",
+   "area_sf": 690.0,
+   "source": "apartment.yaml rooms[S] on Level 1"
+  },
+  {
+   "number": "2",
+   "name": "Stair West L1",
+   "level": "Level 1",
+   "tag_point": [
+    4.5,
+    15.0
+   ],
+   "boundary": [
+    [
+     0,
+     12
+    ],
+    [
+     9,
+     12
+    ],
+    [
+     9,
+     18
+    ],
+    [
+     0,
+     18
+    ],
+    [
+     0,
+     12
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "L1SW",
+   "area_sf": 54,
+   "source": "apartment.yaml rooms[SW] on Level 1"
+  },
+  {
+   "number": "3",
+   "name": "Corridor L1",
+   "level": "Level 1",
+   "tag_point": [
+    30.0,
+    15.0
+   ],
+   "boundary": [
+    [
+     9.5,
+     12
+    ],
+    [
+     50.5,
+     12
+    ],
+    [
+     50.5,
+     18
+    ],
+    [
+     9.5,
+     18
+    ],
+    [
+     9.5,
+     12
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "L1C",
+   "area_sf": 246.0,
+   "source": "apartment.yaml rooms[C] on Level 1"
+  },
+  {
+   "number": "4",
+   "name": "Stair East L1",
+   "level": "Level 1",
+   "tag_point": [
+    55.5,
+    15.0
+   ],
+   "boundary": [
+    [
+     51,
+     12
+    ],
+    [
+     60,
+     12
+    ],
+    [
+     60,
+     18
+    ],
+    [
+     51,
+     18
+    ],
+    [
+     51,
+     12
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "L1SE",
+   "area_sf": 54,
+   "source": "apartment.yaml rooms[SE] on Level 1"
+  },
+  {
+   "number": "5",
+   "name": "Apartment North L1",
+   "level": "Level 1",
+   "tag_point": [
+    30.0,
+    24.25
+   ],
+   "boundary": [
+    [
+     0,
+     18.5
+    ],
+    [
+     60,
+     18.5
+    ],
+    [
+     60,
+     30
+    ],
+    [
+     0,
+     30
+    ],
+    [
+     0,
+     18.5
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "L1N",
+   "area_sf": 690.0,
+   "source": "apartment.yaml rooms[N] on Level 1"
+  },
+  {
+   "number": "6",
+   "name": "Apartment South L2",
+   "level": "Level 2",
+   "tag_point": [
+    30.0,
+    5.75
+   ],
+   "boundary": [
+    [
+     0,
+     0
+    ],
+    [
+     60,
+     0
+    ],
+    [
+     60,
+     11.5
+    ],
+    [
+     0,
+     11.5
+    ],
+    [
+     0,
+     0
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "L2S",
+   "area_sf": 690.0,
+   "source": "apartment.yaml rooms[S] on Level 2"
+  },
+  {
+   "number": "7",
+   "name": "Stair West L2",
+   "level": "Level 2",
+   "tag_point": [
+    4.5,
+    15.0
+   ],
+   "boundary": [
+    [
+     0,
+     12
+    ],
+    [
+     9,
+     12
+    ],
+    [
+     9,
+     18
+    ],
+    [
+     0,
+     18
+    ],
+    [
+     0,
+     12
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "L2SW",
+   "area_sf": 54,
+   "source": "apartment.yaml rooms[SW] on Level 2"
+  },
+  {
+   "number": "8",
+   "name": "Corridor L2",
+   "level": "Level 2",
+   "tag_point": [
+    30.0,
+    15.0
+   ],
+   "boundary": [
+    [
+     9.5,
+     12
+    ],
+    [
+     50.5,
+     12
+    ],
+    [
+     50.5,
+     18
+    ],
+    [
+     9.5,
+     18
+    ],
+    [
+     9.5,
+     12
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "L2C",
+   "area_sf": 246.0,
+   "source": "apartment.yaml rooms[C] on Level 2"
+  },
+  {
+   "number": "9",
+   "name": "Stair East L2",
+   "level": "Level 2",
+   "tag_point": [
+    55.5,
+    15.0
+   ],
+   "boundary": [
+    [
+     51,
+     12
+    ],
+    [
+     60,
+     12
+    ],
+    [
+     60,
+     18
+    ],
+    [
+     51,
+     18
+    ],
+    [
+     51,
+     12
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "L2SE",
+   "area_sf": 54,
+   "source": "apartment.yaml rooms[SE] on Level 2"
+  },
+  {
+   "number": "10",
+   "name": "Apartment North L2",
+   "level": "Level 2",
+   "tag_point": [
+    30.0,
+    24.25
+   ],
+   "boundary": [
+    [
+     0,
+     18.5
+    ],
+    [
+     60,
+     18.5
+    ],
+    [
+     60,
+     30
+    ],
+    [
+     0,
+     30
+    ],
+    [
+     0,
+     18.5
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "L2N",
+   "area_sf": 690.0,
+   "source": "apartment.yaml rooms[N] on Level 2"
+  }
+ ],
+ "floors": [
+  {
+   "level": "Level 1",
+   "outline": [
+    [
+     -0.5,
+     -0.5
+    ],
+    [
+     60.5,
+     -0.5
+    ],
+    [
+     60.5,
+     30.5
+    ],
+    [
+     -0.5,
+     30.5
+    ],
+    [
+     -0.5,
+     -0.5
+    ]
+   ],
+   "thickness_in": 12.0,
+   "source": "apartment.yaml: a 12 in slab under the level over the outside of the walls (ASSUMED thickness: assumptions)"
+  },
+  {
+   "level": "Level 2",
+   "outline": [
+    [
+     -0.5,
+     -0.5
+    ],
+    [
+     60.5,
+     -0.5
+    ],
+    [
+     60.5,
+     30.5
+    ],
+    [
+     -0.5,
+     30.5
+    ],
+    [
+     -0.5,
+     -0.5
+    ]
+   ],
+   "thickness_in": 12.0,
+   "source": "apartment.yaml: a 12 in slab under the level over the outside of the walls (ASSUMED thickness: assumptions)"
+  },
+  {
+   "level": "Level 2",
+   "outline": [
+    [
+     -0.5,
+     -0.5
+    ],
+    [
+     60.5,
+     -0.5
+    ],
+    [
+     60.5,
+     30.5
+    ],
+    [
+     -0.5,
+     30.5
+    ],
+    [
+     -0.5,
+     -0.5
+    ]
+   ],
+   "thickness_in": 12.0,
+   "top_offset_ft": 10,
+   "source": "the flat roof over Level 2, its top at the walls' top (ASSUMED thickness: assumptions)"
+  }
+ ],
+ "lot": {
+  "outline": [
+   [
+    -20,
+    -30
+   ],
+   [
+    80,
+    -30
+   ],
+   [
+    80,
+    60
+   ],
+   [
+    -20,
+    60
+   ],
+   [
+    -20,
+    -30
+   ]
+  ],
+  "source": "apartment.yaml lot [-20, -30, 80, 60]: a stand-in, its south edge (y = -30) the street"
+ },
+ "spot_grades": [
+  {
+   "at": [
+    30.0,
+    -1.5,
+    0
+   ],
+   "source": "apartment.yaml ground: flat, 1 ft outside each wall's middle"
+  },
+  {
+   "at": [
+    61.5,
+    15.0,
+    0
+   ],
+   "source": "apartment.yaml ground: flat, 1 ft outside each wall's middle"
+  },
+  {
+   "at": [
+    30.0,
+    31.5,
+    0
+   ],
+   "source": "apartment.yaml ground: flat, 1 ft outside each wall's middle"
+  },
+  {
+   "at": [
+    -1.5,
+    15.0,
+    0
+   ],
+   "source": "apartment.yaml ground: flat, 1 ft outside each wall's middle"
+  }
+ ],
+ "plan": "x east, y north from the inside face of the south wall, feet",
+ "made_from": {
+  "tool": "apps/revit_addin/tools/evals/make_swing_build_data.py",
+  "sources": [
+   {
+    "file": "test_data/test_sites/new_york/ithaca_city/four_unit_apartment/revit_build_data.json",
+    "sha256": "79e9bb4c01a8ec1b16bfabe80a7fbf5df890f852a7e495923ee3b2c4376b0c4b"
+   }
+  ]
+ },
+ "not_drawn": {
+  "stairs": "the two exit stair enclosures are drawn as rooms only: no Building Code rule here reads a stair's risers or treads, and the residential stair rules don't run (the Building Code governs)",
+  "windows": "no rule checked reads a window (the Building Code's escape-window sections aren't brought in)",
+  "apartment interiors": "each apartment is one room: the rules checked read the routes from its door, and its own rooms would only lengthen the travel figures, about 54 ft against Table 1017.2's 200 ft for Group R-2 (expected.yaml)"
+ },
+ "assumptions": [
+  {
+   "what": "The slabs and the roof 12 in thick",
+   "why": "the eval building has none given",
+   "effect": "none: no rule reads a slab's thickness"
+  },
+  {
+   "what": "Every door a 36 x 84 in single leaf, 34 in clear, 80 in high, no swing side",
+   "why": "the eval building's doors (apartment.yaml door; no maker named)",
+   "effect": "none on the verdicts: the routes pass each door's 34 in clear opening (over the 24 in they need), and the exits' separation is measured between the openings' nearest points across the corridor's length, which the opening's width along its wall doesn't change"
+  }
+ ],
+ "stats": {
+  "walls": 16,
+  "doors": 10,
+  "windows": 0,
+  "rooms": 10
+ }
+}

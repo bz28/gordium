@@ -231,13 +231,14 @@ public static class ResultRows
     /// keeping the street edge picked): never a change that makes the result stale.</summary>
     public static readonly IReadOnlySet<string> OwnTransactions = new HashSet<string>(StringComparer.Ordinal)
     {
-        MarksTransaction, StreetTransaction, AreasTransaction,
+        MarksTransaction, StreetTransaction, AreasTransaction, SwingsTransaction,
     };
 
     /// <summary>The names of those transactions (the add-in names its transactions with these).</summary>
     public const string MarksTransaction = "Gordium: add the egress marks";
     public const string StreetTransaction = "Gordium: the street edge";
     public const string AreasTransaction = "Gordium: read the enclosed areas (rolled back)";
+    public const string SwingsTransaction = "Gordium: read the door swings (rolled back)";
 
     /// <summary>Whether a change to the checked project (Revit's DocumentChanged) makes the shown results stale.
     /// <paramref name="committed"/>: whether it is a transaction committed (<c>e.Operation</c> is

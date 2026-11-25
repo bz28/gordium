@@ -147,6 +147,20 @@ public sealed class App : IExternalApplication
             }
             return;
         }
+        if (File.Exists(SwingCheck.RequestPath))
+        {
+            try
+            {
+                var takenSwing = SwingCheck.RequestPath + ".taken";
+                File.Move(SwingCheck.RequestPath, takenSwing, overwrite: true);
+                SwingCheck.Run(ui.Application, takenSwing);
+            }
+            catch (Exception x)       // never out of Revit's Idling event
+            {
+                Trial.Log("swing_check", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
+            return;
+        }
         if (File.Exists(DetailCheck.RequestPath))
         {
             try

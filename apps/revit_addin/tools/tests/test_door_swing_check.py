@@ -1,0 +1,61 @@
+"""The door swing reading held against Revit itself (docs/revit/revit_interior_reading_design.md, section 10, "Which
+side a door swings into"): the add-in's swing check (SwingCheck.cs), run in Revit 2027 on the building
+make_swing_build_data.py writes, recorded in test_data/test_sites/revit_door_swing/swing_check_recorded.json. Replayed
+here so CI holds the recording to what it shows: every door read on the side it was built to swing, the template's
+single door in all four facing and hand states and Gordium's double door, both as built and with every view Coarse and
+the door subcategories hidden (the architect's own views never decide it: the reader makes its own plan view)."""
+
+import hashlib
+import importlib.util
+import json
+import re
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[4]
+HERE = REPO / "test_data/test_sites/revit_door_swing"
+RECORDED = json.loads((HERE / "swing_check_recorded.json").read_text(encoding="utf-8"))
+ROW = re.compile(r"^(D\d\d) \((.+?); (single|double)\): facing \(.+?\) flipped (True|False), hand \(.+?\) flipped "
+                 r"(True|False), mirrored (True|False): read ([+-]|none), built ([+-]|none) \((agrees|DIFFERS)\)(; .*)?$")
+
+
+def _rows(run, key):
+    rows = run["swing_check"][key]
+    out = []
+    for r in rows:
+        m = ROW.match(r)
+        assert m, r
+        out.append(m.groups())
+    return out
+
+
+def test_the_recording_is_of_the_build_data_as_it_is_now():
+    data = HERE / "revit_build_data.json"
+    assert RECORDED["build_data"]["sha256"] == hashlib.sha256(data.read_bytes()).hexdigest()
+    spec = importlib.util.spec_from_file_location("make_swing", REPO / "apps/revit_addin/tools/evals/make_swing_build_data.py")
+    make = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(make)
+    assert make.main(["--check"]) == 0
+
+
+def test_every_door_is_read_on_the_side_it_was_built_to_swing_in_every_facing_and_hand():
+    run = RECORDED["runs"][1]
+    assert run["build"]["ok"] and run["build"]["all_built"] and not run["build"]["failed"]
+    assert all(line.endswith("swings as the data") or "swings as the data;" in line for line in run["build"]["doors"])
+    for key in ("as_built", "views_coarse_swings_hidden"):
+        rows = _rows(run, key)
+        assert len(rows) == 10, key
+        assert all(r[6] in "+-" and r[6] == r[7] and r[8] == "agrees" for r in rows), (key, rows)
+        singles = {(r[3], r[4]) for r in rows if r[2] == "single" and r[1].startswith("Single-Flush")}
+        assert singles == {("True", "True"), ("True", "False"), ("False", "True"), ("False", "False")}, singles
+        assert any(r[2] == "double" for r in rows)
+    assert run["swing_check"]["subcategories_hidden"] > 0
+
+
+def test_the_reading_follows_what_revit_draws_not_the_builds_flip_convention():
+    # built with the build's defaults, every template door stood turned from the data (the plan pictures showed each
+    # swing where the reader read it); the reader never agreed with the data there, and agreed with Gordium's own double
+    # door, whose swing it draws itself
+    rows = _rows(RECORDED["runs"][0], "as_built")
+    single = [r for r in rows if r[2] == "single"]
+    assert single and all(r[6] in "+-" and r[7] in "+-" and r[6] != r[7] for r in single)
+    assert all(r[8] == "agrees" for r in rows if r[2] == "double")
