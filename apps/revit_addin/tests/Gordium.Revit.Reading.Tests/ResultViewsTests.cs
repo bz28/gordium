@@ -84,12 +84,14 @@ public sealed class ResultViewsTests
         Assert.Equal(4, card.Elements.Count);
         Assert.DoesNotContain("933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e", card.Elements);
         Assert.DoesNotContain("6341822b-d4f3-11d3-a039-0000863f1523-000026da", card.Elements);
-        // never a mark to set for an occupant load (no host has one); group 4a's corridors ask theirs by hand, in words
-        // (whether another level's occupants reach a corridor has no mark yet), never as a mark
+        // never a mark to set for an occupant load (no host has one); group 4a's corridors ask instead whether another
+        // level's occupants reach them, a question on Project Information its own mark answers (Gordium: Other levels
+        // reach corridors, the Revit-fields PR for groups 4 and 5; before it, asked by hand)
         Assert.DoesNotContain(m.Fix.SelectMany(g => g.Cards),
                               c => c.Kind == FixKind.Mark && c.Headline.Contains("occupant load", StringComparison.Ordinal));
-        Assert.Contains(m.Fix.SelectMany(g => g.Cards),
-                        c => c.Kind != FixKind.Mark && c.Headline.Contains("corridor occupant load", StringComparison.Ordinal));
+        var levels = m.Fix.SelectMany(g => g.Cards).Single(c => c.Field == "building.other_level_egress_into_corridors");
+        Assert.Equal((FixKind.Answer, "Say whether another level's occupants reach the corridors"), (levels.Kind, levels.Headline));
+        Assert.Equal(Marks.OtherLevelsReachCorridors, Marks.All.Single(k => k.Feeds == levels.Field));
     }
 
     [Fact]
