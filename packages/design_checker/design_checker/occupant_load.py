@@ -39,6 +39,7 @@ LOWER, UPPER = "room_area", "grossed_up_or_increased"
 # a room's function is the architect's to set, on the room mark Revit gives it (Gordium: Function, rooms[].function:
 # PR #191), so the panel asks for that mark (ui_data: "Set the room's function"), never for an occupant load to mark
 FUNCTION_FIELD = "rooms[].function"
+FUNCTION_ROOMS = "room_ids_without_function"   # a story's `more`: the rooms its function ask is set on (never its level)
 FUNCTION_STATED = "set the room's Table 1004.5 function (the room mark Gordium: Function)"
 NOT_GIVEN = "the room's function (Table 1004.5) isn't stated, so its occupant load isn't worked out: " + FUNCTION_STATED
 # the same words for a load Gordium (or a person) must work out and no mark carries (round 6): a room others pass
@@ -52,17 +53,20 @@ THROUGH = ("other rooms' egress passes through it (1004.2: their occupant loads 
 SERVED = ("{names} egress{es} through it (1004.2: {their} occupant load adds to its own), which isn't summed yet: "
           + LOAD_STATED)
 STORY_OPEN = "a room on the story has no occupant load worked out ({names}), so the story's isn't either"
-# where a room is open for want of a stated function, or for a function the table sends elsewhere, the story's load
-# is by hand too, in the routes' words (working that room's load out is what settles the story's, whatever else is
-# open); where every open room is so for the model's sake (its floor area, a function no table row has), a model fix
-# (rounds 5, 7 and 8; a room passed through or served through holds its own load in the story's sum, never open)
+# where a room is open for want of a stated function, the story's words ask for that function (the room mark: the
+# panel's one "Set the room's function" card, selecting the rooms, never the story's level); where one is open for a
+# function the table sends elsewhere, the story's load is by hand, in the routes' words (working that room's out is
+# what settles the story's, whatever else is open); where every open room is so for the model's sake (its floor
+# area, a function no table row has), a model fix (rounds 5, 7, 8 and 14; a room passed through or served through
+# holds its own load in the story's sum, never open)
 STORY_FUNCTION = ": " + FUNCTION_STATED
 EXIT_FUNCTION = ("{name} is itself an exit (a door into it is an exit enclosure's or passageway's), yet states "
                  "the function {f!r}: an exit holds no occupant load of its own, so which it is isn't known")
 IS_EXIT = ("it is itself an exit (an exit stair's enclosure, an exit passageway): it holds no occupant load of its own, "
            "so a rule that reads one for it is a person's check: ") + LOAD_STATED
 NO_LOAD = ("a {use} with no function stated holds no occupant load of its own (202 FLOOR AREA, NET leaves closets and "
-           "toilet rooms out); if people use it, ") + FUNCTION_STATED
+           "toilet rooms out), so a rule that reads one for it is a person's check: ") + LOAD_STATED   # never the
+# Function mark, which Revit's tooltip says to leave blank on a closet or toilet (round 14)
 STORY_NONE = ("no room on the story holds an occupant load of its own (its spaces are exits, closets or toilets): "
               + STORY_STATED)
 GROSS_NOT_MEASURED = "the story's gross floor area isn't measured, so the gross-function rooms' share of it can't be"
@@ -88,7 +92,7 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
     for story in parts.get("story") or []:
         mine = [p for p in spaces if p.get("within") == story["id"]]
         gross = story["measures"].get("story_gross_floor_area")
-        loads, open_ = [], []
+        loads, open_, lacking = [], [], []
         plan = []
         odd = [CORRIDOR_FUNCTION.format(name=c.get("name") or cid, f=rooms[cid]["function"])   # never dropped
                for cid, c in corridors.items() if c.get("within") == story["id"]
@@ -110,6 +114,8 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
                        UNKNOWN.format(f=fn) if entry is None else ELSEWHERE.format(f=fn, where=entry["elsewhere"]))
                 p["not_measured"]["space_occupant_load"] = why
                 open_.append((p.get("name") or p["id"], why))
+                if why == NOT_GIVEN:                      # the rooms the story's function ask is set on (round 14)
+                    lacking.append(p["id"])
                 continue
             plan.append((p, entry, area))
         net_area = sum(a for _, e, a in plan if e and e["area"] == "net")
@@ -151,6 +157,8 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
             loads.append((low, high))
             _give(p, "space_occupant_load", low, high, no_share)
         if open_ or odd:
+            if lacking:                               # the story's ask for a function names these rooms, not the level
+                story.setdefault("more", {}).setdefault("story_occupant_load", {})[FUNCTION_ROOMS] = lacking
             story["not_measured"]["story_occupant_load"] = "; ".join(
                 ([STORY_OPEN.format(names=", ".join(n for n, _ in open_))
                   + (STORY_FUNCTION if any(w == NOT_GIVEN for _, w in open_) else

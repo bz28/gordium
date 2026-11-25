@@ -303,7 +303,12 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
             add({"kind": MARK, "key": f"fact:{m}", "words": f"{_words(rule, m)}: not stated for the project",
                  "elements": [], "measure": m, "field": f"facts.{m}"})
         elif why and (MARK_WORD.search(why) or "stated by the architect" in why):
-            add({"kind": MARK, "key": f"mark:{kind}:{m}", "words": f"{_words(rule, m)}: {why}", "elements": own_id,
+            # a mark set on other elements than this row's (a story's occupant load waits on its rooms' function marks:
+            # occupant_load.FUNCTION_ROOMS) names those elements, never the row's own (a level can't hold a room mark)
+            held = (more or {}).get(m)
+            on = held.get("room_ids_without_function") if isinstance(held, dict) else None
+            add({"kind": MARK, "key": f"mark:{kind}:{m}", "words": f"{_words(rule, m)}: {why}",
+                 "elements": list(on) if on else own_id,
                  "measure": m})
         else:
             add({"kind": FIX_MODEL, "key": f"model:{kind}:{m}:{why or ''}",

@@ -448,11 +448,12 @@ def test_an_exits_reason_never_says_no_rule_asks_for_its_load(apartment, monkeyp
     assert len(rows) == 4 and {r["outcome"] for r in rows} == {"pass"}, rows
 
 def test_the_panel_never_asks_for_a_mark_revit_does_not_have():
-    """Group 3 review round 4 (P2, 2026-11-24): a room with no function named the room mark 'Gordium: Function',
-    which the Revit add-in doesn't have, so the panel asked the architect to 'Mark the occupant load in the model'.
-    The words are now the routes' own for a figure no mark carries: on Ben's trial request (the four-unit apartment
-    as Revit sends it), no occupant-load ask is a mark to set, and every 'Gordium: ...' mark the answer names is one
-    the add-in defines (apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs)."""
+    """Group 3 review rounds 4 and 14: the panel never asks to mark an occupant load (no host has that mark). On
+    Ben's trial request (the four-unit apartment as Revit sends it), a room with no function is asked for its function,
+    the room mark Gordium: Function (PR #191: 'Set the room's function', field rooms[].function), selecting the rooms
+    only (never a story's level: round 14); a closet or toilet with none is never asked to set it (the mark's tooltip
+    says to leave it blank there: round 14); and every 'Gordium: ...' mark the answer or these words name is one the
+    add-in defines (apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs)."""
     import json
     from design_checker.__main__ import answer
     request = REPO / "test_data/test_sites/new_york/ithaca_city/four_unit_apartment/revit_check_site_request.json"
@@ -461,6 +462,10 @@ def test_the_panel_never_asks_for_a_mark_revit_does_not_have():
     assert "Mark the occupant load in the model" not in text
     assert "Fix the model so the occupant load can be measured" not in text
     assert "Set the room's function" in text and '"rooms[].function"' in text   # its own mark (PR #191)
+    rooms = {r["id"] for r in sent["interior"]["rooms"]}
+    asks = [a for i in json.loads(text)["result"]["view"]["items"] for a in i.get("asks") or []
+            if a.get("field") == occupant_load.FUNCTION_FIELD]
+    assert asks and all(set(a.get("elements") or []) <= rooms for a in asks), asks      # round 14: never a level
     for use in ("closet", "toilet"):                     # round 5: a closet or toilet Revit marks, with no function
         marked = copy.deepcopy(sent)
         marked["interior"]["rooms"][0]["use"] = use
@@ -468,6 +473,9 @@ def test_the_panel_never_asks_for_a_mark_revit_does_not_have():
         assert f"a {use} with no function stated" in got, use
         assert "Fix the model so the occupant load can be measured" not in got, use
         assert "Mark the occupant load in the model" not in got, use
+        closet = marked["interior"]["rooms"][0]["id"]
+        assert not any(closet in (a.get("elements") or []) for i in json.loads(got)["result"]["view"]["items"]
+                       for a in i.get("asks") or [] if a.get("field") == occupant_load.FUNCTION_FIELD), use   # round 14
     text += got
     marks = set(re.findall(r'"(Gordium: [^"]+)"',
                            (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")))
@@ -481,7 +489,7 @@ def test_the_panel_never_asks_for_a_mark_revit_does_not_have():
 def test_a_story_names_a_missing_function_only_where_a_room_lacks_one():
     """Group 3 review round 5 (P3, 2026-11-24): a story whose rooms are open for another reason (a floor area not
     measured, a function the table sends elsewhere) never says a function is what's missing; one with a room of no
-    function does, in the routes' words (asked by hand)."""
+    function does, asking for that function (the room mark Gordium: Function, round 14)."""
     stated = occupant_load.FUNCTION_STATED
     def story_words(rooms, measures):
         parts = {"story": [{"id": "L1", "measures": {"story_gross_floor_area": 1000}, "not_measured": {}}],
@@ -517,15 +525,16 @@ def _asked(why):
 
 def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answered():
     """Group 3 review rounds 6 and 7 (2026-11-25): a load Gordium or a person must work out (no function, a room
-    others pass through or a loaded room is served through, a function the table sends elsewhere, an exit, a story of
-    no loaded room, or one left open by a room of no function or one sent elsewhere) is asked for by hand; only what the model itself can fix (an
-    outline, a floor area, a function value no table row has, a use or exit against a function) is a model fix; none
-    is ever a mark to set (no host has an occupant-load mark). The class: every reason occupant_load.py defines, so a
+    others pass through or a loaded room is served through, a function the table sends elsewhere, an exit, a closet or
+    toilet with no function, a story of no loaded room, or one left open by a room sent elsewhere) is asked for by
+    hand; a room with no function, and a story left open by one, is asked for that function, the room mark Gordium:
+    Function (PR #191, round 14); only what the model itself can fix (an outline, a floor area, a function value no
+    table row has, a use or exit against a function) is a model fix; none is ever an occupant load to mark. The class: every reason occupant_load.py defines, so a
     new one can't slip through unclassified; and none says a function 'is stated' when it isn't."""
     ol = occupant_load
     by_hand, model, function = "by hand", "model", "function"
     reasons = {
-        "NOT_GIVEN": (ol.NOT_GIVEN, function), "NO_LOAD": (ol.NO_LOAD.format(use="closet"), function),
+        "NOT_GIVEN": (ol.NOT_GIVEN, function), "NO_LOAD": (ol.NO_LOAD.format(use="closet"), by_hand),
         "THROUGH": (ol.THROUGH, by_hand), "SERVED": (ol.SERVED.format(names="st", es="es", their="its"), by_hand),
         "ELSEWHERE": (ol.ELSEWHERE.format(f="mall", where="402.8.2"), by_hand), "IS_EXIT": (ol.IS_EXIT, by_hand),
         "STORY_NONE": (ol.STORY_NONE, by_hand),
@@ -535,7 +544,8 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         "CORRIDOR_FUNCTION": (ol.CORRIDOR_FUNCTION.format(name="c", f="business"), model),
         "GROSS_NOT_MEASURED": (ol.GROSS_NOT_MEASURED, model), "AREAS_OVER": (ol.AREAS_OVER, model),
     }
-    fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "LOAD_STATED", "STORY_STATED", "STORY_FUNCTION"}
+    fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "FUNCTION_ROOMS", "LOAD_STATED",
+                 "STORY_STATED", "STORY_FUNCTION"}
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
     cases = [(w, kind) for w, kind in reasons.values()] + [

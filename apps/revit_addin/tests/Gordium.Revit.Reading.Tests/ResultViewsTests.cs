@@ -80,6 +80,10 @@ public sealed class ResultViewsTests
         Assert.Equal(FixKind.Mark, card.Kind);
         Assert.Equal("Set the room's function", card.Headline);
         Assert.Equal(Marks.RoomFunction, Marks.All.Single(k => k.Feeds == card.Field));
+        // the rooms only (the four apartments), never a story's level: the mark is on Rooms (round 14)
+        Assert.Equal(4, card.Elements.Count);
+        Assert.DoesNotContain("933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e", card.Elements);
+        Assert.DoesNotContain("6341822b-d4f3-11d3-a039-0000863f1523-000026da", card.Elements);
         Assert.DoesNotContain(m.Fix.SelectMany(g => g.Cards), c => c.Headline.Contains("occupant load", StringComparison.Ordinal));
     }
 

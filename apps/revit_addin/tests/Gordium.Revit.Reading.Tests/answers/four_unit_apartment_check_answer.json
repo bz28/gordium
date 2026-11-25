@@ -38533,7 +38533,8 @@
        "key": "mark:story:story_occupant_load",
        "words": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
        ],
        "measure": "story_occupant_load"
       },
@@ -38575,7 +38576,8 @@
        "key": "field:rooms[].function",
        "why": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
        ],
        "measure": "story_occupant_load",
        "kind": "mark",
@@ -38784,7 +38786,8 @@
        "key": "mark:story:story_occupant_load",
        "words": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "6341822b-d4f3-11d3-a039-0000863f1523-000026da"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
        ],
        "measure": "story_occupant_load"
       },
@@ -38826,7 +38829,8 @@
        "key": "field:rooms[].function",
        "why": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "6341822b-d4f3-11d3-a039-0000863f1523-000026da"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
        ],
        "measure": "story_occupant_load",
        "kind": "mark",
@@ -39048,7 +39052,8 @@
        "key": "mark:story:story_occupant_load",
        "words": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
        ],
        "measure": "story_occupant_load"
       },
@@ -39090,7 +39095,8 @@
        "key": "field:rooms[].function",
        "why": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
        ],
        "measure": "story_occupant_load",
        "kind": "mark",
@@ -39312,7 +39318,8 @@
        "key": "mark:story:story_occupant_load",
        "words": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "6341822b-d4f3-11d3-a039-0000863f1523-000026da"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
        ],
        "measure": "story_occupant_load"
       },
@@ -39354,7 +39361,8 @@
        "key": "field:rooms[].function",
        "why": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "6341822b-d4f3-11d3-a039-0000863f1523-000026da"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
        ],
        "measure": "story_occupant_load",
        "kind": "mark",
@@ -39580,7 +39588,8 @@
        "key": "mark:story:story_occupant_load",
        "words": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
        ],
        "measure": "story_occupant_load"
       },
@@ -39622,7 +39631,8 @@
        "key": "field:rooms[].function",
        "why": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
        ],
        "measure": "story_occupant_load",
        "kind": "mark",
@@ -39848,7 +39858,8 @@
        "key": "mark:story:story_occupant_load",
        "words": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "6341822b-d4f3-11d3-a039-0000863f1523-000026da"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
        ],
        "measure": "story_occupant_load"
       },
@@ -39890,7 +39901,8 @@
        "key": "field:rooms[].function",
        "why": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "6341822b-d4f3-11d3-a039-0000863f1523-000026da"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
        ],
        "measure": "story_occupant_load",
        "kind": "mark",
@@ -40112,7 +40124,8 @@
        "key": "mark:story:story_occupant_load",
        "words": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
        ],
        "measure": "story_occupant_load"
       },
@@ -40154,7 +40167,8 @@
        "key": "field:rooms[].function",
        "why": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
        ],
        "measure": "story_occupant_load",
        "kind": "mark",
@@ -40376,7 +40390,8 @@
        "key": "mark:story:story_occupant_load",
        "words": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "6341822b-d4f3-11d3-a039-0000863f1523-000026da"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
        ],
        "measure": "story_occupant_load"
       },
@@ -40418,7 +40433,8 @@
        "key": "field:rooms[].function",
        "why": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "6341822b-d4f3-11d3-a039-0000863f1523-000026da"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
        ],
        "measure": "story_occupant_load",
        "kind": "mark",
@@ -40646,7 +40662,8 @@
        "key": "mark:story:story_occupant_load",
        "words": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
        ],
        "measure": "story_occupant_load"
       },
@@ -40688,7 +40705,8 @@
        "key": "field:rooms[].function",
        "why": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L1 (1), APARTMENT NORTH L1 (5)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
        ],
        "measure": "story_occupant_load",
        "kind": "mark",
@@ -40916,7 +40934,8 @@
        "key": "mark:story:story_occupant_load",
        "words": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "6341822b-d4f3-11d3-a039-0000863f1523-000026da"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
        ],
        "measure": "story_occupant_load"
       },
@@ -40958,7 +40977,8 @@
        "key": "field:rooms[].function",
        "why": "occupant load: a room on the story has no occupant load worked out (APARTMENT SOUTH L2 (6), APARTMENT NORTH L2 (10)), so the story's isn't either: set the room's Table 1004.5 function (the room mark Gordium: Function)",
        "elements": [
-        "6341822b-d4f3-11d3-a039-0000863f1523-000026da"
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+        "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
        ],
        "measure": "story_occupant_load",
        "kind": "mark",
@@ -84711,7 +84731,13 @@
          "room": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
          "door": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77a"
         },
-        "computed_day_care_occupant_load": 0.0
+        "computed_day_care_occupant_load": 0.0,
+        "story_occupant_load": {
+         "room_ids_without_function": [
+          "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
+          "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
+         ]
+        }
        },
        "readings": {
         "story_building_area": [
@@ -86067,7 +86093,13 @@
          "room": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
          "door": "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b780"
         },
-        "computed_day_care_occupant_load": 0.0
+        "computed_day_care_occupant_load": 0.0,
+        "story_occupant_load": {
+         "room_ids_without_function": [
+          "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
+          "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
+         ]
+        }
        },
        "readings": {
         "story_building_area": [
@@ -86747,7 +86779,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "e3432f22c34e33cfe95e4673a3f4f788d1ff435355adc6116aad27b89ad884ee",
+  "worker_fingerprint": "c92282ce43f202ae685222084f0bb0bed2b32344877408de37ce459b6461a2c8",
   "rulebook": {
    "new_york/ithaca_city": "f1f442bc800d20d22438be707d9970d7f4ea080ad5195ca6a6957c14e300b438"
   }
