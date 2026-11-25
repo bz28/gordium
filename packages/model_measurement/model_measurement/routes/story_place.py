@@ -2,8 +2,8 @@
 Code of New York State's single-exit tables read (Table 1006.3.4(1) and (2)): `story_first_above_or_below_grade`,
 `story_second_above_grade_plane` and `story_fourth_or_higher_above_grade_plane` (rule_format/parts.yaml).
 
-    places(description, reader, levels, ground) -> {level id: {"measures": {...}, "not_measured": {...},
-                                                    "more": {...}}}
+    places(description, reader, levels, stories, ground) -> {level id: {"measures": {...}, "not_measured": {...},
+                                                             "more": {...}}}
 
 The law (BCNYS 2025, Chapter 2, quoted from the book):
 - GRADE PLANE (p.48 lines 35-38): "A reference plane representing the average of finished ground level adjoining the
@@ -21,25 +21,32 @@ The law (BCNYS 2025, Chapter 2, quoted from the book):
   higher".
 
 How (docs/decisions/2026-11-25_story_facts_from_the_model.md):
-- The stories are the levels with rooms, each with the range of its rooms' finished floor elevations and its level's
-  own elevation (a sunken room widens it; an enclosed space with no room drawn in it stands on the level). Their floors must stack: one story's highest floor below the next one's lowest, else no place is
-  measured (a split level). A level with no rooms between two that have rooms may be a story nobody drew: no place
-  is measured.
+- The stories placed are the levels with rooms, each with the range of its rooms' finished floor elevations and its
+  level's own elevation (a sunken room widens it; an enclosed space with no room drawn in it stands on the level).
+  Their floors must stack (one story's highest floor below the next one's lowest), else no place is measured (a split
+  level). A level with no rooms (not at a story's floor) may be a story nobody drew rooms on (a garage, a lobby) or
+  no story (a roof, a datum): both are tried, so a place is measured only where it is the same either way.
 - The ground is only what the architect stated: flat ground (one elevation: the grade plane and the finished ground
-  everywhere), or spot grades at the walls. Spot grades are samples: Gordium's reading is that the ground between two
-  spots lies between their values (the usual surveying reading, shown with every figure measured from spots), so the
-  average along the walls is at most the highest spot within reach of them; every wall of the stories' outline must
-  have one, else nothing is measured. The slope-away rule can only lower the grade plane, below any spot at the
-  walls, so spots give no lower bound: a story is never proven a basement from spots, only from flat ground. No
-  ground stated, or existing ground (not the finished ground the code measures from), or flat ground only assumed:
-  nothing is measured.
+  everywhere), or spot grades outside the walls. Spot grades are samples: Gordium's reading is that the ground
+  between two spots lies between their values (the usual surveying reading, shown with every figure measured from
+  spots), so the average along the walls is at most the highest spot within reach of them; every wall of the
+  stories' outline (a courtyard's too) must have one, else nothing is measured. A spot inside the outline is under
+  the building, not ground beside it: left out. Outlines that come apart (two buildings) aren't placed: whose
+  ground is whose isn't known. The slope-away rule can only lower the grade plane, below any spot at the walls, so
+  spots give no lower bound: a story is never proven a basement from spots, only from flat ground. No ground stated,
+  or existing ground (not the finished ground the code measures from), or flat ground only assumed: nothing is
+  measured.
 - Each story is certainly above grade plane, certainly a basement, or could be either (every threshold tested with
-  1/16 in to spare, so a floor on the line is "either"). Being above grade plane holds for every story above one
-  that is, so the possible readings are "the lowest b stories are basements" for each b the ground allows. A fact is
-  measured only where it is the same under every such b; otherwise it is not measured and says which stories it
-  could be. Never a guess: a wrong "first", "second" or "not fourth" could pass a story that one exit can't serve.
+  1/16 in to spare, so a floor on the line is "either"). Below the top story, being above grade plane holds for
+  every story above one that is (each test only gets easier higher up), so those readings are "the lowest b stories
+  are basements"; the top story has no floor next above, so only its own floor decides it, whatever the stories
+  under it are. Every reading is tried; a story under the grade plane above one that is above it isn't placed (the
+  tables don't say what it is). A fact is measured only where it is the same in every reading; otherwise it is not
+  measured and says which stories it could be. Never a guess: a wrong "first", "second" or "not fourth" could pass a
+  story that one exit can't serve.
 """
 
+import itertools
 import math
 
 from shapely.geometry import LineString, Point
@@ -57,9 +64,11 @@ SAME = 1 / 16                # in: a figure this close to a threshold could be e
 SPOT_REACH = 24.0            # in: a spot grade this close to a wall (in plan) is the ground at that wall (the
 #                              zoning reader's own reach, places/ithaca_city/measure.py SPOT_REACH)
 WALL_LEAST = 12.0            # in: a wall of the outline shorter than this needs no spot of its own
+MOST_ROOMLESS = 8            # levels with no rooms tried both ways (2 ** 8 combinations); more: not placed
 SPOTS_READING = ("Gordium's reading: the ground between two spot grades lies between their values (the usual "
                  "surveying reading), so the grade plane is at most the highest spot at the walls ({high}); the "
                  "slope-away rule (BCNYS 202 GRADE PLANE) can only lower it")
+UNPLACED = "not placed (under the grade plane above a story that is above it)"
 
 
 # --- the ground the architect stated --------------------------------------------------------------------------------
@@ -116,59 +125,87 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
     for lid, (f_lo, f_hi) in list(floors.items()):       # the level's own floor too: an enclosed space with no
         z = elevation[lid]                               # room drawn in it is on it, its floor not given
         floors[lid] = (min(f_lo, z), max(f_hi, z))
-    order =sorted(floors, key=lambda lid: floors[lid][0])
+    order = sorted(floors, key=lambda lid: floors[lid][0])
     for a, b in zip(order, order[1:]):
         if floors[a][1] >= floors[b][0] - SAME:
             return none(Stop("place_split_level", a=stories[a].name, b=stories[b].name).reason)
-    lo, hi = floors[order[0]][0], floors[order[-1]][1]
-    gaps = [lid for lid in levels if lid not in floors and lid in elevation and lo + SAME < elevation[lid] < hi - SAME]
-    if gaps:
-        return none(Stop("place_level_no_rooms", name=levels[gaps[0]]).reason)
-    plane, why = _plane(ground, reader, stories)
+    # a level with no rooms, not at a story's floor: a story nobody drew rooms on, or none (a roof, a datum)
+    roomless = sorted(((elevation[lid], lid) for lid in levels if lid not in floors and lid in elevation),
+                      key=lambda e: e[0])
+    roomless = [(z, lid) for z, lid in roomless
+                if not any(floors[r][0] - SAME <= z <= floors[r][1] + SAME for r in order)]
+    if len(roomless) > MOST_ROOMLESS:
+        return none(Stop("place_too_many_levels", count=len(roomless)).reason)
+    plane, why = _plane(ground, stories)
     if why:
         return none(why)
-    g_lo, g_hi, ground_low, flat = plane["low"], plane["high"], plane["point"], plane["flat"]
-    above, basement = [], []
-    for i, lid in enumerate(order):
-        f_lo, f_hi = floors[lid]
-        nxt = floors[order[i + 1]] if i + 1 < len(order) else None
-        above.append(_certainly_above(f_lo, nxt, g_hi, ground_low))
-        basement.append(flat is not None and _certainly_basement(f_hi, nxt, flat))
-    # above grade plane holds upward, so: b basements for every b from those proven to those not proven above
-    b_least = next((i for i, v in enumerate(basement) if not v), len(order))
-    b_most = next((i for i, v in enumerate(above) if v), len(order))
-    counts = range(b_least, max(b_least, b_most) + 1)
-    shown = {"grade_plane_ft": [None if g_lo == -math.inf else round(g_lo / FT, 4), round(g_hi / FT, 4)],
-             "basements_possible": list(counts),
-             "floors_ft": {lid: [round(floors[lid][0] / FT, 4), round(floors[lid][1] / FT, 4)] for lid in order}}
+    seen = {lid: [] for lid in order}                    # every reading's facts (or UNPLACED) for each story placed
+    for chosen in itertools.product((False, True), repeat=len(roomless)):
+        stack = sorted([(floors[lid], lid) for lid in order] +
+                       [((z, z), lid) for (z, lid), on in zip(roomless, chosen) if on], key=lambda s: s[0][0])
+        for i, facts in _readings(stack, plane):
+            lid = stack[i][1]
+            if lid in seen:
+                seen[lid].append(facts)
+    shown = {"grade_plane_ft": [None if plane["low"] == -math.inf else round(plane["low"] / FT, 4),
+                                round(plane["high"] / FT, 4)],
+             "floors_ft": {lid: [round(floors[lid][0] / FT, 4), round(floors[lid][1] / FT, 4)] for lid in order},
+             "levels_maybe_stories": [levels[lid] for _, lid in roomless]}
     if plane.get("reading"):
         shown["reading"] = plane["reading"]
-    for i, lid in enumerate(order):
+    maybe = ", ".join(levels[lid] for _, lid in roomless)
+    for lid in order:
         got = out[lid]
         got["more"]["story_place"] = shown
-        each = [_facts(i, b) for b in counts]
         for f in FACTS:
-            values = {e[f] for e in each}
-            if len(values) == 1:
+            values = {UNPLACED if e == UNPLACED else e[f] for e in seen[lid]}
+            if len(values) == 1 and UNPLACED not in values:
                 got["measures"][f] = values.pop()
-            else:
-                got["not_measured"][f] = Stop("place_either", name=stories[lid].name,
-                                              could=" or ".join(dict.fromkeys(_said(i, b) for b in counts))).reason
+                continue
+            could = " or ".join(dict.fromkeys(e if e == UNPLACED else e["said"] for e in seen[lid]))
+            got["not_measured"][f] = (Stop("place_either_levels", name=stories[lid].name, could=could, levels=maybe)
+                                      if maybe else Stop("place_either", name=stories[lid].name, could=could)).reason
     return out
 
 
-def _facts(i: int, b: int) -> dict:
-    """Story i (0 the lowest with rooms) when the lowest b stories are basements."""
-    if i < b:
-        return {FIRST: b - i == 1, SECOND: False, FOURTH: False}
-    n = i - b + 1
-    return {FIRST: n == 1, SECOND: n == 2, FOURTH: n >= 4}
+def _readings(stack, plane):
+    """(index, facts or UNPLACED) for each story of `stack` [((lowest, highest floor), id)] in every reading the
+    ground allows: below the top, the lowest b stories basements; the top story either way its own floor allows."""
+    lo, hi, low_point, flat = plane["low"], plane["high"], plane["point"], plane["flat"]
+    n = len(stack)
+    above, basement = [], []
+    for i, ((f_lo, f_hi), _) in enumerate(stack):
+        nxt = stack[i + 1][0] if i + 1 < n else None
+        above.append(_certainly_above(f_lo, nxt, hi, low_point))
+        basement.append(_certainly_basement(f_hi, nxt, flat))
+    under = n - 1                                        # the stories below the top: monotone upward
+    b_least = next((i for i in range(under) if not basement[i]), under)
+    b_most = next((i for i in range(under) if above[i]), under)
+    tops = [s for s in (True, False) if not (s and basement[-1]) and not (not s and above[-1])]
+    for b in range(b_least, max(b_least, b_most) + 1):
+        for top in tops:
+            vec = [i >= b for i in range(under)] + [top]
+            for i, facts in enumerate(_facts_of(vec)):
+                yield i, facts
 
 
-def _said(i: int, b: int) -> str:
-    n = b - i if i < b else i - b + 1
-    nth = {1: "first", 2: "second", 3: "third"}.get(n, f"{n}th")
-    return f"the {nth} story {'below' if i < b else 'above'} grade plane"
+def _facts_of(vec: list) -> list:
+    """Each story's facts from which stories are above grade plane (True), bottom first; UNPLACED for a story under
+    the grade plane above one that is above it."""
+    out = []
+    for i, up in enumerate(vec):
+        if up:
+            k = sum(vec[:i + 1])
+            nth = {1: "first", 2: "second", 3: "third"}.get(k, f"{k}th")
+            out.append({FIRST: k == 1, SECOND: k == 2, FOURTH: k >= 4, "said": f"the {nth} story above grade plane"})
+        elif any(vec[:i]):
+            out.append(UNPLACED)
+        else:
+            first_up = next((k for k in range(i, len(vec)) if vec[k]), len(vec))
+            k = first_up - i
+            nth = {1: "first", 2: "second", 3: "third"}.get(k, f"{k}th")
+            out.append({FIRST: k == 1, SECOND: False, FOURTH: False, "said": f"the {nth} story below grade plane"})
+    return out
 
 
 def _certainly_above(f_lo, nxt, g_hi, ground_low) -> bool:
@@ -183,10 +220,12 @@ def _certainly_above(f_lo, nxt, g_hi, ground_low) -> bool:
 
 
 def _certainly_basement(f_hi, nxt, flat) -> bool:
-    """Not above grade plane, on flat ground at `flat` (the grade plane and the ground at every point)."""
-    if nxt is None or f_hi > flat - SAME:                    # its floor could be above; nothing next above to test
-        return False
-    return nxt[1] < flat + 6 * FT - SAME                    # items 1 and 3 (and so item 2) fail
+    """Not above grade plane, on flat ground at `flat` (the grade plane and the ground at every point); never from
+    spots (no lower end), and never the top story (whether its roof counts as "the floor next above" for items 1 to
+    3 the definition doesn't say: either way)."""
+    if flat is None or f_hi > flat - SAME or nxt is None:   # its floor could be entirely above grade plane, or
+        return False                                         # it is the top story
+    return nxt[1] < flat + 6 * FT - SAME                     # items 1 and 3 (and so item 2) fail
 
 
 def _floors(description, reader, stories) -> tuple:
@@ -207,7 +246,7 @@ def _floors(description, reader, stories) -> tuple:
     return floors, None
 
 
-def _plane(ground, reader, stories) -> tuple:
+def _plane(ground, stories) -> tuple:
     """The grade plane's range in inches {low, high, point (a known point of finished ground, or None), flat (its
     elevation on flat ground, else None), reading}, or why not."""
     ground = ground or {"none": Stop("no_ground").reason}
@@ -220,15 +259,18 @@ def _plane(ground, reader, stories) -> tuple:
              if isinstance(p, (list, tuple)) and len(p) == 3 and all(_number(v) for v in p)]
     if not spots or len(spots) != len(ground.get("spots") or []):
         return None, Stop("ground_spots_not_read").reason
-    outlines = [s.outer for s in stories.values() if s.outer is not None]
     if any(s.outer is None for s in stories.values() if s.rooms):
         return None, Stop("ground_no_outline").reason
     # the outlines are read in inches (the interior reader), the spots are in feet: both in inches here
-    footprint = unary_union([o.buffer(0) for o in outlines])
-    rings = [g.exterior for g in getattr(footprint, "geoms", [footprint])]
+    footprint = unary_union([s.outer.buffer(0) for s in stories.values() if s.outer is not None])
+    parts = list(getattr(footprint, "geoms", [footprint]))
+    if len(parts) != 1:
+        return None, Stop("ground_buildings_apart", count=len(parts)).reason
+    rings = [footprint.exterior, *footprint.interiors]                  # a courtyard's walls are exterior walls too
     walls = [LineString([a, b]) for r in rings for a, b in zip(r.coords, r.coords[1:]) if math.dist(a, b) >= WALL_LEAST]
+    inside = footprint.buffer(-SAME)
     at = [(Point(x * FT, y * FT), z * FT) for x, y, z in spots]
-    near = [(p, z) for p, z in at if any(w.distance(p) <= SPOT_REACH for w in walls)]
+    near = [(p, z) for p, z in at if not inside.contains(p) and any(w.distance(p) <= SPOT_REACH for w in walls)]
     bare = [w for w in walls if not any(w.distance(p) <= SPOT_REACH for p, _ in near)]
     if not walls or bare:
         return None, Stop("ground_wall_bare", count=len(bare) or 1).reason

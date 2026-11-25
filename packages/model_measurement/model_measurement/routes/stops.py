@@ -132,14 +132,20 @@ STOPS = {
     "place_level_not_read": "the elevation of the level {name} isn't read",
     "place_split_level": "the floors of {a} and {b} overlap in height (a split level): which story is above which "
                          "isn't clear",
-    "place_level_no_rooms": "the level {name} lies between stories with rooms but has none: it may be a story not "
-                            "drawn, which would change every story's number above it",
     "place_either": "{name} could be {could}, depending on where the grade plane lies within what the ground stated "
                     "allows",
+    "place_either_levels": "{name} could be {could}, depending on where the grade plane lies within what the ground "
+                           "stated allows and on whether the levels with no rooms ({levels}) are stories nobody drew "
+                           "rooms on",
+    "place_too_many_levels": "{count} levels have no rooms: whether each is a story nobody drew rooms on is tried both "
+                             "ways only up to 8",
+    "ground_buildings_apart": "the stories' outlines come apart in {count} pieces (separate buildings?): which spot "
+                              "grades are each building's ground isn't known",
     # whether the story's rooms exit directly outside (BCNYS 1006.3.4 item 2: __init__.rooms_exit_outside)
     "outside_no_rooms": "the story has no room besides its exits and the closets they serve",
-    "outside_door_not_marked": "the room {name} has a door to the outside ({door}) not marked as an exit door at the level of "
-                               "exit discharge: whether it is one isn't known (exits are marked, never guessed)",
+    "outside_door_not_marked": "the room {name} has a door to the outside ({door}) not marked as an exit door at the "
+                               "level of exit discharge: whether it is one isn't known (exits are marked, never "
+                               "guessed)",
     # each door's own part (doors.py, section group 6a): its sizes only from the maker's stated clear opening
     "door_no_stated_clear": "the door {name} has no maker's stated clear opening (its type's clear width and height, "
                             "confirmed): its size is never taken from the door's own size or its leaf",

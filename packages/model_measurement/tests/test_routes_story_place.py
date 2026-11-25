@@ -30,7 +30,8 @@ BOX = Polygon([(0, 0), (40 * FT, 0), (40 * FT, 30 * FT), (0, 30 * FT)])     # ou
 WALL_SPOTS = [(20, -1), (41, 15), (20, 31), (-1, 15)]                        # 1 ft outside each wall, feet
 PLACE_KEYS = {"no_ground", "ground_existing", "ground_assumed", "ground_spots_not_read", "ground_no_outline",
               "ground_wall_bare", "place_no_rooms", "place_story_no_rooms", "place_floor_not_read",
-              "place_level_not_read", "place_split_level", "place_level_no_rooms", "place_either"}
+              "place_level_not_read", "place_split_level", "place_either", "place_either_levels",
+              "place_too_many_levels", "ground_buildings_apart"}
 
 
 def building(floors, extra_levels=(), outline=BOX):
@@ -73,7 +74,8 @@ def _worlds(floors, ground):
 
 
 def _oracle(floors, world, pick):
-    """Each story's (number, above) in one world, `pick` choosing each stepped floor's height for "next above"."""
+    """Which stories are above grade plane in one world, `pick` choosing each stepped floor's height for "next
+    above"; None for the top story whose floor isn't entirely above (a roof isn't a floor: tried both ways)."""
     g, m, p = world
     above = []
     for i, f in enumerate(floors):
@@ -81,68 +83,85 @@ def _oracle(floors, world, pick):
             above.append(True)
             continue
         if i + 1 == len(floors):
-            above.append(None)                                   # the roof next above: not drawn, either way
+            above.append(None)
             continue
         n = pick[i + 1]
         above.append(n > g + 6 or n > m + 12 or (p is not None and n > p + 6))
     return above
 
 
-def _facts_in(floors, above):
-    """Each story's three facts from which stories are above grade plane (None: either: both tried by the caller)."""
+UNPLACED = (None, None, None)       # a story under the grade plane above one that is above it: the tables don't say
+
+
+def _facts_in(above):
+    """Each story's (first, second, fourth) from which stories are above grade plane."""
     out = []
     ups = [i for i, a in enumerate(above) if a]
     for i, a in enumerate(above):
         if a:
             n = sum(1 for k in ups if k <= i)
-            out.append({FIRST: n == 1, SECOND: n == 2, FOURTH: n >= 4})
+            out.append((n == 1, n == 2, n >= 4))
+        elif any(k < i for k in ups):
+            out.append(UNPLACED)
         else:
-            first_up = min(ups) if ups else len(above)
-            below = sum(1 for k in range(i, first_up) if not above[k])
-            out.append({FIRST: below == 1, SECOND: False, FOURTH: False})
+            first_up = min([k for k in ups if k > i], default=len(above))
+            out.append((first_up - i == 1, False, False))
     return out
 
 
-def oracle(floors, ground):
-    """Every combination of facts the stated ground allows, per story: [set of (first, second, fourth)]."""
+def oracle(floors, ground, extra=()):
+    """Every combination of facts the stated ground allows, per story with rooms: [set of (first, second, fourth)].
+    `extra`: levels with no rooms (feet): each one, unless at a story's floor, a story nobody drew rooms on or not."""
     seen = [set() for _ in floors]
-    picks = list(itertools.product(*[sorted(set(f)) for f in floors]))
-    for world in _worlds(floors, ground):
-        for pick in picks:
-            above = _oracle(floors, world, pick)
-            for top in ((True, False) if above[-1] is None else (above[-1],)):
-                got = _facts_in(floors, above[:-1] + [top])
-                for i, f in enumerate(got):
-                    seen[i].add((f[FIRST], f[SECOND], f[FOURTH]))
+    extra = [z for z in extra if not any(min(f) <= z <= max(f) for f in floors)]
+    for chosen in itertools.product((False, True), repeat=len(extra)):
+        stack = sorted([(f, i) for i, f in enumerate(floors)] + [([z], None) for z, on in zip(extra, chosen) if on],
+                       key=lambda s: min(s[0]))
+        fl = [f for f, _ in stack]
+        picks = list(itertools.product(*[sorted(set(f)) for f in fl]))
+        for world in _worlds(fl, ground):
+            for pick in picks:
+                above = _oracle(fl, world, pick)
+                for top in ((True, False) if above[-1] is None else (above[-1],)):
+                    for (f, i), facts in zip(stack, _facts_in(above[:-1] + [top])):
+                        if i is not None:
+                            seen[i].add(facts)
     return seen
 
 
 STACKS = [[[0]], [[0], [10]], [[0], [10], [20], [30]], [[-10], [0], [10], [20], [30]], [[-4], [6], [16]],
           [[-8], [2], [12], [22]], [[-10, -9], [0], [10]], [[0, -0.6], [10, 9.5]], [[-6], [3.5], [14]],
-          [[-14], [-4], [6], [16], [26]], [[2], [13]], [[-12], [-2]], [[0], [6], [12], [18], [24]]]
+          [[-14], [-4], [6], [16], [26]], [[2], [13]], [[-12], [-2]], [[0], [6], [12], [18], [24]], [[-10], [0]],
+          [[-14], [-4], [6]]]
+EXTRAS = [(), (0,), (-4,), (35,), (5, 30)]        # levels with no rooms: a garage under, a datum, a roof, a gap
 GROUNDS = ([{"flat": z} for z in (-8, -6, -4, -2, -0.5, 0, 0.5, 2, 3.5, 4, 6, 7, 10)]
            + [{"spots": [[x, y, z] for (x, y), z in zip(WALL_SPOTS, zs)]}
-              for zs in ((0, 0, 0, 0), (-1, 0, 1, 0), (-6, -2, 0, -4), (2, 2, 4, 3), (-12, 0, 0, -10), (5, 6, 7, 8))])
+              for zs in ((0, 0, 0, 0), (-1, 0, 1, 0), (-6, -2, 0, -4), (2, 2, 4, 3), (-12, 0, 0, -10), (5, 6, 7, 8),
+                         (-13, 0, 0, -13), (-14, 0, 0, -10))])
 
 
 @pytest.mark.parametrize("floors", STACKS, ids=lambda f: "_".join(str(min(x)) for x in f))
 def test_every_place_measured_is_the_same_in_every_world_the_ground_stated_allows(floors):
-    """The property: a fact measured is the oracle's one value; a fact the oracle can't settle is never measured. And
-    flat ground settles every story whose floors are clear of the thresholds, where the top one is above the ground
-    (the measuring is no lazier than it must be there)."""
-    for ground in GROUNDS + [None]:
-        got = placed(floors, ground or {"none": "none stated"})
-        seen = oracle(floors, ground or {})
-        for i, lid in enumerate(f"L{k}" for k in range(len(floors))):
-            for k, fact in enumerate((FIRST, SECOND, FOURTH)):
-                values = {s[k] for s in seen[i]}
-                if fact in got[lid]["measures"]:
-                    assert values == {got[lid]["measures"][fact]}, (floors, ground, lid, fact, values)
-                else:
-                    assert fact in got[lid]["not_measured"], (floors, ground, lid, fact)
-        if ground and "flat" in ground and all(len(set(f)) == 1 for f in floors) and \
-                all(abs(f[0] - ground["flat"] - d) > 0.1 for f in floors for d in (0, 6)) and                 floors[-1][0] > ground["flat"]:            # a top story at or below grade has no floor above to test
-            assert all(f in got[f"L{i}"]["measures"] for i in range(len(floors) - 1) for f in FACTS), (floors, ground)
+    """The property: a fact measured is the oracle's one value; a fact the oracle can't settle is never measured,
+    with or without levels that have no rooms. And flat ground with no such level settles every story whose floors
+    are clear of the thresholds, where the top one is above the ground (the measuring is no lazier than it must be
+    there)."""
+    for extra in EXTRAS:
+        for ground in GROUNDS + [None]:
+            got = placed(floors, ground or {"none": "none stated"}, extra_levels=extra)
+            seen = oracle(floors, ground or {}, extra)
+            for i, lid in enumerate(f"L{k}" for k in range(len(floors))):
+                for k, fact in enumerate((FIRST, SECOND, FOURTH)):
+                    values = {s[k] for s in seen[i]}
+                    if fact in got[lid]["measures"]:
+                        assert values == {got[lid]["measures"][fact]}, (floors, extra, ground, lid, fact, values)
+                    else:
+                        assert fact in got[lid]["not_measured"], (floors, extra, ground, lid, fact)
+            clear = all(len(set(f)) == 1 and all(abs(f[0] - ground["flat"] - d) > 0.1 for d in (0, 6))
+                        for f in floors) if ground and "flat" in ground else False
+            if clear and not extra and floors[-1][0] > ground["flat"]:      # a top story at or below grade has no
+                assert all(f in got[f"L{i}"]["measures"]                    # floor above to test
+                           for i in range(len(floors) - 1) for f in FACTS), (floors, ground)
 
 
 def test_the_oracle_catches_a_wrong_place():
@@ -247,7 +266,10 @@ def test_each_reason_a_place_isnt_measured():
     said("ground_no_outline", _reason(placed([[0]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS]}, outline=None)))
     said("ground_wall_bare", _reason(placed([[0]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS[:3]]})))
     said("place_story_no_rooms", _reason(placed([[0]], {"flat": 0}, extra_levels=(30,)), "X0"))
-    said("place_level_no_rooms", _reason(placed([[0], [20]], {"flat": 0}, extra_levels=(10,))))
+    said("place_either_levels", _reason(placed([[10], [20]], {"flat": 0}, extra_levels=(0,))))
+    said("place_too_many_levels", _reason(placed([[0]], {"flat": 0}, extra_levels=tuple(range(10, 100, 10)))))
+    two = BOX.union(Polygon([(60 * FT, 0), (80 * FT, 0), (80 * FT, 20 * FT), (60 * FT, 20 * FT)]))
+    said("ground_buildings_apart", _reason(placed([[0]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS]}, outline=two)))
     said("place_split_level", _reason(placed([[0, 6], [5]], {"flat": 0})))
     said("place_either", placed([[-4], [6]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS]})["L1"]["not_measured"][FIRST])
     desc, stories = building([[0]])
@@ -283,3 +305,60 @@ def test_a_floor_on_a_threshold_is_either():
     got = placed([[0], [6]], {"flat": 0})
     assert FIRST not in got["L1"]["measures"]
     assert got["L0"]["measures"][FIRST] is True              # the first above, or the first below: either way
+
+
+# --- review round 1 (2026-11-25): each finding's pin --------------------------------------------------------------
+
+def test_a_level_with_no_rooms_under_the_lowest_story_may_be_a_story():
+    """A garage or lobby level with no rooms drawn, at 0 on flat ground at 0, under rooms at 10 and 20: if it is a
+    story, the rooms' levels are the second and third. Before, it was ignored and Level 0 measured the first (a
+    false pass for Group A's one exit on a second story)."""
+    got = placed([[10], [20]], {"flat": 0}, extra_levels=(0,))
+    assert FIRST not in got["L0"]["measures"] and SECOND not in got["L1"]["measures"]
+    assert "Datum 0" in got["L0"]["not_measured"][FIRST]
+
+
+def test_a_datum_under_the_slab_changes_nothing():
+    """A foundation level 4 ft under a slab on flat ground: a story there would be a basement, so the slab is the
+    first story above grade plane either way."""
+    got = placed([[0], [10]], {"flat": 0}, extra_levels=(-4,))
+    assert got["L0"]["measures"][FIRST] is True and got["L1"]["measures"][SECOND] is True
+
+
+def test_the_top_story_under_the_grade_plane_is_never_placed_above_it():
+    """A walk-out on a slope: spots at -13 ft and 0 ft, floors at -10 and 0. Level 0 is above grade plane by item 2
+    (its floor above is more than 12 ft over the low spot); Level 1, the top, has no floor above, and its floor may
+    be under the grade plane (at 0): it isn't the second story above for certain. Before, it was measured so."""
+    spots = {"spots": [[20, -1, -13], [41, 15, 0], [20, 31, 0], [-1, 15, -13]]}
+    got = placed([[-10], [0]], spots)
+    assert SECOND not in got["L1"]["measures"] and FIRST not in got["L1"]["measures"]
+
+
+def test_a_spot_grade_inside_the_building_is_not_ground_beside_it():
+    """A spot 1.5 ft inside the south wall at -26 ft was taken as finished ground (item 2's known point), making a
+    deep basement the first story above."""
+    walls = [[x, y, 0] for x, y in WALL_SPOTS]
+    without = placed([[-14], [-4], [6]], {"spots": walls})
+    with_inside = placed([[-14], [-4], [6]], {"spots": walls + [[20, 1.5, -26]]})
+    for lid in ("L0", "L1", "L2"):
+        assert with_inside[lid]["measures"] == without[lid]["measures"], lid
+    assert FIRST not in with_inside["L0"]["measures"]
+
+
+def test_two_buildings_never_share_their_ground():
+    """Two separate outlines (building B's spots far lower): never placed."""
+    two = BOX.union(Polygon([(60 * FT, 0), (80 * FT, 0), (80 * FT, 20 * FT), (60 * FT, 20 * FT)]))
+    spots = [[x, y, 0] for x, y in WALL_SPOTS] + [[70, -1, -13], [81, 10, -13], [70, 21, -13], [59, 10, -13]]
+    got = placed([[-4], [6]], {"spots": spots}, outline=two)
+    assert not set(FACTS) & set(got["L0"]["measures"])
+    assert got["L0"]["not_measured"][FIRST] == STOPS["ground_buildings_apart"].format(count=2)
+
+
+def test_a_courtyards_walls_need_spots_too():
+    """A courtyard (an inner ring of the outline) is ground adjoining exterior walls: with no spot in it, the grade
+    plane isn't known (its ground could be higher than every spot outside)."""
+    ring = BOX.difference(Polygon([(15 * FT, 10 * FT), (25 * FT, 10 * FT), (25 * FT, 20 * FT), (15 * FT, 20 * FT)]))
+    spots = [[x, y, 0] for x, y in WALL_SPOTS]
+    assert _reason(placed([[0], [10]], {"spots": spots}, outline=ring)).startswith("4 wall(s)")
+    court = spots + [[20, 11, 0], [24, 15, 0], [20, 19, 0], [16, 15, 0]]
+    assert placed([[0], [10]], {"spots": court}, outline=ring)["L1"]["measures"][SECOND] is True
