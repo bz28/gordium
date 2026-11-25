@@ -57,10 +57,10 @@ def test_every_test_listed_as_slow_is_still_a_real_test_id_shape_and_a_second_or
 
 def test_a_test_of_a_few_seconds_never_fails_a_part_by_chance():
     # PR #190 (2026-11-24): four unlisted tests of 3.0 to 3.6 s, quick on the run before, failed two parts on CI;
-    # only a test of 10 s or more fails a part, and a listed one never does
+    # only a test of 30 s or more fails a part (#203: a 12 s run of a usually quick test), and a listed one never does
     c = _conftest()
-    took = {"a::few": {"call": 3.6}, "a::nine": {"call": 9.9}, "a::ten": {"call": 10.0}}
-    assert c.unlisted_slow(took, {}) == [(10.0, "a::ten")]
+    took = {"a::few": {"call": 3.6}, "a::twelve": {"call": 12.1}, "a::thirty": {"call": 30.0}}
+    assert c.unlisted_slow(took, {}) == [(30.0, "a::thirty")]
 
 
 def test_only_a_linux_part_fails_for_an_unlisted_slow_test():
@@ -78,7 +78,7 @@ def test_the_part_itself_fails_on_linux_and_only_names_the_test_on_windows(monke
     listed = tmp_path / "durations.json"
     listed.write_text("{}", encoding="utf-8")
     monkeypatch.setattr(c, "DURATIONS", listed)
-    monkeypatch.setattr(c, "_took", {"a::slow_unlisted": {"call": 10.0}})
+    monkeypatch.setattr(c, "_took", {"a::slow_unlisted": {"call": c.TOO_SLOW}})
     for platform, failed in (("linux", True), ("win32", False)):
         monkeypatch.setattr(c.sys, "platform", platform)
         config = types.SimpleNamespace(getoption=lambda name: "1/4")
