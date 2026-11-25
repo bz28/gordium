@@ -423,7 +423,7 @@ public sealed class CauseCardsTests
     public void The_addin_runs_card_actions_on_revits_thread_and_a_tick_does_nothing_else()
     {
         var pane = Addin("ResultsPane.cs");
-        Assert.Contains("new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, SetUp, _theme)", pane, StringComparison.Ordinal);
+        Assert.Contains("new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, SetUp, _theme, SaveAnswers)", pane, StringComparison.Ordinal);
         Assert.Contains("    private static void Card(CardRequest request) => Post(", pane, StringComparison.Ordinal);
         Assert.Contains("            var selected = ShowElements(ui, request.Elements, request.What, zoom: true);\n" +
                         "            if (request.Action != CardAction.ShowAndProperties || selected == 0)\n                return;\n" +
@@ -438,7 +438,7 @@ public sealed class CauseCardsTests
         Assert.Contains("    public void TickCard(Fix group, bool ticked)\n    {\n        _looked.SetCard(group.Key, ticked);\n        RefreshTicks();\n    }", view, StringComparison.Ordinal);
         Assert.Contains("    internal void Show(PanelContent content)\n    {\n        NewCheck(content);", view, StringComparison.Ordinal);
         // compared and carried by the document's identity (review round 2 of UI changes 13-15: a Save As renames it)
-        Assert.Contains("        if (key is not null && model.Stale is null)\n            _compared[key] = (content.When, model);", view, StringComparison.Ordinal);
+        Assert.Contains("        if (key is not null && model.Stale is null)\n            _compared[key] = (content.When, model, content.Questions);", view, StringComparison.Ordinal);
         Assert.Contains("        if (_shownCheck == (content.Key ?? content.Project, content.When))\n            return;", view, StringComparison.Ordinal);
     }
 

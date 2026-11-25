@@ -22,6 +22,18 @@ internal interface IListHost
 
     /// <summary>A "What to fix" group or card, or a "By code" node, opened or folded (UI polish PR 3).</summary>
     void ToggleOpen(string key);
+
+    /// <summary>The questions card's answers, chosen and not saved (UI polish changes 22, 23).</summary>
+    SetupDraft Answers { get; }
+
+    /// <summary>A question answered in the draft: the card's Save words follow.</summary>
+    void Answered();
+
+    /// <summary>Save and check again.</summary>
+    void SaveAnswers(IReadOnlyList<ProjectQuestion> questions);
+
+    /// <summary>Open Project Information (Revit's own dialog).</summary>
+    void OpenProjectInformation();
 }
 
 /// <summary>One item of the list's ItemsSource: what <see cref="EntryView"/> draws.</summary>
@@ -82,6 +94,32 @@ internal sealed class CodeNodeItem(IListHost host, CodeNodeEntry entry) : ListIt
     internal override string? Tip => ResultViewList.Tip(Entry);
 }
 
+/// <summary>One question of the questions card (UI polish changes 22, 23).</summary>
+internal sealed class QuestionItem(IListHost host, QuestionEntry entry) : ListItem(host)
+{
+    internal QuestionEntry Entry { get; } = entry;
+
+    internal override string? Spoken => ResultViewList.Spoken(Entry);
+
+    internal override string? Tip => Entry.Question.Card.Why is { } why ? $"{Entry.Question.Card.Headline}\n\nWhy: {why}" : null;
+}
+
+/// <summary>"+ N more questions".</summary>
+internal sealed class MoreQuestionsItem(IListHost host, MoreQuestionsEntry entry) : ListItem(host)
+{
+    internal MoreQuestionsEntry Entry { get; } = entry;
+
+    internal override string? Spoken => ResultViewList.Spoken(Entry);
+}
+
+/// <summary>The questions card's foot: the scope note, Save and check again, Open Project Information.</summary>
+internal sealed class AnswerFootItem(IListHost host, AnswerFootEntry entry) : ListItem(host)
+{
+    internal AnswerFootEntry Entry { get; } = entry;
+
+    internal override string? Spoken => ResultViewList.Spoken(Entry);
+}
+
 /// <summary>The list's first entry: the worker's state and counts, made afresh each time it scrolls into view.</summary>
 internal sealed class SummaryItem(IListHost host, Func<W.UIElement> build) : ListItem(host)
 {
@@ -127,7 +165,7 @@ internal sealed class EntryStyles : C.StyleSelector
         return (W.Style)c.FindResource(item switch
         {
             RowItem => "list.row",
-            FixGroupItem or FixCardItem or CodeNodeItem => "list.opener",   // reached and opened by the keyboard too
+            FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem or AnswerFootItem => "list.opener",   // reached and opened by the keyboard too
             _ => "list.heading",
         });
     }
@@ -163,6 +201,9 @@ public sealed class EntryView : C.Border
             FixGroupItem g => FixGroupView(g),
             FixCardItem c => FixCardView(c),
             CodeNodeItem n => CodeNodeView(n),
+            QuestionItem q => QuestionView(q),
+            MoreQuestionsItem m => MoreQuestionsView(m),
+            AnswerFootItem f => AnswerFootView(f),
             _ => null,
         };
     }
@@ -207,11 +248,20 @@ public sealed class EntryView : C.Border
     private static W.UIElement FixGroupView(FixGroupItem item)
     {
         var e = item.Entry;
-        var line = Opener(item.Host, e.Key, canOpen: true, e.Open, e.Status, 14, new W.Thickness(0, 10, 0, 4));
+        var line = Opener(item.Host, e.Key, canOpen: true, e.Open, e.Status, 14, new W.Thickness(0, 16, 0, 4));   // 16 between sections (change 44)
         var see = Typed(new C.TextBlock { Text = e.Open ? "Hide" : e.Group.SeeWords, Margin = new W.Thickness(8, 0, 0, 0) }, "type.caption");
         Ink(see, PanelTokens.Accent);
         C.DockPanel.SetDock(see, C.Dock.Right);
         line.Children.Add(see);
+        // the kind of work, as its icon (change 46), in the text's colour: never a status colour
+        if (ResultViewList.IconOf(e.Group.Kind) is { } kind)
+        {
+            var icon = PanelLook.Icon(kind, 14);
+            icon.Margin = new W.Thickness(0, 1, 6, 0);
+            icon.VerticalAlignment = W.VerticalAlignment.Top;
+            C.DockPanel.SetDock(icon, C.Dock.Left);
+            line.Children.Add(icon);
+        }
         var words = new C.StackPanel();
         words.Children.Add(Ink(Typed(new C.TextBlock { Text = e.Group.Title, TextWrapping = W.TextWrapping.Wrap, FontWeight = W.FontWeights.SemiBold }, "type.body"),
                                e.Status == PanelStatus.NotChecked ? PanelTokens.TextMuted : PanelTokens.Text));
@@ -255,12 +305,209 @@ public sealed class EntryView : C.Border
         if (n.Note is { } note)                                  // which code governs, the law's quoted words on hover
             words.Children.Add(Ink(Typed(new C.TextBlock { Text = note, TextWrapping = W.TextWrapping.Wrap, ToolTip = n.NoteTooltip }, "type.caption"), PanelTokens.TextMuted));
         words.Children.Add(Ink(Typed(new C.TextBlock { Text = n.Line, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
+        if (n.Scope is { } scope)                                // the scope note, once, under the book it is said of
+        {
+            var scopeNote = ScopeNote(scope);
+            scopeNote.Margin = new W.Thickness(0, 4, 0, 2);
+            words.Children.Add(scopeNote);
+        }
         line.Children.Add(words);
         // which code governs and the law's words: said and shown on its list item (EntryStyles: ResultViewList.Spoken,
         // Tip, review round 5), and on hover here
         line.ToolTip = ResultViewList.Tip(e);
         return line;
     }
+
+    // ---- UI polish changes 22 to 24: the questions asked in the card --------------------------------------------
+
+    /// <summary>One question: its words, "N results" (opens to them), and its field's control (a dropdown, Yes / No, a
+    /// box) or why there is none. A choice goes to the draft only: nothing is written until Save.</summary>
+    private static W.UIElement QuestionView(QuestionItem item)
+    {
+        var e = item.Entry;
+        var q = e.Question;
+        var box = new C.StackPanel { Margin = new W.Thickness(28, 8, 4, 2) };
+        var head = new C.DockPanel();
+        var count = Typed(new C.TextBlock
+        {
+            Text = PaneWords.Results(q.Affects), Margin = new W.Thickness(8, 0, 0, 0), Cursor = I.Cursors.Hand,
+            ToolTip = e.Open ? "Hide the results waiting on it" : $"See the {PaneWords.Results(q.Affects)} waiting on it ({ProjectQuestions.Affects(q.Affects)})",
+        }, "type.caption");
+        Ink(count, PanelTokens.Accent);
+        count.MouseLeftButtonDown += (_, a) =>
+        {
+            a.Handled = true;
+            item.Host.ToggleOpen(e.Key);
+        };
+        C.DockPanel.SetDock(count, C.Dock.Right);
+        head.Children.Add(count);
+        head.Children.Add(Typed(new C.TextBlock { Text = q.Card.Headline, TextWrapping = W.TextWrapping.Wrap }, Body));
+        box.Children.Add(head);
+        if (q.Field is { } f)
+        {
+            var chosen = item.Host.Answers.Chosen(f.Mark);
+            box.Children.Add(AnswerControl(item, f, chosen ?? f.CurrentChoice?.Value ?? f.Current));
+            if (f.Problem is not null && chosen is null)
+                box.Children.Add(Ink(Typed(new C.TextBlock { Text = f.Problem, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 3, 0, 0) }, Caption), PanelTokens.StatusReview));
+        }
+        else
+            box.Children.Add(Muted(ProjectQuestions.NoField, top: 2));
+        return box;
+    }
+
+    /// <summary>A question's control, as the Setup form's (the same field, the same allowed values).</summary>
+    private static W.UIElement AnswerControl(QuestionItem item, SetupField f, string? shown)
+    {
+        var host = item.Host;
+        var name = item.Entry.Question.Card.Headline;
+        switch (f.Kind)
+        {
+            case FieldKind.Choice:
+            {
+                var combo = new C.ComboBox { Margin = new W.Thickness(0, 4, 0, 0), MaxDropDownHeight = 280, IsEditable = false };
+                W.Automation.AutomationProperties.SetName(combo, name);
+                foreach (var c in f.Choices)
+                    combo.Items.Add(new C.ComboBoxItem { Content = c.Label, Tag = c.Value });
+                var at = f.Choices.ToList().FindIndex(c => c.Value == shown);
+                combo.SelectedIndex = at;
+                var hint = Muted("Choose…");
+                hint.IsHitTestVisible = false;
+                hint.Margin = new W.Thickness(8, 9, 24, 0);
+                hint.Visibility = at < 0 ? W.Visibility.Visible : W.Visibility.Collapsed;
+                // only the architect's own pick is a choice: setting the shown value above is not
+                combo.SelectionChanged += (_, _) =>
+                {
+                    if (combo.SelectedItem is not C.ComboBoxItem { Tag: string value })
+                        return;
+                    host.Answers.Choose(f.Mark, value);
+                    hint.Visibility = W.Visibility.Collapsed;
+                    host.Answered();
+                };
+                var grid = new C.Grid();
+                grid.Children.Add(combo);
+                grid.Children.Add(hint);
+                return grid;
+            }
+            case FieldKind.YesNo:
+            {
+                var row = new C.StackPanel { Orientation = C.Orientation.Horizontal, Margin = new W.Thickness(0, 4, 0, 0) };
+                var buttons = new List<C.Primitives.ToggleButton>();
+                foreach (var c in f.Choices)
+                {
+                    var t = new C.Primitives.ToggleButton
+                    {
+                        Content = c.Label, IsChecked = shown == c.Value, MinWidth = 48, Padding = new W.Thickness(10, 2, 10, 2),
+                        Margin = new W.Thickness(buttons.Count == 0 ? 0 : 2, 0, 0, 0),
+                    };
+                    W.Automation.AutomationProperties.SetName(t, $"{name}: {c.Label}");
+                    var value = c.Value;
+                    t.Click += (_, _) =>
+                    {
+                        host.Answers.Choose(f.Mark, value);
+                        foreach (var b in buttons)
+                            b.IsChecked = ReferenceEquals(b, t);
+                        host.Answered();
+                    };
+                    buttons.Add(t);
+                    row.Children.Add(t);
+                }
+                return row;
+            }
+            default:
+            {
+                var number = f.Kind is FieldKind.Number or FieldKind.Feet;
+                var text = new C.TextBox
+                {
+                    Text = shown ?? "", Margin = new W.Thickness(0, 4, 0, 0), MinWidth = number ? 90 : 0, MaxWidth = number ? 120 : double.PositiveInfinity,
+                    HorizontalAlignment = number ? W.HorizontalAlignment.Left : W.HorizontalAlignment.Stretch,
+                };
+                // a length (or an area, #193) is typed in the project's unit, said beside the box as the Setup form's label
+                // says it (review round 1: "20" in a metric project is 20 m), and feet (square feet) when Gordium can't read it
+                var unit = f.Kind == FieldKind.Feet ? f.LengthUnit : null;
+                W.Automation.AutomationProperties.SetName(text, unit is null ? name : $"{name}, in {unit.Words}");
+                // the draft follows every keystroke (an emptied box chooses nothing), Save's words with it
+                text.TextChanged += (_, _) =>
+                {
+                    if (text.Text.Trim().Length == 0)
+                        host.Answers.Forget(f.Mark);
+                    else
+                        host.Answers.Choose(f.Mark, text.Text);
+                    host.Answered();
+                };
+                if (unit is null)
+                    return text;
+                var row = new C.StackPanel { Orientation = C.Orientation.Horizontal };
+                row.Children.Add(text);
+                var symbol = Muted(ProjectQuestions.UnitWords(unit));
+                symbol.Margin = new W.Thickness(6, 6, 0, 0);
+                row.Children.Add(symbol);
+                return row;
+            }
+        }
+    }
+
+    private static W.UIElement MoreQuestionsView(MoreQuestionsItem item)
+    {
+        var e = item.Entry;
+        var t = Typed(new C.TextBlock { Text = ProjectQuestions.MoreWords(e.Hidden, e.Open), Margin = new W.Thickness(28, 6, 0, 2), Cursor = I.Cursors.Hand }, Caption);
+        Ink(t, PanelTokens.Accent);
+        t.MouseLeftButtonDown += (_, a) =>
+        {
+            a.Handled = true;
+            item.Host.ToggleOpen(e.Key);
+        };
+        return t;
+    }
+
+    /// <summary>The scope note (change 24), what Save does, Save and check again, Open Project Information.</summary>
+    private static W.UIElement AnswerFootView(AnswerFootItem item)
+    {
+        var e = item.Entry;
+        var box = new C.StackPanel { Margin = new W.Thickness(28, 10, 4, 8) };
+        if (e.Scope is { } scope)
+            box.Children.Add(ScopeNote(scope));
+        box.Children.Add(Muted(ProjectQuestions.NothingSaved, top: e.Scope is null ? 0 : 8));
+        var n = ProjectQuestions.Unsaved(e.Questions, item.Host.Answers);
+        var save = new C.Button
+        {
+            Content = ProjectQuestions.SaveWords(n), IsEnabled = n > 0, Tag = item, Padding = new W.Thickness(12, 3, 12, 3),
+            Margin = new W.Thickness(0, 6, 0, 0), HorizontalAlignment = W.HorizontalAlignment.Left,
+            ToolTip = "Writes your answers to Project Information as one step (Ctrl+Z undoes it), then checks the project again",
+        };
+        save.SetResourceReference(StyleProperty, "button.primary");
+        save.Click += (_, a) =>
+        {
+            a.Handled = true;
+            item.Host.SaveAnswers(e.Questions);
+        };
+        box.Children.Add(save);
+        var pi = CauseCardsView.Link("Open Project Information", item.Host.OpenProjectInformation);
+        pi.HorizontalAlignment = W.HorizontalAlignment.Left;
+        pi.Margin = new W.Thickness(0, 6, 0, 0);
+        box.Children.Add(pi);
+        box.MouseLeftButtonDown += (_, a) => a.Handled = true;              // never selected
+        return box;
+    }
+
+    /// <summary>The scope note: an information box (the accent's selection fill, never a status colour), its icon.</summary>
+    internal static C.Border ScopeNote(string words)
+    {
+        var line = new C.DockPanel();
+        var icon = Typed(new C.TextBlock { Text = "ⓘ" }, Body);
+        icon.Margin = new W.Thickness(0, 0, 8, 0);
+        icon.VerticalAlignment = W.VerticalAlignment.Top;
+        C.DockPanel.SetDock(icon, C.Dock.Left);
+        line.Children.Add(icon);
+        line.Children.Add(Typed(new C.TextBlock { Text = words, TextWrapping = W.TextWrapping.Wrap }, Caption));
+        var b = new C.Border { Child = line, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4), Padding = new W.Thickness(8, 6, 8, 6), Tag = ScopeTag };
+        b.SetResourceReference(BackgroundProperty, PanelTokens.BgSelected);
+        b.SetResourceReference(BorderBrushProperty, PanelTokens.Accent);
+        W.Automation.AutomationProperties.SetName(b, words);
+        return b;
+    }
+
+    /// <summary>The scope note's tag (the renders find it by it).</summary>
+    internal const string ScopeTag = "pane.scope";
 
     private static W.UIElement Heading(HeadingItem item)
     {
