@@ -32,7 +32,7 @@ PLACE_KEYS = {"no_ground", "ground_existing", "ground_assumed", "ground_spots_no
               "ground_wall_bare", "place_no_rooms", "place_story_no_rooms", "place_floor_not_read",
               "place_level_not_read", "place_split_level", "place_either", "place_either_levels",
               "place_too_many_levels", "ground_buildings_apart", "place_levels_not_all", "place_description",
-              "ground_spots_not_finished", "ground_disagrees", "ground_openings_not_read"}
+              "ground_spots_not_finished", "ground_disagrees", "ground_openings_not_read", "ground_disagrees_spots"}
 
 
 def building(floors, extra_levels=(), outline=BOX):
@@ -274,6 +274,10 @@ def test_each_reason_a_place_isnt_measured():
     said("ground_disagrees", _reason(places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})))
     desc["openings"] = [{"id": "w", "ground_outside": "low"}]
     said("ground_openings_not_read", _reason(places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})))
+    spots = {"spots": [[x, y, 0] for x, y in WALL_SPOTS]}
+    said("ground_openings_not_read", _reason(places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, spots)))
+    desc["openings"] = [{"id": "w", "ground_outside": 7}]
+    said("ground_disagrees_spots", _reason(places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, spots)))
     said("ground_assumed", ground_of({"ground_is_flat": True, "grade_elevation": 0, "ground_assumed": "flat"})["none"])
     said("ground_spots_not_read", _reason(placed([[0]], {"spots": [[1, 2]]})))
     said("ground_no_outline", _reason(placed([[0]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS]}, outline=None)))
@@ -462,3 +466,16 @@ def test_revits_plain_spot_grades_are_existing_ground():
     assert "none" in ground_of({"grade_from": "spot", "grade_points": spots})
     assert "none" in ground_of({"grade_points": spots})
     assert ground_of({"grade_from": "finished_spots", "grade_points": spots}) == {"spots": spots}
+
+
+# --- review round 4 (2026-11-25) ----------------------------------------------------------------------------------
+
+def test_spot_grades_never_bound_the_grade_plane_below_finished_ground_stated_higher():
+    """Spots at 0 at every wall but finished ground stated 7 ft up at a window: the grade plane may be well above the
+    highest spot (here 5 ft), making Level 0 the second story below. Before, Level 0 measured the first."""
+    desc, stories = building([[-12], [-2], [8]])
+    desc["openings"] = [{"id": "w", "ground_outside": 7}]
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories,
+                 {"spots": [[x, y, 0] for x, y in WALL_SPOTS]})
+    assert FIRST not in got["L0"]["measures"]
+    assert got["L0"]["not_measured"][FIRST] == STOPS["ground_disagrees_spots"].format(high="0 ft", stated="7 ft")

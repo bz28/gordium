@@ -43,3 +43,8 @@ Two findings confirmed by both skeptics, each a possible false pass: the Revit r
 ## Review round 3 (2026-11-25)
 
 Two findings, fixed the cautious way: flat ground proved a basement even where the description states lower finished ground at an opening or a well's floor (item 2's "at any point": a possible false pass); and Revit's plain "Spot grades", the existing ground in Gordium's own convention, were taken as finished. One test each (`test_routes_story_place.py`, round 3).
+
+
+## Review round 4 (2026-11-25)
+
+Round 3's check of finished ground stated at an opening was made for flat ground only: with spot grades, ground stated higher than every spot left the highest spot as the grade plane's top end, though the grade plane could be higher (a second basement measured the first below). Now stated ground above the highest spot places nothing, as for flat ground. One test.

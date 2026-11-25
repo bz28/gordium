@@ -126,6 +126,8 @@ STOPS = {
                                  "from the finished ground",
     "ground_disagrees": "the ground is stated flat at {flat} but finished ground at an opening is stated higher "
                         "({high}): which is right isn't known",
+    "ground_disagrees_spots": "the highest spot grade at the walls is {high} but finished ground at an opening is "
+                              "stated higher ({stated}): the spots don't bound the grade plane",
     "ground_openings_not_read": "the finished ground stated at an opening or an area well's floor can't be read",
     "ground_spots_not_read": "the spot grades can't be read (each is a point with an elevation)",
     "ground_no_outline": "the stories' outlines aren't all given, so which spot grades are at the building's walls "
