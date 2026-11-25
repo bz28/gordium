@@ -69,12 +69,16 @@ public sealed class RoomFunctionTests
 
     // ---- the suggestions --------------------------------------------------------------------------------------
 
-    private static RevitModel Model(FakeFloor floor, string? groups) =>
-        floor.Model() with
-        {
-            ProjectMarks = groups is null ? new Dictionary<Guid, MarkValue>()
-                : new Dictionary<Guid, MarkValue> { [Marks.OccupancyGroups.Guid] = new(true, Text: groups) },
-        };
+    /// <summary>The floor with the project's groups and use (an apartment building, multiple_family, unless said).</summary>
+    private static RevitModel Model(FakeFloor floor, string? groups, string? use = "multiple_family")
+    {
+        var marks = new Dictionary<Guid, MarkValue>();
+        if (groups is not null)
+            marks[Marks.OccupancyGroups.Guid] = new(true, Text: groups);
+        if (use is not null)
+            marks[Marks.Use.Guid] = new(true, Text: use);
+        return floor.Model() with { ProjectMarks = marks };
+    }
 
     /// <summary>The fake floor's doors' sides: dS joins the corridor and the stair (an exit enclosure door).</summary>
     private static List<OpeningSides> Sides() =>
@@ -137,10 +141,11 @@ public sealed class RoomFunctionTests
         // each with its basis, said beside it
         var bed = Line(Model(floor, "R-2"))!.Suggestions.Single(s => s.Element == FakeFloor.Uid("A"));
         Assert.Contains("named \"Bedroom 2\"", bed.Basis, StringComparison.Ordinal);
-        Assert.Contains("a dormitory's rooms are Dormitory instead", bed.Basis, StringComparison.Ordinal);
-        Assert.Contains("a shared lounge or dining room Assembly unconcentrated", bed.Basis, StringComparison.Ordinal);
-        // a hotel (R-1): a bedroom is its guest room, a "Living Room" may be its lounge: none offered for it
-        Assert.Equal([FakeFloor.Uid("A"), FakeFloor.Uid("L")], Suggested(Line(Model(floor, "R-1"))!).Keys);
+        Assert.Contains("a shared lounge or dining room is Assembly unconcentrated instead", bed.Basis, StringComparison.Ordinal);
+        // a hotel (R-1) or a care home (R-4): a "Bedroom" is a guest or care room, a "Living Room" may be a lounge
+        foreach (var groups in new[] { "R-1", "R-4" })
+            Assert.Equal([FakeFloor.Uid("L")], Suggested(Line(Model(floor, groups))!).Keys);
+        Assert.Contains("a building of dwelling units (multiple_family, Group R-2)", bed.Basis, StringComparison.Ordinal);
     }
 
     /// <summary>Review round 1: a suggestion only for the room type as the whole name (with a number or letter): a word
@@ -186,6 +191,7 @@ public sealed class RoomFunctionTests
             ProjectMarks = new Dictionary<Guid, MarkValue>
             {
                 [Marks.OccupancyGroups.Guid] = new(true, Text: "R-2"), [Marks.FollowsBuildingCode.Guid] = new(true, 1),
+                [Marks.Use.Guid] = new(true, Text: "multiple_family"),
             },
         };
         string? Offered(SetupDraft? draft) => SetupScreen.Build(model, Sides(), null, draft).Lines
@@ -197,6 +203,67 @@ public sealed class RoomFunctionTests
         var cleared = new SetupDraft();
         cleared.Choose(Marks.OccupancyGroups, "");
         Assert.Null(Offered(cleared));
+    }
+
+    /// <summary>Review round 2: a dormitory's or a fraternity's (Group R-2 too) bedroom is Dormitories, 50 gross, and its
+    /// living room a shared lounge: Residential (200 gross) only for a building of dwelling units.</summary>
+    [Theory]
+    [InlineData("dormitory")]
+    [InlineData("fraternity_sorority_group_house")]
+    [InlineData("hotel_motel")]
+    [InlineData(null)]
+    public void Residential_only_for_a_building_of_dwelling_units(string? use)
+    {
+        var floor = new FakeFloor();
+        Name(floor, "A", "Bedroom 2");
+        Name(floor, "B", "Living Room");
+        Name(floor, "L", "Storage");
+        Assert.Equal([FakeFloor.Uid("L")], Suggested(Line(Model(floor, "R-2", use))!).Keys);
+        foreach (var dwelling in new[] { "one_family_detached", "two_family", "multiple_family" })
+            Assert.Equal(3, Suggested(Line(Model(floor, "R-3", dwelling))!).Count);
+    }
+
+    /// <summary>Review round 2: only the room an exit enclosure door enters is left out of the count (as the route
+    /// reader reads it: its every door between rooms is that exit); where both rooms could be, both stay counted.</summary>
+    [Fact]
+    public void Only_the_exit_enclosure_itself_is_left_out_of_the_count()
+    {
+        var floor = new FakeFloor();
+        floor.SetMark("dA", Marks.Exit, new(true, Text: "Exit stair enclosure"));
+        var line = Line(Model(floor, "R-2"));
+        // dA (office A to the corridor) is now marked an exit too: A's one door is that exit, so A could be the
+        // enclosure, the corridor can't (dB is plain): A is left out, as the route reader reads it
+        Assert.DoesNotContain(FakeFloor.Uid("A"), line!.Unset);
+        // office A opening straight onto the stair, with a plain door to office B too: the stair is the enclosure, A is counted
+        List<OpeningSides> sides =
+        [
+            new(FakeFloor.Uid("dA"), FakeFloor.Uid("A"), FakeFloor.Uid("S"), FakeFloor.Level, "Level 1", 0),
+            new(FakeFloor.Uid("dB"), FakeFloor.Uid("A"), FakeFloor.Uid("B"), FakeFloor.Level, "Level 1", 0),
+            new(FakeFloor.Uid("dS2"), FakeFloor.Uid("S"), null, FakeFloor.Level, "Level 1", 0),
+        ];
+        var direct = SetupChecklist.Build(Model(floor, "R-2"), sides, "building", routes: true, buildingCode: true).Single(l => l.Key == "room_function");
+        Assert.Contains(FakeFloor.Uid("A"), direct.Unset);
+        Assert.DoesNotContain(FakeFloor.Uid("S"), direct.Unset);
+        // neither side can be told (A's one door is the exit too): both stay counted, never a guess
+        List<OpeningSides> both = [sides[0], sides[2]];
+        var unclear = SetupChecklist.Build(Model(floor, "R-2"), both, "building", routes: true, buildingCode: true).Single(l => l.Key == "room_function");
+        Assert.Contains(FakeFloor.Uid("A"), unclear.Unset);
+        Assert.Contains(FakeFloor.Uid("S"), unclear.Unset);
+    }
+
+    /// <summary>Review round 2: what stays blank is said by the Use mark, the one the count and the occupant loads read:
+    /// a room only named so ("Bathroom 1") with no Use is counted, still to set.</summary>
+    [Fact]
+    public void What_stays_blank_is_said_by_the_use_mark()
+    {
+        var floor = new FakeFloor();
+        Name(floor, "A", "Bathroom 1");
+        floor.SetMark("A", Marks.Use, null);
+        var line = Line(Model(floor, "R-2"))!;
+        Assert.Contains(FakeFloor.Uid("A"), line.Unset);
+        Assert.DoesNotContain(FakeFloor.Uid("A"), Suggested(line).Keys);             // never a suggestion for it
+        Assert.Contains("A room whose Gordium: Use is Corridor, Closet or Toilet, and an exit stair enclosure, stay blank", line.IfBlank, StringComparison.Ordinal);
+        Assert.Contains("on a room whose Gordium: Use is Corridor, Closet or Toilet", Marks.RoomFunction.Description, StringComparison.Ordinal);
     }
 
     [Theory]

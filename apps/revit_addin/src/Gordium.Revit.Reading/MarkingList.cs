@@ -466,10 +466,22 @@ public static class MarkingList
     [
         (Whole(@"(mechanical|mech\.?|boiler|furnace)(\s*(room|rm\.?))?"), "accessory_storage_mechanical", "any"),
         (Whole(@"(storage|store\s*room|stock\s*room)(\s*(room|rm\.?))?"), "storage_stock_shipping", "any"),
-        (Whole(@"(bed\s*room|bedrm|bdrm)"), "residential", "R"),
-        // a living room is a dwelling unit's in Group R-2 or R-3; in R-1 or R-4 one so named is often a shared lounge
-        (Whole(@"living(\s*room)?"), "residential", "R-2 R-3"),
+        // Residential only in a building of dwelling units (DwellingUses, Group R-2 or R-3): a dormitory's or a
+        // fraternity's bedroom is Dormitories (50 gross) and its living room a shared lounge (assembly, 15 net), and an
+        // R-1 or R-4 one so named is often a guest or care room or a lounge (review rounds 1 and 2)
+        (Whole(@"(bed\s*room|bedrm|bdrm)"), "residential", "dwelling"),
+        (Whole(@"living(\s*room)?"), "residential", "dwelling"),
     ];
+
+    /// <summary>The project uses (Gordium: Use on Project Information, the place's own words) whose building is made of
+    /// dwelling units, where a bedroom or a living room is Table 1004.5's Residential: Ithaca's one- and two-family and
+    /// multiple dwellings (never its dormitory or fraternity, sorority or group house, a congregate residence). A use
+    /// not listed (another place's, or none) is offered no Residential.</summary>
+    internal static readonly IReadOnlySet<string> DwellingUses = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached", "one_family_attached",
+        "two_family", "multiple_family",
+    };
 
     /// <summary>A room type as the whole name, with an optional number or single letter after it.</summary>
     private static Regex Whole(string type) =>
@@ -484,9 +496,9 @@ public static class MarkingList
     /// <summary>The Table 1004.5 function a room's name suggests, as the description's word, or null. <paramref name="use"/>:
     /// the room's use as marked (the description's word): an accessory storage room is Table 1004.5's accessory storage
     /// row whatever its name; a corridor, a closet or a toilet is offered none. <paramref name="groups"/>: the building's
-    /// groups as stated (null when not stated or not read): Residential is offered only where every one is Group R (a
-    /// bedroom), or R-2 or R-3 (a living room); never otherwise (a classroom building's "Bedroom" set is a stage set).</summary>
-    internal static string? FunctionFromName(string? name, string? use, IReadOnlyList<string>? groups)
+    /// groups as stated (null when not stated or not read), <paramref name="projectUse"/> the project's use: Residential is
+    /// offered only for a use of <see cref="DwellingUses"/> whose every group is R-2 or R-3; never otherwise.</summary>
+    internal static string? FunctionFromName(string? name, string? use, IReadOnlyList<string>? groups, string? projectUse = null)
     {
         if (use is "corridor" or "closet" or "toilet")
             return null;
@@ -498,8 +510,8 @@ public static class MarkingList
         {
             if (!rx.IsMatch(n))
                 continue;
-            var allowed = rooms == "any" || groups is { Count: > 0 } && groups.All(g =>
-                rooms == "R" ? g.StartsWith("R-", StringComparison.Ordinal) : rooms.Split(' ').Contains(g, StringComparer.Ordinal));
+            var allowed = rooms == "any" || projectUse is not null && DwellingUses.Contains(projectUse)
+                && groups is { Count: > 0 } && groups.All(g => g is "R-2" or "R-3");
             return allowed ? function : null;
         }
         return null;

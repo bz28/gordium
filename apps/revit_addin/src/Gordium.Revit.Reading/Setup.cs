@@ -167,7 +167,7 @@ public sealed record SetupScreen(string Noun, IReadOnlyList<SetupField> Fields, 
             f.Mark == Marks.StreetEdge && streetOnLot == false && f.Current is not null && f.Problem is null
                 ? f with { Problem = SetupSteps.StreetOffLot } : f).ToList();
         var routes = !SetupWords.IsDwelling(use) && use is not null || SetupChecklist.AnyRouteMark(model);
-        var lines = SetupChecklist.Build(model, sides ?? [], noun, routes, governs, draft?.Chosen(Marks.OccupancyGroups));
+        var lines = SetupChecklist.Build(model, sides ?? [], noun, routes, governs, draft?.Chosen(Marks.OccupancyGroups), use);
         var fixFirst = MarkReading.RoomBlockers(model).Select(e =>
             $"Room {ElementNames.Of("Rooms", e.Name, e.Number, null, 0)} " + (e.Placement switch
             {
@@ -714,8 +714,10 @@ public static class SetupChecklist
     /// <param name="routes">Show the escape-route lines (a building that isn't a house, or one already marked).</param>
     /// <param name="buildingCode">The Building Code governs: show the rooms' functions line (its occupant loads).</param>
     /// <param name="groupsTyped">The occupancy groups the form holds, chosen and not saved yet (null: as saved).</param>
+    /// <param name="projectUse">The project's use the form holds (null: as saved): Residential is offered only for a
+    /// building of dwelling units (<see cref="MarkingList.DwellingUses"/>).</param>
     public static IReadOnlyList<ChecklistLine> Build(RevitModel model, IReadOnlyList<OpeningSides> sides, string noun, bool routes,
-                                                     bool buildingCode = false, string? groupsTyped = null)
+                                                     bool buildingCode = false, string? groupsTyped = null, string? projectUse = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         ArgumentNullException.ThrowIfNull(sides);
@@ -894,7 +896,7 @@ public static class SetupChecklist
             });
         }
         if (buildingCode)
-            lines.Add(FunctionLine(model, rooms, doors, side, groupsTyped));
+            lines.Add(FunctionLine(model, rooms, doors, side, groupsTyped, projectUse ?? Marks.Text(SetupFacts.Get(model, Marks.Use))));
         return lines;
     }
 
@@ -905,7 +907,7 @@ public static class SetupChecklist
     /// are those the form holds (<c>groupsTyped</c>: chosen and not saved yet, else as saved; review round 1: a
     /// suggestion is written by Accept, apart from Save, so it is offered on what the form shows).</summary>
     private static ChecklistLine FunctionLine(RevitModel model, List<MarkedElement> rooms, List<MarkedElement> doors,
-                                              Dictionary<string, OpeningSides> side, string? groupsTyped)
+                                              Dictionary<string, OpeningSides> side, string? groupsTyped, string? projectUse)
     {
         var typed = groupsTyped ?? Marks.Text(SetupFacts.Get(model, Marks.OccupancyGroups));
         var groups = typed is null ? null : OccupancyGroupWords.Parse(typed);
@@ -921,27 +923,51 @@ public static class SetupChecklist
         foreach (var r in rooms.Where(r => Marks.Text(MarkReading.Value(r, Marks.RoomFunction)) is null && !enclosed.Contains(r.UniqueId)))
         {
             var use = RoomUses.Table.Of(Marks.Text(MarkReading.Value(r, Marks.Use)));
-            if (MarkingList.FunctionFromName(r.Name, use, groups) is not { } function)
+            if (MarkingList.FunctionFromName(r.Name, use, groups, projectUse) is not { } function)
                 continue;
             var word = RoomFunctions.Table.WordFor(function);
             var basis = use == "accessory_storage" && function == "accessory_storage_mechanical"
                 ? $"its {Marks.Use.Name} is Accessory storage"
                 : $"named \"{r.Name!.Trim()}\"" + (function == "residential"
-                    ? $"; the building's groups are {string.Join(", ", groups!)} (a dormitory's rooms are Dormitory instead, " +
-                      "and a shared lounge or dining room Assembly unconcentrated)" : "");
+                    ? $"; a building of dwelling units ({projectUse}, Group {string.Join(", ", groups!)}), so a room inside a " +
+                      "dwelling unit (a shared lounge or dining room is Assembly unconcentrated instead)" : "");
             suggestions.Add(new(r.UniqueId, false, Marks.RoomFunction, new MarkValue(true, Text: word), word, RoomName(r), basis));
         }
-        // counted: every room but those left blank by design (a corridor, an exit enclosure's, a closet or toilet: none
-        // holds a load of its own), unless it has one set (review round 1: the line never read done)
-        bool BlankByDesign(MarkedElement r) => enclosed.Contains(r.UniqueId)
+        // counted: every room but those left blank by design (a room whose Use is a corridor, a closet or a toilet, and
+        // the exit enclosure itself), unless it has one set (review round 1: the line never read done)
+        var exits = EnteredExits(doors, side);
+        bool BlankByDesign(MarkedElement r) => exits.Contains(r.UniqueId)
             || RoomUses.Table.Of(Marks.Text(MarkReading.Value(r, Marks.Use))) is "corridor" or "closet" or "toilet";
         var counted = rooms.Where(r => Set(r) || !BlankByDesign(r)).ToList();
         return new("room_function", Marks.RoomFunction, "Room function (occupant loads)", "rooms", counted.Count(Set), counted.Count,
                    counted.Where(r => !Set(r)).Select(r => r.UniqueId).ToList(), false, false,
                    "What each room is used for, in Table 1004.5's words, gives its occupant load factor; Revit doesn't record it.",
-                   "An occupied room left blank has its occupant load, and its story's, at needs review. Corridors and exit stair " +
-                   "enclosures stay blank, as does a closet or toilet nobody occupies (none of them is counted here).",
+                   $"A room whose {Marks.Use.Name} is Corridor, Closet or Toilet, and an exit stair enclosure, stay blank (they " +
+                   "aren't counted here); any other room left blank has its occupant load, and its story's, at needs review.",
                    suggestions, []);
+    }
+
+    /// <summary>The rooms an exit stair enclosure or exit passageway door enters, as the route reader reads it
+    /// (RouteReader.ExitId): of the two rooms it joins, the one whose every door between two rooms is an exit of that
+    /// kind; none where both or neither are (never a guess: both stay counted). Review round 2: the occupied room on
+    /// the door's other side was left uncounted.</summary>
+    private static HashSet<string> EnteredExits(List<MarkedElement> doors, Dictionary<string, OpeningSides> side)
+    {
+        string? KindOf(MarkedElement d) => ExitKinds.Table.Of(Marks.Text(MarkReading.Value(d, Marks.Exit)));
+        bool Only(string room, string kind) => doors
+            .Where(d => side.TryGetValue(d.UniqueId, out var s) && (s.FromRoom == room || s.ToRoom == room))
+            .All(d => side[d.UniqueId] is { FromRoom: null } or { ToRoom: null } || KindOf(d) == kind);
+        var entered = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var d in doors)
+            if (KindOf(d) is ExitKinds.Enclosure or ExitKinds.Passageway && side.TryGetValue(d.UniqueId, out var s)
+                && s.FromRoom is { } a && s.ToRoom is { } b)
+            {
+                var kind = KindOf(d)!;
+                var enters = new[] { a, b }.Where(x => Only(x, kind)).ToList();
+                if (enters.Count == 1)
+                    entered.Add(enters[0]);
+            }
+        return entered;
     }
 }
 
