@@ -494,9 +494,10 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
     through it, 1016.2); a corridor or lobby opening into one space only is part of it (a vestibule). True only where
     each space has a door to the outside marked as an exterior exit door at the level of exit discharge (exits are
     marked, never guessed). False only where a space reaches the outside through a corridor or lobby shared with
-    another tenant, which the model shows only for dwelling units: the corridor reaches an exit itself (a door
-    outside, or into an exit), two or more of the spaces opening into it hold a room whose function is residential,
-    this one among them, and the building states no corridor is within a dwelling unit (`corridors_within_dwelling_
+    another tenant, which the model shows only for dwelling units: the corridor (every room of it marked a corridor:
+    a lobby may be a dwelling's own foyer) reaches an exit itself (a door outside, or into an exit), two or more of the
+    spaces opening into it hold a room whose function is residential, this one among them and with no door of its own
+    into an exit, and the building states no corridor is within a dwelling unit (`corridors_within_dwelling_
     units` no, BCNYS 1020.2 exception 2's fact); a corridor otherwise may be a hallway within one dwelling or tenant
     space (a house's hall, a shop's back corridor to its toilets). Every other case is not measured (Stop): a door to
     the outside not marked so, or onto an exterior stair or ramp; a space whose way out is through such a corridor,
@@ -514,7 +515,8 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
             groups[next(iter(touched))] |= rooms
         elif not touched:
             groups.append(set(rooms))
-        elif within_units is False and len(touched & residential) >= 2 and any(
+        elif within_units is False and all(story.rooms[r].use == "corridor" for r in rooms) and \
+                len(touched & residential) >= 2 and any(
                 OUTSIDE in d.sides or any(s != r and _is_exit(story, s) for s in d.sides if s in story.rooms)
                 for d in story.doors.values() for r in rooms if r in d.sides):
             common |= touched & residential
@@ -533,6 +535,12 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
         if outside:
             unclear = unclear or Stop("outside_door_not_marked", name=names, door=outside[0].name)
         elif i in common:
+            into = sorted((d for d in story.doors.values() if group & set(d.sides)
+                           and any(s not in group and s in story.rooms and _is_exit(story, s) for s in d.sides)),
+                          key=lambda d: d.id)
+            if into:                                     # its own door into an exit too: whether that is "directly
+                unclear = unclear or Stop("outside_into_exit", name=names, door=into[0].name)    # outside" isn't
+                continue                                                                           # settled here
             return False
         elif i in private:
             unclear = unclear or Stop("outside_hall_unclear", name=names)

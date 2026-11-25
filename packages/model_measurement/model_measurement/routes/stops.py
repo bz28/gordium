@@ -159,6 +159,8 @@ STOPS = {
     "outside_hall_unclear": "the space of {name} reaches the outside through a corridor or lobby that may be its own "
                             "(a hallway within one dwelling or tenant space): whether it exits directly outside isn't "
                             "known",
+    "outside_into_exit": "the space of {name} has its own door into an exit ({door}) besides the shared corridor: "
+                         "whether it exits directly outside isn't known",
     "outside_door_not_marked": "the space of {name} has a door to the outside ({door}) not marked as an exit door at "
                                "the level of exit discharge: whether it is one isn't known (exits are marked, never "
                                "guessed)",
