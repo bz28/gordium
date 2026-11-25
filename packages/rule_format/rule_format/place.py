@@ -241,6 +241,9 @@ def settings_problems(settings) -> list[str]:
     if site is not None and not (isinstance(site, dict) and all(str(site.get(k) or "").strip()
                                                                for k in ("folder", "address"))):
         out.append("sample_site must give a folder and an address")
+    if "plain_words" in settings and settings["plain_words"] is not True:   # rulebook.py: plain_words_problems
+        out.append("plain_words must be true (the rulebook's architect-visible words carry no engineer's key), "
+                   "or left out")
     return out
 
 
