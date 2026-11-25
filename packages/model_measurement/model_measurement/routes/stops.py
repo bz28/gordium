@@ -146,6 +146,15 @@ STOPS = {
     "outside_door_not_marked": "the room {name} has a door to the outside ({door}) not marked as an exit door at the "
                                "level of exit discharge: whether it is one isn't known (exits are marked, never "
                                "guessed)",
+    # the dwelling units on a story (Table 1006.3.4(1): dwelling_units.py)
+    "units_use_unknown": "the room {name} has no use given: whether it is a corridor (shared) or part of a dwelling "
+                         "unit isn't known",
+    "units_function_unknown": "the rooms {name} state no function (Gordium: Function): whether they are a dwelling "
+                              "unit isn't known",
+    "units_no_entrance": "the rooms {name} have no door to a corridor, an exit or the outside: they may be part of a "
+                         "dwelling unit on two stories, which story counts it isn't known",
+    "units_entrances": "the rooms {name} have {count} doors to the corridors, exits or outside ({doors}): they may be "
+                       "two dwelling units joined by a door",
     # each door's own part (doors.py, section group 6a): its sizes only from the maker's stated clear opening
     "door_no_stated_clear": "the door {name} has no maker's stated clear opening (its type's clear width and height, "
                             "confirmed): its size is never taken from the door's own size or its leaf",

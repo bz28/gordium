@@ -40,7 +40,7 @@ import copy
 import math
 
 from model_measurement.interior.read import Reader, name_of
-from model_measurement.routes import areas, dead_ends, story_place, straight
+from model_measurement.routes import areas, dead_ends, dwelling_units, story_place, straight
 from model_measurement.routes.common_path import _TravelOnly, at_point, story_figure
 from model_measurement.routes.doors import door_parts
 from model_measurement.routes.floor import CLEARANCE, OUTSIDE, READING, read, region
@@ -140,6 +140,11 @@ def _story_parts(story, uses, items, unknown, parts, r) -> None:
         sp["measures"][OUTSIDE_FACT] = rooms_exit_outside(story)
     except Stop as s:
         sp["not_measured"][OUTSIDE_FACT] = s.reason
+    try:
+        sp["measures"][UNITS_FACT] = dwelling_units.units_on(story, items, _is_exit)
+        sp["more"][UNITS_FACT] = {"reading": dwelling_units.READING}      # said with the figure (1016.2.1)
+    except Stop as s:
+        sp["not_measured"][UNITS_FACT] = s.reason
     for m in ("story_occupant_load",):
         sp["not_measured"][m] = Stop("stated_not_given", what=STATED[m]).reason
     found = dead_ends.corridors(story, uses, routes)
@@ -481,6 +486,7 @@ ENTERED_EXITS = ("exit_enclosure", "exit_passageway")    # the exits a door ente
 
 
 OUTSIDE_FACT = "story_rooms_exit_directly_outside"
+UNITS_FACT = "story_dwelling_units"
 
 
 def rooms_exit_outside(story) -> bool:
