@@ -175,6 +175,45 @@ internal static class Program
                         Settle(p.View);
                         Check(FindAll<ComboBox>(p.View).Any(c => c.IsVisible), "18: Answer 2 questions goes back to the questions card, open");
                     });
+                    // UI polish PR 4b: What changed with what the architect changed (change 40; two checks of one
+                    // project, the second after the sprinkler system and corner lot were answered), the proportion bar
+                    // (18), the selection strip (41), the printable summary in By code order (38)
+                    var answeredModel = new RevitModel
+                    {
+                        Document = setupModel.Document, Marked = setupModel.Marked, DisplayUnits = setupModel.DisplayUnits,
+                        ProjectMarks = new Dictionary<Guid, MarkValue>(setupModel.ProjectMarks)
+                        {
+                            [Marks.SprinklerSystem.Guid] = new(true, Text: SprinklerWords.Table.Words[0]),
+                            [Marks.CornerLot.Guid] = new(true, 0),
+                        },
+                    };
+                    var answered = SetupScreen.Build(answeredModel, setupSides, options).Fields;
+                    Step(make(theme, []), "19_what_changed_apartment", 900, dark, p =>
+                    {
+                        p.Show(title, when, ResultRows.Build(houseAfter, "New Construction", [], null), Labels(houseAfter), questions, key: "render:what-changed");
+                        p.Show(title, when.AddMinutes(9), rows, Labels(apartment), answered, key: "render:what-changed");
+                        Settle(p.View);
+                        Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, ResultsView.ChangeTag)), "19: What changed sits at the top");
+                        Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t).StartsWith("You changed: ", StringComparison.Ordinal)), "19: it says what you changed");
+                        Check(!FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t).Contains("hover for all", StringComparison.Ordinal)), "19: no \"hover for all\"");
+                        Check(FindAll<Grid>(p.View).Any(g => g.IsVisible && Equals(g.Tag, ResultsView.BarTag)), "19: the proportion bar under the summary line");
+                        NoComplies(FindAll<Grid>(p.View).First(g => Equals(g.Tag, ResultsView.BarTag)), "19: the bar has no green while results need review");
+                    });
+                    Step(make(theme, []), "20_selection_strip_apartment", 740, dark, p =>
+                    {
+                        p.Show(title, when, rows, Labels(apartment), questions);
+                        var map = SelectionMap.Of(rows, when);
+                        var wall = map.Elements.OrderByDescending(u => map.For([u]).Count).First();
+                        p.Strip(map.Answer([wall], _ => "Wall “LS New 6\"”"));
+                        Settle(p.View);
+                        var strip = FindAll<Border>(p.View).Single(b => b.IsVisible && Equals(b.Tag, SelectionStrip.Tag));
+                        var links = FindAll<Button>(strip).Count(b => b.IsVisible && (b.Content as TextBlock)?.Text is { } t && !t.StartsWith("Show all", StringComparison.Ordinal));
+                        Check(links == SelectionMap.Shown, $"20: the strip lists the top {SelectionMap.Shown} ({links})");
+                        Check(FindAll<Button>(strip).Any(b => b.IsVisible && b.Content as string == "Clear"), "20: Clear puts it away");
+                    });
+                    if (!dark)
+                        File.WriteAllText(Path.Combine(_out, "21_summary_by_code_apartment.html"),
+                                          ComplianceSummary.Html(rows, title, when, when.AddMinutes(3)), new UTF8Encoding(false));
                     Step(make(theme, []), "15_by_code_stale_apartment", 900, dark, p =>
                     {
                         p.Show(title, when, rows, Labels(apartment));
