@@ -392,7 +392,10 @@ public sealed class SetupTests
         // never the building called a house; a term of the law that holds the letters (a townhouse unit, the
         // household) is no such word (merged with the code decision's marks, 2026-11-22)
         var house = new System.Text.RegularExpressions.Regex(@"\bhouses?\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-        Assert.DoesNotContain(care.Fields, f => house.IsMatch(f.Label) || house.IsMatch(f.Law));
+        // (the law's own words, quoted, are the law's: §325-8B(1)'s "one family house" is kept as written, review round 1
+        // of the lot facts' fields)
+        static string Unquoted(string s) => System.Text.RegularExpressions.Regex.Replace(s, "\"[^\"]*\"", "");
+        Assert.DoesNotContain(care.Fields, f => house.IsMatch(f.Label) || house.IsMatch(Unquoted(f.Law)));
         Assert.Contains(care.Fields, f => f.Label == "This building has no stairs");
         // a building that isn't a house gets the escape-route lines
         Assert.Contains(care.Lines, l => l.Key == "room_use");

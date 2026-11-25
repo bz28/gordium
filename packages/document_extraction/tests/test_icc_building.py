@@ -143,3 +143,7 @@ def test_a_raised_letter_before_a_slash_ends_a_cell_so_both_numbers_are_read():
     assert [shown(s) for s in statements("R Greater than 10 Not Permitted 0.5[fnc]/1[fnd]")] == [
         "greater than 10", "0.5", "1"]
     assert [shown(s) for s in statements("a ratio of 1/2 and 3[fn2] m")] == ["1/2", "and 3 m"]   # a fraction stays one
+    # review round 1 of group 4b: only a note letter's mark ends a cell; a raised digit before a slash is a stacked
+    # fraction's top, read as before (Table 716.1's "2 1[fn1]/ 2" hours, a drawing's "[fn5]/8 IN.")
+    assert "1" not in [shown(s) for s in statements("2 1[fn1]/ 2 W-120")]
+    assert "8 inch" not in [shown(s) for s in statements("[fn5]/8 IN. MIN. TO EDGE")]

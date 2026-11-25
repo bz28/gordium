@@ -11614,6 +11614,11 @@ rules:
       corridors_within_dwelling_units
     reason: 'Unless the corridor is within a dwelling unit or sleeping unit (exception 2: no rating required there), which
       the building states or doesn''t rule out, the table''s rating isn''t met: a person checks.'
+  - when: occupancy_group == "R-4" and sprinklered_903_3_1_3 and not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and
+      corridor_occupant_load > 10
+    reason: 'Group R-4 with an NFPA 13D system: note d sends to 903.2.8, which permits 903.3.1.3 in Group R-4 only in Condition
+      1 (903.2.8.2), and the condition isn''t stated, so whether the table''s 1 hour or its Not Permitted applies is a person''s
+      check.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -11733,6 +11738,24 @@ rules:
     expect: pass
     note: 'Note d: 1 hour for Group R-3 or R-4 with 903.3.1.3.'
   - given:
+      occupancy_group: R-4
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: true
+      corridors_within_dwelling_units: false
+    parts:
+      corridor:
+      - id: p1
+        name: R-4, NFPA 13D, 1 hour
+        measures:
+          corridor_occupant_load: 40
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Note d''s 903.2.8 permits 13D in Group R-4 only in Condition 1 (903.2.8.2), not stated: a person checks.'
+  - given:
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -11782,7 +11805,9 @@ rules:
   notes: 'Table 1020.2''s row for Group R: more than 10 occupants, Not Permitted without a sprinkler system, 0.5 hour with
     903.3.1.1 or 903.3.1.2 (note c) and 1 hour for Groups R-3 and R-4 with 903.3.1.3 (note d); 10 or fewer, none. Exception
     2 (a corridor within a dwelling or sleeping unit needs no rating) needs review where it falls short while the building
-    states it has such corridors or doesn''t rule them out. Hand-drafted in a Claude Code session (2026-11-25).'
+    states it has such corridors or doesn''t rule them out. Note d''s 13D in Group R-4 (903.2.8.2: Condition 1 only) needs
+    review. Note c''s 903.3.1.2 ''where allowed'' (903.3.1.2''s own limits: stories, height) is taken on the architect''s
+    statement of the system, as the other tables'' rules take it. Hand-drafted in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1020_2_i2
