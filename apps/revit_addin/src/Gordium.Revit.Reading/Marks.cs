@@ -5,8 +5,9 @@ namespace Gordium.Revit.Reading;
 // the Revit layer only copies them into Revit, and the tests read the same list.
 
 /// <summary>What a mark holds (the Revit layer maps each to its <c>SpecTypeId</c>: <c>Boolean.YesNo</c>,
-/// <c>String.Text</c>, <c>Length</c>, <c>Int.Integer</c>).</summary>
-public enum MarkValueKind { YesNo, Text, Length, Integer }
+/// <c>String.Text</c>, <c>Length</c>, <c>Int.Integer</c>, <c>Area</c>; a length held in feet, an area in square feet,
+/// Revit's internal units).</summary>
+public enum MarkValueKind { YesNo, Text, Length, Integer, Area }
 
 /// <summary>Whether a mark is set on each element (<c>InstanceBinding</c>) or once on its type (<c>TypeBinding</c>).</summary>
 public enum MarkBinding { Instance, Type }
@@ -303,6 +304,78 @@ public static class Marks
         "Yes when the building has an atrium (BCNYS 202 ATRIUM: an opening connecting two or more stories, closed at the top) that a path of egress travel passes through or that areas open to. BCNYS 1017.3.2.3: \"Where the path of egress travel is not at the level of exit discharge from the atrium, that portion of the total permitted exit access travel distance that occurs within the atrium shall be not greater than 200 feet (60 960 mm).\" " +
         "Yes: a travel distance over 200 ft is checked by a person. No: there is none. Blank: the rules that turn on it need review.");
 
+    // ---- the lot facts the worker asks the architect for that no other mark stated (Ithaca's zoning: §325-3B,
+    // §325-8B(1), §325-19E, §325-28): sent as the lot facts of the same names (host_core.facts.STATED_FACTS) only when
+    // set, so a blank one is not stated and its rows need review; a value Gordium can't read is said, never sent
+
+    /// <summary>Whether R-1a or R-1b land abuts the lot (<c>facts.abuts_r1_district</c>, §325-19E).</summary>
+    public static readonly MarkDefinition AbutsR1 = new(
+        "Gordium: Abuts R-1 land", new("e03a7668-69f3-4286-b79e-7e2fedd51174"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "facts.abuts_r1_district",
+        "For a use other than a one- or two-family dwelling in R-3a or R-3b: Yes when any R-1a or R-1b land touches the lot (even at a corner) or is across a street, alley, creek or other waterway, railroad or other right-of-way from it. " +
+        "§325-19E: \"Development in R-3 Districts which abut R-1 Districts.\" (its lot size, height, coverage and yards change). Gordium reads its test (land that directly abuts) the cautious way, across a street included, as a reading to confirm. No: none. Blank: the rules that turn on it need review.");
+
+    /// <summary>Whether the building is a conversion, not new construction (<c>facts.conversion</c>, §325-3B).</summary>
+    public static readonly MarkDefinition Conversion = new(
+        "Gordium: Conversion", new("b4ae661a-9d9d-4e7b-addf-cb674911fc28"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "facts.conversion",
+        "Yes when the building is made by converting an existing building, not new construction. §325-3B: \"CONVERSION — The changing of use or occupancy by alteration, addition or by other reorganization.\" No: new construction. Blank: the rules that turn on it need review.");
+
+    /// <summary>How many primary buildings stand on the lot (<c>facts.primary_buildings</c>, 1 or more).</summary>
+    public static readonly MarkDefinition PrimaryBuildings = new(
+        "Gordium: Primary buildings", new("99739cee-bd25-46a2-9ed4-f552654d1209"), MarkValueKind.Integer,
+        MarkBinding.Instance, [ProjectInformation], "facts.primary_buildings",
+        "A count: the primary buildings on the lot, the main one included: each separate building holding a home or another permitted primary use, never a garage, shed or accessory dwelling unit. " +
+        "§325-3B: \"PRIMARY STRUCTURE — A single structure (located on a parcel) containing a use permitted in the zoning district in which it is located.\" A whole number, 1 or more. Blank: read from the drawing, and where the drawing allows more than one count the rows it changes need review.");
+
+    /// <summary>Whether every primary building holds the lot's use (<c>facts.primary_buildings_same_use</c>, §325-8B(1)).</summary>
+    public static readonly MarkDefinition PrimaryBuildingsSameUse = new(
+        "Gordium: Primary buildings same use", new("8c4cda53-f475-42ff-ad64-b7ba1f85979e"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "facts.primary_buildings_same_use",
+        "With more than one primary building: Yes when every one holds the use given for the lot (Gordium: Use), so each needs that use's lot area. " +
+        "§325-8B(1): \"For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use districts, each square-footage requirement applies separately to the initial permitted primary use and to each additional permitted primary use located in a separate building on the property in question (e.g., in R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and an additional area of 3,000 square feet is required for each additional one-family house or two-family house on the property).\" No: they hold other uses. Blank: the lot size needs review.");
+
+    /// <summary>The home occupation's indoor floor area (<c>facts.home_occupation_area</c>, sq ft, §325-3B).</summary>
+    public static readonly MarkDefinition HomeOccupationArea = new(
+        "Gordium: Home occupation area", new("78decf20-6a2b-49f3-910c-c09c2e63d90d"), MarkValueKind.Area,
+        MarkBinding.Instance, [ProjectInformation], "facts.home_occupation_area",
+        AreaWords + " (Manage > Project Units: 300 typed is 300 sq ft in a square-feet project, 300 m² in a square-meters one): with a home occupation planned, the indoor floor area it uses, its accessory structures included, as typed (never rounded). " +
+        "§325-3B HOME OCCUPATION (1)(f): \"The occupation occupies no more than 25% of the dwelling unit and no more than a total of 500 indoor square feet, including accessory structures.\" 0 or more. Blank: the rule needs review.");
+
+    /// <summary>The floor area of the dwelling unit the home occupation is in (<c>facts.home_occupation_unit_area</c>).</summary>
+    public static readonly MarkDefinition HomeOccupationUnitArea = new(
+        "Gordium: Home occupation unit area", new("2b6debca-6222-4c69-a0b0-c6d754ef4f0d"), MarkValueKind.Area,
+        MarkBinding.Instance, [ProjectInformation], "facts.home_occupation_unit_area",
+        AreaWords + " (Manage > Project Units: 300 typed is 300 sq ft in a square-feet project, 300 m² in a square-meters one): with a home occupation planned, the floor area of the dwelling unit it is in, as typed (never rounded). " +
+        "§325-3B HOME OCCUPATION (1)(f): \"The occupation occupies no more than 25% of the dwelling unit and no more than a total of 500 indoor square feet, including accessory structures.\" 0 or more. Blank: the rule needs review.");
+
+    /// <summary>Whether a detached ADU is in an existing accessory building (<c>facts.adu_existing_building</c>).</summary>
+    public static readonly MarkDefinition AduExistingBuilding = new(
+        "Gordium: ADU in existing building", new("acd7b1f8-d8f1-4001-8a07-362db5e75524"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "facts.adu_existing_building",
+        "For a detached accessory dwelling unit: Yes when it is in an accessory building that already exists; No when it is new construction (§325-28C(7)(b) and (c), its size, and (8)(b), its setbacks, differ). " +
+        "§325-28C(7)(b)[1]: \"An existing accessory building may be altered or expanded, provided that it does not exceed the size limitations for new construction.\" Blank: the rules that turn on it need review.");
+
+    /// <summary>The bedrooms in the accessory dwelling unit (<c>facts.adu_bedrooms</c>, §325-28C(3)).</summary>
+    public static readonly MarkDefinition AduBedrooms = new(
+        "Gordium: ADU bedrooms", new("019161da-e9c1-4219-8cfc-01dbd1071761"), MarkValueKind.Integer,
+        MarkBinding.Instance, [ProjectInformation], "facts.adu_bedrooms",
+        "A count: the bedrooms in the accessory dwelling unit. §325-28C(3): \"An ADU may have a maximum of two bedrooms.\" A whole number, 0 or more. Blank: the rule needs review.");
+
+    /// <summary>The floor area of an attached ADU (<c>facts.adu_floor_area</c>, sq ft, §325-28C(7)(a)).</summary>
+    public static readonly MarkDefinition AduFloorArea = new(
+        "Gordium: ADU floor area", new("41c8f63d-368d-4ea9-b371-85828b769d6a"), MarkValueKind.Area,
+        MarkBinding.Instance, [ProjectInformation], "facts.adu_floor_area",
+        AreaWords + " (Manage > Project Units: 300 typed is 300 sq ft in a square-feet project, 300 m² in a square-meters one): for an attached accessory dwelling unit, its floor area, as typed (never rounded). " +
+        "§325-28C(7)(a): \"The ADU shall not exceed 40% of the floor area of the primary structure.\" 0 or more. Blank: the rule needs review.");
+
+    /// <summary>The floor area of the main building an attached ADU is in (<c>facts.primary_floor_area</c>).</summary>
+    public static readonly MarkDefinition MainBuildingFloorArea = new(
+        "Gordium: Main building floor area", new("f237131b-5e7e-4c8e-94df-a8538de16954"), MarkValueKind.Area,
+        MarkBinding.Instance, [ProjectInformation], "facts.primary_floor_area",
+        AreaWords + " (Manage > Project Units: 300 typed is 300 sq ft in a square-feet project, 300 m² in a square-meters one): for an attached accessory dwelling unit, the floor area of the whole main building it is in, the ADU included, as typed (never rounded). " +
+        "§325-28C(7)(a): \"The ADU shall not exceed 40% of the floor area of the primary structure.\" (whether the 40% is of the whole structure or of the rest of it is an open question, so a close result needs review). 0 or more. Blank: the rule needs review.");
+
     // ---- the dwelling's own facts which New York code needs (code_scope.py) and Ithaca's zoning reads too: sent as
     // the lot facts of the same names (host_core.facts.STATED_FACTS), each only when set (unset is not stated)
 
@@ -525,6 +598,8 @@ public static class Marks
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
+        AbutsR1, Conversion, PrimaryBuildings, PrimaryBuildingsSameUse, HomeOccupationArea, HomeOccupationUnitArea,
+        AduExistingBuilding, AduBedrooms, AduFloorArea, MainBuildingFloorArea,
     ];
 
     /// <summary>What a number typed in a mark means, said before it is typed, true wherever it is read: "count" for a
@@ -533,6 +608,7 @@ public static class Marks
     public static string? Unit(MarkDefinition m) => m.Kind switch
     {
         MarkValueKind.Length => "length",
+        MarkValueKind.Area => "area",
         MarkValueKind.Integer => "count",
         _ => null,
     };
@@ -541,6 +617,10 @@ public static class Marks
     /// project's length units, so the tooltip never names one unit (review round 2 of change 20: "In feet" was false in
     /// a meters project, where 15 typed is 15 m).</summary>
     public const string LengthWords = "A length, in this project's length units";
+
+    /// <summary>The words every area mark's tooltip opens with: in Revit's own dialogs an area is read in the project's
+    /// area units, so the tooltip never names one unit.</summary>
+    public const string AreaWords = "An area, in this project's area units";
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------
 
@@ -560,6 +640,10 @@ public static class Marks
     /// <summary>A length mark (feet); null when not stated or not a finite number. Never 0 for blank.</summary>
     public static double? Length(MarkValue? v) =>
         v is { HasValue: true, Number: { } d } && double.IsFinite(d) ? d : null;
+
+    /// <summary>An area mark (square feet, Revit's internal unit); null when not stated or not a finite number. Never 0
+    /// for blank.</summary>
+    public static double? Area(MarkValue? v) => Length(v);
 }
 
 /// <summary>The architect-facing operation list (the <c>Gordium: Operation</c> mark), each word through a fixed table

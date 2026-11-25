@@ -47,6 +47,7 @@ internal static class RevitRead
             Document = doc.Title,
             Version = version,
             DisplayUnits = doc.GetUnits().GetFormatOptions(SpecTypeId.Length).GetUnitTypeId().TypeId,
+            AreaDisplayUnits = doc.GetUnits().GetFormatOptions(SpecTypeId.Area).GetUnitTypeId().TypeId,
             VertexTolerance = vertexTolerance,
             InternalToShared = depth == 0 ? InternalToShared(doc) : Reading.Transform3.Identity,
             Phases = doc.Phases.Cast<Phase>().Select(p => Id(p.Id)!).ToList(),
