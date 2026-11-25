@@ -3957,11 +3957,10 @@ labels:
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1010.1.2:
-    label: rule
+    label: flag
     topic: means_of_egress
-    reason: 'Egress doors are side-hinged swinging, pivoted or balanced, with exceptions (power-operated doors in any group;
-      revolving and special-purpose sliding or folding doors other than in Group H; doors of a single dwelling unit in Groups
-      R-2 and R-3; small areas): checkable per door from its stated operation, a door of another kind needing review.'
+    reason: 'Egress doors are side-hinged swinging, pivoted or balanced, with exceptions the model doesn''t tell apart (a power-operated
+      door in any group among them): a door of another kind, or whose kind isn''t stated, is a person''s check per door.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 323

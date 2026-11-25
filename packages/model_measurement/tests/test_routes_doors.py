@@ -19,7 +19,10 @@ from routes_layouts import description, door, rect, room  # noqa: E402
 
 DOOR_KEYS = {"door_no_stated_clear", "door_clear_not_read", "door_clear_disagree", "door_leaves_not_given",
              "door_leaves_not_read", "door_exit_kind_not_read", "door_sides_not_read", "door_side_no_use",
-             "door_side_room_not_read"}
+             "door_side_room_not_read",
+             # section group 6b: each door's kind and swing
+             "egress_side_unclear", "door_swing_not_given", "door_swing_not_read", "door_operation_not_given",
+             "door_operation_other", "door_not_on_routes"}
 STATED = {"width": 34 / 12, "height": 80 / 12, "source": "maker's catalogue, p.4"}
 
 
@@ -238,4 +241,52 @@ def test_a_drawing_that_cant_be_measured_leaves_its_size_unmeasured():
     got = _parts(_office(stated_clear=dict(STATED), **low))["d"]
     assert _why(got, "moe_door_clear_height").startswith("the door d's clear opening isn't read: ")
     assert got["measures"]["moe_door_clear_width"] == pytest.approx(34)
+
+
+# ---- section group 6b (2026-11-25): each door's kind (1010.1.2) and swing (1010.1.2.1) -------------------------------
+
+def test_a_doors_kind_from_its_stated_operation():
+    for op, want in (("side_hinged", True), ("sliding", False), ("folding", False), ("pocket", False)):
+        assert _parts(_office(operation=op))["d"]["measures"]["moe_door_swinging"] is want, op
+    assert _why(_parts(_office())["d"], "moe_door_swinging") == STOPS["door_operation_not_given"].format(name="d")
+    assert _why(_parts(_office(operation="other"))["d"], "moe_door_swinging") == STOPS["door_operation_other"].format(
+        name="d")
+    assert "moe_door_swinging" not in _parts(_office(operation="revolving"))["d"]["measures"]
+
+
+def test_a_door_swings_with_egress_where_it_swings_into_the_side_egress_travel_goes_into():
+    """The room's door to the corridor: egress travel goes from the room (its exit access door) into the corridor;
+    the corridor's exit door to the outside: outside. Stated swinging into those sides, each swings with egress;
+    stated the other way, against."""
+    got = _parts(_office(swings_into="c"))
+    assert got["d"]["measures"]["moe_door_swings_with_egress"] is True and got["d"]["more"]["egress_into"] == "c"
+    assert _parts(_office(swings_into="r"))["d"]["measures"]["moe_door_swings_with_egress"] is False
+    d = _office()
+    d["doors"][1]["swings_into"] = "outside"
+    assert _parts(d)["x"]["measures"]["moe_door_swings_with_egress"] is True
+    d["doors"][1]["swings_into"] = "c"
+    assert _parts(d)["x"]["measures"]["moe_door_swings_with_egress"] is False
+
+
+def test_a_swing_not_stated_or_not_read_or_a_direction_not_known_leaves_it_unmeasured():
+    assert _why(_parts(_office())["d"], "moe_door_swings_with_egress") == STOPS["door_swing_not_given"].format(name="d")
+    for bad in ("nowhere", 1, ["c"]):
+        assert _why(_parts(_office(swings_into=bad))["d"], "moe_door_swings_with_egress").startswith(
+            "the door d says it swings into"), bad
+    # a door between two rooms that both lead out through it: which way egress goes isn't known
+    d = description([room("a", rect(0, 0, 10, 10), use="other", lockable=True),
+                     room("b", rect(10.5, 0, 20, 10), use="other", lockable=True)],
+                    [door("ab", (10.25, 5), (0, 1), ("a", "b"), swings_into="b"),
+                     door("xa", (-0.25, 5), (0, 1), ("a", "outside"), exit_id="A"),
+                     door("xb", (20.25, 5), (0, 1), ("b", "outside"), exit_id="B")])
+    got = {p["id"]: p for p in measure(d)["parts"]["means_of_egress_door"]}
+    assert _why(got["ab"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="ab")
+    # a story whose routes aren't measured (no exit marked): not known
+    d = _office(swings_into="c")
+    del d["doors"][1]["exit_kind"], d["doors"][1]["exit_id"]
+    assert _why(_parts(d)["d"], "moe_door_swings_with_egress").startswith("the story's routes aren't measured")
+    # a door the routes can't place (no plan): not known
+    d = _office(swings_into="c")
+    del d["doors"][0]["plan"]
+    assert _why(_parts(d)["d"], "moe_door_swings_with_egress") == STOPS["door_not_on_routes"].format(name="d")
 
