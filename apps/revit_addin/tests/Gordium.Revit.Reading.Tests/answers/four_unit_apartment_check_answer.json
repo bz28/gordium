@@ -93428,7 +93428,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "be4cb0b436ff39f9cd662ba4cf20bf597910728ff1ed86043c7751620bbcb1e6",
+  "worker_fingerprint": "031108e9e64523e98dad848ec156ad5ff84ac7d8d7a63f8507e49e85623943ff",
   "rulebook": {
    "new_york/ithaca_city": "7f3a4a81e05714ea46e11b02a1b81db7e00c81d79516bd62c04e1f556ed012d9"
   }

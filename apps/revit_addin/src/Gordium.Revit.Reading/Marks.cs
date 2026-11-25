@@ -364,7 +364,8 @@ public static class Marks
     public static readonly MarkDefinition EmergencyVoiceAlarm = new(
         "Gordium: Emergency voice/alarm system", new("f4184d32-275e-4423-90c6-66a2e4d247ee"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.emergency_voice_alarm_system",
-        "Yes only when the building is equipped with an emergency voice/alarm communication system in accordance with BCNYS Section 907.5.2.2. With an NFPA 13 or 13R sprinkler system throughout, BCNYS 1005.3.1 and 1005.3.2 exception 1 then lower the egress capacity factors (other than Groups H and I-2): 0.15 in per occupant for corridors and other components, 0.2 in for stairways. " +
+        "Yes only when the building is equipped throughout with an emergency voice/alarm communication system in accordance with BCNYS Section 907.5.2.2. A system in only part of the building: No. " +
+        "With an automatic sprinkler system throughout too (NFPA 13; NFPA 13R in Group R only, elsewhere a person checks), BCNYS 1005.3.1 and 1005.3.2 exception 1 lower the egress capacity factors (other than Groups H and I-2): 0.15 in per occupant for corridors and other components, 0.2 in for stairways. " +
         "No: the full factors (0.2 in and 0.3 in). Blank: a capacity met only at the lower factor needs review.");
 
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>

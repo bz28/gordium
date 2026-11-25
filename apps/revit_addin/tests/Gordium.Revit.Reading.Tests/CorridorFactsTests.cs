@@ -51,8 +51,11 @@ public sealed class CorridorFactsTests
     {
         Assert.Contains("\"A fire-resistance rating is not required for corridors contained within a dwelling unit or sleeping unit in an occupancy in Groups I-1 and R.\"",
                         Marks.CorridorsWithinDwellingUnits.Description, StringComparison.Ordinal);
-        Assert.Contains("Yes only when the building is equipped with an emergency voice/alarm communication system in accordance with BCNYS Section 907.5.2.2",
+        // review round 1: the whole building's, never a system in part of it (the lower factors are for buildings
+        // "equipped throughout"); 13R only in Group R, as the capacity rule reads it
+        Assert.Contains("Yes only when the building is equipped throughout with an emergency voice/alarm communication system in accordance with BCNYS Section 907.5.2.2. A system in only part of the building: No.",
                         Marks.EmergencyVoiceAlarm.Description, StringComparison.Ordinal);
+        Assert.Contains("NFPA 13R in Group R only", Marks.EmergencyVoiceAlarm.Description, StringComparison.Ordinal);
         Assert.Contains("No: none does, so each corridor's load lies between none and its whole story's", Marks.OtherLevelsReachCorridors.Description, StringComparison.Ordinal);
         Assert.Contains("Table 1020.3 asks 72 in", Marks.AmbulatoryCareFacility.Description, StringComparison.Ordinal);
     }

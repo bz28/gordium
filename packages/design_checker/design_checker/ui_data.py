@@ -63,7 +63,7 @@ FIELD_HEADLINES = {
     "building.occupied_outdoor_areas": "Say whether the occupants use outdoor areas (yards, patios, roofs: 1004.7)",
     "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
-    "building.emergency_voice_alarm_system": "Say whether the building has an emergency voice/alarm communication system (907.5.2.2)",
+    "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",

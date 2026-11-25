@@ -639,6 +639,11 @@ def test_every_story_fact_a_story_exit_rule_reads_and_nothing_measures_is_a_ques
         assert "story above grade plane" in each_part.MEASURE_NAMES[m] and "(whether it is the" in each_part.MEASURE_NAMES[m]
 
 
+def test_the_voice_alarm_ask_is_the_whole_buildings():
+    # groups 4 and 5's Revit fields, review round 1: the lower capacity factors are for buildings equipped throughout
+    assert "whole building" in ui_data.FIELD_HEADLINES["building.emergency_voice_alarm_system"]
+
+
 def test_the_r2_sleeping_units_ask_never_reads_as_either_or_for_a_mixed_building():
     # group 2 facts' review rounds 1 and 2: one building-wide fact, so a building with both kinds leaves it blank (both
     # tables' rows need review); the words the architect reads say so, never "sleeping units (not dwelling units)"
