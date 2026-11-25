@@ -126,7 +126,9 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         # what the Building Code's Chapter 10 rules read of the whole building (Revit: each a Yes/No on Project Information)
         "assembly_fixed_seating": "Gordium: Fixed assembly seating", "special_egress_spaces": "Gordium: Special egress spaces",
         "merchandise_pads": "Gordium: Merchandise pads", "egress_balcony_increase_taken": "Gordium: Egress balcony increase",
-        "building_has_atrium": "Gordium: Atrium"}
+        "building_has_atrium": "Gordium: Atrium",
+        # group 2's: which Table 1006.3.4 a Group R-2 story reads, and its 1031 escape openings
+        "r2_sleeping_units": "Gordium: R-2 sleeping units", "emergency_escape_openings_1031": "Gordium: 1031 escape openings"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise

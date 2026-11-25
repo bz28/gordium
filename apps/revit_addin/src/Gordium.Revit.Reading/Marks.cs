@@ -297,6 +297,24 @@ public static class Marks
         "Yes when the design relies on BCNYS 1017.2.1's exterior egress balcony increase: up to 100 ft more exit access travel where the last portion of the exit access leading to the exit is on an exterior egress balcony. " +
         "Yes: a travel distance over the table's limit but within the increase is checked by a person. No: the design doesn't take it, so Table 1017.2's limits apply as they are. Blank: the rules that turn on it need review.");
 
+    /// <summary>Whether the building's Group R-2 consists of sleeping units, not dwelling units
+    /// (<c>building.r2_sleeping_units</c>, BCNYS Tables 1006.3.4(1) and (2), notes b and c).</summary>
+    public static readonly MarkDefinition R2SleepingUnits = new(
+        "Gordium: R-2 sleeping units", new("4ea5ab97-6e4a-4bb9-a137-b6cb88838f9c"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.r2_sleeping_units",
+        "For a Group R-2 building: Yes when its Group R-2 consists of sleeping units (a dormitory, a boarding house); No when it consists of dwelling units (apartments). It chooses which table limits a story with one exit. " +
+        "BCNYS Table 1006.3.4(1) note b: \"This table is used for Group R-2 occupancies consisting of dwelling units. For Group R-2 occupancies consisting of sleeping units, use Table 1006.3.4(2).\" " +
+        "Blank: the one-exit rows for Group R-2 need review.");
+
+    /// <summary>Whether the building has emergency escape and rescue openings per BCNYS 1031
+    /// (<c>building.emergency_escape_openings_1031</c>, Tables 1006.3.4(1) and (2) note a).</summary>
+    public static readonly MarkDefinition EscapeOpenings1031 = new(
+        "Gordium: 1031 escape openings", new("298cd307-3a3f-4c2f-a12d-e8fe3d31b4f6"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.emergency_escape_openings_1031",
+        "For a Group R-2 building: Yes only when it is provided with emergency escape and rescue openings in accordance with Section 1031 (every sleeping room and basement the section asks for has one that complies with it; Gordium doesn't check them under the Building Code). " +
+        "BCNYS Table 1006.3.4(1) note a: \"Buildings classified as Group R-2 equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 and provided with emergency escape and rescue openings in accordance with Section 1031.\" " +
+        "Yes: a Group R-2 story may then have one exit within the table's limits. No: it may not under that row. Blank: those rows need review.");
+
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
         "Gordium: Atrium", new("8c3211a5-546b-463e-8d8c-b70fd753c1b6"), MarkValueKind.YesNo,
@@ -594,7 +612,8 @@ public static class Marks
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
         CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
-        SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, Atrium,
+        SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
+        EscapeOpenings1031, Atrium,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,

@@ -141,7 +141,9 @@ public static class BuildingFacts
                      // what the Building Code's Chapter 10 rules read of the whole building (code_scope.FACTS)
                      (Marks.AssemblyFixedSeating, "assembly_fixed_seating"), (Marks.SpecialEgressSpaces, "special_egress_spaces"),
                      (Marks.MerchandisePads, "merchandise_pads"), (Marks.EgressBalconyIncrease, "egress_balcony_increase_taken"),
-                     (Marks.Atrium, "building_has_atrium") })
+                     (Marks.Atrium, "building_has_atrium"),
+                     // group 2's (Table 1006.3.4's notes): which table a Group R-2 story reads, and its escape openings
+                     (Marks.R2SleepingUnits, "r2_sleeping_units"), (Marks.EscapeOpenings1031, "emergency_escape_openings_1031") })
         {
             var v = Get(mark);
             if (Marks.YesNo(v) is { } yes)

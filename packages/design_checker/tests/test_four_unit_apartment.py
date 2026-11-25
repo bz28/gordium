@@ -153,3 +153,18 @@ def test_a_rooms_function_changes_no_result_until_the_occupant_loads_read_it(got
         room["function"] = "residential"
     now = egress.check(laws, interior, VALUES, ALLOWED)
     assert now["results"] == got["results"]
+
+
+def test_group_2s_marks_stated_choose_the_r2_table_and_never_pass_on_their_own(got, laws):
+    """The two Revit marks for Table 1006.3.4's notes (Gordium: R-2 sleeping units, Gordium: 1031 escape openings) on
+    the apartment (Group R-2, no sprinkler system): stated dwelling units, the sleeping-units table (1006.3.4(2)) is
+    not applicable and nothing else moves (its dwelling-units row still needs review: the occupant loads aren't read);
+    stated sleeping units, the dwelling-units table is not applicable. Never a pass from the statement alone."""
+    moved = {}
+    for sleeping in (False, True):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], "r2_sleeping_units": sleeping, "emergency_escape_openings_1031": True}
+        now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
+        moved[sleeping] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
+    assert moved[False] == {"general.bc_table_1006_3_4_2__h_i_r": ("needs_review", "not_applicable")}
+    assert moved[True] == {"general.bc_table_1006_3_4_1__r2_dwelling_units": ("needs_review", "not_applicable")}

@@ -403,7 +403,7 @@ def _known_fields() -> set:
         found = set()
         for cs in (REPO / "apps/revit_addin/src").rglob("*.cs"):
             if "obj" not in cs.parts:
-                found |= set(re.findall(r'"((?:building|facts)\.[a-z_]+|[a-z]+\[\]\.[a-z_]+)"',
+                found |= set(re.findall(r'"((?:building|facts)\.[a-z0-9_]+|[a-z]+\[\]\.[a-z0-9_]+)"',
                                         cs.read_text(encoding="utf-8")))
         found |= {f"facts.{k}" for k in STATED_FACTS} | {f"building.{k}" for k in code_scope.FACTS}
         found |= {f"facts.{f}" for facts in ui_data.SITE_STOPS.values() for f in facts}
@@ -551,7 +551,7 @@ def _revit_marks() -> dict:
     text = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
     out = {}
     for label, feeds in re.findall(r'new\(\s*"(Gordium: [^"]+)"[^;]*?\]\s*,\s*"([^"]+)"', text):
-        for key in re.findall(r"(?:building|facts)\.([a-z_]+)", feeds):
+        for key in re.findall(r"(?:building|facts)\.([a-z0-9_]+)", feeds):
             out.setdefault(key, label)
     return out
 
@@ -567,9 +567,11 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
             assert k not in code_scope.MARK, k
     # every fact the code choice and the Building Code's rules read has its Revit mark (the BCNYS's balcony, atrium,
     # fixed seating, special egress spaces and merchandise pads were the last without one, PR feat/revit-fields-ch10)
-    # group 2's two Building Code facts have no Revit mark yet: asked for by name, never by a mark; their marks come in
-    # a follow-up PR from the Revit-fields work (r2_sleeping_units: Table 1006.3.4(1)/(2); 1031 escape openings)
-    assert keys - set(revit) == {"r2_sleeping_units", "emergency_escape_openings_1031"}
+    # every fact the code choice and the Building Code's rules read has its Revit mark (group 2's two, the last
+    # without one: Table 1006.3.4's notes, PR feat/revit-group2-facts)
+    assert keys - set(revit) == set()
+    for k in ("r2_sleeping_units", "emergency_escape_openings_1031"):
+        assert code_scope.field_of(k) == f"building.{k}" and code_scope.MARK[k] == revit[k], k
     for k in ("egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating", "special_egress_spaces",
               "merchandise_pads"):
         assert code_scope.field_of(k) == f"building.{k}" and code_scope.MARK[k] == revit[k], k

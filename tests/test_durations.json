@@ -377,6 +377,7 @@
 "packages/design_checker/tests/test_four_unit_apartment.py::test_a_rooms_function_changes_no_result_until_the_occupant_loads_read_it": 22.1,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_an_exit_stair_is_never_held_to_the_exits_of_the_spaces_it_serves[nfpa_13]": 5.7,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_an_exit_stair_is_never_held_to_the_exits_of_the_spaces_it_serves[none]": 11.3,
+"packages/design_checker/tests/test_four_unit_apartment.py::test_group_2s_marks_stated_choose_the_r2_table_and_never_pass_on_their_own": 22.1,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them[False]": 22.1,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them[True]": 19.1,
 "packages/design_checker/tests/test_goldens.py::test_a_changed_answer_is_caught_and_says_which_part_and_value_changed": 6.5,
