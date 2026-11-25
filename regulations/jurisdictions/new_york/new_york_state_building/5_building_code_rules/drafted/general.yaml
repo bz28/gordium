@@ -11615,10 +11615,10 @@ rules:
     reason: 'Unless the corridor is within a dwelling unit or sleeping unit (exception 2: no rating required there), which
       the building states or doesn''t rule out, the table''s rating isn''t met: a person checks.'
   - when: occupancy_group == "R-4" and sprinklered_903_3_1_3 and not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and
-      corridor_occupant_load > 10
-    reason: 'Group R-4 with an NFPA 13D system: note d sends to 903.2.8, which permits 903.3.1.3 in Group R-4 only in Condition
-      1 (903.2.8.2), and the condition isn''t stated, so whether the table''s 1 hour or its Not Permitted applies is a person''s
-      check.'
+      corridor_occupant_load > 10 and corridor_fire_rating_hours >= 1
+    reason: 'Group R-4 with an NFPA 13D system and a 1-hour corridor: note d sends to 903.2.8, which permits 903.3.1.3 in
+      Group R-4 only in Condition 1 (903.2.8.2); in Condition 1 the 1 hour is met, in Condition 2 the system isn''t one 903.3.1.3
+      allows and the table''s Not Permitted applies. The condition isn''t stated: a person checks.'
   for_each: corridor
   when_none: not_applicable
   sources:
