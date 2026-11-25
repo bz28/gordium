@@ -332,6 +332,11 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
     if bare or not used:
         return None, Stop("ground_wall_bare", count=bare or 1).reason
     high = max(used)
+    lows = _stated_ground(description, reader)           # finished ground stated at an opening: above every spot,
+    if lows is None:                                     # the spots don't bound the grade plane (nothing placed)
+        return None, Stop("ground_openings_not_read").reason
+    if any(g > high + SAME for g in lows):
+        return None, Stop("ground_disagrees_spots", high=f"{high / FT:g} ft", stated=f"{max(lows) / FT:g} ft").reason
     # item 2's "finished ground level at any point": never a spot (it may stand in an areaway or a window well,
     # whose floor as "ground" is an open question: docs/questions_for_architects.md 4.6), only flat ground
     return {"low": -math.inf, "high": high, "point": None, "flat": None,
