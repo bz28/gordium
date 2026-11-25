@@ -81,7 +81,7 @@ def test_a_room_with_no_function_leaves_it_and_its_story_unmeasured(apartment):
     parts = _loads(desc, {"occupant_load_increased": False})
     apt = next(p for p in parts["space"] if p["name"].startswith("Apartment"))
     assert _values(apt, "space_occupant_load") == []
-    assert "Gordium: Function" in apt["not_measured"]["space_occupant_load"]
+    assert apt["not_measured"]["space_occupant_load"] == occupant_load.NOT_GIVEN
     assert "story_occupant_load" not in parts["story"][0]["measures"]
     assert "Apartment" in parts["story"][0]["not_measured"]["story_occupant_load"]
 
@@ -424,7 +424,7 @@ def test_a_storeroom_with_no_function_is_never_a_room_of_no_one():
     assert "story_occupant_load" not in story["measures"] and not (story.get("readings") or {}).get(
         "story_occupant_load")
     assert "st" in story["not_measured"]["story_occupant_load"]
-    assert "Gordium: Function" in _space(parts, "st")["not_measured"]["space_occupant_load"]
+    assert _space(parts, "st")["not_measured"]["space_occupant_load"] == occupant_load.NOT_GIVEN
     st["function"] = "accessory_storage_mechanical"                    # stated: 12 / 300 = 0.04, served through k
     parts = measure(desc)["parts"]
     occupant_load.apply(parts, desc, FACTORS, {"occupant_load_increased": False})
@@ -446,3 +446,24 @@ def test_an_exits_reason_never_says_no_rule_asks_for_its_load(apartment, monkeyp
     rows = [r for r in got["rows"] if r["rule"] == "general.bc_1006_2_1_two_exits"
             and r["id"] in {"L1SW", "L1SE", "L2SW", "L2SE"}]
     assert len(rows) == 4 and {r["outcome"] for r in rows} == {"pass"}, rows
+
+def test_the_panel_never_asks_for_a_mark_revit_does_not_have():
+    """Group 3 review round 4 (P2, 2026-11-24): a room with no function named the room mark 'Gordium: Function',
+    which the Revit add-in doesn't have, so the panel asked the architect to 'Mark the occupant load in the model'.
+    The words are now the routes' own for a figure no mark carries: on Ben's trial request (the four-unit apartment
+    as Revit sends it), no occupant-load ask is a mark to set, and every 'Gordium: ...' mark the answer names is one
+    the add-in defines (apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs)."""
+    import json
+    from design_checker.__main__ import answer
+    request = REPO / "test_data/test_sites/new_york/ithaca_city/four_unit_apartment/revit_check_site_request.json"
+    text = json.dumps(answer(json.loads(request.read_text(encoding="utf-8"))), ensure_ascii=False)
+    assert "Mark the occupant load in the model" not in text
+    assert "Fix the model so the occupant load can be measured" not in text
+    assert "Work out the occupant load by hand" in text                  # asked for by hand, honestly
+    marks = set(re.findall(r'"(Gordium: [^"]+)"',
+                           (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")))
+    words = " ".join([text, *(v for v in vars(occupant_load).values() if isinstance(v, str)),
+                      load(NY / "state.yaml")["waiting_why"]])
+    named = set(re.findall(r"Gordium: [A-Z][A-Za-z ]*[a-z]", words))
+    assert {"Gordium: Use", "Gordium: Exit"} <= named        # the waiting sentence names the marks it means
+    assert all(any(n == m or n.startswith(m + " ") for m in marks) for n in named), named

@@ -96,12 +96,12 @@ def test_the_occupant_loads_come_from_each_rooms_function(got):
 def test_before_and_after_the_functions_only_rules_reading_an_occupant_load_change_and_only_from_needs_review(
         got, before):
     """The apartment before section group 3 (no function stated: 1006.2.1.1 needs review, its reason naming the
-    missing Gordium: Function mark) and after (residential: it passes). Stating a function only settles a rule that
+    missing function) and after (residential: it passes). Stating a function only settles a rule that
     reads an occupant load and needed review for want of one; it never turns a verdict over."""
     rule = "general.bc_1006_2_1_1_three_or_more_exits"
     assert before["results"][rule] == present.REVIEW and got["results"][rule] == "pass"
     rows = [i for i in before["items"] if i["rule"] == rule]
-    assert len(rows) == 8 and sum("Gordium: Function" in i["reason"] for i in rows) == 4     # each apartment's
+    assert len(rows) == 8 and sum("Table 1004.5 function" in i["reason"] for i in rows) == 4     # each apartment's
     assert [i["status"] for i in rows].count(present.REVIEW) == 4                            # the stairs are exits
     rules = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/new_york_state_building"
                                       / "5_building_code_rules/drafted/general.yaml")["rules"]}
