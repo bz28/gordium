@@ -53,7 +53,7 @@ if (ROUND >= 2 && !VERIFY_ONLY && (!SINCE || !PRIOR.length)) {
   throw new Error('review-loop: round >= 2 needs sinceLastRound and priorConfirmed, so the prior fixes are re-checked')
 }
 const WHERE = CWD
-  ? `WORKING DIRECTORY: run every command and read every file inside \`${CWD}\` (\`cd ${CWD}\` first — the branch under review is checked out THERE, not in the session's default directory).\n\n`
+  ? `WORKING DIRECTORY: run every command and read every file inside \`${CWD}\` (\`cd ${CWD}\` first — the branch under review is checked out THERE, not in the session's default directory). NEVER change what is checked out there: no \`git checkout\`, \`git switch\`, \`git reset\`, \`git stash\`, \`git commit\` or file edits (the author is working in it; a reviewer's checkout once detached a branch, so the author's next commits never reached GitHub). To read another commit use \`git show <sha>:<path>\` or \`git diff\`; to run code at another commit, \`git worktree add\` a scratch worktree in your scratchpad and remove it after.\n\n`
   : ''
 
 const FINDING_ITEM = {
