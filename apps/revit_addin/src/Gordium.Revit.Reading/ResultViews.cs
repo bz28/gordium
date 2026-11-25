@@ -87,6 +87,9 @@ public sealed record ResultViewsModel(string Summary, string Headline, IReadOnly
     /// sent, the code choice would otherwise be shown nowhere).</summary>
     public bool ShowsWhichCode => Code.Any(d => d.Note is not null);
 
+    /// <summary>The ids of the rows the scope note is said of (<see cref="ResultViews.DraftedForOneGroup"/>).</summary>
+    public IReadOnlySet<string> Scoped { get; init; } = new HashSet<string>(StringComparer.Ordinal);
+
     /// <summary>The scope note (change 24), said once where it matters (the questions card and the book in By code),
     /// or null when no row says its rules are drafted for one group only.</summary>
     public string? Scope { get; init; }
@@ -111,6 +114,7 @@ public static class ResultViews
                                     FixGroups(rows), CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
         {
             Scope = scoped.Count == 0 ? null : ScopeWords(scoped.Count),
+            Scoped = scoped.Select(r => r.Row.Id).ToHashSet(StringComparer.Ordinal),
         };
     }
 

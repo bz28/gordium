@@ -223,7 +223,9 @@ public sealed class DetailPageTests
         Assert.Equal(answers.Cards.Count - ProjectQuestions.ShownAtFirst, more.Hidden);
         var foot = Assert.Single(first.OfType<AnswerFootEntry>());
         Assert.Equal(answers.Cards.Count, foot.Questions.Count);                // Save covers every question, shown or not
-        Assert.Equal(m.Views!.Scope, foot.Scope);
+        // the card's scope note counts only its own results (the apartment's two I-4-only rows ask no question)
+        var scopedInCard = answers.Rows.Count(r => m.Views!.Scoped.Contains(r.Id));
+        Assert.Equal(scopedInCard == 0 ? null : ResultViews.ScopeWords(scopedInCard), foot.Scope);
         Assert.Equal(answers.Cards.Count, Lay(open.Append(ResultViewList.MoreQuestionsKey)).OfType<QuestionEntry>().Count());
         // every result of the group, even behind "+ N more", is reached by the path to it
         foreach (var row in answers.Rows)
@@ -246,7 +248,7 @@ public sealed class DetailPageTests
         Assert.False(ResultViewList.Saves(question, "Enter"));
         Assert.Contains("Save and check again", ResultViewList.Spoken(foot), StringComparison.Ordinal);
         // review round 2: the foot says the scope note drawn in it, and promises no answer that isn't chosen
-        Assert.StartsWith(m.Views!.Scope!, ResultViewList.Spoken(foot), StringComparison.Ordinal);
+        Assert.StartsWith(string.Join(" ", new[] { foot.Scope, ResultViewList.FootWords }.OfType<string>()), ResultViewList.Spoken(foot), StringComparison.Ordinal);
         Assert.DoesNotContain("the answers chosen", ResultViewList.Spoken(foot), StringComparison.Ordinal);
         var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
         // review round 2: an open dropdown's item keeps its keys (a ComboBoxItem is a ListBoxItem)
