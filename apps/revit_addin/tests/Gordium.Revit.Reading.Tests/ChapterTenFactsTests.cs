@@ -21,6 +21,16 @@ public sealed class ChapterTenFactsTests(RealWorker worker) : IClassFixture<Real
 
     public static TheoryData<string> Keys => [.. Each.Select(e => e.Key)];
 
+    /// <summary>Every Yes/No building mark BuildingFacts reads: the five above and the four the code choice reads
+    /// (review round 1: a value neither Yes nor No on the older four was dropped as not stated before this branch).</summary>
+    private static readonly (MarkDefinition Mark, string Key)[] EveryYesNo =
+    [
+        .. Each, (Marks.FollowsBuildingCode, "follows_building_code"), (Marks.SeparateMeansOfEgress, "separate_means_of_egress"),
+        (Marks.TownhouseUnits, "townhouse_units"), (Marks.CareFacility, "care_facility"),
+    ];
+
+    public static TheoryData<string> EveryYesNoKey => [.. EveryYesNo.Select(e => e.Key)];
+
     private static RevitModel Model(Dictionary<Guid, MarkValue> marks) => new() { Document = "b.rvt", ProjectMarks = marks };
 
     [Fact]
@@ -43,6 +53,9 @@ public sealed class ChapterTenFactsTests(RealWorker worker) : IClassFixture<Real
         Assert.Contains("from any point in the merchandise pad.\"", Marks.MerchandisePads.Description, StringComparison.Ordinal);
         Assert.Contains("that occurs within the atrium shall be not greater than 200 feet (60 960 mm).\"", Marks.Atrium.Description, StringComparison.Ordinal);
         Assert.Contains("in the uses described in Sections 1006.2.2.1 through 1006.2.2.6.\"", Marks.SpecialEgressSpaces.Description, StringComparison.Ordinal);
+        // each section named for what it says (review round 1: 1030.7's aisle measuring was credited to 1030.8)
+        Assert.Contains("1030.7 measures its travel along the aisles, never over or on the seats; 1030.8 limits its common path from any seat",
+                        Marks.AssemblyFixedSeating.Description, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -85,10 +98,11 @@ public sealed class ChapterTenFactsTests(RealWorker worker) : IClassFixture<Real
     /// <summary>A Yes/No building mark holding neither 1 nor 0 (set through the API) is asked again and never dropped
     /// as not stated: sent anyway, the value goes as held, so the code decision says it can't read it.</summary>
     [Theory]
-    [MemberData(nameof(Keys))]
+    [MemberData(nameof(EveryYesNoKey))]
     public void A_mark_holding_neither_yes_nor_no_is_asked_again(string key)
     {
-        var (mark, _) = Each.Single(e => e.Key == key);
+        var (mark, _) = EveryYesNo.Single(e => e.Key == key);
+        Assert.Equal("building." + key, mark.Feeds);                           // the form's problem is for building facts
         var model = Model(new() { [mark.Guid] = new(true, 2) });
         var read = BuildingFacts.Read(model);
         Assert.Equal($"{mark.Name} holds a value that isn't Yes or No: tick Yes or No, or leave it blank on Project Information (Manage > Project Information).",

@@ -257,7 +257,7 @@ public static class Marks
         "Gordium: Fixed assembly seating", new("717d4f32-6264-46b4-95e7-ffd7668518c4"), MarkValueKind.YesNo,
         MarkBinding.Instance, [ProjectInformation], "building.assembly_fixed_seating",
         "Yes when any room or space of the building is used for assembly purposes with fixed seating, in any group (BCNYS Table 1006.2.1 note c: \"c. For a room or space used for assembly purposes having fixed seating, see Section 1030.8.\"). " +
-        "Yes: a person checks the exits, common path and travel such a room changes (1030.8 measures along the aisles, never over the seats). No: there is none. Blank: the rules that turn on it need review.");
+        "Yes: a person checks the exits, common path and travel such a room changes (1030.7 measures its travel along the aisles, never over or on the seats; 1030.8 limits its common path from any seat). No: there is none. Blank: the rules that turn on it need review.");
 
     /// <summary>Whether the building holds a space the Building Code gives its own exits or travel limit
     /// (<c>building.special_egress_spaces</c>, BCNYS 1006.2.2, Table 1017.2 note a).</summary>

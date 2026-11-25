@@ -261,7 +261,10 @@ def _given(building) -> tuple[dict, list[str]]:
         elif ok:
             out[k] = v
         else:
-            bad.append(f"the building's {k.replace('_', ' ')} is {value_words(v)}, which Gordium can't read")
+            # named by the mark the architect corrects it on (review round 1: "the building's building has atrium is
+            # 2"), else in words
+            name = MARK.get(k) or f"the building's {k.replace('_', ' ')}"
+            bad.append(f"{name} is {value_words(v)}, which Gordium can't read")
     return out, bad
 
 
