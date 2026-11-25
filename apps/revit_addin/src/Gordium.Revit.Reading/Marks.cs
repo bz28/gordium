@@ -246,6 +246,51 @@ public static class Marks
         "The automatic sprinkler system the building is equipped with throughout, one of: " + SprinklerWords.Table.Listed +
         " (BCNYS 903.3.1.1 NFPA 13, 903.3.1.2 NFPA 13R, 903.3.1.3 NFPA 13D). Blank: the limits that change with a sprinkler system need review.");
 
+    // ---- what the Building Code's Chapter 10 egress rules read of the whole building (code_scope.FACTS, the BCNYS
+    // rulebook's proposed_measures.yaml): each a Yes/No on Project Information, sent only when set. Yes leaves the limits
+    // the fact changes to a person (Gordium doesn't measure them yet); No is the architect's statement that the general
+    // limits apply; blank is not stated, and every rule that reads it needs review (never read as No).
+
+    /// <summary>Whether any room or space is used for assembly with fixed seating (<c>building.assembly_fixed_seating</c>,
+    /// BCNYS Table 1006.2.1 note c, 1030.8).</summary>
+    public static readonly MarkDefinition AssemblyFixedSeating = new(
+        "Gordium: Fixed assembly seating", new("717d4f32-6264-46b4-95e7-ffd7668518c4"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.assembly_fixed_seating",
+        "Yes when any room or space of the building is used for assembly purposes with fixed seating, in any group (BCNYS Table 1006.2.1 note c: \"c. For a room or space used for assembly purposes having fixed seating, see Section 1030.8.\"). " +
+        "Yes: a person checks the exits, common path and travel such a room changes (1030.8 measures along the aisles, never over the seats). No: there is none. Blank: the rules that turn on it need review.");
+
+    /// <summary>Whether the building holds a space the Building Code gives its own exits or travel limit
+    /// (<c>building.special_egress_spaces</c>, BCNYS 1006.2.2, Table 1017.2 note a).</summary>
+    public static readonly MarkDefinition SpecialEgressSpaces = new(
+        "Gordium: Special egress spaces", new("8efde5e2-df14-4f88-b8ce-da46285b930d"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.special_egress_spaces",
+        "Yes when the building holds any space the Building Code gives its own exits or exit access travel limit: a covered or open mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing facility (412.6), " +
+        "a boiler, incinerator or furnace room, a refrigeration machinery room, a refrigerated room or an electrical room (1006.2.2.1 to 1006.2.2.4), a vehicular ramp (1006.2.2.5), a temporary structure (3103.4) or a pedestrian walkway (3104.9). " +
+        "BCNYS 1006.2.2: \"The numbers, configuration and types of components of exits or access to exits shall be provided in the uses described in Sections 1006.2.2.1 through 1006.2.2.6.\" " +
+        "Yes: a person checks the limits those spaces change. No: the building has none of them. Blank: the rules that turn on it need review.");
+
+    /// <summary>Whether a Group M store has merchandise pads (<c>building.merchandise_pads</c>, BCNYS 1018.4).</summary>
+    public static readonly MarkDefinition MerchandisePads = new(
+        "Gordium: Merchandise pads", new("90d6a3a4-6f52-487c-b98b-21ea864dee45"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.merchandise_pads",
+        "Yes when a Group M store in the building has merchandise pads (areas of display elements with aisle accessways among them). BCNYS 1018.4: \"The common path of egress travel shall not exceed 30 feet (9144 mm) from any point in the merchandise pad.\" (75 ft for not more than 50 occupants). " +
+        "Yes: a person checks that common path (the pads aren't marked in the model). No: there are none. Blank: the rules that turn on it need review.");
+
+    /// <summary>Whether the design takes the exterior egress balcony increase (<c>building.egress_balcony_increase_taken</c>,
+    /// BCNYS 1017.2.1).</summary>
+    public static readonly MarkDefinition EgressBalconyIncrease = new(
+        "Gordium: Egress balcony increase", new("3f260842-2450-44da-902d-3e066984a521"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.egress_balcony_increase_taken",
+        "Yes when the design relies on BCNYS 1017.2.1's exterior egress balcony increase: up to 100 ft more exit access travel where the last portion of the exit access leading to the exit is on an exterior egress balcony. " +
+        "Yes: a travel distance over the table's limit but within the increase is checked by a person. No: the design doesn't take it, so Table 1017.2's limits apply as they are. Blank: the rules that turn on it need review.");
+
+    /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
+    public static readonly MarkDefinition Atrium = new(
+        "Gordium: Atrium", new("8c3211a5-546b-463e-8d8c-b70fd753c1b6"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.building_has_atrium",
+        "Yes when the building has an atrium (BCNYS 202 ATRIUM: an opening connecting two or more stories, closed at the top) that a path of egress travel passes through or that areas open to. BCNYS 1017.3.2.3: \"Where the path of egress travel is not at the level of exit discharge from the atrium, that portion of the total permitted exit access travel distance that occurs within the atrium shall be not greater than 200 feet (60 960 mm).\" " +
+        "Yes: a travel distance over 200 ft is checked by a person. No: there is none. Blank: the rules that turn on it need review.");
+
     // ---- the dwelling's own facts which New York code needs (code_scope.py) and Ithaca's zoning reads too: sent as
     // the lot facts of the same names (host_core.facts.STATED_FACTS), each only when set (unset is not stated)
 
@@ -464,7 +509,8 @@ public static class Marks
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
         CanBeLocked, PassThrough, Exit, Stories, NotOccupied,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
-        SprinklerSystem, DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
+        SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, Atrium,
+        DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
     ];
