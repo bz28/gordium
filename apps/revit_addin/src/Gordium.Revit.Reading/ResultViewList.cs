@@ -21,8 +21,21 @@ public sealed record FixCardEntry(FixCard Card, string Key, bool Open, PanelStat
 /// to what is inside (a rule: its rows).</summary>
 public sealed record CodeNodeEntry(CodeNode Node, string Key, int Depth, bool Open, bool CanOpen, PanelStatus Status) : ListEntry;
 
+/// <summary>One question of the open "Answer N questions" group (changes 22, 23): the checker's ask, its field's
+/// control, "affects N results" (opening to them).</summary>
+public sealed record QuestionEntry(ProjectQuestion Question, string Key, bool Open, PanelStatus Status) : ListEntry;
+
+/// <summary>"+ N more questions" (or "Fewer questions"), after the first <see cref="ProjectQuestions.ShownAtFirst"/>.</summary>
+public sealed record MoreQuestionsEntry(string Key, int Hidden, bool Open) : ListEntry;
+
+/// <summary>The questions' foot: the scope note (change 24), Save and check again, Open Project Information.</summary>
+public sealed record AnswerFootEntry(FixGroup Group, IReadOnlyList<ProjectQuestion> Questions, string? Scope) : ListEntry;
+
 public static class ResultViewList
 {
+    /// <summary>The key of the "Answer" group's "+ N more questions".</summary>
+    public const string MoreQuestionsKey = "questions:more";
+
     /// <summary>The words of the switch (change 17), in its order.</summary>
     public static string Words(ResultsViewKind view) => view == ResultsViewKind.WhatToFix ? "What to fix" : "By code";
 
@@ -71,7 +84,8 @@ public static class ResultViewList
     /// matching rows instead, the same in both views.</summary>
     public static IReadOnlyList<ListEntry> Layout(ResultViewsModel model, IReadOnlyList<ListRow> placed, ResultsViewKind view,
                                                   IReadOnlySet<string> open, string? query,
-                                                  IReadOnlyDictionary<string, string>? labels, bool stale)
+                                                  IReadOnlyDictionary<string, string>? labels, bool stale,
+                                                  IReadOnlyList<SetupField>? fields = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         ArgumentNullException.ThrowIfNull(placed);
@@ -99,6 +113,24 @@ public static class ResultViewList
                 if (g.Kind is FixKind.Fails or FixKind.NotChecked or FixKind.Done)
                 {
                     Rows(g.Rows);
+                    continue;
+                }
+                // the questions asked in the card (changes 22, 23), once the project's fields are known
+                if (g.Kind == FixKind.Answer && fields is not null)
+                {
+                    var questions = ProjectQuestions.Of(g, fields);
+                    var more = open.Contains(MoreQuestionsKey);
+                    foreach (var q in more ? questions : questions.Take(ProjectQuestions.ShownAtFirst))
+                    {
+                        var qk = CardKey(q.Card);
+                        var qOpen = open.Contains(qk);
+                        entries.Add(new QuestionEntry(q, qk, qOpen, StatusOf(g.Kind, q.Card.Rows, stale)));
+                        if (qOpen)
+                            Rows(q.Card.Rows);
+                    }
+                    if (questions.Count > ProjectQuestions.ShownAtFirst)
+                        entries.Add(new MoreQuestionsEntry(MoreQuestionsKey, questions.Count - ProjectQuestions.ShownAtFirst, more));
+                    entries.Add(new AnswerFootEntry(g, questions, model.Scope));
                     continue;
                 }
                 foreach (var c in g.Cards)
@@ -138,6 +170,8 @@ public static class ResultViewList
             FixGroupEntry g => (g.Key, g.Open, true),
             FixCardEntry c => (c.Key, c.Open, true),
             CodeNodeEntry n => (n.Key, n.Open, n.CanOpen),
+            QuestionEntry q => (q.Key, q.Open, true),
+            MoreQuestionsEntry m => (m.Key, m.Open, true),
             _ => ((string?)null, false, false),
         };
         if (k is null || !canOpen)
@@ -157,8 +191,11 @@ public static class ResultViewList
     {
         FixGroupEntry g => $"{g.Group.Title}, {StatusLook.Word(g.Status)}, {g.Group.SeeWords}" + (g.Open ? ", open" : ", folded"),
         FixCardEntry c => $"{c.Card.Headline}, {(c.Card.Rows.Count == 1 ? "1 result" : $"{c.Card.Rows.Count} results")}" + (c.Open ? ", open" : ", folded"),
-        CodeNodeEntry n => string.Join(", ", new[] { Title(n.Node), n.Node.Note, StatusLook.Word(n.Status), n.Node.Line }.OfType<string>())
+        CodeNodeEntry n => string.Join(", ", new[] { Title(n.Node), n.Node.Note, StatusLook.Word(n.Status), n.Node.Line, n.Node.Scope }.OfType<string>())
                            + (n.CanOpen ? n.Open ? ", open" : ", folded" : ""),
+        QuestionEntry q => $"{q.Question.Card.Headline}, {ProjectQuestions.Affects(q.Question.Affects)}"
+                           + (q.Question.Field is null ? ", " + ProjectQuestions.NoField : "") + (q.Open ? ", results shown" : ""),
+        MoreQuestionsEntry m => ProjectQuestions.MoreWords(m.Hidden, m.Open),
         _ => null,
     };
 
@@ -188,8 +225,11 @@ public static class ResultViewList
                     continue;
                 if (g.Kind is FixKind.Fails or FixKind.NotChecked or FixKind.Done)
                     return [GroupKey(g)];
-                var card = g.Cards.First(c => c.Rows.Any(r => r.Id == rowId));
-                return [GroupKey(g), CardKey(card)];
+                var at = g.Cards.ToList().FindIndex(c => c.Rows.Any(r => r.Id == rowId));
+                // a question past the first few is behind "+ N more questions" (the key is harmless elsewhere)
+                return g.Kind == FixKind.Answer && at >= ProjectQuestions.ShownAtFirst
+                    ? [GroupKey(g), MoreQuestionsKey, CardKey(g.Cards[at])]
+                    : [GroupKey(g), CardKey(g.Cards[at])];
             }
             return [];
         }

@@ -58,6 +58,12 @@ internal static class SetupRun
 
     private static SetupScreen Screen() => SetupScreen.Build(_model!, _sides, _options, Draft, _streetWords, _streetOnLot);
 
+    /// <summary>The project's facts as the Setup form's fields (Revit's thread, when a check's answer is shown): what
+    /// "Answer N questions about the project" asks with in the results (UI polish changes 22, 23), read now from the
+    /// marks, with the place's options when known. Nothing is written here.</summary>
+    internal static IReadOnlyList<SetupField> Questions(Document doc) =>
+        SetupScreen.Build(RevitMarks.Model(doc), null, _options).Fields;
+
     /// <summary>Check project's gate (Revit's thread, during the check's read): the form's screen, and what to do
     /// (SetupGate.Decide: show the form, send anyway for what was already checked anyway, or send).</summary>
     internal static (SetupScreen Screen, SetupStep Step) Needs(Document doc)

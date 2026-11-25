@@ -28,6 +28,16 @@ public static class PaneWords
         return s.Length == 0 ? s : char.ToUpperInvariant(s[0]) + s[1..];
     }
 
+    /// <summary>Why the questions card's answers weren't saved (a write Revit refused, or the transaction not
+    /// committed): nothing was checked, and the answers stay chosen in the card.</summary>
+    public static string AnswersNotSaved(IReadOnlyList<string> refused, string status)
+    {
+        ArgumentNullException.ThrowIfNull(refused);
+        return "Your answers weren't saved, so nothing was checked" +
+               (refused.Count > 0 ? $": {string.Join("; ", refused)}." : $" (Revit didn't take the change: {status}).") +
+               " They are still chosen in the card: try Save again.";
+    }
+
     /// <summary>"a", "a and b", "a, b and c".</summary>
     public static string And(IReadOnlyList<string> items)
     {

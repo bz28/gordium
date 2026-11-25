@@ -132,6 +132,49 @@ internal static class Program
                         Check(items.Where(i => i.DataContext is CodeNodeItem).All(i => System.Windows.Automation.AutomationProperties.GetName(i).Length > 0),
                               "14 By code: every node's list item has words for a screen reader");
                     });
+                    // UI polish PR 4: the questions asked in the card (changes 22 to 24), the result detail (28 to 32)
+                    var (_, setupModel, setupSides) = Fixture(Path.Combine(fix, "setup_apartment.json"));
+                    var questions = SetupScreen.Build(setupModel, setupSides, options).Fields;
+                    var answerGroup = views.Fix.First(g => g.Kind == FixKind.Answer);
+                    Step(make(theme, []), "16_questions_apartment", 1100, dark, p =>
+                    {
+                        p.Show(title, when, rows, Labels(apartment), questions);
+                        Settle(p.View);
+                        var combos = FindAll<ComboBox>(p.View).Count(c => c.IsVisible);
+                        var yesNo = FindAll<System.Windows.Controls.Primitives.ToggleButton>(p.View).Count(t => t.IsVisible && (t.Content as string) is "Yes" or "No");
+                        Check(combos >= 2 && yesNo >= 2, $"16 questions: asked in the card ({combos} dropdowns, {yesNo} Yes/No buttons)");
+                        var save = FindAll<Button>(p.View).SingleOrDefault(b => b.IsVisible && b.Content as string == ProjectQuestions.SaveWords(0));
+                        Check(save is { IsEnabled: false }, "16 questions: Save is off until an answer is chosen (nothing is written before)");
+                        Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, EntryView.ScopeTag)), "16 questions: the scope note is in the card");
+                    });
+                    var exits = rows.Groups.SelectMany(g => g.AllRows).First(r => r.Name.Contains("Two exits", StringComparison.Ordinal) && r.Name.Contains("APARTMENT SOUTH L1", StringComparison.Ordinal));
+                    foreach (var why in new[] { false, true })
+                        Step(make(theme, []), why ? "17b_detail_why_open_apartment" : "17_detail_apartment", 900, dark, p =>
+                        {
+                            p.Show(title, when, rows, Labels(apartment), questions);
+                            p.OpenResult(exits.Id);
+                            Settle(p.View);
+                            var callout = FindAll<Border>(p.View).SingleOrDefault(b => b.IsVisible && Equals(b.Tag, DetailView.CalloutTag));
+                            Check(callout is not null, "17 detail: one callout with the headline");
+                            Check(FindAll<Button>(p.View).Any(b => b.IsVisible && (b.Content as TextBlock)?.Text == "Answer 2 questions"), "17 detail: Answer 2 questions beside it");
+                            Check(!FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t) == "MEASURED AGAINST THE LIMIT"), "17 detail: nothing measured, so no Measured block");
+                            Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t) == "WHAT THE CODE SAYS"), "17 detail: What the code says");
+                            if (why)
+                            {
+                                var link = FindAll<Button>(p.View).First(b => b.IsVisible && (b.Content as TextBlock)?.Text == "Why?");
+                                link.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+                                Settle(p.View);
+                                Check(FindAll<StackPanel>(p.View).Any(s => s.IsVisible && Equals(s.Tag, DetailView.WhyTag)), "17b detail: Why? opens the checker's own words");
+                            }
+                        });
+                    Step(make(theme, []), "18_detail_answer_goes_to_questions_apartment", 900, dark, p =>
+                    {
+                        p.Show(title, when, rows, Labels(apartment), questions);
+                        p.OpenResult(exits.Id);
+                        p.Answer();
+                        Settle(p.View);
+                        Check(FindAll<ComboBox>(p.View).Any(c => c.IsVisible), "18: Answer 2 questions goes back to the questions card, open");
+                    });
                     Step(make(theme, []), "15_by_code_stale_apartment", 900, dark, p =>
                     {
                         p.Show(title, when, rows, Labels(apartment));

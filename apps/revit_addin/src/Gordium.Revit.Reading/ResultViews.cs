@@ -69,6 +69,10 @@ public sealed record CodeNode(CodeLevel Level, string? Number, string Title, str
     /// quotes, as the which-code line's tooltip says them: <see cref="WhichCode.Tooltip"/>), or null (review round 3:
     /// the quotes are shown where the choice is).</summary>
     public string? NoteTooltip { get; init; }
+
+    /// <summary>A document's scope note (change 24: "Gordium's Building Code egress rules are drafted for day care
+    /// (Group I-4) so far…"), said once under the book its rows say it of, or null.</summary>
+    public string? Scope { get; init; }
 }
 
 /// <summary>Both views of one answer, and the words at the top of either.</summary>
@@ -82,6 +86,10 @@ public sealed record ResultViewsModel(string Summary, string Headline, IReadOnly
     /// the pane leave the which-code line off its top (UI polish PR 3 review round 3: with no contents, or no reason
     /// sent, the code choice would otherwise be shown nowhere).</summary>
     public bool ShowsWhichCode => Code.Any(d => d.Note is not null);
+
+    /// <summary>The scope note (change 24), said once where it matters (the questions card and the book in By code),
+    /// or null when no row says its rules are drafted for one group only.</summary>
+    public string? Scope { get; init; }
 }
 
 public static class ResultViews
@@ -97,10 +105,35 @@ public static class ResultViews
     {
         ArgumentNullException.ThrowIfNull(result);
         var rows = result.Items.Select(i => (Item: i, Row: ResultRows.Row(i))).ToList();
+        var scoped = rows.Where(r => DraftedForOneGroup(r.Item.Raw)).ToList();
         return new ResultViewsModel(Summary(rows.Select(r => r.Row.Verdict)),
                                     Headline(rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id))),
-                                    FixGroups(rows), CodeTree(result, rows));
+                                    FixGroups(rows), CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
+        {
+            Scope = scoped.Count == 0 ? null : ScopeWords,
+        };
     }
+
+    // ---- the scope note (change 24) ---------------------------------------------------------------------------
+
+    /// <summary>The checker's words for a rule drafted for one occupancy group only (design_checker/egress.py FLAG_WHY
+    /// and the rulebook's notes: "this rulebook's rules are drafted for Group I-4 only").</summary>
+    public const string DraftedFor = "drafted for Group I-4 only";
+
+    /// <summary>Whether the checker says of this row (its reason, or an ask's why) that its rules are drafted for Group
+    /// I-4 only: the rows the scope note is said for.</summary>
+    public static bool DraftedForOneGroup(JsonElement raw)
+    {
+        if (Str(raw, "reason")?.Contains(DraftedFor, StringComparison.Ordinal) == true)
+            return true;
+        return raw.ValueKind == JsonValueKind.Object && raw.TryGetProperty("asks", out var asks) && asks.ValueKind == JsonValueKind.Array
+               && asks.EnumerateArray().Any(a => Str(a, "why")?.Contains(DraftedFor, StringComparison.Ordinal) == true);
+    }
+
+    /// <summary>The scope note in words (strings.md, "What to fix": the rulebook's own note, said for any group).</summary>
+    public const string ScopeWords =
+        "Gordium's Building Code egress rules are drafted for day care (Group I-4) so far. For any other group, most egress " +
+        "results will stay Needs review: check egress by hand.";
 
     // ---- the top: one summary line and the headline sentence --------------------------------------------------
 
@@ -237,6 +270,14 @@ public static class ResultViews
         };
     }
 
+    /// <summary>The cards of What to fix that list row <paramref name="rowId"/>, in their groups' order: the checker's
+    /// asks for it (a row in no card of asks, such as what fails, gives the group's own row card).</summary>
+    public static IReadOnlyList<FixCard> CardsOf(ResultViewsModel model, string rowId)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        return [.. model.Fix.SelectMany(g => g.Cards).Where(c => c.Rows.Any(r => r.Id == rowId))];
+    }
+
     /// <summary>One ask as the checker sent it (<c>asks[]</c>).</summary>
     public sealed record Ask(string Kind, string Key, string Headline, string? Why, string? Field, IReadOnlyList<string> Elements);
 
@@ -327,7 +368,7 @@ public static class ResultViews
             ? (Str(w, "title"), Str(w, "why"))
             : (null, null);
 
-    private static List<CodeNode> CodeTree(CheckResult result, List<(CheckItem Item, ResultRow Row)> rows)
+    private static List<CodeNode> CodeTree(CheckResult result, List<(CheckItem Item, ResultRow Row)> rows, HashSet<ResultRow> scoped)
     {
         var placed = rows.Select(r => (r.Row, In: InCodeOf(r.Item.Raw), Rule: Str(r.Item.Raw, "rule") ?? r.Row.Id,
                                        RuleName: Str(r.Item.Raw, "rule_name") ?? r.Row.Name)).ToList();
@@ -369,9 +410,11 @@ public static class ResultViews
                 used.UnionWith(g.Select(p => p.Row));
             }
             var note = isGoverning && why is not null ? $"Governs this building: {why}" : null;
+            var scopedHere = mine.Count(p => scoped.Contains(p.Row));
             docs.Add(Node(CodeLevel.Document, null, doc.Document, note, Fold(chapters), []) with
             {
                 NoteTooltip = note is null ? null : Gordium.Revit.Reading.WhichCode.Read(result.Raw)?.Tooltip,
+                Scope = scopedHere == 0 ? null : ScopeWords,
             });
         }
         // a row the contents can't place (no in_code, or a document they don't list): its own document node, last
