@@ -15,6 +15,49 @@ public sealed class FakeWorkerTests
     private static async Task<WorkerClient> Start(string mode, TimeSpan? timeout = null) =>
         await WorkerClient.StartAsync(Env.Fake(mode, timeout: timeout));
 
+    private sealed class Said : IProgress<string>
+    {
+        public List<string> Lines { get; } = [];
+
+        public void Report(string value)
+        {
+            lock (Lines)
+                Lines.Add(value);
+        }
+    }
+
+    /// <summary>UI polish change 15: with a silence limit the worker is asked for its progress lines, each starts the
+    /// silence again (a 2 s check answers within a 1 s silence limit), and each is handed on; the answer is read as
+    /// ever.</summary>
+    [Fact]
+    public async Task A_long_check_that_keeps_talking_is_never_stopped()
+    {
+        using var client = await Start("beats");
+        var said = new Said();
+        var clock = Stopwatch.StartNew();
+        var result = await client.CheckSiteAsync(Site, Facts, silence: TimeSpan.FromSeconds(1), step: said);
+        Assert.True(clock.Elapsed > TimeSpan.FromSeconds(1.5), $"took {clock.Elapsed}: the lines weren't asked for");
+        Assert.Equal(Verdict.Complies, Assert.Single(result.Items).Status);
+        Assert.Equal(4, said.Lines.Count);
+        Assert.All(said.Lines, l => Assert.Equal("Measuring the building…", l));
+        Assert.False(client.IsStopped);
+    }
+
+    /// <summary>A worker that falls silent is stopped after the silence limit, and the error says it was silence.</summary>
+    [Fact]
+    public async Task A_check_that_falls_silent_is_stopped_after_the_silence()
+    {
+        using var client = await Start("beats_then_hang");
+        var pid = client.ProcessId;
+        var clock = Stopwatch.StartNew();
+        var e = await Assert.ThrowsAsync<WorkerTimeoutException>(() => client.CheckSiteAsync(Site, Facts, silence: TimeSpan.FromSeconds(1)));
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(20), $"took {clock.Elapsed}");
+        Assert.True(e.Silent);
+        Assert.Equal(TimeSpan.FromSeconds(1), e.Limit);
+        Assert.True(client.IsStopped);
+        Assert.True(Exited(pid), "the silent worker was not stopped");
+    }
+
     [Fact]
     public async Task A_well_formed_answer_is_read()
     {

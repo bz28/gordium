@@ -183,9 +183,9 @@ public sealed class CheckProjectCommand : IExternalCommand
                 return;
             }
             check.End("failed");
-            // the last check's rows taken down: never left showing as if they were this one's
-            ResultsPane.Failed(clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})");
-            TaskDialog.Show(Title, clear + $"Nothing was checked: {e.GetType().Name}\n{e.Message}\n\nLogged to {Trial.LogPath()}");
+            // the last check's rows taken down: never left showing as if they were this one's; in the pane, never a
+            // dialog that blocks Revit (UI polish change 16), the technical words only behind Copy details
+            ResultsPane.Failed(CheckFailures.ReadFailed(clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})"));
         }
     }
 
@@ -220,7 +220,9 @@ public sealed class CheckProjectCommand : IExternalCommand
             if (use == AnswerUse.ShowError)
             {
                 End("failed");
-                ResultsPane.Failed(CheckWords.CheckerStopped((string)log["error"]!) + $" (logged to {Trial.LogPath()})");
+                // one message per failure (UI polish change 13), from what the wait ended with
+                var why = sent.Exception?.GetBaseException() ?? new OperationCanceledException("the check was cancelled");
+                ResultsPane.Failed(CheckFailures.Of(why, CheckWords.CheckerStopped((string)log["error"]!) + $" (logged to {Trial.LogPath()})"));
                 return;
             }
             var run = Answer(doc, check.Prepared!, sent.Result, log);
@@ -233,7 +235,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             log["error"] = $"{e.GetType().Name}: {e.Message}";
             log["where"] = e.StackTrace?.Split('\n').Take(8).Select(l => l.Trim()).ToList();
             End("failed");
-            ResultsPane.Failed(check.Clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})");
+            ResultsPane.Failed(CheckFailures.Of(e, check.Clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})"));
         }
     }
 

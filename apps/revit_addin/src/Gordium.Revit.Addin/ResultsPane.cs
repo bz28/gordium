@@ -32,7 +32,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
         };
     }
 
-    private static ResultsView View() => _view ??= new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, SetUp, _theme, SaveAnswers);
+    private static ResultsView View() => _view ??= new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, SetUp, _theme, SaveAnswers, MoreTime);
 
     /// <summary>"Save and check again" in the questions card (UI polish changes 22, 23): the answers written to Project
     /// Information in one transaction (one Ctrl+Z, named for Gordium like the Setup form's Save), then the project
@@ -117,14 +117,24 @@ internal sealed class ResultsPane : IDockablePaneProvider
 
     /// <summary>A check that failed: the last check's rows taken down (never shown as this one's), and why. From any
     /// thread (put on the panel's).</summary>
-    internal static void Failed(string words) => Ui(() =>
+    internal static void Failed(CheckFailure failure) => Ui(() =>
     {
         if (_view is null)
             return;
         if (!CheckRun.Flow.Running)
             _view.EndProgress();
-        _view.Failed(words);
+        _view.Failed(failure);
     });
+
+    /// <summary>The checker's progress line (its stage, as it says it), under the check's step.</summary>
+    internal static void Step(string words) => _view?.Step(words);
+
+    /// <summary>"Try again with more time": the next check's silence doubled, then the check.</summary>
+    private static void MoreTime()
+    {
+        CheckRun.MoreTime();
+        CheckAgain();
+    }
 
     /// <summary>A line in the panel (a click's result, a problem), when the panel exists. From any thread.</summary>
     internal static void Say(string words) => Ui(() => _view?.Say(words));
@@ -267,7 +277,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
             if (_checked is null || !e.Document.Equals(_checked))
                 return;
             _checked = null;
-            Failed("The project checked was closed: open it and click Check project.");
+            Failed(CheckFailures.Closed());
         }
         catch (Exception x)       // never out of Revit's event
         {

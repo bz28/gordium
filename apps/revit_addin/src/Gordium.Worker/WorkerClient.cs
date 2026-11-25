@@ -157,9 +157,13 @@ public sealed class WorkerClient : IDisposable
     /// if no rooms were drawn, so with an older worker this throws <see cref="WorkerVersionException"/> and sends
     /// nothing (the worker keeps running).</param>
     /// <param name="cancel">Cancels the wait; the worker is then stopped.</param>
+    /// <param name="silence">With a value, the worker is asked for its progress lines and stopped only when it says
+    /// nothing for this long (WorkerTimeoutException with Silent); null: one limit for the whole answer, as before.</param>
+    /// <param name="step">Told each progress line's words as it comes (with <paramref name="silence"/> only).</param>
     public async Task<CheckResult> CheckSiteAsync(JsonNode site, JsonNode facts, string? report = null,
                                                   JsonNode? extras = null, string? today = null,
-                                                  JsonNode? interior = null, CancellationToken cancel = default)
+                                                  JsonNode? interior = null, CancellationToken cancel = default,
+                                                  TimeSpan? silence = null, IProgress<string>? step = null)
     {
         ArgumentNullException.ThrowIfNull(site);
         ArgumentNullException.ThrowIfNull(facts);
@@ -177,7 +181,11 @@ public sealed class WorkerClient : IDisposable
             fields["today"] = today;
         if (interior is not null)
             fields["interior"] = interior.DeepClone();
-        var answer = await ExchangeAsync("check_site", fields, _options.RequestTimeout, cancel).ConfigureAwait(false);
+        // with a silence limit (UI polish change 15): the worker is asked for its progress lines, and it is stopped only
+        // when none comes for that long (a large model's check is long, not stuck); else one limit for the whole answer
+        var answer = silence is { } quiet
+            ? await ExchangeAsync("check_site", fields, quiet, cancel, silence: true, step: step).ConfigureAwait(false)
+            : await ExchangeAsync("check_site", fields, _options.RequestTimeout, cancel).ConfigureAwait(false);
         return Guard(() => CheckResult.Parse(answer));
     }
 
@@ -301,7 +309,8 @@ public sealed class WorkerClient : IDisposable
     }
 
     private async Task<WorkerAnswer> ExchangeAsync(string command, JsonObject fields, TimeSpan timeout,
-                                                   CancellationToken cancel, bool checkedFields = false, bool legacy = false)
+                                                   CancellationToken cancel, bool checkedFields = false, bool legacy = false,
+                                                   bool silence = false, IProgress<string>? step = null)
     {
         var body = checkedFields ? fields : Fields(fields);
         await _one.WaitAsync(cancel).ConfigureAwait(false);
@@ -313,6 +322,8 @@ public sealed class WorkerClient : IDisposable
             // an older command names no protocol (it is answered as before protocol 1, without about)
             var request = legacy ? new JsonObject { ["id"] = id, ["cmd"] = command }
                                  : new JsonObject { ["id"] = id, ["cmd"] = command, ["protocol"] = Protocol.Version };
+            if (silence)
+                request["progress"] = true;              // the worker writes a line as each stage starts, and while it works
             foreach (var (k, v) in body.ToList())
             {
                 body.Remove(k);
@@ -330,6 +341,17 @@ public sealed class WorkerClient : IDisposable
             // one time limit for the whole request: sending it, then its answer
             var clock = Stopwatch.StartNew();
             await WriteAsync(line, command, timeout, timeout, cancel).ConfigureAwait(false);
+            if (silence)
+            {
+                // each progress line of this request starts the silence again; the first other line is the answer
+                while (true)
+                {
+                    var said = await ReadAsync(command, timeout, timeout, cancel, silence: true).ConfigureAwait(false);
+                    if (Protocol.StepOf(said, id) is not { } stage)
+                        return Answer(command, id, said, legacy);
+                    step?.Report(stage);
+                }
+            }
             var left = timeout - clock.Elapsed;
             var text = await ReadAsync(command, left > TimeSpan.Zero ? left : TimeSpan.Zero, timeout, cancel).ConfigureAwait(false);
             return Answer(command, id, text, legacy);
@@ -371,7 +393,7 @@ public sealed class WorkerClient : IDisposable
         await stdin.FlushAsync().ConfigureAwait(false);
     }
 
-    private async Task<string> ReadAsync(string command, TimeSpan timeout, TimeSpan limit, CancellationToken cancel)
+    private async Task<string> ReadAsync(string command, TimeSpan timeout, TimeSpan limit, CancellationToken cancel, bool silence = false)
     {
         using var wait = CancellationTokenSource.CreateLinkedTokenSource(cancel);
         wait.CancelAfter(timeout);
@@ -390,11 +412,19 @@ public sealed class WorkerClient : IDisposable
             Stop($"{command} was cancelled");
             throw;
         }
+        catch (OperationCanceledException) when (silence)
+        {
+            Stop($"no word from the checker on {command} for {limit.TotalSeconds:0} s");
+            throw new WorkerTimeoutException(
+                $"The Gordium checker said nothing for {limit.TotalSeconds:0} s while answering {command}, so it was stopped and nothing from it is shown")
+            { Limit = limit, Silent = true };
+        }
         catch (OperationCanceledException)
         {
             Stop($"no answer to {command} in {limit.TotalSeconds:0} s");
             throw new WorkerTimeoutException(
-                $"The Gordium checker gave no answer to {command} in {limit.TotalSeconds:0} s, so it was stopped and nothing from it is shown");
+                $"The Gordium checker gave no answer to {command} in {limit.TotalSeconds:0} s, so it was stopped and nothing from it is shown")
+            { Limit = limit };
         }
     }
 

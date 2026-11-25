@@ -134,13 +134,29 @@ internal sealed class CheckRun
             return;
         }
         // off Revit's thread (CheckFlow.Send); the outcome back on it through the panel's ExternalEvent
+        // the checker is stopped only when it says nothing for Silence (UI polish change 15); each of its progress lines
+        // is shown under the check's step
+        Log["silence_s"] = Silence.TotalSeconds;
         _ = Flow.Send(Ticket, Worker, request, (sent, seconds) =>
             ResultsPane.Post("Show the check's answer", app =>
             {
                 Log["check_s"] = seconds;
                 Clock.OffThread("check", seconds);
                 CheckProjectCommand.Answered(app, Doc, this, sent);
-            }, refused: () => Refused("the checker's answer")));
+            }, refused: () => Refused("the checker's answer")), Silence, new Said(step => ResultsPane.Ui(() => ResultsPane.Step(step))));
+    }
+
+    /// <summary>How long the checker may say nothing before it is stopped: 60 s, doubled by each "Try again with more
+    /// time" this session (CheckFailures.More).</summary>
+    internal static TimeSpan Silence { get; private set; } = CheckFailures.FirstSilence;
+
+    /// <summary>"Try again with more time": the next check's silence doubled.</summary>
+    internal static void MoreTime() => Silence = CheckFailures.More(Silence);
+
+    /// <summary>A progress line, handed on as it comes (never through a captured context: the pane's Ui does that).</summary>
+    private sealed class Said(Action<string> said) : IProgress<string>
+    {
+        public void Report(string value) => said(value);
     }
 
     /// <summary>Revit refused the ExternalEvent for <paramref name="what"/>: the error state (never a check left
@@ -154,7 +170,7 @@ internal sealed class CheckRun
             return;
         }
         End("failed");
-        ResultsPane.Failed($"Revit didn't take {what}: nothing was checked. Click Check again.");
+        ResultsPane.Failed(CheckFailures.NotStarted($"Revit didn't take {what}: nothing was checked."));
     });
 
     /// <summary>Cancels the running check (the panel's Cancel, or the project read closing; on Revit's thread, no API

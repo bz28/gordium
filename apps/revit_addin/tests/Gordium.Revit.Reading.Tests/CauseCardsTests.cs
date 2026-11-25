@@ -423,7 +423,7 @@ public sealed class CauseCardsTests
     public void The_addin_runs_card_actions_on_revits_thread_and_a_tick_does_nothing_else()
     {
         var pane = Addin("ResultsPane.cs");
-        Assert.Contains("new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, SetUp, _theme, SaveAnswers)", pane, StringComparison.Ordinal);
+        Assert.Contains("new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, SetUp, _theme, SaveAnswers, MoreTime)", pane, StringComparison.Ordinal);
         Assert.Contains("    private static void Card(CardRequest request) => Post(", pane, StringComparison.Ordinal);
         Assert.Contains("            var selected = ShowElements(ui, request.Elements, request.What, zoom: true);\n" +
                         "            if (request.Action != CardAction.ShowAndProperties || selected == 0)\n                return;\n" +
