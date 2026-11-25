@@ -255,3 +255,38 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
                          "bc_1006_2_2_3_refrigerated_rooms", "bc_1006_2_2_4_electrical_rooms",
                          "bc_1006_2_2_5_vehicular_ramps", "bc_table_1017_2_note_a", "bc_1017_2_1_balcony_increase",
                          "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")}}
+
+
+def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(got, laws):
+    """The two Revit marks for Table 1006.3.4's notes (Gordium: R-2 sleeping units, Gordium: 1031 escape openings) on
+    the apartment (Group R-2, no sprinkler system): stated dwelling units, the sleeping-units table (1006.3.4(2)) is
+    not applicable and the dwelling-units row passes on the story's two exits (its occupant loads, read since group 3,
+    under 500: Table 1006.3.3's two exits; the same two-exit test in either table, never the one-exit allowance the
+    escape openings unlock); stated sleeping units, the other way round. Blank (or Both), both rows need review."""
+    moved = {}
+    for sleeping in (False, True):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], "r2_sleeping_units": sleeping, "emergency_escape_openings_1031": True}
+        now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
+        moved[sleeping] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
+    assert moved[False] == {"general.bc_table_1006_3_4_2__h_i_r": ("needs_review", "not_applicable"),
+                            "general.bc_table_1006_3_4_1__r2_dwelling_units": ("needs_review", "pass")}
+    assert moved[True] == {"general.bc_table_1006_3_4_1__r2_dwelling_units": ("needs_review", "not_applicable"),
+                           "general.bc_table_1006_3_4_2__h_i_r": ("needs_review", "pass")}
+
+
+def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got, laws):
+    """The two Revit marks for group 3's building facts on the apartment: Gordium: Occupied outdoor areas No makes 1004.7's
+    flag not applicable and moves nothing else (Yes leaves it a person's check); Gordium: Occupant load increased, either
+    way, moves nothing here (an increase not ruled out keeps each room's larger reading at its area / 7 or more:
+    occupant_load.py)."""
+    moved = {}
+    for fact, value in (("occupied_outdoor_areas", False), ("occupied_outdoor_areas", True),
+                        ("occupant_load_increased", False), ("occupant_load_increased", True)):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], fact: value}
+        now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
+        moved[(fact, value)] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
+    assert moved[("occupied_outdoor_areas", False)] == {"general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable")}
+    assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", False)] == \
+        moved[("occupant_load_increased", True)] == {}
