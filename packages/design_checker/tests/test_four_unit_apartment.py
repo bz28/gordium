@@ -291,7 +291,8 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
     """The two Revit marks for group 3's building facts on the apartment: Gordium: Occupied outdoor areas No makes 1004.7's
     flag not applicable and moves nothing else (Yes leaves it a person's check); Gordium: Occupant load increased, either
     way, moves nothing here (an increase not ruled out keeps each room's larger reading at its area / 7 or more:
-    occupant_load.py), except 1010.1.2.1's swing (section group 6b), which the building's smaller load settles."""
+    occupant_load.py); with both stated, 1010.1.2.1's swing (section group 6b), which the building's smaller load
+    settles."""
     moved = {}
     for fact, value in (("occupied_outdoor_areas", False), ("occupied_outdoor_areas", True),
                         ("occupant_load_increased", False), ("occupant_load_increased", True)):
@@ -300,10 +301,15 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
         now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
         moved[(fact, value)] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
     assert moved[("occupied_outdoor_areas", False)] == {"general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable")}
-    assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", True)] == {}
-    # section group 6b: the increase ruled out, the whole building holds at most 18 (two stories of 1800 / 200), so no
-    # door serves 50 and, in Group R-2, 1010.1.2.1 asks no door's swing: its rule complies; nothing else moves
-    assert moved[("occupant_load_increased", False)] == {
+    assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", False)] ==         moved[("occupant_load_increased", True)] == {}
+    # section group 6b: both stated (no outdoor areas, no increase), the whole building holds at most 18 (two stories
+    # of 1800 / 200), so no door serves 50 and, in Group R-2, 1010.1.2.1 asks no door's swing: it complies, and only
+    # it and 1004.7's flag move (review round 1: the increase alone leaves outdoor occupants unbounded)
+    interior = build.interior_of()
+    interior["building"] = {**interior["building"], "occupied_outdoor_areas": False, "occupant_load_increased": False}
+    now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
+    assert {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]} == {
+        "general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable"),
         "general.bc_1010_1_2_1_direction_of_swing": ("needs_review", "pass")}
 
 
@@ -357,10 +363,29 @@ def test_door_swing_as_sent_and_with_each_doors_swing_stated(got):
     for d in desc["doors"]:
         d["swings_into"] = d["sides"][1]
     stated = _check(desc, egress.measure_routes(desc))
+    assert stated["results"][SWING] == present.REVIEW     # round 1: the stairs' outside doors may lead in from a patio
+    desc["building"] = {**desc["building"], "occupied_outdoor_areas": False}
+    stated = _check(desc, egress.measure_routes(desc))
     assert stated["results"][SWING] == "pass"
-    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {SWING}
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {
+        SWING, "general.bc_1004_7_outdoor_areas"}
     for d in desc["doors"]:
         d["swings_into"] = d["sides"][0]
-    wrong = _check(desc, egress.measure_routes(desc))
+    wrong = _check(desc, egress.measure_routes(desc))                          # (no outdoor areas stated, as above)
     assert wrong["results"][SWING] == present.REVIEW
 
+
+def test_a_stair_that_may_discharge_through_the_corridor_never_passes_on_its_door_swinging_in(got):
+    """Review round 1 of group 6b (F2): with the west stair's outside door gone, Level 1's corridor door into it may be
+    its discharge (1028.1: through a lobby or corridor), so egress may run out of the stair through it: a door
+    swinging into the stair needs review there, never a pass; Level 2's, with no door to outside on its story, still
+    leads into the stair."""
+    desc = build.interior_of()
+    desc["doors"] = [d for d in desc["doors"] if d["id"] != "L1WO"]
+    desc["building"] = {**desc["building"], "occupied_outdoor_areas": False}
+    for d in desc["doors"]:
+        d["swings_into"] = d["sides"][1]
+    stated = _check(desc, egress.measure_routes(desc))
+    rows = {r["id"]: r["outcome"] for r in stated["rows"] if r["rule"] == SWING}
+    assert rows["L1W"] == present.REVIEW and stated["results"][SWING] == present.REVIEW
+    assert rows["L2W"] == "pass"

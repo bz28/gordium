@@ -574,10 +574,11 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         "CORRIDOR_OTHER_LEVELS": (ol.CORRIDOR_OTHER_LEVELS, by_hand),
         "CORRIDOR_NO_STORY": (ol.CORRIDOR_NO_STORY, by_hand),
         "DOOR_NO_STORY": (ol.DOOR_NO_STORY, by_hand),                     # section group 6b: a door's
+        "DOOR_OUTDOOR": (ol.DOOR_OUTDOOR, by_hand),
     }
     fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "FUNCTION_ROOMS", "LOAD_STATED",
                  "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
-                 "CORRIDOR_READINGS", "DOOR_QUESTION", "DOOR_NONE", "DOOR_BUILDING", "DOOR_BY_HAND",
+                 "CORRIDOR_READINGS", "DOOR_QUESTION", "DOOR_NONE", "DOOR_BUILDING", "DOOR_BY_HAND", "OUTDOOR",
                  "DOOR_READINGS"}     # the readings' own words: a load given, never asked
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
@@ -627,7 +628,7 @@ def test_each_doors_load_is_none_to_the_whole_buildings(apartment):
     between its doors, and a stair's discharge door serves every story above, so each door's load is two readings,
     none and the whole building's (every story's upper load added: 2 x 1800 / 7 here, while 1004.5.1's increase
     isn't ruled out)."""
-    parts = _loads(apartment)
+    parts = _loads(apartment, {"occupied_outdoor_areas": False})
     total = 2 * 1800 / 7
     for d in parts["means_of_egress_door"]:
         assert _values(d, "moe_door_occupant_load") == pytest.approx([0, total]), d["name"]
@@ -640,8 +641,17 @@ def test_a_doors_load_isnt_worked_out_where_a_storys_isnt(apartment):
     for r in desc["rooms"]:
         if r["id"].startswith("L2"):
             r.pop("function", None)
-    parts = _loads(desc)
+    parts = _loads(desc, {"occupied_outdoor_areas": False})
     for d in parts["means_of_egress_door"]:
         assert _values(d, "moe_door_occupant_load") == [], d["name"]
         assert d["not_measured"]["moe_door_occupant_load"] == occupant_load.DOOR_NO_STORY
 
+
+def test_a_doors_load_isnt_bounded_while_occupied_outdoor_areas_arent_ruled_out(apartment):
+    """Review round 1 of group 6b: 1004.7 adds the occupants of yards, patios and occupiable roofs whose egress
+    passes through the building, so the stories' load bounds a door's only where the building states it has no
+    occupied outdoor areas; yes or not stated, not worked out (the swing rule then never passes on a load under 50)."""
+    for building in ({"occupied_outdoor_areas": True}, {}, None):
+        for d in _loads(apartment, building)["means_of_egress_door"]:
+            assert _values(d, "moe_door_occupant_load") == [], (building, d["name"])
+            assert d["not_measured"]["moe_door_occupant_load"] == occupant_load.DOOR_OUTDOOR

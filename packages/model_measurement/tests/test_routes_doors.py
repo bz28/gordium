@@ -290,3 +290,22 @@ def test_a_swing_not_stated_or_not_read_or_a_direction_not_known_leaves_it_unmea
     del d["doors"][0]["plan"]
     assert _why(_parts(d)["d"], "moe_door_swings_with_egress") == STOPS["door_not_on_routes"].format(name="d")
 
+
+
+def test_egress_direction_is_known_only_where_travel_can_cross_the_door_one_way_alone():
+    """Review round 1 of group 6b (F1, F4): a door from a pass-through room with its own exit onto a corridor may be
+    crossed by the corridor's occupants into the room, so which way egress goes through it isn't known; a door to
+    outside that isn't marked an exit may be an occupied patio's or roof's way back in (1004.7), so it leads outside
+    only where the building states it has no occupied outdoor areas."""
+    d = _office(swings_into="c")
+    d["rooms"][0].update(lockable=False, pass_through=True)
+    d["doors"].append(door("y", (-0.25, 7.5), (0, 1), ("r", "outside"), exit_id="B"))
+    got = _parts(d)["d"]
+    assert _why(got, "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="d")
+    patio = _office()
+    patio["doors"].append(door("p", (10, -0.25), (1, 0), ("r", "outside"), swings_into="outside"))
+    assert _why(_parts(patio)["p"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="p")
+    patio["building"] = {"occupied_outdoor_areas": False}
+    assert _parts(patio)["p"]["measures"]["moe_door_swings_with_egress"] is True
+    patio["building"] = {"occupied_outdoor_areas": True}
+    assert "moe_door_swings_with_egress" not in _parts(patio)["p"]["measures"]

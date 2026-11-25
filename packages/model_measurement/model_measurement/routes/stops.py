@@ -128,8 +128,9 @@ STOPS = {
     "door_sides_not_read": "the door {name}'s sides (the two rooms, or a room and outside, it joins) aren't read",
     "door_side_no_use": "a side of the door {name} is the room {room}, which has no use given: whether it is a "
                         "corridor isn't known",
-    "egress_side_unclear": "which way egress travel goes through the door {name} isn't worked out (both rooms it joins, "
-                           "or neither, lead out through it to an exit)",
+    "egress_side_unclear": "which way egress travel goes through the door {name} isn't worked out: travel may cross it "
+                           "both ways (two rooms that both lead out through it, a room others' routes cross, an exit "
+                           "stair that may discharge through it, an outdoor area whose way out is back inside)",
     "door_swing_not_given": "the door {name} doesn't say which side it swings into, and Gordium has no mark for it in "
                             "the model yet",
     "door_swing_not_read": "the door {name} says it swings into {got}, not one of the two sides it joins",
