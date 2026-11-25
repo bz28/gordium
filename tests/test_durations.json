@@ -376,6 +376,8 @@
 "packages/design_checker/tests/test_flood_lookup_age.py::test_without_a_day_from_the_host_no_lookup_counts_as_recent": 1.8,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_an_exit_stair_is_never_held_to_the_exits_of_the_spaces_it_serves[nfpa_13]": 5.7,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_an_exit_stair_is_never_held_to_the_exits_of_the_spaces_it_serves[none]": 11.3,
+"packages/design_checker/tests/test_four_unit_apartment.py::test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them[False]": 22.1,
+"packages/design_checker/tests/test_four_unit_apartment.py::test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them[True]": 19.1,
 "packages/design_checker/tests/test_goldens.py::test_a_changed_answer_is_caught_and_says_which_part_and_value_changed": 6.5,
 "packages/design_checker/tests/test_goldens.py::test_a_shape_moved_farther_than_the_tolerance_or_any_other_value_changed_still_fails": 4.6,
 "packages/design_checker/tests/test_goldens.py::test_an_answer_whose_shapes_have_other_points_on_the_same_lines_is_still_its_golden": 3.6,

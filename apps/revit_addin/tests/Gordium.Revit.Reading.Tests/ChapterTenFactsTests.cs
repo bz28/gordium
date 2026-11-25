@@ -131,6 +131,26 @@ public sealed class ChapterTenFactsTests(RealWorker worker) : IClassFixture<Real
         Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(card, null));
     }
 
+    /// <summary>PR #181 review round 13: in the pane's "What to fix", an answer card says "Set on Project Information";
+    /// on the four-unit apartment's real answer (regenerated from the checker) five of them asked for building facts no
+    /// mark held. Every answer card for a building fact now has the mark that answers it, among them the
+    /// Chapter 10 facts this answer asks.</summary>
+    [Fact]
+    public void Every_answer_card_for_a_building_fact_on_the_apartments_answer_has_its_mark()
+    {
+        var file = Path.Combine(Env.Repo, "apps", "revit_addin", "tests", "Gordium.Revit.Reading.Tests", "answers", "four_unit_apartment_check_answer.json");
+        var doc = JsonDocument.Parse(File.ReadAllText(file, System.Text.Encoding.UTF8));
+        var about = new WorkerAbout("1.3", "gordium.site/1", new string('f', 64), new Dictionary<string, string>());
+        var model = ResultViews.Build(CheckResult.Parse(new WorkerAnswer(doc.RootElement.GetProperty("result").Clone(), about)));
+        var fed = Marks.All.SelectMany(m => m.Feeds.Split(", ").Select(p => p.Split(' ')[0])).ToHashSet(StringComparer.Ordinal);
+        var asked = model.Fix.Where(g => g.Kind == FixKind.Answer).SelectMany(g => g.Cards)
+                         .Select(c => c.Field).OfType<string>().Where(f => f.StartsWith("building.", StringComparison.Ordinal))
+                         .Distinct().ToList();
+        Assert.Superset(new HashSet<string> { "building.assembly_fixed_seating", "building.special_egress_spaces",
+                                              "building.egress_balcony_increase_taken" }, asked.ToHashSet());
+        Assert.All(asked, f => Assert.Contains(f, fed));
+    }
+
     /// <summary>End to end through the real worker: the ranch under the Building Code (Gordium: Follows the Building
     /// Code Yes, Group R-3, no sprinkler system), blank then each mark No. Blank, the atrium's and balcony's rules need
     /// review; No, they are not applicable. Ticked Yes, they need review again: never a pass on Yes or blank.</summary>
