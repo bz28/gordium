@@ -105,21 +105,29 @@ public sealed class PaneTests
         Assert.Equal(8, fixes.Count);
         Assert.Equal("pi", fixes[0].Key);
         Assert.Equal(CardAction.ProjectInformation, fixes[0].Action);
-        // the ADU's fact joins the two lists there (its mark since 2026-11-22)
-        Assert.StartsWith("Set 3 facts on Project Information: ", fixes[0].Title, StringComparison.Ordinal);
+        // the ADU's fact joins the two lists there (its mark since 2026-11-22), and since UI design change 20 the
+        // stream, the household and the garage too: 9 facts, counted by their marks (the stream's card asks two)
+        Assert.StartsWith("Set 9 facts on Project Information: ", fixes[0].Title, StringComparison.Ordinal);
+        foreach (var said in new[] { "stream within 20 ft", "distance from stream", "unrelated people per unit", "owner-occupied",
+                     "functional family unit", "garage cars" })
+            Assert.Contains(said, fixes[0].Title, StringComparison.Ordinal);
         Assert.EndsWith("the stairs list and the guards and handrails list", fixes[0].Title, StringComparison.Ordinal);
         Assert.Contains("accessory dwelling unit", fixes[0].Title, StringComparison.OrdinalIgnoreCase);
         var note = Fixes.Note(fixes[0]);
         Assert.StartsWith("In Manage › Project Information, set Gordium: ", note, StringComparison.Ordinal);
-        foreach (var mark in new[] { "Gordium: Accessory dwelling unit", "Gordium: These are all the stairs", "Gordium: These are all the guards and handrails" })
+        foreach (var mark in new[] { "Gordium: Accessory dwelling unit", "Gordium: Stream within 20 ft", "Gordium: Distance from stream",
+                     "Gordium: Unrelated people per unit", "Gordium: Owner-occupied", "Gordium: Functional family unit", "Gordium: Garage cars",
+                     "Gordium: These are all the stairs", "Gordium: These are all the guards and handrails" })
             Assert.Contains(mark, note, StringComparison.Ordinal);
         Assert.EndsWith(", then Check again.", note, StringComparison.Ordinal);
-        Assert.Equal("8 results waiting on this · 3 facts", fixes[0].Count);   // 2, and the ADU card's 6
+        Assert.Equal("11 results waiting on this · 9 facts", fixes[0].Count);   // 2, the ADU card's 6, and the stream's, household's and garage's
         Assert.Equal(["Stairs: 11 things Gordium couldn't measure from the model", "Escape windows: 10 things Gordium couldn't measure from the model"],
                      fixes.Skip(1).Take(2).Select(f => f.Title));
         var nofield = fixes[^1];
         Assert.Equal(("nofield", CardAction.Decide, 3), (nofield.Key, nofield.Action, nofield.Tier));
-        Assert.Equal("+5 more fixes (70 results)", Fixes.MoreWords(fixes));   // the ADU card's 6 results now in fix 1
+        Assert.Equal("+5 more fixes (67 results)", Fixes.MoreWords(fixes));   // the stream's, household's and garage's results now in fix 1
+        Assert.Equal(4, nofield.Members.Count);         // what is left with no field: the nosings fact and the three "all of them" lists
+        Assert.DoesNotContain(nofield.Members, c => c.Fields.Any(f => f is "facts.stream_near_lot" or "facts.unrelated_persons" or "facts.garage_cars"));
         Assert.Equal(3, Fixes.Shown(fixes, all: false).Count);
         Assert.Equal(8, Fixes.Shown(fixes, all: true).Count);
     }
@@ -190,7 +198,8 @@ public sealed class PaneTests
             Assert.False(PaneWords.WelcomeShows(other, true));
         }
         Assert.Equal(3, PaneWords.WelcomeLines.Count);
-        Assert.Contains(PaneWords.WelcomeLines, l => l.Words.Contains("never complies", StringComparison.Ordinal));
+        Assert.Contains(PaneWords.WelcomeLines, l => l.Words.Contains("It never guesses a pass", StringComparison.Ordinal));
+        Assert.Contains(PaneWords.WelcomeLines, l => l.Icon == PaneIcon.Review && l.Words.Contains("Needs review", StringComparison.Ordinal));
         var view = Read("ResultsView.cs");
         var welcome = Between(view, "    private void Welcome(string? checking = null)", "\n    }\n");
         Assert.Contains("if (!PaneWords.WelcomeShows(PaneShows.Welcome, _everShown))\n            return;", welcome, StringComparison.Ordinal);
@@ -219,14 +228,15 @@ public sealed class PaneTests
     [Fact]
     public void Setup_save_is_pinned_at_the_foot()
     {
-        Assert.Equal("Save", PaneWords.SaveAndCheck(0, checksAfter: true));
-        Assert.Equal("Save 3 facts", PaneWords.SaveAndCheck(3, checksAfter: false));
-        Assert.Equal("Save 1 fact and check", PaneWords.SaveAndCheck(1, checksAfter: true));
-        Assert.Equal("4 facts needed; 3 chosen, not saved yet. The street edge is picked on the plan (Pick on plan, above).",
-                     PaneWords.SetupFooter(4, 3, streetToPick: true));
-        Assert.Equal("1 fact needed; none chosen yet.", PaneWords.SetupFooter(1, 0, streetToPick: false));
-        // Revit 2027 trial: opened by Mark facts with everything set, never "0 facts needed" nor Check without them
-        Assert.Equal("Every fact the check needs is set.", PaneWords.SetupFooter(0, 0, streetToPick: false));
+        Assert.Equal("Save and check", PaneWords.SaveAndCheck(0));
+        Assert.Equal("Save 4 and check", PaneWords.SaveAndCheck(4));
+        Assert.Equal("Saves 4 facts to Project Information (one undo). Escape openings and exit doors still need marking: their rules will need review.",
+                     PaneWords.SetupFooter(4, [], ["escape openings", "exit doors"]));
+        Assert.Equal("Saves 1 fact to Project Information (one undo). Street edge isn't set yet: its rules will need review.",
+                     PaneWords.SetupFooter(1, ["street edge"], []));
+        Assert.Equal(PaneWords.BlankFact, PaneWords.SetupFooter(0, ["zoning district"], []));
+        // opened by Set up with everything set: only what Save writes
+        Assert.Equal("Saves 2 facts to Project Information (one undo).", PaneWords.SetupFooter(2, [], []));
         var view = Read("ResultsView.cs");
         Assert.Contains("page.Children.Add(_setupFoot);\n        page.Children.Add(_setupScroll);", view, StringComparison.Ordinal);
         Assert.Contains("_setupFoot.Child = _setup.Footer;", view, StringComparison.Ordinal);
@@ -273,7 +283,7 @@ public sealed class PaneTests
                                       [new DetailStep(ResultDetail.ResolveStep, DetailAction.None)], [], null, [], null, [], []) { Id = id };
         var step = Fixes.Step(detail, fixes, detail.Steps[0]);
         Assert.NotNull(step);
-        Assert.StartsWith("Fix 1: Set 3 facts on Project Information", step!.Words, StringComparison.Ordinal);   // the ADU's too
+        Assert.StartsWith("Fix 1: Set 9 facts on Project Information", step!.Words, StringComparison.Ordinal);   // the ADU's, the stream's, the household's and the garage's too
         Assert.Null(Fixes.Step(detail, fixes, new DetailStep("Change the design so it meets the limit (the figures below).", DetailAction.None)));
         Assert.Null(Fixes.Step(detail with { Id = "not a row" }, fixes, detail.Steps[0]));
         Assert.Contains("Fixes.Step(d, causes.Groups, step)", Read("DetailView.cs"), StringComparison.Ordinal);
@@ -299,6 +309,38 @@ public sealed class PaneTests
         Assert.Equal(Tone.Complies, PaneWords.ChangeTone(new RowChange("a", "a", Verdict.NeedsReview, Verdict.Complies, "a now complies")));
         Assert.Equal(Tone.Review, PaneWords.ChangeTone(new RowChange("a", "a", Verdict.Complies, Verdict.NeedsReview, "a")));
         Assert.Equal(Tone.Review, PaneWords.ChangeTone(new RowChange("a", "a", Verdict.Complies, null, "a no longer in the check")));
+    }
+
+    /// <summary>"Hover for all" shows all: the hover lists every changed verdict (the ones listed and every one
+    /// "And N more" counts), never a count of its own that disagrees with the pane's (review round 1 of change 20: the
+    /// pane said "And 5 more" while the hover, the worker's one line, said "and 6 more").</summary>
+    [Fact]
+    public void What_changeds_hover_lists_every_verdict_the_pane_counts()
+    {
+        var change = CheckChanges.Between(Model(House()), new DateTime(2026, 11, 22, 14, 32, 0), Model(HouseAfter()))!;
+        var all = PaneWords.ChangesAll(change).Split('\n');
+        var listed = all.Where(l => l.StartsWith("• ", StringComparison.Ordinal)).ToList();
+        Assert.Equal(change.Rows.Select(r => "• " + r.Words), listed);               // every one, in the worker's order
+        Assert.Equal(PaneWords.ChangesShown(change).Count + 5, listed.Count);       // shown + "And 5 more"
+        Assert.StartsWith("9 changed verdicts:", all[0], StringComparison.Ordinal);
+        Assert.DoesNotContain(all, l => l.Contains("and 6 more", StringComparison.Ordinal));         // the worker's one line's own count
+        var view = Read("ResultsView.cs");
+        Assert.Contains("ToolTip = PaneWords.ChangesAll(change)", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("ToolTip = change.Words", view, StringComparison.Ordinal);
+    }
+
+    /// <summary>The house's Project Information fix says one number of facts everywhere: its title, its count and the
+    /// opened card's overline (review round 1 of change 20: the overline counted its cards as facts).</summary>
+    [Fact]
+    public void The_house_project_information_fix_never_claims_two_numbers_of_facts()
+    {
+        var fix = FixesOf(House())[0];
+        Assert.Equal("pi", fix.Key);
+        var numbers = new[] { fix.Title, fix.Count, fix.MembersWords }
+            .SelectMany(w => System.Text.RegularExpressions.Regex.Matches(w, @"(\d+) facts").Select(m => m.Groups[1].Value)).Distinct().ToList();
+        Assert.Equal(["9"], numbers);
+        Assert.Equal("The 6 causes asking 9 facts, in Gordium's checker's words", fix.MembersWords);
+        Assert.Contains("Overline(g.MembersWords)", Read("CauseCardsView.cs"), StringComparison.Ordinal);
     }
 
     // ---- changes 10 and 11: error and stale in plain words ---------------------------------------------------------

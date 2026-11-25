@@ -103,6 +103,29 @@ internal sealed class ResultsPane : IDockablePaneProvider
     /// <summary>A line in the panel (a click's result, a problem), when the panel exists. From any thread.</summary>
     internal static void Say(string words) => Ui(() => _view?.Say(words));
 
+    /// <summary>While Revit waits for the street edge's click: the pane says so, with Cancel (UI polish change 9: the
+    /// status bar alone is easy to miss, and the pane looked frozen); drawn at once (the pick runs on Revit's thread).</summary>
+    internal static void Picking(bool on)
+    {
+        if (_view is null)
+            return;
+        _view.Picking(on, CancelPick);
+        if (on)
+            _view.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Render);
+    }
+
+    /// <summary>Cancel on the picking card: Esc to Revit's main window, as the status bar says (PickObject then ends
+    /// with OperationCanceledException, its own way out).</summary>
+    private static void CancelPick()
+    {
+        var main = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+        if (main != IntPtr.Zero)
+        {
+            NativeKeys.PostMessage(main, NativeKeys.KeyDown, (IntPtr)NativeKeys.Escape, IntPtr.Zero);
+            NativeKeys.PostMessage(main, NativeKeys.KeyUp, (IntPtr)NativeKeys.Escape, IntPtr.Zero);
+        }
+    }
+
     /// <summary>Runs <paramref name="act"/> on the panel's thread (Revit's: WPF and Revit share it): now when called
     /// there, else queued to it (a pool thread's refusal). Never calls Revit's API.</summary>
     internal static void Ui(Action act)
@@ -153,7 +176,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
         if (PanelActions.Current is not { } actions)
         {
             refused?.Invoke();
-            Say("The Gordium add-in didn't start its panel actions: restart Revit.");
+            Say("The Gordium add-in didn't start its pane's actions: restart Revit.");
             return;
         }
         if (actions.Post(what, act, refused) is { } said)
@@ -315,4 +338,16 @@ internal sealed class ResultsPane : IDockablePaneProvider
             (gone > 0 ? $"; {gone} not in this model now" : "") + (zoom ? "." : " (Show or Space zooms to them)."));
         return found.Count;
     }
+}
+
+/// <summary>The one Windows call the picking card's Cancel makes: Esc posted to Revit's main window.</summary>
+internal static class NativeKeys
+{
+    internal const uint KeyDown = 0x0100;
+    internal const uint KeyUp = 0x0101;
+    internal const int Escape = 0x1B;
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "PostMessageW")]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    internal static extern bool PostMessage(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
 }

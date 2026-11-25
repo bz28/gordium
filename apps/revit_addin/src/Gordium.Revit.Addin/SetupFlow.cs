@@ -46,10 +46,17 @@ internal static class SetupRun
         }
         _model = RevitMarks.Model(doc);
         _sides = RevitMarks.Sides(doc);                      // read again each time: a window added since has its rooms
+        var kept = Marks.Text(SetupFacts.Value(_model, Marks.StreetEdge));
+        _streetWords = EdgeWords.OfMark(kept, RevitRead.LotLines(doc), RevitRead.InternalToShared(doc), doc.Application.VertexTolerance);
+        // a kept edge (text Gordium wrote) no property line has any more: the form waits for a new pick, as the check would
+        _streetOnLot = kept is not null && StreetEdges.Parse(kept) is not null ? _streetWords is not null : null;
         return Screen();
     }
 
-    private static SetupScreen Screen() => SetupScreen.Build(_model!, _sides, _options, Draft);
+    private static string? _streetWords;
+    private static bool? _streetOnLot;
+
+    private static SetupScreen Screen() => SetupScreen.Build(_model!, _sides, _options, Draft, _streetWords, _streetOnLot);
 
     /// <summary>Check project's gate (Revit's thread, during the check's read): the form's screen, and what to do
     /// (SetupGate.Decide: show the form, send anyway for what was already checked anyway, or send).</summary>
@@ -170,13 +177,17 @@ internal static class SetupRun
             else
                 Draft.Choose(mark, value);
         },
+        // Save and check: the facts chosen written (one undo), then the check, whatever is still unset (each makes its
+        // rules need review, never a pass: UI polish change 7)
         Save: () => Write("Save the project facts", SetupWrites.FactsTransaction, () =>
         {
             var (writes, problems) = Draft.Writes(Screen().Fields);
             foreach (var w in writes)
                 Draft.Forget(w.Mark);
+            if (writes.Any(w => w.Mark == Marks.StreetEdge))
+                Draft.PickedWords = null;
             return (writes, problems);
-        }),
+        }, checkAfter: true),
         Discard: () =>
         {
             Draft.Clear();
@@ -194,11 +205,13 @@ internal static class SetupRun
             if (CheckRun.Start(ui, doc, anyway: true) is { } refused)
                 ResultsPane.Say(refused);
         }),
-        ProjectInformation: ResultsPane.OpenProjectInformation);
+        ProjectInformation: ResultsPane.OpenProjectInformation,
+        Redraw: Redraw);
 
     /// <summary>One write (Revit's thread): the writes made from what is chosen now, in one transaction; then the
     /// form read again, and the check run by itself when nothing needed is left.</summary>
-    private static void Write(string what, string transaction, Func<(IReadOnlyList<MarkWrite> Writes, IReadOnlyList<string> Problems)> make) =>
+    private static void Write(string what, string transaction, Func<(IReadOnlyList<MarkWrite> Writes, IReadOnlyList<string> Problems)> make,
+                              bool checkAfter = false) =>
         ResultsPane.Post(what, ui =>
         {
             if (_doc is not { IsValidObject: true } doc)
@@ -213,9 +226,23 @@ internal static class SetupRun
                 ["document"] = doc.Title, ["transaction"] = transaction, ["status"] = status,
                 ["applied"] = applied, ["refused"] = refused, ["problems"] = problems,
             });
-            Refreshed(ui, doc, string.Join(" ", problems.Concat(refused.Select(r => "Not written: " + r))
+            var said = string.Join(" ", problems.Concat(refused.Select(r => "Not written: " + r))
                 .Prepend(status == "Committed" ? $"Saved {applied.Count} (Ctrl+Z undoes it)." : applied.Count == 0 && writes.Count > 0 ? "Nothing was written." : "")
-                .Where(s => s.Length > 0)));
+                .Where(s => s.Length > 0));
+            // Save and check: checks once every write went in (a write refused or a choice not taken: the form stays,
+            // saying why, and nothing is checked on facts the architect didn't get)
+            if (checkAfter && problems.Count == 0 && refused.Count == 0 && status is "Committed" or "Nothing")
+            {
+                var screen = Read(doc);
+                _shown = null;
+                ResultsPane.Say(said);
+                if (!screen.Ready)
+                    Anyway[Key(doc)] = [.. screen.Needed];
+                if (CheckRun.Start(ui, doc, anyway: !screen.Ready) is { } refusedCheck)
+                    ResultsPane.Say(refusedCheck);
+                return;
+            }
+            Refreshed(ui, doc, said);
         });
 
     /// <summary>After a write or a pick: the form read again; the check runs by itself when nothing needed is left.</summary>
@@ -277,10 +304,12 @@ internal static class SetupRun
         var log = new Dictionary<string, object?> { ["document"] = doc.Title };
         var kept = CheckProjectCommand.PickEdges(uidoc, log);
         var text = Draft.Pick(kept);
+        if (text is not null)
+            Draft.PickedWords = CheckProjectCommand.EdgesInWords(doc, kept);
         log["street_edge_chosen"] = text;
         Trial.Log("setup", log);
         Redraw();
         ResultsPane.Say(text is null ? StreetEdges.NonePickedFromSetup
-            : $"Street edge picked: {string.Join(" and ", kept.Select(e => StreetEdges.Describe(e, RevitRead.InternalToShared(doc))))}. Save writes it with the other facts.");
+            : $"Street edge picked: {Draft.PickedWords ?? "kept"}. Save writes it with the other facts.");
     });
 }

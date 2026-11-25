@@ -425,10 +425,10 @@ rules:
   topic: means_of_egress
   title: Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)
   applies_when: occupancy_group_i4
-  check: space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and space_common_path
-    <= 75)
+  check: space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
+    and space_common_path <= 75)
   review_when:
-  - when: space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2))
+  - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2))
     reason: 'Two exits or more, and a common path over 75 ft (or a building not sprinklered throughout, where the table gives
       Group I-4 no common path): whether Table 1006.2.1 caps the common path or only decides when a second exit is needed
       is open (the open question); a person checks.'
@@ -5216,7 +5216,8 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Three exits from 501-1,000 occupants, four above (BCNYS 1006.2.1.1)
-  check: (space_occupant_load <= 500 or space_exit_count >= 3) and (space_occupant_load <= 1000 or space_exit_count >= 4)
+  check: space_is_exit or (space_occupant_load <= 500 or space_exit_count >= 3) and (space_occupant_load <= 1000 or space_exit_count
+    >= 4)
   for_each: space
   when_none: needs_review
   sources:
@@ -5243,6 +5244,7 @@ rules:
         measures:
           space_occupant_load: 600
           space_exit_count: 3
+          space_is_exit: false
     rows:
     - part: p1
       outcome: pass
@@ -5255,6 +5257,7 @@ rules:
         measures:
           space_occupant_load: 600
           space_exit_count: 2
+          space_is_exit: false
     rows:
     - part: p2
       outcome: fail
@@ -5267,6 +5270,7 @@ rules:
         measures:
           space_occupant_load: 1200
           space_exit_count: 3
+          space_is_exit: false
     rows:
     - part: p3
       outcome: fail
@@ -6996,25 +7000,26 @@ rules:
   kind: rule
   topic: means_of_egress
   title: A space's doorways 1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)
-  check: space_exit_count < 2 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else
-    1 / 2)
+  check: space_is_exit or space_exit_count < 2 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+    else 1 / 2)
   review_when:
-  - when: space_exit_count >= 2 and not (space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
-      else 1 / 2)) and (not (occupancy_group_i4 or other_occupancy_present) or other_occupancy_present and occupancy_group
-      == "mixed" or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and space_common_path
-      <= 75))
+  - when: not space_is_exit and space_exit_count >= 2 and not (space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
+      or sprinklered_903_3_1_2 else 1 / 2)) and (not (occupancy_group_i4 or other_occupancy_present) or other_occupancy_present
+      and occupancy_group == "mixed" or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and
+      space_common_path <= 75))
     reason: 'The space''s doorways are close together, but it may not need two: Table 1006.2.1''s I-4 row (10 or fewer occupants,
       sprinklered, a common path of 75 ft or less) lets it have one, or the space is in another occupancy (or its occupancy
       isn''t stated), whose row is a flag (the rule “Table 1006.2.1 in a building of two or more groups (BCNYS)”). Whether
       1007.1.1 applies to it is a person''s check.'
-  - when: space_exit_count >= 2 and not space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
-      else 1 / 2) and other_occupancy_present and (occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "E", "M"] and space_occupant_load
-      <= 49 and space_common_path <= 75 or occupancy_group in ["B", "F-1", "F-2", "U"] and space_occupant_load <= 49 and space_common_path
-      <= 100 or occupancy_group in ["H-1", "H-2", "H-3"] and space_occupant_load <= 3 and space_common_path <= 25 or occupancy_group
-      in ["H-4", "H-5", "I-1", "I-2", "R-1"] and space_occupant_load <= 10 and space_common_path <= 75 or occupancy_group
-      == "I-3" and space_occupant_load <= 10 and space_common_path <= 100 or occupancy_group == "R-2" and space_occupant_load
-      <= 20 and space_common_path <= 125 or occupancy_group in ["R-3", "R-4"] and space_occupant_load <= 20 or occupancy_group
-      in ["S-1", "S-2"] and space_occupant_load <= 29 and space_common_path <= 100)
+  - when: not space_is_exit and space_exit_count >= 2 and not space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
+      or sprinklered_903_3_1_2 else 1 / 2) and other_occupancy_present and (occupancy_group in ["A-1", "A-2", "A-3", "A-4",
+      "A-5", "E", "M"] and space_occupant_load <= 49 and space_common_path <= 75 or occupancy_group in ["B", "F-1", "F-2",
+      "U"] and space_occupant_load <= 49 and space_common_path <= 100 or occupancy_group in ["H-1", "H-2", "H-3"] and space_occupant_load
+      <= 3 and space_common_path <= 25 or occupancy_group in ["H-4", "H-5", "I-1", "I-2", "R-1"] and space_occupant_load <=
+      10 and space_common_path <= 75 or occupancy_group == "I-3" and space_occupant_load <= 10 and space_common_path <= 100
+      or occupancy_group == "R-2" and space_occupant_load <= 20 and space_common_path <= 125 or occupancy_group in ["R-3",
+      "R-4"] and space_occupant_load <= 20 or occupancy_group in ["S-1", "S-2"] and space_occupant_load <= 29 and space_common_path
+      <= 100)
     reason: 'A close pair in a building of one group other than I-4 whose own row could allow one exit (read loosely, sprinklered
       or not: Table 1006.3.4(1) or (2) for a story, Table 1006.2.1 for a space): two may not be required, a person checks
       (2026-11-23). Elsewhere two are required and a close pair fails.'
@@ -7091,6 +7096,7 @@ rules:
           space_exit_remoteness_ratio: 0.6
           space_occupant_load: 30
           space_common_path: 40
+          space_is_exit: false
     rows:
     - part: p1
       outcome: pass
@@ -7111,6 +7117,7 @@ rules:
           space_exit_remoteness_ratio: 0.2
           space_occupant_load: 30
           space_common_path: 40
+          space_is_exit: false
     rows:
     - part: p2
       outcome: fail
@@ -7131,6 +7138,7 @@ rules:
           space_exit_remoteness_ratio: 0.2
           space_occupant_load: 6
           space_common_path: 20
+          space_is_exit: false
     rows:
     - part: p3
       outcome: needs_review
@@ -7151,6 +7159,7 @@ rules:
           space_exit_count: 2
           space_occupant_load: 30
           space_common_path: 40
+          space_is_exit: false
     rows:
     - part: p4
       outcome: needs_review
@@ -7170,6 +7179,7 @@ rules:
           space_exit_remoteness_ratio: 0.2
           space_occupant_load: 30
           space_common_path: 40
+          space_is_exit: false
     rows:
     - part: p5
       outcome: needs_review
@@ -7191,6 +7201,7 @@ rules:
           space_exit_remoteness_ratio: 0.2
           space_occupant_load: 60
           space_common_path: 40
+          space_is_exit: false
     rows:
     - part: p9
       outcome: fail
@@ -7223,11 +7234,11 @@ rules:
   kind: rule
   topic: means_of_egress
   title: 'A space needing three exits: two arranged per 1007.1.1 (BCNYS 1007.1.2)'
-  check: space_exit_count < 3 or space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
+  check: space_is_exit or space_exit_count < 3 or space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
     or sprinklered_903_3_1_2 else 1 / 2)
   review_when:
-  - when: space_exit_count >= 3 and (space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2 else 1 / 2))
+  - when: not space_is_exit and space_exit_count >= 3 and (space_occupant_load <= 500 or space_exit_remoteness_ratio >= (1
+      / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1 / 2))
     reason: 'Three or more doorways: three aren''t required here (500 occupants or fewer: 1006.2.1.1 asks three from 501,
       Table 1006.3.3''s two-exit band is 1-500), so whether two must be apart is 1007.1.1''s question; or two are far enough
       apart and whether the others are a reasonable distance apart is a person''s judgment.'
@@ -7287,6 +7298,7 @@ rules:
           space_exit_count: 3
           space_occupant_load: 600
           space_exit_remoteness_ratio: 0.2
+          space_is_exit: false
     rows:
     - part: p1
       outcome: fail
@@ -7304,6 +7316,7 @@ rules:
           space_exit_count: 3
           space_occupant_load: 600
           space_exit_remoteness_ratio: 0.6
+          space_is_exit: false
     rows:
     - part: p2
       outcome: needs_review
@@ -7322,6 +7335,7 @@ rules:
           space_occupant_load: 6
           space_common_path: 20
           space_exit_remoteness_ratio: 0.2
+          space_is_exit: false
     rows:
     - part: p3
       outcome: needs_review
@@ -7340,6 +7354,7 @@ rules:
           space_exit_count: 2
           space_occupant_load: 600
           space_exit_remoteness_ratio: 0.6
+          space_is_exit: false
     rows:
     - part: p4
       outcome: pass

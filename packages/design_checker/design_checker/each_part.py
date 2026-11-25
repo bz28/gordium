@@ -255,6 +255,15 @@ def _more(given) -> dict:
             if isinstance(p, dict) and isinstance(p.get("id"), str) and isinstance(p.get("more"), dict)}
 
 
+NOT_SENT = "weren't sent from the model"
+
+
+def not_sent_words(kind: str) -> str:
+    """A part kind the interior description can give but left out (its list missing), in an architect's words:
+    "the stairs weren't sent from the model"."""
+    return f"the {parts._plural(kind).replace('_', ' ')} {NOT_SENT}"
+
+
 def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not: dict | None,
               more: dict | None = None) -> dict | None:
     """Why a needs-review row isn't settled, for grouping the results (docs/decisions/2026-11-16_results_grouping.md);
@@ -283,8 +292,7 @@ def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not
                 return {"gordium": NOT_READ, "kinds": unread}
             # a kind the description can give but left out (no `stairs` list): the drawing's to give, never a gap
             return {"gordium": None, "measures": [], "gaps": [], "notes": [],
-                    "inputs": [f"the {parts._plural(k).replace('_', ' ')} aren't in the interior drawing (no "
-                               f"`{READ_KINDS[k]}` list)" for k in drawn], "decide": False}
+                    "inputs": [not_sent_words(k) for k in drawn], "decide": False}
         return {"gordium": None, "measures": [], "gaps": [], "inputs": [], "notes": [row["reason"]],
                 "decide": False}
     why_not = why_not or {}
@@ -458,8 +466,52 @@ def _unit(rule: dict, measure: str) -> str:
     return f" {u}" if u else ""
 
 
+# A measure in an architect's words where its key isn't (C4, the UI polish design 2026-11-23): the building facts
+# the BCNYS rulebook reads (its drafted/records/proposed_measures.yaml), each by the question it answers, and the
+# few part measures whose key says it badly. Each name stays distinct from every other measure a rule may read with
+# it (test_plain_measure_names), so two causes never read as one.
+MEASURE_NAMES = {
+    "occupancy_group_i4": "occupancy group (whether Group I-4)",
+    "other_occupancy_present": "occupancy group (whether any group besides I-4)",
+    "sprinklered_903_3_1_1": "sprinkler system (NFPA 13)",
+    "sprinklered_903_3_1_2": "sprinkler system (NFPA 13R)",
+    "egress_balcony_increase_taken": "egress balcony travel increase (whether the design takes it)",
+    "building_has_atrium": "atrium (whether the building has one)",
+    "occupancy_group": "occupancy group (the building's one group, or mixed)",
+    "sprinklered_903_3_1_3": "sprinkler system (NFPA 13D)",
+    "assembly_fixed_seating": "fixed assembly seating (whether any room has it)",
+    "special_egress_spaces": "special egress spaces (whether the building has any with their own egress sections)",
+    "merchandise_pads": "merchandise pads (whether a store has any)",
+    "r2_sleeping_units": "R-2 sleeping units (whether the Group R-2 is of sleeping units, not dwelling units)",
+    "emergency_escape_openings_1031": "emergency escape openings (whether every sleeping room has one, per 1031)",
+    "space_is_exit": "exit status (whether the space is itself an exit)",
+    "space_occupant_load": "occupant load",
+    "story_first_above_or_below_grade": "whether the story is the first above or below grade",
+    "story_second_above_grade_plane": "story's place (whether the second above grade plane)",
+    "story_fourth_or_higher_above_grade_plane": "story's place (whether the fourth or higher above grade plane)",
+    "story_dwelling_units": "dwelling units on the story",
+    "space_exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
+    "exit_remoteness_ratio": "exit remoteness (the exits' distance apart over the diagonal)",
+}
+# a key's leading word for its part kind, in words ("moe_door_latched": "door latched", never "moe latched")
+PREFIX_WORDS = (("moe_door_", "door "), ("atd_", "alternating tread device "), ("ladder_", "ship's ladder "),
+                ("opening_", ""), ("stair_", ""), ("door_", ""))
+
+
 def _words(rule: dict, measure: str) -> str:
-    return measure.replace("opening_", "").replace("stair_", "").replace("door_", "").replace("_", " ")
+    """A measure in words: its plain name (MEASURE_NAMES), else its key without the part kind's own leading word
+    ("space_egress_through_locked_room" on a space: "egress through locked room")."""
+    if measure in MEASURE_NAMES:
+        return MEASURE_NAMES[measure]
+    kind = rule.get("for_each") if isinstance(rule, dict) else None
+    text = measure
+    if isinstance(kind, str) and kind in ("space", "story") and text.startswith(kind + "_"):
+        text = text[len(kind) + 1:]
+    for prefix, said in PREFIX_WORDS:
+        if text.startswith(prefix):
+            text = said + text[len(prefix):]
+            break
+    return text.replace("opening_", "").replace("stair_", "").replace("door_", "").replace("_", " ")
 
 
 def _first_failing(rule: dict, values: dict, allowed: dict, if_it_applies: bool = False) -> str | None:

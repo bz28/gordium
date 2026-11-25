@@ -23,14 +23,15 @@ margins): the law's figure changes no faster than you walk, and Gordium's routes
 its figure at a sample is never less than the law's. Lengths in inches.
 """
 
-import bisect
 import heapq
 import math
 from dataclasses import dataclass, field
 from itertools import combinations
 
+import numpy as np
+
 from model_measurement.routes.paths import (EPS, TIE, Route, StoryRoutes, Tied, Tight, _down, _piece_length, _show,
-                                            _tidy)
+                                            _tidy, exact)
 from model_measurement.routes.remote import Remote, farthest
 from model_measurement.routes.stops import Stop
 
@@ -135,15 +136,19 @@ def _circle_circle(c1, r1, c2, r2) -> list:
 def _meetings(p, q) -> list:
     """Candidate points both pieces may hold: every end of each (an overlap's ends are among them), and where the two
     cross or touch. Each is kept only if it lies on both."""
-    out = list(_ends(p)) + list(_ends(q))
+    return list(_ends(p)) + list(_ends(q)) + _crossings(p, q)
+
+
+def _crossings(p, q) -> list:
+    """Where the two pieces cross or touch (`_meetings` less the pieces' ends)."""
     if p[0] == "line" and q[0] == "line":
-        out += _line_line(p, q)
-    elif p[0] == "line" or q[0] == "line":
+        return _line_line(p, q)
+    if p[0] == "line" or q[0] == "line":
         line, arc = (p, q) if p[0] == "line" else (q, p)
-        out += _line_circle(line, arc[1], arc[2])
-    elif math.dist(p[1], q[1]) > TOL or abs(p[2] - q[2]) > TOL:
-        out += _circle_circle(p[1], p[2], q[1], q[2])
-    return out
+        return _line_circle(line, arc[1], arc[2])
+    if math.dist(p[1], q[1]) > TOL or abs(p[2] - q[2]) > TOL:
+        return _circle_circle(p[1], p[2], q[1], q[2])
+    return []
 
 
 def _starts(pieces) -> list:
@@ -183,24 +188,188 @@ def shared(a, b) -> float:
     return best
 
 
-def farthest_shared(a: Tied, b: Tied) -> tuple:
+def farthest_shared(a: Tied, b: Tied, rows: dict | None = None) -> tuple:
     """The farthest point both unions of tied routes pass (decision 5, amended 2026-11-22): (its travel distance, the
     point, a's piece and offset there, b's). Every pair of a tied route to one exit and a tied route to the other
     shares the walk to such a point, and a pair's last shared point is one, so this is the greatest shared walk over
     every pair, found without listing a route. The start itself is shared (0). Of the two travel distances to the
     point (equal, within float, both routes being shortest there) the greater is taken (the cautious side)."""
-    best = (0.0, None, None, None)
-    boxes = [_box(q) for q, _ in b.pieces]
-    for p, op in a.pieces:
-        bp = _box(p)
-        for (q, oq), bq in zip(b.pieces, boxes):
-            if bp[0] > bq[2] + TOL or bq[0] > bp[2] + TOL or bp[1] > bq[3] + TOL or bq[1] > bp[3] + TOL:
-                continue                                 # pieces apart: nothing shared
-            for x in _meetings(p, q):
-                u, v = _along(p, x), _along(q, x)
-                if u is not None and v is not None and max(op + u, oq + v) > best[0]:
-                    best = (max(op + u, oq + v), x, (p, op), (q, oq))
-    return best
+    # Worked as one loop over the pairs (a's pieces, then b's, each pair's meetings in turn) keeping a meeting only
+    # when it beats the best so far, so the answer is the FIRST meeting, in that order, whose distance is the
+    # greatest, M. Found here in two passes with the same answer: M first, the pairs taken greatest bound first,
+    # stopping at a bound that can't beat it; then that first meeting, in the old order, among the pairs whose bound
+    # reaches M. A pair's bound is max(op + U(p), oq + U(q)), U a piece's greatest `_along` (its length, by the very
+    # expressions `_along` caps at), never under a distance its meetings give (adding op rounds the same way).
+    boxes_a, ends_a, reach_a = _union_arrays(a, rows)
+    boxes_b, ends_b, reach_b = _union_arrays(b, rows)
+    ii, jj = _touching_boxes(boxes_a, boxes_b)            # pieces apart share nothing: skipped
+    if len(ii):                 # and pieces whose reach (every point `_along` takes as on them) is apart: no meeting
+        ra, rb = reach_a[ii], reach_b[jj]
+        near = ~((ra[:, 0] > rb[:, 2]) | (rb[:, 0] > ra[:, 2]) | (ra[:, 1] > rb[:, 3]) | (rb[:, 1] > ra[:, 3]))
+        ii, jj = ii[near], jj[near]
+    if not len(ii):
+        return (0.0, None, None, None)
+    bound = np.maximum(ends_a[ii], ends_b[jj])        # max(ends_a[i], ends_b[j]), each pair's, as floats are
+    pairs, bounds = list(zip(ii.tolist(), jj.tolist())), bound.tolist()
+    if np.isnan(bound).any():                         # never (lengths), but numpy and Python order NaN apart
+        first = sorted(range(len(pairs)), key=lambda k: -bounds[k])
+    else:                                             # the same order: greatest bound first, ties as listed
+        first = np.argsort(-bound, kind="stable").tolist()
+
+    own_a, own_b = {}, {}               # each piece's ends, and how far along itself each lies, worked once
+
+    def own(pieces, memo, i):
+        got = memo.get(i)
+        if got is None:
+            piece = pieces[i][0]
+            ends = _ends(piece)
+            got = memo[i] = (ends, [_along(piece, x) for x in ends])
+        return got
+
+    def meetings(i, j):
+        """The pair's meetings, as `_meetings` lists the candidates and `_along` places them on both pieces (a
+        candidate off one piece is dropped before it is placed on the other: the same meetings, in the same order)."""
+        (p, op), (q, oq) = a.pieces[i], b.pieces[j]
+        ends_p, along_p = own(a.pieces, own_a, i)
+        ends_q, along_q = own(b.pieces, own_b, j)
+        for x, u in zip(ends_p, along_p):
+            if u is not None:
+                v = _along(q, x)
+                if v is not None:
+                    yield max(op + u, oq + v), x, (p, op), (q, oq)
+        for x, v in zip(ends_q, along_q):
+            if v is not None:
+                u = _along(p, x)
+                if u is not None:
+                    yield max(op + u, oq + v), x, (p, op), (q, oq)
+        for x in _crossings(p, q):
+            u = _along(p, x)
+            if u is not None:
+                v = _along(q, x)
+                if v is not None:
+                    yield max(op + u, oq + v), x, (p, op), (q, oq)
+
+    most, seen = 0.0, {}                                  # seen: each pair's meetings the first pass worked out
+    for k in first:
+        if bounds[k] <= most:
+            break
+        seen[k] = list(meetings(*pairs[k]))
+        for got in seen[k]:
+            most = max(most, got[0])
+    if not most > 0.0:
+        return (0.0, None, None, None)
+    for k, (i, j) in enumerate(pairs):
+        if bounds[k] >= most:
+            for got in (seen[k] if k in seen else meetings(i, j)):      # the same meetings, never worked twice
+                if got[0] == most:
+                    return got
+    raise RuntimeError("the greatest meeting not found again")       # never: the same meetings, worked the same
+
+
+REACH = 1e-4                    # in: what a piece's reach box is grown by, 100 times TOL (float error is far less)
+
+
+def _union_arrays(t: Tied, rows: dict | None = None) -> tuple:
+    """A union's pieces as arrays, worked once per union (a point's union to one exit is set against every other
+    exit's): each piece's `_box`, its offset plus its greatest `_along`, and its reach box (`_reach_box`). Kept on the
+    union itself, with the pieces list it was worked from (a Tied is never changed once made). `rows`: each piece's
+    (box, greatest along, reach box), remembered by the piece (the story's routes keep one, for one measure() call:
+    the pieces on from a door are the same at every point)."""
+    got = t.__dict__.get("_shared_arrays")
+    if got is None or got[0] is not t.pieces or got[1] != len(t.pieces):
+        rows = {} if rows is None else rows
+        if len(rows) > ROWS_MOST:
+            rows.clear()
+        mine = []
+        for q, _ in t.pieces:
+            row = rows.get(q)
+            if row is None:
+                row = rows[q] = (_box(q), _most_along(q), _reach_box(q))
+            mine.append(row)
+        boxes = np.array([row[0] for row in mine], dtype=float).reshape(-1, 4)
+        ends = np.array([o + row[1] for (_, o), row in zip(t.pieces, mine)], dtype=float)
+        reach = np.array([row[2] for row in mine], dtype=float).reshape(-1, 4)
+        got = (t.pieces, len(t.pieces), boxes, ends, reach)
+        t.__dict__["_shared_arrays"] = got
+    return got[2:]
+
+
+ROWS_MOST = 1 << 18             # pieces whose rows a story's routes remember, at most (then begun again)
+
+
+def _reach_box(piece) -> tuple:
+    """(x0, y0, x1, y1) holding every point `_along` takes as on the piece, grown by REACH: a line's box (its points
+    are within TOL of it); an arc's over its own sweep only (`_box` takes its whole circle), with twice `_on_arc`'s
+    TOL / r of slack at each end, TOL across, and every quarter point the sweep may hold. Only ever larger than that
+    set, so a pair whose reach boxes are apart has no point on both: no meeting. A piece that can't be bounded gets
+    the whole plane."""
+    if piece[0] == "line":
+        (x0, y0), (x1, y1) = piece[1], piece[2]
+        return min(x0, x1) - REACH, min(y0, y1) - REACH, max(x0, x1) + REACH, max(y0, y1) + REACH
+    _, (cx, cy), r, a0, sweep = piece
+    whole = (-math.inf, -math.inf, math.inf, math.inf)
+    if not all(map(math.isfinite, (cx, cy, r, a0, sweep))) or not r > 0:
+        return whole
+    slack = 2 * TOL / r + 1e-9
+    lo, hi = (a0, a0 + sweep) if sweep >= 0 else (a0 + sweep, a0)
+    lo, hi = lo - slack, hi + slack
+    if hi - lo >= 2 * math.pi:
+        return whole
+    far, near = r + TOL, max(r - TOL, 0.0)
+    xs = [cx + far * math.cos(lo), cx + far * math.cos(hi), cx + near * math.cos(lo), cx + near * math.cos(hi)]
+    ys = [cy + far * math.sin(lo), cy + far * math.sin(hi), cy + near * math.sin(lo), cy + near * math.sin(hi)]
+    for k, (dx, dy) in enumerate(((1, 0), (0, 1), (-1, 0), (0, -1))):
+        q = k * math.pi / 2                            # the sweep holds this quarter point (widened: never missed)
+        if math.floor((hi + 1e-9 - q) / (2 * math.pi)) >= math.ceil((lo - 1e-9 - q) / (2 * math.pi)):
+            xs.append(cx + far * dx)
+            ys.append(cy + far * dy)
+    box = (min(xs) - REACH, min(ys) - REACH, max(xs) + REACH, max(ys) + REACH)
+    return box if all(map(math.isfinite, box)) else whole
+
+
+def _most_along(piece) -> float:
+    """The greatest `_along` a piece can give: a line's length and an arc's, by the same expressions it caps at."""
+    if piece[0] == "line":
+        _, a, b = piece
+        return math.hypot(*(b[0] - a[0], b[1] - a[1]))
+    return abs(piece[4]) * piece[2]
+
+
+CELLS = 1 << 20                 # box pairs set against each other in one numpy step, at most
+
+
+def _touching(a, b):
+    """Each pair (i, j) of a's piece i and b's piece j whose boxes (`_box`, grown by TOL) meet, in the order of the
+    two loops over a then b: the same box test, `p0 > q2 + TOL or ...`, each float sum and comparison worked by numpy
+    exactly as Python works it (IEEE doubles, one rounding each), a block of a's pieces at a time."""
+    ii, jj = _touching_arrays(a, b)
+    for i, j in zip(ii.tolist(), jj.tolist()):
+        yield i, j
+
+
+def _touching_arrays(a, b):
+    """`_touching`'s pairs as two arrays (a's piece indices, b's), in the same order."""
+    if not a or not b:
+        return np.zeros(0, dtype=np.intp), np.zeros(0, dtype=np.intp)
+    return _touching_boxes(np.array([_box(p) for p, _ in a], dtype=float).reshape(-1, 4),
+                           np.array([_box(q) for q, _ in b], dtype=float).reshape(-1, 4))
+
+
+def _touching_boxes(all_a, boxes_b):
+    """`_touching_arrays` from the pieces' boxes (`_box`, one row each)."""
+    if not len(all_a) or not len(boxes_b):
+        return np.zeros(0, dtype=np.intp), np.zeros(0, dtype=np.intp)
+    rows = max(1, CELLS // len(boxes_b))
+    found_i, found_j = [], []
+    for start in range(0, len(all_a), rows):
+        boxes_a = all_a[start:start + rows]
+        pa, pb = boxes_a[:, None, :], boxes_b[None, :, :]
+        apart = ((pa[..., 0] > pb[..., 2] + TOL) | (pb[..., 0] > pa[..., 2] + TOL) |
+                 (pa[..., 1] > pb[..., 3] + TOL) | (pb[..., 1] > pa[..., 3] + TOL))
+        i, j = np.nonzero(~apart)
+        found_i.append(i + start)
+        found_j.append(j)
+    return np.concatenate(found_i), np.concatenate(found_j)
 
 
 SLACK = 1e-4                   # in: how far apart two pieces' meeting ends, and their offsets, may be (float error)
@@ -244,6 +413,7 @@ class _Prepared:
         engine.prepare(centres)                          # the zone's one graph (paths.py builds it for the chain)
         self.targets, self.on, self.dist, _, self.xy, self.adj, self.ids = engine._base
         self._last = None
+        self._tights = (None, {})        # the last point's curves, by target: every exit's routes read the same ones
 
     def firsts(self, p) -> list:
         """Every way a curve from p (clear of every ring) can reach the graph: by a tangent to a ring and round it to
@@ -252,21 +422,10 @@ class _Prepared:
             return self._last[1]
         e, r = self.engine, self.engine.r
         out = []
-        for k in range(len(e.rings)):
-            ring = self.on[k]
-            if not ring:
-                continue
+        for length, n1, k, q, ang, sweep in e.ring_ways(p, self.on):
             c = (float(e.rings[k][0]), float(e.rings[k][1]))
-            angles = [a for a, _ in ring]
-            for ang, q, length in e._tangents(p, k, c):
-                i = bisect.bisect_left(angles, ang)
-                after, before = ring[i % len(ring)], ring[(i - 1) % len(ring)]
-                lead = [("line", p, q)] if q is not None else []
-                up, down = (after[0] - ang) % (2 * math.pi), (ang - before[0]) % (2 * math.pi)
-                for n1, a0, sweep, piece in ((after[1], ang, up, ("arc", c, r, ang, up)),
-                                             (before[1], before[0], down, ("arc", c, r, ang, -down))):
-                    if e._arc_clear(k, c, a0, sweep):
-                        out.append((length + r * sweep, lead + [piece], n1))
+            lead = [("line", p, q)] if q is not None else []
+            out.append((length, lead + [("arc", c, r, ang, sweep)], n1))
         self._last = (p, out)
         return out
 
@@ -274,10 +433,20 @@ class _Prepared:
         """Every tied shortest curve from p (clear of every ring) to the target t, all together, as `_Leg.dist`
         measures it: straight to t, or by a tangent to a ring and round it to the first node there and on along the
         graph. Only the nodes on a tied curve are walked (each node's distance from p plus its distance to t, known
-        for every node, adds up to the shortest), so a point costs what its tied curves hold, never the graph."""
+        for every node, adds up to the shortest), so a point costs what its tied curves hold, never the graph.
+        Worked once per point and target: the routes to each exit ask for the same door centres from the same point
+        (only the last point's are kept; a Tight is never changed once made)."""
+        if self._tights[0] != exact(p):
+            self._tights = (exact(p), {})
+        memo, key = self._tights[1], exact(t)
+        if key not in memo:
+            memo[key] = self._tight(p, t)
+        return memo[key]
+
+    def _tight(self, p, t) -> Tight | None:
         D, goal = self.dist[t], self.ids[t]
         cands = [(lead_len + D[n], lead_len, lead, n) for lead_len, lead, n in self.firsts(p) if math.isfinite(D[n])]
-        straight = math.dist(p, t) if self.engine.clear(p, t) else math.inf
+        straight = math.dist(p, t) if self.engine.clear_to(p, t) else math.inf
         length = min([c[0] for c in cands] + [straight])
         if not math.isfinite(length):
             return None
@@ -357,6 +526,12 @@ def tied(routes: StoryRoutes, point, exit_id) -> Tied:
 def at_point(routes: StoryRoutes, point) -> CommonPath:
     """The common path from a point clear of every ring (decision 5): for each pair of distinct exits, the farthest
     point the unions of their tied routes share; the least over the pairs."""
+    return _at_point(routes, point, drawn=True)
+
+
+def _at_point(routes: StoryRoutes, point, drawn: bool) -> CommonPath:
+    """`at_point`; with drawn False, without the two routes through the point where they part (`routes` left
+    empty), for the story's figure, which reads the length alone: the same length, worked the same way."""
     p = (float(point[0]), float(point[1]))
     unions, first = {}, None
     for e in sorted(routes.exits):
@@ -371,12 +546,14 @@ def at_point(routes: StoryRoutes, point) -> CommonPath:
     if len(unions) == 1:                                 # one exit: the common path is the travel distance
         (e, got), = unions.items()
         return CommonPath(got.one.length, (e,), [got.one], None)
-    best = None
+    best, rows = None, routes.__dict__.setdefault("_piece_rows", {})     # each piece's rows, for this measure()
     for e1, e2 in combinations(sorted(unions), 2):
-        length, x, a, b = farthest_shared(unions[e1], unions[e2])
+        length, x, a, b = farthest_shared(unions[e1], unions[e2], rows)
         if best is None or length < best[0]:
             best = (length, (e1, e2), x, a, b)
     length, pair, x, a, b = best
+    if not drawn:
+        return CommonPath(0.0 if x is None else length, pair, [], p if x is None else x)
     if x is None:                                        # they share only the start
         return CommonPath(0.0, pair, [unions[pair[0]].one, unions[pair[1]].one], p)
     return CommonPath(length, pair, [_through(unions[pair[0]], a[0], a[1], p),
@@ -410,7 +587,7 @@ class _CommonPathSampler:
         cache = self._routes.__dict__.setdefault("_common_values", {})
         key = (round(point[0], 9), round(point[1], 9))
         if key not in cache:
-            cache[key] = at_point(self._routes, point).length
+            cache[key] = _at_point(self._routes, point, drawn=False).length
         return cache[key]
 
 

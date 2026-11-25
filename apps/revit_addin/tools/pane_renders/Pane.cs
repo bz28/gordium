@@ -17,11 +17,14 @@ internal sealed class Pane
 
     public FrameworkElement View => _view;
 
-    public void Setup(string title, SetupScreen screen, SetupDraft draft)
+    public void Setup(string title, SetupScreen screen, SetupDraft draft, HashSet<string>? open = null)
     {
-        var h = new SetupHandlers((_, _) => { }, (_, _) => { }, () => { }, () => { }, _ => { }, _ => { }, () => { }, () => { }, () => { });
-        _view.ShowSetup(title, screen, draft, h, null, []);
+        var h = new SetupHandlers((_, _) => { }, (_, _) => { }, () => { }, () => { }, _ => { }, _ => { }, () => { }, () => { }, () => { }, () => { });
+        _view.ShowSetup(title, screen, draft, h, null, open ?? []);
     }
+
+    /// <summary>The street pick waiting for its click (the card over the form).</summary>
+    public void Picking(bool on) => _view.Picking(on, () => { });
 
     public void Progress(CheckStage stage, DateTime since) => _view.Progress(stage, since);
 

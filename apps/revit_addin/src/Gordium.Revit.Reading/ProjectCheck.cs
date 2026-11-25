@@ -256,6 +256,10 @@ public static class ProjectFacts
                      (Marks.AccessoryDwellingUnit, "accessory_dwelling_unit"), (Marks.AduDetached, "adu_detached") })
             if (Marks.YesNo(Get(mark)) is { } yes)
                 facts[key] = yes;
+        // the house's own facts Ithaca's zoning reads (UI design change 20): each sent as stated; blank is not stated
+        // (its rows need review, never No or 0); a value Gordium can't read, or under its least, is said and not sent
+        foreach (var (mark, problem) in HouseFacts(model, facts))
+            missing.Add($"{mark.Name} {problem}{Where}.");
         IReadOnlyList<KeptEdge>? edges = null;
         var street = Marks.Text(Get(Marks.StreetEdge));
         if (street is null)
@@ -264,6 +268,59 @@ public static class ProjectFacts
             missing.Add($"{Marks.StreetEdge.Name} holds \"{street}\", which isn't an edge Gordium wrote: clear it, then " +
                         "click the lot edge along the street when Check project asks.");
         return new ProjectFactsRead(facts, edges, missing);
+    }
+
+    /// <summary>The house's own facts Ithaca's zoning reads and no drawing shows (UI design change 20), each with the
+    /// lot fact it sends and the least it takes (a length: 0 or more feet).</summary>
+    public static IReadOnlyList<(MarkDefinition Mark, string Key, int Least)> HouseFactMarks { get; } =
+    [
+        (Marks.StreamNearLot, "stream_near_lot", 0), (Marks.StreamDistance, "stream_distance", 0),
+        (Marks.UnrelatedPersons, "unrelated_persons", 0), (Marks.OwnerOccupied, "owner_occupied", 0),
+        (Marks.FunctionalFamilyUnit, "functional_family_unit", 0), (Marks.GarageCars, "garage_cars", 0),
+        (Marks.PrivateGarages, "private_garages", 1),
+    ];
+
+    /// <summary>Adds each house fact set to <paramref name="facts"/>, and returns the ones holding what Gordium can't
+    /// send, each with why in plain words: a value of another kind than the mark's (a Yes/No that isn't 1 or 0, text in
+    /// a number), a count under its least, a length under 0 or not a number. A blank one is neither: not stated.</summary>
+    public static IReadOnlyList<(MarkDefinition Mark, string Problem)> HouseFacts(RevitModel model, JsonObject? facts = null)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        var problems = new List<(MarkDefinition, string)>();
+        var unit = LengthUnits.Of(model.DisplayUnits);          // a length's messages in the project's units, as it is typed
+        foreach (var (mark, key, least) in HouseFactMarks)
+        {
+            if (!model.ProjectMarks.TryGetValue(mark.Guid, out var v) || !v.HasValue)
+                continue;                                         // not stated
+            switch (mark.Kind)
+            {
+                case MarkValueKind.YesNo when Marks.YesNo(v) is { } yes:
+                    if (facts is not null) facts[key] = yes;
+                    break;
+                case MarkValueKind.YesNo:
+                    problems.Add((mark, "holds a value that isn't Yes or No: tick Yes or No, or leave it blank"));
+                    break;
+                case MarkValueKind.Integer when Marks.Count(v) is { } n && n >= least:
+                    if (facts is not null) facts[key] = n;
+                    break;
+                case MarkValueKind.Integer when Marks.Count(v) is { } n:
+                    problems.Add((mark, $"is {n.ToString(CultureInfo.InvariantCulture)}: type {least} or more, or leave it blank"));
+                    break;
+                case MarkValueKind.Integer:
+                    problems.Add((mark, "holds a value that isn't a whole number: type a whole number, or leave it blank"));
+                    break;
+                case MarkValueKind.Length when Marks.Length(v) is { } feet && feet >= 0:
+                    if (facts is not null) facts[key] = feet;
+                    break;
+                case MarkValueKind.Length when Marks.Length(v) is { } feet:
+                    problems.Add((mark, $"is {LengthUnits.Shown(feet, unit)} {unit.Symbol}: type a length of 0 {unit.Symbol} or more, or leave it blank"));
+                    break;
+                default:
+                    problems.Add((mark, $"holds a value that isn't a length: type a length in {unit.Words}, or leave it blank"));
+                    break;
+            }
+        }
+        return problems;
     }
 
     /// <summary>Every write of a Gordium mark (the street pick's and a request file's) goes through here:

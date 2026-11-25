@@ -1,0 +1,577 @@
+{"file": "gov.ny.residential.2025.pdf", "sha256": "36490d8c8b11dd2b12c50bb11bd78c4aa228b38245d2fe99225cabe059398451", "made_by": "document_extraction.contents v1", "pages": [16, 17, 18, 19, 20, 21, 22], "source": "pdf", "chapters": 44, "sections": 483, "problems": []}
+{"kind": "part", "number": "I", "title": "Administrative", "book_page": 1, "page": 16, "line": 3}
+{"kind": "chapter", "number": "1", "title": "SCOPE AND ADMINISTRATION", "book_page": 1, "page": 16, "line": 5}
+{"kind": "section", "number": "R101", "title": "Scope and General Requirements", "book_page": 1, "page": 16, "line": 7, "chapter": "1"}
+{"kind": "section", "number": "R102", "title": "Applicability", "book_page": 2, "page": 16, "line": 9, "chapter": "1"}
+{"kind": "section", "number": "R103", "title": "Administration and Enforcement", "book_page": 3, "page": 16, "line": 11, "chapter": "1"}
+{"kind": "section", "number": "R104", "title": "Materials, Equipment, and Methods of Construction", "book_page": 4, "page": 16, "line": 13, "chapter": "1"}
+{"kind": "section", "number": "R105", "title": "Building Permits", "book_page": 5, "page": 16, "line": 15, "chapter": "1"}
+{"kind": "section", "number": "R106", "title": "Construction Documents", "book_page": 6, "page": 16, "line": 17, "chapter": "1"}
+{"kind": "section", "number": "R107", "title": "Temporary Structures", "book_page": 7, "page": 16, "line": 19, "chapter": "1"}
+{"kind": "section", "number": "R108", "title": "Reserved", "book_page": 7, "page": 16, "line": 21, "chapter": "1"}
+{"kind": "section", "number": "R109", "title": "Inspections", "book_page": 7, "page": 16, "line": 22, "chapter": "1"}
+{"kind": "section", "number": "R110", "title": "Certificate of Occupancy", "book_page": 7, "page": 16, "line": 23, "chapter": "1"}
+{"kind": "section", "number": "R111", "title": "Service Utilities", "book_page": 8, "page": 16, "line": 24, "chapter": "1"}
+{"kind": "section", "number": "R112", "title": "Variances and Appeals", "book_page": 8, "page": 16, "line": 25, "chapter": "1"}
+{"kind": "section", "number": "R113", "title": "Violations", "book_page": 8, "page": 16, "line": 26, "chapter": "1"}
+{"kind": "section", "number": "R114", "title": "Stop Work Order", "book_page": 8, "page": 16, "line": 27, "chapter": "1"}
+{"kind": "section", "number": "R115", "title": "Inspection of Solid-Fuel Burning Heating Appliances, Chimneys, and Flues", "book_page": 8, "page": 16, "line": 28, "chapter": "1"}
+{"kind": "part", "number": "II", "title": "Definitions", "book_page": 11, "page": 16, "line": 30}
+{"kind": "chapter", "number": "2", "title": "DEFINITIONS", "book_page": 11, "page": 16, "line": 31}
+{"kind": "section", "number": "R201", "title": "General", "book_page": 11, "page": 16, "line": 32, "chapter": "2"}
+{"kind": "section", "number": "R202", "title": "Definitions", "book_page": 11, "page": 16, "line": 33, "chapter": "2"}
+{"kind": "part", "number": "III", "title": "Building Planning and Construction", "book_page": 535, "page": 16, "line": 35, "note": "printed as page 535, after the page of the chapter it heads (3, page 35): kept as printed"}
+{"kind": "chapter", "number": "3", "title": "BUILDING PLANNING", "book_page": 35, "page": 16, "line": 38}
+{"kind": "section", "number": "R301", "title": "Design Criteria", "book_page": 35, "page": 16, "line": 40, "chapter": "3"}
+{"kind": "section", "number": "R302", "title": "Fire-Resistant Construction", "book_page": 54, "page": 16, "line": 42, "chapter": "3"}
+{"kind": "section", "number": "R303", "title": "Foam Plastic", "book_page": 62, "page": 16, "line": 44, "chapter": "3"}
+{"kind": "section", "number": "R304", "title": "Protection of Wood and Wood-Based Products Against Decay", "book_page": 64, "page": 16, "line": 45, "chapter": "3"}
+{"kind": "section", "number": "R305", "title": "Protection Against Subterranean Termites", "book_page": 66, "page": 16, "line": 49, "chapter": "3"}
+{"kind": "section", "number": "R306", "title": "Flood-Resistant Construction", "book_page": 67, "page": 16, "line": 51, "chapter": "3"}
+{"kind": "section", "number": "R307", "title": "Storm Shelters", "book_page": 71, "page": 16, "line": 53, "chapter": "3"}
+{"kind": "section", "number": "R308", "title": "Site Address", "book_page": 71, "page": 16, "line": 55, "chapter": "3"}
+{"kind": "section", "number": "R309", "title": "Automatic Sprinkler Systems", "book_page": 71, "page": 16, "line": 57, "chapter": "3"}
+{"kind": "section", "number": "R310", "title": "Smoke Alarms", "book_page": 72, "page": 16, "line": 59, "chapter": "3"}
+{"kind": "section", "number": "R311", "title": "Carbon Monoxide Alarms", "book_page": 73, "page": 16, "line": 61, "chapter": "3"}
+{"kind": "section", "number": "R312", "title": "Minimum Room Areas", "book_page": 73, "page": 16, "line": 63, "chapter": "3"}
+{"kind": "section", "number": "R313", "title": "Ceiling Height", "book_page": 74, "page": 16, "line": 65, "chapter": "3"}
+{"kind": "section", "number": "R314", "title": "Mezzanines", "book_page": 74, "page": 16, "line": 67, "chapter": "3"}
+{"kind": "section", "number": "R315", "title": "Sleeping Lofts", "book_page": 75, "page": 16, "line": 68, "chapter": "3"}
+{"kind": "section", "number": "R316", "title": "Habitable Attics", "book_page": 75, "page": 16, "line": 70, "chapter": "3"}
+{"kind": "section", "number": "R317", "title": "Garages and Carports", "book_page": 76, "page": 16, "line": 72, "chapter": "3"}
+{"kind": "section", "number": "R318", "title": "Means of Egress", "book_page": 76, "page": 16, "line": 74, "chapter": "3"}
+{"kind": "section", "number": "R319", "title": "Emergency Escape and Rescue Openings", "book_page": 79, "page": 16, "line": 76, "chapter": "3"}
+{"kind": "section", "number": "R320", "title": "Handrails", "book_page": 80, "page": 16, "line": 78, "chapter": "3"}
+{"kind": "section", "number": "R321", "title": "Guards and Window Fall Protection", "book_page": 81, "page": 16, "line": 80, "chapter": "3"}
+{"kind": "section", "number": "R322", "title": "Accessibility", "book_page": 82, "page": 16, "line": 81, "chapter": "3"}
+{"kind": "section", "number": "R323", "title": "Elevators and Platform Lifts", "book_page": 82, "page": 16, "line": 3, "chapter": "3"}
+{"kind": "section", "number": "R324", "title": "Glazing", "book_page": 82, "page": 16, "line": 4, "chapter": "3"}
+{"kind": "section", "number": "R325", "title": "Light, Ventilation and Heating", "book_page": 85, "page": 16, "line": 6, "chapter": "3"}
+{"kind": "section", "number": "R326", "title": "Sanitation", "book_page": 87, "page": 16, "line": 8, "chapter": "3"}
+{"kind": "section", "number": "R327", "title": "Toilet, Bath and Shower Spaces", "book_page": 87, "page": 16, "line": 10, "chapter": "3"}
+{"kind": "section", "number": "R328", "title": "Swimming Pools, Spas and Hot Tubs", "book_page": 88, "page": 16, "line": 12, "chapter": "3"}
+{"kind": "section", "number": "R329", "title": "Solar Energy Systems", "book_page": 91, "page": 16, "line": 14, "chapter": "3"}
+{"kind": "section", "number": "R330", "title": "Energy Storage Systems", "book_page": 92, "page": 16, "line": 16, "chapter": "3"}
+{"kind": "section", "number": "R331", "title": "Stationary Engine Generators", "book_page": 95, "page": 16, "line": 18, "chapter": "3"}
+{"kind": "section", "number": "R332", "title": "Stationary Fuel Cell Power Systems", "book_page": 95, "page": 16, "line": 20, "chapter": "3"}
+{"kind": "chapter", "number": "4", "title": "FOUNDATIONS", "book_page": 97, "page": 16, "line": 22}
+{"kind": "section", "number": "R401", "title": "General", "book_page": 97, "page": 16, "line": 23, "chapter": "4"}
+{"kind": "section", "number": "R402", "title": "Materials", "book_page": 98, "page": 16, "line": 24, "chapter": "4"}
+{"kind": "section", "number": "R403", "title": "Footings", "book_page": 99, "page": 16, "line": 25, "chapter": "4"}
+{"kind": "section", "number": "R404", "title": "Foundation and Retaining Walls", "book_page": 118, "page": 16, "line": 26, "chapter": "4"}
+{"kind": "section", "number": "R405", "title": "Foundation Drainage", "book_page": 138, "page": 16, "line": 27, "chapter": "4"}
+{"kind": "section", "number": "R406", "title": "Foundation Waterproofing and Dampproofing", "book_page": 138, "page": 16, "line": 28, "chapter": "4"}
+{"kind": "section", "number": "R407", "title": "Columns", "book_page": 139, "page": 16, "line": 29, "chapter": "4"}
+{"kind": "section", "number": "R408", "title": "Under-Floor Space", "book_page": 139, "page": 16, "line": 30, "chapter": "4"}
+{"kind": "chapter", "number": "5", "title": "FLOORS", "book_page": 141, "page": 16, "line": 31}
+{"kind": "section", "number": "R501", "title": "General", "book_page": 141, "page": 16, "line": 32, "chapter": "5"}
+{"kind": "section", "number": "R502", "title": "Wood Floor Framing", "book_page": 141, "page": 16, "line": 33, "chapter": "5"}
+{"kind": "section", "number": "R503", "title": "Floor Sheathing", "book_page": 150, "page": 16, "line": 34, "chapter": "5"}
+{"kind": "section", "number": "R504", "title": "Pressure Preservative-Treated Wood Floors (On Ground)", "book_page": 152, "page": 16, "line": 36, "chapter": "5"}
+{"kind": "section", "number": "R505", "title": "Cold-Formed Steel Floor Framing", "book_page": 152, "page": 16, "line": 39, "chapter": "5"}
+{"kind": "section", "number": "R506", "title": "Concrete Floors (On Ground)", "book_page": 164, "page": 16, "line": 41, "chapter": "5"}
+{"kind": "section", "number": "R507", "title": "Exterior Decks", "book_page": 164, "page": 16, "line": 43, "chapter": "5"}
+{"kind": "chapter", "number": "6", "title": "WALL CONSTRUCTION", "book_page": 183, "page": 16, "line": 46}
+{"kind": "section", "number": "R601", "title": "General", "book_page": 183, "page": 16, "line": 48, "chapter": "6"}
+{"kind": "section", "number": "R602", "title": "Wood Wall Framing", "book_page": 183, "page": 16, "line": 50, "chapter": "6"}
+{"kind": "section", "number": "R603", "title": "Cold-Formed Steel Wall Framing", "book_page": 234, "page": 16, "line": 52, "chapter": "6"}
+{"kind": "section", "number": "R604", "title": "Wood Structural Panels", "book_page": 275, "page": 16, "line": 54, "chapter": "6"}
+{"kind": "section", "number": "R605", "title": "Particleboard", "book_page": 275, "page": 16, "line": 56, "chapter": "6"}
+{"kind": "section", "number": "R606", "title": "General Masonry Construction", "book_page": 275, "page": 16, "line": 58, "chapter": "6"}
+{"kind": "section", "number": "R607", "title": "Glass Unit Masonry", "book_page": 289, "page": 16, "line": 60, "chapter": "6"}
+{"kind": "section", "number": "R608", "title": "Exterior Concrete Wall Construction", "book_page": 290, "page": 16, "line": 62, "chapter": "6"}
+{"kind": "section", "number": "R609", "title": "Exterior Windows And Doors", "book_page": 356, "page": 16, "line": 64, "chapter": "6"}
+{"kind": "section", "number": "R610", "title": "Structural Insulated Panel Wall Construction", "book_page": 359, "page": 16, "line": 66, "chapter": "6"}
+{"kind": "chapter", "number": "7", "title": "WALL COVERING", "book_page": 369, "page": 16, "line": 69}
+{"kind": "section", "number": "R701", "title": "General", "book_page": 369, "page": 16, "line": 71, "chapter": "7"}
+{"kind": "section", "number": "R702", "title": "Interior Covering", "book_page": 369, "page": 16, "line": 73, "chapter": "7"}
+{"kind": "section", "number": "R703", "title": "Exterior Wall Covering", "book_page": 376, "page": 16, "line": 75, "chapter": "7"}
+{"kind": "section", "number": "R704", "title": "Exterior Soffits and Fascias", "book_page": 400, "page": 16, "line": 77, "chapter": "7"}
+{"kind": "section", "number": "R705", "title": "BIPV Systems for Exterior Wall Coverings and Fenestration", "book_page": 404, "page": 16, "line": 79, "chapter": "7"}
+{"kind": "chapter", "number": "8", "title": "ROOF-CEILING CONSTRUCTION", "book_page": 405, "page": 17, "line": 3}
+{"kind": "section", "number": "R801", "title": "General", "book_page": 405, "page": 17, "line": 4, "chapter": "8"}
+{"kind": "section", "number": "R802", "title": "Wood Roof Framing", "book_page": 405, "page": 17, "line": 5, "chapter": "8"}
+{"kind": "section", "number": "R803", "title": "Roof Sheathing", "book_page": 432, "page": 17, "line": 6, "chapter": "8"}
+{"kind": "section", "number": "R804", "title": "Cold-formed Steel Roof Framing", "book_page": 433, "page": 17, "line": 7, "chapter": "8"}
+{"kind": "section", "number": "R805", "title": "Ceiling Finishes", "book_page": 446, "page": 17, "line": 8, "chapter": "8"}
+{"kind": "section", "number": "R806", "title": "Roof Ventilation", "book_page": 446, "page": 17, "line": 9, "chapter": "8"}
+{"kind": "section", "number": "R807", "title": "Attic Access", "book_page": 447, "page": 17, "line": 10, "chapter": "8"}
+{"kind": "chapter", "number": "9", "title": "ROOF ASSEMBLIES", "book_page": 449, "page": 17, "line": 12}
+{"kind": "section", "number": "R901", "title": "General", "book_page": 449, "page": 17, "line": 14, "chapter": "9"}
+{"kind": "section", "number": "R902", "title": "Fire Classification", "book_page": 449, "page": 17, "line": 16, "chapter": "9"}
+{"kind": "section", "number": "R903", "title": "Weather Protection", "book_page": 449, "page": 17, "line": 18, "chapter": "9"}
+{"kind": "section", "number": "R904", "title": "Materials", "book_page": 450, "page": 17, "line": 19, "chapter": "9"}
+{"kind": "section", "number": "R905", "title": "Requirements For Roof Coverings", "book_page": 450, "page": 17, "line": 20, "chapter": "9"}
+{"kind": "section", "number": "R906", "title": "Roof Insulation", "book_page": 466, "page": 17, "line": 21, "chapter": "9"}
+{"kind": "section", "number": "R907", "title": "Rooftop-Mounted Photovoltaic Panel Systems", "book_page": 466, "page": 17, "line": 22, "chapter": "9"}
+{"kind": "section", "number": "R908", "title": "Reroofing", "book_page": 466, "page": 17, "line": 23, "chapter": "9"}
+{"kind": "section", "number": "R909", "title": "Roof Coatings", "book_page": 467, "page": 17, "line": 24, "chapter": "9"}
+{"kind": "chapter", "number": "10", "title": "CHIMNEYS AND FIREPLACES", "book_page": 469, "page": 17, "line": 25}
+{"kind": "section", "number": "R1001", "title": "Masonry Fireplaces", "book_page": 469, "page": 17, "line": 26, "chapter": "10"}
+{"kind": "section", "number": "R1002", "title": "Masonry Heaters", "book_page": 472, "page": 17, "line": 27, "chapter": "10"}
+{"kind": "section", "number": "R1003", "title": "Masonry Chimneys", "book_page": 473, "page": 17, "line": 28, "chapter": "10"}
+{"kind": "section", "number": "R1004", "title": "Factory-Built Fireplaces", "book_page": 478, "page": 17, "line": 30, "chapter": "10"}
+{"kind": "section", "number": "R1005", "title": "Factory-Built Chimneys", "book_page": 478, "page": 17, "line": 32, "chapter": "10"}
+{"kind": "section", "number": "R1006", "title": "Exterior Air Supply", "book_page": 478, "page": 17, "line": 33, "chapter": "10"}
+{"kind": "part", "number": "IV", "title": "Energy Conservation", "book_page": 481, "page": 17, "line": 35}
+{"kind": "chapter", "number": "11", "title": "RESERVED", "book_page": 481, "page": 17, "line": 37}
+{"kind": "part", "number": "V", "title": "Mechanical", "book_page": 483, "page": 17, "line": 39}
+{"kind": "chapter", "number": "12", "title": "MECHANICAL ADMINISTRATION", "book_page": 483, "page": 17, "line": 41}
+{"kind": "section", "number": "M1201", "title": "General", "book_page": 483, "page": 17, "line": 42, "chapter": "12"}
+{"kind": "section", "number": "M1202", "title": "Existing Mechanical Systems", "book_page": 483, "page": 17, "line": 43, "chapter": "12"}
+{"kind": "chapter", "number": "13", "title": "GENERAL MECHANICAL SYSTEM REQUIREMENTS", "book_page": 485, "page": 17, "line": 45}
+{"kind": "section", "number": "M1301", "title": "General", "book_page": 485, "page": 17, "line": 49, "chapter": "13"}
+{"kind": "section", "number": "M1302", "title": "Approval", "book_page": 485, "page": 17, "line": 51, "chapter": "13"}
+{"kind": "section", "number": "M1303", "title": "Labeling of Appliances", "book_page": 485, "page": 17, "line": 52, "chapter": "13"}
+{"kind": "section", "number": "M1304", "title": "Type of Fuel", "book_page": 485, "page": 17, "line": 53, "chapter": "13"}
+{"kind": "section", "number": "M1305", "title": "Appliance Access", "book_page": 485, "page": 17, "line": 54, "chapter": "13"}
+{"kind": "section", "number": "M1306", "title": "Clearances from Combustible Construction", "book_page": 486, "page": 17, "line": 55, "chapter": "13"}
+{"kind": "section", "number": "M1307", "title": "Appliance Installation", "book_page": 489, "page": 17, "line": 56, "chapter": "13"}
+{"kind": "section", "number": "M1308", "title": "Mechanical Systems Installation", "book_page": 490, "page": 17, "line": 57, "chapter": "13"}
+{"kind": "chapter", "number": "14", "title": "HEATING AND COOLING EQUIPMENT AND APPLIANCES", "book_page": 491, "page": 17, "line": 59}
+{"kind": "section", "number": "M1401", "title": "General", "book_page": 491, "page": 17, "line": 62, "chapter": "14"}
+{"kind": "section", "number": "M1402", "title": "Central Furnaces", "book_page": 491, "page": 17, "line": 64, "chapter": "14"}
+{"kind": "section", "number": "M1403", "title": "Heat Pump Equipment", "book_page": 491, "page": 17, "line": 66, "chapter": "14"}
+{"kind": "section", "number": "M1404", "title": "Refrigeration Cooling Equipment", "book_page": 491, "page": 17, "line": 68, "chapter": "14"}
+{"kind": "section", "number": "M1405", "title": "Baseboard Convectors", "book_page": 491, "page": 17, "line": 3, "chapter": "14"}
+{"kind": "section", "number": "M1406", "title": "Radiant Heating Systems", "book_page": 492, "page": 17, "line": 4, "chapter": "14"}
+{"kind": "section", "number": "M1407", "title": "Duct Heaters", "book_page": 492, "page": 17, "line": 5, "chapter": "14"}
+{"kind": "section", "number": "M1408", "title": "Vented Floor Furnaces", "book_page": 492, "page": 17, "line": 6, "chapter": "14"}
+{"kind": "section", "number": "M1409", "title": "Vented Wall Furnaces", "book_page": 493, "page": 17, "line": 7, "chapter": "14"}
+{"kind": "section", "number": "M1410", "title": "Vented Room Heaters", "book_page": 493, "page": 17, "line": 8, "chapter": "14"}
+{"kind": "section", "number": "M1411", "title": "Heating and Cooling Equipment", "book_page": 493, "page": 17, "line": 9, "chapter": "14"}
+{"kind": "section", "number": "M1412", "title": "Absorption Cooling Equipment", "book_page": 495, "page": 17, "line": 10, "chapter": "14"}
+{"kind": "section", "number": "M1413", "title": "Evaporative Cooling Equipment", "book_page": 495, "page": 17, "line": 11, "chapter": "14"}
+{"kind": "section", "number": "M1414", "title": "Fireplace Stoves", "book_page": 495, "page": 17, "line": 13, "chapter": "14"}
+{"kind": "section", "number": "M1415", "title": "Masonry Heaters", "book_page": 495, "page": 17, "line": 15, "chapter": "14"}
+{"kind": "section", "number": "M1416", "title": "Portable Kerosene Heaters", "book_page": 495, "page": 17, "line": 17, "chapter": "14"}
+{"kind": "chapter", "number": "15", "title": "EXHAUST SYSTEMS", "book_page": 497, "page": 17, "line": 19}
+{"kind": "section", "number": "M1501", "title": "General", "book_page": 497, "page": 17, "line": 20, "chapter": "15"}
+{"kind": "section", "number": "M1502", "title": "Clothes Dryer Exhaust", "book_page": 497, "page": 17, "line": 21, "chapter": "15"}
+{"kind": "section", "number": "M1503", "title": "Domestic Cooking Exhaust Equipment", "book_page": 498, "page": 17, "line": 22, "chapter": "15"}
+{"kind": "section", "number": "M1504", "title": "Exhaust Ducts and Exhaust Openings", "book_page": 499, "page": 17, "line": 23, "chapter": "15"}
+{"kind": "section", "number": "M1505", "title": "Mechanical Ventilation", "book_page": 500, "page": 17, "line": 24, "chapter": "15"}
+{"kind": "chapter", "number": "16", "title": "DUCT SYSTEMS", "book_page": 503, "page": 17, "line": 25}
+{"kind": "section", "number": "M1601", "title": "Duct Construction", "book_page": 503, "page": 17, "line": 26, "chapter": "16"}
+{"kind": "section", "number": "M1602", "title": "Return Air", "book_page": 506, "page": 17, "line": 27, "chapter": "16"}
+{"kind": "chapter", "number": "17", "title": "COMBUSTION AIR", "book_page": 507, "page": 17, "line": 29}
+{"kind": "section", "number": "M1701", "title": "General", "book_page": 507, "page": 17, "line": 31, "chapter": "17"}
+{"kind": "chapter", "number": "18", "title": "CHIMNEYS AND VENTS", "book_page": 509, "page": 17, "line": 34}
+{"kind": "section", "number": "M1801", "title": "General", "book_page": 509, "page": 17, "line": 35, "chapter": "18"}
+{"kind": "section", "number": "M1802", "title": "Vent Components", "book_page": 510, "page": 17, "line": 36, "chapter": "18"}
+{"kind": "section", "number": "M1803", "title": "Chimney and Vent Connectors", "book_page": 510, "page": 17, "line": 38, "chapter": "18"}
+{"kind": "section", "number": "M1804", "title": "Vents", "book_page": 511, "page": 17, "line": 39, "chapter": "18"}
+{"kind": "section", "number": "M1805", "title": "Masonry and Factory-Built Chimneys", "book_page": 512, "page": 17, "line": 40, "chapter": "18"}
+{"kind": "chapter", "number": "19", "title": "SPECIAL APPLIANCES, EQUIPMENT AND SYSTEMS", "book_page": 513, "page": 17, "line": 42}
+{"kind": "section", "number": "M1901", "title": "Ranges and Ovens", "book_page": 513, "page": 17, "line": 44, "chapter": "19"}
+{"kind": "section", "number": "M1902", "title": "Sauna Heaters", "book_page": 513, "page": 17, "line": 46, "chapter": "19"}
+{"kind": "section", "number": "M1903", "title": "Stationary Fuel Cell Power Plants", "book_page": 513, "page": 17, "line": 48, "chapter": "19"}
+{"kind": "section", "number": "M1904", "title": "Gaseous Hydrogen Systems", "book_page": 513, "page": 17, "line": 50, "chapter": "19"}
+{"kind": "chapter", "number": "20", "title": "BOILERS AND WATER HEATERS", "book_page": 515, "page": 17, "line": 52}
+{"kind": "section", "number": "M2001", "title": "Boilers", "book_page": 515, "page": 17, "line": 53, "chapter": "20"}
+{"kind": "section", "number": "M2002", "title": "Operating and Safety Controls", "book_page": 515, "page": 17, "line": 54, "chapter": "20"}
+{"kind": "section", "number": "M2003", "title": "Expansion Tanks", "book_page": 516, "page": 17, "line": 55, "chapter": "20"}
+{"kind": "section", "number": "M2004", "title": "Water Heaters used for Space Heating", "book_page": 516, "page": 17, "line": 56, "chapter": "20"}
+{"kind": "section", "number": "M2005", "title": "Water Heaters", "book_page": 516, "page": 17, "line": 57, "chapter": "20"}
+{"kind": "section", "number": "M2006", "title": "Pool Heaters", "book_page": 516, "page": 17, "line": 58, "chapter": "20"}
+{"kind": "chapter", "number": "21", "title": "HYDRONIC PIPING", "book_page": 519, "page": 17, "line": 61}
+{"kind": "section", "number": "M2101", "title": "Hydronic Piping Systems Installation", "book_page": 519, "page": 17, "line": 63, "chapter": "21"}
+{"kind": "section", "number": "M2102", "title": "Baseboard Convectors", "book_page": 523, "page": 17, "line": 65, "chapter": "21"}
+{"kind": "section", "number": "M2103", "title": "Floor Heating Systems", "book_page": 523, "page": 17, "line": 67, "chapter": "21"}
+{"kind": "section", "number": "M2104", "title": "Low Temperature Piping", "book_page": 524, "page": 18, "line": 3, "chapter": "21"}
+{"kind": "section", "number": "M2105", "title": "Ground-Source Heat-Pump System Loop Piping", "book_page": 524, "page": 18, "line": 4, "chapter": "21"}
+{"kind": "chapter", "number": "22", "title": "SPECIAL PIPING AND STORAGE SYSTEMS", "book_page": 529, "page": 18, "line": 7}
+{"kind": "section", "number": "M2201", "title": "Oil Tanks", "book_page": 529, "page": 18, "line": 11, "chapter": "22"}
+{"kind": "section", "number": "M2202", "title": "Oil Piping, Fitting and Connections", "book_page": 529, "page": 18, "line": 13, "chapter": "22"}
+{"kind": "section", "number": "M2203", "title": "Installation", "book_page": 529, "page": 18, "line": 15, "chapter": "22"}
+{"kind": "section", "number": "M2204", "title": "Oil Pumps and Valves", "book_page": 530, "page": 18, "line": 17, "chapter": "22"}
+{"kind": "chapter", "number": "23", "title": "SOLAR THERMAL ENERGY SYSTEMS", "book_page": 531, "page": 18, "line": 20}
+{"kind": "section", "number": "M2301", "title": "Solar Thermal Energy Systems", "book_page": 531, "page": 18, "line": 22, "chapter": "23"}
+{"kind": "part", "number": "VI", "title": "Fuel Gas", "book_page": 533, "page": 18, "line": 24}
+{"kind": "chapter", "number": "24", "title": "FUEL GAS", "book_page": 533, "page": 18, "line": 27}
+{"kind": "section", "number": "G2401", "title": "(101)—General", "book_page": 533, "page": 18, "line": 29, "chapter": "24"}
+{"kind": "section", "number": "G2402", "title": "(201)—General", "book_page": 533, "page": 18, "line": 31, "chapter": "24"}
+{"kind": "section", "number": "G2403", "title": "(202)—General Definitions", "book_page": 533, "page": 18, "line": 33, "chapter": "24"}
+{"kind": "section", "number": "G2404", "title": "(301)—General", "book_page": 540, "page": 18, "line": 35, "chapter": "24"}
+{"kind": "section", "number": "G2405", "title": "(302)—Structural Safety", "book_page": 540, "page": 18, "line": 37, "chapter": "24"}
+{"kind": "section", "number": "G2406", "title": "(303)—Appliance Location", "book_page": 541, "page": 18, "line": 39, "chapter": "24"}
+{"kind": "section", "number": "G2407", "title": "(304)—Combustion, Ventilation and Dilution Air", "book_page": 541, "page": 18, "line": 40, "chapter": "24"}
+{"kind": "section", "number": "G2408", "title": "(305)—Installation", "book_page": 545, "page": 18, "line": 41, "chapter": "24"}
+{"kind": "section", "number": "G2409", "title": "(308)—Clearance Reduction", "book_page": 546, "page": 18, "line": 43, "chapter": "24"}
+{"kind": "section", "number": "G2410", "title": "(309)—Electrical", "book_page": 549, "page": 18, "line": 45, "chapter": "24"}
+{"kind": "section", "number": "G2411", "title": "(310)—Electrical Bonding", "book_page": 549, "page": 18, "line": 47, "chapter": "24"}
+{"kind": "section", "number": "G2412", "title": "(401)—General", "book_page": 550, "page": 18, "line": 49, "chapter": "24"}
+{"kind": "section", "number": "G2413", "title": "(402)—Pipe Sizing", "book_page": 551, "page": 18, "line": 50, "chapter": "24"}
+{"kind": "section", "number": "G2414", "title": "(403)—Piping Materials", "book_page": 580, "page": 18, "line": 52, "chapter": "24"}
+{"kind": "section", "number": "G2415", "title": "(404)—Piping System Installation", "book_page": 582, "page": 18, "line": 54, "chapter": "24"}
+{"kind": "section", "number": "G2416", "title": "(405)—Piping Bends and Changes in Direction", "book_page": 584, "page": 18, "line": 56, "chapter": "24"}
+{"kind": "section", "number": "G2417", "title": "(406)—Inspection, Testing and Purging", "book_page": 585, "page": 18, "line": 58, "chapter": "24"}
+{"kind": "section", "number": "G2418", "title": "(407)—Piping Support", "book_page": 587, "page": 18, "line": 60, "chapter": "24"}
+{"kind": "section", "number": "G2419", "title": "(408)—Drips and Sloped Piping", "book_page": 587, "page": 18, "line": 62, "chapter": "24"}
+{"kind": "section", "number": "G2420", "title": "(409)—Shutoff Valves", "book_page": 588, "page": 18, "line": 64, "chapter": "24"}
+{"kind": "section", "number": "G2421", "title": "(410)—Flow Controls", "book_page": 589, "page": 18, "line": 66, "chapter": "24"}
+{"kind": "section", "number": "G2422", "title": "(411)—Appliance Connections", "book_page": 589, "page": 18, "line": 68, "chapter": "24"}
+{"kind": "section", "number": "G2423", "title": "(413) —Compressed Natural Gas Motor Vehicle Fuel-Dispensing Facilities", "book_page": 590, "page": 18, "line": 70, "chapter": "24"}
+{"kind": "section", "number": "G2424", "title": "(415)—Piping Support Intervals", "book_page": 590, "page": 18, "line": 73, "chapter": "24"}
+{"kind": "section", "number": "G2425", "title": "(501)—General", "book_page": 591, "page": 18, "line": 75, "chapter": "24"}
+{"kind": "section", "number": "G2426", "title": "(502)—Vents", "book_page": 592, "page": 18, "line": 77, "chapter": "24"}
+{"kind": "section", "number": "G2427", "title": "(503)—Venting of Appliances", "book_page": 592, "page": 18, "line": 79, "chapter": "24"}
+{"kind": "section", "number": "G2428", "title": "(504)—Sizing of Category I Appliance Venting Systems", "book_page": 603, "page": 18, "line": 81, "chapter": "24"}
+{"kind": "section", "number": "G2429", "title": "(505)—Direct-Vent, Integral Vent, Mechanical Vent and Ventilation/Exhaust Hood Venting", "book_page": 619, "page": 18, "line": 85, "chapter": "24"}
+{"kind": "section", "number": "G2430", "title": "(506)—Factory-Built Chimneys", "book_page": 620, "page": 18, "line": 89, "chapter": "24"}
+{"kind": "section", "number": "G2431", "title": "(601)—General", "book_page": 620, "page": 18, "line": 91, "chapter": "24"}
+{"kind": "section", "number": "G2432", "title": "(602)—Decorative Appliances for Installation in Fireplaces", "book_page": 620, "page": 18, "line": 93, "chapter": "24"}
+{"kind": "section", "number": "G2433", "title": "(603)—Log Lighters", "book_page": 620, "page": 18, "line": 97, "chapter": "24"}
+{"kind": "section", "number": "G2434", "title": "(604)—Vented Gas Fireplaces (Decorative Appliances)", "book_page": 620, "page": 18, "line": 3, "chapter": "24"}
+{"kind": "section", "number": "G2435", "title": "(605)—Vented Gas Fireplace Heaters", "book_page": 620, "page": 18, "line": 5, "chapter": "24"}
+{"kind": "section", "number": "G2436", "title": "(608)—Vented Wall Furnaces", "book_page": 620, "page": 18, "line": 6, "chapter": "24"}
+{"kind": "section", "number": "G2437", "title": "(609)—Floor Furnaces", "book_page": 621, "page": 18, "line": 8, "chapter": "24"}
+{"kind": "section", "number": "G2438", "title": "(613)—Clothes Dryers", "book_page": 621, "page": 18, "line": 10, "chapter": "24"}
+{"kind": "section", "number": "G2439", "title": "(614)—Clothes Dryer Exhaust", "book_page": 621, "page": 18, "line": 12, "chapter": "24"}
+{"kind": "section", "number": "G2440", "title": "(615)—Sauna Heaters", "book_page": 622, "page": 18, "line": 14, "chapter": "24"}
+{"kind": "section", "number": "G2441", "title": "(617)—Pool and Spa Heaters", "book_page": 623, "page": 18, "line": 16, "chapter": "24"}
+{"kind": "section", "number": "G2442", "title": "(618)—Forced-Air Warm-Air Furnaces", "book_page": 623, "page": 18, "line": 18, "chapter": "24"}
+{"kind": "section", "number": "G2443", "title": "(619)—Conversion Burners", "book_page": 624, "page": 18, "line": 19, "chapter": "24"}
+{"kind": "section", "number": "G2444", "title": "(620)—Unit Heaters", "book_page": 624, "page": 18, "line": 21, "chapter": "24"}
+{"kind": "section", "number": "G2445", "title": "(621)—Unvented Room Heaters", "book_page": 624, "page": 18, "line": 23, "chapter": "24"}
+{"kind": "section", "number": "G2446", "title": "(622)—Vented Room Heaters", "book_page": 625, "page": 18, "line": 25, "chapter": "24"}
+{"kind": "section", "number": "G2447", "title": "(623)—Cooking Appliances", "book_page": 625, "page": 18, "line": 26, "chapter": "24"}
+{"kind": "section", "number": "G2448", "title": "(624)—Water Heaters", "book_page": 625, "page": 18, "line": 28, "chapter": "24"}
+{"kind": "section", "number": "G2449", "title": "(627)—Air-Conditioning Appliances", "book_page": 625, "page": 18, "line": 30, "chapter": "24"}
+{"kind": "section", "number": "G2450", "title": "(628)—Illuminating Appliances", "book_page": 625, "page": 18, "line": 32, "chapter": "24"}
+{"kind": "section", "number": "G2451", "title": "(630)—Infrared Radiant Heaters", "book_page": 626, "page": 18, "line": 34, "chapter": "24"}
+{"kind": "section", "number": "G2452", "title": "(631)—Boilers", "book_page": 626, "page": 18, "line": 36, "chapter": "24"}
+{"kind": "section", "number": "G2453", "title": "(635)—Outdoor Decorative Appliances", "book_page": 626, "page": 18, "line": 38, "chapter": "24"}
+{"kind": "part", "number": "VII", "title": "PLUMBING", "book_page": 627, "page": 18, "line": 40}
+{"kind": "chapter", "number": "25", "title": "PLUMBING ADMINISTRATION", "book_page": 627, "page": 18, "line": 42}
+{"kind": "section", "number": "P2501", "title": "General", "book_page": 627, "page": 18, "line": 44, "chapter": "25"}
+{"kind": "section", "number": "P2502", "title": "Existing Plumbing Systems", "book_page": 627, "page": 18, "line": 46, "chapter": "25"}
+{"kind": "section", "number": "P2503", "title": "Inspection and Tests", "book_page": 627, "page": 18, "line": 48, "chapter": "25"}
+{"kind": "chapter", "number": "26", "title": "GENERAL PLUMBING REQUIREMENTS", "book_page": 629, "page": 18, "line": 51}
+{"kind": "section", "number": "P2601", "title": "General", "book_page": 629, "page": 18, "line": 53, "chapter": "26"}
+{"kind": "section", "number": "P2602", "title": "Individual Water Supply and Sewage Disposal", "book_page": 629, "page": 18, "line": 55, "chapter": "26"}
+{"kind": "section", "number": "P2603", "title": "Structural and Piping Protection", "book_page": 629, "page": 18, "line": 57, "chapter": "26"}
+{"kind": "section", "number": "P2604", "title": "Trenching and Backfilling", "book_page": 630, "page": 18, "line": 59, "chapter": "26"}
+{"kind": "section", "number": "P2605", "title": "Support", "book_page": 630, "page": 18, "line": 61, "chapter": "26"}
+{"kind": "section", "number": "P2606", "title": "Penetrations", "book_page": 631, "page": 18, "line": 63, "chapter": "26"}
+{"kind": "section", "number": "P2607", "title": "Waterproofing of Openings", "book_page": 631, "page": 18, "line": 65, "chapter": "26"}
+{"kind": "section", "number": "P2608", "title": "Workmanship", "book_page": 632, "page": 18, "line": 67, "chapter": "26"}
+{"kind": "section", "number": "P2609", "title": "Materials Evaluation and Listing", "book_page": 632, "page": 18, "line": 69, "chapter": "26"}
+{"kind": "chapter", "number": "27", "title": "PLUMBING FIXTURES", "book_page": 633, "page": 18, "line": 72}
+{"kind": "section", "number": "P2701", "title": "Fixtures, Faucets and Fixture Fittings", "book_page": 633, "page": 18, "line": 74, "chapter": "27"}
+{"kind": "section", "number": "P2702", "title": "Fixture Accessories", "book_page": 634, "page": 18, "line": 76, "chapter": "27"}
+{"kind": "section", "number": "P2703", "title": "Tail Pieces", "book_page": 634, "page": 18, "line": 78, "chapter": "27"}
+{"kind": "section", "number": "P2704", "title": "Slip-Joint Connections", "book_page": 634, "page": 18, "line": 80, "chapter": "27"}
+{"kind": "section", "number": "P2705", "title": "Installation", "book_page": 634, "page": 18, "line": 82, "chapter": "27"}
+{"kind": "section", "number": "P2706", "title": "Waste Receptors", "book_page": 634, "page": 18, "line": 84, "chapter": "27"}
+{"kind": "section", "number": "P2707", "title": "Directional Fittings", "book_page": 635, "page": 18, "line": 86, "chapter": "27"}
+{"kind": "section", "number": "P2708", "title": "Showers", "book_page": 635, "page": 18, "line": 88, "chapter": "27"}
+{"kind": "section", "number": "P2709", "title": "Shower Receptors", "book_page": 635, "page": 18, "line": 90, "chapter": "27"}
+{"kind": "section", "number": "P2710", "title": "Shower Walls", "book_page": 636, "page": 18, "line": 92, "chapter": "27"}
+{"kind": "section", "number": "P2711", "title": "Lavatories", "book_page": 636, "page": 18, "line": 94, "chapter": "27"}
+{"kind": "section", "number": "P2712", "title": "Water Closets", "book_page": 636, "page": 18, "line": 96, "chapter": "27"}
+{"kind": "section", "number": "P2713", "title": "Bathtubs", "book_page": 637, "page": 19, "line": 3, "chapter": "27"}
+{"kind": "section", "number": "P2714", "title": "Sinks", "book_page": 637, "page": 19, "line": 4, "chapter": "27"}
+{"kind": "section", "number": "P2715", "title": "Laundry Tubs", "book_page": 637, "page": 19, "line": 5, "chapter": "27"}
+{"kind": "section", "number": "P2716", "title": "Food-Waste Disposer", "book_page": 637, "page": 19, "line": 6, "chapter": "27"}
+{"kind": "section", "number": "P2717", "title": "Dishwashing Machines", "book_page": 637, "page": 19, "line": 7, "chapter": "27"}
+{"kind": "section", "number": "P2718", "title": "Clothes Washing Machine", "book_page": 637, "page": 19, "line": 8, "chapter": "27"}
+{"kind": "section", "number": "P2719", "title": "Floor Drains", "book_page": 637, "page": 19, "line": 9, "chapter": "27"}
+{"kind": "section", "number": "P2720", "title": "Whirlpool Bathtubs", "book_page": 638, "page": 19, "line": 10, "chapter": "27"}
+{"kind": "section", "number": "P2721", "title": "Bidet Installations", "book_page": 638, "page": 19, "line": 11, "chapter": "27"}
+{"kind": "section", "number": "P2722", "title": "Fixture Fitting", "book_page": 638, "page": 19, "line": 12, "chapter": "27"}
+{"kind": "section", "number": "P2723", "title": "Macerating Toilet Systems", "book_page": 638, "page": 19, "line": 13, "chapter": "27"}
+{"kind": "section", "number": "P2724", "title": "Specialty Temperature Control Devices and Valves", "book_page": 638, "page": 19, "line": 14, "chapter": "27"}
+{"kind": "section", "number": "P2725", "title": "Nonliquid Saturated Treatment Systems", "book_page": 638, "page": 19, "line": 16, "chapter": "27"}
+{"kind": "chapter", "number": "28", "title": "WATER HEATERS", "book_page": 639, "page": 19, "line": 18}
+{"kind": "section", "number": "P2801", "title": "General", "book_page": 639, "page": 19, "line": 19, "chapter": "28"}
+{"kind": "section", "number": "P2802", "title": "Solar Water Heating Systems", "book_page": 639, "page": 19, "line": 20, "chapter": "28"}
+{"kind": "section", "number": "P2803", "title": "Water Heaters used for Space Heating", "book_page": 640, "page": 19, "line": 21, "chapter": "28"}
+{"kind": "section", "number": "P2804", "title": "Relief Valves", "book_page": 640, "page": 19, "line": 22, "chapter": "28"}
+{"kind": "chapter", "number": "29", "title": "WATER SUPPLY AND DISTRIBUTION", "book_page": 641, "page": 19, "line": 24}
+{"kind": "section", "number": "P2901", "title": "General", "book_page": 641, "page": 19, "line": 25, "chapter": "29"}
+{"kind": "section", "number": "P2902", "title": "Protection of Potable Water Supply", "book_page": 642, "page": 19, "line": 26, "chapter": "29"}
+{"kind": "section", "number": "P2903", "title": "Water Supply System", "book_page": 645, "page": 19, "line": 27, "chapter": "29"}
+{"kind": "section", "number": "P2904", "title": "Dwelling Unit Automatic Sprinkler Systems", "book_page": 650, "page": 19, "line": 29, "chapter": "29"}
+{"kind": "section", "number": "P2905", "title": "Heated Water Distribution Systems", "book_page": 663, "page": 19, "line": 30, "chapter": "29"}
+{"kind": "section", "number": "P2906", "title": "Materials, Joints and Connections", "book_page": 663, "page": 19, "line": 31, "chapter": "29"}
+{"kind": "section", "number": "P2907", "title": "Changes in Direction", "book_page": 667, "page": 19, "line": 32, "chapter": "29"}
+{"kind": "section", "number": "P2908", "title": "Support", "book_page": 667, "page": 19, "line": 33, "chapter": "29"}
+{"kind": "section", "number": "P2909", "title": "Drinking Water Treatment Units", "book_page": 667, "page": 19, "line": 34, "chapter": "29"}
+{"kind": "section", "number": "P2910", "title": "Nonpotable Water Systems", "book_page": 667, "page": 19, "line": 35, "chapter": "29"}
+{"kind": "section", "number": "P2911", "title": "On-site Nonpotable Water Reuse Systems", "book_page": 670, "page": 19, "line": 36, "chapter": "29"}
+{"kind": "section", "number": "P2912", "title": "Nonpotable Rainwater Collection and Distribution Systems", "book_page": 672, "page": 19, "line": 37, "chapter": "29"}
+{"kind": "section", "number": "P2913", "title": "Reclaimed Water Systems", "book_page": 674, "page": 19, "line": 39, "chapter": "29"}
+{"kind": "chapter", "number": "30", "title": "SANITARY DRAINAGE", "book_page": 675, "page": 19, "line": 41}
+{"kind": "section", "number": "P3001", "title": "General", "book_page": 675, "page": 19, "line": 42, "chapter": "30"}
+{"kind": "section", "number": "P3002", "title": "Materials", "book_page": 675, "page": 19, "line": 43, "chapter": "30"}
+{"kind": "section", "number": "P3003", "title": "Joints and Connections", "book_page": 677, "page": 19, "line": 44, "chapter": "30"}
+{"kind": "section", "number": "P3004", "title": "Determining Drainage Fixture Units", "book_page": 679, "page": 19, "line": 45, "chapter": "30"}
+{"kind": "section", "number": "P3005", "title": "Drainage System", "book_page": 680, "page": 19, "line": 46, "chapter": "30"}
+{"kind": "section", "number": "P3006", "title": "Sizing of Drain Pipe Offsets", "book_page": 683, "page": 19, "line": 47, "chapter": "30"}
+{"kind": "section", "number": "P3007", "title": "Sumps And Ejectors", "book_page": 684, "page": 19, "line": 49, "chapter": "30"}
+{"kind": "section", "number": "P3008", "title": "Backwater Valves", "book_page": 685, "page": 19, "line": 51, "chapter": "30"}
+{"kind": "section", "number": "P3009", "title": "Graywater Soil Absorption Systems", "book_page": 685, "page": 19, "line": 53, "chapter": "30"}
+{"kind": "section", "number": "P3010", "title": "Replacement of Underground Building Sewers and Building Drains by Pipe Bursting Methods", "book_page": 687, "page": 19, "line": 55, "chapter": "30"}
+{"kind": "section", "number": "P3011", "title": "Relining of Building Sewers and Building Drains", "book_page": 688, "page": 19, "line": 57, "chapter": "30"}
+{"kind": "chapter", "number": "31", "title": "VENTS", "book_page": 689, "page": 19, "line": 3}
+{"kind": "section", "number": "P3101", "title": "Vent Systems", "book_page": 689, "page": 19, "line": 4, "chapter": "31"}
+{"kind": "section", "number": "P3102", "title": "Vent Stacks and Stack Vents", "book_page": 689, "page": 19, "line": 5, "chapter": "31"}
+{"kind": "section", "number": "P3103", "title": "Vent Terminals", "book_page": 689, "page": 19, "line": 6, "chapter": "31"}
+{"kind": "section", "number": "P3104", "title": "Vent Connections and Grades", "book_page": 690, "page": 19, "line": 7, "chapter": "31"}
+{"kind": "section", "number": "P3105", "title": "Fixture Vents", "book_page": 690, "page": 19, "line": 8, "chapter": "31"}
+{"kind": "section", "number": "P3106", "title": "Individual Vent", "book_page": 690, "page": 19, "line": 9, "chapter": "31"}
+{"kind": "section", "number": "P3107", "title": "Common Vent", "book_page": 690, "page": 19, "line": 10, "chapter": "31"}
+{"kind": "section", "number": "P3108", "title": "Wet Venting", "book_page": 691, "page": 19, "line": 11, "chapter": "31"}
+{"kind": "section", "number": "P3109", "title": "Waste Stack Vent", "book_page": 691, "page": 19, "line": 12, "chapter": "31"}
+{"kind": "section", "number": "P3110", "title": "Circuit Venting", "book_page": 692, "page": 19, "line": 13, "chapter": "31"}
+{"kind": "section", "number": "P3111", "title": "Combination Waste and Vent System", "book_page": 692, "page": 19, "line": 14, "chapter": "31"}
+{"kind": "section", "number": "P3112", "title": "Island Fixture Venting", "book_page": 693, "page": 19, "line": 15, "chapter": "31"}
+{"kind": "section", "number": "P3113", "title": "Vent Pipe Sizing", "book_page": 693, "page": 19, "line": 16, "chapter": "31"}
+{"kind": "section", "number": "P3114", "title": "Air Admittance Valves", "book_page": 694, "page": 19, "line": 17, "chapter": "31"}
+{"kind": "chapter", "number": "32", "title": "TRAPS", "book_page": 695, "page": 19, "line": 19}
+{"kind": "section", "number": "P3201", "title": "Fixture Traps", "book_page": 695, "page": 19, "line": 20, "chapter": "32"}
+{"kind": "section", "number": "P3202", "title": "Grease Interceptors (Traps)", "book_page": 696, "page": 19, "line": 21, "chapter": "32"}
+{"kind": "chapter", "number": "33", "title": "STORM DRAINAGE", "book_page": 697, "page": 19, "line": 23}
+{"kind": "section", "number": "P3301", "title": "General", "book_page": 697, "page": 19, "line": 24, "chapter": "33"}
+{"kind": "section", "number": "P3302", "title": "Subsoil Drains", "book_page": 697, "page": 19, "line": 25, "chapter": "33"}
+{"kind": "section", "number": "P3303", "title": "Sumps and Pumping Systems", "book_page": 697, "page": 19, "line": 26, "chapter": "33"}
+{"kind": "part", "number": "VIII", "title": "Electrical", "book_page": 699, "page": 19, "line": 28}
+{"kind": "chapter", "number": "34", "title": "GENERAL REQUIREMENTS", "book_page": 699, "page": 19, "line": 30}
+{"kind": "section", "number": "E3401", "title": "General", "book_page": 699, "page": 19, "line": 31, "chapter": "34"}
+{"kind": "section", "number": "E3402", "title": "Building Structure Protection", "book_page": 700, "page": 19, "line": 32, "chapter": "34"}
+{"kind": "section", "number": "E3403", "title": "Inspection and Approval", "book_page": 700, "page": 19, "line": 33, "chapter": "34"}
+{"kind": "section", "number": "E3404", "title": "General Equipment Requirements", "book_page": 700, "page": 19, "line": 34, "chapter": "34"}
+{"kind": "section", "number": "E3405", "title": "Equipment Location and Clearances", "book_page": 702, "page": 19, "line": 35, "chapter": "34"}
+{"kind": "section", "number": "E3406", "title": "Electrical Conductors and Connections", "book_page": 704, "page": 19, "line": 36, "chapter": "34"}
+{"kind": "section", "number": "E3407", "title": "Conductor and Terminal Identification", "book_page": 706, "page": 19, "line": 37, "chapter": "34"}
+{"kind": "chapter", "number": "35", "title": "ELECTRICAL DEFINITIONS", "book_page": 709, "page": 19, "line": 39}
+{"kind": "section", "number": "E3501", "title": "General", "book_page": 709, "page": 19, "line": 40, "chapter": "35"}
+{"kind": "chapter", "number": "36", "title": "SERVICES", "book_page": 715, "page": 19, "line": 42}
+{"kind": "section", "number": "E3601", "title": "General Services", "book_page": 715, "page": 19, "line": 43, "chapter": "36"}
+{"kind": "section", "number": "E3602", "title": "Service Size and Rating", "book_page": 716, "page": 19, "line": 44, "chapter": "36"}
+{"kind": "section", "number": "E3603", "title": "Service, Feeder and Grounding Electrode Conductor Sizing", "book_page": 716, "page": 19, "line": 45, "chapter": "36"}
+{"kind": "section", "number": "E3604", "title": "Overhead Service and Service-Entrance Conductor Installation", "book_page": 718, "page": 19, "line": 47, "chapter": "36"}
+{"kind": "section", "number": "E3605", "title": "Service-Entrance Conductors", "book_page": 720, "page": 19, "line": 50, "chapter": "36"}
+{"kind": "section", "number": "E3606", "title": "Service Equipment—General", "book_page": 721, "page": 19, "line": 52, "chapter": "36"}
+{"kind": "section", "number": "E3607", "title": "System Grounding", "book_page": 721, "page": 19, "line": 54, "chapter": "36"}
+{"kind": "section", "number": "E3608", "title": "Grounding Electrode System", "book_page": 722, "page": 19, "line": 56, "chapter": "36"}
+{"kind": "section", "number": "E3609", "title": "Bonding", "book_page": 723, "page": 19, "line": 57, "chapter": "36"}
+{"kind": "section", "number": "E3610", "title": "Grounding Electrode Conductors", "book_page": 724, "page": 19, "line": 58, "chapter": "36"}
+{"kind": "section", "number": "E3611", "title": "Grounding Electrode Conductor Connection to the Grounding Electrodes", "book_page": 725, "page": 19, "line": 59, "chapter": "36"}
+{"kind": "chapter", "number": "37", "title": "BRANCH CIRCUIT AND FEEDER REQUIREMENTS", "book_page": 727, "page": 20, "line": 3}
+{"kind": "section", "number": "E3701", "title": "General", "book_page": 727, "page": 20, "line": 5, "chapter": "37"}
+{"kind": "section", "number": "E3702", "title": "Branch Circuit Ratings", "book_page": 727, "page": 20, "line": 6, "chapter": "37"}
+{"kind": "section", "number": "E3703", "title": "Required Branch Circuits", "book_page": 729, "page": 20, "line": 8, "chapter": "37"}
+{"kind": "section", "number": "E3704", "title": "Feeder Requirements", "book_page": 730, "page": 20, "line": 9, "chapter": "37"}
+{"kind": "section", "number": "E3705", "title": "Conductor Sizing and Overcurrent Protection", "book_page": 731, "page": 20, "line": 10, "chapter": "37"}
+{"kind": "section", "number": "E3706", "title": "Panelboards", "book_page": 736, "page": 20, "line": 11, "chapter": "37"}
+{"kind": "section", "number": "E3707", "title": "Electrification Ready", "book_page": 736, "page": 20, "line": 12, "chapter": "37"}
+{"kind": "chapter", "number": "38", "title": "WIRING METHODS", "book_page": 737, "page": 20, "line": 14}
+{"kind": "section", "number": "E3801", "title": "General Requirements", "book_page": 737, "page": 20, "line": 16, "chapter": "38"}
+{"kind": "section", "number": "E3802", "title": "Above-Ground Installation Requirements", "book_page": 738, "page": 20, "line": 17, "chapter": "38"}
+{"kind": "section", "number": "E3803", "title": "Underground Installation Requirements", "book_page": 740, "page": 20, "line": 19, "chapter": "38"}
+{"kind": "chapter", "number": "39", "title": "POWER AND LIGHTING DISTRIBUTION", "book_page": 743, "page": 20, "line": 22}
+{"kind": "section", "number": "E3901", "title": "Receptacle Outlets", "book_page": 743, "page": 20, "line": 24, "chapter": "39"}
+{"kind": "section", "number": "E3902", "title": "Ground-Fault and Arc-Fault Circuit-Interrupter Protection", "book_page": 747, "page": 20, "line": 26, "chapter": "39"}
+{"kind": "section", "number": "E3903", "title": "Lighting Outlets", "book_page": 749, "page": 20, "line": 30, "chapter": "39"}
+{"kind": "section", "number": "E3904", "title": "General Installation Requirements", "book_page": 750, "page": 20, "line": 32, "chapter": "39"}
+{"kind": "section", "number": "E3905", "title": "Boxes, Conduit Bodies and Fittings", "book_page": 766, "page": 20, "line": 34, "chapter": "39"}
+{"kind": "section", "number": "E3906", "title": "Installation of Boxes, Conduit Bodies and Fittings", "book_page": 770, "page": 20, "line": 36, "chapter": "39"}
+{"kind": "section", "number": "E3907", "title": "Cabinets and Panelboards", "book_page": 772, "page": 20, "line": 40, "chapter": "39"}
+{"kind": "section", "number": "E3908", "title": "Grounding and Bonding", "book_page": 775, "page": 20, "line": 42, "chapter": "39"}
+{"kind": "section", "number": "E3909", "title": "Flexible Cords and Flexible Cables", "book_page": 779, "page": 20, "line": 44, "chapter": "39"}
+{"kind": "chapter", "number": "40", "title": "DEVICES AND LUMINAIRES", "book_page": 781, "page": 20, "line": 46}
+{"kind": "section", "number": "E4001", "title": "Switches", "book_page": 781, "page": 20, "line": 47, "chapter": "40"}
+{"kind": "section", "number": "E4002", "title": "Receptacles", "book_page": 783, "page": 20, "line": 48, "chapter": "40"}
+{"kind": "section", "number": "E4003", "title": "Luminaires", "book_page": 785, "page": 20, "line": 49, "chapter": "40"}
+{"kind": "section", "number": "E4004", "title": "Luminaire Installation", "book_page": 787, "page": 20, "line": 50, "chapter": "40"}
+{"kind": "section", "number": "E4005", "title": "Track Lighting", "book_page": 787, "page": 20, "line": 51, "chapter": "40"}
+{"kind": "chapter", "number": "41", "title": "APPLIANCE INSTALLATION", "book_page": 789, "page": 20, "line": 53}
+{"kind": "section", "number": "E4101", "title": "General", "book_page": 789, "page": 20, "line": 54, "chapter": "41"}
+{"kind": "chapter", "number": "42", "title": "SWIMMING POOLS", "book_page": 793, "page": 20, "line": 56}
+{"kind": "section", "number": "E4201", "title": "General", "book_page": 793, "page": 20, "line": 58, "chapter": "42"}
+{"kind": "section", "number": "E4202", "title": "Wiring Methods for Pools, Spas, Hot Tubs and Hydromassage Bathtubs", "book_page": 793, "page": 20, "line": 60, "chapter": "42"}
+{"kind": "section", "number": "E4203", "title": "Equipment Location and Clearances", "book_page": 794, "page": 20, "line": 64, "chapter": "42"}
+{"kind": "section", "number": "E4204", "title": "Equipotential Bonding", "book_page": 796, "page": 20, "line": 66, "chapter": "42"}
+{"kind": "section", "number": "E4205", "title": "Bonding and Grounding", "book_page": 799, "page": 20, "line": 67, "chapter": "42"}
+{"kind": "section", "number": "E4206", "title": "Equipment Installation", "book_page": 800, "page": 20, "line": 68, "chapter": "42"}
+{"kind": "section", "number": "E4207", "title": "Storable Swimming Pools, Storable Spas and Storable Hot Tubs", "book_page": 802, "page": 20, "line": 69, "chapter": "42"}
+{"kind": "section", "number": "E4208", "title": "Spas and Hot Tubs", "book_page": 803, "page": 20, "line": 72, "chapter": "42"}
+{"kind": "section", "number": "E4209", "title": "Hydromassage Bathtubs", "book_page": 804, "page": 20, "line": 74, "chapter": "42"}
+{"kind": "chapter", "number": "43", "title": "CLASS 2 REMOTE-CONTROL, SIGNALING AND POWER-LIMITED CIRCUITS", "book_page": 805, "page": 20, "line": 77}
+{"kind": "section", "number": "E4301", "title": "General", "book_page": 805, "page": 20, "line": 80, "chapter": "43"}
+{"kind": "section", "number": "E4302", "title": "Power Sources", "book_page": 805, "page": 20, "line": 3, "chapter": "43"}
+{"kind": "section", "number": "E4303", "title": "Wiring Methods", "book_page": 805, "page": 20, "line": 4, "chapter": "43"}
+{"kind": "section", "number": "E4304", "title": "Installation Requirements", "book_page": 806, "page": 20, "line": 5, "chapter": "43"}
+{"kind": "part", "number": "IX", "title": "Referenced Standards", "book_page": 809, "page": 20, "line": 7}
+{"kind": "chapter", "number": "44", "title": "REFERENCED STANDARDS", "book_page": 809, "page": 20, "line": 9}
+{"kind": "appendix", "number": "AA", "title": "RESERVED", "book_page": 845, "page": 20, "line": 11}
+{"kind": "appendix", "number": "AB", "title": "RESERVED", "book_page": 847, "page": 20, "line": 13}
+{"kind": "appendix", "number": "AC", "title": "RESERVED", "book_page": 849, "page": 20, "line": 15}
+{"kind": "appendix", "number": "BA", "title": "MANUFACTURED HOUSING USED AS DWELLINGS", "book_page": 851, "page": 20, "line": 18}
+{"kind": "section", "number": "BA101", "title": "Scope", "book_page": 851, "page": 20, "line": 21, "chapter": "BA"}
+{"kind": "section", "number": "BA102", "title": "Application to Existing Manufactured Homes and Building Service Equipment", "book_page": 851, "page": 20, "line": 23, "chapter": "BA"}
+{"kind": "section", "number": "BA103", "title": "Definitions", "book_page": 852, "page": 20, "line": 27, "chapter": "BA"}
+{"kind": "section", "number": "BA104", "title": "Permits", "book_page": 853, "page": 20, "line": 29, "chapter": "BA"}
+{"kind": "section", "number": "BA105", "title": "Application for Permit", "book_page": 853, "page": 20, "line": 31, "chapter": "BA"}
+{"kind": "section", "number": "BA106", "title": "Reserved", "book_page": 853, "page": 20, "line": 33, "chapter": "BA"}
+{"kind": "section", "number": "BA107", "title": "Reserved", "book_page": 853, "page": 20, "line": 35, "chapter": "BA"}
+{"kind": "section", "number": "BA108", "title": "Inspections", "book_page": 853, "page": 20, "line": 37, "chapter": "BA"}
+{"kind": "section", "number": "BA109", "title": "Reserved", "book_page": 853, "page": 20, "line": 39, "chapter": "BA"}
+{"kind": "section", "number": "BA110", "title": "Utility Service", "book_page": 853, "page": 20, "line": 41, "chapter": "BA"}
+{"kind": "section", "number": "BA111", "title": "Occupancy Classification", "book_page": 853, "page": 20, "line": 43, "chapter": "BA"}
+{"kind": "section", "number": "BA112", "title": "Location on Property", "book_page": 854, "page": 20, "line": 45, "chapter": "BA"}
+{"kind": "section", "number": "BA113", "title": "Design", "book_page": 854, "page": 20, "line": 46, "chapter": "BA"}
+{"kind": "section", "number": "BA114", "title": "Foundation Systems", "book_page": 854, "page": 20, "line": 47, "chapter": "BA"}
+{"kind": "section", "number": "BA115", "title": "Skirting and Perimeter Enclosures", "book_page": 855, "page": 20, "line": 48, "chapter": "BA"}
+{"kind": "section", "number": "BA116", "title": "Reserved", "book_page": 855, "page": 20, "line": 49, "chapter": "BA"}
+{"kind": "section", "number": "BA117", "title": "Building Service Equipment", "book_page": 855, "page": 20, "line": 50, "chapter": "BA"}
+{"kind": "section", "number": "BA118", "title": "Exits", "book_page": 855, "page": 20, "line": 51, "chapter": "BA"}
+{"kind": "section", "number": "BA119", "title": "Occupancy, Fire Safety and Energy Conservation Standards", "book_page": 855, "page": 20, "line": 52, "chapter": "BA"}
+{"kind": "section", "number": "BA120", "title": "Reserved", "book_page": 855, "page": 20, "line": 54, "chapter": "BA"}
+{"kind": "section", "number": "BA121", "title": "Reserved", "book_page": 855, "page": 20, "line": 55, "chapter": "BA"}
+{"kind": "section", "number": "BA122", "title": "Reserved", "book_page": 855, "page": 20, "line": 57, "chapter": "BA"}
+{"kind": "section", "number": "BA123", "title": "Reserved", "book_page": 855, "page": 20, "line": 59, "chapter": "BA"}
+{"kind": "section", "number": "BA124", "title": "Reserved", "book_page": 855, "page": 20, "line": 61, "chapter": "BA"}
+{"kind": "section", "number": "BA125", "title": "Reserved", "book_page": 855, "page": 20, "line": 63, "chapter": "BA"}
+{"kind": "section", "number": "BA126", "title": "Reserved", "book_page": 855, "page": 20, "line": 65, "chapter": "BA"}
+{"kind": "appendix", "number": "BB", "title": "TINY HOUSES", "book_page": 857, "page": 20, "line": 67}
+{"kind": "section", "number": "BB101", "title": "General", "book_page": 857, "page": 20, "line": 68, "chapter": "BB"}
+{"kind": "section", "number": "BB102", "title": "Definitions", "book_page": 857, "page": 20, "line": 69, "chapter": "BB"}
+{"kind": "section", "number": "BB103", "title": "Ceiling Height", "book_page": 857, "page": 20, "line": 71, "chapter": "BB"}
+{"kind": "section", "number": "BB104", "title": "Lofts", "book_page": 857, "page": 20, "line": 73, "chapter": "BB"}
+{"kind": "section", "number": "BB105", "title": "Emergency Escape and Rescue Openings", "book_page": 858, "page": 20, "line": 75, "chapter": "BB"}
+{"kind": "section", "number": "BB106", "title": "Energy Conservation", "book_page": 858, "page": 20, "line": 76, "chapter": "BB"}
+{"kind": "appendix", "number": "BC", "title": "RESERVED", "book_page": 861, "page": 20, "line": 79}
+{"kind": "appendix", "number": "BD", "title": "RESERVED", "book_page": 863, "page": 21, "line": 3}
+{"kind": "appendix", "number": "BE", "title": "RADON CONTROL METHODS", "book_page": 865, "page": 21, "line": 5}
+{"kind": "section", "number": "BE101", "title": "Scope", "book_page": 865, "page": 21, "line": 7, "chapter": "BE"}
+{"kind": "section", "number": "BE102", "title": "Definitions", "book_page": 870, "page": 21, "line": 9, "chapter": "BE"}
+{"kind": "section", "number": "BE103", "title": "Requirements", "book_page": 870, "page": 21, "line": 11, "chapter": "BE"}
+{"kind": "section", "number": "BE104", "title": "Testing", "book_page": 873, "page": 21, "line": 12, "chapter": "BE"}
+{"kind": "appendix", "number": "BF", "title": "PATIO COVERS", "book_page": 875, "page": 21, "line": 14}
+{"kind": "section", "number": "BF101", "title": "General", "book_page": 875, "page": 21, "line": 15, "chapter": "BF"}
+{"kind": "section", "number": "BF102", "title": "Definition", "book_page": 875, "page": 21, "line": 16, "chapter": "BF"}
+{"kind": "section", "number": "BF103", "title": "Exterior Walls and Openings", "book_page": 875, "page": 21, "line": 17, "chapter": "BF"}
+{"kind": "section", "number": "BF104", "title": "Height", "book_page": 875, "page": 21, "line": 18, "chapter": "BF"}
+{"kind": "section", "number": "BF105", "title": "Structural Provisions", "book_page": 875, "page": 21, "line": 19, "chapter": "BF"}
+{"kind": "section", "number": "BF106", "title": "Special Provisions for Aluminum Screen Enclosures in Hurricane-Prone Regions", "book_page": 875, "page": 21, "line": 20, "chapter": "BF"}
+{"kind": "appendix", "number": "BG", "title": "SOUND TRANSMISSION", "book_page": 879, "page": 21, "line": 23}
+{"kind": "section", "number": "BG101", "title": "General", "book_page": 879, "page": 21, "line": 25, "chapter": "BG"}
+{"kind": "section", "number": "BG102", "title": "Airborne Sound", "book_page": 879, "page": 21, "line": 26, "chapter": "BG"}
+{"kind": "section", "number": "BG103", "title": "Structural-Borne Sound", "book_page": 879, "page": 21, "line": 27, "chapter": "BG"}
+{"kind": "section", "number": "BG104", "title": "Referenced Standards", "book_page": 879, "page": 21, "line": 28, "chapter": "BG"}
+{"kind": "appendix", "number": "BH", "title": "AUTOMATIC VEHICULAR GATES", "book_page": 881, "page": 21, "line": 30}
+{"kind": "section", "number": "BH101", "title": "General", "book_page": 881, "page": 21, "line": 32, "chapter": "BH"}
+{"kind": "section", "number": "BH102", "title": "Definition", "book_page": 881, "page": 21, "line": 34, "chapter": "BH"}
+{"kind": "section", "number": "BH103", "title": "Automatic Vehicular Gates", "book_page": 881, "page": 21, "line": 35, "chapter": "BH"}
+{"kind": "section", "number": "BH104", "title": "Referenced Standards", "book_page": 881, "page": 21, "line": 36, "chapter": "BH"}
+{"kind": "appendix", "number": "BI", "title": "LIGHT STRAW-CLAY CONSTRUCTION", "book_page": 883, "page": 21, "line": 38}
+{"kind": "section", "number": "BI101", "title": "General", "book_page": 883, "page": 21, "line": 40, "chapter": "BI"}
+{"kind": "section", "number": "BI102", "title": "Definitions", "book_page": 883, "page": 21, "line": 41, "chapter": "BI"}
+{"kind": "section", "number": "BI103", "title": "Nonbearing Light Straw-Clay Construction", "book_page": 883, "page": 21, "line": 42, "chapter": "BI"}
+{"kind": "section", "number": "BI104", "title": "Thermal Performance", "book_page": 886, "page": 21, "line": 43, "chapter": "BI"}
+{"kind": "section", "number": "BI105", "title": "Referenced Standards", "book_page": 887, "page": 21, "line": 44, "chapter": "BI"}
+{"kind": "appendix", "number": "BJ", "title": "STRAWBALE CONSTRUCTION", "book_page": 889, "page": 21, "line": 46}
+{"kind": "section", "number": "BJ101", "title": "General", "book_page": 889, "page": 21, "line": 47, "chapter": "BJ"}
+{"kind": "section", "number": "BJ102", "title": "Definitions", "book_page": 889, "page": 21, "line": 48, "chapter": "BJ"}
+{"kind": "section", "number": "BJ103", "title": "Bales", "book_page": 891, "page": 21, "line": 49, "chapter": "BJ"}
+{"kind": "section", "number": "BJ104", "title": "Finishes", "book_page": 892, "page": 21, "line": 50, "chapter": "BJ"}
+{"kind": "section", "number": "BJ105", "title": "Strawbale Walls—General", "book_page": 893, "page": 21, "line": 51, "chapter": "BJ"}
+{"kind": "section", "number": "BJ106", "title": "Strawbale Walls—Structural", "book_page": 897, "page": 21, "line": 52, "chapter": "BJ"}
+{"kind": "section", "number": "BJ107", "title": "Fire Resistance", "book_page": 903, "page": 21, "line": 53, "chapter": "BJ"}
+{"kind": "section", "number": "BJ108", "title": "Thermal Insulation", "book_page": 903, "page": 21, "line": 54, "chapter": "BJ"}
+{"kind": "section", "number": "BJ109", "title": "Referenced Standards", "book_page": 903, "page": 21, "line": 55, "chapter": "BJ"}
+{"kind": "appendix", "number": "BK", "title": "COB CONSTRUCTION (MONOLITHIC ADOBE)", "book_page": 905, "page": 21, "line": 57}
+{"kind": "section", "number": "BK101", "title": "General", "book_page": 905, "page": 21, "line": 59, "chapter": "BK"}
+{"kind": "section", "number": "BK102", "title": "Definitions", "book_page": 906, "page": 21, "line": 60, "chapter": "BK"}
+{"kind": "section", "number": "BK103", "title": "Materials, Mixing and Installation", "book_page": 906, "page": 21, "line": 61, "chapter": "BK"}
+{"kind": "section", "number": "BK104", "title": "Finishes", "book_page": 907, "page": 21, "line": 62, "chapter": "BK"}
+{"kind": "section", "number": "BK105", "title": "Cob Walls—General", "book_page": 908, "page": 21, "line": 63, "chapter": "BK"}
+{"kind": "section", "number": "BK106", "title": "Cob Walls—Structural", "book_page": 910, "page": 21, "line": 3, "chapter": "BK"}
+{"kind": "section", "number": "BK107", "title": "Cob Floors", "book_page": 922, "page": 21, "line": 4, "chapter": "BK"}
+{"kind": "section", "number": "BK108", "title": "Fire Resistance", "book_page": 922, "page": 21, "line": 6, "chapter": "BK"}
+{"kind": "section", "number": "BK109", "title": "Thermal Performance", "book_page": 922, "page": 21, "line": 8, "chapter": "BK"}
+{"kind": "section", "number": "BK110", "title": "Referenced Standards", "book_page": 922, "page": 21, "line": 10, "chapter": "BK"}
+{"kind": "appendix", "number": "BL", "title": "HEMP-LIME (HEMPCRETE) CONSTRUCTION", "book_page": 925, "page": 21, "line": 12}
+{"kind": "section", "number": "BL101", "title": "General", "book_page": 925, "page": 21, "line": 14, "chapter": "BL"}
+{"kind": "section", "number": "BL102", "title": "Definitions", "book_page": 925, "page": 21, "line": 15, "chapter": "BL"}
+{"kind": "section", "number": "BL103", "title": "Hemp-Lime Construction", "book_page": 926, "page": 21, "line": 16, "chapter": "BL"}
+{"kind": "section", "number": "BL104", "title": "Finishes", "book_page": 931, "page": 21, "line": 17, "chapter": "BL"}
+{"kind": "section", "number": "BL105", "title": "Fire Resistance", "book_page": 932, "page": 21, "line": 18, "chapter": "BL"}
+{"kind": "section", "number": "BL106", "title": "Thermal Performance", "book_page": 932, "page": 21, "line": 19, "chapter": "BL"}
+{"kind": "section", "number": "BL107", "title": "Mechanical Performance", "book_page": 933, "page": 21, "line": 20, "chapter": "BL"}
+{"kind": "section", "number": "BL108", "title": "Referenced Standards", "book_page": 933, "page": 21, "line": 22, "chapter": "BL"}
+{"kind": "appendix", "number": "BM", "title": "3D-PRINTED BUILDING CONSTRUCTION", "book_page": 935, "page": 21, "line": 24}
+{"kind": "section", "number": "BM101", "title": "General", "book_page": 935, "page": 21, "line": 26, "chapter": "BM"}
+{"kind": "section", "number": "BM102", "title": "Definitions", "book_page": 935, "page": 21, "line": 27, "chapter": "BM"}
+{"kind": "section", "number": "BM103", "title": "Building Design", "book_page": 935, "page": 21, "line": 28, "chapter": "BM"}
+{"kind": "section", "number": "BM104", "title": "Building Construction", "book_page": 935, "page": 21, "line": 29, "chapter": "BM"}
+{"kind": "section", "number": "BM105", "title": "Special Inspections", "book_page": 935, "page": 21, "line": 31, "chapter": "BM"}
+{"kind": "section", "number": "BM106", "title": "Referenced Standards", "book_page": 936, "page": 21, "line": 33, "chapter": "BM"}
+{"kind": "appendix", "number": "BN", "title": "EXTENDED PLATE WALL CONSTRUCTION", "book_page": 937, "page": 21, "line": 35}
+{"kind": "section", "number": "BN101", "title": "General", "book_page": 937, "page": 21, "line": 37, "chapter": "BN"}
+{"kind": "section", "number": "BN102", "title": "Construction Requirements", "book_page": 937, "page": 21, "line": 39, "chapter": "BN"}
+{"kind": "appendix", "number": "BO", "title": "EXISTING BUILDINGS AND STRUCTURES", "book_page": 941, "page": 21, "line": 41}
+{"kind": "section", "number": "BO101", "title": "Purpose and Intent", "book_page": 941, "page": 21, "line": 43, "chapter": "BO"}
+{"kind": "section", "number": "BO102", "title": "Compliance", "book_page": 943, "page": 21, "line": 44, "chapter": "BO"}
+{"kind": "section", "number": "BO103", "title": "Definitions", "book_page": 943, "page": 21, "line": 45, "chapter": "BO"}
+{"kind": "section", "number": "BO104", "title": "Repairs", "book_page": 944, "page": 21, "line": 46, "chapter": "BO"}
+{"kind": "section", "number": "BO105", "title": "Alterations", "book_page": 945, "page": 21, "line": 47, "chapter": "BO"}
+{"kind": "section", "number": "BO106", "title": "Addition", "book_page": 948, "page": 21, "line": 48, "chapter": "BO"}
+{"kind": "section", "number": "BO107", "title": "Change of Occupancy", "book_page": 949, "page": 21, "line": 49, "chapter": "BO"}
+{"kind": "section", "number": "BO108", "title": "Bed and Breakfast Dwellings", "book_page": 950, "page": 21, "line": 50, "chapter": "BO"}
+{"kind": "section", "number": "BO109", "title": "Historic Buildings", "book_page": 950, "page": 21, "line": 51, "chapter": "BO"}
+{"kind": "section", "number": "BO110", "title": "Relocated Buildings", "book_page": 951, "page": 21, "line": 52, "chapter": "BO"}
+{"kind": "section", "number": "BO111", "title": "Replacement Buildings", "book_page": 952, "page": 21, "line": 53, "chapter": "BO"}
+{"kind": "section", "number": "BO112", "title": "Reserved", "book_page": 952, "page": 21, "line": 54, "chapter": "BO"}
+{"kind": "appendix", "number": "CA", "title": "SIZING AND CAPACITIES OF GAS PIPING", "book_page": 953, "page": 21, "line": 56}
+{"kind": "section", "number": "CA101", "title": "General Piping Considerations", "book_page": 953, "page": 21, "line": 58, "chapter": "CA"}
+{"kind": "section", "number": "CA102", "title": "Description of Tables", "book_page": 953, "page": 21, "line": 59, "chapter": "CA"}
+{"kind": "section", "number": "CA103", "title": "Use of Capacity Tables", "book_page": 956, "page": 21, "line": 60, "chapter": "CA"}
+{"kind": "section", "number": "CA104", "title": "Use of Sizing Equations", "book_page": 958, "page": 21, "line": 61, "chapter": "CA"}
+{"kind": "section", "number": "CA105", "title": "Pipe and Tube Diameters", "book_page": 959, "page": 21, "line": 62, "chapter": "CA"}
+{"kind": "section", "number": "CA106", "title": "Examples of Piping System Design and Sizing", "book_page": 960, "page": 21, "line": 63, "chapter": "CA"}
+{"kind": "appendix", "number": "CB", "title": "SIZING OF VENTING SYSTEMS SERVING APPLIANCES EQUIPPED WITH DRAFT HOODS, CATEGORY I APPLIANCES AND APPLIANCES LISTED FOR USE WITH TYPE B VENTS", "book_page": 967, "page": 22, "line": 3}
+{"kind": "section", "number": "CB101", "title": "Examples Using Single-Appliance Venting Tables", "book_page": 967, "page": 22, "line": 7, "chapter": "CB"}
+{"kind": "section", "number": "CB102", "title": "Examples Using Common Venting Tables", "book_page": 971, "page": 22, "line": 9, "chapter": "CB"}
+{"kind": "appendix", "number": "CC", "title": "RECOMMENDED PROCEDURE FOR SAFETY INSPECTION OF AN EXISTING APPLIANCE INSTALLATION", "book_page": 981, "page": 22, "line": 10}
+{"kind": "section", "number": "CC101", "title": "General", "book_page": 981, "page": 22, "line": 13, "chapter": "CC"}
+{"kind": "section", "number": "CC102", "title": "Occupant and Inspector Safety", "book_page": 981, "page": 22, "line": 15, "chapter": "CC"}
+{"kind": "section", "number": "CC103", "title": "Gas Piping and Connections Inspections", "book_page": 982, "page": 22, "line": 16, "chapter": "CC"}
+{"kind": "section", "number": "CC104", "title": "Inspections to be Performed with the Appliance Not Operating", "book_page": 982, "page": 22, "line": 18, "chapter": "CC"}
+{"kind": "section", "number": "CC105", "title": "Inspections to be Performed with the Appliance Operating", "book_page": 983, "page": 22, "line": 20, "chapter": "CC"}
+{"kind": "section", "number": "CC106", "title": "Appliance-Specific Inspections", "book_page": 984, "page": 22, "line": 22, "chapter": "CC"}
+{"kind": "appendix", "number": "CD", "title": "PIPING STANDARDS FOR VARIOUS APPLICATIONS", "book_page": 987, "page": 22, "line": 23}
+{"kind": "section", "number": "CD101", "title": "Plastic Piping Standards", "book_page": 987, "page": 22, "line": 25, "chapter": "CD"}
+{"kind": "section", "number": "CD102", "title": "Referenced Standards", "book_page": 990, "page": 22, "line": 26, "chapter": "CD"}
+{"kind": "appendix", "number": "CE", "title": "VENTING METHODS", "book_page": 993, "page": 22, "line": 27}
+{"kind": "section", "number": "CE101", "title": "Venting Methods", "book_page": 993, "page": 22, "line": 28, "chapter": "CE"}
+{"kind": "appendix", "number": "CF", "title": "SIZING OF WATER PIPING SYSTEM", "book_page": 999, "page": 22, "line": 29}
+{"kind": "section", "number": "CF101", "title": "General", "book_page": 999, "page": 22, "line": 30, "chapter": "CF"}
+{"kind": "section", "number": "CF102", "title": "Information Required", "book_page": 999, "page": 22, "line": 31, "chapter": "CF"}
+{"kind": "section", "number": "CF103", "title": "Selection of Pipe Size", "book_page": 999, "page": 22, "line": 32, "chapter": "CF"}
+{"kind": "section", "number": "CF201", "title": "Selection of Pipe Size", "book_page": 1014, "page": 22, "line": 33, "chapter": "CF"}
+{"kind": "appendix", "number": "CG", "title": "NONSEWERED SANITATION SYSTEMS", "book_page": 1019, "page": 22, "line": 34}
+{"kind": "section", "number": "CG101", "title": "General", "book_page": 1019, "page": 22, "line": 35, "chapter": "CG"}
+{"kind": "section", "number": "CG102", "title": "Definitions", "book_page": 1019, "page": 22, "line": 36, "chapter": "CG"}
+{"kind": "section", "number": "CG103", "title": "Installation", "book_page": 1019, "page": 22, "line": 37, "chapter": "CG"}
+{"kind": "section", "number": "CG104", "title": "Manual Required", "book_page": 1019, "page": 22, "line": 38, "chapter": "CG"}
+{"kind": "section", "number": "CG105", "title": "System Output", "book_page": 1019, "page": 22, "line": 39, "chapter": "CG"}
+{"kind": "section", "number": "CG106", "title": "Referenced Standards", "book_page": 1019, "page": 22, "line": 40, "chapter": "CG"}
+{"kind": "appendix", "number": "CH", "title": "RESERVED", "book_page": 1021, "page": 22, "line": 41}
+{"kind": "appendix", "number": "NA", "title": "RESERVED", "book_page": 1023, "page": 22, "line": 42}
+{"kind": "appendix", "number": "NB", "title": "RESERVED", "book_page": 1025, "page": 22, "line": 43}
+{"kind": "appendix", "number": "NC", "title": "RESERVED", "book_page": 1027, "page": 22, "line": 44}
+{"kind": "appendix", "number": "ND", "title": "RESERVED", "book_page": 1029, "page": 22, "line": 45}
+{"kind": "appendix", "number": "NE", "title": "RESERVED", "book_page": 1031, "page": 22, "line": 47}
+{"kind": "appendix", "number": "NF", "title": "RESERVED", "book_page": 1033, "page": 22, "line": 48}
+{"kind": "appendix", "number": "NG", "title": "RESERVED", "book_page": 1035, "page": 22, "line": 3}
+{"kind": "appendix", "number": "NH", "title": "RESERVED", "book_page": 1037, "page": 22, "line": 5}
+{"kind": "appendix", "number": "NI", "title": "RESERVED", "book_page": 1039, "page": 22, "line": 7}
+{"kind": "appendix", "number": "NJ", "title": "RESERVED", "book_page": 1041, "page": 22, "line": 9}
+{"kind": "appendix", "number": "NK", "title": "RESERVED", "book_page": 1043, "page": 22, "line": 10}
+{"kind": "appendix", "number": "NL", "title": "RESERVED", "book_page": 1045, "page": 22, "line": 12}
+{"kind": "index", "number": "INDEX", "title": "INDEX", "book_page": 1047, "page": 22, "line": 14}
+{"kind": "resource", "number": "A", "title": "RESERVED", "book_page": 1055, "page": 22, "line": 17}

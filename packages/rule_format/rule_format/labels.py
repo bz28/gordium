@@ -24,6 +24,7 @@ AI's original answer stays visible (and in the run record) and every change is t
 import datetime
 import hashlib
 import json
+import re
 from pathlib import Path
 
 from .rulebook import (APPROVAL_FIELDS, VOCABULARY_FILE, Context, _approval_problems, _list_of_dicts,
@@ -35,6 +36,27 @@ LABEL_FIELDS = {"label", "topic", "reason", "sources", "piece_sha256", "run", "n
                 "revised"}
 LABEL_APPROVED = ("id", "label", "topic", "reason", "sources", "piece_sha256", "findings", "answers", "revised")
 LABEL_KINDS = tuple(load(VOCABULARY_FILE)["label_kinds"])
+
+
+CONTENTS_SECTION = re.compile(r"(?:Table )?([A-Z]{0,2}\d{3,4})(?=\.|$|\()")
+ZONING_SECTION = re.compile(r"(325-\d+(?:\.\d+)*)")
+
+
+def contents_section(piece_id: str) -> str | None:
+    """The section of a document's contents list a sections-file piece is in, the one rule for every package
+    (document_extraction's contents check, the checker's contents view): "1006.2.1", "Table 1006.2.1" → "1006";
+    "R319.2.3" → "R319"; an appendix's "BF101.2" → "BF101"; a definition, "202:floor_area_gross" → "202",
+    "325-3B:kitchen" → "325-3"; "325-8A" → "325-8", "325-29.10.1" → "325-29.10.1"; None for front matter or an
+    editor's note."""
+    head = str(piece_id).split(":")[0]
+    m = ZONING_SECTION.match(head) or CONTENTS_SECTION.match(head)
+    if m is None:
+        return None
+    if head.startswith("325-"):
+        number = m.group(1)
+        # "325-8A": the letter is a subsection; "325-29.10.1": dots are the section's own number
+        return number
+    return m.group(1)
 
 
 def piece_fingerprint(piece: dict, pdf_sha256: str) -> str:

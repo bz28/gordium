@@ -6,13 +6,14 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Gordium.Revit.Reading;
+using RevitButton = Autodesk.Revit.UI.RibbonButton;
 
 namespace Gordium.Revit.Addin;
 
 /// <summary>
-/// The Gordium tab, built from <see cref="RibbonPlan"/> (docs/revit/ui_design_pass.md section 2.2): Check (Check
-/// project, Mark facts), Results (Panel), Help (About), and the Trial panel only in a trial build or with
-/// <c>GORDIUM_TRIAL=1</c>. Each button's 16 and 32 px icons are drawn by <see cref="RibbonIcons"/> in Revit's theme;
+/// The Gordium tab, built from <see cref="RibbonPlan"/> (docs/revit/ui_design_pass.md section 2.2; UI polish change
+/// 48): Check (Check project, Set up), Results (Results, Summary), Help (About, and the Trial pull-down only in a trial
+/// build or with <c>GORDIUM_TRIAL=1</c>). Each button's 16 and 32 px icons are drawn by <see cref="RibbonIcons"/> in Revit's theme;
 /// Revit doesn't switch an add-in's images by theme, so they are swapped on ThemeChanged (as Autodesk's own sample
 /// does: The Building Coder, "Dark Icons", 2023). The request files the trial runs by (App's Idling handler) never
 /// depend on a button: they work with or without the Trial panel.
@@ -41,7 +42,7 @@ internal static class Ribbon
         [RibbonPlan.RecordHouses] = typeof(RecordHousesCommand),
     };
 
-    private static readonly List<(PushButton Button, string Icon)> Made = [];
+    private static readonly List<(RevitButton Button, string Icon)> Made = [];
     private static readonly Dictionary<(string, int, PanelTheme), ImageSource> Images = [];
     private static PanelTheme _theme = PanelTheme.Light;
 
@@ -69,29 +70,29 @@ internal static class Ribbon
             Trial.Log("ribbon", new Dictionary<string, object?> { ["theme"] = $"{x.GetType().Name}: {x.Message}" });
         }
         var trial = TrialOn();
-        var dll = Assembly.GetExecutingAssembly().Location;
         foreach (var plan in RibbonPlan.Panels(trial))
         {
             var panel = app.CreateRibbonPanel(RibbonPlan.Tab, plan.Name);
             foreach (var b in plan.Buttons)
+                Add(b, data => panel.AddItem(data) as PushButton);
+            if (plan.Pulldown is { } menu)
             {
                 try
                 {
-                    var data = new PushButtonData(b.Id, b.Text, dll, Commands[b.Id].FullName)
+                    var data = new PulldownButtonData(menu.Id, menu.Text)
                     {
-                        ToolTip = b.ToolTip,
-                        LongDescription = b.LongDescriptionText,
-                        Image = Image(b.Icon, 16, _theme),
-                        LargeImage = Image(b.Icon, 32, _theme),
+                        ToolTip = menu.ToolTip, Image = Image(menu.Icon, 16, _theme), LargeImage = Image(menu.Icon, 32, _theme),
                     };
-                    if (b.AnyTime)
-                        data.AvailabilityClassName = typeof(AnyTime).FullName;
-                    if (panel.AddItem(data) is PushButton made)
-                        Made.Add((made, b.Icon));
+                    if (panel.AddItem(data) is PulldownButton made)
+                    {
+                        Made.Add((made, menu.Icon));
+                        foreach (var b in menu.Buttons)
+                            Add(b, made.AddPushButton);
+                    }
                 }
-                catch (Exception x)       // one button that can't be made never takes the others (or the add-in) down
+                catch (Exception x)       // a pull-down that can't be made never takes the other buttons down
                 {
-                    Trial.Log("ribbon", new Dictionary<string, object?> { ["button"] = b.Id, ["error"] = $"{x.GetType().Name}: {x.Message}" });
+                    Trial.Log("ribbon", new Dictionary<string, object?> { ["button"] = menu.Id, ["error"] = $"{x.GetType().Name}: {x.Message}" });
                 }
             }
         }
@@ -100,6 +101,29 @@ internal static class Ribbon
             ["trial"] = trial, ["trial_build"] = TrialBuild, ["theme"] = _theme.ToString(),
             ["buttons"] = Made.Select(m => m.Button.Name).ToList(),
         });
+    }
+
+    /// <summary>One push button made by <paramref name="add"/> (a panel's AddItem, or a pull-down's AddPushButton).</summary>
+    private static void Add(Gordium.Revit.Reading.RibbonButton b, Func<PushButtonData, PushButton?> add)
+    {
+        try
+        {
+            var data = new PushButtonData(b.Id, b.Text, Assembly.GetExecutingAssembly().Location, Commands[b.Id].FullName)
+            {
+                ToolTip = b.ToolTip,
+                LongDescription = b.LongDescriptionText,
+                Image = Image(b.Icon, 16, _theme),
+                LargeImage = Image(b.Icon, 32, _theme),
+            };
+            if (b.AnyTime)
+                data.AvailabilityClassName = typeof(AnyTime).FullName;
+            if (add(data) is { } made)
+                Made.Add((made, b.Icon));
+        }
+        catch (Exception x)       // one button that can't be made never takes the others (or the add-in) down
+        {
+            Trial.Log("ribbon", new Dictionary<string, object?> { ["button"] = b.Id, ["error"] = $"{x.GetType().Name}: {x.Message}" });
+        }
     }
 
     /// <summary>Revit's ThemeChanged: the buttons' icons swapped to the new theme's. Never throws out of Revit's event.</summary>
@@ -151,7 +175,7 @@ public sealed class AnyTime : IExternalCommandAvailability
     public bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories) => true;
 }
 
-/// <summary>"Panel": shows the Gordium results panel, or hides it when it is showing. Revit keeps where it is docked.</summary>
+/// <summary>"Results": shows the Gordium results pane, or hides it when it is showing. Revit keeps where it is docked.</summary>
 [Transaction(TransactionMode.ReadOnly)]
 public sealed class TogglePanelCommand : IExternalCommand
 {
@@ -169,7 +193,7 @@ public sealed class TogglePanelCommand : IExternalCommand
         catch (Exception e)
         {
             Trial.Log("results_panel", new Dictionary<string, object?> { ["toggle"] = $"{e.GetType().Name}: {e.Message}" });
-            message = $"The Gordium panel couldn't be shown: {e.Message}";
+            message = PaneWords.PaneWontOpen;
             return Result.Failed;
         }
     }

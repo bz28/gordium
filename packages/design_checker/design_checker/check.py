@@ -26,7 +26,7 @@ from pathlib import Path
 import shapely
 import yaml
 
-from design_checker import code_scope, egress, present, reading_set, site_json
+from design_checker import code_scope, egress, present, reading_set, site_json, ui_data
 from design_checker import rhino_logic as logic
 from design_checker.rhino_logic import COLUMN_DELTA
 from envelope_builder import start as generator
@@ -34,11 +34,15 @@ from envelope_builder.envelope import envelope
 from model_measurement.places import measuring
 from model_measurement.plugin_measuring import TAX_MAP_TOLERANCE
 from model_measurement.project import fact_problems, load_facts, working
+from model_measurement.stops import joined, reason_part
 from model_measurement.read_3dm import read_site
+from model_measurement.stops import in_words
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
 from rule_format import formula, parts
+from rule_format.place import UnknownPlace
+from rule_format.place import place as place_of_folder
 from rule_format.place import plugin_place
-from rule_format.rulebook import (MEASURE_KINDS, REPO, Context, load, load_bytes, outcome, rulebook_for,
+from rule_format.rulebook import (MEASURE_KINDS, REPO, STATE_SETTINGS, Context, load, load_bytes, outcome, rulebook_for,
                                   unknown_settings)
 
 COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
@@ -127,8 +131,13 @@ def _why(row: dict, rules: dict, measured: dict, allowed: dict | None = None, fa
                 continue        # an optional fact that can't change this row isn't why it needs review (r2 round 2)
             if (measured.get(name) or {}).get("value") is None and reason and reason not in reasons:
                 reasons.append(reason)
-        reasons = own + reasons
-    return {**row, "Why": "; ".join(reasons) or row["Why it needs review"]}
+        reasons = [reason_part("review_when", r) for r in own] + reasons
+    if reasons:
+        return {**row, "Why": joined(reasons)}
+    # the report's own reason, under what it is (a flag: a person decides; else the rule's review)
+    flag = (rules.get(row["Rule id"]) or {}).get("kind") == "flag"
+    why = row["Why it needs review"]
+    return {**row, "Why": reason_part("flag" if flag else "review", why) if why else why}
 
 
 def _review_reasons(rule: dict, measured: dict, allowed: dict, facts: dict | None) -> list[str]:
@@ -986,6 +995,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     give each law's own state; its state and summary are over both."""
     today = present.checked_today(today)
     _refuse_bad_facts(facts)
+    site = in_words(site)           # problems as words, coded ones too ({code, args}): the report says them plainly
     model_path = Path(name)
     say = step or _quiet
     say(STEPS["measure"])
@@ -1060,6 +1070,11 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                                                             getattr(measuring(facts["jurisdiction"]), "fact_conflicts",
                                                                     None)), allowed)
     egress.add_to_view(v, law, found["place"])
+    # what the rebuilt results pane reads beyond today's fields (C1-C9): new fields only, never a status
+    place_folder = egress._folder(facts["jurisdiction"])
+    ui_data.add(v, rules_by_id=by_id, laws=found["laws"], site=site, values=values,
+                place=measuring(facts["jurisdiction"]), place_folder=place_folder,
+                documents=ui_data.place_documents(place_folder))
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:
@@ -2098,7 +2113,8 @@ def _read_for(rules: list, use: str | None, uses: dict, memo: dict | None = None
 
 def options(jurisdiction: str) -> dict:
     """What the confirm dialog offers: the zones that have a rulebook, the city's use names, and per district the
-    uses its chart lists (use_choices) and per use the facts to ask after it (follow_up_facts).
+    uses its chart lists (use_choices) and per use the facts to ask after it (follow_up_facts); and the uses whose
+    buildings the Building Code covers (building_code_uses), for the Setup form's occupancy group and sprinkler system.
 
     Worked out once per exact input (the answer depends on nothing else): every file it reads is read once here
     (_options_files), the answer is worked out from those bytes alone, and it is kept by their SHA-256 and names
@@ -2132,8 +2148,8 @@ USES_FILE = "4_term_definitions/uses.yaml"
 def _options_files(j: Path) -> dict:
     """Every file options reads, by its path in the jurisdiction (as posix), sorted: each rulebook the folder listing
     finds (5_zoning_rules/*.yaml and 5_zoning_rules/drafted/*.yaml, hand-drafted and AI-drafted both, whichever
-    rulebook_for picks) and the city's uses (uses.yaml), each with its bytes, None for a rulebook name that isn't a
-    file and for no uses.yaml (one that is there but can't be read, a folder, is an error, as before). The only place
+    rulebook_for picks), the city's uses (uses.yaml) and the settings (state.yaml) of each state law the place
+    inherits, each with its bytes, None for a rulebook name that isn't a file, for no uses.yaml and no state.yaml (one that is there but can't be read, a folder, is an error, as before). The only place
     options reads the disk: the answer is worked out from these bytes and names alone, even which rulebook is a
     district's (test_options_cache pins that nothing else is opened or looked at)."""
     found = [p for folder in (j / "5_zoning_rules", j / "5_zoning_rules/drafted") if folder.is_dir()
@@ -2142,7 +2158,33 @@ def _options_files(j: Path) -> dict:
              for p in sorted(set(found), key=lambda p: p.relative_to(j).as_posix())}
     uses = j / USES_FILE
     files[USES_FILE] = uses.read_bytes() if uses.exists() else None
+    # the settings of each state law the place inherits (whether it splits buildings between books: building_code_uses),
+    # by their path from the place's folder ("../new_york_state/state.yaml")
+    try:
+        inherited = [folder for folder, _ in place_of_folder(j).inherited_rulebooks()]
+    except UnknownPlace:                          # a folder that is no place (a copy of a city's rulebooks) inherits none
+        inherited = []
+    for folder in inherited:
+        settings = folder / STATE_SETTINGS
+        files[Path(os.path.relpath(settings, j)).as_posix()] = settings.read_bytes() if settings.is_file() else None
     return files
+
+
+
+def building_code_uses(names: dict, files: dict) -> list:
+    """The uses whose buildings the Building Code covers whatever else is stated (code_scope.by_use), in the uses
+    file's order, where a state law the place inherits splits buildings between books (state.yaml `scope`: New
+    York's); none elsewhere. A host's Setup form asks for the facts the Building Code's rules turn on (occupancy
+    group, sprinkler system) before the first check of such a use (UI polish, Ben 2026-11-23)."""
+    def splits(data):
+        try:
+            got = load_bytes(data) if data is not None else None
+        except Exception:                         # a settings file that can't be read splits nothing (its own problem
+            return False                          # is said by the check, state_settings_problems)
+        return isinstance(got, dict) and got.get("scope") in code_scope.CODES
+    if not any(splits(data) for name, data in files.items() if name.startswith("../") and name.endswith("/" + STATE_SETTINGS)):
+        return []
+    return [u for u in names if code_scope.by_use(u) == code_scope.BUILDING]
 
 
 def _options_lists():
@@ -2177,4 +2219,4 @@ def _options(j: Path, files: dict) -> dict:
         follow_ups[zone] = {u: follow_up_facts(rules, u, names, read_for[u]) for u in every}   # is asked its own
         implied[zone] = {u: implied_for(rules, u, names, read_for[u]) for u in every}          # too
     return {"zones": zones, "uses": names, "district_uses": district_uses, "follow_ups": follow_ups,
-            "implied": implied}
+            "implied": implied, "building_code_uses": building_code_uses(names, files)}

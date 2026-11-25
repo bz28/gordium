@@ -143,7 +143,7 @@ internal static class CauseCardsView
         var list = new C.StackPanel { Margin = new W.Thickness(26, 6, 0, 0) };
         if (g.Members.Count > 1)
         {
-            list.Children.Add(Overline($"The {g.Members.Count} {g.Noun}, in Gordium's checker's words"));
+            list.Children.Add(Overline(g.MembersWords));
             foreach (var m in g.Members)
                 list.Children.Add(EntryView.Muted($"• {PaneWords.Capital(m.Words)} ({PaneWords.Results(m.Items.Count)})", bottom: 2));
         }
