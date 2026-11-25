@@ -300,7 +300,8 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
         now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
         moved[(fact, value)] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
     assert moved[("occupied_outdoor_areas", False)] == {"general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable")}
-    assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", False)] ==         moved[("occupant_load_increased", True)] == {}
+    assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", False)] == \
+        moved[("occupant_load_increased", True)] == {}
 
 
 # ---- section group 6a (2026-11-25): door size, 1010.1.1, from each door's maker's stated clear opening ----------------
