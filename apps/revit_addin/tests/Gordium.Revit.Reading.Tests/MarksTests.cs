@@ -72,6 +72,8 @@ public sealed class MarksTests
             ("Gordium: Stories", "bf758947-8ee4-490c-a499-dee706a6f1e7", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // a space nobody occupies (route note decision 1b)
             ("Gordium: Not occupied", "306bccbe-b2f7-4a73-9169-6be76fb46202", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
+            // a room's Table 1004.5 function (the Building Code's occupant loads)
+            ("Gordium: Function", "de595662-5386-4cab-9245-600eefb9462d", MarkValueKind.Text, MarkBinding.Instance, ["OST_Rooms"]),
             // which New York code governs, and what the Building Code's rules read (docs/decisions/2026-11-22_which_ny_code.md)
             ("Gordium: Follows the Building Code", "01405f95-7061-47e2-b2a3-7706747c0817", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Stories above grade plane", "3f5ba80f-f877-49d9-bc47-a86de4a87a19", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
