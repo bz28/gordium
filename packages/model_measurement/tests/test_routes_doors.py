@@ -215,8 +215,13 @@ def test_a_drawn_door_that_disagrees_with_its_stated_opening_leaves_that_size_un
         name="d", where="drawing", size="width", other=28.75, stated=34.0)
     assert got["measures"]["moe_door_clear_height"] == pytest.approx(80)
     got = _parts(_office(stated_clear=dict(STATED), **_drawn(34 + 1 / 32, 80 - 1 / 32)))["d"]   # within 1/16 in
-    assert got["measures"]["moe_door_clear_width"] == pytest.approx(34)
-    assert got["measures"]["moe_door_clear_height"] == pytest.approx(80)
+    assert got["measures"]["moe_door_clear_width"] == pytest.approx(34)                 # the smaller: the maker's
+    # review round 2: within 1/16 in the smaller counts, never the maker's larger: 80 in stated, 79 31/32 drawn
+    assert got["measures"]["moe_door_clear_height"] == pytest.approx(80 - 1 / 32) and got["measures"][
+        "moe_door_clear_height"] < 80
+    d = _office(stated_clear=dict(STATED))
+    d["doors"][0]["plan"]["clear_width"] = (34 - 1 / 32) / 12                         # the plan's width, smaller
+    assert _parts(d)["d"]["measures"]["moe_door_clear_width"] == pytest.approx(34 - 1 / 32)
 
 
 def test_a_drawing_that_cant_be_measured_leaves_its_size_unmeasured():
