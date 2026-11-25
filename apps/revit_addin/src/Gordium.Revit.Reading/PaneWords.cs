@@ -287,10 +287,15 @@ public static class PaneWords
         {
             // what it holds and whether Gordium can read it (a value that isn't one of its words is its own state: never
             // said as cleared, and a change into it is said; review after #190/#191)
-            if (!old.TryGetValue(f.Mark.Guid, out var o) || o.Current == f.Current && o.Problem == f.Problem)
+            // a problem counts only when both reads could tell (the zone's and use's lists come with the place's options,
+            // which one read may not have had: the same value is then no change)
+            if (!old.TryGetValue(f.Mark.Guid, out var o) || o.Current == f.Current && (o.Problem == f.Problem || o.Kind != f.Kind))
                 continue;
             var label = SetupSteps.Title(f.Mark, f.Label);
-            said.Add(f.Problem is not null ? $"{label}: a value Gordium can't read" : f.Current is null ? $"{label} cleared" : $"{label}: {f.CurrentLabel}");
+            said.Add(f.Problem is not null && o.Kind == f.Kind ? $"{label}: a value Gordium can't read"
+                     : f.Current is null ? $"{label} cleared"
+                     : f.Kind == FieldKind.StreetPick ? $"{label} picked again"            // never the edge's coordinates
+                     : $"{label}: {f.CurrentLabel}");
         }
         return said.Count == 0 ? null : "You changed: " + string.Join("; ", said) + ".";
     }

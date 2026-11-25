@@ -378,6 +378,17 @@ public sealed class PaneTests
         Assert.Contains("a value Gordium can't read", intoOdd, StringComparison.Ordinal);
         Assert.DoesNotContain("cleared", intoOdd, StringComparison.Ordinal);
         Assert.Contains("a value Gordium can't read", PaneWords.FactsChanged(F(M()), odd), StringComparison.Ordinal);
+        // the same use read before and after the place's options arrived (its list, so its problem, known only then): no change
+        var options = new PlaceOptions(["R-3a"], [("multiple_family", "Multiple family dwelling")], new Dictionary<string, IReadOnlyList<UseChoice>>());
+        var typedUse = M((Marks.Use, new MarkValue(true, Text: "Multiple_Family")));
+        var withList = SetupScreen.Build(typedUse, [], options).Fields;
+        Assert.NotNull(withList.Single(x => x.Mark == Marks.Use).Problem);
+        Assert.Null(PaneWords.FactsChanged(F(typedUse), withList));
+        // a street edge picked again is said so, never by its coordinates
+        var edgeA = F(M((Marks.StreetEdge, new MarkValue(true, Text: StreetEdges.Format([(new Xyz(0, 0, 0), new Xyz(10, 0, 0))])))));
+        var edgeB = F(M((Marks.StreetEdge, new MarkValue(true, Text: StreetEdges.Format([(new Xyz(0, 0, 0), new Xyz(0, 10, 0))])))));
+        Assert.Equal("You changed: " + SetupSteps.Title(Marks.StreetEdge, edgeB.Single(x => x.Mark == Marks.StreetEdge).Label) + " picked again.",
+                     PaneWords.FactsChanged(edgeA, edgeB));
     }
 
     /// <summary>The proportion bar (change 18): one segment per verdict, worst first, as long as its count; never green
