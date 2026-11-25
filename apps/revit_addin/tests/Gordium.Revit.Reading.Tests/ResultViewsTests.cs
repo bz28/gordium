@@ -220,7 +220,11 @@ public sealed class ResultViewsTests
         // the law's own words behind the choice are where it is shown (the governing book's note, on hover)
         var governing = m.Code.Single(d => d.Note is not null);
         Assert.Contains("R101.2", governing.NoteTooltip, StringComparison.Ordinal);
-        Assert.Contains("ToolTip = n.NoteTooltip", File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs")), StringComparison.Ordinal);
+        var list = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs"));
+        Assert.Contains("ToolTip = n.NoteTooltip", list, StringComparison.Ordinal);
+        // and to a screen reader and the keyboard (review round 4): the book's name says it, the focused line shows it
+        Assert.Contains("SetName(line, n.Note is { } said ? $\"{title}, {said}, ", list, StringComparison.Ordinal);
+        Assert.Contains("line.ToolTip = n.NoteTooltip is { } quotes ? $\"{why}\\n\\n{quotes}\" : why;", list, StringComparison.Ordinal);
         var none = Answer();
         none["view"]!["contents"] = new JsonArray();
         Assert.False(ResultViews.Build(Parse(none)).ShowsWhichCode);

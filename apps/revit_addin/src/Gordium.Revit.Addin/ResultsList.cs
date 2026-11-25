@@ -225,7 +225,11 @@ public sealed class EntryView : C.Border
             words.Children.Add(Ink(Typed(new C.TextBlock { Text = note, TextWrapping = W.TextWrapping.Wrap, ToolTip = n.NoteTooltip }, "type.caption"), PanelTokens.TextMuted));
         words.Children.Add(Ink(Typed(new C.TextBlock { Text = n.Line, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
         line.Children.Add(words);
-        W.Automation.AutomationProperties.SetName(line, $"{title}, {StatusLook.Word(e.Status)}, {n.Line}");
+        // which code governs is said with the book (review round 4): to a screen reader, and on the focused line's tooltip
+        W.Automation.AutomationProperties.SetName(line, n.Note is { } said ? $"{title}, {said}, {StatusLook.Word(e.Status)}, {n.Line}"
+                                                                           : $"{title}, {StatusLook.Word(e.Status)}, {n.Line}");
+        if (n.Note is { } why)
+            line.ToolTip = n.NoteTooltip is { } quotes ? $"{why}\n\n{quotes}" : why;
         return line;
     }
 
