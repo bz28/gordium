@@ -93,6 +93,11 @@ public sealed class MarksTests
             // group 3's (1004.7, 1004.5.1)
             ("Gordium: Occupied outdoor areas", "5be49bb1-7c0f-4eea-a360-c6b47d2e9dad", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Occupant load increased", "64b5a6c7-d4ae-4424-b7e1-2c041b09d02a", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // groups 4 and 5's (1020 corridors, 1005.3 capacity)
+            ("Gordium: Other levels reach corridors", "63ce1aaf-5fb8-4af6-9c71-730392b78bb4", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Ambulatory care facility", "2a31e2c4-cf29-4ac4-9c57-a41ca85748b3", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Corridors within dwelling units", "a61d6738-cc50-4a7a-bf34-eb258e6b55d7", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Emergency voice/alarm system", "f4184d32-275e-4423-90c6-66a2e4d247ee", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // the dwelling's own facts the code decision reads (review round 1: an ask named marks Revit didn't have)
             ("Gordium: Dwelling units", "aa32131a-e757-47a3-abf8-9deb81d7a09a", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Units in the attached building", "bccb088a-c087-475f-9ff9-53fd10133d0e", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
