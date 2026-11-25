@@ -219,6 +219,50 @@ internal static class Program
                     if (!dark)
                         File.WriteAllText(Path.Combine(_out, "21_summary_by_code_apartment.html"),
                                           ComplianceSummary.Html(rows, title, when, when.AddMinutes(3)), new UTF8Encoding(false));
+                    // UI polish PR 5: the check's progress as three steps (change 12), a message per failure with no raw
+                    // text anywhere (13, 14), the time-out with Try again with more time (15), the read failure in the
+                    // pane (16), the slim stale banner (39)
+                    Step(make(theme, []), "22_checking_steps_apartment", 740, dark, p =>
+                    {
+                        p.Setup(title, SetupScreen.Build(setupModel, setupSides, options, new SetupDraft()), new SetupDraft());
+                        p.Progress(CheckStage.Reading, DateTime.Now.AddSeconds(-47));
+                        p.Progress(CheckStage.Checking, DateTime.Now.AddSeconds(-45));
+                        p.Step("Measuring the building…");
+                        Settle(p.View);
+                        Check(FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, ResultsView.ProgressTag)), "22: the progress card");
+                        Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t) == CheckSteps.Check), "22: the checking step");
+                        Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t).EndsWith(CheckSteps.Long, StringComparison.Ordinal)), "22: after 40 s, large models take longer");
+                        Check(!FindAll<SetupView>(p.View).Any(v => v.IsVisible), "22: the form is hidden behind the progress");
+                    });
+                    var failures = new (string Name, CheckFailure Failure)[]
+                    {
+                        ("23_error_timeout", CheckFailures.Of(new WorkerTimeoutException("t") { Limit = TimeSpan.FromSeconds(60), Silent = true },
+                            "WorkerTimeoutException: The Gordium checker said nothing for 60 s while answering check_site (logged to C:\\x\\results.jsonl)")),
+                        ("24_error_read", CheckFailures.ReadFailed("Nothing was checked: InvalidOperationException: boom (logged to C:\\x\\results.jsonl)")),
+                        ("25_error_closed", CheckFailures.Closed()),
+                        ("26_error_unreadable", CheckFailures.Of(new WorkerProtocolException("p"), "WorkerProtocolException: result.view.groups is null")),
+                    };
+                    foreach (var (name, failure) in failures)
+                        Step(make(theme, []), name, 430, dark, p =>
+                        {
+                            p.Failed(failure);
+                            Settle(p.View);
+                            var card = FindAll<StackPanel>(p.View).Single(s => s.IsVisible && Equals(s.Tag, ResultsView.ErrorTag));
+                            Check(FindAll<FrameworkElement>(card).Prepend(card).All(e => e.ToolTip is null), $"{name}: no tooltip on the error card (change 14)");
+                            Check(!FindAll<TextBlock>(p.View).Any(t => t.IsVisible && (TextOf(t).Contains("Exception", StringComparison.Ordinal) || TextOf(t).Contains("results.jsonl", StringComparison.Ordinal))),
+                                  $"{name}: no raw text on screen");
+                            Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t) == failure.Title), $"{name}: its own title");
+                        });
+                    Step(make(theme, []), "27_stale_slim_apartment", 740, dark, p =>
+                    {
+                        p.Show(title, when, rows, Labels(apartment), questions);
+                        p.Stale();
+                        Settle(p.View);
+                        var banner = FindAll<StackPanel>(p.View).Single(s => s.IsVisible && Equals(s.Tag, ResultsView.StaleTag));
+                        Check(!FindAll<Button>(banner).Any(), "27: the stale banner has no button (the header's is the one)");
+                        Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t).Contains("needed review", StringComparison.Ordinal)), "27: counts in the past tense");
+                        NoComplies(p.View, "27 stale slim");
+                    });
                     Step(make(theme, []), "15_by_code_stale_apartment", 900, dark, p =>
                     {
                         p.Show(title, when, rows, Labels(apartment));
@@ -300,8 +344,8 @@ internal static class Program
                     // h: a project with nothing missing that just runs: Check project straight to checking
                     Step(make(theme, []), "09_just_runs_house", 430, dark, p => p.Progress(CheckStage.Checking, DateTime.Now.AddSeconds(-6)));
                     // the error state, and stale
-                    Step(make(theme, []), "10_error_house", 430, dark, p => p.Failed(
-                        CheckWords.CheckerStopped("the worker exited with code 1") + @" (logged to C:\Users\you\AppData\Local\Gordium\trial\results.jsonl)"));
+                    Step(make(theme, []), "10_error_house", 430, dark, p => p.Failed(CheckFailures.Of(new WorkerExitedException("exited", 1, ""),
+                        CheckWords.CheckerStopped("the worker exited with code 1") + @" (logged to C:\Users\you\AppData\Local\Gordium\trial\results.jsonl)")));
                     Step(make(theme, []), "11_stale_house", 430, dark, p =>
                     {
                         p.Show(title, when, rows, labels);
