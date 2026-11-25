@@ -76,6 +76,14 @@ public sealed class ComplianceSummaryTests
             if (doc.Scope is { } scope)
                 Assert.Contains($"<p class=\"scope\">{WebUtility.HtmlEncode(scope)}</p>", html, StringComparison.Ordinal);
         Assert.Equal(model.Views.Code.Count(d => d.Scope is not null), Regex.Matches(html, "<p class=\"scope\">").Count);
+        // two Building Code results saying their rules are drafted for Group I-4 only: one paragraph, under that book
+        var node = JsonNode.Parse(File.ReadAllText(Path.Combine(UxAnswers.Here, "answers", "four_unit_apartment_check_answer.json"), Encoding.UTF8))!["result"]!;
+        foreach (var item in node["view"]!["items"]!.AsArray().Where(i => ((string?)i!["in_code"]?["document"])?.StartsWith("2025 Building Code", StringComparison.Ordinal) == true).Take(2))
+            item!["reason"] = "this rulebook's rules are " + ResultViews.DraftedFor + ", so a person checks";
+        var scoped = UxAnswers.Model(UxAnswers.Parse(node.AsObject()));
+        var scopedHtml = ComplianceSummary.Html(scoped, "Four-unit apartment", At, Made);
+        Assert.Equal(1, Regex.Matches(scopedHtml, "<p class=\"scope\">").Count);
+        Assert.Contains($"<p class=\"scope\">{WebUtility.HtmlEncode(ResultViews.ScopeWords(2))}</p>", scopedHtml, StringComparison.Ordinal);
         var greyed = Regex.Matches(html, "<p class=\"muted greyed\" data-greyed=\"(?<s>[A-Za-z]+)\">(?<t>.*?)</p>").ToList();
         Assert.NotEmpty(greyed);
         Assert.All(greyed, g => Assert.Contains(g.Groups["s"].Value, new[] { "NotCheckedYet", "NothingToCheck" }));
