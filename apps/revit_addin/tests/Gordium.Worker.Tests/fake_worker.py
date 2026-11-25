@@ -235,6 +235,11 @@ def main(argv):
             return 3
         elif mode == "hang":
             time.sleep(3600)
+        elif mode == "beats_forever":                  # alive but getting nowhere: the same stage, forever
+            while True:
+                out.write((json.dumps({"id": i, "step": "Measuring the building…"}) + "\n").encode("utf-8"))
+                out.flush()
+                time.sleep(0.1)
         elif mode in ("beats", "beats_then_hang"):     # a long check that says it is working (only when asked)
             if request.get("progress"):
                 for _ in range(1 if mode == "beats_then_hang" else 4):

@@ -43,6 +43,21 @@ public sealed class FakeWorkerTests
         Assert.False(client.IsStopped);
     }
 
+    /// <summary>Review round 1: a worker that keeps saying the same stage forever (alive, but getting nowhere) is still
+    /// stopped at the ceiling on the whole answer, and the error says it wasn't silence.</summary>
+    [Fact]
+    public async Task A_check_that_talks_forever_is_stopped_at_the_ceiling()
+    {
+        using var client = await Start("beats_forever");
+        var clock = Stopwatch.StartNew();
+        var e = await Assert.ThrowsAsync<WorkerTimeoutException>(() =>
+            client.CheckSiteAsync(Site, Facts, silence: TimeSpan.FromSeconds(1), total: TimeSpan.FromSeconds(2)));
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(20), $"took {clock.Elapsed}");
+        Assert.False(e.Silent);
+        Assert.Equal(TimeSpan.FromSeconds(2), e.Limit);
+        Assert.True(client.IsStopped);
+    }
+
     /// <summary>A worker that falls silent is stopped after the silence limit, and the error says it was silence.</summary>
     [Fact]
     public async Task A_check_that_falls_silent_is_stopped_after_the_silence()

@@ -85,6 +85,8 @@ public static class CheckFailures
             WorkerRefusedException { Trace: not null } => new(FailureKind.CheckerStopped, "Gordium's checker hit an error",
                 $"It failed on this check before answering. {Safe}", "This is a Gordium bug: send the details to support.",
                 FailureAction.TryAgain, details),
+            // the checker's refusals are written for the architect ("Gordium doesn't have rules for district B-1a yet…",
+            // "lot facts: no zone given"): its first line, plain, with what to do
             WorkerRefusedException r => new(FailureKind.Refused, "The checker couldn't use what was sent",
                 $"{Plain(r.Error)} Nothing was checked.", "Fix what it says, then check again.", FailureAction.TryAgain, details),
             _ => new(FailureKind.Other, "Gordium couldn't finish this check",
@@ -127,6 +129,10 @@ public static class CheckFailures
 
     /// <summary>The silence the checker gets first (change 15: it is stopped only when it says nothing this long).</summary>
     public static readonly TimeSpan FirstSilence = TimeSpan.FromSeconds(60);
+
+    /// <summary>The longest a whole check may take, whatever the checker says meanwhile (review round 1: its progress
+    /// lines prove it is alive, not that it is getting anywhere): ten times the silence, at least 10 minutes.</summary>
+    public static TimeSpan Ceiling(TimeSpan silence) => silence * 10 > TimeSpan.FromMinutes(10) ? silence * 10 : TimeSpan.FromMinutes(10);
 
     /// <summary>The silence after "Try again with more time": twice the last (at most 16 minutes).</summary>
     public static TimeSpan More(TimeSpan silence) => silence * 2 > TimeSpan.FromMinutes(16) ? TimeSpan.FromMinutes(16) : silence * 2;

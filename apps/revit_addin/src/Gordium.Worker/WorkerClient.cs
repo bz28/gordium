@@ -160,10 +160,12 @@ public sealed class WorkerClient : IDisposable
     /// <param name="silence">With a value, the worker is asked for its progress lines and stopped only when it says
     /// nothing for this long (WorkerTimeoutException with Silent); null: one limit for the whole answer, as before.</param>
     /// <param name="step">Told each progress line's words as it comes (with <paramref name="silence"/> only).</param>
+    /// <param name="total">With <paramref name="silence"/>: the longest the whole answer may take, whatever the worker
+    /// says meanwhile (then WorkerTimeoutException, not Silent); null: no ceiling beyond the silence.</param>
     public async Task<CheckResult> CheckSiteAsync(JsonNode site, JsonNode facts, string? report = null,
                                                   JsonNode? extras = null, string? today = null,
                                                   JsonNode? interior = null, CancellationToken cancel = default,
-                                                  TimeSpan? silence = null, IProgress<string>? step = null)
+                                                  TimeSpan? silence = null, IProgress<string>? step = null, TimeSpan? total = null)
     {
         ArgumentNullException.ThrowIfNull(site);
         ArgumentNullException.ThrowIfNull(facts);
@@ -184,7 +186,7 @@ public sealed class WorkerClient : IDisposable
         // with a silence limit (UI polish change 15): the worker is asked for its progress lines, and it is stopped only
         // when none comes for that long (a large model's check is long, not stuck); else one limit for the whole answer
         var answer = silence is { } quiet
-            ? await ExchangeAsync("check_site", fields, quiet, cancel, silence: true, step: step).ConfigureAwait(false)
+            ? await ExchangeAsync("check_site", fields, quiet, cancel, silence: true, step: step, total: total).ConfigureAwait(false)
             : await ExchangeAsync("check_site", fields, _options.RequestTimeout, cancel).ConfigureAwait(false);
         return Guard(() => CheckResult.Parse(answer));
     }
@@ -310,7 +312,7 @@ public sealed class WorkerClient : IDisposable
 
     private async Task<WorkerAnswer> ExchangeAsync(string command, JsonObject fields, TimeSpan timeout,
                                                    CancellationToken cancel, bool checkedFields = false, bool legacy = false,
-                                                   bool silence = false, IProgress<string>? step = null)
+                                                   bool silence = false, IProgress<string>? step = null, TimeSpan? total = null)
     {
         var body = checkedFields ? fields : Fields(fields);
         await _one.WaitAsync(cancel).ConfigureAwait(false);
@@ -346,6 +348,16 @@ public sealed class WorkerClient : IDisposable
                 // each progress line of this request starts the silence again; the first other line is the answer
                 while (true)
                 {
+                    // the next line within the silence, and within what is left of the ceiling
+                    var toCap = total is { } cap ? cap - clock.Elapsed : TimeSpan.MaxValue;
+                    if (toCap <= TimeSpan.Zero || toCap < timeout)
+                    {
+                        var said0 = await ReadAsync(command, toCap > TimeSpan.Zero ? toCap : TimeSpan.Zero, total!.Value, cancel).ConfigureAwait(false);
+                        if (Protocol.StepOf(said0, id) is not { } stage0)
+                            return Answer(command, id, said0, legacy);
+                        step?.Report(stage0);
+                        continue;
+                    }
                     var said = await ReadAsync(command, timeout, timeout, cancel, silence: true).ConfigureAwait(false);
                     if (Protocol.StepOf(said, id) is not { } stage)
                         return Answer(command, id, said, legacy);

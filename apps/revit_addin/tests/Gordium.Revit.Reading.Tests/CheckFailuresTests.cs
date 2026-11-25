@@ -74,6 +74,11 @@ public sealed class CheckFailuresTests
         Assert.Equal(TimeSpan.FromSeconds(60), CheckFailures.FirstSilence);
         Assert.Equal(TimeSpan.FromSeconds(120), CheckFailures.More(CheckFailures.FirstSilence));
         Assert.Equal(TimeSpan.FromMinutes(16), CheckFailures.More(TimeSpan.FromMinutes(12)));
+        // review round 1: a ceiling on the whole check, whatever the checker says meanwhile
+        Assert.Equal(TimeSpan.FromMinutes(10), CheckFailures.Ceiling(TimeSpan.FromSeconds(60)));
+        Assert.Equal(TimeSpan.FromMinutes(20), CheckFailures.Ceiling(TimeSpan.FromSeconds(120)));
+        var check = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Reading", "ProjectCheck.cs"));
+        Assert.Contains("total: silence is { } s ? CheckFailures.Ceiling(s) : null", check, StringComparison.Ordinal);
         Assert.StartsWith("Gordium stopped waiting after 2 minutes",
                           CheckFailures.Of(new WorkerTimeoutException("t") { Limit = TimeSpan.FromSeconds(120) }, "").Words, StringComparison.Ordinal);
         // the add-in sends the check with the silence and doubles it on "Try again with more time"

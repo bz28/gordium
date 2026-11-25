@@ -95,7 +95,8 @@ public static class ProjectCheck
     {
         ArgumentNullException.ThrowIfNull(worker);
         ArgumentNullException.ThrowIfNull(request);
-        return worker.CheckSiteAsync(request.Site, request.Facts, interior: request.Interior, cancel: cancel, silence: silence, step: step);
+        return worker.CheckSiteAsync(request.Site, request.Facts, interior: request.Interior, cancel: cancel, silence: silence, step: step,
+                                     total: silence is { } s ? CheckFailures.Ceiling(s) : null);
     }
 
     /// <summary>Why the two reads aren't of the same design (phases, option sets, the option being edited), or null.</summary>
