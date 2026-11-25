@@ -367,3 +367,19 @@ def test_only_an_exterior_exit_door_at_discharge_surely_leads_outside():
     d = _office()
     d["doors"][1]["swings_into"] = "outside"
     assert _parts(d)["x"]["measures"]["moe_door_swings_with_egress"] is True
+
+
+def test_a_stairs_unmarked_outside_door_never_makes_its_lobby_door_one_way():
+    """Review round 7 of group 6b: a stair whose only door to outside isn't marked an exterior exit door at discharge
+    may not discharge there (it may be a patio's or walkway's way in), so the lobby's door into the stair may be its
+    discharge (1028.1): not known; marked, the lobby door leads into the stair."""
+    d = description([room("L", rect(0, 0, 20, 10), use="lobby", lockable=False, pass_through=True),
+                     room("S", rect(20.5, 0, 30, 10), use="other", lockable=False, pass_through=False)],
+                    [door("FD", (10, -0.25), (1, 0), ("L", "outside"), exit_id="OUT"),
+                     door("E", (20.25, 5), (0, 1), ("L", "S"), exit_id="S", kind="exit_enclosure", swings_into="S"),
+                     door("SO", (30.25, 5), (0, 1), ("S", "outside"), swings_into="S")])
+    got = {p["id"]: p for p in measure(d)["parts"]["means_of_egress_door"]}
+    assert _why(got["E"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="E")
+    d["doors"][2].update(exit_kind="exterior_at_discharge", exit_id="OUT2")
+    got = {p["id"]: p for p in measure(d)["parts"]["means_of_egress_door"]}
+    assert got["E"]["measures"]["moe_door_swings_with_egress"] is True
