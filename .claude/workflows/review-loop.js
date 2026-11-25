@@ -52,9 +52,12 @@ const MAX_AGENTS = 3
 if (ROUND >= 2 && !VERIFY_ONLY && (!SINCE || !PRIOR.length)) {
   throw new Error('review-loop: round >= 2 needs sinceLastRound and priorConfirmed, so the prior fixes are re-checked')
 }
-const WHERE = CWD
-  ? `WORKING DIRECTORY: run every command and read every file inside \`${CWD}\` (\`cd ${CWD}\` first — the branch under review is checked out THERE, not in the session's default directory). NEVER change what is checked out there: no \`git checkout\`, \`git switch\`, \`git reset\`, \`git stash\`, \`git commit\` or file edits (the author is working in it; a reviewer's checkout once detached a branch, so the author's next commits never reached GitHub). To read another commit use \`git show <sha>:<path>\` or \`git diff\`; to run code at another commit, \`git worktree add\` a scratch worktree in your scratchpad and remove it after.\n\n`
+// Every agent, with or without a cwd, works in a folder someone is working in (PR #189)
+const NO_TOUCH = `NEVER change what is checked out in the working directory: no \`git checkout\`, \`git switch\`, \`git reset\`, \`git stash\`, \`git commit\` or file edits (the author is working in it; a reviewer's checkout once detached a branch, so the author's next commits never reached GitHub). To read another commit use \`git show <sha>:<path>\` or \`git diff\`; to run code at another commit, \`git worktree add\` a scratch worktree in your scratchpad and remove it after.\n\n`
+const WHERE_DIR = CWD
+  ? `WORKING DIRECTORY: run every command and read every file inside \`${CWD}\` (\`cd ${CWD}\` first — the branch under review is checked out THERE, not in the session's default directory).\n\n`
   : ''
+const WHERE = WHERE_DIR + NO_TOUCH
 
 const FINDING_ITEM = {
   type: 'object',
