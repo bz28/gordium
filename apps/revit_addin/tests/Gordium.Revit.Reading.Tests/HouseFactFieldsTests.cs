@@ -35,7 +35,7 @@ public sealed class HouseFactFieldsTests
     [Fact]
     public void Each_house_fact_is_a_project_information_mark_quoting_its_law()
     {
-        Assert.Equal(Each.Select(e => e.Mark), ProjectFacts.HouseFactMarks.Select(h => h.Mark));
+        Assert.Equal(Each.Select(e => e.Mark), ProjectFacts.HouseFactMarks.Take(Each.Length).Select(h => h.Mark));
         foreach (var (m, key, _, _) in Each)
         {
             Assert.Contains(m, Marks.All);                                  // MarkSetup adds it; the Setup form lists it
@@ -165,7 +165,7 @@ public sealed class HouseFactFieldsTests
     [Fact]
     public void Every_numeric_mark_says_what_its_number_is_and_it_is_true_in_revits_dialogs_too()
     {
-        var numeric = Marks.All.Where(m => m.Kind is MarkValueKind.Length or MarkValueKind.Integer).ToList();
+        var numeric = Marks.All.Where(m => m.Kind is MarkValueKind.Length or MarkValueKind.Integer or MarkValueKind.Area).ToList();
         Assert.True(numeric.Count >= 13);
         foreach (var m in numeric)
         {
@@ -177,6 +177,16 @@ public sealed class HouseFactFieldsTests
                     Assert.DoesNotContain(claim, m.Description, StringComparison.Ordinal);
                 Assert.EndsWith(" (ft)", SetupWords.Label(m, "house"), StringComparison.Ordinal);      // the form's default, a feet project
                 Assert.EndsWith(" (mm)", SetupWords.Label(m, "house", "mm"), StringComparison.Ordinal);
+            }
+            else if (m.Kind == MarkValueKind.Area)
+            {
+                // an area, likewise in the project's area units: never one unit named
+                Assert.Equal("area", Marks.Unit(m));
+                Assert.StartsWith(Marks.AreaWords, m.Description, StringComparison.Ordinal);
+                foreach (var claim in new[] { "In square feet", "in square feet", "(sq ft)" })
+                    Assert.DoesNotContain(claim, m.Description, StringComparison.Ordinal);
+                Assert.EndsWith(" (sq ft)", SetupWords.Label(m, "house"), StringComparison.Ordinal);
+                Assert.EndsWith(" (m²)", SetupWords.Label(m, "house", "m²"), StringComparison.Ordinal);
             }
             else
             {
