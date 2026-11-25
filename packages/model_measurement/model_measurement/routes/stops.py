@@ -141,6 +141,9 @@ STOPS = {
     "place_story_no_rooms": "the level {name} has no rooms: it isn't placed as a story",
     "place_floor_not_read": "the floor elevation of the room {name} isn't read: {reason}",
     "place_level_not_read": "the elevation of the level {name} isn't read",
+    "place_story_spread": "the rooms of {name} have floors {spread} apart: they may be two stories (a room drawn on a "
+                          "lower level with an offset)",
+    "place_level_inside_story": "the level {name} lies within a story's floors: a story may be drawn on another level",
     "place_split_level": "the floors of {a} and {b} overlap in height (a split level): which story is above which "
                          "isn't clear",
     "place_either": "{name} could be {could}, depending on where the grade plane lies within what the ground stated "
@@ -159,6 +162,8 @@ STOPS = {
     "outside_hall_unclear": "the space of {name} reaches the outside through a corridor or lobby that may be its own "
                             "(a hallway within one dwelling or tenant space): whether it exits directly outside isn't "
                             "known",
+    "outside_into_exit": "the space of {name} has its own door into an exit ({door}) besides the shared corridor: "
+                         "whether it exits directly outside isn't known",
     "outside_door_not_marked": "the space of {name} has a door to the outside ({door}) not marked as an exit door at "
                                "the level of exit discharge: whether it is one isn't known (exits are marked, never "
                                "guessed)",

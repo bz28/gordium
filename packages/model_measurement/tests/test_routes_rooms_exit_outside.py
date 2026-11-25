@@ -28,13 +28,14 @@ from model_measurement.routes.floor import read  # noqa: E402
 from model_measurement.routes.stops import STOPS, Stop  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[3]
-OUTSIDE_KEYS = {"outside_no_rooms", "outside_door_not_marked", "outside_way_unclear", "outside_hall_unclear"}
+OUTSIDE_KEYS = {"outside_no_rooms", "outside_door_not_marked", "outside_way_unclear", "outside_hall_unclear",
+                "outside_into_exit"}
 KINDS = ("marked", "unmarked", "stair", "none")
 SIDES = ("door", "passage", "wall")
 
 
 def row(kinds, joins, uses=("other", "other", "other"), corridor=None, function=None, corridor_exit=True,
-        within=None):
+        within=None, hall="corridor"):
     """Three 10 by 10 ft rooms side by side (x 0-10, 10.5-20.5, 21-31; a 6 in wall between), each door to the
     outside on the south wall (y = -0.25), `joins` between rooms 0-1 and 1-2 (a door, a passage with no wall: then
     the rooms touch, or a plain wall). `corridor`: None, or which rooms open into a corridor along their north side
@@ -61,7 +62,7 @@ def row(kinds, joins, uses=("other", "other", "other"), corridor=None, function=
             passages.append(((f"r{i}", f"r{i + 1}"), [(xs[i][1], 0), (xs[i][1], 10)]))
     top = 10
     if corridor is not None:
-        rooms.append(room("c", rect(0, 10.5, x, 16.5), use="corridor", lockable=False, pass_through=True))
+        rooms.append(room("c", rect(0, 10.5, x, 16.5), use=hall, lockable=False, pass_through=True))
         if corridor_exit:
             doors.append(door("oc", (-0.25, 13.5), (0, 1), ("c", "outside"), exit_id="oc"))
         for i in corridor:
@@ -88,7 +89,7 @@ def _story(desc):
         return {"measures": {}, "not_measured": {OUTSIDE_FACT: s.reason}}
 
 
-def oracle(kinds, joins, corridor=None, function=None, corridor_exit=True, within=None):
+def oracle(kinds, joins, corridor=None, function=None, corridor_exit=True, within=None, hall="corridor"):
     """True, False, or None (not known): see the module's words."""
     if "stair" in kinds:                                 # travel along an exterior stair isn't read: the story isn't
         return None
@@ -101,7 +102,8 @@ def oracle(kinds, joins, corridor=None, function=None, corridor_exit=True, withi
             owner = [new if o == old else o for o in owner]
     spaces = {o: {i for i in range(3) if owner[i] == o} for o in set(owner)}
     touched = {owner[i] for i in (corridor or ())}
-    shared = len(touched) >= 2 and function == "residential" and within is False and corridor_exit
+    shared = len(touched) >= 2 and function == "residential" and within is False and corridor_exit and \
+        hall == "corridor"                               # a lobby may be a dwelling's own foyer
     verdicts = []
     for o, members in spaces.items():
         has = {kinds[i] for i in members}
@@ -143,14 +145,16 @@ def test_the_walk_with_a_corridor(joins):
     seen = set()
     for opens in itertools.product((False, True), repeat=3):
         corridor = [i for i in range(3) if opens[i]]
-        for kinds, function, corridor_exit, within in itertools.product(
+        for kinds, function, corridor_exit, within, hall in itertools.product(
                 itertools.product(("marked", "unmarked", "none"), repeat=3), ("residential", None), (True, False),
-                (False, None)):
+                (False, None), ("corridor", "lobby")):
+            if hall == "lobby" and (function is None or within is None):
+                continue                                 # the lobby matters only where a corridor could be shared
             sp = _story(row(kinds, joins, corridor=corridor, function=function, corridor_exit=corridor_exit,
-                            within=within))
-            want = oracle(kinds, joins, corridor, function, corridor_exit, within)
+                            within=within, hall=hall))
+            want = oracle(kinds, joins, corridor, function, corridor_exit, within, hall)
             seen.add(sp["measures"].get(OUTSIDE_FACT))
-            case = (kinds, joins, corridor, function, corridor_exit, within)
+            case = (kinds, joins, corridor, function, corridor_exit, within, hall)
             if want is None:
                 assert OUTSIDE_FACT not in sp["measures"], (case, sp["measures"].get(OUTSIDE_FACT))
             else:
@@ -233,4 +237,31 @@ def test_each_reason_has_a_case():
     hall = _story(row(("marked", "none", "none"), ("wall", "wall"), corridor=[0, 1, 2]))["not_measured"][OUTSIDE_FACT]
     assert hall == STOPS["outside_hall_unclear"].format(name="r1")
     seen.add("outside_hall_unclear")
+    into = _story(_into_exit(("none", "marked", "marked"), [0, 1]))["not_measured"][OUTSIDE_FACT]
+    assert into == STOPS["outside_into_exit"].format(name="r0", door="se")
+    seen.add("outside_into_exit")
     assert seen == OUTSIDE_KEYS
+
+
+def _into_exit(kinds, opens):
+    """The row with a corridor, residential, the building stating no corridor within a unit, and room 0's door out
+    replaced by its own door into a stair enclosure (an exit) that discharges outside."""
+    desc = row(kinds, ("wall", "wall"), corridor=opens, function="residential", within=False)
+    desc["rooms"].append(room("s", rect(0, -6.5, 10, -0.5), use="other", lockable=False, pass_through=False))
+    desc["doors"] = [d for d in desc["doors"] if d["id"] != "o0"]
+    desc["doors"].append(door("se", (5, -0.25), (1, 0), ("r0", "s"), exit_id="s", kind="exit_enclosure"))
+    desc["doors"].append(door("so", (-0.25, -3.5), (0, 1), ("s", "outside"), exit_id="s", kind="exit_enclosure"))
+    return desc
+
+
+def test_a_foyer_or_a_space_with_its_own_door_into_an_exit_is_never_a_no():
+    """Review round 3 (PR 2): a house's foyer marked a lobby, opening onto its living room and study, read as a
+    shared corridor ("no"); and a space with its own door into a stair enclosure, opening onto the shared corridor
+    too, read "no" though its own exit door may be its direct way out. Neither is known: not measured. (A space with
+    no exit of its own on the shared corridor is still "no".)"""
+    foyer = row(("none", "none", "none"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False,
+                hall="lobby")
+    assert _story(foyer)["measures"].get(OUTSIDE_FACT) is not False
+    got = _story(_into_exit(("none", "marked", "marked"), [0, 1]))
+    assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_into_exit"].format(name="r0", door="se")
+    assert _story(_into_exit(("none", "none", "marked"), [0, 1]))["measures"][OUTSIDE_FACT] is False   # room 1
