@@ -81,6 +81,15 @@ public static class ProjectQuestions
         _ => $"Save {unsaved} answers and check again",
     };
 
+    /// <summary>The unit said beside a length's or an area's box: its symbol, and when Gordium can't read the project's
+    /// units, what to type instead (feet for a length, square feet for an area: after #193 an area said "type feet").</summary>
+    public static string UnitWords(LengthUnit unit)
+    {
+        ArgumentNullException.ThrowIfNull(unit);
+        return unit.Known ? unit.Symbol
+            : $"{unit.Symbol} (this project's units aren't ones Gordium reads: type {(unit.Quantity == "area" ? "square feet" : "feet")})";
+    }
+
     /// <summary>"+ 4 more questions" / "Fewer questions".</summary>
     public static string MoreWords(int hidden, bool open) =>
         open ? "Fewer questions" : hidden == 1 ? "+ 1 more question" : $"+ {hidden} more questions";

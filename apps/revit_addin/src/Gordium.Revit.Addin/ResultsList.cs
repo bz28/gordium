@@ -412,8 +412,8 @@ public sealed class EntryView : C.Border
                     Text = shown ?? "", Margin = new W.Thickness(0, 4, 0, 0), MinWidth = number ? 90 : 0, MaxWidth = number ? 120 : double.PositiveInfinity,
                     HorizontalAlignment = number ? W.HorizontalAlignment.Left : W.HorizontalAlignment.Stretch,
                 };
-                // a length is typed in the project's unit, said beside the box as the Setup form's label says it
-                // (review round 1: "20" in a metric project is 20 m), and feet when Gordium can't read the project's
+                // a length (or an area, #193) is typed in the project's unit, said beside the box as the Setup form's label
+                // says it (review round 1: "20" in a metric project is 20 m), and feet (square feet) when Gordium can't read it
                 var unit = f.Kind == FieldKind.Feet ? f.LengthUnit : null;
                 W.Automation.AutomationProperties.SetName(text, unit is null ? name : $"{name}, in {unit.Words}");
                 // the draft follows every keystroke (an emptied box chooses nothing), Save's words with it
@@ -429,7 +429,7 @@ public sealed class EntryView : C.Border
                     return text;
                 var row = new C.StackPanel { Orientation = C.Orientation.Horizontal };
                 row.Children.Add(text);
-                var symbol = Muted(unit.Known ? unit.Symbol : $"{unit.Symbol} (this project's units aren't ones Gordium reads: type feet)");
+                var symbol = Muted(ProjectQuestions.UnitWords(unit));
                 symbol.Margin = new W.Thickness(6, 6, 0, 0);
                 row.Children.Add(symbol);
                 return row;
