@@ -18,7 +18,9 @@ from rule_format.rulebook import REPO, Context, load, rulebook_file_problems
 NY = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
 RULEBOOK = NY / "5_building_code_rules/drafted/general.yaml"
 KEY = REPO / "test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml"
-I4 = {"occupancy_group_i4": True, "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False}
+I4 = {"occupancy_group_i4": True, "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False,
+      # the sheet's day care has none of the spaces that tighten the tables (review rounds 1 and 2, 2026-11-23)
+      "assembly_fixed_seating": False, "special_egress_spaces": False, "egress_balcony_increase_taken": False}
 
 
 @pytest.fixture(scope="module")
@@ -32,6 +34,10 @@ def rules():
 
 
 def _rows(rule, kind, measures, given, ctx):
+    # these spaces are rooms exit access serves, never an exit themselves: said, since a space's exit rules let an
+    # exit be and so need review where it isn't known (PR #181)
+    if kind == "space":
+        measures = {"space_is_exit": False, **measures}
     return [r["outcome"] for r in parts.rows(rule, {kind: [{"id": "p1", "measures": measures}]}, given, ctx.allowed())]
 
 
@@ -343,6 +349,6 @@ def test_both_space_rules_record_the_over_500_reading_with_its_sources(rules):
         quoted = " ".join(s.get("quote", "") for s in f["sources"] if "file" in s)
         assert "501 to 1,000" in quoted and "1-500" in quoted and "OCCUPANT LOAD" in quoted, rid
         assert any(s.get("rank") == 3 and "1004.5" in s["cite"] for s in f["sources"]), rid
-        assert "by analogy" in r["notes"] and "space_over_500_needs_three" in r["notes"], rid
+        assert "by analogy" in r["notes"] and "the finding on loads over 500" in r["notes"], rid
     label = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]["Table 1006.3.3"]["reason"]
     assert "general.bc_1006_2_1_1_three_or_more_exits" in label and "general.bc_1007_1_2_space_three_or_more" in label

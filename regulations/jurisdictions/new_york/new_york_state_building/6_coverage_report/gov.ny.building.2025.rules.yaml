@@ -29,6 +29,11 @@ pieces:
     heading: Institutional Group I-4, day care facilities › Five or fewer persons receiving care in a dwelling unit
     rules:
     - general.bc_308_5_4_dwelling_unit
+  407.4.2:
+    label: rule
+    heading: Distance of travel
+    rules:
+    - general.bc_407_4_2_sleeping_room_travel
   508.2.1:
     label: flag
     heading: Accessory occupancies › Occupancy classification
@@ -60,12 +65,54 @@ pieces:
     heading: Spaces with one exit or exit access doorway
     rules:
     - general.bc_table_1006_2_1_other_occupancies
+    - general.bc_table_1006_2_1_a_e_m
+    - general.bc_table_1006_2_1_b
+    - general.bc_table_1006_2_1_f
+    - general.bc_table_1006_2_1_h1_h2_h3
+    - general.bc_table_1006_2_1_h4_h5
+    - general.bc_table_1006_2_1_i1_i2
+    - general.bc_table_1006_2_1_i3
+    - general.bc_table_1006_2_1_r1
+    - general.bc_table_1006_2_1_r2
+    - general.bc_table_1006_2_1_r3_r4
+    - general.bc_table_1006_2_1_s
+    - general.bc_table_1006_2_1_u
   1006.2.1.1:
     label: rule
     heading: Egress based on occupant load and common path of egress travel distance › Three or more exits or exit access
       doorways
     rules:
     - general.bc_1006_2_1_1_three_or_more_exits
+  1006.2.2.1:
+    label: flag
+    heading: Egress based on use › Boiler, incinerator and furnace rooms
+    rules:
+    - general.bc_1006_2_2_1_boiler_rooms
+  1006.2.2.2:
+    label: flag
+    heading: Egress based on use › Refrigeration machinery rooms
+    rules:
+    - general.bc_1006_2_2_2_refrigeration_machinery_rooms
+  1006.2.2.3:
+    label: flag
+    heading: Egress based on use › Refrigerated rooms or spaces
+    rules:
+    - general.bc_1006_2_2_3_refrigerated_rooms
+  1006.2.2.4:
+    label: flag
+    heading: Egress based on use › Electrical rooms
+    rules:
+    - general.bc_1006_2_2_4_electrical_rooms
+  1006.2.2.5:
+    label: flag
+    heading: Egress based on use › Vehicular ramps
+    rules:
+    - general.bc_1006_2_2_5_vehicular_ramps
+  1006.2.2.6:
+    label: rule
+    heading: Egress based on use › Groups R-3 and R-4
+    rules:
+    - general.bc_1006_2_2_6_r3_r4_nfpa_13d
   1006.3.3:
     label: rule
     heading: Egress based on occupant load
@@ -109,6 +156,7 @@ pieces:
     rules:
     - general.bc_1016_2_intervening_spaces
     - general.bc_1016_2_other_occupancies
+    - general.bc_1016_2_intervening_spaces_other_groups
   1016.2.1:
     label: flag
     heading: Egress through intervening spaces › Multiple tenants
@@ -124,6 +172,18 @@ pieces:
     heading: Exit access travel distance
     rules:
     - general.bc_table_1017_2_other_occupancies
+    - general.bc_table_1017_2_a_e_f1_m_r_s1
+    - general.bc_table_1017_2_i1
+    - general.bc_table_1017_2_b
+    - general.bc_table_1017_2_f2_s2_u
+    - general.bc_table_1017_2_h1
+    - general.bc_table_1017_2_h2
+    - general.bc_table_1017_2_h3
+    - general.bc_table_1017_2_h4
+    - general.bc_table_1017_2_h5
+    - general.bc_table_1017_2_i2_i3
+    - general.bc_table_1017_2_note_a
+    - general.bc_table_1017_2_note_d_group_h
   1017.2.1:
     label: flag
     heading: Limitations › Exterior egress balcony increase
@@ -144,10 +204,21 @@ pieces:
     heading: Atriums › Exit access travel distance at other than the level of exit discharge
     rules:
     - general.bc_1017_3_2_3_atrium
+  '1018.4':
+    label: flag
+    heading: Aisle accessways in Group M
+    rules:
+    - general.bc_1018_4_merchandise_pads
   '1020.5':
     label: rule
     heading: Dead ends
     rules:
     - general.bc_1020_5_dead_end
     - general.bc_1020_5_other_occupancies
+    - general.bc_1020_5_dead_end_other_groups
+  '1030.8':
+    label: flag
+    heading: Common path of egress travel
+    rules:
+    - general.bc_1030_8_fixed_seating_common_path
 not_checked_yet: []

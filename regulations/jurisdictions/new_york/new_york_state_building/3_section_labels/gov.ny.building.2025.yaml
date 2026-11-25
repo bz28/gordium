@@ -20,6 +20,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:accessible:
+    label: reference
+    topic: definitions
+    reason: 'Defines ACCESSIBLE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 32
+      lines:
+      - 28
+      - 28
+      quote: '[BE] ACCESSIBLE. A site, building, facility or portion thereof that complies with Chapter 11.'
+    piece_sha256: 448b071e5a39107e0584f9c3a0bea2a3d5764b3166e5500fc0a89fbde54e468a
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:aggregate:
     label: reference
     topic: definitions
@@ -48,6 +65,42 @@ labels:
       quote: '[BE] AISLE. An unenclosed exit access component that defines and provides a path of egress travel.'
     piece_sha256: 1c9d4afb83000e62ce00aeea7586d1a63fdce836ef28d65c377e3996a3415f8c
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:aisle_accessway:
+    label: reference
+    topic: definitions
+    reason: 'Defines AISLE ACCESSWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 17
+      - 17
+      quote: '[BE] AISLE ACCESSWAY. That portion of an exit access that leads to an aisle.'
+    piece_sha256: b5205adb1cb0eb9dc1f511a57aec34489dc9ffb308c31a4a2a5e5cc729db6ed9
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:alternating_tread_device:
+    label: reference
+    topic: definitions
+    reason: 'Defines ALTERNATING TREAD DEVICE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 27
+      - 29
+      quote: '[BE] ALTERNATING TREAD DEVICE. A device that has a series of steps between 50 and 70 degrees (0.87 and 1.22
+        rad) from horizontal, usually attached to a center support rail in an alternating manner so that the user does not
+        have both feet on the same level at the same time.'
+    piece_sha256: a058f79e2fd37fafc2c5dc897e49657d3573f111aca84fc61e969a299a4dc432
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:approved:
@@ -708,6 +761,58 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:fire_door:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE DOOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 17
+      - 17
+      quote: '[BF] FIRE DOOR. The door component of a fire door assembly.'
+    piece_sha256: a8941aef23edcfa6733785462a68dda71988e28fbc7e1e50d51a1a4d7b93deac
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_door_assembly:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE DOOR ASSEMBLY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 18
+      - 19
+      quote: '[BF] FIRE DOOR ASSEMBLY. Any combination of a fire door, frame, hardware and other accessories that together
+        provide a specific degree of fire protection to the opening.'
+    piece_sha256: b3136972655a7598f31fa7c4e9efda7b8af28120e3d19b27b9f12fd82bc0b2e7
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_exit_hardware:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE EXIT HARDWARE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 21
+      - 21
+      quote: '[BF] FIRE EXIT HARDWARE. Panic hardware that is listed for use on fire door assemblies.'
+    piece_sha256: 4db0e976a1b5846f0cde73da95f948142d901e4c9e0cb5d1f1098cda6fad984d
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:fire_wall:
     label: reference
     topic: definitions
@@ -722,6 +827,23 @@ labels:
         extends continuously'
     piece_sha256: 13baefb78e6958cd35ec518f1244fe88b8fbe0602fd3fbdd92e3a81e3875ceee
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_window_assembly:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE WINDOW ASSEMBLY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 43
+      - 43
+      quote: '[BF] FIRE WINDOW ASSEMBLY. A window constructed and glazed to give protection against the passage of fire.'
+    piece_sha256: e58ec50d5d7108977c528b01c4f6c20d1f992fe7ad28f0b7b0615cf98bc70119
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fixed_seating:
@@ -863,6 +985,23 @@ labels:
       quote: '[F] HANDLING. The deliberate transport by any means to a point of storage or use.'
     piece_sha256: a14796dfd3d49bf8d4c89810fc19623624e0505548e9f046bb2781ab94097890
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:hardware:
+    label: reference
+    topic: definitions
+    reason: 'Defines HARDWARE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 18
+      - 18
+      quote: HARDWARE. See “Fire exit hardware” and “Panic hardware.”
+    piece_sha256: ff5b277570e5f32c21116daf1a35b416d7469631d31c4a0280bcd4f19d3eceb7
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:head_joint:
@@ -1101,6 +1240,43 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:mechanical_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: 'Defines MECHANICAL CODE OF NEW YORK STATE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 50
+      - 51
+      quote: '[NY] MECHANICAL CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Mechanical Code of New
+        York State”, published by the International Code Council, Inc. (publication date July 2025).'
+    piece_sha256: 4d535ce1a22f6ecb1e3680d8af451d7b961dd621b5d57f6aa94d2129726d34bc
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:merchandise_pad:
+    label: reference
+    topic: definitions
+    reason: 'Defines MERCHANDISE PAD, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 54
+      lines:
+      - 11
+      - 12
+      quote: '[NY] MERCHANDISE PAD. A merchandise pad is an area for display of merchandise surrounded by aisles, permanent
+        fixtures or walls. Merchandise pads contain elements such as nonfixed and movable fixtures, cases, racks, counters
+        and partitions.'
+    piece_sha256: 1f4c351439c75724822ab99382fe712bf0a660d5fa3d89fedc56198ffc0fab90
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:mezzanine:
     label: reference
     topic: definitions
@@ -1226,6 +1402,42 @@ labels:
         within or under a'
     piece_sha256: 805eb9d0d5f671bc66c022e9bc6b4341b3c1a78dde101d1c9a03e2b8896d79ca
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:opening_protective:
+    label: reference
+    topic: definitions
+    reason: 'Defines OPENING PROTECTIVE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 38
+      - 39
+      quote: '[BF] OPENING PROTECTIVE. A fire door assembly, fire shutter assembly, fire window assembly or glass-block assembly
+        in a fire-resis- tance-rated wall or partition.'
+    piece_sha256: 2f5230d999192232a14fdd6b5fd86ff2543b669591c2a23f0e7e0a0a2746b25f
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:panic_hardware:
+    label: reference
+    topic: definitions
+    reason: 'Defines PANIC HARDWARE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 23
+      - 24
+      quote: '[BE] PANIC HARDWARE. A door-latching assembly incorporating a device that releases the latch upon the application
+        of a force in the direction of egress travel. See “Fire exit hardware.”'
+    piece_sha256: 0be0e2e6022b43acbae53aaec43c14803ec78216dfad6258f2283b750e790220
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:penthouse:
@@ -1432,6 +1644,24 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:self_closing:
+    label: reference
+    topic: definitions
+    reason: 'Defines SELF-CLOSING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 59
+      lines:
+      - 55
+      - 56
+      quote: '[BF] SELF-CLOSING. As applied to a fire door or other opening protective, means equipped with a device that
+        will ensure closing after having been opened.'
+    piece_sha256: 6bfda0739cb8a8540ce92bf66e9a0c9669ed2b7b94bc03d2cc03098da01eb33f
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:shaft:
     label: reference
     topic: definitions
@@ -1477,6 +1707,24 @@ labels:
         for sleeping'
     piece_sha256: 335f0aad19104c19a345963fb8108c42c8d02c90dc78d65deaebb4ba01012205
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:smoke_protected_assembly_seating:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKE-PROTECTED ASSEMBLY SEATING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 19
+      - 20
+      quote: '[BE] SMOKE-PROTECTED ASSEMBLY SEATING. Seating served by means of egress that is not subject to smoke accumulation
+        within or under a structure for a specified design time by means of passive design or by mechanical ventilation.'
+    piece_sha256: fb68075e4b9bd65132ea95a5b3147bbf7f2b766e7e38c63146f6a1ca096c0c3e
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 2
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): fixed seating''s travel in any
+      group.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:solid:
@@ -1890,6 +2138,26 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  407.4.2:
+    label: rule
+    topic: means_of_egress
+    reason: 'A Group I-2 sleeping room not in a care suite: at most 50 feet from any point to its exit access door: measurable
+      per story (egress_travel_in_sleeping_room; general.bc_407_4_2_sleeping_room_travel).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 99
+      lines:
+      - 48
+      - 49
+      quote: '[BE] 407.4.2 Distance of travel. The distance of travel between any point in a Group I-2 occupancy sleeping
+        room, not located in a care suite, and an exit access door in that room shall be not greater than 50 feet (15 240
+        mm).'
+    piece_sha256: 0513c7ea81fa0abe00c0d228b29937b83416f1e1b91bb2c9aed4299ca9d4ad4b
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   '508.2':
     label: reference
     topic: uses
@@ -2039,8 +2307,9 @@ labels:
   Table 1006.2.1:
     label: rule
     topic: means_of_egress
-    reason: 'The values 1006.2.1 uses: for Group I-4 a space with one exit may have at most 10 occupants and a common path
-      of at most 75 feet, only in a building sprinklered throughout (903.3.1.1 or 903.3.1.2); not permitted without.'
+    reason: 'The values 1006.2.1 uses, row by row: the most occupants and the longest common path a space with one exit may
+      have in each group, without an automatic sprinkler system (by occupant load up to 30 and over 30, or not permitted)
+      and with one (note a: 903.3.1.1 or 903.3.1.2; note b: Group H''s 903.2.5).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 315
@@ -2052,8 +2321,9 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Read by position (each cell''s
       characters and their x positions) and on the page image: the I-4 row is I-1, I-2 (note d), I-4 | 10 | NP | NP | 75 (note
       a). The text runs each raised note letter into its cell (''75a''); sources.yaml brought_in.misread puts each right by
-      line. Gordium''s rules are drafted for Group I-4 (day care) first; the table''s other rows have a flag of their own
-      (a section''s rule checks only its own row).'
+      line. Every row has a rule of its own since 2026-11-23 (general.bc_table_1006_2_1_<groups>; the I-4 row''s is general.bc_1006_2_1_two_exits),
+      read by the building''s one occupancy group; a building of two or more groups is general.bc_table_1006_2_1_other_occupancies''s
+      flag.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1006.2.1.1:
@@ -2072,6 +2342,145 @@ labels:
         space with an occu- pant load greater than 1,000.
     piece_sha256: 6f99daba63cd22d6c6b869777291d20039e0d258954f3ac6ed5b12627f802bb7
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.2.2:
+    label: reference
+    topic: means_of_egress
+    reason: 'Points to 1006.2.2.1 to 1006.2.2.6, the uses whose exits are set by their use: a pointer, no requirement of its
+      own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 315
+      lines:
+      - 48
+      - 49
+      quote: 1006.2.2 Egress based on use. The numbers, configuration and types of components of exits or access to exits
+        shall be provided in the uses described in Sections 1006.2.2.1 through 1006.2.2.6.
+    piece_sha256: 81c936e13a0a91eec504459aa3598a735e4624386eaef0d6d6980ef2c6567d57
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.2.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Two exit access doorways for a boiler, incinerator or furnace room over 500 square feet with fuel-fired equipment
+      over 400,000 Btu input, one-half the diagonal apart: the room''s use isn''t marked, so a person''s check (general.bc_1006_2_2_1_boiler_rooms).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 315
+      lines:
+      - 50
+      - 52
+      quote: 1006.2.2.1 Boiler, incinerator and furnace rooms. Two exit access doorways are required in boiler, incinerator
+        and furnace rooms where the area is over 500 square feet (46 m[fn2]) and any fuel-fired equipment exceeds 400,000
+        British thermal units (Btu) (422 000 KJ) input capacity. Where two exit access doorways are required, one is permitted
+        to be a fixed ladder or an alternating
+    piece_sha256: 1f672375b0d27efadc1c67a70a6de5338e1fe19db02fcf4852e4925460b092f5
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.2.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Refrigeration machinery rooms over 1,000 square feet: two exits, travel within 150 feet where not sprinklered,
+      doors swinging with egress with panic hardware: the use isn''t marked, a person''s check (general.bc_1006_2_2_2_refrigeration_machinery_rooms).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 315
+      lines:
+      - 55
+      - 56
+      quote: 1006.2.2.2 Refrigeration machinery rooms. Machinery rooms larger than 1,000 square feet (93 m[fn2]) shall have
+        not less than two exits or exit access doorways. Where two exit access doorways are required, one such doorway is
+        permitted to be served by
+    piece_sha256: dca1e66356ce59abf0e5ec34e3078dd9b6bbefa91a97e50a08614f2e9a8455ee
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.2.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Refrigerated rooms over 1,000 square feet below 68 F: two exits, 150 feet where not sprinklered: not marked,
+      a person''s check (general.bc_1006_2_2_3_refrigerated_rooms).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 316
+      lines:
+      - 11
+      - 13
+      quote: 1006.2.2.3 Refrigerated rooms or spaces. Rooms or spaces having a floor area larger than 1,000 square feet (93
+        m[fn2]), contain- ing a refrigerant evaporator and maintained at a temperature below 68°F (20°C), shall have access
+        to not less than two exits or exit access doorways.
+    piece_sha256: f0d82d7aefe0a2b8e9fb1eae6365a436b2523fac7290bccca3f4fea1d6d5c181
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.2.2.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Electrical rooms'' exits per NFPA 70: not marked, a person''s check (general.bc_1006_2_2_4_electrical_rooms).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 316
+      lines:
+      - 19
+      - 21
+      quote: 1006.2.2.4 Electrical rooms. The location and number of exit or exit access doorways shall be provided for electrical
+        rooms in accordance with Section 110.26 of NFPA 70 for electrical equipment rated 1,000 volts or less, and Section
+        110.33 of NFPA 70 for electrical equipment rated over 1,000 volts. Panic hardware shall be provided where required
+        in accordance with Section
+    piece_sha256: 73a81675af1015410421bd7a7ef9eaa429e2c5d6233e51689380d919430eda25
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.2.2.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'A vehicular ramp is no exit access ramp without pedestrian facilities: a person''s check (general.bc_1006_2_2_5_vehicular_ramps).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 316
+      lines:
+      - 23
+      - 24
+      quote: 1006.2.2.5 Vehicular ramps. Vehicular ramps shall not be considered as an exit access ramp unless pedestrian
+        facilities are provided.
+    piece_sha256: b0c44fbb32cca13f9d721a5cd7e05aba4fc0b4c1eb978c2ea0fa49811ee21eaa
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.2.2.6:
+    label: rule
+    topic: means_of_egress
+    reason: 'Groups R-3 and R-4 with an NFPA 13D system (903.3.1.3): exit access travel at most 125 and 75 feet: measurable
+      per story (general.bc_1006_2_2_6_r3_r4_nfpa_13d; Table 1017.2''s row reads the same).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 316
+      lines:
+      - 25
+      - 27
+      quote: 1006.2.2.6 Groups R-3 and R-4. Where Group R-3 occupancies are permitted by Section 903.2.8 to be protected by
+        an auto- matic sprinkler system installed in accordance with Section 903.3.1.3, the exit access travel distance for
+        Group R-3 shall be not more than 125 feet (38 100 mm). Where Group R-4 occupancies are permitted by Section 903.2.8
+        to be protected by an auto-
+    piece_sha256: 617e64dfd5466cb5c697cacb0f813d8711c7e1179494dd52099c21b1af1f50c8
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1006.3.3:
@@ -2308,7 +2717,8 @@ labels:
       quote: 6. Egress shall not pass through kitchens, storage rooms, closets or spaces used for similar purposes.
     piece_sha256: 75ce5120ce02dba41247b79ce0300db00da2a96dfe6066836bd5c20e9e0df752
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Item 1 (enclosed elevator lobbies,
-      Section 3006, not brought in) is a person's check.
+      Section 3006, not brought in) is a person's check. Every group but I-4 is general.bc_1016_2_intervening_spaces_other_groups
+      (2026-11-23).
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1016.2.1:
@@ -2378,8 +2788,8 @@ labels:
   Table 1017.2:
     label: rule
     topic: means_of_egress
-    reason: 'The values 1017.2 uses: Group I-4 150 feet without an automatic sprinkler system, 200 feet with one per 903.3.1.1
-      (note c).'
+    reason: 'The values 1017.2 uses, row by row: each group''s longest exit access travel distance without an automatic sprinkler
+      system (or not permitted) and with one (note b: 903.3.1.1 or 903.3.1.2; note c: 903.3.1.1 only; note d: Group H''s 903.2.5.1).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 341
@@ -2392,8 +2802,10 @@ labels:
       characters and their x positions) and on the page image: I-4 | 150 | 200 (note c: 903.3.1.1 only). The text runs each
       raised note letter into its cell (''200c''); sources.yaml brought_in.misread puts each right by line. Note a lists other
       sections that modify the distance (malls, I-2, I-3, one-exit buildings 1006.3.4, 1017.2.2, 1017.2.3...), none brought
-      in but 1017.2.2 and 1017.2.3. Gordium''s rules are drafted for Group I-4 (day care) first; the table''s other rows have
-      a flag of their own (a section''s rule checks only its own row).'
+      in but 1017.2.2 and 1017.2.3. Every row has a rule of its own since 2026-11-23 (general.bc_table_1017_2_<groups>; the
+      I-4 row''s is general.bc_1017_2_travel_distance), read by the building''s one occupancy group; note a''s sections are
+      general.bc_table_1017_2_note_a''s flag, Group H''s system general.bc_table_1017_2_note_d_group_h''s, a building of two
+      or more groups general.bc_table_1017_2_other_occupancies''s.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1017.2.1:
@@ -2551,6 +2963,29 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '1018.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'Group M merchandise pads: an aisle accessway on one side of each element, 30 inches clear, and a common path
+      of at most 30 feet from any point in the pad (75 feet for not more than 50 occupants): the pads aren''t drawn, so a
+      person''s check (general.bc_1018_4_merchandise_pads), and Table 1006.2.1''s A, E, M row needs review over 30 feet where
+      pads are stated or not ruled out.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 51
+      - 53
+      quote: 1018.4 Aisle accessways in Group M. An aisle accessway shall be provided on not less than one side of each element
+        within the merchandise pad. The minimum clear width for an aisle accessway not required to be accessible shall be
+        30 inches (762 mm). The required clear width of the aisle accessway shall be measured perpendicular to the elements
+        and merchandise within the merchan-
+    piece_sha256: e65270e1b455b7c9657e82137cd74acdc9ee50d7432e92e54773f50dfa77b8df
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   '1020.5':
     label: rule
     topic: means_of_egress
@@ -2573,7 +3008,50 @@ labels:
       quote: 3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than
         2.5 times the least width of the dead-end corridor.
     piece_sha256: 3a8020bc52c9e2bd47f823c3c37f59c86f78c5c113ec84325a82e8dacdf2d3cc
-    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Exceptions 1 (I-3) and 4 (I-2)
-      are for other groups.
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Every group but I-4 is general.bc_1020_5_dead_end_other_groups
+      (2026-11-23); within exceptions 1 (I-3, Conditions 2 to 4) and 4 (I-2, Condition 2), whose conditions aren't stated,
+      it needs review.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.7':
+    label: reference
+    topic: means_of_egress
+    reason: 'How exit access travel is measured where aisles serve seating: along the aisles and aisle accessways, never over
+      or on the seats; exceptions for smoke-protected and open-air seating allow more. Every travel row needs review while
+      fixed seating is stated or not ruled out (assembly_fixed_seating), since the routes don''t see the seats.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 354
+      lines:
+      - 50
+      - 52
+      quote: '1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
+        for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
+        Exceptions:'
+    piece_sha256: 0dedbb8deaa95cfacfefff8ad82fb14eb63468c3e6c595eb4bc7e45d398a2fc6
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 2
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): fixed seating''s travel in any
+      group.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1030.8':
+    label: flag
+    topic: means_of_egress
+    reason: 'An assembly space with fixed seating: a common path of at most 30 feet from any seat (75 feet for fewer than
+      50 occupants, 50 feet for smoke-protected or open-air seating): the seats aren''t drawn, so a person''s check (general.bc_1030_8_fixed_seating_common_path),
+      and Table 1006.2.1''s A, E, M row needs review over it where fixed seating is stated or not ruled out.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 355
+      lines:
+      - 13
+      - 15
+      quote: 1030.8 Common path of egress travel. The common path of egress travel for a room or space used for assembly purposes
+        having fixed seating shall not exceed 30 feet (9144 mm) from any seat to a point where an occupant has a choice of
+        two paths of egress travel to two exits.
+    piece_sha256: bec0c4f98d601924da08413740e93ced18dce4119f71313694aec4c5213d0fb5
+    notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
+      of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
+      table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft

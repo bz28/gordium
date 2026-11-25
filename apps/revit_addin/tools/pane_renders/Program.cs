@@ -156,7 +156,8 @@ internal static class Program
                             Settle(p.View);
                             var callout = FindAll<Border>(p.View).SingleOrDefault(b => b.IsVisible && Equals(b.Tag, DetailView.CalloutTag));
                             Check(callout is not null, "17 detail: one callout with the headline");
-                            Check(FindAll<Button>(p.View).Any(b => b.IsVisible && (b.Content as TextBlock)?.Text == "Answer 2 questions"), "17 detail: Answer 2 questions beside it");
+                            var asked = ResultViews.CardsOf(views, exits.Id).Count(c => c.Kind == FixKind.Answer);
+                            Check(FindAll<Button>(p.View).Any(b => b.IsVisible && (b.Content as TextBlock)?.Text == $"Answer {asked} questions"), $"17 detail: Answer {asked} questions beside it");
                             Check(!FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t) == "MEASURED AGAINST THE LIMIT"), "17 detail: nothing measured, so no Measured block");
                             Check(FindAll<TextBlock>(p.View).Any(t => t.IsVisible && TextOf(t) == "WHAT THE CODE SAYS"), "17 detail: What the code says");
                             if (why)
@@ -173,7 +174,7 @@ internal static class Program
                         p.OpenResult(exits.Id);
                         p.Answer();
                         Settle(p.View);
-                        Check(FindAll<ComboBox>(p.View).Any(c => c.IsVisible), "18: Answer 2 questions goes back to the questions card, open");
+                        Check(FindAll<ComboBox>(p.View).Any(c => c.IsVisible), "18: Answer N questions goes back to the questions card, open");
                     });
                     // UI polish PR 4b: What changed with what the architect changed (change 40; two checks of one
                     // project, the second after the sprinkler system and corner lot were answered), the proportion bar
