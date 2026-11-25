@@ -58,6 +58,8 @@ FIELD_HEADLINES = {
     "building.assembly_fixed_seating": "Say whether any room has fixed assembly seating",
     "building.special_egress_spaces": "Say whether the building has special egress spaces (boiler or electrical rooms, malls…)",
     "building.merchandise_pads": "Say whether the store has merchandise pads",
+    "building.r2_sleeping_units": "Say whether the Group R-2 is of sleeping units (not dwelling units)",
+    "building.emergency_escape_openings_1031": "Say whether every sleeping room has an emergency escape opening (1031)",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",
     "facts.ground_is_flat": "Say whether the ground is flat",
@@ -91,6 +93,9 @@ BY_HAND_QUESTIONS = {
     "space_egress_sleeping_through_sleeping_or_toilet":
         "Check by hand: does the path from a sleeping area pass through another sleeping area or a toilet room?",
     "story_first_above_or_below_grade": "Check by hand: is this the first story above or below grade?",
+    "story_second_above_grade_plane": "Check by hand: is this the second story above grade plane?",
+    "story_fourth_or_higher_above_grade_plane": "Check by hand: is this the fourth story above grade plane or higher?",
+    "story_dwelling_units": "Check by hand: how many dwelling units are on this story?",
     "space_exit_remoteness_ratio": "Check by hand: are the exits far enough apart (1/2 or 1/3 of the diagonal)?",
     "exit_remoteness_ratio": "Check by hand: are the exits far enough apart (1/2 or 1/3 of the diagonal)?",
 }

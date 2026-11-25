@@ -62,17 +62,19 @@ def test_the_story_figures_are_the_hand_worked_ones(got, expected):
 
 
 def test_a_rule_reading_a_figure_not_measured_yet_says_so(got):
-    rows = [i for i in got["items"] if i["rule"] == "general.bc_1006_3_3_story_exits"]
-    assert len(rows) == 2 and all(i["status"] == present.REVIEW for i in rows)
-    assert all("occupant load not measured" in i["reason"] for i in rows)   # its plain name (C4)
+    rows = [i for i in got["items"] if i["rule"] == "general.bc_1006_2_1_1_three_or_more_exits"]
+    review = [i for i in rows if i["status"] == present.REVIEW]
+    assert len(rows) == 8 and len(review) == 4        # the four stair enclosures are exits (space_is_exit): pass
+    assert all("occupant load not measured" in i["reason"] for i in review)   # its plain name (C4)
 
 
 def test_each_flag_is_its_own_line_with_its_section(got):
-    """24 of the rulebook's 32 flags show (2026-11-23; 1006.2.2's five rooms by use since review round 1; 1030.8's
-    on its fact alone since round 2): those narrowed to a building of two or more groups, or to
-    another group (F-1 and S-1's increase, H-5's, Group H's sprinkler system), are not applicable to a one-group R-2."""
+    """22 of the rulebook's 32 flags show (2026-11-23; 1006.2.2's five rooms by use since review round 1; the
+    mixed-occupancy single-exit flags not applicable since section group 2; 1030.8's on its fact alone since round
+    2): those narrowed to a building of two or more groups, or to another group (F-1 and S-1's increase, H-5's,
+    Group H's sprinkler system), are not applicable to a one-group R-2."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 24 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 22 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
