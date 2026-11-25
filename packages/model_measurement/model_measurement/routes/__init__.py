@@ -1,8 +1,9 @@
 """Measuring a story's escape routes from an interior description (docs/decisions/2026-11-20_route_measurement.md):
-the `story`, `space` and `corridor` parts the commercial egress rules read (rule_format/parts.yaml), handed over the
+the `story`, `space`, `corridor` and `means_of_egress_door` parts the commercial egress rules read (rule_format/parts.yaml), handed over the
 way interior/ hands its parts.
 
-    measure(description) -> {"format", "units", "parts": {"story": [...], "space": [...], "corridor": [...]},
+    measure(description) -> {"format", "units", "parts": {"story": [...], "space": [...], "corridor": [...],
+                                                         "means_of_egress_door": [...]},
                              "problems": [...]}
 
 `parts` is what rule_format.parts.rows reads: each part {"id", "name", "within"?, "measures", "not_measured",
@@ -41,13 +42,14 @@ import math
 from model_measurement.interior.read import name_of
 from model_measurement.routes import areas, dead_ends, straight
 from model_measurement.routes.common_path import _TravelOnly, at_point, story_figure
+from model_measurement.routes.doors import door_parts
 from model_measurement.routes.floor import CLEARANCE, READING, read, region
 from model_measurement.routes.paths import FOOT, StoryRoutes, _Leg
 from model_measurement.routes.remote import farthest
 from model_measurement.routes.stops import Stop
 
 MEASURED_FORMAT = "gordium.routes_measured/1"
-KINDS = ("story", "space", "corridor")
+KINDS = ("story", "space", "corridor", "means_of_egress_door")
 SF = FOOT * FOOT
 # decision 1b: NFPA 101 measures travel and common path from points "subject to occupancy" (7.6.1(1), A.3.3.47), the
 # 2009 IBC from every point within the story (1016.1): each book's figure under its own measure's name
@@ -79,6 +81,7 @@ def measure(description, clearance: float = CLEARANCE) -> dict:
         uses = {rid: (items.get(rid) or {}).get("use") for rid in story.rooms}
         here = [u for u in unknown if u.get("level") == level]
         _story_parts(story, uses, items, here, parts, clearance)
+    parts["means_of_egress_door"] = door_parts(description, floor)   # every door given (section group 6a)
     if floor.stops:                                      # a part that can't be placed on a story: none is "none"
         for u in unknown:
             if u.get("level") not in floor.stories:

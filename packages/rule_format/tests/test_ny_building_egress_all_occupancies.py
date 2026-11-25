@@ -280,7 +280,9 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          "1005.3.1": (313, 51, 55), "1005.3.1 (part 2)": (314, 3, 13), "1005.3.2": (314, 14, 28),
          "1005.4": (314, 29, 30), "1005.5": (314, 31, 33), "1005.6": (314, 34, 36),       # section group 5b
          "1005.7": (314, 37, 38), "1005.7.1": (314, 39, 49), "1005.7.2": (314, 50, 53),
-         "1005.7.3": (314, 54, 54)}                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
+         "1005.7.3": (314, 54, 54),
+         "1010.1": (322, 28, 36), "1010.1.1": (322, 37, 58), "1010.1.1 (part 2)": (323, 3, 5),
+         "1010.1.1.1": (323, 6, 10)}                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -319,9 +321,15 @@ HANDLERS = {
     # section group 5c: 1005.7's
     "1014.9": ("general.bc_1005_7_2_projections", "1014.9"), "407.4.3": ("general.bc_1005_7_2_projections", "407.4.3"),
     "1003.3": ("general.bc_1005_7_3_protruding_objects", "1003.3"),
+    # section group 6a: 1010.1's and 1010.1.1's (the rest of 1010, gates, turnstiles, exterior exit doors: flagged;
+    # a shower compartment's door per the Plumbing Code: the width rule's compartment review)
+    "1010.3.4": ("general.bc_1010_1_doors_general", "1010.3.4"), "1022.2": ("general.bc_1010_1_doors_general", "1022.2"),
+    "1010.4": ("general.bc_1010_1_doors_general", "1010.4"), "1010.4.1": ("general.bc_1010_1_doors_general", "1010.4.1"),
+    "1010.5": ("general.bc_1010_1_doors_general", "1010.5"), "1010.5.4": ("general.bc_1010_1_doors_general", "1010.5.4"),
+    "421.4.2": ("general.bc_1010_1_1_door_width", "421.4.2"), "421": ("general.bc_1010_1_1_door_width", "421.4.2"),
 }
 NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
-            "1005.7.1", "1005.7.2", "1005.7.3"}          # the piece naming itself
+            "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
@@ -890,3 +898,74 @@ def test_the_readmes_not_brought_in_list_names_no_section_brought_in():
     bad += [n for n in re.findall(r"\b\d{3,4}(?:\.\d+)*\b", listed)
             if any(n == b or (n.startswith(b + ".") and b not in brought["alone"]) for b in ids)]
     assert named and not bad, bad
+
+
+# ---- section group 6a (2026-11-25): door size, 1010.1.1 (pp.322-323) ------------------------------------------------
+
+ON_CORRIDOR = {"moe_door_exit": False, "moe_door_exterior": False, "moe_door_to_corridor": True,
+               "moe_door_to_room_under_10_sf": False}           # no exception can loosen it (with no units' corridors)
+BETWEEN_ROOMS = ON_CORRIDOR | {"moe_door_to_corridor": False}
+OUTSIDE = BETWEEN_ROOMS | {"moe_door_exterior": True}
+NO_UNITS = {"corridors_within_dwelling_units": False}
+
+
+def _door(width=None, height=None, leaves=1, **sides):
+    m = (ON_CORRIDOR | sides) | ({"moe_door_leaves": leaves} if leaves is not None else {})
+    m |= {k: v for k, v in (("moe_door_clear_width", width), ("moe_door_clear_height", height)) if v is not None}
+    return m
+
+
+def test_1010_1_1_width_at_its_limits_and_just_past(ctx, rules):
+    """1010.1.1's widths, typed from the page: 32 in (p.322 line 38), 41 1/2 in for Group I-2 bed movement (line 42),
+    exception 2's 28 in (line 48), exception 7's 31.75 in (line 58), exception 8's 20 in (p.323 line 4); exceptions
+    1 and 6 (lines 45, 55) and 3 (line 49) set no width."""
+    r = rules["general.bc_1010_1_1_door_width"]
+    for line in (38, 42, 45, 48, 49, 55, 58):
+        assert _cites(r, 322, line), line
+    assert _cites(r, 323, 4)
+    b = {"occupancy_group": "B"} | NO_UNITS
+    one = lambda m, g=b: _one(r, "means_of_egress_door", m, g, ctx)
+    assert one(_door(32)) == "pass" and one(_door(31.99, moe_door_exit=True)) == "fail"   # into an exit: nothing loosens it
+    assert one(_door(31.99)) == "needs_review"          # on a corridor: it may serve a compartment (8: 20 in, round 1)
+    i2 = {"occupancy_group": "I-2"} | NO_UNITS
+    assert one(_door(41.5), i2) == "pass" and one(_door(41.49), i2) == "needs_review" and one(_door(31.99, moe_door_exit=True), i2) == "fail"
+    i3 = {"occupancy_group": "I-3"} | NO_UNITS
+    assert one(_door(28), i3) == "needs_review" and one(_door(27.99, moe_door_exit=True), i3) == "fail" and one(_door(32), i3) == "pass"
+    # exception 7 (31.75, within a Type B unit: only a door between two rooms) and 8 (20, a compartment: any door but
+    # one into an exit enclosure, passageway or horizontal exit, review rounds 1 and 2)
+    assert one(_door(31.75, **BETWEEN_ROOMS)) == "needs_review" and one(_door(19.99, **BETWEEN_ROOMS)) == "fail"
+    assert one(_door(20, **BETWEEN_ROOMS)) == "needs_review" and one(_door(31.75, moe_door_exit=True)) == "fail"
+    assert one(_door(24, **OUTSIDE)) == "needs_review"   # a compartment may open outside (review round 1)
+    assert one(_door(24, **(OUTSIDE | {"moe_door_exit": True}))) == "needs_review"   # by a door marked an exit (round 2)
+    # exception 3: a storage closet under 10 sq ft, no width
+    assert one(_door(10, moe_door_to_room_under_10_sf=True)) == "needs_review"
+    # exceptions 1 and 6 (Groups R-2, R-3; I-1, R-2, R-3, R-4): no width for a door that may be in a unit
+    for g in ("R-2", "R-3", "I-1", "R-4"):
+        gg = {"occupancy_group": g} | NO_UNITS
+        assert one(_door(10, **BETWEEN_ROOMS), gg) == "needs_review", g
+        assert one(_door(10), gg) == "fail", g                                   # on a corridor in no unit
+        assert one(_door(10), {"occupancy_group": g}) == "needs_review", g        # the corridors not stated
+        assert one(_door(10, moe_door_exit=True), {"occupancy_group": g}) == "fail", g   # into an exit enclosure
+    assert one(_door(10, **BETWEEN_ROOMS), {"occupancy_group": "R-1"} | NO_UNITS) == "fail"   # R-1: neither exception
+
+
+def test_1010_1_1_height_at_its_limits_and_just_past(ctx, rules):
+    """80 in (p.322 line 43), exception 4's 78 in within a unit (line 51), exception 5's 76 in for a unit's exterior
+    door (line 54)."""
+    r = rules["general.bc_1010_1_1_door_height"]
+    for line in (43, 51, 54):
+        assert _cites(r, 322, line), line
+    one = lambda m: _one(r, "means_of_egress_door", m, NO_UNITS, ctx)
+    assert one(_door(height=80)) == "pass" and one(_door(height=79.99)) == "fail"
+    assert one(_door(height=78, **BETWEEN_ROOMS)) == "needs_review" and one(_door(height=77.99, **BETWEEN_ROOMS)) == "fail"
+    assert one(_door(height=76, **OUTSIDE)) == "needs_review" and one(_door(height=75.99, **OUTSIDE)) == "fail"
+    assert one(_door(height=78, moe_door_exit=True, **{k: v for k, v in BETWEEN_ROOMS.items() if k != "moe_door_exit"}))         == "fail"                                                     # an exit door is no door within a unit
+
+
+def test_1010_1_1_takes_no_size_from_anything_but_the_stated_clear_opening(ctx, rules):
+    """The hard condition (section group 6a): the sizes are the maker's stated clear opening, or none: a door with
+    no width or height measured needs review on both rules, never a pass (and never a fail: nothing measured)."""
+    for rid in ("general.bc_1010_1_1_door_width", "general.bc_1010_1_1_door_height"):
+        for g in ("B", "R-2", "I-2"):
+            assert _one(rules[rid], "means_of_egress_door", _door(), {"occupancy_group": g} | NO_UNITS, ctx) ==                 "needs_review", (rid, g)
+
