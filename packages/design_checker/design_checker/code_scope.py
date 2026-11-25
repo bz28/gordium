@@ -120,7 +120,11 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         "dwelling_units": "Gordium: Dwelling units", "care_facility": "Gordium: Care facility",
         "home_occupation": "Gordium: Home occupation", "rooms_let_for_profit": "Gordium: Rooms let for profit",
         "accessory_dwelling_unit": "Gordium: Accessory dwelling unit", "adu_detached": "Gordium: ADU detached",
-        "adus_on_parcel": "Gordium: ADUs on parcel", "sprinkler_system": "Gordium: Sprinkler system"}
+        "adus_on_parcel": "Gordium: ADUs on parcel", "sprinkler_system": "Gordium: Sprinkler system",
+        # what the Building Code's Chapter 10 rules read of the whole building (Revit: each a Yes/No on Project Information)
+        "assembly_fixed_seating": "Gordium: Fixed assembly seating", "special_egress_spaces": "Gordium: Special egress spaces",
+        "merchandise_pads": "Gordium: Merchandise pads", "egress_balcony_increase_taken": "Gordium: Egress balcony increase",
+        "building_has_atrium": "Gordium: Atrium"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
@@ -257,7 +261,10 @@ def _given(building) -> tuple[dict, list[str]]:
         elif ok:
             out[k] = v
         else:
-            bad.append(f"the building's {k.replace('_', ' ')} is {value_words(v)}, which Gordium can't read")
+            # named by the mark the architect corrects it on (review round 1: "the building's building has atrium is
+            # 2"), else in words
+            name = MARK.get(k) or f"the building's {k.replace('_', ' ')}"
+            bad.append(f"{name} is {value_words(v)}, which Gordium can't read")
     return out, bad
 
 

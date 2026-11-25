@@ -564,10 +564,12 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
             assert code_scope.MARK.get(k) == revit[k], (k, code_scope.MARK.get(k), revit[k])
         else:                        # no host has a mark for it: never one invented here
             assert k not in code_scope.MARK, k
-    # the facts no Revit mark states yet (the BCNYS's balcony, atrium, fixed seating, special egress spaces and
-    # merchandise pads): asked for by name, never by a mark
-    assert keys - set(revit) == {"egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating",
-                                 "special_egress_spaces", "merchandise_pads"}
+    # every fact the code choice and the Building Code's rules read has its Revit mark (the BCNYS's balcony, atrium,
+    # fixed seating, special egress spaces and merchandise pads were the last without one, PR feat/revit-fields-ch10)
+    assert keys - set(revit) == set()
+    for k in ("egress_balcony_increase_taken", "building_has_atrium", "assembly_fixed_seating", "special_egress_spaces",
+              "merchandise_pads"):
+        assert code_scope.field_of(k) == f"building.{k}" and code_scope.MARK[k] == revit[k], k
 
 
 @pytest.mark.parametrize("key", code_scope.READS)

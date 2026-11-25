@@ -139,9 +139,24 @@ public static class BuildingFacts
         MarkValue? Get(MarkDefinition m) => model.ProjectMarks.TryGetValue(m.Guid, out var v) ? v : null;
         foreach (var (mark, key) in new[] { (Marks.FollowsBuildingCode, "follows_building_code"),
                      (Marks.SeparateMeansOfEgress, "separate_means_of_egress"), (Marks.TownhouseUnits, "townhouse_units"),
-                     (Marks.CareFacility, "care_facility") })
-            if (Marks.YesNo(Get(mark)) is { } yes)
+                     (Marks.CareFacility, "care_facility"),
+                     // what the Building Code's Chapter 10 rules read of the whole building (code_scope.FACTS)
+                     (Marks.AssemblyFixedSeating, "assembly_fixed_seating"), (Marks.SpecialEgressSpaces, "special_egress_spaces"),
+                     (Marks.MerchandisePads, "merchandise_pads"), (Marks.EgressBalconyIncrease, "egress_balcony_increase_taken"),
+                     (Marks.Atrium, "building_has_atrium") })
+        {
+            var v = Get(mark);
+            if (Marks.YesNo(v) is { } yes)
                 b[key] = yes;
+            else if (v is { HasValue: true })
+            {
+                // set, but neither Yes nor No: asked again, never read as not stated; sent anyway as held, so the
+                // check says it can't read it (code_scope._given: a yes/no fact that isn't one needs review)
+                b[key] = v.Integer is { } n ? JsonValue.Create(n) : JsonValue.Create(v.Text ?? "not Yes or No");
+                notRead.Add(mark);
+                missing.Add($"{mark.Name} holds a value that isn't Yes or No: tick Yes or No, or leave it blank{Where}.");
+            }
+        }
         if (Marks.Count(Get(Marks.StoriesAboveGradePlane)) is { } stories)
         {
             if (stories < 1)
