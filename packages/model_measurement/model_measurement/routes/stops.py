@@ -121,6 +121,14 @@ STOPS = {
     "ground_existing": "the ground given is the existing ground, not the finished ground the grade plane is "
                        "measured from (the Building Code's grade plane, 202)",
     "ground_assumed": "the ground is assumed flat, not stated ({why}): where the grade plane is isn't known",
+    "ground_spots_not_finished": "the spot grades aren't stated as finished ground (Revit's Ground from mark set to "
+                                 "Finished spot grades, or no regrading near the house): the grade plane is measured "
+                                 "from the finished ground",
+    "ground_disagrees": "the ground is stated flat at {flat} but finished ground at an opening is stated higher "
+                        "({high}): which is right isn't known",
+    "ground_disagrees_spots": "the highest spot grade at the walls is {high} but finished ground at an opening is "
+                              "stated higher ({stated}): the spots don't bound the grade plane",
+    "ground_openings_not_read": "the finished ground stated at an opening or an area well's floor can't be read",
     "ground_spots_not_read": "the spot grades can't be read (each is a point with an elevation)",
     "ground_no_outline": "the stories' outlines aren't all given, so which spot grades are at the building's walls "
                          "isn't known",
@@ -145,11 +153,14 @@ STOPS = {
     "ground_buildings_apart": "the stories' outlines come apart in {count} pieces (separate buildings?): which spot "
                               "grades are each building's ground isn't known",
     # whether the story's rooms exit directly outside (BCNYS 1006.3.4 item 2: __init__.rooms_exit_outside)
-    "outside_no_rooms": "the story has no room besides its exits and the closets they serve",
-    "outside_way_unclear": "the rooms {name} have no door to the outside and open into no corridor or lobby shared "
-                           "with other rooms: whether they exit directly outside isn't known",
-    "outside_door_not_marked": "the room {name} has a door to the outside ({door}) not marked as an exit door at the "
-                               "level of exit discharge: whether it is one isn't known (exits are marked, never "
+    "outside_no_rooms": "the story has no room besides its exits",
+    "outside_way_unclear": "the space of {name} has no door to the outside and opens into no corridor or lobby: "
+                           "whether it exits directly outside isn't known",
+    "outside_hall_unclear": "the space of {name} reaches the outside through a corridor or lobby that may be its own "
+                            "(a hallway within one dwelling or tenant space): whether it exits directly outside isn't "
+                            "known",
+    "outside_door_not_marked": "the space of {name} has a door to the outside ({door}) not marked as an exit door at "
+                               "the level of exit discharge: whether it is one isn't known (exits are marked, never "
                                "guessed)",
     # the dwelling units on a story (Table 1006.3.4(1): dwelling_units.py)
     "units_use_unknown": "the room {name} has no use given: whether it is a corridor (shared) or part of a dwelling "
