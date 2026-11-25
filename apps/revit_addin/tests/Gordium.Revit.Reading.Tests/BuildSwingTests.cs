@@ -62,10 +62,13 @@ public sealed class BuildSwingTests
             {
                 var floor = new FakeFloor(turn);
                 floor.Swing("dA", +1, hinge: drawn);
-                var r = Read(floor, (0, 1), (10, 9.75));
-                Assert.Equal(0, r.DataHinge);
-                Assert.False(r.AsTheData || r.FlipHand);
-                Assert.Contains("hinge is at the door's centre", r.Why);
+                foreach (var off in new[] { 0, 0.004, -0.004 })          // a hair off centre too (round 4): within 1/16 in
+                {
+                    var r = Read(floor, (0, 1), (10 + off, 9.75));
+                    Assert.Equal(0, r.DataHinge);
+                    Assert.False(r.AsTheData || r.FlipHand);
+                    Assert.Contains("hinge is at the door's centre", r.Why);
+                }
                 var along = Read(floor, (1, 0), (8.5, 9.75));       // a swing along the wall says no side
                 Assert.Null(along.DataSide);
                 Assert.False(along.AsTheData || along.FlipFacing);
