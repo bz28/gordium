@@ -2539,11 +2539,35 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  Table 1006.3.4(1):
+    label: rule
+    topic: means_of_egress
+    reason: 'The values 1006.3.4 item 1 uses for Group R-2 of dwelling units: a basement or the first, second or third story
+      above grade plane may have one exit with at most 4 dwelling units and 125 feet of exit access travel, in a building
+      sprinklered per 903.3.1.1 or 903.3.1.2 with emergency escape and rescue openings per 1031 (note a); the fourth story
+      and higher not permitted.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 317
+      lines:
+      - 21
+      - 24
+      quote: Basement, first, second or third story above grade plane and occupi- R-2[fna,] [fnb,] [fnc] 4 dwelling units
+        125 feet able roofs over the first or second story above grade plane Fourth story above grade plane and higher NP
+        NA NA
+    piece_sha256: f9a641c0de1c5c19fa29fe73aa81ba53ec9ccec42ea86b9df69c1f055eaf3a20
+    notes: Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group 2
+      (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md); its rule is general.bc_table_1006_3_4_1__r2_dwelling_units.
+      Note b sends Group R-2 of sleeping units to Table 1006.3.4(2); note c's occupiable roofs are not measured.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   Table 1006.3.4(2):
     label: rule
     topic: means_of_egress
-    reason: 'The values 1006.3.4 item 1 uses: Group I on the first story above or below grade plane may have one exit with
-      at most 10 occupants and 75 feet of exit access travel; on the second story and above, not at all.'
+    reason: 'The values 1006.3.4 item 1 uses for every group but Group R-2 of dwelling units: on the first story above or
+      below grade plane, A, B, E, F, M and U at most 49 occupants and 75 feet (100 feet in B and F with NFPA 13, note b),
+      H-2 and H-3 3 and 25 feet, H-4, H-5, I, R-1 and R-2 of sleeping units 10 and 75 feet, S 29 and 75 feet; on the second
+      story B, F, M and S 29 and 75 feet; the third story and higher not permitted.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 317
@@ -2556,8 +2580,9 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Read by position (each cell''s
       characters and x positions on p.317) and on the page image: the I row is H-4, H-5, I, R-1, R-2 (notes a, c) | 10 | 75,
       under ''First story above or below grade plane and occupiable roofs over the first story above grade plane''; Group
-      I is not in the second-story row. Gordium''s rules are drafted for Group I-4 (day care) first; the table''s other rows
-      have a flag of their own (a section''s rule checks only its own row).'
+      I is not in the second-story row. Every row has a rule since 2026-11-23 (general.bc_table_1006_3_4_2__<groups>, three by family;
+      Group I-4''s, general.bc_1006_3_3_story_exits); a building of two or more groups is general.bc_table_1006_3_4_2__other_occupancies''s
+      flag.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   1006.3.4.1:

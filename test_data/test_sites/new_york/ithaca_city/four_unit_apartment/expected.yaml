@@ -45,7 +45,15 @@ results:
   general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
   general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three
   general.bc_1006_2_1_1_three_or_more_exits: needs_review   # reads space_occupant_load: not measured (no mark yet)
-  general.bc_1006_3_3_story_exits: needs_review        # reads story_occupant_load and story_first_above_or_below_grade: not measured
+  # a story's exits (section group 2, 2026-11-23): Group I-4's rule no longer applies (Group R-2 is one other
+  # group); the R-2 rows need review: whether its R-2 is of dwelling units (Table 1006.3.4(1)) or sleeping units
+  # (Table 1006.3.4(2)) isn't stated (r2_sleeping_units: no Revit mark yet), and the story's occupant load isn't
+  # measured
+  general.bc_1006_3_3_story_exits: not_applicable
+  general.bc_table_1006_3_4_1__r2_dwelling_units: needs_review
+  general.bc_table_1006_3_4_2__h_i_r: needs_review
+  general.bc_table_1006_3_4_2__a_b_e_f_m_u: not_applicable
+  general.bc_table_1006_3_4_2__s: not_applicable
   general.bc_508_2_3_accessory_area: needs_review      # no accessory rooms (0 sf both readings), but the story's net and gross floor areas aren't measured
   # Group I-4 rules: applies_when occupancy_group_i4, stated no (Group R-2)
   general.bc_1006_2_1_two_exits: not_applicable
@@ -90,7 +98,7 @@ results:
   general.bc_table_1006_2_1_u: not_applicable
   # the flags: a person's check, each its own line (other_occupancy_present is yes: Group R-2 is not I-4; the
   # balcony and atrium flags' facts aren't stated, so they show), but those narrowed 2026-11-23 to a building of two
-  # or more groups or to another group (not applicable: R-2 is one group, its rows drafted); 24 show
+  # or more groups or to another group (not applicable: R-2 is one group, its rows drafted); 22 show
   general.bc_308_5_classification: needs_review
   general.bc_308_5_1_group_e: needs_review
   general.bc_308_5_2_religious_worship: needs_review
@@ -101,8 +109,8 @@ results:
   general.bc_508_2_3_tabular_values: needs_review
   general.bc_508_2_4_separation: needs_review
   general.bc_table_1006_2_1_other_occupancies: not_applicable
-  general.bc_1006_3_4_1_mixed_occupancies: needs_review
-  general.bc_table_1006_3_4_2__other_occupancies: needs_review
+  general.bc_1006_3_4_1_mixed_occupancies: not_applicable
+  general.bc_table_1006_3_4_2__other_occupancies: not_applicable
   general.bc_1007_1_2_three_or_more_exits: needs_review
   general.bc_1007_1_3_exit_access_stairways: needs_review
   general.bc_1007_1_3_1_three_or_more_stairways: needs_review
