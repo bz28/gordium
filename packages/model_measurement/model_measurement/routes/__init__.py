@@ -163,8 +163,10 @@ def _egress_sides(story, access) -> dict:
     - A door into an exit enclosure or passageway (the room it enters): into the exit, only where that room has its own
       door to outside on this story or the story has no door to outside at all, so the door can't be the exit's
       discharge (1028.1's discharge through a lobby or corridor runs out of the stair through it). A horizontal exit:
-      not known (the routes count it an exit for the rooms on both its sides; it is often used both ways, 1026).
-    - Any door to outside: outside. Whether an occupied patio or roof egresses back in through it (1004.7) is the
+      not known (the routes count it an exit for the rooms on both its sides; it is often used both ways, 1026). An
+      exterior exit door at the level of exit discharge: outside; any other exit door with outside on one side (a
+      stair's door onto an occupiable roof, whose occupants egress into the stair: 1004.7): not known.
+    - Any other door to outside: outside. Whether an occupied patio or roof egresses back in through it (1004.7) is the
       swing rule's own condition (the building's occupied outdoor areas), so the panel asks that fact.
     - Any other: away from the one room whose exit access it is (a door from which a route reaches an exit without
       coming back into the room), only where that room is stated end-only (sleeping, an end-only use, lockable, or
@@ -181,8 +183,8 @@ def _egress_sides(story, access) -> dict:
             out[d.id] = Stop("story_not_measured", reasons="; ".join(story.stops))
             continue
         if d.exit_kind:
-            if OUTSIDE_SIDE in d.sides:
-                out[d.id] = OUTSIDE_SIDE
+            if OUTSIDE_SIDE in d.sides:              # only an exterior exit door at discharge surely leads out (round 3:
+                out[d.id] = OUTSIDE_SIDE if d.exit_kind == "exterior_at_discharge" else unclear(d)   # a roof's door
             elif d.exit_kind in ("exit_enclosure", "exit_passageway") and d.exit_id in d.sides:
                 own_outside = any(d.exit_id in story.doors[o].sides for o in outside_doors)
                 out[d.id] = d.exit_id if own_outside or not outside_doors else unclear(d)

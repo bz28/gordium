@@ -328,3 +328,20 @@ def test_egress_direction_is_known_only_where_travel_can_cross_the_door_one_way_
     patio = _office()
     patio["doors"].append(door("p", (10, -0.25), (1, 0), ("r", "outside"), swings_into="outside"))
     assert _parts(patio)["p"]["measures"]["moe_door_swings_with_egress"] is True
+
+
+def test_only_an_exterior_exit_door_at_discharge_surely_leads_outside():
+    """Review round 3 of group 6b: a stair's door onto an occupiable roof, marked an exit enclosure's door, carries the
+    roof's occupants into the stair (1004.7): which way egress goes through it isn't known; an exterior door at the
+    level of exit discharge leads outside."""
+    d = description([room("r", rect(0, 0, 10, 10), use="other", lockable=False, pass_through=False),
+                     room("s", rect(10.5, 0, 20, 10), use="other", lockable=False, pass_through=False)],
+                    [door("d", (10.25, 5), (0, 1), ("r", "s"), exit_id="s", kind="exit_enclosure", swings_into="s"),
+                     door("rf", (15, 10.25), (1, 0), ("s", "outside"), exit_id="s", kind="exit_enclosure",
+                          swings_into="outside")])
+    got = {p["id"]: p for p in measure(d)["parts"]["means_of_egress_door"]}
+    assert _why(got["rf"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="rf")
+    got = _parts(_office())                                  # x: an exterior door at discharge
+    d = _office()
+    d["doors"][1]["swings_into"] = "outside"
+    assert _parts(d)["x"]["measures"]["moe_door_swings_with_egress"] is True

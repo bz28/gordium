@@ -14030,7 +14030,7 @@ rules:
     whose operation is other or not stated may be swinging. Whether it swings with egress travel: the side it swings into,
     as the description states it (no Revit mark yet), against the side egress travel goes into through it, as the routes find
     it, known only where travel crosses the door one way alone (into an exit stair or passageway where it can''t be the exit''s
-    discharge; outside through an exit door, or any door to outside where the building states no occupied outdoor areas;
+    discharge; outside through an exterior exit door at discharge or a door to outside that isn''t an exit (the rule needing review for the latter while occupied outdoor areas aren''t ruled out), not known through any other exit door to outside (a stair''s door onto a roof);
     else away from the one room it is an exit access door of, where that room is stated end-only (a horizontal exit: not known); review round 1). Its occupant
     load is two readings, none and the whole building''s, only where no occupied outdoor areas are stated (1004.7; every
     story''s upper load added):
