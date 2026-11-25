@@ -197,9 +197,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     Group H's sprinkler system), are not applicable to a one-group R-2. Section group 4b adds 1020.2.1's elevator
     hoistway doors (24); its per-corridor flag (a rated corridor's walls) is a corridor's row, not a building line.
     Section group 4c adds 1020.4's and 1020.6's (26); 1020.7's is a corridor's row. Section group 5a adds 1005.3.1's
-    stairways and 1005.3.2's doors, ramps and passageways (28); section group 5b 1005.4, 1005.5 and 1005.6 (31); section group 5c 1005.7.1 to 1005.7.3 (34)."""
+    stairways and 1005.3.2's doors, ramps and passageways (28); section group 5b 1005.4, 1005.5 and 1005.6 (31); section group 5c 1005.7.1 to 1005.7.3 (34);
+    section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 34 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 37 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -301,3 +302,37 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
     assert moved[("occupied_outdoor_areas", False)] == {"general.bc_1004_7_outdoor_areas": ("needs_review", "not_applicable")}
     assert moved[("occupied_outdoor_areas", True)] == moved[("occupant_load_increased", False)] == \
         moved[("occupant_load_increased", True)] == {}
+
+
+# ---- section group 6a (2026-11-25): door size, 1010.1.1, from each door's maker's stated clear opening ----------------
+
+WIDTH, HEIGHT = "general.bc_1010_1_1_door_width", "general.bc_1010_1_1_door_height"
+
+
+def test_door_size_as_sent_and_with_each_doors_leaves_stated(got):
+    """Before: the door width rule needs review on every door (34 in, but how many leaves isn't stated: a pair's
+    one leaf must give 32 in), the height complies on every door (80 in, the maker's stated clear height). After,
+    every door stated to have one leaf: the width complies too, and nothing else changes."""
+    assert got["results"][WIDTH] == present.REVIEW and got["results"][HEIGHT] == "pass"
+    rows = [r for r in got["rows"] if r["rule"] in (WIDTH, HEIGHT)]
+    assert len(rows) == 20 and {r["values"].get("moe_door_clear_width") for r in rows if r["rule"] == WIDTH} == {34}
+    desc = build.interior_of()
+    for d in desc["doors"]:
+        d["leaves"] = 1
+    stated = _check(desc, egress.measure_routes(desc))
+    assert stated["results"][WIDTH] == "pass" and stated["results"][HEIGHT] == "pass"
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {WIDTH}
+
+
+def test_a_door_with_no_stated_clear_opening_is_never_sized_from_its_leaf(got):
+    """The hard condition through the whole check: one door's maker's clear opening taken away (its plan, the routes'
+    figure, kept), both its size rows need review, never a pass on its 36 by 84 in leaf or its plan width; the rule's
+    answer with it."""
+    desc = build.interior_of()
+    for d in desc["doors"]:
+        d["leaves"] = 1
+    desc["doors"][0].pop("stated_clear")
+    stated = _check(desc, egress.measure_routes(desc))
+    mine = [r for r in stated["rows"] if r["rule"] in (WIDTH, HEIGHT) and r["id"] == desc["doors"][0]["id"]]
+    assert len(mine) == 2 and {r["outcome"] for r in mine} == {"needs_review"}
+    assert stated["results"][WIDTH] == present.REVIEW and stated["results"][HEIGHT] == present.REVIEW

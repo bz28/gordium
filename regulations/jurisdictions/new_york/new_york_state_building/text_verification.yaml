@@ -18,15 +18,16 @@ second_reading:
     pieces of the rest of Section 1020 (1020.4, 1020.6, 1020.6.1, 1020.7 and 1 definition, 2026-11-25), a twelfth for
     the 4 pieces of section group 5a (1005.1, 1005.2, 1005.3, 1005.3.1, 2026-11-25), a thirteenth for the 3 of section
     group 5b (1005.4, 1005.5, 1005.6), a fourteenth for the 6 of section group 5c (1005.7 to 1005.7.3 and 2
-    definitions), and a helper for the comparison words)
+    definitions), a fifteenth for the 9 of section group 6a (1010.1, 1010.1.1, 1010.1.1.1 and 6 definitions,
+    2026-11-25), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), and 3 pages, 6 boxes as step_13 (section group 5c); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), and 7 pages, 10 boxes as step_14 (section group 6a); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 243 pieces, 621 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 252 pieces, 663 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -54,6 +55,12 @@ pieces:
     - '11'
     second_reading_comparisons:
     - none
+  202:accessible_unit:
+    piece_sha256: 3324feb626458076a684e2c2614aaa33f3d85d1301d25ed55b68240d1d1f1e60
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:addition:
     piece_sha256: 0efc764c69f61e6f2b28b62f545c3e254cb3104a1a695afb51a4606b5f12f733
     numbers: []
@@ -937,6 +944,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:overhead_doorstop:
+    piece_sha256: fe7e9cd1315fd3fcc3242c0e146260cd57b253d3162cf54d5b396b0ee8a84264
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:owner:
     piece_sha256: 70386dd0eeb1c09bcd4e38930757ca37adcd8c68813729a467af9805052e4a11
     numbers: []
@@ -979,6 +992,18 @@ pieces:
     second_reading_comparisons:
     - none
     - <=
+  202:plumbing_code_of_new_york_state:
+    piece_sha256: 1d1e666b5250e6f76b3e98251099e4533448cbce3ff3152a850f71c500a95a3e
+    numbers:
+    - '2025'
+    - '2025'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2025'
+    - '2025'
+    second_reading_comparisons:
+    - none
+    - none
   202:public_way:
     piece_sha256: 9c30bb288f4686d66c6762dfcbf3145b9a1416cc78180b76405f8335b44d63f6
     numbers:
@@ -1100,6 +1125,12 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:shower:
+    piece_sha256: 2d11d59170848ae3e34dbc53ce98df7407a0acd2c8acdbc0fd2a8612c2108d2d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:site:
     piece_sha256: 920170e75cc3b8b0be60c3232b2cd76c652dafb3d8013af8d97cb6b4e88359fe
     numbers: []
@@ -1289,6 +1320,18 @@ pieces:
       is missed. The second reading is right. Used by no rule.'
   202:trim:
     piece_sha256: a50c365023e107da8eab8f57defaddf42c7c9a7db84a49d484e64c9ba5f4e6da
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:type_a_unit:
+    piece_sha256: af41f2f6852fed20551c5a7669196c2c62200a0d947fd5ea7c6cff92e139cb53
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:type_b_unit:
+    piece_sha256: e6ba8254a2a98fee8232a0fb07f252b60f7a7bf0e547c6040d18f22af1b99cda
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -2749,6 +2792,155 @@ pieces:
     - '>='
     - '>'
     - '>='
+  '1010.1':
+    piece_sha256: c1e2ce1fde03033ec7eec8d0217bc8b6732499263e79d2a42b83fc0720085261
+    numbers:
+    - '1010.1'
+    - '1022.2'
+    - '1010.4'
+    - '1010.5'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1010.1'
+    - '1022.2'
+    - '1010.4'
+    - '1010.5'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  1010.1.1:
+    piece_sha256: 112c58f8b7ca46cda115ba232f295d1f56b73dcb902b0c8d8520a936c010a49d
+    numbers:
+    - 32 inch
+    - 813 mm
+    - 90 degree
+    - 1.57 rad
+    - 32 inch
+    - 813 mm
+    - two
+    - one
+    - 32 inch
+    - 813 mm
+    - 41 1/2 inch
+    - 1054 mm
+    - not less than 80 inch
+    - 2032 mm
+    - 28 inch
+    - 711 mm
+    - less than 10 square foot
+    - 0.93 m
+    - 78 inch
+    - 1981 mm
+    - 76 inch
+    - 1930 mm
+    - 31.75 inch
+    - 806 mm
+    - 20 inch
+    - 508 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 32 inch
+    - 813 mm
+    - 90 degree
+    - 1.57 rad
+    - 32 inch
+    - 813 mm
+    - two
+    - one
+    - 32 inch
+    - 813 mm
+    - 41 1/2 inch
+    - 1054 mm
+    - not less than 80 inch
+    - 2032 mm
+    - 28 inch
+    - 711 mm
+    - less than 10 square foot
+    - 0.93 m
+    - 78 inch
+    - 1981 mm
+    - 76 inch
+    - 1930 mm
+    - 31.75 inch
+    - 806 mm
+    - 20 inch
+    - 508 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - <
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    flags:
+    - '''32 inch'' (>=), three times: ''shall provide a minimum clear opening width of 32 inches'' and ''one leaf shall provide
+      a minimum clear opening width of 32 inches''; ''41 1/2 inch'' (>=), ''28 inch'' (>=), ''31.75 inch'' (>=) and ''20 inch''
+      (>=): each ''a minimum clear opening width of''; ''78 inch'' (>=) and ''76 inch'' (>=): each ''a minimum clear opening
+      height of''. The recorded words miss them (numbers.py reads ''minimum'' only directly before a number, not before ''clear
+      opening width of''). The second reading is right.'
+  1010.1.1.1:
+    piece_sha256: 510625f8fefc1d31569155bbb4d0b0fa8b26eedd717388b481591941632e1231
+    numbers:
+    - 34 inch
+    - 864 mm
+    - between 34 inch
+    - 864 mm
+    - and 80 inch
+    - 2032 mm
+    - not exceed 4 inch
+    - 102 mm
+    - 78 inch
+    - 1980 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 34 inch
+    - 864 mm
+    - between 34 inch
+    - 864 mm
+    - and 80 inch
+    - 2032 mm
+    - not exceed 4 inch
+    - 102 mm
+    - 78 inch
+    - 1980 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - between
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - '>='
+    - none
+    flags:
+    - '''34 inch'' (>=): ''There shall not be projections into the required clear opening width lower than 34 inches'', so a
+      projection is at 34 inches or higher; ''and 80 inch'' (<=): the upper end of ''between 34 inches and 80 inches''; ''78
+      inch'' (>=): ''not lower than 78 inches''. The recorded words miss them (numbers.py reads no ''lower than'' and no range''s
+      upper end). The second reading is right. A flag: no rule uses them.'
   '1016.2':
     piece_sha256: 75ce5120ce02dba41247b79ce0300db00da2a96dfe6066836bd5c20e9e0df752
     numbers:

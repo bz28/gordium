@@ -154,6 +154,7 @@ occupancy_group:
   - general.bc_1006_3_4_1_mixed_occupancies
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
+  - general.bc_1010_1_1_door_width
   - general.bc_1016_2_intervening_spaces_other_groups
   - general.bc_1016_2_other_occupancies
   - general.bc_1017_2_2_f1_s1_increase
@@ -352,6 +353,8 @@ corridors_within_dwelling_units:
     required there in Groups I-1 and R; Table 1020.3: 36 inches within a dwelling unit), as the architect states it'
   unit: yes_no
   needed_by:
+  - general.bc_1010_1_1_door_height
+  - general.bc_1010_1_1_door_width
   - general.bc_table_1020_2_i1_i3
   - general.bc_table_1020_2_r
   - general.bc_table_1020_3_corridor_width
