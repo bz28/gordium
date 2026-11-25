@@ -12,10 +12,11 @@ Each part says:
   (`stated_clear`, read and refused as model_measurement.interior.doors.stated_clear reads it), the confirmed
   figure the routes pass the door by. Never the door's size, its leaf, or a plan width alone: a door with no stated
   clear opening (or a malformed one) has neither size measured, so BCNYS 1010.1.1 needs review for it, never a
-  pass. Every other figure given for a size must agree with the maker's within 1/16 in, or that size isn't
-  measured either (which is the door's is unclear), and where they agree the smallest of them counts: the plan's clear width (the routes' figure), and the drawn door
-  where its drawing is given (its stops, hinge pin and closed leaf; its threshold and head stop, measured as the
-  house reading measures them, model_measurement.interior.doors), or that drawing can't be measured.
+  pass. Every other figure given for a size, the plan's clear width (the routes' figure) and the drawn door where
+  its drawing is given (its stops, hinge pin and closed leaf; its threshold and head stop, measured as the house
+  reading measures them, model_measurement.interior.doors), must agree with the maker's within 1/16 in, and the
+  drawing must be measurable, or that size isn't measured (which figure is the door's is unclear); where they
+  agree, the smallest counts.
 - `moe_door_leaves` (count): the description's `leaves` (1, or 2 for a pair with no mullion): 1010.1.1 asks one
   leaf of a pair for the 32 in, which a pair's clear opening doesn't show. Not given: not measured.
 - `moe_door_exit`: the door is marked an exit (`exit_kind`); `moe_door_exterior`: one side is outside;
