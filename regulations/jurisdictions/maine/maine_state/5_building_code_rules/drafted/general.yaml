@@ -30,13 +30,15 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: Which group the building is in decides every limit below; the architect states it (occupancy_group_i4), a person
-      confirms.
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    The rules of this rulebook are drafted for Group I-4 only (their applies_when); a building in another group needs its
-    own rules, so this flag always shows. Hand-drafted in a Claude Code session (2026-11-20).'
+    note: >-
+      Which group the building is in decides every limit below; the architect states it, a person confirms.
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). The rules of this rulebook are drafted for Group I-4 only
+    (each applies to Group I-4 alone); a building in another group needs its own rules, so this flag always shows.
+    Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_308_5_1_adult_care_classification
@@ -55,10 +57,12 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Adult day care for more than five: I-4, or R-3 by the exception; the architect states it.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    ''1-4'' is the OCR''s reading of I-4 (the book''s ICC print reads I-4). Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). '1-4' is the OCR's reading of I-4 (the book's ICC print reads
+    I-4). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_308_5_2_child_care_classification
@@ -87,11 +91,12 @@ rules:
     expect: needs_review
     note: 'More than five children 2 1/2 or younger: I-4, unless the exception makes it Group E; the children''s ages and
       the rooms'' doors are the architect''s statement.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    ''1-4'' is the OCR''s reading of I-4 (the book''s ICC print reads I-4). The answer key''s sheet says I-4. Hand-drafted
-    in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). '1-4' is the OCR's reading of I-4 (the book's ICC print reads
+    I-4). The answer key's sheet says I-4. Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_508_2_1_accessory_area
@@ -145,12 +150,14 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Its second test, Table 503''s tabular values (and Section 506''s increases), is not brought in: that part needs a person
-    whatever this test gives. The sheet cites only Table 503 and names no section for the 10 percent (hand_check.yaml sheet_errors).'
+    note: "No story: with none, the rule needs review."
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Its second test, Table 503's tabular values (and Section
+    506's increases), is not brought in: that part needs a person whatever this test gives. The sheet cites only Table
+    503 and names no section for the 10 percent (the answer key's list of the sheet's errors, hand_check.yaml).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_508_2_2_classification
@@ -168,10 +175,11 @@ rules:
   - given: {}
     expect: needs_review
     note: Each accessory occupancy's own classification is the architect's statement.
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_508_2_3_area_and_height
@@ -189,10 +197,11 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Table 503 and Sections 503.1 and 504 are not brought in: a person checks.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_508_2_4_separation
@@ -210,10 +219,11 @@ rules:
   - given: {}
     expect: needs_review
     note: Whether an exception (Group H, incidental, dwelling or sleeping units) applies is the architect's statement.
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_508_2_5_incidental_accessory
@@ -238,10 +248,11 @@ rules:
   - given: {}
     expect: needs_review
     note: Which rooms are incidental (Table 508.2.5) and how they are separated are the architect's input.
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_508_2_5_1_rated_separation
@@ -260,10 +271,11 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Sections 707 and 712 are not brought in: a person checks the assemblies.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_508_2_5_2_smoke_resisting_separation
@@ -281,10 +293,11 @@ rules:
   - given: {}
     expect: needs_review
     note: The walls, doors and openings are a person's check.
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_508_2_5_3_protection
@@ -302,10 +315,11 @@ rules:
   - given: {}
     expect: needs_review
     note: The system's extent is a person's check.
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1004_1_design_occupant_load
@@ -325,10 +339,11 @@ rules:
   - given: {}
     expect: needs_review
     note: Whose egress passes through which space is the architect's input.
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1004_1_1_occupant_load
@@ -397,7 +412,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       occupancy_group_i4: true
     parts:
@@ -430,11 +445,13 @@ rules:
     expect: not_applicable
     drafted_check: not_applicable
     note: 'Not Group I-4: the day-care factor is not this building''s.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    The sheet gives no occupant load. Most restrictive: NFPA 101 16.1.7.1 uses the same 35 net (Table 7.3.1.2), and the greater
-    of that and the maximum probable population; both apply, the stricter governs (general.nfpa_16_1_7_1_occupant_load).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). The sheet gives no occupant load. Most restrictive: NFPA 101
+    16.1.7.1 uses the same 35 net (Table 7.3.1.2), and the greater of that and the maximum probable population; both
+    apply, the stricter governs (the rule “Occupant load at least net area / 35 (NFPA 16.1.7.1)”).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1008_1_2_door_swing
@@ -494,13 +511,14 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No means of egress door: the rule''s when_none (needs_review).'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Its exceptions (revolving, horizontal sliding and power-operated doors complying with 1008.1.4, not brought in; private
-    garages, offices, factory and storage areas of 10 or fewer) are a person''s check: a door that is not swinging fails this
-    drafted test, never passes it.'
+    note: "No means of egress door: with none, the rule needs review."
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Its exceptions (revolving, horizontal sliding and
+    power-operated doors complying with 1008.1.4, not brought in; private garages, offices, factory and storage areas of
+    10 or fewer) are a person's check: a door that is not swinging fails this drafted test, never passes it.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1014_3_common_path
@@ -561,13 +579,15 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Its exceptions raise the limit for Groups B, F, S, I-3 and R-2, not I-4 (sprinklered or not). Most restrictive: NFPA 101
-    16.2.5.3.1 allows 100 ft in a building sprinklered throughout (approved, supervised, Section 9.7), 16.2.5.3.2 75 ft otherwise;
-    both apply and the stricter governs: this rule''s 75 ft, as the sheet says (''1014.3 2009 IBC (most restrictive)'').'
+    note: "No story: with none, the rule needs review."
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Its exceptions raise the limit for Groups B, F, S, I-3 and
+    R-2, not I-4 (sprinklered or not). Most restrictive: NFPA 101 16.2.5.3.1 allows 100 ft in a building sprinklered
+    throughout (approved, supervised, Section 9.7), 16.2.5.3.2 75 ft otherwise; both apply and the stricter governs:
+    this rule's 75 ft, as the sheet says ('1014.3 2009 IBC (most restrictive)').
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1015_1_two_exits
@@ -652,12 +672,14 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Table 1015.1''s I-4 row prints ''1-4'' (the OCR''s reading; ICC''s book prints I-4) and its footnote a sets day care at
-    10. Condition 3 (1015.3 to 1015.6.1, not brought in) is a person''s check.'
+    note: "No space: with none, the rule needs review."
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Table 1015.1's I-4 row prints '1-4' (the OCR's reading; ICC's
+    book prints I-4) and its footnote a sets day care at 10. Condition 3 (1015.3 to 1015.6.1, not brought in) is a
+    person's check.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1015_1_1_three_or_more_exits
@@ -713,10 +735,12 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).'
+    note: "No space: with none, the rule needs review."
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1015_2_arrangement
@@ -735,10 +759,11 @@ rules:
   - given: {}
     expect: needs_review
     note: Whether exits are obvious and unobstructed is a person's judgment.
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1015_2_1_remoteness
@@ -816,7 +841,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -833,12 +858,14 @@ rules:
     expect: needs_review
     drafted_check: fail
     note: 'Not sprinklered: one-half applies, and 0.4 is under it.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Exception 1 (exit enclosures joined by a 1-hour corridor: measured along the corridor; ''I-hour'' is the OCR''s reading
-    of 1-hour) is a person''s check. NFPA 101''s day-care chapters set no remoteness of their own in the brought-in parts
-    (7.5.1.3, not brought in, would): this IBC rule is the only one here.'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Exception 1 (exit enclosures joined by a 1-hour corridor:
+    measured along the corridor; 'I-hour' is the OCR's reading of 1-hour) is a person's check. NFPA 101's day-care
+    chapters set no remoteness of their own in the brought-in parts (7.5.1.3, not brought in, would): this IBC rule is
+    the only one here.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1015_2_2_three_or_more_exits
@@ -911,11 +938,13 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    exit_remoteness_ratio is of the two farthest-apart exits, so it is the best pair 1015.2.2 asks for.'
+    note: "No story: with none, the rule needs review."
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). The exits' remoteness is measured between the two
+    farthest-apart exits, so it is the best pair 1015.2.2 asks for.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1016_1_travel_distance
@@ -989,7 +1018,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: false
@@ -1006,13 +1035,15 @@ rules:
     expect: needs_review
     drafted_check: fail
     note: 'Table 1016.1: Group I-4 without a sprinkler system is Not Permitted.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Table 1016.1''s row prints ''1-2,1-3,1-4'' (the OCR''s reading of I-2, I-3, I-4). Exceptions 3 and 4 are for occupancies
-    other than Groups H and I. Most restrictive: NFPA 101 16.2.6.2(2) allows 150 ft from any point in a room, plus 50 ft sprinklered
-    (16.2.6.3: 200 ft), and 16.2.6.2(1) 100 ft (150 ft) from a room door; both apply, the stricter governs. At the sheet''s
-    130''-8" both pass; NFPA''s room-door limit is the tighter where a room door is far from an exit.'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Table 1016.1's row prints '1-2,1-3,1-4' (the OCR's reading of
+    I-2, I-3, I-4). Exceptions 3 and 4 are for occupancies other than Groups H and I. Most restrictive: NFPA 101
+    16.2.6.2(2) allows 150 ft from any point in a room, plus 50 ft sprinklered (16.2.6.3: 200 ft), and 16.2.6.2(1) 100
+    ft (150 ft) from a room door; both apply, the stricter governs. At the sheet's 130'-8" both pass; NFPA's room-door
+    limit is the tighter where a room door is far from an exit.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1018_1_corridor_rating
@@ -1088,15 +1119,16 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-    note: 'No corridor: the rule''s when_none (not_applicable).'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Table 1018.1''s rows are read in two runs (occupancy and load; then the ratings), so the I-4 row (''1-2 ,1-4 All'', the
-    OCR''s reading of I-2, I-4) and its ratings (''Not Permitted 0'') are quoted apart; ICC''s book prints them in one row.
-    Most restrictive: NFPA 101 16.3.6 requires 1-hour corridor walls unless the building is sprinklered (approved, supervised)
-    and the walls form smoke partitions, or every client space opens outside; both apply, the stricter governs (NFPA''s smoke
-    partitions).'
+    note: "No corridor: with none, the rule does not apply."
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Table 1018.1's rows are read in two runs (occupancy and load;
+    then the ratings), so the I-4 row ('1-2 ,1-4 All', the OCR's reading of I-2, I-4) and its ratings ('Not Permitted
+    0') are quoted apart; ICC's book prints them in one row. Most restrictive: NFPA 101 16.3.6 requires 1-hour corridor
+    walls unless the building is sprinklered (approved, supervised) and the walls form smoke partitions, or every client
+    space opens outside; both apply, the stricter governs (NFPA's smoke partitions).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1018_2_corridor_width
@@ -1167,12 +1199,13 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-    note: 'No corridor: the rule''s when_none (not_applicable).'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Section 1005.1 (width by occupant load, not brought in) may ask more: a person checks. Exceptions 1, 3, 4, 5 and 6 are
-    for other spaces and occupancies.'
+    note: "No corridor: with none, the rule does not apply."
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Section 1005.1 (width by occupant load, not brought in) may
+    ask more: a person checks. Exceptions 1, 3, 4, 5 and 6 are for other spaces and occupancies.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_1018_4_dead_end
@@ -1259,7 +1292,7 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-    note: 'No corridor: the rule''s when_none (not_applicable).'
+    note: "No corridor: with none, the rule does not apply."
   open_questions:
   - 'Which dead-end limit Maine enforced on the October 2016 permit: the 2009 IBC''s (20 ft, with exception 3) and NFPA 101''s
     (50 ft sprinklered), or a Maine modification of 16-219 CMR ch. 20 setting a flat 20 ft (today''s rule has one)?'
@@ -1278,14 +1311,16 @@ rules:
         read 2026-11-20 (docs/decisions/2026-11-20_commercial_egress_maine.md)'
     why_open: The rule text in force in October 2016 was not found online; today's names a later edition. A question for the
       City of Portland or the State Fire Marshal's office.
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    It applies where more than one exit or exit access doorway is required (1015.1): with one, a person decides. Exception
-    2''s 50 ft (sprinklered) lists Groups B, E, F, I-1, M, R-1, R-2, R-4, S and U, not I-4; exception 1 is Group I-3. Most
-    restrictive: NFPA 101 16.2.5.2 allows 50 ft in a building sprinklered throughout (approved, supervised), 20 ft otherwise;
-    both apply, the stricter governs: here the IBC''s 25 ft (2.5 x 10 ft), as the sheet says. Maine''s own Life Safety rule
-    (16-219 CMR ch. 20) today sets a flat 20 ft limit, which 21''-6" would fail: open (README).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). It applies where more than one exit or exit access doorway is
+    required (1015.1): with one, a person decides. Exception 2's 50 ft (sprinklered) lists Groups B, E, F, I-1, M, R-1,
+    R-2, R-4, S and U, not I-4; exception 1 is Group I-3. Most restrictive: NFPA 101 16.2.5.2 allows 50 ft in a building
+    sprinklered throughout (approved, supervised), 20 ft otherwise; both apply, the stricter governs: here the IBC's 25
+    ft (2.5 x 10 ft), as the sheet says. Maine's own Life Safety rule (16-219 CMR ch. 20) today sets a flat 20 ft limit,
+    which 21'-6" would fail: an open question, recorded in the Maine folder's README.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_16_1_7_1_occupant_load
@@ -1372,7 +1407,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
@@ -1636,9 +1671,10 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No means of egress door: the rule''s when_none (needs_review).'
-  notes: Hand-drafted in a Claude Code session (2026-11-20). Whether the hardware complies with 7.2.1.7 (not brought in) is
-    the architect's statement (moe_door_panic_hardware).
+    note: "No means of egress door: with none, the rule needs review."
+  notes: >-
+    Hand-drafted in a Claude Code session (2026-11-20). Whether the hardware complies with 7.2.1.7 (not brought in) is
+    the architect's statement (on the door).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_16_2_5_2_dead_end
@@ -1724,7 +1760,7 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-    note: 'No corridor: the rule''s when_none (not_applicable).'
+    note: "No corridor: with none, the rule does not apply."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: false
@@ -1756,9 +1792,11 @@ rules:
         Maine''s modifications, one a 20-ft dead-end limit; read 2026-11-20'
     why_open: The rule text in force in 2016 was not found online; a question for the State Fire Marshal's office or the City
       of Portland.
-  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1018.4 allows 20 ft, or any length under
-    2.5 times the least width (exception 3), and not 50 ft for I-4 (a flag: OCR copy); both apply, the stricter governs (the
-    sheet: 25 ft by the IBC). Maine''s 16-219 CMR ch. 20 today sets a flat 20 ft: open (general.ibc_1018_4_dead_end, README).'
+  notes: >-
+    Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1018.4 allows 20 ft, or any length under
+    2.5 times the least width (exception 3), and not 50 ft for I-4 (a flag: OCR copy); both apply, the stricter governs
+    (the sheet: 25 ft by the IBC). Maine's 16-219 CMR ch. 20 today sets a flat 20 ft: an open question (see the rule
+    “Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4)” and the Maine folder's README).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_16_2_5_3_1_common_path_sprinklered
@@ -1819,7 +1857,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: false
@@ -1907,7 +1945,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: false
@@ -1945,9 +1983,10 @@ rules:
   check: egress_travel_from_room_door <= 100
   review_when:
   - when: egress_travel_from_room_door > 100 and sprinklered_9_7 and sprinkler_supervised_9_7
-    reason: 'Over 100 ft in a building protected throughout by an approved, supervised automatic sprinkler system (Section
-      9.7): 16.2.6.3 permits 50 ft more, a permission whose number the checker doesn''t add (general.nfpa_16_2_6_3_sprinkler_increase);
-      a person applies it.'
+    reason: >-
+      Over 100 ft in a building protected throughout by an approved, supervised automatic sprinkler system (Section
+      9.7): 16.2.6.3 permits 50 ft more, a permission whose number the checker doesn't add (the rule “Travel +50 ft
+      where sprinklered (NFPA 16.2.6.3)”); a person applies it.
   for_each: story
   when_none: needs_review
   sources:
@@ -2005,7 +2044,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: false
@@ -2034,9 +2073,10 @@ rules:
   check: egress_travel_distance_occupied <= 150
   review_when:
   - when: egress_travel_distance_occupied > 150 and sprinklered_9_7 and sprinkler_supervised_9_7
-    reason: 'Over 150 ft in a building protected throughout by an approved, supervised automatic sprinkler system (Section
-      9.7): 16.2.6.3 permits 50 ft more, a permission whose number the checker doesn''t add (general.nfpa_16_2_6_3_sprinkler_increase);
-      a person applies it.'
+    reason: >-
+      Over 150 ft in a building protected throughout by an approved, supervised automatic sprinkler system (Section
+      9.7): 16.2.6.3 permits 50 ft more, a permission whose number the checker doesn't add (the rule “Travel +50 ft
+      where sprinklered (NFPA 16.2.6.3)”); a person applies it.
   for_each: story
   when_none: needs_review
   sources:
@@ -2096,7 +2136,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: false
@@ -2195,7 +2235,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   notes: Hand-drafted in a Claude Code session (2026-11-20). 16.2.6.3's increase is for items (1) and (2) only, never (3).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -2373,7 +2413,7 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-    note: 'No corridor: the rule''s when_none (not_applicable).'
+    note: "No corridor: with none, the rule does not apply."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: false
@@ -2486,7 +2526,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: false
@@ -2753,9 +2793,10 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No means of egress door: the rule''s when_none (needs_review).'
-  notes: Hand-drafted in a Claude Code session (2026-11-20). Whether the hardware complies with 7.2.1.7 (not brought in) is
-    the architect's statement (moe_door_panic_hardware).
+    note: "No means of egress door: with none, the rule needs review."
+  notes: >-
+    Hand-drafted in a Claude Code session (2026-11-20). Whether the hardware complies with 7.2.1.7 (not brought in) is
+    the architect's statement (on the door).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_17_2_5_2_dead_end
@@ -2845,7 +2886,7 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-    note: 'No corridor: the rule''s when_none (not_applicable).'
+    note: "No corridor: with none, the rule does not apply."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
@@ -2878,9 +2919,11 @@ rules:
         Maine''s modifications, one a 20-ft dead-end limit; read 2026-11-20'
     why_open: The rule text in force in 2016 was not found online; a question for the State Fire Marshal's office or the City
       of Portland.
-  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1018.4 allows 20 ft, or any length under
-    2.5 times the least width (exception 3), and not 50 ft for I-4 (a flag: OCR copy); both apply, the stricter governs (the
-    sheet: 25 ft by the IBC). Maine''s 16-219 CMR ch. 20 today sets a flat 20 ft: open (general.ibc_1018_4_dead_end, README).'
+  notes: >-
+    Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1018.4 allows 20 ft, or any length under
+    2.5 times the least width (exception 3), and not 50 ft for I-4 (a flag: OCR copy); both apply, the stricter governs
+    (the sheet: 25 ft by the IBC). Maine's 16-219 CMR ch. 20 today sets a flat 20 ft: an open question (see the rule
+    “Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4)” and the Maine folder's README).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_17_2_5_3_1_common_path_sprinklered
@@ -2944,7 +2987,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
@@ -3035,7 +3078,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
@@ -3074,9 +3117,10 @@ rules:
   check: egress_travel_from_room_door <= 100
   review_when:
   - when: egress_travel_from_room_door > 100 and sprinklered_9_7
-    reason: 'Over 100 ft in a building protected throughout by an approved automatic sprinkler system (Section 9.7): 17.2.6.3
-      permits 50 ft more, a permission whose number the checker doesn''t add (general.nfpa_17_2_6_3_sprinkler_increase); a
-      person applies it.'
+    reason: >-
+      Over 100 ft in a building protected throughout by an approved automatic sprinkler system (Section 9.7): 17.2.6.3
+      permits 50 ft more, a permission whose number the checker doesn't add (the rule “Travel +50 ft where sprinklered
+      (NFPA 17.2.6.3)”); a person applies it.
   for_each: story
   when_none: needs_review
   sources:
@@ -3137,7 +3181,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
@@ -3167,9 +3211,10 @@ rules:
   check: egress_travel_distance_occupied <= 150
   review_when:
   - when: egress_travel_distance_occupied > 150 and sprinklered_9_7
-    reason: 'Over 150 ft in a building protected throughout by an approved automatic sprinkler system (Section 9.7): 17.2.6.3
-      permits 50 ft more, a permission whose number the checker doesn''t add (general.nfpa_17_2_6_3_sprinkler_increase); a
-      person applies it.'
+    reason: >-
+      Over 150 ft in a building protected throughout by an approved automatic sprinkler system (Section 9.7): 17.2.6.3
+      permits 50 ft more, a permission whose number the checker doesn't add (the rule “Travel +50 ft where sprinklered
+      (NFPA 17.2.6.3)”); a person applies it.
   for_each: story
   when_none: needs_review
   sources:
@@ -3232,7 +3277,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
@@ -3335,7 +3380,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: "No story: with none, the rule needs review."
   notes: Hand-drafted in a Claude Code session (2026-11-20). 17.2.6.3's increase is for items (1) and (2) only, never (3).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -3519,7 +3564,7 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-    note: 'No corridor: the rule''s when_none (not_applicable).'
+    note: "No corridor: with none, the rule does not apply."
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
@@ -3539,11 +3584,12 @@ rules:
       outcome: pass
     expect: pass
     note: Rated walls.
-  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Items (3) to (5) (walls ending at a rated ceiling; lavatories)
-    permit less, so leaving them out never passes what fails; a design relying on them fails here and a person checks. Most
-    restrictive: IBC 1018.1 asks 0 hours for I-4 sprinklered (a flag: OCR copy); both apply, the stricter governs: NFPA''s
-    smoke partitions. Item (1) prints ''student occupancy'' (16.3.6(1): ''client''); item (2) prints ''with valve supervision'':
-    read as sprinkler_supervised_9_7, Gordium''s reading for the architects to confirm.'
+  notes: >-
+    Hand-drafted in a Claude Code session (2026-11-20). Items (3) to (5) (walls ending at a rated ceiling; lavatories)
+    permit less, so leaving them out never passes what fails; a design relying on them fails here and a person checks.
+    Most restrictive: IBC 1018.1 asks 0 hours for I-4 sprinklered (a flag: OCR copy); both apply, the stricter governs:
+    NFPA's smoke partitions. Item (1) prints 'student occupancy' (16.3.6(1): 'client'); item (2) prints 'with valve
+    supervision': read as a supervised system (Section 9.7), Gordium's reading for the architects to confirm.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_6_1_14_4_1_separation
@@ -3582,9 +3628,10 @@ rules:
       nfpa_day_care_occupancy: false
     expect: not_applicable
     note: Not a day-care occupancy.
-  notes: 'Hand-drafted in a Claude Code session (2026-11-20). A flag: which occupancy the day care is separated from, and
-    the assembly between them, are the architect''s input (no part kind yet). The table''s cells are read in column bands
-    (its flags, text_verification.gov.law.nfpa.101.2012.yaml); its Part 1, Table 6.1.14.4.1(a), is not brought in.'
+  notes: >-
+    Hand-drafted in a Claude Code session (2026-11-20). A flag: which occupancy the day care is separated from, and the
+    assembly between them, are the architect's input (the model doesn't mark them yet). The table's cells are read in
+    column bands (flagged in Gordium's check of the NFPA 101 text); its Part 1, Table 6.1.14.4.1(a), is not brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_6_1_14_4_2_separation_ratings
@@ -3635,8 +3682,9 @@ rules:
       sprinkler_supervised_9_7: false
     expect: not_applicable
     note: 'Not sprinklered: no reduction.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-20). A flag with general.nfpa_6_1_14_4_1_separation: the row and
-    the double-dagger entries are a person''s reading.'
+  notes: >-
+    Hand-drafted in a Claude Code session (2026-11-20). A flag with the rule “Day care separated from other occupancies
+    (NFPA 6.1.14.4.1)”: the row and the double-dagger entries are a person's reading.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_6_1_14_4_4_separation_form
@@ -3707,10 +3755,12 @@ rules:
     - outcome: not_applicable
     expect: not_applicable
     note: 'No story: nothing to check here.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    The day-care row (35 net) is general.ibc_1004_1_1_occupant_load''s; any other function of space on the story is a person''s.'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). The day-care row (35 net) belongs to the rule “Occupant load
+    at least net area / 35 (IBC 1004.1.1)”; any other function of space on the story is a person's.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_table_1015_1_other_occupancies
@@ -3744,10 +3794,12 @@ rules:
       other_occupancy_present: false
     expect: not_applicable
     note: 'Group I-4 (day care): the section''s rule checks its row.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Group I-4 and day care (10) is general.ibc_1015_1_two_exits''; another occupancy''s row is a person''s.'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Group I-4 and day care (10) belong to the rule “Two exits
+    from a space over 10 occupants or a long common path (IBC 1015.1)”; another occupancy's row is a person's.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_table_1016_1_other_occupancies
@@ -3781,10 +3833,12 @@ rules:
       other_occupancy_present: false
     expect: not_applicable
     note: 'Group I-4 (day care): the section''s rule checks its row.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Group I-4 (200 ft sprinklered) is general.ibc_1016_1_travel_distance''s; another occupancy''s row is a person''s.'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Group I-4 (200 ft sprinklered) belongs to the rule “Exit
+    access travel at most 200 ft, I-4 sprinklered (IBC 1016.1)”; another occupancy's row is a person's.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_table_1018_1_other_occupancies
@@ -3818,10 +3872,12 @@ rules:
       other_occupancy_present: false
     expect: not_applicable
     note: 'Group I-4 (day care): the section''s rule checks its row.'
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Group I-4 is general.ibc_1018_1_corridor_rating''s; another occupancy''s row is a person''s.'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Group I-4 belongs to the rule “Corridor rating per Table
+    1018.1: I-4 0 h sprinklered (IBC 1018.1)”; another occupancy's row is a person's.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.ibc_table_508_2_5_incidental_rooms
@@ -3839,10 +3895,11 @@ rules:
   - given: {}
     expect: needs_review
     note: Which rooms are incidental, and the separation or protection each row asks, are a person's check.
-  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
-    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
-    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
-    Hand-drafted in a Claude Code session (2026-11-20).'
+  notes: >-
+    Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a flag
+    (always needs review); its check is the drafted test, never run for a result, and each example's drafted result is
+    what that test gives (Gordium's check of the IBC 2009 text marks it not verified;
+    docs/decisions/2026-11-20_commercial_egress_maine.md). Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.nfpa_table_7_3_1_2_other_uses

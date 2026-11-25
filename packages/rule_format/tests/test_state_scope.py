@@ -24,7 +24,9 @@ def test_new_yorks_two_books_each_say_which_buildings_they_cover(folder, scope):
 @pytest.mark.parametrize("extra, problem", [
     ({"scope": "houses"}, "scope must be one of residential_code, building_code"),
     ({"waiting_why": "  "}, "waiting_why must be words"),
-    ({"colour": "red"}, "must be a mapping of name, law, results_title, scope, waiting_why and plain_words")])
+    ({"colour": "red"}, "must be a mapping of name, law, results_title, scope, waiting_why and plain_words"),
+    ({"plain_words": "yes"}, "plain_words must be true"),
+    ({"plain_words": False, "name": " "}, "no name")])     # a bad plain_words hides no other problem
 def test_a_scope_or_waiting_words_that_cant_be_used_is_a_problem(extra, problem, monkeypatch):
     real = yaml.safe_load((NY / "new_york_state/state.yaml").read_text(encoding="utf-8"))
     monkeypatch.setattr(state_law, "load", lambda p: {**real, **extra} if Path(p).name == "state.yaml" else None)
