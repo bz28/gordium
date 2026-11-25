@@ -656,7 +656,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var p = new C.StackPanel();
         if (!PaneWords.ChangeIsList(change))                   // no verdict changed: the worker's one line, as it says
         {
-            p.Children.Add(Typed(new C.TextBlock { Text = change.Words, TextWrapping = W.TextWrapping.Wrap }, Caption));
+            p.Children.Add(Typed(new C.TextBlock { Text = PaneWords.ChangeWords(change, _factsChanged is not null), TextWrapping = W.TextWrapping.Wrap }, Caption));
             if (_factsChanged is { } changed)                  // what the architect changed, said either way (review round 1)
                 p.Children.Add(Small(changed, top: 2));
         }
@@ -693,7 +693,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         };
         b.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
         b.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
-        W.Automation.AutomationProperties.SetName(b, PaneWords.ChangesAll(change));
+        // the words a screen reader says are the ones on screen (review round 3): a list's every change, else the line
+        // shown and what the architect changed
+        W.Automation.AutomationProperties.SetName(b, PaneWords.ChangeIsList(change)
+            ? string.Join(" ", new[] { PaneWords.ChangeHeading(change) + ".", _factsChanged, PaneWords.ChangesAll(change) }.OfType<string>())
+            : string.Join(" ", new[] { PaneWords.ChangeWords(change, _factsChanged is not null), _factsChanged }.OfType<string>()));
         return b;
     }
 

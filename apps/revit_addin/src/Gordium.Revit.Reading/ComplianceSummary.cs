@@ -144,13 +144,13 @@ public static class ComplianceSummary
         return h.ToString();
     }
 
-    private static void Table(StringBuilder h, IReadOnlyList<ResultRow> rows, bool appendix)
+    private static void Table(StringBuilder h, IReadOnlyList<ResultRow> rows, bool appendix, int first = 0)
     {
         h.Append("<table>\n<thead><tr><th style=\"width:24%\">Rule</th><th style=\"width:11%\">Proposed</th>")
          .Append("<th style=\"width:11%\">Required</th><th style=\"width:15%\">Result</th>")
          .Append(appendix ? "" : "<th>The law's words</th>").Append("</tr></thead>\n<tbody>\n");
-        foreach (var row in rows)
-            Row(h, row, appendix);
+        for (var i = 0; i < rows.Count; i++)
+            Row(h, rows[i], appendix, appendix ? first + i + 1 : 0);
         h.Append("</tbody>\n</table>\n");
     }
 
@@ -203,20 +203,25 @@ public static class ComplianceSummary
         var rows = node.Rows.Concat(node.Children.Where(c => c.Level == CodeLevel.Rule && !c.Greyed).SelectMany(c => c.Rows)).ToList();
         if (rows.Count > 0)
         {
-            Table(h, rows, appendix: true);
+            Table(h, rows, appendix: true, first: order.Count);   // each row numbered as its law in the appendix
             order.AddRange(rows);
         }
         foreach (var child in node.Children.Where(c => c.Level != CodeLevel.Rule || c.Greyed))
             Node(h, child, depth + 1, order);
     }
 
-    private static void Row(StringBuilder h, ResultRow row, bool appendix)
+    private static void Row(StringBuilder h, ResultRow row, bool appendix, int law = 0)
     {
         var status = StatusLook.Of(row.Tone, stale: false);
         var word = StatusLook.Word(status);
         h.Append("<tr data-row=\"").Append(E(row.Id)).Append("\" data-status=\"").Append(status.ToString().ToLowerInvariant()).Append("\">");
         // the rule, and why when it isn't a pass (the checker's reason, its advice)
-        h.Append("<td>").Append(E(row.Name));
+        h.Append("<td>");
+        // in By code order: the row's number, a link to its law's words in the appendix (review round 2)
+        if (law > 0)
+            h.Append("<a class=\"law-ref\" href=\"#law-").Append(law.ToString(CultureInfo.InvariantCulture)).Append("\">")
+             .Append(law.ToString(CultureInfo.InvariantCulture)).Append(".</a> ");
+        h.Append(E(row.Name));
         if (status is PanelStatus.Fails or PanelStatus.Review)
         {
             if (row.Reason is { Length: > 0 } reason && !row.ReasonIsFigures)

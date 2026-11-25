@@ -353,6 +353,16 @@ public sealed class PaneTests
         Assert.Contains(": 4", said, StringComparison.Ordinal);
         Assert.Null(PaneWords.FactsChanged(before, before));
         Assert.Null(PaneWords.FactsChanged(null, after));
+        // review round 2: a fact changed and no result did: "No result changed since 14:32.", never "Nothing changed"
+        var none = CheckChanges.Between(Model(House()), new DateTime(2026, 11, 22, 14, 32, 0), Model(House()))!;
+        Assert.Equal("No result changed since 14:32.", PaneWords.ChangeWords(none, factsChanged: true));
+        Assert.StartsWith("Nothing changed", PaneWords.ChangeWords(none, factsChanged: false), StringComparison.Ordinal);
+        Assert.Contains("PaneWords.ChangeWords(change, _factsChanged is not null)", Read("ResultsView.cs"), StringComparison.Ordinal);
+        // review round 3: and a screen reader hears the same words, not the checker's "Nothing changed"
+        Assert.Contains(": string.Join(\" \", new[] { PaneWords.ChangeWords(change, _factsChanged is not null), _factsChanged }.OfType<string>())", Read("ResultsView.cs"), StringComparison.Ordinal);
+        // review round 4: with a list too: the heading shown ("Since 14:32 · 9 results changed") and what you changed
+        Assert.Contains("? string.Join(\" \", new[] { PaneWords.ChangeHeading(change) + \".\", _factsChanged, PaneWords.ChangesAll(change) }.OfType<string>())", Read("ResultsView.cs"), StringComparison.Ordinal);
+        Assert.StartsWith("9 results changed:", PaneWords.ChangesAll(CheckChanges.Between(Model(House()), new DateTime(2026, 11, 22, 14, 32, 0), Model(HouseAfter()))!), StringComparison.Ordinal);
         var cleared = PaneWords.FactsChanged(after, F(M()));
         Assert.Contains("cleared", cleared, StringComparison.Ordinal);
     }
