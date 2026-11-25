@@ -145,7 +145,8 @@ public sealed class RoomFunctionTests
         // a hotel (R-1) or a care home (R-4): a "Bedroom" is a guest or care room, a "Living Room" may be a lounge
         foreach (var groups in new[] { "R-1", "R-4" })
             Assert.Equal([FakeFloor.Uid("L")], Suggested(Line(Model(floor, groups))!).Keys);
-        Assert.Contains("a building of dwelling units (multiple_family, Group R-2)", bed.Basis, StringComparison.Ordinal);
+        Assert.Contains("a building of dwelling units (multiple family, Group R-2)", bed.Basis, StringComparison.Ordinal);
+        Assert.DoesNotContain("_", bed.Basis, StringComparison.Ordinal);               // words, never an id (review round 5)
     }
 
     /// <summary>Review round 1: a suggestion only for the room type as the whole name (with a number or letter): a word
@@ -292,6 +293,8 @@ public sealed class RoomFunctionTests
         Assert.DoesNotContain(FakeFloor.Uid("A"), Suggested(line).Keys);             // never a suggestion for it
         Assert.Contains("A room whose Gordium: Use is Corridor, Closet or Toilet, and an exit stair enclosure or exit passageway, stay blank (they aren't counted here unless one holds a function)", line.IfBlank, StringComparison.Ordinal);
         Assert.Contains("on a room whose Gordium: Use is Corridor, Closet or Toilet", Marks.RoomFunction.Description, StringComparison.Ordinal);
+        Assert.Contains("blank on an exit stair enclosure or exit passageway", Marks.RoomFunction.Description, StringComparison.Ordinal);
+        Assert.Contains(RoomFunctions.Listed + ". Leave it blank", Marks.RoomFunction.Description, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -325,6 +328,7 @@ public sealed class RoomFunctionTests
         Assert.Equal("Accessory storage or mechanical equipment room", got[FakeFloor.Uid("B")]);
         Assert.DoesNotContain(FakeFloor.Uid("L"), got.Keys);
         Assert.Contains("its Gordium: Use is Accessory storage", line.Suggestions.Single(s => s.Element == FakeFloor.Uid("A")).Basis, StringComparison.Ordinal);
+        Assert.Equal("Gordium suggests 2 from their names or their Gordium: Use.", SetupSteps.SuggestsLine(line));
         // a typed word not in the list is not set, but the architect typed it: never suggested over either
         floor.SetMark("L", Marks.RoomFunction, new(true, Text: "dorm"));
         Assert.DoesNotContain(FakeFloor.Uid("L"), Suggested(Line(Model(floor, "R-2"))!).Keys);

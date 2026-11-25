@@ -167,7 +167,7 @@ public static class Marks
         "Gordium: Function", new("de595662-5386-4cab-9245-600eefb9462d"), MarkValueKind.Text, MarkBinding.Instance,
         [Rooms], "rooms[].function",
         "The room's function as the 2025 Building Code of New York State's Table 1004.5 lists them (its occupant load factor is read from it), one of: " +
-        RoomFunctions.Listed + ". Leave it blank on an exit stair enclosure and on a room whose Gordium: Use is Corridor, Closet or Toilet. " +
+        RoomFunctions.Listed + ". Leave it blank on an exit stair enclosure or exit passageway and on a room whose Gordium: Use is Corridor, Closet or Toilet. " +
         "Blank on any other room, or a word not in the list: the room's occupant load and its story's need review.");
 
     public static readonly MarkDefinition LotSurveyed = new(

@@ -929,7 +929,7 @@ public static class SetupChecklist
             var basis = use == "accessory_storage" && function == "accessory_storage_mechanical"
                 ? $"its {Marks.Use.Name} is Accessory storage"
                 : $"named \"{r.Name!.Trim()}\"" + (function == "residential"
-                    ? $"; a building of dwelling units ({projectUse}, Group {string.Join(", ", groups!)}), so a room inside a " +
+                    ? $"; a building of dwelling units ({projectUse!.Replace('_', ' ')}, Group {string.Join(", ", groups!)}), so a room inside a " +
                       "dwelling unit (a shared lounge or dining room is Assembly unconcentrated instead)" : "");
             suggestions.Add(new(r.UniqueId, false, Marks.RoomFunction, new MarkValue(true, Text: word), word, RoomName(r), basis));
         }
