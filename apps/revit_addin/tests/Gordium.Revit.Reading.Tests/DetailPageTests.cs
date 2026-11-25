@@ -329,6 +329,30 @@ public sealed class DetailPageTests
         Assert.Equal("m", stream.LengthUnit.Symbol);
     }
 
+    /// <summary>The questions card's scope note is said of the card's own results only, with their count (short review
+    /// after #181): none on the apartment (its two I-4-only results ask no question), and the card's own count when
+    /// one of its questions' results says it.</summary>
+    [Fact]
+    public void The_cards_scope_note_counts_the_cards_own_results()
+    {
+        var m = Apartment();
+        Assert.Equal(2, m.Views!.Scoped.Count);                                  // #181's answer: two results say it
+        var fields = Fields();
+        IReadOnlyList<ListEntry> Lay(ResultModel model) => ResultViewList.Layout(model.Views!, ResultList.Place(model), ResultsViewKind.WhatToFix,
+            new HashSet<string> { ResultViewList.GroupKey(Answers(model)) }, null, null, false, fields);
+        Assert.Null(Lay(m).OfType<AnswerFootEntry>().Single().Scope);
+        // the same answer with one question's result saying it: the card says it, for that one result
+        var file = Path.Combine(Env.Repo, "apps", "revit_addin", "tests", "Gordium.Revit.Reading.Tests", "answers", "four_unit_apartment_check_answer.json");
+        var node = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(file, Encoding.UTF8))!["result"]!;
+        var item = node["view"]!["items"]!.AsArray().First(i => i!["asks"] is System.Text.Json.Nodes.JsonArray a
+            && a.Any(x => (string?)x!["field"] == "facts.corner_lot"))!;
+        item["reason"] = "the building holds another occupancy: this rulebook's rules are " + ResultViews.DraftedFor + ", so a person checks";
+        var changed = ResultRows.Build(CheckResult.Parse(new WorkerAnswer(JsonDocument.Parse(node.ToJsonString()).RootElement.Clone(), About)),
+                                       "New Construction", [], null);
+        Assert.Equal(3, changed.Views!.Scoped.Count);
+        Assert.Equal(ResultViews.ScopeWords(1), Lay(changed).OfType<AnswerFootEntry>().Single().Scope);
+    }
+
     [Fact]
     public void The_scope_note_is_said_once_where_the_rows_say_the_rules_are_drafted_for_one_group()
     {
