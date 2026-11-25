@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 78 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 87 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1403,14 +1403,23 @@
     "Egress · Doors take at most 7 in: A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
     "Egress · Trim at most 1 1/2 in each side into the width: A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
     "Egress · Protruding objects per 1003.3: A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
-    "Egress · Doors recognizable as doors: A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
+    "Egress · Doors recognizable as doors: A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.7's are rules and flags of their own; 1010.2.8 to 1010.3.4 follow in section group 6e.",
     "Egress · Each door's capacity for its occupant load: A person checks this (Gordium doesn't decide it): Each door opening's capacity is enough for the occupants it serves (1005.3.2: 0.2 in each, 0.15 in with a sprinkler system and an emergency voice/alarm system, other than Groups H and I-2): which occupants each door serves isn't worked out, so a person's check.",
     "Egress · Nothing projects into a door's clear opening: A person checks this (Gordium doesn't decide it): No projection into a door's required clear width below 34 in, at most 4 in between 34 and 80 in, and door closers, overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn't in the model, so a person's check.",
     "Egress · Forces to unlatch and open each door: A person checks this (Gordium doesn't decide it): Hardware that unlatches by push or pull needs at most 15 pounds, by rotation at most 28 inch-pounds; an interior manually operated swinging door not required to be fire rated opens with at most 5 pounds; any other swinging, sliding or folding door, and a fire-rated one, is set in motion by at most 30 pounds and opens fully at most 15 pounds; each force applied at the latch side (1010.1.3.1): door hardware and forces aren't in the model, so a person's check.",
     "Egress · A floor or landing at the same level on each side of a door: A person checks this (Gordium doesn't decide it): A floor or landing on each side of every door, at the same elevation, level (an exterior landing at most 2 percent); the exceptions allow a dwelling or sleeping unit's door at the top step of an interior stair it doesn't swing over (Groups R-2 and R-3), an exterior landing up to 7 inches lower (Groups F, H, R-2 and S, off an accessible route, the door, other than an exterior storm or screen door, not swinging over it) or 7 3/4 inches lower (Group U and R-2 and R-3 units not required to be Accessible, Type A or Type B; such doors, storm and screen doors included, may swing over either landing), 1/2 inch for finish materials, a Type B unit's deck, patio or balcony with an impervious surface up to 4 inches lower, and an equipment space's door (not required to be accessible by 1103.2.9, five occupants or fewer) up to 7 inches above or below: floor levels at each door and landings aren't in the model, so a person's check.",
     "Egress · Landings at doors: A person checks this (Gordium doesn't decide it): A landing at least as wide as the stairway or the door, whichever is greater, and at least 44 inches long in the direction of travel (36 inches in Groups R-3 and U and within a Group R-2 unit); a fully open door reduces a required dimension by at most 7 inches, and where the landing serves 50 or more, a door in any position leaves at least half its required width: landings aren't in the model, so a person's check.",
     "Egress · Thresholds at doorways: A person checks this (Gordium doesn't decide it): A threshold at most 3/4 inch high for a sliding door serving a dwelling unit, 1/2 inch for any other door, and any raised threshold or level change over 1/4 inch beveled no steeper than 1 in 2; the exceptions allow up to 7 3/4 inches at a Group R-2 or R-3 exterior sliding or side-hinged door that is not part of the required means of egress, an accessible route or an Accessible, Type A or Type B unit, and, on the exterior side above a Type B unit's deck, patio or balcony where 1010.1.4's exception 5 applies, 4 3/4 inches for a sliding door and 4 1/2 inches for others: thresholds aren't in the model, so a person's check.",
-    "Egress · Space between two doors in a series: A person checks this (Gordium doesn't decide it): Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space, and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches, storm and screen doors serving Group R-2 and R-3 dwelling units need not be 48 inches from the other door (they still swing as above), and doors within those units, other than within Type A units, are excepted: doors in a series and the space between them aren't in the model, so a person's check."
+    "Egress · Space between two doors in a series: A person checks this (Gordium doesn't decide it): Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space, and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches, storm and screen doors serving Group R-2 and R-3 dwelling units need not be 48 inches from the other door (they still swing as above), and doors within those units, other than within Type A units, are excepted: doors in a series and the space between them aren't in the model, so a person's check.",
+    "Egress · Egress doors readily openable from the egress side: A person checks this (Gordium doesn't decide it): Every egress door opens from the egress side without a key or special knowledge or effort, except where 1010.2's own sections permit (locks and latches per 1010.2.4, stairway doors per 1010.2.6, and the electrical locking systems of 1010.2.9 to 1010.2.15): how each door locks isn't in the model, so a person's check.",
+    "Egress · One motion to unlatch: A person checks this (Gordium doesn't decide it): Unlatching any door or leaf for egress takes no more than one motion in a single linear or rotational direction to release every latch and lock, and manual bolts aren't permitted; except in places of detention or restraint, the bolts 1010.2.4 item 4 permits on a pair's inactive leaf (Table 1010.2.4), and a Group R unit's single exit door with a night latch, dead bolt, manual bolt or security chain per 1010.2.4 item 5: hardware isn't in the model, so a person's check.",
+    "Egress · Accessible doors' hardware needs no tight grasping or twisting: A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors Chapter 11 requires to be accessible operate without tight grasping, tight pinching or twisting of the wrist: hardware, and which doors Chapter 11 (not brought in) requires to be accessible, aren't in the model, so a person's check.",
+    "Egress · Door hardware 34 to 48 inches above the floor: A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors are at least 34 inches and at most 48 inches above the finished floor; locks used only for security, not for normal operation, may be at any height, and the locks and latches of doors and gates in a swimming pool, spa or hot tub barrier follow 3109.2.7 and 3109.2.8 (not brought in): hardware isn't in the model, so a person's check.",
+    "Egress · Locks and latches that stop a door opening: A person checks this (Gordium doesn't decide it): A lock or latch may keep an egress door from opening only where one of 1010.2.4's ten items applies, each with its own conditions: places of detention or restraint; Group I-1 Condition 2 and I-2 containment with clinical staff able to unlock; the main exterior or tenant doors of Group A (300 or fewer), B, F, M and S and places of religious worship with a key lock readily distinguishable as locked, a sign in 1-inch letters (\"THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED\"), revocable by the building official; bolts on a pair's inactive leaf per Table 1010.2.4 (that leaf without a doorknob, panic hardware or similar); a Group R unit's single exit door (1006.2.1 or 1006.3.4) with a night latch, dead bolt, manual bolt or security chain openable from inside without a key or tool; fire doors after their unlatching is disabled by heat; doors to roofs not intended to be occupied, locked against entry; exit access doors from occupied exterior spaces (other than egress courts) with the posted load (1004.9), a two-way communication system (1009.8.1, 1009.8.2), a key lock, a clear window or glazing of 5 sq ft or more, a sign and 300 occupants at most; doors to a dwelling or sleeping unit's balconies, decks or other exterior spaces; and those of 250 sq ft or less serving a private office: how each door locks isn't in the model, so a person's check.",
+    "Egress · Bolts on the inactive leaf of a pair of doors: A person checks this (Gordium doesn't decide it): Manual (surface- or flush-mounted) bolts, automatic flush bolts and constant latching bolts on a pair's inactive leaf only as Table 1010.2.4 permits, by use and whether the pair must comply with Section 716 (fire door assemblies, not brought in): Group B, F or S under 50 occupants; Group B, F or S with a 903.3.1.1 sprinkler system where the inactive leaf isn't needed for egress capacity; Group I-2 patient care and sleeping rooms, that leaf not needed; any occupancy without required panic hardware where both leaves are needed (automatic flush bolts only); storage or equipment rooms, that leaf not needed (note a: no manual bolts on Group I-2 corridor doors required to be positive latching); note b permits automatic flush bolts on a 716 pair with self- or automatic-closing leaves and a coordinator: which doors are pairs, their bolts and their fire rating aren't in the model, so a person's check.",
+    "Egress · A closet door that latches opens from inside: A person checks this (Gordium doesn't decide it): A closet door that latches closed is openable from inside the closet: hardware isn't in the model, so a person's check.",
+    "Egress · Interior stairway doors openable from both sides: A person checks this (Gordium doesn't decide it): Interior stairway egress doors open from both sides without a key or special knowledge or effort; except a stairway's discharge door, openable from the egress side and locked only from the other; doors arranged per 403.5.3 (not brought in); stairway exit doors locked from the side opposite egress only where they open from the egress side and unlock together, without unlatching, on a signal from the fire command center or a single location inside the main entrance, on a fire alarm signal where a fire alarm system serves the stairway, and on loss of power; and in Groups B, F, M and S, and Group R-2, where the only interior access to the tenant space or dwelling unit is from a single exit stairway 1006.3.4 permits, locked only from the side opposite egress: how each door locks isn't in the model, so a person's check.",
+    "Egress · Intruder locks in educational occupancies: A person checks this (Gordium doesn't decide it): In Group E, Group B educational and Group I-4 occupancies, egress doors from classrooms, offices and other occupied rooms with locks to keep intruders out can be unlocked from outside the room with a key or other approved means, open from within per 1010.2, and leave listed panic hardware, fire door hardware and door closers unmodified, fire door assemblies modified only per NFPA 80; remote locking or unlocking from an approved location is permitted too: locks aren't in the model, so a person's check."
    ]
   },
   "red": [],
@@ -64492,11 +64501,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
+     "reason": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.7's are rules and flags of their own; 1010.2.8 to 1010.3.4 follow in section group 6e.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
+      "line": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.7's are rules and flags of their own; 1010.2.8 to 1010.3.4 follow in section group 6e.",
       "quotes": [
        {
         "text": "1010.1 General. Doors in the means of egress shall comply with the requirements of Sections 1010.1.1 through 1010.3.4. Exterior exit doors shall also comply with the requirements of Section 1022.2. Gates in the means of egress shall comply with the requirements of Sections 1010.4 and 1010.4.1. Turnstiles in the means of egress shall comply with the requirements of Sections 1010.5 through 1010.5.4. Doors, gates and turnstiles provided for egress purposes in numbers greater than required by this code shall comply with the requirements of this section. Doors in the means of egress shall be readily distinguishable from the adjacent construction and finishes such that the doors are easily recognizable as doors. Mirrors or similar reflecting materials shall not be used on means of egress doors. Means of egress doors shall not be concealed by curtains, drapes, decorations or similar materials.",
@@ -64521,14 +64530,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1010_1_doors_general",
-       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
+       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.7's are rules and flags of their own; 1010.2.8 to 1010.3.4 follow in section group 6e.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1010_1_doors_general",
-       "why": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
+       "why": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.7's are rules and flags of their own; 1010.2.8 to 1010.3.4 follow in section group 6e.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -65042,6 +65051,640 @@
       "section_title": "Doors, Gates and Turnstiles",
       "piece": "1010.1.7",
       "piece_title": "Door arrangement"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_2_door_operations",
+     "rule": "general.bc_1010_2_door_operations",
+     "name": "Egress · Egress doors readily openable from the egress side (BCNYS 1010.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Every egress door opens from the egress side without a key or special knowledge or effort, except where 1010.2's own sections permit (locks and latches per 1010.2.4, stairway doors per 1010.2.6, and the electrical locking systems of 1010.2.9 to 1010.2.15): how each door locks isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Every egress door opens from the egress side without a key or special knowledge or effort, except where 1010.2's own sections permit (locks and latches per 1010.2.4, stairway doors per 1010.2.6, and the electrical locking systems of 1010.2.9 to 1010.2.15): how each door locks isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.2 Door operations. Except as specifically permitted by this section, egress doors shall be readily openable from the egress side without the use of a key or special knowledge or effort.",
+        "where": "1010.2, 2025 Building Code of New York State (BCNYS), PDF p.324"
+       }
+      ],
+      "citation": "1010.2, 2025 Building Code of New York State (BCNYS), PDF p.324",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.2",
+      "quote": "1010.2 Door operations. Except as specifically permitted by this section, egress doors shall be readily openable from the egress side without the use of a key or special knowledge or effort."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_2_door_operations",
+       "words": "A person checks this (Gordium doesn't decide it): Every egress door opens from the egress side without a key or special knowledge or effort, except where 1010.2's own sections permit (locks and latches per 1010.2.4, stairway doors per 1010.2.6, and the electrical locking systems of 1010.2.9 to 1010.2.15): how each door locks isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_2_door_operations",
+       "why": "A person checks this (Gordium doesn't decide it): Every egress door opens from the egress side without a key or special knowledge or effort, except where 1010.2's own sections permit (locks and latches per 1010.2.4, stairway doors per 1010.2.6, and the electrical locking systems of 1010.2.9 to 1010.2.15): how each door locks isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Egress doors readily openable from the egress side",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.2",
+      "piece_title": "Door operations"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_2_1_unlatching",
+     "rule": "general.bc_1010_2_1_unlatching",
+     "name": "Egress · One motion to unlatch, no manual bolts (BCNYS 1010.2.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Unlatching any door or leaf for egress takes no more than one motion in a single linear or rotational direction to release every latch and lock, and manual bolts aren't permitted; except in places of detention or restraint, the bolts 1010.2.4 item 4 permits on a pair's inactive leaf (Table 1010.2.4), and a Group R unit's single exit door with a night latch, dead bolt, manual bolt or security chain per 1010.2.4 item 5: hardware isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Unlatching any door or leaf for egress takes no more than one motion in a single linear or rotational direction to release every latch and lock, and manual bolts aren't permitted; except in places of detention or restraint, the bolts 1010.2.4 item 4 permits on a pair's inactive leaf (Table 1010.2.4), and a Group R unit's single exit door with a night latch, dead bolt, manual bolt or security chain per 1010.2.4 item 5: hardware isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.2.1 Unlatching. The unlatching of any door or leaf for egress shall require not more than one motion in a single linear or rotational direction to release all latching and all locking devices. locking devices. Manual bolts are not permitted. Exceptions: 1. Places of detention or restraint. 2. Doors with manual bolts, automatic flush bolts and constant latching bolts as permitted by Section 1010.2.4, Item 4. 3. Doors from individual dwelling units and sleeping units of Group R occupancies as permitted by Section 1010.2.4, Item 5.",
+        "where": "1010.2.1, 2025 Building Code of New York State (BCNYS), PDF p.324"
+       }
+      ],
+      "citation": "1010.2.1, 2025 Building Code of New York State (BCNYS), PDF p.324",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.2.1",
+      "quote": "1010.2.1 Unlatching. The unlatching of any door or leaf for egress shall require not more than one motion in a single linear or rotational direction to release all latching and all locking devices. locking devices. Manual bolts are not permitted. Exceptions: 1. Places of detention or restraint. 2. Doors with manual bolts, automatic flush bolts and constant latching bolts as permitted by Section 1010.2.4, Item 4. 3. Doors from individual dwelling units and sleeping units of Group R occupancies as permitted by Section 1010.2.4, Item 5."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_2_1_unlatching",
+       "words": "A person checks this (Gordium doesn't decide it): Unlatching any door or leaf for egress takes no more than one motion in a single linear or rotational direction to release every latch and lock, and manual bolts aren't permitted; except in places of detention or restraint, the bolts 1010.2.4 item 4 permits on a pair's inactive leaf (Table 1010.2.4), and a Group R unit's single exit door with a night latch, dead bolt, manual bolt or security chain per 1010.2.4 item 5: hardware isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_2_1_unlatching",
+       "why": "A person checks this (Gordium doesn't decide it): Unlatching any door or leaf for egress takes no more than one motion in a single linear or rotational direction to release every latch and lock, and manual bolts aren't permitted; except in places of detention or restraint, the bolts 1010.2.4 item 4 permits on a pair's inactive leaf (Table 1010.2.4), and a Group R unit's single exit door with a night latch, dead bolt, manual bolt or security chain per 1010.2.4 item 5: hardware isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "One motion to unlatch, no manual bolts",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.2.1",
+      "piece_title": "Unlatching"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_2_2_hardware",
+     "rule": "general.bc_1010_2_2_hardware",
+     "name": "Egress · Accessible doors' hardware needs no tight grasping or twisting (BCNYS 1010.2.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors Chapter 11 requires to be accessible operate without tight grasping, tight pinching or twisting of the wrist: hardware, and which doors Chapter 11 (not brought in) requires to be accessible, aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors Chapter 11 requires to be accessible operate without tight grasping, tight pinching or twisting of the wrist: hardware, and which doors Chapter 11 (not brought in) requires to be accessible, aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "[NY] 1010.2.2 Hardware. Door handles, pulls, latches, locks and other operating devices of doors required to be accessible by Chapter 11 shall not require tight grasping, tight pinching or twisting of the wrist to operate.",
+        "where": "1010.2.2, 2025 Building Code of New York State (BCNYS), PDF p.324"
+       }
+      ],
+      "citation": "1010.2.2, 2025 Building Code of New York State (BCNYS), PDF p.324",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.2.2",
+      "quote": "[NY] 1010.2.2 Hardware. Door handles, pulls, latches, locks and other operating devices of doors required to be accessible by Chapter 11 shall not require tight grasping, tight pinching or twisting of the wrist to operate."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_2_2_hardware",
+       "words": "A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors Chapter 11 requires to be accessible operate without tight grasping, tight pinching or twisting of the wrist: hardware, and which doors Chapter 11 (not brought in) requires to be accessible, aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_2_2_hardware",
+       "why": "A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors Chapter 11 requires to be accessible operate without tight grasping, tight pinching or twisting of the wrist: hardware, and which doors Chapter 11 (not brought in) requires to be accessible, aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Accessible doors' hardware needs no tight grasping or twisting",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.2.2",
+      "piece_title": "Hardware"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_2_3_hardware_height",
+     "rule": "general.bc_1010_2_3_hardware_height",
+     "name": "Egress · Door hardware 34 to 48 inches above the floor (BCNYS 1010.2.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors are at least 34 inches and at most 48 inches above the finished floor; locks used only for security, not for normal operation, may be at any height, and the locks and latches of doors and gates in a swimming pool, spa or hot tub barrier follow 3109.2.7 and 3109.2.8 (not brought in): hardware isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors are at least 34 inches and at most 48 inches above the finished floor; locks used only for security, not for normal operation, may be at any height, and the locks and latches of doors and gates in a swimming pool, spa or hot tub barrier follow 3109.2.7 and 3109.2.8 (not brought in): hardware isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "[NY] 1010.2.3 Hardware height. Door handles, pulls, latches, locks and other operating devices of doors shall be installed 34 inches (864 mm) minimum and 48 inches (1219 mm) maximum above the finished floor. Exceptions: 1. Locks used only for security purposes and not used for normal operation are permitted at any height. 2. The height of operating devices of locks and latches of doors and gates in barriers required to restrict access to a swimming pool, spa, or hot tub shall comply with Sections 3109.2.7 and 3109.2.8.",
+        "where": "1010.2.3, 2025 Building Code of New York State (BCNYS), PDF p.324"
+       }
+      ],
+      "citation": "1010.2.3, 2025 Building Code of New York State (BCNYS), PDF p.324",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.2.3",
+      "quote": "[NY] 1010.2.3 Hardware height. Door handles, pulls, latches, locks and other operating devices of doors shall be installed 34 inches (864 mm) minimum and 48 inches (1219 mm) maximum above the finished floor. Exceptions: 1. Locks used only for security purposes and not used for normal operation are permitted at any height. 2. The height of operating devices of locks and latches of doors and gates in barriers required to restrict access to a swimming pool, spa, or hot tub shall comply with Sections 3109.2.7 and 3109.2.8."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_2_3_hardware_height",
+       "words": "A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors are at least 34 inches and at most 48 inches above the finished floor; locks used only for security, not for normal operation, may be at any height, and the locks and latches of doors and gates in a swimming pool, spa or hot tub barrier follow 3109.2.7 and 3109.2.8 (not brought in): hardware isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_2_3_hardware_height",
+       "why": "A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors are at least 34 inches and at most 48 inches above the finished floor; locks used only for security, not for normal operation, may be at any height, and the locks and latches of doors and gates in a swimming pool, spa or hot tub barrier follow 3109.2.7 and 3109.2.8 (not brought in): hardware isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Door hardware 34 to 48 inches above the floor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.2.3",
+      "piece_title": "Hardware height"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_2_4_locks_and_latches",
+     "rule": "general.bc_1010_2_4_locks_and_latches",
+     "name": "Egress · Locks and latches that stop a door opening, where permitted (BCNYS 1010.2.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A lock or latch may keep an egress door from opening only where one of 1010.2.4's ten items applies, each with its own conditions: places of detention or restraint; Group I-1 Condition 2 and I-2 containment with clinical staff able to unlock; the main exterior or tenant doors of Group A (300 or fewer), B, F, M and S and places of religious worship with a key lock readily distinguishable as locked, a sign in 1-inch letters (\"THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED\"), revocable by the building official; bolts on a pair's inactive leaf per Table 1010.2.4 (that leaf without a doorknob, panic hardware or similar); a Group R unit's single exit door (1006.2.1 or 1006.3.4) with a night latch, dead bolt, manual bolt or security chain openable from inside without a key or tool; fire doors after their unlatching is disabled by heat; doors to roofs not intended to be occupied, locked against entry; exit access doors from occupied exterior spaces (other than egress courts) with the posted load (1004.9), a two-way communication system (1009.8.1, 1009.8.2), a key lock, a clear window or glazing of 5 sq ft or more, a sign and 300 occupants at most; doors to a dwelling or sleeping unit's balconies, decks or other exterior spaces; and those of 250 sq ft or less serving a private office: how each door locks isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A lock or latch may keep an egress door from opening only where one of 1010.2.4's ten items applies, each with its own conditions: places of detention or restraint; Group I-1 Condition 2 and I-2 containment with clinical staff able to unlock; the main exterior or tenant doors of Group A (300 or fewer), B, F, M and S and places of religious worship with a key lock readily distinguishable as locked, a sign in 1-inch letters (\"THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED\"), revocable by the building official; bolts on a pair's inactive leaf per Table 1010.2.4 (that leaf without a doorknob, panic hardware or similar); a Group R unit's single exit door (1006.2.1 or 1006.3.4) with a night latch, dead bolt, manual bolt or security chain openable from inside without a key or tool; fire doors after their unlatching is disabled by heat; doors to roofs not intended to be occupied, locked against entry; exit access doors from occupied exterior spaces (other than egress courts) with the posted load (1004.9), a two-way communication system (1009.8.1, 1009.8.2), a key lock, a clear window or glazing of 5 sq ft or more, a sign and 300 occupants at most; doors to a dwelling or sleeping unit's balconies, decks or other exterior spaces; and those of 250 sq ft or less serving a private office: how each door locks isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.2.4 Locks and latches. Locks and latches shall be permitted to prevent operation of doors where any of the following exist: 1. Places of detention or restraint. 2. In Group I-1, Condition 2 and Group I-2 occupancies where the clinical needs of persons receiving care require contain- ment or where persons receiving care pose a security threat, provided that all clinical staff can readily unlock doors at all times, and all such locks are keyed to keys carried by all clinical staff at all times or all clinical staff have the codes or other means necessary to operate the locks at all times. 3. In buildings in occupancy Group A having an occupant load of 300 or less, Groups B, F, M and S, and in places of religious worship, the main door or doors are permitted to be equipped with key-operated locking devices from the egress side provided that: 3.1. The doors are the main exterior doors to the building, or the doors are the main doors to the tenant space.",
+        "where": "1010.2.4, 2025 Building Code of New York State (BCNYS), PDF p.324"
+       },
+       {
+        "text": "3.2. The locking device is readily distinguishable as locked. 3.3. A readily visible durable sign is posted on the egress side on or adjacent to the door stating: THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED. The sign shall be in letters 1 inch (25 mm) high on a contrasting background. 3.4. The use of the key-operated locking device is revocable by the building official for due cause. 4. Manual bolts, automatic flush bolts and constant latching bolts on the inactive leaf of a pair of doors in accordance with Table 1010.2.4, provided that the inactive leaf does not have a doorknob, panic hardware, or similar operating hardware. 5. Single exit doors complying with Section 1006.2.1 or 1006.3.4 from individual dwelling or sleeping units of Group R occu- pancies and equipped with a night latch, dead bolt, manual bolt, or security chain that requires a second releasing motion, provided that such devices are openable from the inside without the use of a key or tool. 6. Fire doors after the minimum elevated temperature has disabled the unlatching mechanism in accordance with listed fire door test procedures. 7. Doors serving roofs not intended to be occupied shall be permitted to be locked preventing entry to the building from the roof. 8. Other than egress courts, where occupants must egress from an exterior space through the building for means of egress, exit access doors shall be permitted to be equipped with an approved locking device where installed and operated in accordance with all of the following: 8.1. The maximum occupant load shall be posted where required by Section 1004.9. Such signage shall be perma- nently affixed inside the building and shall be posted in a conspicuous space near all the exit access doorways. 8.2. A weatherproof telephone or two-way communication system installed in accordance with Sections 1009.8.1 and 1009.8.2 shall be located adjacent to not less than one required exit access door on the exterior side. 8.3. The egress door locking device is readily distinguishable as locked and shall be a key-operated locking device. 8.4. A clear window or glazed door opening, not less than 5 square feet (0.46 m[fn2]) in area, shall be provided at each exit access door to determine if there are occupants using the outdoor area. 8.5. A readily visible, durable sign shall be posted on the interior side on or adjacent to each locked required exit access door serving the exterior area stating, “THIS DOOR TO REMAIN UNLOCKED WHEN THE OUTDOOR AREA IS OCCUPIED.” The letters on the sign shall be not less than 1 inch (25.4 mm) high on a contrasting background. 8.6. The occupant load of the occupied exterior area shall not exceed 300 occupants in accordance with Section 1004. 9. Locking devices are permitted on doors to balconies, decks or other exterior spaces serving individual dwelling or sleep- ing units. 10. Locking devices are permitted on doors to balconies, decks or other exterior spaces of 250 square feet (23.23 m[fn2]) or less serving a private office space.",
+        "where": "1010.2.4, 2025 Building Code of New York State (BCNYS), PDF p.325"
+       }
+      ],
+      "citation": "1010.2.4, 2025 Building Code of New York State (BCNYS), PDF p.324",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.2.4",
+      "quote": "1010.2.4 Locks and latches. Locks and latches shall be permitted to prevent operation of doors where any of the following exist: 1. Places of detention or restraint. 2. In Group I-1, Condition 2 and Group I-2 occupancies where the clinical needs of persons receiving care require contain- ment or where persons receiving care pose a security threat, provided that all clinical staff can readily unlock doors at all times, and all such locks are keyed to keys carried by all clinical staff at all times or all clinical staff have the codes or other means necessary to operate the locks at all times. 3. In buildings in occupancy Group A having an occupant load of 300 or less, Groups B, F, M and S, and in places of religious worship, the main door or doors are permitted to be equipped with key-operated locking devices from the egress side provided that: 3.1. The doors are the main exterior doors to the building, or the doors are the main doors to the tenant space."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_2_4_locks_and_latches",
+       "words": "A person checks this (Gordium doesn't decide it): A lock or latch may keep an egress door from opening only where one of 1010.2.4's ten items applies, each with its own conditions: places of detention or restraint; Group I-1 Condition 2 and I-2 containment with clinical staff able to unlock; the main exterior or tenant doors of Group A (300 or fewer), B, F, M and S and places of religious worship with a key lock readily distinguishable as locked, a sign in 1-inch letters (\"THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED\"), revocable by the building official; bolts on a pair's inactive leaf per Table 1010.2.4 (that leaf without a doorknob, panic hardware or similar); a Group R unit's single exit door (1006.2.1 or 1006.3.4) with a night latch, dead bolt, manual bolt or security chain openable from inside without a key or tool; fire doors after their unlatching is disabled by heat; doors to roofs not intended to be occupied, locked against entry; exit access doors from occupied exterior spaces (other than egress courts) with the posted load (1004.9), a two-way communication system (1009.8.1, 1009.8.2), a key lock, a clear window or glazing of 5 sq ft or more, a sign and 300 occupants at most; doors to a dwelling or sleeping unit's balconies, decks or other exterior spaces; and those of 250 sq ft or less serving a private office: how each door locks isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_2_4_locks_and_latches",
+       "why": "A person checks this (Gordium doesn't decide it): A lock or latch may keep an egress door from opening only where one of 1010.2.4's ten items applies, each with its own conditions: places of detention or restraint; Group I-1 Condition 2 and I-2 containment with clinical staff able to unlock; the main exterior or tenant doors of Group A (300 or fewer), B, F, M and S and places of religious worship with a key lock readily distinguishable as locked, a sign in 1-inch letters (\"THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED\"), revocable by the building official; bolts on a pair's inactive leaf per Table 1010.2.4 (that leaf without a doorknob, panic hardware or similar); a Group R unit's single exit door (1006.2.1 or 1006.3.4) with a night latch, dead bolt, manual bolt or security chain openable from inside without a key or tool; fire doors after their unlatching is disabled by heat; doors to roofs not intended to be occupied, locked against entry; exit access doors from occupied exterior spaces (other than egress courts) with the posted load (1004.9), a two-way communication system (1009.8.1, 1009.8.2), a key lock, a clear window or glazing of 5 sq ft or more, a sign and 300 occupants at most; doors to a dwelling or sleeping unit's balconies, decks or other exterior spaces; and those of 250 sq ft or less serving a private office: how each door locks isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Locks and latches that stop a door opening, where permitted",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.2.4",
+      "piece_title": "Locks and latches"
+     }
+    },
+    {
+     "id": "egress.general.bc_table_1010_2_4_inactive_leaf_bolts",
+     "rule": "general.bc_table_1010_2_4_inactive_leaf_bolts",
+     "name": "Egress · Bolts on the inactive leaf of a pair of doors (BCNYS Table 1010.2.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Manual (surface- or flush-mounted) bolts, automatic flush bolts and constant latching bolts on a pair's inactive leaf only as Table 1010.2.4 permits, by use and whether the pair must comply with Section 716 (fire door assemblies, not brought in): Group B, F or S under 50 occupants; Group B, F or S with a 903.3.1.1 sprinkler system where the inactive leaf isn't needed for egress capacity; Group I-2 patient care and sleeping rooms, that leaf not needed; any occupancy without required panic hardware where both leaves are needed (automatic flush bolts only); storage or equipment rooms, that leaf not needed (note a: no manual bolts on Group I-2 corridor doors required to be positive latching); note b permits automatic flush bolts on a 716 pair with self- or automatic-closing leaves and a coordinator: which doors are pairs, their bolts and their fire rating aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Manual (surface- or flush-mounted) bolts, automatic flush bolts and constant latching bolts on a pair's inactive leaf only as Table 1010.2.4 permits, by use and whether the pair must comply with Section 716 (fire door assemblies, not brought in): Group B, F or S under 50 occupants; Group B, F or S with a 903.3.1.1 sprinkler system where the inactive leaf isn't needed for egress capacity; Group I-2 patient care and sleeping rooms, that leaf not needed; any occupancy without required panic hardware where both leaves are needed (automatic flush bolts only); storage or equipment rooms, that leaf not needed (note a: no manual bolts on Group I-2 corridor doors required to be positive latching); note b permits automatic flush bolts on a 716 pair with self- or automatic-closing leaves and a coordinator: which doors are pairs, their bolts and their fire rating aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "TABLE 1010.2.4—MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND CONSTANT LATCHING BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS PERMITTED USES OF MANUAL BOLTS, THE PAIR OF AUTOMATIC FLUSH BOLTS AND CONSTANT LATCHING APPLICATION WITH A PAIR OF DOORS WITH AN ACTIVE DOORS IS BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS. REQUIRED TO LEAF AND AN INACTIVE LEAF COMPLY WITH Surface- or Automatic Constant SECTION 716 flush-mounted flush bolts latching bolts manual bolts No P P P Group B, F or S occupancies with occupant load less than 50. Yes NP NP[fnb] P Group B, F or S occupancies where the building is equipped No P P P with an automatic sprinkler system in accordance with Section 903.3.1.1 and the inactive leaf is not needed to meet Yes NP NP[fnb] P egress capacity requirements. Group I-2 patient care and sleeping rooms where inactive leaf No NP NP[fnb] P is not needed to meet egress capacity requirements. Yes NP NP[fnb] P Any occupancy where panic hardware is not required, egress No NP P NP doors are used in pairs, and where both leaves are required to meet egress capacity requirements. Yes NP NP[fnb] NP Storage or equipment rooms where the inactive leaf is not No P[fna] P P needed to meet egress capacity requirements. Yes P[fna] P P P = Permitted. NP = Not permitted. a.Not permitted on corridor doors in Group I-2 occupancies where corridor doors are required to be positive latching. b.Permitted where both doors are self closing or automatic closing, and are provided with a coordinator that causes the inactive leaf to be closed prior to the active leaf.",
+        "where": "Table 1010.2.4, 2025 Building Code of New York State (BCNYS), PDF p.325"
+       }
+      ],
+      "citation": "Table 1010.2.4, 2025 Building Code of New York State (BCNYS), PDF p.325",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "Table 1010.2.4",
+      "quote": "TABLE 1010.2.4—MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND CONSTANT LATCHING BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS PERMITTED USES OF MANUAL BOLTS, THE PAIR OF AUTOMATIC FLUSH BOLTS AND CONSTANT LATCHING APPLICATION WITH A PAIR OF DOORS WITH AN ACTIVE DOORS IS BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS. REQUIRED TO LEAF AND AN INACTIVE LEAF COMPLY WITH Surface- or Automatic Constant SECTION 716 flush-mounted flush bolts latching bolts manual bolts No P P P Group B, F or S occupancies with occupant load less than 50. Yes NP NP[fnb] P Group B, F or S occupancies where the building is equipped No P P P with an automatic sprinkler system in accordance with Section 903.3.1.1 and the inactive leaf is not needed to meet Yes NP NP[fnb] P egress capacity requirements. Group I-2 patient care and sleeping rooms where inactive leaf No NP NP[fnb] P is not needed to meet egress capacity requirements. Yes NP NP[fnb] P Any occupancy where panic hardware is not required, egress No NP P NP doors are used in pairs, and where both leaves are required to meet egress capacity requirements. Yes NP NP[fnb] NP Storage or equipment rooms where the inactive leaf is not No P[fna] P P needed to meet egress capacity requirements. Yes P[fna] P P P = Permitted. NP = Not permitted. a.Not permitted on corridor doors in Group I-2 occupancies where corridor doors are required to be positive latching. b.Permitted where both doors are self closing or automatic closing, and are provided with a coordinator that causes the inactive leaf to be closed prior to the active leaf."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_table_1010_2_4_inactive_leaf_bolts",
+       "words": "A person checks this (Gordium doesn't decide it): Manual (surface- or flush-mounted) bolts, automatic flush bolts and constant latching bolts on a pair's inactive leaf only as Table 1010.2.4 permits, by use and whether the pair must comply with Section 716 (fire door assemblies, not brought in): Group B, F or S under 50 occupants; Group B, F or S with a 903.3.1.1 sprinkler system where the inactive leaf isn't needed for egress capacity; Group I-2 patient care and sleeping rooms, that leaf not needed; any occupancy without required panic hardware where both leaves are needed (automatic flush bolts only); storage or equipment rooms, that leaf not needed (note a: no manual bolts on Group I-2 corridor doors required to be positive latching); note b permits automatic flush bolts on a 716 pair with self- or automatic-closing leaves and a coordinator: which doors are pairs, their bolts and their fire rating aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_table_1010_2_4_inactive_leaf_bolts",
+       "why": "A person checks this (Gordium doesn't decide it): Manual (surface- or flush-mounted) bolts, automatic flush bolts and constant latching bolts on a pair's inactive leaf only as Table 1010.2.4 permits, by use and whether the pair must comply with Section 716 (fire door assemblies, not brought in): Group B, F or S under 50 occupants; Group B, F or S with a 903.3.1.1 sprinkler system where the inactive leaf isn't needed for egress capacity; Group I-2 patient care and sleeping rooms, that leaf not needed; any occupancy without required panic hardware where both leaves are needed (automatic flush bolts only); storage or equipment rooms, that leaf not needed (note a: no manual bolts on Group I-2 corridor doors required to be positive latching); note b permits automatic flush bolts on a 716 pair with self- or automatic-closing leaves and a coordinator: which doors are pairs, their bolts and their fire rating aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Bolts on the inactive leaf of a pair of doors",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "Table 1010.2.4",
+      "piece_title": "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_2_5_closet_doors",
+     "rule": "general.bc_1010_2_5_closet_doors",
+     "name": "Egress · A closet door that latches opens from inside (BCNYS 1010.2.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A closet door that latches closed is openable from inside the closet: hardware isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A closet door that latches closed is openable from inside the closet: hardware isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.2.5 Closet doors. Closet doors that latch in the closed position shall be openable from inside the closet.",
+        "where": "1010.2.5, 2025 Building Code of New York State (BCNYS), PDF p.326"
+       }
+      ],
+      "citation": "1010.2.5, 2025 Building Code of New York State (BCNYS), PDF p.326",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.2.5",
+      "quote": "1010.2.5 Closet doors. Closet doors that latch in the closed position shall be openable from inside the closet."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_2_5_closet_doors",
+       "words": "A person checks this (Gordium doesn't decide it): A closet door that latches closed is openable from inside the closet: hardware isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_2_5_closet_doors",
+       "why": "A person checks this (Gordium doesn't decide it): A closet door that latches closed is openable from inside the closet: hardware isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "A closet door that latches opens from inside",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.2.5",
+      "piece_title": "Closet doors"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_2_6_stairway_doors",
+     "rule": "general.bc_1010_2_6_stairway_doors",
+     "name": "Egress · Interior stairway doors openable from both sides (BCNYS 1010.2.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Interior stairway egress doors open from both sides without a key or special knowledge or effort; except a stairway's discharge door, openable from the egress side and locked only from the other; doors arranged per 403.5.3 (not brought in); stairway exit doors locked from the side opposite egress only where they open from the egress side and unlock together, without unlatching, on a signal from the fire command center or a single location inside the main entrance, on a fire alarm signal where a fire alarm system serves the stairway, and on loss of power; and in Groups B, F, M and S, and Group R-2, where the only interior access to the tenant space or dwelling unit is from a single exit stairway 1006.3.4 permits, locked only from the side opposite egress: how each door locks isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Interior stairway egress doors open from both sides without a key or special knowledge or effort; except a stairway's discharge door, openable from the egress side and locked only from the other; doors arranged per 403.5.3 (not brought in); stairway exit doors locked from the side opposite egress only where they open from the egress side and unlock together, without unlatching, on a signal from the fire command center or a single location inside the main entrance, on a fire alarm signal where a fire alarm system serves the stairway, and on loss of power; and in Groups B, F, M and S, and Group R-2, where the only interior access to the tenant space or dwelling unit is from a single exit stairway 1006.3.4 permits, locked only from the side opposite egress: how each door locks isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.2.6 Stairway doors. Interior stairway means of egress doors shall be openable from both sides without the use of a key or special knowledge or effort. Exceptions: 1. Stairway discharge doors shall be openable from the egress side and shall only be locked from the opposite side. 2. This section shall not apply to doors arranged in accordance with Section 403.5.3. 3. Stairway exit doors shall not be locked from the side opposite the egress side, unless they are openable from the egress side and capable of being unlocked simultaneously without unlatching by all of the following methods: 3.1. Shall be capable of being unlocked individually or simultaneously upon a signal from the fire command center, where present, or a signal by emergency personnel from a single location inside the main entrance to the building. 3.2. Shall unlock simultaneously upon activation of a fire alarm signal when a fire alarm system is present in an area served by the stairway. 3.3. Shall unlock upon failure of the power supply to the electric lock or the locking system. 4. Stairway exit doors shall be openable from the egress side and shall only be locked from the opposite side in Group B, F, M and S occupancies where the only interior access to the tenant space is from a single exit stairway where permit- ted in Section 1006.3.4. 5. Stairway exit doors shall be openable from the egress side and shall only be locked from the opposite side in Group R- 2 occupancies where the only interior access to the dwelling unit is from a single exit stairway where permitted in Section 1006.3.4.",
+        "where": "1010.2.6, 2025 Building Code of New York State (BCNYS), PDF p.326"
+       }
+      ],
+      "citation": "1010.2.6, 2025 Building Code of New York State (BCNYS), PDF p.326",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.2.6",
+      "quote": "1010.2.6 Stairway doors. Interior stairway means of egress doors shall be openable from both sides without the use of a key or special knowledge or effort. Exceptions: 1. Stairway discharge doors shall be openable from the egress side and shall only be locked from the opposite side. 2. This section shall not apply to doors arranged in accordance with Section 403.5.3. 3. Stairway exit doors shall not be locked from the side opposite the egress side, unless they are openable from the egress side and capable of being unlocked simultaneously without unlatching by all of the following methods: 3.1. Shall be capable of being unlocked individually or simultaneously upon a signal from the fire command center, where present, or a signal by emergency personnel from a single location inside the main entrance to the building. 3.2. Shall unlock simultaneously upon activation of a fire alarm signal when a fire alarm system is present in an area served by the stairway. 3.3. Shall unlock upon failure of the power supply to the electric lock or the locking system. 4. Stairway exit doors shall be openable from the egress side and shall only be locked from the opposite side in Group B, F, M and S occupancies where the only interior access to the tenant space is from a single exit stairway where permit- ted in Section 1006.3.4. 5. Stairway exit doors shall be openable from the egress side and shall only be locked from the opposite side in Group R- 2 occupancies where the only interior access to the dwelling unit is from a single exit stairway where permitted in Section 1006.3.4."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_2_6_stairway_doors",
+       "words": "A person checks this (Gordium doesn't decide it): Interior stairway egress doors open from both sides without a key or special knowledge or effort; except a stairway's discharge door, openable from the egress side and locked only from the other; doors arranged per 403.5.3 (not brought in); stairway exit doors locked from the side opposite egress only where they open from the egress side and unlock together, without unlatching, on a signal from the fire command center or a single location inside the main entrance, on a fire alarm signal where a fire alarm system serves the stairway, and on loss of power; and in Groups B, F, M and S, and Group R-2, where the only interior access to the tenant space or dwelling unit is from a single exit stairway 1006.3.4 permits, locked only from the side opposite egress: how each door locks isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_2_6_stairway_doors",
+       "why": "A person checks this (Gordium doesn't decide it): Interior stairway egress doors open from both sides without a key or special knowledge or effort; except a stairway's discharge door, openable from the egress side and locked only from the other; doors arranged per 403.5.3 (not brought in); stairway exit doors locked from the side opposite egress only where they open from the egress side and unlock together, without unlatching, on a signal from the fire command center or a single location inside the main entrance, on a fire alarm signal where a fire alarm system serves the stairway, and on loss of power; and in Groups B, F, M and S, and Group R-2, where the only interior access to the tenant space or dwelling unit is from a single exit stairway 1006.3.4 permits, locked only from the side opposite egress: how each door locks isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Interior stairway doors openable from both sides",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.2.6",
+      "piece_title": "Stairway doors"
+     }
+    },
+    {
+     "id": "egress.general.bc_1010_2_7_educational_locking",
+     "rule": "general.bc_1010_2_7_educational_locking",
+     "name": "Egress · Intruder locks in educational occupancies (BCNYS 1010.2.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): In Group E, Group B educational and Group I-4 occupancies, egress doors from classrooms, offices and other occupied rooms with locks to keep intruders out can be unlocked from outside the room with a key or other approved means, open from within per 1010.2, and leave listed panic hardware, fire door hardware and door closers unmodified, fire door assemblies modified only per NFPA 80; remote locking or unlocking from an approved location is permitted too: locks aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): In Group E, Group B educational and Group I-4 occupancies, egress doors from classrooms, offices and other occupied rooms with locks to keep intruders out can be unlocked from outside the room with a key or other approved means, open from within per 1010.2, and leave listed panic hardware, fire door hardware and door closers unmodified, fire door assemblies modified only per NFPA 80; remote locking or unlocking from an approved location is permitted too: locks aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1010.2.7 Locking arrangements in educational occupancies. In Group E occupancies, Group B educational occupancies and Group I-4 occupancies, egress doors from classrooms, offices and other occupied rooms with locking arrangements designed to keep intruders from entering the room shall comply with all of the following conditions: 1. The door shall be capable of being unlocked from outside the room with a key or other approved means. 2. The door shall be openable from within the room in accordance with Section 1010.2. 3. Modifications shall not be made to listed panic hardware, fire door hardware or door closers. 4. Modifications to fire door assemblies shall be in accordance with NFPA 80. Remote locking or unlocking of doors from an approved location shall be permitted in addition to the unlocking operation in Item 1.",
+        "where": "1010.2.7, 2025 Building Code of New York State (BCNYS), PDF p.326"
+       }
+      ],
+      "citation": "1010.2.7, 2025 Building Code of New York State (BCNYS), PDF p.326",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1010.2.7",
+      "quote": "1010.2.7 Locking arrangements in educational occupancies. In Group E occupancies, Group B educational occupancies and Group I-4 occupancies, egress doors from classrooms, offices and other occupied rooms with locking arrangements designed to keep intruders from entering the room shall comply with all of the following conditions: 1. The door shall be capable of being unlocked from outside the room with a key or other approved means. 2. The door shall be openable from within the room in accordance with Section 1010.2. 3. Modifications shall not be made to listed panic hardware, fire door hardware or door closers. 4. Modifications to fire door assemblies shall be in accordance with NFPA 80. Remote locking or unlocking of doors from an approved location shall be permitted in addition to the unlocking operation in Item 1."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1010_2_7_educational_locking",
+       "words": "A person checks this (Gordium doesn't decide it): In Group E, Group B educational and Group I-4 occupancies, egress doors from classrooms, offices and other occupied rooms with locks to keep intruders out can be unlocked from outside the room with a key or other approved means, open from within per 1010.2, and leave listed panic hardware, fire door hardware and door closers unmodified, fire door assemblies modified only per NFPA 80; remote locking or unlocking from an approved location is permitted too: locks aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1010_2_7_educational_locking",
+       "why": "A person checks this (Gordium doesn't decide it): In Group E, Group B educational and Group I-4 occupancies, egress doors from classrooms, offices and other occupied rooms with locks to keep intruders out can be unlocked from outside the room with a key or other approved means, open from within per 1010.2, and leave listed panic hardware, fire door hardware and door closers unmodified, fire door assemblies modified only per NFPA 80; remote locking or unlocking from an approved location is permitted too: locks aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Intruder locks in educational occupancies",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1010",
+      "section_title": "Doors, Gates and Turnstiles",
+      "piece": "1010.2.7",
+      "piece_title": "Locking arrangements in educational occupancies"
      }
     },
     {
@@ -69428,7 +70071,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 78 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 87 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -69990,7 +70633,16 @@
       "egress.general.bc_1010_1_4_floor_elevation",
       "egress.general.bc_1010_1_5_landings",
       "egress.general.bc_1010_1_6_thresholds",
-      "egress.general.bc_1010_1_7_door_arrangement"
+      "egress.general.bc_1010_1_7_door_arrangement",
+      "egress.general.bc_1010_2_door_operations",
+      "egress.general.bc_1010_2_1_unlatching",
+      "egress.general.bc_1010_2_2_hardware",
+      "egress.general.bc_1010_2_3_hardware_height",
+      "egress.general.bc_1010_2_4_locks_and_latches",
+      "egress.general.bc_table_1010_2_4_inactive_leaf_bolts",
+      "egress.general.bc_1010_2_5_closet_doors",
+      "egress.general.bc_1010_2_6_stairway_doors",
+      "egress.general.bc_1010_2_7_educational_locking"
      ],
      "lines": [
       {
@@ -71100,7 +71752,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Doors recognizable as doors, no mirrors, not concealed (BCNYS 1010.1): A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
+       "title": "Egress · Doors recognizable as doors, no mirrors, not concealed (BCNYS 1010.1): A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.7's are rules and flags of their own; 1010.2.8 to 1010.3.4 follow in section group 6e.",
        "mark": "?",
        "name": "Egress · Doors recognizable as doors, no mirrors, not concealed (BCNYS 1010.1)"
       },
@@ -71194,9 +71846,126 @@
        "title": "Egress · Space between two doors in a series, and their swings (BCNYS 1010.1.7): A person checks this (Gordium doesn't decide it): Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space, and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches, storm and screen doors serving Group R-2 and R-3 dwelling units need not be 48 inches from the other door (they still swing as above), and doors within those units, other than within Type A units, are excepted: doors in a series and the space between them aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Space between two doors in a series, and their swings (BCNYS 1010.1.7)"
+      },
+      {
+       "key": "review#d2925d225a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_2_door_operations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Egress doors readily openable from the egress side (BCNYS 1010.2): A person checks this (Gordium doesn't decide it): Every egress door opens from the egress side without a key or special knowledge or effort, except where 1010.2's own sections permit (locks and latches per 1010.2.4, stairway doors per 1010.2.6, and the electrical locking systems of 1010.2.9 to 1010.2.15): how each door locks isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Egress doors readily openable from the egress side (BCNYS 1010.2)"
+      },
+      {
+       "key": "review#2e70e9afbc",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_2_1_unlatching"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · One motion to unlatch, no manual bolts (BCNYS 1010.2.1): A person checks this (Gordium doesn't decide it): Unlatching any door or leaf for egress takes no more than one motion in a single linear or rotational direction to release every latch and lock, and manual bolts aren't permitted; except in places of detention or restraint, the bolts 1010.2.4 item 4 permits on a pair's inactive leaf (Table 1010.2.4), and a Group R unit's single exit door with a night latch, dead bolt, manual bolt or security chain per 1010.2.4 item 5: hardware isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · One motion to unlatch, no manual bolts (BCNYS 1010.2.1)"
+      },
+      {
+       "key": "review#567f9ab054",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_2_2_hardware"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Accessible doors' hardware needs no tight grasping or twisting (BCNYS 1010.2.2): A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors Chapter 11 requires to be accessible operate without tight grasping, tight pinching or twisting of the wrist: hardware, and which doors Chapter 11 (not brought in) requires to be accessible, aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Accessible doors' hardware needs no tight grasping or twisting (BCNYS 1010.2.2)"
+      },
+      {
+       "key": "review#d0e0dd8111",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_2_3_hardware_height"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Door hardware 34 to 48 inches above the floor (BCNYS 1010.2.3): A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors are at least 34 inches and at most 48 inches above the finished floor; locks used only for security, not for normal operation, may be at any height, and the locks and latches of doors and gates in a swimming pool, spa or hot tub barrier follow 3109.2.7 and 3109.2.8 (not brought in): hardware isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Door hardware 34 to 48 inches above the floor (BCNYS 1010.2.3)"
+      },
+      {
+       "key": "review#4857656094",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_2_4_locks_and_latches"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Locks and latches that stop a door opening, where permitted (BCNYS 1010.2.4): A person checks this (Gordium doesn't decide it): A lock or latch may keep an egress door from opening only where one of 1010.2.4's ten items applies, each with its own conditions: places of detention or restraint; Group I-1 Condition 2 and I-2 containment with clinical staff able to unlock; the main exterior or tenant doors of Group A (300 or fewer), B, F, M and S and places of religious worship with a key lock readily distinguishable as locked, a sign in 1-inch letters (\"THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED\"), revocable by the building official; bolts on a pair's inactive leaf per Table 1010.2.4 (that leaf without a doorknob, panic hardware or similar); a Group R unit's single exit door (1006.2.1 or 1006.3.4) with a night latch, dead bolt, manual bolt or security chain openable from inside without a key or tool; fire doors after their unlatching is disabled by heat; doors to roofs not intended to be occupied, locked against entry; exit access doors from occupied exterior spaces (other than egress courts) with the posted load (1004.9), a two-way communication system (1009.8.1, 1009.8.2), a key lock, a clear window or glazing of 5 sq ft or more, a sign and 300 occupants at most; doors to a dwelling or sleeping unit's balconies, decks or other exterior spaces; and those of 250 sq ft or less serving a private office: how each door locks isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Locks and latches that stop a door opening, where permitted (BCNYS 1010.2.4)"
+      },
+      {
+       "key": "review#4dfb5ac7cd",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_table_1010_2_4_inactive_leaf_bolts"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Bolts on the inactive leaf of a pair of doors (BCNYS Table 1010.2.4): A person checks this (Gordium doesn't decide it): Manual (surface- or flush-mounted) bolts, automatic flush bolts and constant latching bolts on a pair's inactive leaf only as Table 1010.2.4 permits, by use and whether the pair must comply with Section 716 (fire door assemblies, not brought in): Group B, F or S under 50 occupants; Group B, F or S with a 903.3.1.1 sprinkler system where the inactive leaf isn't needed for egress capacity; Group I-2 patient care and sleeping rooms, that leaf not needed; any occupancy without required panic hardware where both leaves are needed (automatic flush bolts only); storage or equipment rooms, that leaf not needed (note a: no manual bolts on Group I-2 corridor doors required to be positive latching); note b permits automatic flush bolts on a 716 pair with self- or automatic-closing leaves and a coordinator: which doors are pairs, their bolts and their fire rating aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Bolts on the inactive leaf of a pair of doors (BCNYS Table 1010.2.4)"
+      },
+      {
+       "key": "review#c8180dadc3",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_2_5_closet_doors"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · A closet door that latches opens from inside (BCNYS 1010.2.5): A person checks this (Gordium doesn't decide it): A closet door that latches closed is openable from inside the closet: hardware isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · A closet door that latches opens from inside (BCNYS 1010.2.5)"
+      },
+      {
+       "key": "review#ab12818f5b",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_2_6_stairway_doors"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Interior stairway doors openable from both sides (BCNYS 1010.2.6): A person checks this (Gordium doesn't decide it): Interior stairway egress doors open from both sides without a key or special knowledge or effort; except a stairway's discharge door, openable from the egress side and locked only from the other; doors arranged per 403.5.3 (not brought in); stairway exit doors locked from the side opposite egress only where they open from the egress side and unlock together, without unlatching, on a signal from the fire command center or a single location inside the main entrance, on a fire alarm signal where a fire alarm system serves the stairway, and on loss of power; and in Groups B, F, M and S, and Group R-2, where the only interior access to the tenant space or dwelling unit is from a single exit stairway 1006.3.4 permits, locked only from the side opposite egress: how each door locks isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Interior stairway doors openable from both sides (BCNYS 1010.2.6)"
+      },
+      {
+       "key": "review#f1351f4de3",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1010_2_7_educational_locking"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Intruder locks in educational occupancies (BCNYS 1010.2.7): A person checks this (Gordium doesn't decide it): In Group E, Group B educational and Group I-4 occupancies, egress doors from classrooms, offices and other occupied rooms with locks to keep intruders out can be unlocked from outside the room with a key or other approved means, open from within per 1010.2, and leave listed panic hardware, fire door hardware and door closers unmodified, fire door assemblies modified only per NFPA 80; remote locking or unlocking from an approved location is permitted too: locks aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Intruder locks in educational occupancies (BCNYS 1010.2.7)"
       }
      ],
-     "count": 78,
+     "count": 87,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -72002,7 +72771,7 @@
       {
        "key": "reason:egress.general.bc_1010_1_doors_general",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.1.7's are rules and flags of their own; 1010.2 to 1010.3.4 follow in section group 6d.",
+       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.7's are rules and flags of their own; 1010.2.8 to 1010.3.4 follow in section group 6e.",
        "elements": [],
        "items": [
         "egress.general.bc_1010_1_doors_general"
@@ -72076,6 +72845,96 @@
        "elements": [],
        "items": [
         "egress.general.bc_1010_1_7_door_arrangement"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_2_door_operations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Every egress door opens from the egress side without a key or special knowledge or effort, except where 1010.2's own sections permit (locks and latches per 1010.2.4, stairway doors per 1010.2.6, and the electrical locking systems of 1010.2.9 to 1010.2.15): how each door locks isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_2_door_operations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_2_1_unlatching",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Unlatching any door or leaf for egress takes no more than one motion in a single linear or rotational direction to release every latch and lock, and manual bolts aren't permitted; except in places of detention or restraint, the bolts 1010.2.4 item 4 permits on a pair's inactive leaf (Table 1010.2.4), and a Group R unit's single exit door with a night latch, dead bolt, manual bolt or security chain per 1010.2.4 item 5: hardware isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_2_1_unlatching"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_2_2_hardware",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors Chapter 11 requires to be accessible operate without tight grasping, tight pinching or twisting of the wrist: hardware, and which doors Chapter 11 (not brought in) requires to be accessible, aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_2_2_hardware"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_2_3_hardware_height",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Handles, pulls, latches, locks and other operating devices of doors are at least 34 inches and at most 48 inches above the finished floor; locks used only for security, not for normal operation, may be at any height, and the locks and latches of doors and gates in a swimming pool, spa or hot tub barrier follow 3109.2.7 and 3109.2.8 (not brought in): hardware isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_2_3_hardware_height"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_2_4_locks_and_latches",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A lock or latch may keep an egress door from opening only where one of 1010.2.4's ten items applies, each with its own conditions: places of detention or restraint; Group I-1 Condition 2 and I-2 containment with clinical staff able to unlock; the main exterior or tenant doors of Group A (300 or fewer), B, F, M and S and places of religious worship with a key lock readily distinguishable as locked, a sign in 1-inch letters (\"THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED\"), revocable by the building official; bolts on a pair's inactive leaf per Table 1010.2.4 (that leaf without a doorknob, panic hardware or similar); a Group R unit's single exit door (1006.2.1 or 1006.3.4) with a night latch, dead bolt, manual bolt or security chain openable from inside without a key or tool; fire doors after their unlatching is disabled by heat; doors to roofs not intended to be occupied, locked against entry; exit access doors from occupied exterior spaces (other than egress courts) with the posted load (1004.9), a two-way communication system (1009.8.1, 1009.8.2), a key lock, a clear window or glazing of 5 sq ft or more, a sign and 300 occupants at most; doors to a dwelling or sleeping unit's balconies, decks or other exterior spaces; and those of 250 sq ft or less serving a private office: how each door locks isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_2_4_locks_and_latches"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_table_1010_2_4_inactive_leaf_bolts",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Manual (surface- or flush-mounted) bolts, automatic flush bolts and constant latching bolts on a pair's inactive leaf only as Table 1010.2.4 permits, by use and whether the pair must comply with Section 716 (fire door assemblies, not brought in): Group B, F or S under 50 occupants; Group B, F or S with a 903.3.1.1 sprinkler system where the inactive leaf isn't needed for egress capacity; Group I-2 patient care and sleeping rooms, that leaf not needed; any occupancy without required panic hardware where both leaves are needed (automatic flush bolts only); storage or equipment rooms, that leaf not needed (note a: no manual bolts on Group I-2 corridor doors required to be positive latching); note b permits automatic flush bolts on a 716 pair with self- or automatic-closing leaves and a coordinator: which doors are pairs, their bolts and their fire rating aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_table_1010_2_4_inactive_leaf_bolts"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_2_5_closet_doors",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A closet door that latches closed is openable from inside the closet: hardware isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_2_5_closet_doors"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_2_6_stairway_doors",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Interior stairway egress doors open from both sides without a key or special knowledge or effort; except a stairway's discharge door, openable from the egress side and locked only from the other; doors arranged per 403.5.3 (not brought in); stairway exit doors locked from the side opposite egress only where they open from the egress side and unlock together, without unlatching, on a signal from the fire command center or a single location inside the main entrance, on a fire alarm signal where a fire alarm system serves the stairway, and on loss of power; and in Groups B, F, M and S, and Group R-2, where the only interior access to the tenant space or dwelling unit is from a single exit stairway 1006.3.4 permits, locked only from the side opposite egress: how each door locks isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_2_6_stairway_doors"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1010_2_7_educational_locking",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): In Group E, Group B educational and Group I-4 occupancies, egress doors from classrooms, offices and other occupied rooms with locks to keep intruders out can be unlocked from outside the room with a key or other approved means, open from within per 1010.2, and leave listed panic hardware, fire door hardware and door closers unmodified, fire door assemblies modified only per NFPA 80; remote locking or unlocking from an approved location is permitted too: locks aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1010_2_7_educational_locking"
        ],
        "rules": 1
       }
@@ -72431,7 +73290,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "78 to review · 30 comply"
+     "summary": "87 to review · 30 comply"
     }
    ],
    "contents": [
@@ -84698,7 +85557,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 172
+          "not_for_checking": 185
          },
          "pieces": [
           {
@@ -84762,6 +85621,12 @@
            "rules": []
           },
           {
+           "id": "202:alarm_signal",
+           "title": "ALARM SIGNAL",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:alternating_tread_device",
            "title": "ALTERNATING TREAD DEVICE",
            "coverage": "not_for_checking",
@@ -84806,6 +85671,12 @@
           {
            "id": "202:automatic",
            "title": "AUTOMATIC",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:automatic_flush_bolt",
+           "title": "AUTOMATIC FLUSH BOLT",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -84900,6 +85771,12 @@
            "rules": []
           },
           {
+           "id": "202:constant_latching_bolt",
+           "title": "CONSTANT LATCHING BOLT",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:corridor",
            "title": "CORRIDOR",
            "coverage": "not_for_checking",
@@ -84920,6 +85797,12 @@
           {
            "id": "202:custodial_care",
            "title": "CUSTODIAL CARE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:dead_bolt",
+           "title": "DEAD BOLT",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -84992,6 +85875,12 @@
           {
            "id": "202:dwelling_unit",
            "title": "DWELLING UNIT",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:egress_court",
+           "title": "EGRESS COURT",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -85076,6 +85965,36 @@
           {
            "id": "202:facility",
            "title": "FACILITY",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_alarm_box_manual",
+           "title": "FIRE ALARM BOX, MANUAL",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_alarm_signal",
+           "title": "FIRE ALARM SIGNAL",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_alarm_system",
+           "title": "FIRE ALARM SYSTEM",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_command_center",
+           "title": "FIRE COMMAND CENTER",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:fire_detector_automatic",
+           "title": "FIRE DETECTOR, AUTOMATIC",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -85292,6 +86211,18 @@
           {
            "id": "202:low_energy_power_operated_door",
            "title": "LOW-ENERGY POWER-OPERATED DOOR",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:manual_bolt",
+           "title": "MANUAL BOLT",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:manual_fire_alarm_box",
+           "title": "MANUAL FIRE ALARM BOX",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -85646,6 +86577,12 @@
           {
            "id": "202:structure",
            "title": "STRUCTURE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:supervisory_signal_initiating_device",
+           "title": "SUPERVISORY SIGNAL-INITIATING DEVICE",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -87349,7 +88286,7 @@
          "whole": false,
          "counts": {
           "rules": 2,
-          "flag": 9,
+          "flag": 18,
           "not_for_checking": 1
          },
          "pieces": [
@@ -87441,6 +88378,78 @@
            "coverage": "flag",
            "rules": [
             "general.bc_1010_1_7_door_arrangement"
+           ]
+          },
+          {
+           "id": "1010.2",
+           "title": "Door operations",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_2_door_operations"
+           ]
+          },
+          {
+           "id": "1010.2.1",
+           "title": "Unlatching",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_2_1_unlatching"
+           ]
+          },
+          {
+           "id": "1010.2.2",
+           "title": "Hardware",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_2_2_hardware"
+           ]
+          },
+          {
+           "id": "1010.2.3",
+           "title": "Hardware height",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_2_3_hardware_height"
+           ]
+          },
+          {
+           "id": "1010.2.4",
+           "title": "Locks and latches",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_2_4_locks_and_latches"
+           ]
+          },
+          {
+           "id": "Table 1010.2.4",
+           "title": "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_table_1010_2_4_inactive_leaf_bolts"
+           ]
+          },
+          {
+           "id": "1010.2.5",
+           "title": "Closet doors",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_2_5_closet_doors"
+           ]
+          },
+          {
+           "id": "1010.2.6",
+           "title": "Stairway doors",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_2_6_stairway_doors"
+           ]
+          },
+          {
+           "id": "1010.2.7",
+           "title": "Locking arrangements in educational occupancies",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1010_2_7_educational_locking"
            ]
           },
           {
@@ -91780,6 +92789,15 @@
    "egress.general.bc_1010_1_5_landings": "needs_review",
    "egress.general.bc_1010_1_6_thresholds": "needs_review",
    "egress.general.bc_1010_1_7_door_arrangement": "needs_review",
+   "egress.general.bc_1010_2_door_operations": "needs_review",
+   "egress.general.bc_1010_2_1_unlatching": "needs_review",
+   "egress.general.bc_1010_2_2_hardware": "needs_review",
+   "egress.general.bc_1010_2_3_hardware_height": "needs_review",
+   "egress.general.bc_1010_2_4_locks_and_latches": "needs_review",
+   "egress.general.bc_table_1010_2_4_inactive_leaf_bolts": "needs_review",
+   "egress.general.bc_1010_2_5_closet_doors": "needs_review",
+   "egress.general.bc_1010_2_6_stairway_doors": "needs_review",
+   "egress.general.bc_1010_2_7_educational_locking": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7da": "complies",
@@ -91824,7 +92842,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "78 to review · 30 comply"
+    "summary": "87 to review · 30 comply"
    }
   ],
   "egress": {
@@ -96748,7 +97766,16 @@
     "general.bc_1010_1_4_floor_elevation": "needs_review",
     "general.bc_1010_1_5_landings": "needs_review",
     "general.bc_1010_1_6_thresholds": "needs_review",
-    "general.bc_1010_1_7_door_arrangement": "needs_review"
+    "general.bc_1010_1_7_door_arrangement": "needs_review",
+    "general.bc_1010_2_door_operations": "needs_review",
+    "general.bc_1010_2_1_unlatching": "needs_review",
+    "general.bc_1010_2_2_hardware": "needs_review",
+    "general.bc_1010_2_3_hardware_height": "needs_review",
+    "general.bc_1010_2_4_locks_and_latches": "needs_review",
+    "general.bc_table_1010_2_4_inactive_leaf_bolts": "needs_review",
+    "general.bc_1010_2_5_closet_doors": "needs_review",
+    "general.bc_1010_2_6_stairway_doors": "needs_review",
+    "general.bc_1010_2_7_educational_locking": "needs_review"
    },
    "interior": {
     "parts": {
@@ -100664,7 +101691,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "64659972c0fa96e1aa9a006ee0c56bb5e863f1cecf3664c810b6b772e0e580de",
   "rulebook": {
-   "new_york/ithaca_city": "db8cb57989389346ef6afd0938ed1bada3186e30886de2ddf4ab3ebe09ab0f1f"
+   "new_york/ithaca_city": "6bdd3e215164f8dfe0dddd71b48e5461a2655e8ddfd22e71bd9bfc42e99d2b43"
   }
  }
 }

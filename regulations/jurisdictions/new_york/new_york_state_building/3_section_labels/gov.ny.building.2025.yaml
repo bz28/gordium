@@ -167,6 +167,22 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:alarm_signal:
+    label: reference
+    topic: definitions
+    reason: 'Defines ALARM SIGNAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 20
+      - 20
+      quote: '[F] ALARM SIGNAL. A signal indicating an emergency requiring immediate action, such as a signal indicative of
+        fire.'
+    piece_sha256: 95591167dcd24bc03267be2968375c3b1e8931db1834fea47e2ac1e0a463048c
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:alternating_tread_device:
     label: reference
     topic: definitions
@@ -295,6 +311,25 @@ labels:
         the necessity for'
     piece_sha256: d4a09578ec9aa29d640e81df267daa1a209a9dee6ac4ac76fc7358f405c78e9e
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:automatic_flush_bolt:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTOMATIC FLUSH BOLT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 16
+      - 19
+      quote: '[BE] AUTOMATIC FLUSH BOLT. Door-locking hardware, installed on the inactive leaf of a pair of doors, which has
+        a bolt that is extended automatically into the door frame or floor when the active leaf is closed after the inactive
+        leaf, and which holds the inactive leaf in a closed position. When the active leaf is opened, the automatic flush
+        bolt retracts the bolt or rod, allowing the inactive leaf to be opened (see “Constant latching bolt,” “Dead bolt,”
+        “Manual bolt”).'
+    piece_sha256: 02cb0c8d5cc25f6cc1920ca4f1f206a6646f49bc91d124a5851a7e9ec421d543
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:automatic_sprinkler_system:
@@ -533,6 +568,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:constant_latching_bolt:
+    label: reference
+    topic: definitions
+    reason: 'Defines CONSTANT LATCHING BOLT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 38
+      lines:
+      - 44
+      - 46
+      quote: '[BE] CONSTANT LATCHING BOLT. Door-locking hardware installed on the inactive leaf of a pair of doors consisting
+        of a bolt that auto- matically latches into the door frame or floor, holding the inactive leaf in a closed position.
+        The latch bolt is retracted manually to allow the inactive leaf to be opened.'
+    piece_sha256: 3c6e987ea4574d0a1a5c27f277fe97c634db98e26d9d3e8dd1317b8a55f8ec3d
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:corridor:
     label: reference
     topic: definitions
@@ -594,6 +646,22 @@ labels:
         taking medication,'
     piece_sha256: 44133a2ce27f0e8a43479860532e14a23db315684f953b34ebe75ba63ffe579a
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:dead_bolt:
+    label: reference
+    topic: definitions
+    reason: 'Defines DEAD BOLT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 40
+      lines:
+      - 14
+      - 15
+      quote: '[BE] DEAD BOLT. Door locking hardware with a bolt that is extended and retracted by action of the lock mechanism
+        (see “Automatic flush bolt,” “Constant latching bolt,” “Manual bolt”).'
+    piece_sha256: 318db18308c5f303f672d5d5225ba45e501d216db6fef27cf5b16bf78ebd1e9f
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:dead_load:
@@ -783,6 +851,21 @@ labels:
         including permanent'
     piece_sha256: 7ca57b0329845f8839c9ccef07d4cec122cae092de4c120631e22a237ec44857
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:egress_court:
+    label: reference
+    topic: definitions
+    reason: 'Defines EGRESS COURT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 4
+      - 4
+      quote: '[BE] EGRESS COURT. A court or yard which provides access to a public way for one or more exits.'
+    piece_sha256: d85feeeb4ad45650b08673f5d6868ceac974b6b026613ae44999bf3e5eb2201c
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:emergency_escape_and_rescue_opening:
@@ -1003,6 +1086,86 @@ labels:
         routes located on a'
     piece_sha256: d3218b5b4796d1c3140a4374dece0a2c36cfffc347e0330d47c51983c7993e69
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_alarm_box_manual:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE ALARM BOX, MANUAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 52
+      - 52
+      quote: FIRE ALARM BOX, MANUAL. See “Manual fire alarm box.”
+    piece_sha256: 86eb8c6a06170095bbe1aaa68657cf2101f6212837fa0e4432c80254f11c970d
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_alarm_signal:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE ALARM SIGNAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 56
+      - 57
+      quote: '[F] FIRE ALARM SIGNAL. A signal initiated by a fire alarm-initiating device such as a manual fire alarm box,
+        automatic fire detector, waterflow switch or other device whose activation is indicative of the presence of a fire
+        or fire signature.'
+    piece_sha256: 4e0e1ac4569062cadaabf7445efe4a87311446bd0603337ec3e33c46dd44e5f4
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_alarm_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE ALARM SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 58
+      - 59
+      quote: '[F] FIRE ALARM SYSTEM. A system or portion of a combination system consisting of components and circuits arranged
+        to monitor and annunciate the status of fire alarm or supervisory signal-initiating devices and to initiate the appropriate
+        response to those signals.'
+    piece_sha256: 33a8b800345bc2a4672d91c19cf4409e58c17002f0d1953342ee3bb1bce8a85d
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_command_center:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE COMMAND CENTER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 10
+      - 11
+      quote: '[F] FIRE COMMAND CENTER. The principal attended or unattended location where the status of detection, alarm
+        communications and control systems is displayed, and from which the systems can be manually controlled.'
+    piece_sha256: 5c6af425e103a36ddcd19bcc03ac123db6dc7b9109b5ee76c18f67d31231ff1d
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_detector_automatic:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE DETECTOR, AUTOMATIC, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 16
+      - 16
+      quote: '[F] FIRE DETECTOR, AUTOMATIC. A device designed to detect the presence of a fire signature and to initiate action.'
+    piece_sha256: 56399eeb88bc608dba2e29d9dc18fb3d35c48dd4a9b2215857bb69e2c3e0ddf5
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_door:
@@ -1588,6 +1751,38 @@ labels:
         and operates with decreased forces and decreased speeds (see “Power-assisted door” and “Power-operated door”).'
     piece_sha256: 3b0151e86c26e482f1942593116a7541d772a1d9dabff9e58dc64da00d16fab1
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:manual_bolt:
+    label: reference
+    topic: definitions
+    reason: 'Defines MANUAL BOLT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 10
+      - 12
+      quote: '[BE] MANUAL BOLT. Door-locking hardware operable from one side of the door, or from the edge of a door leaf,
+        with a bolt or rod extended and retracted by manual movement of the bolt or rod, such as a manual flush bolt or manual
+        surface bolt (see “Automatic flush bolt,” “Constant latching bolt,” “Dead bolt”).'
+    piece_sha256: 34efc7a9523a0b1b961196085b3d9d1489265fa0e4fd1f6cc22982ed2c72ba5d
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:manual_fire_alarm_box:
+    label: reference
+    topic: definitions
+    reason: 'Defines MANUAL FIRE ALARM BOX, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 13
+      - 13
+      quote: '[F] MANUAL FIRE ALARM BOX. A manually operated device used to initiate an alarm signal.'
+    piece_sha256: 80f811ad2e2cfb6de1214be42ac372f93ab2d10db0e9044cbba3e0b82ca9fbdc
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:masonry:
@@ -2550,6 +2745,24 @@ labels:
       quote: '[A] STRUCTURE. That which is built or constructed.'
     piece_sha256: 0a2ea45a577f48e5194c0496c4f735fc362db3d2b90086fee6f0b93e26d412cf
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:supervisory_signal_initiating_device:
+    label: reference
+    topic: definitions
+    reason: 'Defines SUPERVISORY SIGNAL-INITIATING DEVICE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 64
+      lines:
+      - 13
+      - 16
+      quote: '[F] SUPERVISORY SIGNAL-INITIATING DEVICE. An initiation device, such as a valve supervisory switch, water-level
+        indicator or low- air pressure switch on a dry-pipe sprinkler system, whose change of state signals an off-normal
+        condition and its restoration to normal of a fire protection or life safety system, or a need for action in connection
+        with guard tours, fire suppression systems or equipment or maintenance features of related systems.'
+    piece_sha256: 6e0e706319eef21505ea4e93da0244898cabec2aaf1e70dc6f478d0b40e6833f
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:swimming_pool:
@@ -4243,6 +4456,232 @@ labels:
         R-3 need not be spaced 48 inches (1219 mm) from the other door. 3. Doors within individual dwelling units in Groups
         R-2 and R-3 other than within Type A dwelling units.'
     piece_sha256: 2a103ee8e4be3f2396bb7490c4c00752b3a0e91c4281a41837230c7d1262b342
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1010.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'Egress doors readily openable from the egress side without a key or special knowledge or effort, except as 1010.2
+      permits: how each door locks isn''t in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 324
+      lines:
+      - 33
+      - 34
+      quote: 1010.2 Door operations. Except as specifically permitted by this section, egress doors shall be readily openable
+        from the egress side without the use of a key or special knowledge or effort.
+    piece_sha256: d4c0c56ed034027e669a63af431a49f6ac8e196755f23f3965c57cb69e2e767b
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'One motion in one direction releases every latch and lock, no manual bolts, with three exceptions: hardware isn''t
+      in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 324
+      lines:
+      - 35
+      - 40
+      quote: '1010.2.1 Unlatching. The unlatching of any door or leaf for egress shall require not more than one motion in
+        a single linear or rotational direction to release all latching and all locking devices. locking devices. Manual bolts
+        are not permitted. Exceptions: 1. Places of detention or restraint. 2. Doors with manual bolts, automatic flush bolts
+        and constant latching bolts as permitted by Section 1010.2.4, Item 4. 3. Doors from individual dwelling units and
+        sleeping units of Group R occupancies as permitted by Section 1010.2.4, Item 5.'
+    piece_sha256: 352a3b6ad338700a8073217e92eecda799045348320f19313ad9d8bfce7eb9e4
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Operating devices of doors Chapter 11 requires to be accessible need no tight grasping, pinching or twisting:
+      hardware isn''t in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 324
+      lines:
+      - 41
+      - 42
+      quote: '[NY] 1010.2.2 Hardware. Door handles, pulls, latches, locks and other operating devices of doors required to
+        be accessible by Chapter 11 shall not require tight grasping, tight pinching or twisting of the wrist to operate.'
+    piece_sha256: c4c7f6c90263942a7c52b5bb43963ce99b33c899d63eeec90c9dd389cdd3ca86
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Door handles, pulls, latches, locks and other operating devices 34 to 48 inches above the finished floor, with
+      two exceptions: hardware isn''t in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 324
+      lines:
+      - 43
+      - 48
+      quote: '[NY] 1010.2.3 Hardware height. Door handles, pulls, latches, locks and other operating devices of doors shall
+        be installed 34 inches (864 mm) minimum and 48 inches (1219 mm) maximum above the finished floor. Exceptions: 1. Locks
+        used only for security purposes and not used for normal operation are permitted at any height. 2. The height of operating
+        devices of locks and latches of doors and gates in barriers required to restrict access to a swimming pool, spa, or
+        hot tub shall comply with Sections 3109.2.7 and 3109.2.8.'
+    piece_sha256: 9a0afdc7f83e0cfccc76c62ee92a3d2badb240c93ee95257be74c86ee294475a
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.2.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where locks and latches may keep a door from opening (ten items, each with its conditions): how each door locks
+      isn''t in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 324
+      lines:
+      - 49
+      - 58
+      quote: '1010.2.4 Locks and latches. Locks and latches shall be permitted to prevent operation of doors where any of
+        the following exist: 1. Places of detention or restraint. 2. In Group I-1, Condition 2 and Group I-2 occupancies where
+        the clinical needs of persons receiving care require contain- ment or where persons receiving care pose a security
+        threat, provided that all clinical staff can readily unlock doors at all times, and all such locks are keyed to keys
+        carried by all clinical staff at all times or all clinical staff have the codes or other means necessary to operate
+        the locks at all times. 3. In buildings in occupancy Group A having an occupant load of 300 or less, Groups B, F,
+        M and S, and in places of religious worship, the main door or doors are permitted to be equipped with key-operated
+        locking devices from the egress side provided that: 3.1. The doors are the main exterior doors to the building, or
+        the doors are the main doors to the tenant space.'
+    - file: gov.ny.building.2025.pdf
+      page: 325
+      lines:
+      - 3
+      - 35
+      quote: '3.2. The locking device is readily distinguishable as locked. 3.3. A readily visible durable sign is posted
+        on the egress side on or adjacent to the door stating: THIS DOOR TO REMAIN UNLOCKED WHEN THIS SPACE IS OCCUPIED. The
+        sign shall be in letters 1 inch (25 mm) high on a contrasting background. 3.4. The use of the key-operated locking
+        device is revocable by the building official for due cause. 4. Manual bolts, automatic flush bolts and constant latching
+        bolts on the inactive leaf of a pair of doors in accordance with Table 1010.2.4, provided that the inactive leaf does
+        not have a doorknob, panic hardware, or similar operating hardware. 5. Single exit doors complying with Section 1006.2.1
+        or 1006.3.4 from individual dwelling or sleeping units of Group R occu- pancies and equipped with a night latch, dead
+        bolt, manual bolt, or security chain that requires a second releasing motion, provided that such devices are openable
+        from the inside without the use of a key or tool. 6. Fire doors after the minimum elevated temperature has disabled
+        the unlatching mechanism in accordance with listed fire door test procedures. 7. Doors serving roofs not intended
+        to be occupied shall be permitted to be locked preventing entry to the building from the roof. 8. Other than egress
+        courts, where occupants must egress from an exterior space through the building for means of egress, exit access doors
+        shall be permitted to be equipped with an approved locking device where installed and operated in accordance with
+        all of the following: 8.1. The maximum occupant load shall be posted where required by Section 1004.9. Such signage
+        shall be perma- nently affixed inside the building and shall be posted in a conspicuous space near all the exit access
+        doorways. 8.2. A weatherproof telephone or two-way communication system installed in accordance with Sections 1009.8.1
+        and 1009.8.2 shall be located adjacent to not less than one required exit access door on the exterior side. 8.3. The
+        egress door locking device is readily distinguishable as locked and shall be a key-operated locking device. 8.4. A
+        clear window or glazed door opening, not less than 5 square feet (0.46 m[fn2]) in area, shall be provided at each
+        exit access door to determine if there are occupants using the outdoor area. 8.5. A readily visible, durable sign
+        shall be posted on the interior side on or adjacent to each locked required exit access door serving the exterior
+        area stating, “THIS DOOR TO REMAIN UNLOCKED WHEN THE OUTDOOR AREA IS OCCUPIED.” The letters on the sign shall be not
+        less than 1 inch (25.4 mm) high on a contrasting background. 8.6. The occupant load of the occupied exterior area
+        shall not exceed 300 occupants in accordance with Section 1004. 9. Locking devices are permitted on doors to balconies,
+        decks or other exterior spaces serving individual dwelling or sleep- ing units. 10. Locking devices are permitted
+        on doors to balconies, decks or other exterior spaces of 250 square feet (23.23 m[fn2]) or less serving a private
+        office space.'
+    piece_sha256: 3625634d6ebf941561332ec7ed1fd2da62ce08918cb91954c8bfddf14d4cd576
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1010.2.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where manual bolts, automatic flush bolts and constant latching bolts are permitted on a pair''s inactive leaf,
+      by use and fire-door rating: bolts aren''t in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 325
+      lines:
+      - 36
+      - 61
+      quote: TABLE 1010.2.4—MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND CONSTANT LATCHING BOLTS ON THE INACTIVE LEAF OF A PAIR
+        OF DOORS PERMITTED USES OF MANUAL BOLTS, THE PAIR OF AUTOMATIC FLUSH BOLTS AND CONSTANT LATCHING APPLICATION WITH
+        A PAIR OF DOORS WITH AN ACTIVE DOORS IS BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS. REQUIRED TO LEAF AND AN INACTIVE
+        LEAF COMPLY WITH Surface- or Automatic Constant SECTION 716 flush-mounted flush bolts latching bolts manual bolts
+        No P P P Group B, F or S occupancies with occupant load less than 50. Yes NP NP[fnb] P Group B, F or S occupancies
+        where the building is equipped No P P P with an automatic sprinkler system in accordance with Section 903.3.1.1 and
+        the inactive leaf is not needed to meet Yes NP NP[fnb] P egress capacity requirements. Group I-2 patient care and sleeping
+        rooms where inactive leaf No NP NP[fnb] P is not needed to meet egress capacity requirements. Yes NP NP[fnb] P Any occupancy
+        where panic hardware is not required, egress No NP P NP doors are used in pairs, and where both leaves are required
+        to meet egress capacity requirements. Yes NP NP[fnb] NP Storage or equipment rooms where the inactive leaf is not
+        No P[fna] P P needed to meet egress capacity requirements. Yes P[fna] P P P = Permitted. NP = Not permitted. a.Not permitted
+        on corridor doors in Group I-2 occupancies where corridor doors are required to be positive latching. b.Permitted
+        where both doors are self closing or automatic closing, and are provided with a coordinator that causes the inactive
+        leaf to be closed prior to the active leaf.
+    piece_sha256: e09679fb2ae1ba42c144bfcb69d2d14c475749b1c382e8be582bfb2376f9ef42
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.2.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'A closet door that latches closed opens from inside the closet: hardware isn''t in the model, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 326
+      lines:
+      - 3
+      - 3
+      quote: 1010.2.5 Closet doors. Closet doors that latch in the closed position shall be openable from inside the closet.
+    piece_sha256: d17c82eb93de006535a9ad027b392cadc4dc7ab076978fc5c8e2f91913bbd6fa
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.2.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'Interior stairway doors openable from both sides, with five exceptions: how each door locks isn''t in the model,
+      a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 326
+      lines:
+      - 4
+      - 22
+      quote: '1010.2.6 Stairway doors. Interior stairway means of egress doors shall be openable from both sides without the
+        use of a key or special knowledge or effort. Exceptions: 1. Stairway discharge doors shall be openable from the egress
+        side and shall only be locked from the opposite side. 2. This section shall not apply to doors arranged in accordance
+        with Section 403.5.3. 3. Stairway exit doors shall not be locked from the side opposite the egress side, unless they
+        are openable from the egress side and capable of being unlocked simultaneously without unlatching by all of the following
+        methods: 3.1. Shall be capable of being unlocked individually or simultaneously upon a signal from the fire command
+        center, where present, or a signal by emergency personnel from a single location inside the main entrance to the building.
+        3.2. Shall unlock simultaneously upon activation of a fire alarm signal when a fire alarm system is present in an
+        area served by the stairway. 3.3. Shall unlock upon failure of the power supply to the electric lock or the locking
+        system. 4. Stairway exit doors shall be openable from the egress side and shall only be locked from the opposite side
+        in Group B, F, M and S occupancies where the only interior access to the tenant space is from a single exit stairway
+        where permit- ted in Section 1006.3.4. 5. Stairway exit doors shall be openable from the egress side and shall only
+        be locked from the opposite side in Group R- 2 occupancies where the only interior access to the dwelling unit is
+        from a single exit stairway where permitted in Section 1006.3.4.'
+    piece_sha256: d6485737f24dd534420567ae6c778e850af7b95f013cb559becc362d0c905cc1
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.2.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'Intruder locks on classroom, office and other occupied rooms'' doors in Groups E, B (educational) and I-4: locks
+      aren''t in the model, a person''s check where the building may be one of those groups.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 326
+      lines:
+      - 23
+      - 30
+      quote: '1010.2.7 Locking arrangements in educational occupancies. In Group E occupancies, Group B educational occupancies
+        and Group I-4 occupancies, egress doors from classrooms, offices and other occupied rooms with locking arrangements
+        designed to keep intruders from entering the room shall comply with all of the following conditions: 1. The door shall
+        be capable of being unlocked from outside the room with a key or other approved means. 2. The door shall be openable
+        from within the room in accordance with Section 1010.2. 3. Modifications shall not be made to listed panic hardware,
+        fire door hardware or door closers. 4. Modifications to fire door assemblies shall be in accordance with NFPA 80.
+        Remote locking or unlocking of doors from an approved location shall be permitted in addition to the unlocking operation
+        in Item 1.'
+    piece_sha256: e43fbcf2a0cd0a42d8982d7dc9acb30a4ea5188d3903735fb3b5d14f678f88e0
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft

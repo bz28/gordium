@@ -287,7 +287,11 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          # section group 6c: the rest of 1010.1
          "1010.1.3": (323, 26, 36), "1010.1.3.1": (323, 37, 37), "1010.1.3.2": (323, 38, 39),
          "1010.1.4": (323, 40, 56), "1010.1.4 (part 2)": (324, 3, 5), "1010.1.5": (324, 6, 11),
-         "1010.1.6": (324, 12, 25), "1010.1.7": (324, 26, 32)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
+         "1010.1.6": (324, 12, 25), "1010.1.7": (324, 26, 32),
+         # section group 6d: 1010.2 to 1010.2.7 and Table 1010.2.4
+         "1010.2": (324, 33, 34), "1010.2.1": (324, 35, 40), "1010.2.2": (324, 41, 42), "1010.2.3": (324, 43, 48),
+         "1010.2.4": (324, 49, 58), "1010.2.4 (part 2)": (325, 3, 35), "Table 1010.2.4": (325, 36, 61),
+         "1010.2.5": (326, 3, 3), "1010.2.6": (326, 4, 22), "1010.2.7": (326, 23, 30)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -337,11 +341,19 @@ HANDLERS = {
     "1010.3.3": ("general.bc_1010_1_2_door_types", "1010.3.3"),
     # section group 6c: 1010.1.4's exception 6 (equipment spaces not required to be accessible)
     "1103.2.9": ("general.bc_1010_1_4_floor_elevation", "1103.2.9"),
+    # section group 6d: pool barriers, two-way communication, the posted load, fire door assemblies, high-rise stairs
+    "3109.2.7": ("general.bc_1010_2_3_hardware_height", "3109.2.7"),
+    "3109.2.8": ("general.bc_1010_2_3_hardware_height", "3109.2.8"),
+    "1009.8.1": ("general.bc_1010_2_4_locks_and_latches", "1009.8.1"),
+    "1009.8.2": ("general.bc_1010_2_4_locks_and_latches", "1009.8.2"),
+    "1004.9": ("general.bc_1010_2_4_locks_and_latches", "1004.9"),
+    "716": ("general.bc_table_1010_2_4_inactive_leaf_bolts", "716"),
+    "403.5.3": ("general.bc_1010_2_6_stairway_doors", "403.5.3"),
 }
 NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
             "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1", "1010.1.2",
             "1010.1.2.1", "1010.1.3", "1010.1.3.1", "1010.1.3.2", "1010.1.4", "1010.1.5", "1010.1.6",
-            "1010.1.7"}          # the piece naming itself
+            "1010.1.7", "1010.2", "1010.2.1", "1010.2.2", "1010.2.3", "1010.2.4", "1010.2.5", "1010.2.6", "1010.2.7"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
@@ -1070,3 +1082,38 @@ def test_the_6c_flags_state_each_exceptions_own_conditions(rules):
     series = note("general.bc_1010_1_7_door_arrangement")
     assert "need not be 48 inches from the other door (they still swing as above)" in series  # exception 2
     assert "other than within Type A units" in series                                          # exception 3
+
+
+# ---- section group 6d (2026-11-25): door operations, 1010.2 to 1010.2.7 and Table 1010.2.4 (pp.324-326) ----------------
+
+FLAGS_6D = {"general.bc_1010_2_door_operations": (324, 33), "general.bc_1010_2_1_unlatching": (324, 35),
+            "general.bc_1010_2_2_hardware": (324, 41), "general.bc_1010_2_3_hardware_height": (324, 43),
+            "general.bc_1010_2_4_locks_and_latches": (325, 35), "general.bc_table_1010_2_4_inactive_leaf_bolts": (325, 61),
+            "general.bc_1010_2_5_closet_doors": (326, 3), "general.bc_1010_2_6_stairway_doors": (326, 22)}
+
+
+@pytest.mark.parametrize("rid", sorted(FLAGS_6D))
+def test_1010_2_to_1010_2_6_are_always_a_persons_check(ctx, rules, rid):
+    """Locks, latches, bolts and hardware aren't in the model: each is a flag shown for every building, whatever its
+    group, never a pass or a fail (typed from the page: the line each cites)."""
+    r = rules[rid]
+    assert r["kind"] == "flag" and "applies_when" not in r and "for_each" not in r
+    assert _cites(r, *FLAGS_6D[rid])
+    from rule_format.rulebook import outcome
+    for g in ("B", "H-1", "R-2", "A-1", "E", "I-3", "mixed", None):
+        given = {} if g is None else {"occupancy_group": g}
+        assert outcome(r, given, ctx.allowed()) == "needs_review", (rid, g)
+
+
+def test_1010_2_7_is_asked_wherever_the_building_may_be_group_e_b_or_i4(ctx, rules):
+    """1010.2.7 (p.326 lines 23-25): Group E, Group B educational and Group I-4 occupancies; Group B is asked in full
+    (whether it is educational isn't stated), two or more groups and an unstated group too; set aside only for a single
+    stated group of another kind."""
+    from rule_format.rulebook import outcome
+    r = rules["general.bc_1010_2_7_educational_locking"]
+    assert _cites(r, 326, 23) and _cites(r, 326, 30)
+    for g in ("E", "B", "I-4", "mixed", None):
+        given = {} if g is None else {"occupancy_group": g}
+        assert outcome(r, given, ctx.allowed()) == "needs_review", g
+    for g in ("A-1", "R-2", "I-2", "M", "S-1", "H-3", "F-1", "U", "I-1", "I-3", "R-1"):
+        assert outcome(r, {"occupancy_group": g}, ctx.allowed()) == "not_applicable", g

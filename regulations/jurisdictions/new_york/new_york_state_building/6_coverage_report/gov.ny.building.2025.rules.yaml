@@ -265,6 +265,51 @@ pieces:
     heading: General › Door arrangement
     rules:
     - general.bc_1010_1_7_door_arrangement
+  '1010.2':
+    label: flag
+    heading: Door operations
+    rules:
+    - general.bc_1010_2_door_operations
+  1010.2.1:
+    label: flag
+    heading: Door operations › Unlatching
+    rules:
+    - general.bc_1010_2_1_unlatching
+  1010.2.2:
+    label: flag
+    heading: Door operations › Hardware
+    rules:
+    - general.bc_1010_2_2_hardware
+  1010.2.3:
+    label: flag
+    heading: Door operations › Hardware height
+    rules:
+    - general.bc_1010_2_3_hardware_height
+  1010.2.4:
+    label: flag
+    heading: Door operations › Locks and latches
+    rules:
+    - general.bc_1010_2_4_locks_and_latches
+  Table 1010.2.4:
+    label: flag
+    heading: Manual bolts, automatic flush bolts and
+    rules:
+    - general.bc_table_1010_2_4_inactive_leaf_bolts
+  1010.2.5:
+    label: flag
+    heading: Door operations › Closet doors
+    rules:
+    - general.bc_1010_2_5_closet_doors
+  1010.2.6:
+    label: flag
+    heading: Door operations › Stairway doors
+    rules:
+    - general.bc_1010_2_6_stairway_doors
+  1010.2.7:
+    label: flag
+    heading: Door operations › Locking arrangements in educational occupancies
+    rules:
+    - general.bc_1010_2_7_educational_locking
   '1016.2':
     label: rule
     heading: Egress through intervening spaces
