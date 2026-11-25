@@ -570,12 +570,12 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         "CORRIDOR_FUNCTION": (ol.CORRIDOR_FUNCTION.format(name="c", f="business"), model),
         "GROSS_NOT_MEASURED": (ol.GROSS_NOT_MEASURED, model), "AREAS_OVER": (ol.AREAS_OVER, model),
         # section group 4: a corridor's (asked on the corridor, below: _asked_corridor)
-        "CORRIDOR_NOT_RULED_OUT": (ol.CORRIDOR_NOT_RULED_OUT, by_hand),   # no Revit mark yet: never a card
+        "CORRIDOR_NOT_RULED_OUT": (ol.CORRIDOR_NOT_RULED_OUT, "mark"),    # Gordium: Other levels reach corridors
         "CORRIDOR_OTHER_LEVELS": (ol.CORRIDOR_OTHER_LEVELS, by_hand),
         "CORRIDOR_NO_STORY": (ol.CORRIDOR_NO_STORY, by_hand),
     }
     fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "FUNCTION_ROOMS", "LOAD_STATED",
-                 "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
+                 "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "OTHER_LEVELS_FIELD", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
                  "CORRIDOR_READINGS"}     # the readings' own words: a load given, never asked
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
@@ -583,10 +583,14 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     for why, kind in corridor.values():
         heads = _asked_corridor(why)
         assert heads and not any(h.startswith(("Mark the", "Fix the model")) for h in heads), (why, heads)
-        # review of group 4a: the fact has no Revit mark yet, so the panel never makes it a card to set (Revit's
-        # ChapterTenFactsTests: every answer card's field is one a mark feeds); asked by hand, in words naming it
-        assert any(h.startswith("Work out") for h in heads) and not any(h.startswith("Say whether") for h in heads), \
-            (why, kind, heads)
+        # the building's other-levels fact not stated: its own Revit mark (Gordium: Other levels reach corridors) is
+        # the card to set (the Revit-fields PR for groups 4 and 5; before it, asked by hand); a load that is the
+        # architect's to work out (other levels do reach the corridors, or the story's isn't known): by hand
+        if kind == "mark":
+            assert heads == ["Say whether another level's occupants reach the corridors"], (why, heads)
+        else:
+            assert any(h.startswith("Work out") for h in heads) and not any(h.startswith("Say whether") for h in heads), \
+                (why, kind, heads)
         assert "is stated by the architect" not in why, why
     # round 2: every host is told the statement that settles it (the command line can state it), not only Revit's gap
     assert "say on the building that none do" in ol.CORRIDOR_NOT_RULED_OUT

@@ -64,6 +64,7 @@ FIELD_HEADLINES = {
     "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "building.emergency_voice_alarm_system": "Say whether the building has an emergency voice/alarm communication system (907.5.2.2)",
+    "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",
     "facts.ground_is_flat": "Say whether the ground is flat",
@@ -169,6 +170,11 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
         if key.startswith("mark:") and occupant_load.FUNCTION_STATED in words:   # a room's function: its own mark
             return {**base, "kind": MARK, "key": f"field:{occupant_load.FUNCTION_FIELD}",
                     "field": occupant_load.FUNCTION_FIELD, "headline": "Set the room's function"}
+        # a corridor's load not bounded for want of the building's other-levels fact: that fact's own mark (a card to
+        # set), never "work it out by hand" (the Revit-fields PR for groups 4 and 5 gave it one)
+        if key.startswith("mark:") and occupant_load.CORRIDOR_NOT_RULED_OUT.split(" (")[0] in words:
+            f = occupant_load.OTHER_LEVELS_FIELD
+            return {**base, "kind": MARK, "key": f"field:{f}", "field": f, "headline": FIELD_HEADLINES[f]}
         if key.startswith("mark:") and isinstance(measure, str) and stated in words:
             name = _measure_name(measure, rule_kind)
             return {**base, "kind": MEASURE,
