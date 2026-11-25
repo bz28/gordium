@@ -629,10 +629,10 @@ public static class RouteReader
         /// when both hinges are known and differ. Nothing is flipped on what isn't read.</summary>
         public bool FlipFacing => Side is { } s && DataSide is { } d && s != d;
 
-        public bool FlipHand => Hinge is { } h && DataHinge is { } d && h != d;
+        public bool FlipHand => Hinge is { } h && DataHinge is { } d && d != 0 && h != d;
 
         /// <summary>Read as the data says: the side read and equal to the data's, and the hinge too where the data
-        /// gives one.</summary>
+        /// gives one (a data hinge at the door's centre, 0, is never matched: build review round 1).</summary>
         public bool AsTheData => Side is { } s && s == DataSide && (DataHinge is null || Hinge == DataHinge);
     }
 
@@ -662,7 +662,13 @@ public static class RouteReader
             }
             var side = SwingRead(model, rec, place, rec.TypeWidth ?? 0, out why, out var jambs);
             int? hinge = side is not null && jambs.Count == 1 ? jambs.Single() : null;
-            rows.Add(new(rec.UniqueId, side, hinge, dataSide == 0 ? null : dataSide, dataHinge == 0 ? null : dataHinge, why));
+            // the data's own side or hinge that says neither way (a swing along the wall, a hinge at the door's centre):
+            // kept so the door is never matched on it, and said (build review round 1)
+            if (dataSide == 0)
+                why = "the data's swing runs along its wall, so which side it should swing to isn't told";
+            else if (dataHinge == 0)
+                why = "the data's hinge is at the door's centre along its wall, so which jamb it should hang at isn't told";
+            rows.Add(new(rec.UniqueId, side, hinge, dataSide == 0 ? null : dataSide, dataHinge, why));
         }
         return rows;
     }

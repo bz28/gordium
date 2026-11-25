@@ -92,4 +92,19 @@ def test_the_build_flips_each_door_until_what_it_reads_back_is_the_data():
         assert h is None or h.group(1) == h.group(2), line
     rows = rec["swing_check"]
     assert all(r.endswith("(agrees)") for r in rows["rooms"]) and len(rows["rooms"]) == 10
+    # the hinge and side held against what Revit drew, not the reader (build review round 1): each arc recorded is
+    # hinged at the data's jamb (a single door) and bulges to the data's side, in the data's own (internal) feet
+    data = json.loads((HERE / "revit_build_data.json").read_text(encoding="utf-8"))["doors"]
+    arc = re.compile(r"centre \((-?[\d.]+), (-?[\d.]+)\) r [\d.]+ mid \((-?[\d.]+), (-?[\d.]+)\)")
+    for k, line in enumerate(sorted(rows["arcs"])):
+        d = data[k]
+        assert line.startswith(f"D{k + 1:02}: "), line
+        arcs = [tuple(map(float, m)) for m in arc.findall(line)]
+        assert len(arcs) == (2 if d["kind"] == "double" else 1), line
+        (cx, cy), (sx, sy) = d["center"], d["swing_dir"]
+        for ax, ay, mx, my in arcs:
+            assert (mx - cx) * sx + (my - cy) * sy > 0.5, (line, d)          # to the data's side
+            if d.get("hinge"):
+                hx, hy = d["hinge"]
+                assert (ax - cx) * (hx - cx) + (ay - cy) * (hy - cy) > 0, (line, d)   # at the data's jamb
     assert all("(agrees)" in r for r in rows["as_built"] + rows["views_coarse_swings_hidden"])

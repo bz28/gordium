@@ -780,10 +780,11 @@ internal static class ModelBuild
         void Flip(string name, Func<RouteReader.BuildSwing, bool> needs, Func<FamilyInstance, bool> can, Func<FamilyInstance, bool> flip, string word)
         {
             var read = Read();
-            Step(doc, name, report, [], _ =>
+            var labels = placed.Where(x => x.Fi.IsValidObject).ToDictionary(x => x.Fi.Id, x => $"door {BuildData.DoorMark(x.D)}");
+            Step(doc, name, report, labels, _ =>
             {
                 foreach (var (_, fi, _) in placed)
-                    if (read.TryGetValue(fi.UniqueId, out var r) && needs(r))
+                    if (fi.IsValidObject && read.TryGetValue(fi.UniqueId, out var r) && needs(r))
                     {
                         if (!can(fi) || !flip(fi))
                             report.Failed.Add($"door {Mark(fi)}: Revit wouldn't flip its {word}");
@@ -795,6 +796,7 @@ internal static class ModelBuild
         Flip("Gordium: doors flipped to swing to the data's side", r => r.FlipFacing, fi => fi.CanFlipFacing, fi => fi.flipFacing(), "facing");
         Flip("Gordium: doors flipped to hinge at the data's jamb", r => r.FlipHand, fi => fi.CanFlipHand, fi => fi.flipHand(), "hand");
         var end = Read();
+        placed = placed.Where(x => x.Fi.IsValidObject).ToList();      // a door Revit removed in a flip: a failure, named by Step
         static string Way(int? s) => s switch { 1 => "+", -1 => "-", _ => "not read" };
         foreach (var (d, fi, madeHere) in placed)
         {
@@ -807,12 +809,15 @@ internal static class ModelBuild
             }
             var r = end[fi.UniqueId];
             var words = $"{BuildData.DoorMark(d)} ({family}, swing {Xy(d.SwingDir.Value)}): {flipped}; read back: swings {Way(r.Side)} " +
-                        $"(the data {Way(r.DataSide)})" + (d.Hinge is null ? "" : $", hinged {Way(r.Hinge)} (the data {Way(r.DataHinge)})");
+                        $"(the data {Way(r.DataSide)})" + (d.Hinge is null
+                            ? d.IsDouble ? "" : ", no hinge in the data: its hand left as placed"
+                            : $", hinged {Way(r.Hinge)} (the data {(r.DataHinge == 0 ? "at its centre" : Way(r.DataHinge))})");
             if (r.AsTheData)
                 report.Doors.Add(words + "; swings as the data");
             else
             {
-                var why = r.Side is null ? r.Why ?? "its swing isn't read" : r.Hinge is null && d.Hinge is not null ? "its hinge isn't read" : "what is read isn't the data's";
+                var why = r.Side is null ? r.Why ?? "its swing isn't read" : r.DataSide is null || r.DataHinge == 0 ? r.Why! :
+                    r.Hinge is null && d.Hinge is not null ? "its hinge isn't read" : "what is read isn't the data's";
                 report.Doors.Add(words + $"; NOT shown to swing as the data: {why}");
                 report.Failed.Add($"door {BuildData.DoorMark(d)}: placed, but not shown to swing as the data ({why})");
             }

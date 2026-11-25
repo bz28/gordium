@@ -53,6 +53,23 @@ public sealed class BuildSwingTests
     }
 
     [Fact]
+    public void A_data_hinge_at_the_doors_centre_is_never_matched_or_flipped_to()
+    {
+        // build review round 1: a hinge with no offset along the wall said nothing, yet was read as "no hinge given",
+        // and the door was said to swing as the data
+        var floor = new FakeFloor();
+        floor.Swing("dA", +1, hinge: -1);
+        var r = Read(floor, (0, 1), (10, 9.75));
+        Assert.Equal(0, r.DataHinge);
+        Assert.False(r.AsTheData || r.FlipHand);
+        Assert.Contains("hinge is at the door's centre", r.Why);
+        var along = Read(floor, (1, 0), (8.5, 9.75));       // a swing along the wall says no side
+        Assert.Null(along.DataSide);
+        Assert.False(along.AsTheData || along.FlipFacing);
+        Assert.Contains("runs along its wall", along.Why);
+    }
+
+    [Fact]
     public void A_pairs_hinge_isnt_read_so_its_hand_is_never_flipped()
     {
         var floor = new FakeFloor();
