@@ -14,6 +14,9 @@ occupancy_group_i4:
   - general.ibc_1016_1_travel_distance
   - general.ibc_1018_1_corridor_rating
   - general.ibc_1018_4_dead_end
+  - general.ibc_table_1015_1_other_occupancies
+  - general.ibc_table_1016_1_other_occupancies
+  - general.ibc_table_1018_1_other_occupancies
 other_occupancy_present:
   meaning: "The building holds an occupancy other than Group I-4 besides the day care (a mixed building: another tenant, or an accessory or separated occupancy, IBC 2009 508), as the architect states it; left unstated, the rows of the IBC's tables for other occupancies need review"
   unit: yes_no
@@ -74,6 +77,8 @@ nfpa_day_care_occupancy:
   - general.nfpa_17_2_6_3_sprinkler_increase
   - general.nfpa_17_3_6_corridor_walls
   - general.nfpa_6_1_14_4_1_separation
+  - general.nfpa_table_6_1_14_4_1_b__separation_hours
+  - general.nfpa_table_7_3_1_2_other_uses
 day_care_existing:
   meaning: "The day-care occupancy is an existing one (NFPA 101 2012 3.3.79 EXISTING: already in existence on the date this edition of the Code goes into effect), so Chapter 17 applies, not Chapter 16 (new), as the architect states it"
   unit: yes_no

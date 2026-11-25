@@ -127,13 +127,15 @@ public sealed class DetailPageTests
                 Assert.Equal(questions == 1 ? "Answer 1 question" : $"Answer {questions} questions", page.ActionWords);
             }
         }
-        // the brief's row: two exits from Apartment South L1 waits on the occupancy group, the sprinkler system and
-        // the occupant load (two of them questions)
+        // the brief's row: two exits from Apartment South L1 waits on the occupancy group among its questions, and on
+        // the occupant load worked out by hand (the checker's asks since #181; their number is the answer's)
         var exits = pages.First(p => p.Row.Row.Name.Contains("Two exits", StringComparison.Ordinal) && p.Row.Row.Name.Contains("APARTMENT SOUTH L1", StringComparison.Ordinal));
+        var exitQuestions = ResultViews.CardsOf(m.Views!, exits.Row.Row.Id).Count(c => c.Kind == FixKind.Answer);
+        Assert.True(exitQuestions >= 2, $"{exitQuestions} questions");
         Assert.Equal(CalloutAction.Answer, exits.Page.Action);
-        Assert.Equal("Answer 2 questions", exits.Page.ActionWords);
+        Assert.Equal($"Answer {exitQuestions} questions", exits.Page.ActionWords);
         Assert.Contains("Set the occupancy group.", exits.Page.Steps);
-        Assert.Contains("Set the sprinkler system.", exits.Page.Steps);
+        Assert.Contains(exits.Page.Steps, st => st.StartsWith("Work out the occupant load by hand", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -174,7 +176,8 @@ public sealed class DetailPageTests
         Assert.Equal(FieldKind.YesNo, questions.Single(q => q.Card == Card("facts.corner_lot")).Field!.Kind);
         Assert.Equal(FieldKind.Number, questions.Single(q => q.Card == Card("facts.dwelling_units")).Field!.Kind);
         Assert.Null(questions.Single(q => q.Card == Card("facts.adu_existing_building")).Field);  // no mark for it yet
-        Assert.Equal(28, questions.Single(q => q.Card == Card("building.sprinkler_system")).Affects);
+        Assert.Equal(Card("building.sprinkler_system").Rows.Count, questions.Single(q => q.Card == Card("building.sprinkler_system")).Affects);
+        Assert.True(questions.Single(q => q.Card == Card("building.sprinkler_system")).Affects > 1);
         Assert.Equal("affects 28 results", ProjectQuestions.Affects(28));
         Assert.Equal("affects 1 result", ProjectQuestions.Affects(1));
         // the street edge is picked on the plan, never asked with a box

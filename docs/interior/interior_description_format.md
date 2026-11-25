@@ -194,6 +194,14 @@ building:
   sprinkler_system: none               # none, nfpa_13 (903.3.1.1), nfpa_13r (903.3.1.2), nfpa_13d (903.3.1.3)
   egress_balcony_increase_taken: false # BCNYS 1017.2.1 (a fact the Building Code's flags read)
   building_has_atrium: false
+  assembly_fixed_seating: false        # rooms used for assembly with fixed seating (BCNYS Table 1006.2.1 note c)
+  special_egress_spaces: false         # a space the BCNYS gives its own exits or travel limit: a covered or open
+                                       # mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area
+                                       # (411), an aircraft manufacturing facility (412.6), a boiler, incinerator or
+                                       # furnace room (1006.2.2.1), a refrigeration machinery room (1006.2.2.2), a
+                                       # refrigerated room (1006.2.2.3), an electrical room (1006.2.2.4), a vehicular
+                                       # ramp (1006.2.2.5), a temporary structure (3103.4), a pedestrian walkway (3104.9)
+  merchandise_pads: false              # Group M merchandise pads (BCNYS 1018.4: their own common path)
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 

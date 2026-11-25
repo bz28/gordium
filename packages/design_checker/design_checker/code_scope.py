@@ -45,6 +45,9 @@ FACTS = {
     "sprinkler_system": "sprinkler",          # none, nfpa_13 (903.3.1.1), nfpa_13r (903.3.1.2), nfpa_13d (903.3.1.3)
     "egress_balcony_increase_taken": "yes_no",
     "building_has_atrium": "yes_no",
+    "assembly_fixed_seating": "yes_no",       # rooms used for assembly with fixed seating (Table 1006.2.1 note c)
+    "special_egress_spaces": "yes_no",        # a space with its own exits or travel limit (1006.2.2, Table 1017.2 note a)
+    "merchandise_pads": "yes_no",             # Group M merchandise pads (1018.4: their own common path)
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -52,6 +55,7 @@ FACTS = {
 GROUPS = ("A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2", "H-3", "H-4", "H-5", "I-1",
           "I-2", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U")
 SPRINKLERS = ("none", "nfpa_13", "nfpa_13r", "nfpa_13d")
+MIXED = "mixed"                     # occupancy_group's value for a building of two or more groups
 
 RCNYS = "2025 Residential Code of New York State"
 BCNYS = "2025 Building Code of New York State"
@@ -259,8 +263,9 @@ def _given(building) -> tuple[dict, list[str]]:
 
 def building_measures(building: dict | None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
-    states: occupancy_group_i4 and other_occupancy_present from the groups, the two sprinkler systems the limits
-    name from the system, and the two stated yes/no facts. A fact not stated is left out (its rules need review)."""
+    states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
+    groups, the three sprinkler systems the limits name from the system, and the five stated yes/no facts. A fact
+    not stated is left out (its rules need review)."""
     facts, _ = _given(building)
     return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
 
@@ -271,10 +276,17 @@ def building_measures(building: dict | None) -> dict:
 DERIVED = {
     "occupancy_group_i4": ("occupancy_groups", lambda groups: "I-4" in groups),
     "other_occupancy_present": ("occupancy_groups", lambda groups: any(g != "I-4" for g in groups)),
+    # the building's one group, or MIXED for two or more: the table-row rules read it (docs/decisions/
+    # 2026-11-23_ny_building_egress_all_occupancies.md decisions 1 and 3)
+    "occupancy_group": ("occupancy_groups", lambda groups: next(iter(set(groups))) if len(set(groups)) == 1 else MIXED),
     "sprinklered_903_3_1_1": ("sprinkler_system", lambda system: system == "nfpa_13"),
     "sprinklered_903_3_1_2": ("sprinkler_system", lambda system: system == "nfpa_13r"),
+    "sprinklered_903_3_1_3": ("sprinkler_system", lambda system: system == "nfpa_13d"),
     "egress_balcony_increase_taken": ("egress_balcony_increase_taken", lambda v: v),
     "building_has_atrium": ("building_has_atrium", lambda v: v),
+    "assembly_fixed_seating": ("assembly_fixed_seating", lambda v: v),
+    "special_egress_spaces": ("special_egress_spaces", lambda v: v),
+    "merchandise_pads": ("merchandise_pads", lambda v: v),
 }
 
 

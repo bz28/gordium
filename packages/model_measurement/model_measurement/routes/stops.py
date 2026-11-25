@@ -107,6 +107,8 @@ STOPS = {
                        "leaves by it isn't worked out",
     "no_room_doors": "the story has no room besides its corridors: no room door to measure from",
     "no_exit_access": "the room {name} has no door from which a route reaches an exit without coming back into it",
+    "exit_side_unclear": "the room {name} is beside the exit door {door}, whose exit ({exit_id!r}) is neither room it "
+                         "joins: whether the room is the exit (a stair enclosure) or a space it serves isn't known",
     # areas (areas.py)
     "area_room_not_read": "the room {name} isn't read, so what it adds to the story's areas isn't known",
     "area_no_use": "the room {name} has no use given: which of the story's areas it counts in isn't known",
