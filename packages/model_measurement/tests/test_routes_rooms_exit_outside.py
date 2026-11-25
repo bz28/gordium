@@ -3,11 +3,15 @@ with Section 1006.2.1 with exits that discharge directly to the exterior at the 
 permitted to have one exit or access to a single exit"), worked out from the model: routes.rooms_exit_outside.
 
 The property walk: a row of three rooms along an outside wall, each with a door to the outside marked as an exterior
-exit door at discharge, one not marked, one onto an exterior stair, or none, and each pair either walled (a door
-between them, or none) or open (a passage). The oracle, from item 2's words: a room or open area with its own exit
-straight outside qualifies; the story relies on item 2 only if every one does (yes), cannot if one has no door
-outside at all (no), and isn't known where a door outside isn't marked (an exit is marked, never guessed) or the
-story's routes aren't read."""
+exit door at discharge, one not marked, one onto an exterior stair, or none, each pair joined by a door, open (a
+passage) or walled; and again with a corridor along them that each room opens into or not, with or without its own
+exit, the rooms residential or with no function, the building stating corridors within dwelling units no or nothing.
+The oracle, written apart from the code from item 2's "rooms, areas and spaces": rooms joined by doors or passages
+are one space; each needs its own exit straight outside (yes); a space reaching the outside only through a corridor
+shared with another dwelling unit can't rely on item 2 (no), which the model shows only where the corridor reaches an
+exit, two or more residential spaces open into it and the building states no corridor is within a dwelling unit;
+everything else isn't known (a door outside not marked: exits are marked, never guessed; a corridor that may be a
+space's own hallway; the story's routes not read)."""
 
 import itertools
 import json
@@ -24,12 +28,13 @@ from model_measurement.routes.floor import read  # noqa: E402
 from model_measurement.routes.stops import STOPS, Stop  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[3]
-OUTSIDE_KEYS = {"outside_no_rooms", "outside_door_not_marked", "outside_way_unclear"}
+OUTSIDE_KEYS = {"outside_no_rooms", "outside_door_not_marked", "outside_way_unclear", "outside_hall_unclear"}
 KINDS = ("marked", "unmarked", "stair", "none")
 SIDES = ("door", "passage", "wall")
 
 
-def row(kinds, joins, uses=("other", "other", "other"), corridor=None):
+def row(kinds, joins, uses=("other", "other", "other"), corridor=None, function=None, corridor_exit=True,
+        within=None):
     """Three 10 by 10 ft rooms side by side (x 0-10, 10.5-20.5, 21-31; a 6 in wall between), each door to the
     outside on the south wall (y = -0.25), `joins` between rooms 0-1 and 1-2 (a door, a passage with no wall: then
     the rooms touch, or a plain wall). `corridor`: None, or which rooms open into a corridor along their north side
@@ -41,6 +46,8 @@ def row(kinds, joins, uses=("other", "other", "other"), corridor=None):
         x1 = x0 + 10
         xs.append((x0, x1))
         rooms.append(room(f"r{i}", rect(x0, 0, x1, 10), use=use, lockable=False, pass_through=False))
+        if function:
+            rooms[-1]["function"] = function
         if kind != "none":
             d = door(f"o{i}", ((x0 + x1) / 2, -0.25), (1, 0), (f"r{i}", "outside"),
                      exit_id=None if kind == "unmarked" else f"o{i}",
@@ -55,11 +62,14 @@ def row(kinds, joins, uses=("other", "other", "other"), corridor=None):
     top = 10
     if corridor is not None:
         rooms.append(room("c", rect(0, 10.5, x, 16.5), use="corridor", lockable=False, pass_through=True))
-        doors.append(door("oc", (-0.25, 13.5), (0, 1), ("c", "outside"), exit_id="oc"))
+        if corridor_exit:
+            doors.append(door("oc", (-0.25, 13.5), (0, 1), ("c", "outside"), exit_id="oc"))
         for i in corridor:
             doors.append(door(f"e{i}", ((xs[i][0] + xs[i][1]) / 2, 10.25), (1, 0), (f"r{i}", "c")))
         top = 16.5
     desc = description(rooms, doors, passages)
+    if within is not None:
+        desc["building"] = {"corridors_within_dwelling_units": within}
     desc["story_outlines"] = [{"level": "L1", "outer": [[-0.5, -0.5], [x + 0.5, -0.5], [x + 0.5, top + 0.5],
                                                         [-0.5, top + 0.5]],
                                "inner": [[0, 0], [x, 0], [x, top], [0, top]]}]
@@ -72,20 +82,18 @@ def _story(desc):
     it)."""
     story = read(desc).stories["L1"]
     try:
-        return {"measures": {OUTSIDE_FACT: rooms_exit_outside(story)}, "not_measured": {}}
+        got = rooms_exit_outside(story, {r["id"]: r for r in desc["rooms"]}, desc.get("building"))
+        return {"measures": {OUTSIDE_FACT: got}, "not_measured": {}}
     except Stop as s:
         return {"measures": {}, "not_measured": {OUTSIDE_FACT: s.reason}}
 
 
-def oracle(kinds, joins, corridor=None):
-    """True, False, or None (not known), from item 2's words read as rooms, areas and spaces: rooms joined by a door
-    or with no wall are one space (its occupants reach its exit through it, 1016.2); a corridor opening into one
-    space only is a vestibule of it, one into two or more is shared. Each space needs its own exit straight
-    outside (yes); a space reaching the outside only through a shared corridor can't rely on item 2 (no)."""
+def oracle(kinds, joins, corridor=None, function=None, corridor_exit=True, within=None):
+    """True, False, or None (not known): see the module's words."""
     if "stair" in kinds:                                 # travel along an exterior stair isn't read: the story isn't
         return None
-    if "marked" not in kinds and corridor is None:       # no exit marked on the story: its routes aren't read
-        return None
+    if "marked" not in kinds and not (corridor is not None and corridor_exit):
+        return None                                      # no exit marked on the story: its routes aren't read
     owner = list(range(3))
     for i, j in enumerate(joins):
         if j in ("door", "passage"):
@@ -93,18 +101,20 @@ def oracle(kinds, joins, corridor=None):
             owner = [new if o == old else o for o in owner]
     spaces = {o: {i for i in range(3) if owner[i] == o} for o in set(owner)}
     touched = {owner[i] for i in (corridor or ())}
-    shared = len(touched) >= 2
+    shared = len(touched) >= 2 and function == "residential" and within is False and corridor_exit
     verdicts = []
     for o, members in spaces.items():
         has = {kinds[i] for i in members}
-        if "marked" in has or (corridor is not None and touched == {o}):     # its own door, or its vestibule's
-            verdicts.append(True)
+        if "marked" in has or (corridor is not None and corridor_exit and touched == {o}):  # its own door, or its
+            verdicts.append(True)                                                           # vestibule's
         elif "unmarked" in has:
             verdicts.append(None)
         elif shared and o in touched:
             verdicts.append(False)
         else:
             verdicts.append(None)
+    if corridor is not None and not touched:            # a corridor opening into no room: a space of its own
+        verdicts.append(True if corridor_exit else None)
     if False in verdicts:
         return False
     return None if None in verdicts else True
@@ -127,21 +137,41 @@ def test_the_walk_every_value_measured_is_the_oracles_and_every_other_needs_revi
 
 @pytest.mark.parametrize("joins", list(itertools.product(("door", "wall"), repeat=2)), ids="-".join)
 def test_the_walk_with_a_corridor(joins):
-    """The same row with a corridor along it, each room opening into it or not: the corridor shared by two or more
-    spaces, a vestibule of one, or opening into none."""
+    """The same row with a corridor along it, each room opening into it or not (shared, a vestibule of one space, or
+    opening into none), with and without its own exit, the rooms residential or with no function, the building
+    stating corridors within dwelling units no or nothing."""
     seen = set()
     for opens in itertools.product((False, True), repeat=3):
         corridor = [i for i in range(3) if opens[i]]
-        for kinds in itertools.product(("marked", "unmarked", "none"), repeat=3):
-            sp = _story(row(kinds, joins, corridor=corridor))
-            want = oracle(kinds, joins, corridor)
+        for kinds, function, corridor_exit, within in itertools.product(
+                itertools.product(("marked", "unmarked", "none"), repeat=3), ("residential", None), (True, False),
+                (False, None)):
+            sp = _story(row(kinds, joins, corridor=corridor, function=function, corridor_exit=corridor_exit,
+                            within=within))
+            want = oracle(kinds, joins, corridor, function, corridor_exit, within)
             seen.add(sp["measures"].get(OUTSIDE_FACT))
+            case = (kinds, joins, corridor, function, corridor_exit, within)
             if want is None:
-                assert OUTSIDE_FACT not in sp["measures"], (kinds, joins, corridor, sp["measures"].get(OUTSIDE_FACT))
+                assert OUTSIDE_FACT not in sp["measures"], (case, sp["measures"].get(OUTSIDE_FACT))
             else:
-                assert sp["measures"].get(OUTSIDE_FACT) is want, (kinds, joins, corridor,
-                                                                  sp["not_measured"].get(OUTSIDE_FACT))
+                assert sp["measures"].get(OUTSIDE_FACT) is want, (case, sp["not_measured"].get(OUTSIDE_FACT))
     assert True in seen and (False in seen or "wall" not in joins), seen           # never vacuous
+
+
+def test_a_hallway_within_one_tenant_or_house_is_never_a_no():
+    """Review round 2 (PR 2): a shop with its front door marked and toilets off a back corridor (with or without its
+    own rear exit), and a house with bedrooms off a hall marked a corridor, read "no" (the corridor counted as shared),
+    failing a one-exit story outright. A corridor is shared only between dwelling units the building says have no
+    corridor within them."""
+    for corridor_exit in (True, False):
+        shop = row(("marked", "none", "none"), ("wall", "wall"), uses=("other", "toilet", "toilet"),
+                   corridor=[0, 1, 2], corridor_exit=corridor_exit)
+        assert _story(shop)["measures"].get(OUTSIDE_FACT) is not False, corridor_exit
+    house = row(("marked", "none", "none"), ("wall", "wall"), corridor=[0, 1, 2], function="residential")
+    assert _story(house)["measures"].get(OUTSIDE_FACT) is not False
+    stated = row(("marked", "none", "none"), ("wall", "wall"), corridor=[0, 1, 2], function="residential",
+                 within=False)
+    assert _story(stated)["measures"][OUTSIDE_FACT] is False         # the building says the corridor is no unit's
 
 
 def test_a_room_reached_through_another_of_its_space_is_part_of_it():
@@ -172,10 +202,18 @@ APARTMENT = REPO / "test_data/test_sites/new_york/ithaca_city/four_unit_apartmen
 
 
 def test_the_four_unit_apartment_its_apartments_reach_the_outside_only_by_the_corridor_and_stairs():
-    """Level 1: the apartments and the corridor have no door to the outside (the stair enclosures, themselves exits,
-    have the doors out, and are left out): no. Level 2 the same."""
+    """As marked for the eval (each apartment residential) and stating its corridors are within no dwelling unit:
+    the two apartments on each story reach the outside only through the shared corridor and the stair enclosures
+    (themselves exits, left out): no on both stories. As Revit sent it (no function, no corridor fact): not
+    measured."""
+    sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
+    import make_ny_build_data as build
+    interior = build.interior_of()
+    interior["building"] = {**interior["building"], "corridors_within_dwelling_units": False}
+    assert [s["measures"][OUTSIDE_FACT] for s in measure(interior)["parts"]["story"]] == [False, False]
     got = measure(json.loads(APARTMENT.read_text(encoding="utf-8"))["interior"])
-    assert [s["measures"][OUTSIDE_FACT] for s in got["parts"]["story"]] == [False, False]
+    for s in got["parts"]["story"]:
+        assert s["not_measured"][OUTSIDE_FACT].startswith(STOPS["outside_hall_unclear"].split("{")[0])
 
 
 def test_each_reason_has_a_case():
@@ -192,4 +230,7 @@ def test_each_reason_has_a_case():
     alone = _story(row(("marked", "none", "marked"), ("wall", "wall")))["not_measured"][OUTSIDE_FACT]
     assert alone == STOPS["outside_way_unclear"].format(name="r1")
     seen.add("outside_way_unclear")
+    hall = _story(row(("marked", "none", "none"), ("wall", "wall"), corridor=[0, 1, 2]))["not_measured"][OUTSIDE_FACT]
+    assert hall == STOPS["outside_hall_unclear"].format(name="r1")
+    seen.add("outside_hall_unclear")
     assert seen == OUTSIDE_KEYS

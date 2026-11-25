@@ -145,11 +145,14 @@ STOPS = {
     "ground_buildings_apart": "the stories' outlines come apart in {count} pieces (separate buildings?): which spot "
                               "grades are each building's ground isn't known",
     # whether the story's rooms exit directly outside (BCNYS 1006.3.4 item 2: __init__.rooms_exit_outside)
-    "outside_no_rooms": "the story has no room besides its exits and the closets they serve",
-    "outside_way_unclear": "the rooms {name} have no door to the outside and open into no corridor or lobby shared "
-                           "with other rooms: whether they exit directly outside isn't known",
-    "outside_door_not_marked": "the room {name} has a door to the outside ({door}) not marked as an exit door at the "
-                               "level of exit discharge: whether it is one isn't known (exits are marked, never "
+    "outside_no_rooms": "the story has no room besides its exits",
+    "outside_way_unclear": "the space of {name} has no door to the outside and opens into no corridor or lobby: "
+                           "whether it exits directly outside isn't known",
+    "outside_hall_unclear": "the space of {name} reaches the outside through a corridor or lobby that may be its own "
+                            "(a hallway within one dwelling or tenant space): whether it exits directly outside isn't "
+                            "known",
+    "outside_door_not_marked": "the space of {name} has a door to the outside ({door}) not marked as an exit door at "
+                               "the level of exit discharge: whether it is one isn't known (exits are marked, never "
                                "guessed)",
     # each door's own part (doors.py, section group 6a): its sizes only from the maker's stated clear opening
     "door_no_stated_clear": "the door {name} has no maker's stated clear opening (its type's clear width and height, "

@@ -85,7 +85,7 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     for level, story in floor.stories.items():
         uses = {rid: (items.get(rid) or {}).get("use") for rid in story.rooms}
         here = [u for u in unknown if u.get("level") == level]
-        _story_parts(story, uses, items, here, parts, clearance)
+        _story_parts(story, uses, items, here, parts, clearance, description.get("building"))
     for sp in parts["story"]:                            # where each story sits against the grade plane
         got = placed[sp["id"]]
         sp["measures"].update(got["measures"])
@@ -119,7 +119,7 @@ def _readings(part, name, readings, words) -> None:
     part["not_measured"][name] = Stop("readings", question=question, words=words).reason
 
 
-def _story_parts(story, uses, items, unknown, parts, r) -> None:
+def _story_parts(story, uses, items, unknown, parts, r, building=None) -> None:
     sp = _part(story.level, story.name)
     parts["story"].append(sp)
     routes = None
@@ -138,7 +138,7 @@ def _story_parts(story, uses, items, unknown, parts, r) -> None:
             sp["confirm"] = {m: words for m in READ_THROUGH}
     _story_areas(sp, story, uses, [name_of(u) for u in unknown])
     try:
-        sp["measures"][OUTSIDE_FACT] = rooms_exit_outside(story)
+        sp["measures"][OUTSIDE_FACT] = rooms_exit_outside(story, items, building)
     except Stop as s:
         sp["not_measured"][OUTSIDE_FACT] = s.reason
     for m in ("story_occupant_load",):
@@ -484,32 +484,43 @@ ENTERED_EXITS = ("exit_enclosure", "exit_passageway")    # the exits a door ente
 OUTSIDE_FACT = "story_rooms_exit_directly_outside"
 
 
-def rooms_exit_outside(story) -> bool:
+def rooms_exit_outside(story, items: dict | None = None, building: dict | None = None) -> bool:
     """Whether the story relies on BCNYS 1006.3.4 item 2 ("Rooms, areas and spaces complying with Section 1006.2.1 with
     exits that discharge directly to the exterior at the level of exit discharge, are permitted to have one exit or
     access to a single exit", p.317): every space on it has an exit of its own straight outside.
 
     The spaces (spaces.py): rooms joined by doors or passages without crossing a corridor, a lobby, an exit or the
     outside (a bedroom off a living room, a workroom or closet off a shop: one space, whose occupants reach its exit
-    through it, 1016.2); a corridor or lobby opening into one space only (a vestibule) is part of it, one opening into
-    two or more is shared. True only where each space has a door to the outside marked as an exterior exit door at
-    the level of exit discharge (exits are marked, never guessed); false where a space has no door to the outside and
-    opens into a shared corridor or lobby (its occupants reach an exit through space shared with others, so the
-    story's exits are Table 1006.3.3's); else not measured (Stop): a door to the outside not marked so, or onto an
-    exterior stair or ramp, or a space whose way out is neither (only through an exit, or none). A story whose routes
-    aren't read isn't measured either: a room or door not read, or an enclosed space with no room drawn in it, may be
-    the one without."""
+    through it, 1016.2); a corridor or lobby opening into one space only is part of it (a vestibule). True only where
+    each space has a door to the outside marked as an exterior exit door at the level of exit discharge (exits are
+    marked, never guessed). False only where a space reaches the outside through a corridor or lobby shared with
+    another tenant, which the model shows only for dwelling units: the corridor reaches an exit itself (a door
+    outside, or into an exit), two or more of the spaces opening into it hold a room whose function is residential,
+    this one among them, and the building states no corridor is within a dwelling unit (`corridors_within_dwelling_
+    units` no, BCNYS 1020.2 exception 2's fact); a corridor otherwise may be a hallway within one dwelling or tenant
+    space (a house's hall, a shop's back corridor to its toilets). Every other case is not measured (Stop): a door to
+    the outside not marked so, or onto an exterior stair or ramp; a space whose way out is through such a corridor,
+    or only through an exit, or none. A story whose routes aren't read isn't measured either."""
     if story.stops:
         raise Stop("story_not_measured", reasons="; ".join(story.stops))
+    items = items or {}
     found, halls = spaces.spaces(story, _is_exit)
-    groups, shared = [set(g) for g in found], set()
-    for rooms, touched in halls:
+    groups = [set(g) for g in found]
+    residential = {i for i, g in enumerate(found) if any((items.get(r) or {}).get("function") == "residential" for r in g)}
+    within_units = (building or {}).get("corridors_within_dwelling_units") if isinstance(building, dict) else None
+    common, private = set(), set()                       # spaces opening into a corridor shared between dwelling units
+    for rooms, touched in halls:                         # (common), or into one that may be a space's own (private)
         if len(touched) == 1:                            # a vestibule: part of the one space it opens into
             groups[next(iter(touched))] |= rooms
         elif not touched:
             groups.append(set(rooms))
+        elif within_units is False and len(touched & residential) >= 2 and any(
+                OUTSIDE in d.sides or any(s != r and _is_exit(story, s) for s in d.sides if s in story.rooms)
+                for d in story.doors.values() for r in rooms if r in d.sides):
+            common |= touched & residential
+            private |= touched - residential
         else:
-            shared |= touched
+            private |= touched
     if not groups:
         raise Stop("outside_no_rooms")
     unclear = None
@@ -521,8 +532,10 @@ def rooms_exit_outside(story) -> bool:
             continue
         if outside:
             unclear = unclear or Stop("outside_door_not_marked", name=names, door=outside[0].name)
-        elif i in shared:
+        elif i in common:
             return False
+        elif i in private:
+            unclear = unclear or Stop("outside_hall_unclear", name=names)
         else:
             unclear = unclear or Stop("outside_way_unclear", name=names)
     if unclear:
