@@ -3005,7 +3005,8 @@ labels:
     reason: 'The capacity of an egress component other than a stairway: 0.2 inch per occupant served (0.15 with a sprinkler
       system per 903.3.1.1 or 903.3.1.2 and an emergency voice/alarm system, other than Groups H and I-2; assembly seating''s
       own factors): measurable for a corridor (its width and the occupants it serves, the rule "Corridor capacity, 0.2 or
-      0.15 in per occupant"); doors, ramps and exit passageways aren''t measured, a flag.'
+      0.15 in per occupant"; a 903.3.1.2 system counts where 903.3.1.2 allows it, in Group R); doors, ramps and exit
+      passageways aren''t measured, a flag.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 314

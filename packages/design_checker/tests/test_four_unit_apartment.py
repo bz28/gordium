@@ -146,6 +146,15 @@ def test_the_corridor_rating_needs_review_however_the_corridor_facts_are_stated(
     assert stated["results"]["general.bc_table_1020_3_corridor_width"] == "pass"     # 72 in, as group 4a found
 
 
+def test_each_flags_short_name_names_its_whole_subject():
+    """Review round 1 of group 5a (P3): a result line shows a rule's title cut at its first bracket and comma
+    (check.short); 1005.3.2's flag read "Doors" there though it covers every component but stairways."""
+    from design_checker import check
+    rules = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+                                      / "5_building_code_rules/drafted/general.yaml")["rules"]}
+    assert check.short(rules["general.bc_1005_3_2_other_components"]["title"]) == "Other components' capacity"
+
+
 def test_the_occupant_loads_come_from_each_rooms_function(got):
     """Section group 3 (2026-11-23): each apartment's stated function (residential, 200 gross) gives its occupant
     load as two readings, 690 / 200 from its own area and 690 / 7 while 1004.5.1's increase isn't ruled out; both at

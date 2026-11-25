@@ -1376,7 +1376,7 @@
     "Egress · Corridor width kept clear: A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (not brought in) are a person's check.",
     "Egress · Corridors not used as air ducts: A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
     "Egress · Stairway capacity: A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
-    "Egress · Doors: A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own."
+    "Egress · Other components' capacity: A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own."
    ]
   },
   "red": [],
@@ -60381,7 +60381,7 @@
     {
      "id": "egress.general.bc_1005_3_2_other_components",
      "rule": "general.bc_1005_3_2_other_components",
-     "name": "Egress · Doors, ramps and passageways, 0.2 or 0.15 in per occupant (BCNYS 1005.3.2)",
+     "name": "Egress · Other components' capacity, doors and ramps included (BCNYS 1005.3.2)",
      "group": "law",
      "status": "needs_review",
      "mark": "?",
@@ -60440,7 +60440,7 @@
        "headline": "Check this by hand: a person decides it"
       }
      ],
-     "rule_name": "Doors, ramps and passageways, 0.2 or 0.15 in per occupant",
+     "rule_name": "Other components' capacity, doors and ramps included",
      "in_code": {
       "document": "2025 Building Code of New York State (BCNYS)",
       "file": "gov.ny.building.2025.pdf",
@@ -65243,9 +65243,9 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Doors, ramps and passageways, 0.2 or 0.15 in per occupant (BCNYS 1005.3.2): A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
+       "title": "Egress · Other components' capacity, doors and ramps included (BCNYS 1005.3.2): A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
        "mark": "?",
-       "name": "Egress · Doors, ramps and passageways, 0.2 or 0.15 in per occupant (BCNYS 1005.3.2)"
+       "name": "Egress · Other components' capacity, doors and ramps included (BCNYS 1005.3.2)"
       }
      ],
      "count": 54,
@@ -92760,7 +92760,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "26af5fc0490effa2fd5607aa88c11166314d82d8300d10e9f531042926fb5a86",
   "rulebook": {
-   "new_york/ithaca_city": "124ff5b0e60d8d8c7e30400edaf136cf44b31149e170a290b8290a435ae59c31"
+   "new_york/ithaca_city": "a7e3b51276cf8374ca109405053c78faa4b907454a240dc10b67c1838e110673"
   }
  }
 }
