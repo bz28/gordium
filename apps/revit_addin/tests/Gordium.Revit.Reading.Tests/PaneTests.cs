@@ -368,6 +368,22 @@ public sealed class PaneTests
         Assert.StartsWith("• ", PaneWords.ChangesAll(listed), StringComparison.Ordinal);
         var saidOne = listed with { Said = 1 };
         Assert.EndsWith(PaneWords.ChangesSaid(saidOne)!, PaneWords.ChangesAll(saidOne), StringComparison.Ordinal);
+        // review after main 7bdad7c5: an area (#193) said in its own unit, the same area in other units is no change,
+        // an unreadable one is said so; the R-2 units (#194) by their word, the same word in another case no change
+        IReadOnlyList<SetupField> Fa(RevitModel m, string units) => SetupScreen.Build(m with { AreaDisplayUnits = units }, [], null).Fields;
+        const string SqM = "autodesk.unit.unit:squareMeters-1.0.1";
+        var area500 = M((Marks.AduFloorArea, new MarkValue(true, Number: 500)));
+        var area600 = M((Marks.AduFloorArea, new MarkValue(true, Number: 600)));
+        Assert.Contains("(m²): 55.741824", PaneWords.FactsChanged(Fa(area500, SqM), Fa(area600, SqM)), StringComparison.Ordinal);
+        Assert.Null(PaneWords.FactsChanged(Fa(area500, "SquareFeet"), Fa(area500, SqM)));
+        var bigArea = PaneWords.FactsChanged(Fa(area500, SqM), Fa(M((Marks.AduFloorArea, new MarkValue(true, Text: "big"))), SqM));
+        Assert.Contains("a value Gordium can't read", bigArea, StringComparison.Ordinal);
+        Assert.DoesNotContain("cleared", bigArea, StringComparison.Ordinal);
+        var dwellings = F(M((Marks.R2SleepingUnits, new MarkValue(true, Text: "All dwelling units"))));
+        var both = PaneWords.FactsChanged(dwellings, F(M((Marks.R2SleepingUnits, new MarkValue(true, Text: "Both")))));
+        Assert.Contains(": Both", both, StringComparison.Ordinal);
+        Assert.Null(PaneWords.FactsChanged(F(M((Marks.R2SleepingUnits, new MarkValue(true, Text: "both")))), F(M((Marks.R2SleepingUnits, new MarkValue(true, Text: "Both"))))));
+        Assert.Contains("a value Gordium can't read", PaneWords.FactsChanged(dwellings, F(M((Marks.R2SleepingUnits, new MarkValue(true, Text: "some")))))!, StringComparison.Ordinal);
         var cleared = PaneWords.FactsChanged(after, F(M()));
         Assert.Contains("cleared", cleared, StringComparison.Ordinal);
         // a building Yes/No fact holding something that isn't Yes or No (it has a problem, no current value): said as
