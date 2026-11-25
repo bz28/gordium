@@ -17,8 +17,8 @@ scope: building_code                  # which buildings it covers (101.2): every
 waiting_why: >-                       # what the waiting row says while no rooms are drawn
   Travel distance, common path, the number of exits and their separation, dead ends and accessory areas are
   measured once the rooms, doors and exits are drawn and marked (Gordium: Use, Gordium: Exit); occupant loads
-  are worked out from each room's Table 1004.5 function where the architect states it (no Revit mark carries it
-  yet), and the rules that read them need review where it isn't stated. Until then this is not a pass
+  are worked out from each room's Table 1004.5 function where the architect states it (Gordium: Function), and
+  the rules that read them need review where it isn't stated. Until then this is not a pass
 
 law:                                  # the documents in 1_source_documents/sources.yaml, by what they are
   building_code: gov.ny.building.2025.pdf    # 2025 Building Code of New York State (kept outside the repo)

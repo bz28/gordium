@@ -71,6 +71,19 @@ public sealed class ResultViewsTests
     }
 
     [Fact]
+    public void A_room_with_no_function_is_one_card_setting_the_gordium_function_mark()
+    {
+        // group 3 (PR #192) end to end with PR #191: the worker's answer for the trial apartment (no room function
+        // marked) asks for the room's function by its field, and that field is the room mark Revit writes it from
+        var m = ResultViews.Build(Apartment());
+        var card = m.Fix.SelectMany(g => g.Cards).Single(c => c.Field == "rooms[].function");
+        Assert.Equal(FixKind.Mark, card.Kind);
+        Assert.Equal("Set the room's function", card.Headline);
+        Assert.Equal(Marks.RoomFunction, Marks.All.Single(k => k.Feeds == card.Field));
+        Assert.DoesNotContain(m.Fix.SelectMany(g => g.Cards), c => c.Headline.Contains("occupant load", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void The_occupancy_group_and_sprinkler_system_are_questions_to_answer()
     {
         var m = ResultViews.Build(Apartment());

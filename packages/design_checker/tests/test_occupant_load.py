@@ -460,7 +460,7 @@ def test_the_panel_never_asks_for_a_mark_revit_does_not_have():
     text = json.dumps(answer(sent), ensure_ascii=False)
     assert "Mark the occupant load in the model" not in text
     assert "Fix the model so the occupant load can be measured" not in text
-    assert "Work out the occupant load by hand" in text                  # asked for by hand, honestly
+    assert "Set the room's function" in text and '"rooms[].function"' in text   # its own mark (PR #191)
     for use in ("closet", "toilet"):                     # round 5: a closet or toilet Revit marks, with no function
         marked = copy.deepcopy(sent)
         marked["interior"]["rooms"][0]["use"] = use
@@ -523,9 +523,9 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     is ever a mark to set (no host has an occupant-load mark). The class: every reason occupant_load.py defines, so a
     new one can't slip through unclassified; and none says a function 'is stated' when it isn't."""
     ol = occupant_load
-    by_hand, model = "by hand", "model"
+    by_hand, model, function = "by hand", "model", "function"
     reasons = {
-        "NOT_GIVEN": (ol.NOT_GIVEN, by_hand), "NO_LOAD": (ol.NO_LOAD.format(use="closet"), by_hand),
+        "NOT_GIVEN": (ol.NOT_GIVEN, function), "NO_LOAD": (ol.NO_LOAD.format(use="closet"), function),
         "THROUGH": (ol.THROUGH, by_hand), "SERVED": (ol.SERVED.format(names="st", es="es", their="its"), by_hand),
         "ELSEWHERE": (ol.ELSEWHERE.format(f="mall", where="402.8.2"), by_hand), "IS_EXIT": (ol.IS_EXIT, by_hand),
         "STORY_NONE": (ol.STORY_NONE, by_hand),
@@ -535,12 +535,12 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         "CORRIDOR_FUNCTION": (ol.CORRIDOR_FUNCTION.format(name="c", f="business"), model),
         "GROSS_NOT_MEASURED": (ol.GROSS_NOT_MEASURED, model), "AREAS_OVER": (ol.AREAS_OVER, model),
     }
-    fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "LOAD_STATED", "STORY_STATED", "STORY_FUNCTION"}
+    fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "LOAD_STATED", "STORY_STATED", "STORY_FUNCTION"}
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
     cases = [(w, kind) for w, kind in reasons.values()] + [
         ("the room's floor area isn't measured", model),
-        (ol.STORY_OPEN.format(names="k") + ol.STORY_FUNCTION, by_hand),             # a room with no function
+        (ol.STORY_OPEN.format(names="k") + ol.STORY_FUNCTION, function),            # a room with no function
         (ol.STORY_OPEN.format(names="k") + ": " + ol.STORY_STATED, by_hand),       # one sent elsewhere
         # round 8: a name or value a reason quotes never reads as a mark ("Supermarket", a function "market")
         (ol.STORY_OPEN.format(names="Supermarket"), model), (ol.UNKNOWN.format(f="market"), model),
@@ -550,6 +550,7 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         heads = _asked(why)
         assert heads and not any(h.startswith("Mark the") for h in heads), (why, heads)
         assert any(h.startswith("Fix the model") for h in heads) == (kind == model), (why, kind, heads)
+        assert ("Set the room's function" in heads) == (kind == function), (why, kind, heads)   # PR #191's mark
         assert "is stated by the architect" not in why, why     # round 6: never says it was stated
     # the reviewer's layout: a closet with no function, a storeroom behind it, off a kitchen: asked by hand
     desc = description([CORRIDOR, room("k", rect(10, 6.5, 20, 16.5), use="kitchen", lockable=False),

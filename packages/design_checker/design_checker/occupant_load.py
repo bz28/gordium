@@ -36,9 +36,10 @@ from rule_format.rulebook import load
 SUPPORT_USES = ("corridor", "closet", "toilet")   # no load of their own unless a function says (202 NET FLOOR AREA)
 QUESTION = "occupant_load_area"
 LOWER, UPPER = "room_area", "grossed_up_or_increased"
-# the routes' own words for a figure the architect states and no host's mark carries yet (Revit has no Function
-# mark: group 3 review round 4), so the panel asks for it by hand, never for a mark that can't be set
-FUNCTION_STATED = STOPS["stated_not_given"].format(what="each room's Table 1004.5 function")
+# a room's function is the architect's to set, on the room mark Revit gives it (Gordium: Function, rooms[].function:
+# PR #191), so the panel asks for that mark (ui_data: "Set the room's function"), never for an occupant load to mark
+FUNCTION_FIELD = "rooms[].function"
+FUNCTION_STATED = "set the room's Table 1004.5 function (the room mark Gordium: Function)"
 NOT_GIVEN = "the room's function (Table 1004.5) isn't stated, so its occupant load isn't worked out: " + FUNCTION_STATED
 # the same words for a load Gordium (or a person) must work out and no mark carries (round 6): a room others pass
 # through (their loads aren't summed yet), a function the table sends elsewhere; asked by hand, never as a model fix
@@ -61,7 +62,7 @@ EXIT_FUNCTION = ("{name} is itself an exit (a door into it is an exit enclosure'
 IS_EXIT = ("it is itself an exit (an exit stair's enclosure, an exit passageway): it holds no occupant load of its own, "
            "so a rule that reads one for it is a person's check: ") + LOAD_STATED
 NO_LOAD = ("a {use} with no function stated holds no occupant load of its own (202 FLOOR AREA, NET leaves closets and "
-           "toilet rooms out); if people use it, its function needs to be ") + FUNCTION_STATED
+           "toilet rooms out); if people use it, ") + FUNCTION_STATED
 STORY_NONE = ("no room on the story holds an occupant load of its own (its spaces are exits, closets or toilets): "
               + STORY_STATED)
 GROSS_NOT_MEASURED = "the story's gross floor area isn't measured, so the gross-function rooms' share of it can't be"

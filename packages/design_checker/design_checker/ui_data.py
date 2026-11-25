@@ -43,7 +43,7 @@ import re
 
 from rule_format import formula
 
-from design_checker import code_scope, present
+from design_checker import code_scope, occupant_load, present
 
 MARK, FIX_MODEL, SURVEY, DECIDE, MEASURE, OPEN_QUESTION = ("mark", "fix_model", "survey", "decide", "measure",
                                                          "open_question")
@@ -163,6 +163,9 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
             return {**base, "kind": MARK, "key": f"field:{field}", "field": field,
                     "headline": FIELD_HEADLINES.get(field) or f"Set the {name}"}
         stated = STOPS["stated_not_given"].split("{what}")[0]
+        if key.startswith("mark:") and occupant_load.FUNCTION_STATED in words:   # a room's function: its own mark
+            return {**base, "kind": MARK, "key": f"field:{occupant_load.FUNCTION_FIELD}",
+                    "field": occupant_load.FUNCTION_FIELD, "headline": "Set the room's function"}
         if key.startswith("mark:") and isinstance(measure, str) and stated in words:
             name = _measure_name(measure, rule_kind)
             return {**base, "kind": MEASURE,
