@@ -14183,8 +14183,10 @@ rules:
     note: 'A floor or landing on each side of every door, at the same elevation, level (an exterior landing at most 2 percent);
       the exceptions allow a dwelling or sleeping unit''s door at the top step of an interior stair it doesn''t swing over
       (Groups R-2 and R-3), an exterior landing up to 7 inches lower (Groups F, H, R-2 and S, off an accessible route, the
-      door not swinging over it) or 7 3/4 inches lower (Group U and R-2 and R-3 units not required to be Accessible, Type
-      A or Type B), 1/2 inch for finish materials, a Type B unit''s deck, patio or balcony up to 4 inches lower, and an equipment
+      door, other than an exterior storm or screen door, not swinging over it) or 7 3/4 inches lower (Group U and R-2 and
+      R-3 units not required to be Accessible, Type A or Type B; such doors, storm and screen doors included, may swing over
+      either landing), 1/2 inch for finish materials, a Type B unit''s deck, patio or balcony with an impervious surface
+      up to 4 inches lower, and an equipment
       space''s door (not required to be accessible by 1103.2.9, five occupants or fewer) up to 7 inches above or below: floor
       levels at each door and landings aren''t in the model, so a person''s check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 6c. The routes read each story as one level; the
@@ -14247,8 +14249,8 @@ rules:
     note: 'A threshold at most 3/4 inch high for a sliding door serving a dwelling unit, 1/2 inch for any other door, and
       any raised threshold or level change over 1/4 inch beveled no steeper than 1 in 2; the exceptions allow up to 7 3/4
       inches at a Group R-2 or R-3 exterior sliding or side-hinged door that is not part of the required means of egress,
-      an accessible route or an Accessible, Type A or Type B unit, and 4 3/4 or 4 1/2 inches above a Type B unit''s deck,
-      patio or balcony where 1010.1.4''s exception 5 applies: thresholds aren''t in the model, so a person''s check.'
+      an accessible route or an Accessible, Type A or Type B unit, and, on the exterior side above a Type B unit''s deck,
+      patio or balcony where 1010.1.4''s exception 5 applies, 4 3/4 inches for a sliding door and 4 1/2 inches for others: thresholds aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-25), section group 6c.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -14273,10 +14275,10 @@ rules:
     expect: needs_review
     note: 'Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space,
       and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches,
-      and storm and screen doors of Group R-2 and R-3 dwelling units, and doors within those units (but Type A units), are
-      excepted: doors in a series and the space between them aren''t in the model, so a person''s check.'
+      storm and screen doors serving Group R-2 and R-3 dwelling units need not be 48 inches from the other door (they still
+      swing as above), and doors within those units, other than within Type A units, are excepted: doors in a series and the space between them aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-25), section group 6c. The routes pass doors one after another, but
-    a vestibule, the distance between its doors and which way each swings (the side each door swings into, as the description states it, no Revit mark yet)
-    aren't read together.
+    a vestibule, the distance between its doors and which way each swings (the side each door swings into, as the
+    description states it, no Revit mark yet) aren't read together.
   drafted_by: claude_code/claude-opus-5-5
   status: draft

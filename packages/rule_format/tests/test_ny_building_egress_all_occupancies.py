@@ -1055,3 +1055,18 @@ def test_1010_1_3_2_a_door_not_stated_side_hinged_is_a_persons_check(ctx, rules)
         assert _one(r, "means_of_egress_door", {"moe_door_swinging": False}, {"occupancy_group": g}, ctx) ==             "needs_review", g
         assert _one(r, "means_of_egress_door", {}, {"occupancy_group": g}, ctx) == "needs_review", g
         assert _one(r, "means_of_egress_door", {"moe_door_swinging": True}, {"occupancy_group": g}, ctx) ==             "not_applicable", g
+
+
+def test_the_6c_flags_state_each_exceptions_own_conditions(rules):
+    """Review round 1 of group 6c: a flag's note is what a person checks by, so an exception's conditions are stated
+    whole, never looser or stricter than the page (p.323 lines 46-56, p.324 lines 22-25 and 30-32)."""
+    note = lambda rid: " ".join(rules[rid]["examples"][0]["note"].split())
+    floor = note("general.bc_1010_1_4_floor_elevation")
+    assert "with an impervious surface up to 4 inches lower" in floor                       # exception 5
+    assert "other than an exterior storm or screen door, not swinging over it" in floor       # exception 2
+    assert "storm and screen doors included, may swing over either landing" in floor          # exception 3
+    sill = note("general.bc_1010_1_6_thresholds")
+    assert "4 3/4 inches for a sliding door and 4 1/2 inches for others" in sill               # exception 2
+    series = note("general.bc_1010_1_7_door_arrangement")
+    assert "need not be 48 inches from the other door (they still swing as above)" in series  # exception 2
+    assert "other than within Type A units" in series                                          # exception 3
