@@ -77,7 +77,8 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     if not floor.stories:
         return out
     placed = story_place.places(description, Reader(description["units"]),
-                                {lid: s.name for lid, s in floor.stories.items()}, floor.stories, ground)
+                                {lid: s.name for lid, s in floor.stories.items()}, floor.stories, ground,
+                                floor.stops)
     items = {r["id"]: r for r in description.get("rooms") or [] if isinstance(r, dict) and isinstance(r.get("id"), str)}
     unknown = [u for u in description.get("unknown_spaces") or [] if isinstance(u, dict)]
     parts = {k: [] for k in KINDS}

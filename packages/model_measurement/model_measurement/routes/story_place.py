@@ -24,15 +24,20 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md):
 - The stories placed are the levels with rooms, each with the range of its rooms' finished floor elevations and its
   level's own elevation (a sunken room widens it; an enclosed space with no room drawn in it stands on the level).
   Their floors must stack (one story's highest floor below the next one's lowest), else no place is measured (a split
-  level). A level with no rooms (not at a story's floor) may be a story nobody drew rooms on (a garage, a lobby) or
-  no story (a roof, a datum): both are tried, so a place is measured only where it is the same either way.
+  level). Every level of the model must be listed (`all_levels`: the Revit reader sends every one, one with nothing
+  drawn on it too), else nothing is placed: an open parking story with nothing drawn would make the first rooms the
+  second story. A level with no rooms (not at a story's floor) may be a story nobody drew rooms on (a garage, a
+  lobby) or no story (a roof, a datum): both are tried, so a place is measured only where it is the same either way.
+  A description not read whole (a room on no level read) places nothing.
 - The ground is only what the architect stated: flat ground (one elevation: the grade plane and the finished ground
   everywhere), or spot grades outside the walls. Spot grades are samples: Gordium's reading is that the ground
   between two spots lies between their values (the usual surveying reading, shown with every figure measured from
-  spots), so the average along the walls is at most the highest spot within reach of them; every wall of the
-  stories' outline (a courtyard's too) must have one, else nothing is measured. A spot inside the outline is under
-  the building, not ground beside it: left out. Outlines that come apart (two buildings) aren't placed: whose
-  ground is whose isn't known. The slope-away rule can only lower the grade plane, below any spot at the walls, so
+  spots), so the average along the walls is at most the highest spot within reach of them; every wall of each
+  story's own outline (a courtyard's too) must have one outside that story, else nothing is measured (the ground
+  floor's walls under an upper story's overhang keep their spots). A spot inside a story's outline is under it, not
+  ground beside it. Outlines that come apart (two buildings) aren't placed: whose ground is whose isn't known. A
+  spot is never item 2's "finished ground level at any point" (it may stand in an areaway or a window well: open
+  question 4.6 of docs/questions_for_architects.md); only flat ground gives that point. The slope-away rule can only lower the grade plane, below any spot at the walls, so
   spots give no lower bound: a story is never proven a basement from spots, only from flat ground. No ground stated,
   or existing ground (not the finished ground the code measures from), or flat ground only assumed: nothing is
   measured.
@@ -96,9 +101,10 @@ def _number(v) -> bool:
 
 # --- the stories ----------------------------------------------------------------------------------------------------
 
-def places(description: dict, reader, levels: dict, stories: dict, ground: dict | None) -> dict:
+def places(description: dict, reader, levels: dict, stories: dict, ground: dict | None, problems=()) -> dict:
     """Each story's three place facts (see the module's words). `levels`: {level id: name} as read; `stories`: the
-    routes' Story by level id (their outer outlines, read); `ground`: ground_of's."""
+    routes' Story by level id (their outer outlines, read); `ground`: ground_of's; `problems`: the description's own
+    (floor.read's stops: a room on no level read, levels not read...), any of which leaves every place unmeasured."""
     out = {lid: {"measures": {}, "not_measured": {}, "more": {}} for lid in stories}
     if not stories:
         return out
@@ -109,6 +115,8 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
                 got["not_measured"].setdefault(f, reason)
         return out
 
+    if problems:                                         # a room or space not placed on a level may be a story's
+        return none(Stop("place_description", reasons="; ".join(problems)).reason)
     floors, why = _floors(description, reader, stories)
     if why:
         return none(why)
@@ -116,12 +124,21 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
         if lid not in floors:                                # a level with no rooms (a roof): not a story placed
             for f in FACTS:
                 out[lid]["not_measured"][f] = Stop("place_story_no_rooms", name=stories[lid].name).reason
-    elevation = {}
-    for item in description.get("levels") or []:
+    every = description.get("all_levels")               # every level of the model, one with nothing on it too
+    if not isinstance(every, list):
+        return none(Stop("place_levels_not_all").reason)
+    elevation, names = {}, {}
+    for item in every:
         try:
+            if not isinstance(item.get("id"), str) or item["id"] in elevation:
+                raise KeyError
             elevation[item["id"]] = reader.length(item.get("elevation"), "its elevation")
-        except (InteriorStop, KeyError, TypeError):
-            return none(Stop("place_level_not_read", name=levels.get(item.get("id"), "?")).reason)
+            names[item["id"]] = item["name"] if isinstance(item.get("name"), str) else item["id"]
+        except (InteriorStop, KeyError, TypeError, AttributeError):
+            name = item.get("name") if isinstance(item, dict) and isinstance(item.get("name"), str) else "?"
+            return none(Stop("place_level_not_read", name=name).reason)
+    if any(lid not in elevation for lid in stories):
+        return none(Stop("place_levels_not_all").reason)
     for lid, (f_lo, f_hi) in list(floors.items()):       # the level's own floor too: an enclosed space with no
         z = elevation[lid]                               # room drawn in it is on it, its floor not given
         floors[lid] = (min(f_lo, z), max(f_hi, z))
@@ -130,8 +147,7 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
         if floors[a][1] >= floors[b][0] - SAME:
             return none(Stop("place_split_level", a=stories[a].name, b=stories[b].name).reason)
     # a level with no rooms, not at a story's floor: a story nobody drew rooms on, or none (a roof, a datum)
-    roomless = sorted(((elevation[lid], lid) for lid in levels if lid not in floors and lid in elevation),
-                      key=lambda e: e[0])
+    roomless = sorted(((z, lid) for lid, z in elevation.items() if lid not in floors), key=lambda e: e[0])
     roomless = [(z, lid) for z, lid in roomless
                 if not any(floors[r][0] - SAME <= z <= floors[r][1] + SAME for r in order)]
     if len(roomless) > MOST_ROOMLESS:
@@ -150,10 +166,10 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
     shown = {"grade_plane_ft": [None if plane["low"] == -math.inf else round(plane["low"] / FT, 4),
                                 round(plane["high"] / FT, 4)],
              "floors_ft": {lid: [round(floors[lid][0] / FT, 4), round(floors[lid][1] / FT, 4)] for lid in order},
-             "levels_maybe_stories": [levels[lid] for _, lid in roomless]}
+             "levels_maybe_stories": [names[lid] for _, lid in roomless]}
     if plane.get("reading"):
         shown["reading"] = plane["reading"]
-    maybe = ", ".join(levels[lid] for _, lid in roomless)
+    maybe = ", ".join(names[lid] for _, lid in roomless)
     for lid in order:
         got = out[lid]
         got["more"]["story_place"] = shown
@@ -262,18 +278,27 @@ def _plane(ground, stories) -> tuple:
     if any(s.outer is None for s in stories.values() if s.rooms):
         return None, Stop("ground_no_outline").reason
     # the outlines are read in inches (the interior reader), the spots are in feet: both in inches here
-    footprint = unary_union([s.outer.buffer(0) for s in stories.values() if s.outer is not None])
+    outlines = [s.outer.buffer(0) for s in stories.values() if s.rooms]
+    footprint = unary_union(outlines)
     parts = list(getattr(footprint, "geoms", [footprint]))
     if len(parts) != 1:
         return None, Stop("ground_buildings_apart", count=len(parts)).reason
-    rings = [footprint.exterior, *footprint.interiors]                  # a courtyard's walls are exterior walls too
-    walls = [LineString([a, b]) for r in rings for a, b in zip(r.coords, r.coords[1:]) if math.dist(a, b) >= WALL_LEAST]
-    inside = footprint.buffer(-SAME)
     at = [(Point(x * FT, y * FT), z * FT) for x, y, z in spots]
-    near = [(p, z) for p, z in at if not inside.contains(p) and any(w.distance(p) <= SPOT_REACH for w in walls)]
-    bare = [w for w in walls if not any(w.distance(p) <= SPOT_REACH for p, _ in near)]
-    if not walls or bare:
-        return None, Stop("ground_wall_bare", count=len(bare) or 1).reason
-    high, low = max(z for _, z in near), min(z for _, z in near)
-    return {"low": -math.inf, "high": high, "point": low, "flat": None,
+    # each story's own walls (a courtyard's too), each with a spot within reach outside that story: the ground floor's
+    # walls under an upper story's overhang keep their spots (inside the overhang's outline, outside their own)
+    used, bare = [], 0
+    for outline in outlines:
+        rings = [outline.exterior, *outline.interiors]
+        walls = [LineString([a, b]) for r in rings for a, b in zip(r.coords, r.coords[1:]) if math.dist(a, b) >= WALL_LEAST]
+        inside = outline.buffer(-SAME)
+        near = [z for p, z in at if not inside.contains(p) and any(w.distance(p) <= SPOT_REACH for w in walls)]
+        bare += sum(1 for w in walls if not any(w.distance(p) <= SPOT_REACH and not inside.contains(p) for p, _ in at))
+        bare += 0 if walls else 1
+        used += near
+    if bare or not used:
+        return None, Stop("ground_wall_bare", count=bare or 1).reason
+    high = max(used)
+    # item 2's "finished ground level at any point": never a spot (it may stand in an areaway or a window well,
+    # whose floor as "ground" is an open question: docs/questions_for_architects.md 4.6), only flat ground
+    return {"low": -math.inf, "high": high, "point": None, "flat": None,
             "reading": SPOTS_READING.format(high=f"{high / FT:g} ft")}, None
