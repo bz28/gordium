@@ -97839,9 +97839,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "7a78c0a972b3f6177a2589d38c0009a05b496058725054326e5d8fa8e0566f4b",
+  "worker_fingerprint": "c920a7cb8489065cdae7dbc7e64c2185928751a1fca3612f107907567fc5be69",
   "rulebook": {
-   "new_york/ithaca_city": "9cf1d8db2f468d5cda2e7a5aeb791de17bb24a22b83bc7c30355049a2563aaf3"
+   "new_york/ithaca_city": "e9611c978210d8f4ed915c5ab7b4e86783b8fa948145e24899f080b13c72e165"
   }
  }
 }
