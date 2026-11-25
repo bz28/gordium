@@ -75,9 +75,9 @@ def oracle(suites, joins):
         members = [suites[i] for i in range(3) if owner[i] == o]
         functions = {f for f, _, _ in members}
         doors = sum(e for _, _, e in members)
+        if None in functions:
+            return None                                  # no function stated: a unit, or a room shared between units
         if "residential" not in functions:
-            if None in functions:
-                return None                              # no function stated: a unit or not
             continue                                     # business throughout: no dwelling unit
         if doors != 1:
             return None                                  # no door of its own, or two units joined by a door
@@ -136,3 +136,53 @@ def test_each_reason_has_a_case():
         seen.add(key)
     seen.add("units_use_unknown")                        # test_a_room_with_no_use_given_may_be_a_corridor...
     assert seen == UNITS_KEYS
+
+
+# --- review round 1 (PR 3): each finding's pin ---------------------------------------------------------------------
+
+def test_an_opening_with_no_door_to_the_corridor_is_a_way_out():
+    """Suite 0 open to the corridor by a passage (no door), joined by a door to suite 1, which has its own door: two
+    ways out, so maybe two units (a lock-off). Before, the opening wasn't counted: one unit."""
+    desc = layout([("residential", 1, 0), ("residential", 1, 1), ("business", 1, 1)], (True, False))
+    desc["passages"] = [{"rooms": ["s0", "c"], "line": [[0, -0.5], [11.5, -0.5]]}]
+    desc["rooms"][1]["floor"] = [list(p) for p in rect(0, -0.5, 11.5, 10)]           # s0 meets the corridor
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_entrances", got
+
+
+@pytest.mark.parametrize("function", ["Residential", "residential ", "R-2", 7, ["residential"], "dormitory",
+                                      "institutional_sleeping"])
+def test_a_function_not_on_the_list_never_rules_a_unit_out(function):
+    """Two of six one-room units with a function that isn't a listed other use: before, "no dwelling unit", the
+    count 4 and the row passing with 6 units. Now not measured."""
+    suites = [("residential", 1, 1)] * 3
+    desc = layout(suites, (False, False))
+    desc["rooms"][1]["function"] = function
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_function_unknown", (function, got)
+
+
+def test_a_shared_vestibule_not_marked_a_corridor_is_never_counted_as_one_unit():
+    """A vestibule (use other) with one door to the corridor and two units off it: one group, one way out, but two
+    units, and 1016.2.1 met (nobody passes through another unit). With no function on the vestibule: not measured;
+    marked residential, the reading said with the count names this case (every shared room marked a corridor or
+    lobby)."""
+    # s0 and s1 open into a room of use other (a vestibule) that opens outside
+    desc = layout([("residential", 1, 0), ("residential", 1, 0), ("business", 1, 1)], (False, False))
+    desc["rooms"].append(room("v", rect(0, 10.5, 23.5, 15), use="other", lockable=False, pass_through=True))
+    desc["doors"] += [door("va", (5, 10.25), (1, 0), ("s0", "v")), door("vb", (17, 10.25), (1, 0), ("s1", "v")),
+                      door("vc", (23.75, 12.75), (0, 1), ("v", "outside"))]
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_function_unknown", got
+    assert "shared between dwelling units is marked a corridor or lobby" in RESTS_ON
+
+
+def test_the_listed_other_uses_are_table_1004_5_but_residential_and_sleeping():
+    """NOT_DWELLING is every function in the frozen Table 1004.5 record but residential, dormitory and institutional
+    sleeping, so the two can't drift."""
+    import yaml
+    from model_measurement.routes.dwelling_units import NOT_DWELLING
+    record = REPO / ("regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/"
+                     "records/occupant_load_factors.yaml")
+    table = set(yaml.safe_load(record.read_text(encoding="utf-8"))["functions"])
+    assert NOT_DWELLING == table - {"residential", "dormitory", "institutional_sleeping"}

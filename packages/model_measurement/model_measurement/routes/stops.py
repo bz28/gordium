@@ -170,12 +170,13 @@ STOPS = {
     # the dwelling units on a story (Table 1006.3.4(1): dwelling_units.py)
     "units_use_unknown": "the room {name} has no use given: whether it is a corridor (shared) or part of a dwelling "
                          "unit isn't known",
-    "units_function_unknown": "the space of {name} states no function (Revit's room mark for it, Table 1004.5): "
-                              "whether it is a dwelling unit isn't known",
+    "units_function_unknown": "a room of the space of {name} states no function, or one not on Table 1004.5's list "
+                              "(Revit's room mark for it): whether it is a dwelling unit, or a room shared between "
+                              "units, isn't known",
     "units_no_entrance": "the space of {name} has no door to a corridor, an exit or the outside: it may be part of a "
                          "dwelling unit on two stories, which story counts it isn't known",
-    "units_entrances": "the space of {name} has {count} doors to the corridors, exits or outside ({doors}): it may be "
-                       "two dwelling units joined by a door",
+    "units_entrances": "the space of {name} has {count} ways out to the corridors, exits or outside ({doors}): it "
+                       "may be two dwelling units joined by a door",
     # each door's own part (doors.py, section group 6a): its sizes only from the maker's stated clear opening
     "door_no_stated_clear": "the door {name} has no maker's stated clear opening (its type's clear width and height, "
                             "confirmed): its size is never taken from the door's own size or its leaf",

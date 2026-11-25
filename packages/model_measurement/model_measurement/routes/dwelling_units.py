@@ -33,12 +33,26 @@ from model_measurement.routes.stops import Stop
 
 NOT_LIVED_IN = ("toilet", "closet", "accessory_storage")
 RESIDENTIAL = "residential"
+# Table 1004.5's functions a dwelling unit's rooms can't all be (rooms.function, the interior format's list; tied to
+# new_york_state_building's drafted/records/occupant_load_factors.yaml by test): every one but residential and the two
+# sleeping ones (a dwelling unit's bedrooms may be marked so). A function not listed here (a typo, a value not on the
+# table, dormitory, institutional sleeping) never rules a group out: not measured
+NOT_DWELLING = frozenset({
+    "accessory_storage_mechanical", "agricultural", "aircraft_hangar", "airport_baggage_claim",
+    "airport_baggage_handling", "airport_concourse", "airport_waiting", "assembly_concentrated", "assembly_fixed_seats",
+    "assembly_standing", "assembly_unconcentrated", "bowling_center", "business", "classroom", "commercial_kitchen",
+    "concentrated_business", "courtroom", "day_care", "exercise_room", "exhibit_gallery_museum", "gaming_floor",
+    "h5_fabrication", "industrial", "information_technology", "inpatient_treatment", "library_reading_room",
+    "library_stack", "locker_room", "mall", "mercantile", "outpatient", "parking_garage", "pool_deck", "rink_pool",
+    "stage_platform", "storage_stock_shipping", "vocational_shop", "warehouse"})
 QUOTE_1016_2_1 = ("each tenant space, dwelling unit and sleeping unit shall be provided with access to the required "
                   "exits without passing through adjacent tenant spaces, dwelling units and sleeping units")
 # said with every row reading the count (parts.yaml `rests_on`): the reading it stands on, and the rule that must hold
 # for it (shown always, a person's check: general.bc_1016_2_1_multiple_tenants), never holding a pass
-RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with one door to the corridors, exits or outside is "
-            "one dwelling unit. This count holds only if BCNYS 1016.2.1 (p.341) is met: \"" + QUOTE_1016_2_1 + "\"")
+RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with a residential room and one way out to the "
+            "corridors, lobbies, exits or outside is one dwelling unit. It holds only if every room shared between "
+            "dwelling units is marked a corridor or lobby (a shared vestibule or landing marked otherwise would join "
+            "two units into one) and BCNYS 1016.2.1 (p.341) is met: \"" + QUOTE_1016_2_1 + "\"")
 
 
 def units_on(story, items: dict, is_exit) -> int:
@@ -57,17 +71,19 @@ def units_on(story, items: dict, is_exit) -> int:
         names = ", ".join(sorted(story.rooms[r].name for r in g))
         lived = [r for r in g if story.rooms[r].use not in NOT_LIVED_IN]
         functions = [(items.get(r) or {}).get("function") for r in lived]
-        if not lived or (all(functions) and RESIDENTIAL not in functions):
-            continue                                     # no dwelling unit: nothing lived in, or another function
-        if RESIDENTIAL not in functions:
-            raise Stop("units_function_unknown", name=names)
-        entrances = sorted((d for d in story.doors.values()
-                            if set(d.sides) & g and set(d.sides) - g and set(d.sides) - g <= shared),
-                           key=lambda d: d.id)
+        if not lived or (RESIDENTIAL not in functions and all(isinstance(f, str) and f in NOT_DWELLING
+                                                              for f in functions)):
+            continue                                     # no dwelling unit: nothing lived in, or a listed other use
+        if RESIDENTIAL not in functions or not all(isinstance(f, str) and f for f in functions):
+            raise Stop("units_function_unknown", name=names)   # (a room with none may be a shared vestibule)
+        # its ways out to the shared spaces: doors and openings with no door alike
+        links = [(d.name, set(d.sides)) for d in story.doors.values()] + \
+            [(f"the opening between {story.rooms[a].name} and {story.rooms[b].name}", {a, b})
+             for a, b, _ in story.passages if a in story.rooms and b in story.rooms]
+        entrances = sorted((name for name, sides in links if sides & g and sides - g and sides - g <= shared))
         if not entrances:
             raise Stop("units_no_entrance", name=names)
         if len(entrances) > 1:
-            raise Stop("units_entrances", name=names, count=len(entrances),
-                       doors=", ".join(d.name for d in entrances))
+            raise Stop("units_entrances", name=names, count=len(entrances), doors=", ".join(entrances))
         count += 1
     return count
