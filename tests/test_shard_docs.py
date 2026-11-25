@@ -61,3 +61,10 @@ def test_a_test_of_a_few_seconds_never_fails_a_part_by_chance():
     c = _conftest()
     took = {"a::few": {"call": 3.6}, "a::nine": {"call": 9.9}, "a::ten": {"call": 10.0}}
     assert c.unlisted_slow(took, {}) == [(10.0, "a::ten")]
+
+
+def test_only_a_linux_part_fails_for_an_unlisted_slow_test():
+    # #192 (2026-11-25): Windows CI runs about twice as slow, so two 5 s tests failed two Windows parts; the list is
+    # Linux's, and only Linux parts fail for a test missing from it
+    c = _conftest()
+    assert c.guard_fails("linux") and not c.guard_fails("win32") and not c.guard_fails("darwin")

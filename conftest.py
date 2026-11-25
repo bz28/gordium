@@ -84,6 +84,15 @@ def pytest_collection_modifyitems(config, items):
 # time, and its time on CI's machines varies run to run (PR #190, 2026-11-24: four tests of 3.0 to 3.6 s failed two
 # parts that had passed before), so a part fails only for an unlisted test of TOO_SLOW, 10 s, or more.
 TOO_SLOW = 10.0
+# The list balances the parts by Linux's times, and only a Linux part fails for an unlisted slow test: CI's Windows
+# machines take about twice as long (#192, 2026-11-25: two 5 s tests took 11 and 12 s there and failed two Windows
+# parts though every test passed), so there the same tests are named but never fail the part.
+GUARD_PLATFORM = "linux"
+
+
+def guard_fails(platform=sys.platform):
+    """Whether an unlisted slow test fails this machine's part (on Linux only; elsewhere it is only named)."""
+    return platform.startswith(GUARD_PLATFORM)
 _took = {}
 
 
@@ -113,4 +122,7 @@ def pytest_sessionfinish(session, exitstatus):
               "(record them with `python tests/check_shards.py record`):")
         for s, i in slow[:20]:
             print(f"  {s} s  {i}")
-        session.exitstatus = pytest.ExitCode.TESTS_FAILED
+        if guard_fails():
+            session.exitstatus = pytest.ExitCode.TESTS_FAILED
+        else:
+            print(f"(named only: on {sys.platform} a slow test fails no part; the Linux parts decide)")
