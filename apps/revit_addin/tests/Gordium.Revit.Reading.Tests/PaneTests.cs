@@ -298,9 +298,12 @@ public sealed class PaneTests
     {
         var change = CheckChanges.Between(Model(House()), new DateTime(2026, 11, 22, 14, 32, 0), Model(HouseAfter()));
         Assert.NotNull(change);
-        Assert.Equal("WHAT CHANGED SINCE THE LAST CHECK · 9 verdicts", PaneWords.ChangeHeading(change!));
+        // UI polish change 40: "Since 14:32 · 9 results changed", four listed, "Show all 9" opens every one in place
+        Assert.Equal("Since 14:32 · 9 results changed", PaneWords.ChangeHeading(change!));
         Assert.Equal(4, PaneWords.ChangesShown(change!).Count);
-        Assert.StartsWith("And 5 more changed verdicts", PaneWords.ChangesMore(change!), StringComparison.Ordinal);
+        Assert.Equal("Show all 9", PaneWords.ChangesMore(change!));
+        Assert.Equal(change!.Rows, PaneWords.ChangesShown(change!, all: true));
+        Assert.Equal("Show fewer", PaneWords.ChangesMore(change!, all: true));
         Assert.True(PaneWords.ChangeIsList(change!));
         // nothing changed: the worker's own line, never "· 0 verdicts" (Revit 2027 trial)
         var same = CheckChanges.Between(Model(House()), new DateTime(2026, 11, 22, 14, 32, 0), Model(House()));
@@ -311,22 +314,70 @@ public sealed class PaneTests
         Assert.Equal(Tone.Review, PaneWords.ChangeTone(new RowChange("a", "a", Verdict.Complies, null, "a no longer in the check")));
     }
 
-    /// <summary>"Hover for all" shows all: the hover lists every changed verdict (the ones listed and every one
-    /// "And N more" counts), never a count of its own that disagrees with the pane's (review round 1 of change 20: the
-    /// pane said "And 5 more" while the hover, the worker's one line, said "and 6 more").</summary>
+    /// <summary>What changed lists every changed result in place ("Show all 9"), never behind a hover (UI polish change
+    /// 40: "(hover for all)" goes); for a screen reader its words still say every one (ChangesAll).</summary>
     [Fact]
-    public void What_changeds_hover_lists_every_verdict_the_pane_counts()
+    public void What_changed_shows_all_in_place_and_says_every_result_it_counts()
     {
         var change = CheckChanges.Between(Model(House()), new DateTime(2026, 11, 22, 14, 32, 0), Model(HouseAfter()))!;
         var all = PaneWords.ChangesAll(change).Split('\n');
-        var listed = all.Where(l => l.StartsWith("• ", StringComparison.Ordinal)).ToList();
-        Assert.Equal(change.Rows.Select(r => "• " + r.Words), listed);               // every one, in the worker's order
-        Assert.Equal(PaneWords.ChangesShown(change).Count + 5, listed.Count);       // shown + "And 5 more"
-        Assert.StartsWith("9 changed verdicts:", all[0], StringComparison.Ordinal);
-        Assert.DoesNotContain(all, l => l.Contains("and 6 more", StringComparison.Ordinal));         // the worker's one line's own count
+        Assert.Equal(change.Rows.Select(r => "• " + r.Words), all.Where(l => l.StartsWith("• ", StringComparison.Ordinal)));
         var view = Read("ResultsView.cs");
-        Assert.Contains("ToolTip = PaneWords.ChangesAll(change)", view, StringComparison.Ordinal);
-        Assert.DoesNotContain("ToolTip = change.Words", view, StringComparison.Ordinal);
+        Assert.Contains("foreach (var r in PaneWords.ChangesShown(change, _changesAll))", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("ToolTip = PaneWords.ChangesAll(change)", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("hover for all", string.Join("\n", PaneWords.ChangesMore(change), PaneWords.ChangesSaid(change)), StringComparison.Ordinal);
+    }
+
+    /// <summary>"You changed: …" (change 40) says each project fact that differs between the two checks, by its name and
+    /// new value, and nothing when one check's facts aren't known.</summary>
+    [Fact]
+    public void What_changed_says_the_facts_the_architect_changed()
+    {
+        RevitModel M(params (MarkDefinition Mark, MarkValue Value)[] marks) => new()
+        {
+            Document = "x.rvt", Marked = [], ProjectMarks = marks.ToDictionary(m => m.Mark.Guid, m => m.Value),
+        };
+        IReadOnlyList<SetupField> F(RevitModel m) => SetupScreen.Build(m, [], null).Fields;
+        var before = F(M((Marks.CornerLot, new MarkValue(true, 1))));
+        var after = F(M((Marks.CornerLot, new MarkValue(true, 0)), (Marks.DwellingUnits, new MarkValue(true, 4))));
+        var said = PaneWords.FactsChanged(before, after);
+        Assert.NotNull(said);
+        Assert.StartsWith("You changed: ", said, StringComparison.Ordinal);
+        Assert.Contains(": No", said, StringComparison.Ordinal);
+        Assert.Contains(": 4", said, StringComparison.Ordinal);
+        Assert.Null(PaneWords.FactsChanged(before, before));
+        Assert.Null(PaneWords.FactsChanged(null, after));
+        var cleared = PaneWords.FactsChanged(after, F(M()));
+        Assert.Contains("cleared", cleared, StringComparison.Ordinal);
+    }
+
+    /// <summary>The proportion bar (change 18): one segment per verdict, worst first, as long as its count; never green
+    /// while anything fails, needs review or isn't checked yet; the clock once stale.</summary>
+    [Fact]
+    public void The_proportion_bar_is_never_green_while_anything_is_unsettled()
+    {
+        Verdict[] apartment = [.. Enumerable.Repeat(Verdict.NeedsReview, 98), .. Enumerable.Repeat(Verdict.NotChecked, 8), Verdict.Complies, Verdict.NotApplicable];
+        var bar = ProportionBar.Segments(apartment, stale: false);
+        Assert.Equal([new BarSegment(PanelStatus.Review, 98), new BarSegment(PanelStatus.NotChecked, 8), new BarSegment(PanelStatus.NotApplicable, 1),
+                      new BarSegment(PanelStatus.NotApplicable, 1)], bar);
+        Assert.Equal(apartment.Length, bar.Sum(b => b.Count));
+        Assert.DoesNotContain(bar, b => b.Status == PanelStatus.Complies);
+        Assert.Equal([new BarSegment(PanelStatus.Complies, 2), new BarSegment(PanelStatus.NotApplicable, 1)],
+                     ProportionBar.Segments([Verdict.Complies, Verdict.Complies, Verdict.NotApplicable], stale: false));
+        Assert.All(ProportionBar.Segments([Verdict.Complies, Verdict.DoesNotComply], stale: true), b => Assert.Equal(PanelStatus.Stale, b.Status));
+        Assert.Equal(PanelStatus.Fails, ProportionBar.Segments([Verdict.Complies, Verdict.DoesNotComply], stale: false)[0].Status);
+    }
+
+    /// <summary>Each group of work has its kind's icon (change 46); what fails, isn't checked or is settled has none
+    /// (its status glyph says it).</summary>
+    [Fact]
+    public void Each_kind_of_work_has_its_own_icon()
+    {
+        var kinds = new[] { FixKind.Answer, FixKind.Mark, FixKind.FixModel, FixKind.Survey, FixKind.Measure, FixKind.Decide, FixKind.OpenQuestion };
+        var icons = kinds.Select(ResultViewList.IconOf).ToList();
+        Assert.All(icons, i => Assert.NotNull(i));
+        Assert.Equal(kinds.Length, icons.Distinct().Count());
+        Assert.All(new[] { FixKind.Fails, FixKind.NotChecked, FixKind.Done }, k => Assert.Null(ResultViewList.IconOf(k)));
     }
 
     /// <summary>The house's Project Information fix says one number of facts everywhere: its title, its count and the

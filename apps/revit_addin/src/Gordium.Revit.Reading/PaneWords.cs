@@ -225,31 +225,57 @@ public static class PaneWords
         return change.Rows.Count > 0;
     }
 
-    /// <summary>"WHAT CHANGED SINCE THE LAST CHECK · 9 verdicts".</summary>
+    /// <summary>"Since 14:32 · 9 results changed" (UI polish change 40: results, the pane's one word; the time of the
+    /// check before, when known).</summary>
     public static string ChangeHeading(CheckChange change)
     {
         ArgumentNullException.ThrowIfNull(change);
-        return $"WHAT CHANGED SINCE THE LAST CHECK · {change.Rows.Count} verdict{(change.Rows.Count == 1 ? "" : "s")}";
+        var n = change.Rows.Count;
+        var since = change.Since is { } at ? $"Since {at.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture)} · " : "";
+        return $"{since}{n} result{(n == 1 ? "" : "s")} changed";
     }
 
-    /// <summary>The changed results listed (the first <see cref="ChangesListed"/>, in the worker's order).</summary>
-    public static IReadOnlyList<RowChange> ChangesShown(CheckChange change)
+    /// <summary>The changed results listed: the first <see cref="ChangesListed"/>, or every one once "Show all" is
+    /// opened (<paramref name="all"/>), in the worker's order.</summary>
+    public static IReadOnlyList<RowChange> ChangesShown(CheckChange change, bool all = false)
     {
         ArgumentNullException.ThrowIfNull(change);
-        return change.Rows.Take(ChangesListed).ToList();
+        return all ? change.Rows : change.Rows.Take(ChangesListed).ToList();
     }
 
-    /// <summary>"And 5 more changed verdicts; 2 more say something new (hover for all).", or null.</summary>
-    public static string? ChangesMore(CheckChange change)
+    /// <summary>"Show all 9" when more changed than are listed, "Show fewer" once open; null when every one is listed.</summary>
+    public static string? ChangesMore(CheckChange change, bool all = false)
     {
         ArgumentNullException.ThrowIfNull(change);
-        var rest = change.Rows.Count - Math.Min(ChangesListed, change.Rows.Count);
-        var more = new List<string>();
-        if (rest > 0)
-            more.Add($"{rest} more changed verdict{(rest == 1 ? "" : "s")}");
-        if (change.Said > 0)
-            more.Add($"{change.Said} more say something new");
-        return more.Count == 0 ? null : "And " + string.Join("; ", more) + " (hover for all).";
+        if (change.Rows.Count <= ChangesListed)
+            return null;
+        return all ? "Show fewer" : $"Show all {change.Rows.Count}";
+    }
+
+    /// <summary>"2 more say something new (the same verdict)", or null.</summary>
+    public static string? ChangesSaid(CheckChange change)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+        return change.Said == 0 ? null
+            : $"{change.Said} more result{(change.Said == 1 ? " says" : "s say")} something new with the same verdict.";
+    }
+
+    /// <summary>What the architect changed between the two checks (change 40: "You changed: …"), from both checks'
+    /// project facts as the Setup form reads them (null: not known for one of them); null when nothing changed.</summary>
+    public static string? FactsChanged(IReadOnlyList<SetupField>? before, IReadOnlyList<SetupField>? after)
+    {
+        if (before is null || after is null)
+            return null;
+        var old = before.GroupBy(f => f.Mark.Guid).ToDictionary(g => g.Key, g => g.First());
+        var said = new List<string>();
+        foreach (var f in after)
+        {
+            if (!old.TryGetValue(f.Mark.Guid, out var o) || o.Current == f.Current)
+                continue;
+            var label = SetupSteps.Title(f.Mark, f.Label);
+            said.Add(f.Current is null ? $"{label} cleared" : $"{label}: {f.CurrentLabel}");
+        }
+        return said.Count == 0 ? null : "You changed: " + string.Join("; ", said) + ".";
     }
 
     /// <summary>What "hover for all" shows: every changed verdict, each on its line in the worker's order (the ones
@@ -332,12 +358,12 @@ public static class PaneWords
         _ => $"The model changed after the {at} check. Click to check again.",
     };
 
-    /// <summary>The selection strip's line once stale (PR #168), by why: "2 results mentioned it at the check at
-    /// 14:32; the model changed since, so check again."</summary>
+    /// <summary>The selection strip's line once stale (PR #168), by why: "2 results mentioned it at 14:32. The model
+    /// changed since." (UI polish strings, selection strip).</summary>
     public static string StaleSelection(string mentioned, string at, StaleReason reason) => reason switch
     {
         StaleReason.Cancelled => $"{mentioned} at the check at {at}, {StaleBefore(reason)}, so check again.",
-        _ => $"{mentioned} at the check at {at}; the model changed since, so check again.",
+        _ => $"{mentioned} at {at}. The model changed since.",
     };
 
     /// <summary>Why no compliance summary is made of stale results (PR #168), by why.</summary>

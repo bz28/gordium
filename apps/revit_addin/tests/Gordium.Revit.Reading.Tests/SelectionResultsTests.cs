@@ -26,7 +26,7 @@ public sealed class SelectionResultsTests
         var storage = model.Causes.SelectMany(c => c.Rooms).First(r => r.Name == "STORAGE (13)");
         var answer = map.Answer([storage.Id], uid => uid == storage.Id ? "STORAGE (13)" : null);
         Assert.Equal("STORAGE (13)", answer.Title);
-        Assert.Equal("12 results mention it: 12 need review", answer.Line);
+        Assert.Equal("12 results mention it · 12 need review", answer.Line);
         Assert.All(answer.Rows, r => Assert.Equal(PanelStatus.Review, r.Status));
         var card = model.Causes.Single(c => c.Rooms.Any(r => r.Id == storage.Id));
         Assert.Equal(11, card.Items.Count);
@@ -107,8 +107,8 @@ public sealed class SelectionResultsTests
         var answer = map.Answer(["lot", "bldg", "ramp", "r1", "lot"], _ => null);
         Assert.Equal("4 elements", answer.Title);
         Assert.Equal(["cov", "route", "front", "na"], answer.Rows.Select(r => r.Row.Id));
-        Assert.Equal("4 results mention them: 1 does not comply, 1 needs review, 1 complies, 1 not applicable", answer.Line);
-        Assert.Equal("1 result mentions it: 1 not applicable", map.Answer(["ramp"], _ => "Ramp").Line);
+        Assert.Equal("4 results mention them · 1 does not comply, 1 needs review, 1 complies, 1 not applicable", answer.Line);
+        Assert.Equal("1 result mentions it · 1 not applicable", map.Answer(["ramp"], _ => "Ramp").Line);
     }
 
     /// <summary>An element no result names: said plainly, and that it is not a pass.</summary>
@@ -118,7 +118,7 @@ public sealed class SelectionResultsTests
         var answer = SelectionMap.Of(Synthetic(), At).Answer(["door-7"], _ => "Door D07");
         Assert.Equal("Door D07", answer.Title);
         Assert.Empty(answer.Rows);
-        Assert.Equal("No result of this check mentions it. That is not a pass: Gordium may not read or check it.", answer.Line);
+        Assert.Equal("No result mentions it. That isn't a pass: Gordium may not read or check it yet.", answer.Line);
         Assert.Equal("1 element", SelectionMap.Of(Synthetic(), At).Answer(["door-7"], _ => null).Title);
     }
 
@@ -131,6 +131,6 @@ public sealed class SelectionResultsTests
         var answer = map.Answer(["lot"], _ => "Lot");
         Assert.Equal(["cov", "front"], answer.Rows.Select(r => r.Row.Id));
         Assert.All(answer.Rows, r => Assert.Equal(PanelStatus.Stale, r.Status));
-        Assert.Equal("2 results mentioned it at the check at 14:32; the model changed since, so check again.", answer.Line);
+        Assert.Equal("2 results mentioned it at 14:32. The model changed since.", answer.Line);
     }
 }

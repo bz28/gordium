@@ -246,11 +246,20 @@ public sealed class EntryView : C.Border
     private static W.UIElement FixGroupView(FixGroupItem item)
     {
         var e = item.Entry;
-        var line = Opener(item.Host, e.Key, canOpen: true, e.Open, e.Status, 14, new W.Thickness(0, 10, 0, 4));
+        var line = Opener(item.Host, e.Key, canOpen: true, e.Open, e.Status, 14, new W.Thickness(0, 16, 0, 4));   // 16 between sections (change 44)
         var see = Typed(new C.TextBlock { Text = e.Open ? "Hide" : e.Group.SeeWords, Margin = new W.Thickness(8, 0, 0, 0) }, "type.caption");
         Ink(see, PanelTokens.Accent);
         C.DockPanel.SetDock(see, C.Dock.Right);
         line.Children.Add(see);
+        // the kind of work, as its icon (change 46), in the text's colour: never a status colour
+        if (ResultViewList.IconOf(e.Group.Kind) is { } kind)
+        {
+            var icon = PanelLook.Icon(kind, 14);
+            icon.Margin = new W.Thickness(0, 1, 6, 0);
+            icon.VerticalAlignment = W.VerticalAlignment.Top;
+            C.DockPanel.SetDock(icon, C.Dock.Left);
+            line.Children.Add(icon);
+        }
         var words = new C.StackPanel();
         words.Children.Add(Ink(Typed(new C.TextBlock { Text = e.Group.Title, TextWrapping = W.TextWrapping.Wrap, FontWeight = W.FontWeights.SemiBold }, "type.body"),
                                e.Status == PanelStatus.NotChecked ? PanelTokens.TextMuted : PanelTokens.Text));

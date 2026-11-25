@@ -368,8 +368,9 @@ public sealed class CheckProjectCommand : IExternalCommand
         }
         else
             files = $"Logged to {Trial.LogPath()}";
-        // the project's facts as the Setup form's fields, for the questions the answer asks (only when it asks one)
-        var questions = model?.Views?.Fix.Any(g => g.Kind == FixKind.Answer) == true ? SetupRun.Questions(doc) : null;
+        // the project's facts as the Setup form's fields: what the questions card asks with, and what What changed says
+        // the architect changed since the check before (UI polish change 40)
+        var questions = model?.Views is not null ? SetupRun.Questions(doc) : null;
         ResultsPane.Show(ui, doc, new PanelContent(doc.Title, when, model,
                                                    StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files,
                                                    ClearWords: clear, Ids: ids, Key: DocKeys.Of(doc), Questions: questions,
