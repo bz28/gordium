@@ -12698,6 +12698,17 @@ rules:
     - 8
     quote: '1020.6.1 Corridor ceiling. Use of the space between the corridor ceiling and the floor or roof structure above
       as a return air plenum is permitted for one or more of the following conditions:'
+  - file: gov.ny.building.2025.pdf
+    page: 345
+    lines:
+    - 9
+    - 16
+    quote: 1. The corridor is not required to be of fire-resistance-rated construction. 2. The corridor is separated from
+      the plenum by fire-resistance-rated construction. 3. The air-handling system serving the corridor is shut down upon
+      activation of the air-handling unit smoke detectors required by the Mechanical Code of New York State. 4. The air-handling
+      system serving the corridor is shut down upon detection of sprinkler water flow where the building is equipped throughout
+      with an automatic sprinkler system. 5. The space between the corridor ceiling and the floor or roof structure above
+      the corridor is used as a component of an approved engineered smoke control system.
   examples:
   - given: {}
     expect: needs_review
