@@ -76,15 +76,13 @@ GROSS_NOT_MEASURED = "the story's gross floor area isn't measured, so the gross-
 AREAS_OVER = ("the story's rooms add up to more than its gross floor area (inside its exterior walls), so the "
               "gross-function rooms' share of it can't be: a room's outline may overlap another's or the walls")
 # a corridor's load (section group 4): the story's bounds it only where no other level's occupants reach it
-OTHER_LEVELS = "other_level_egress_into_corridors"
-CORRIDOR_FIELD = "building." + OTHER_LEVELS     # the field that answers it (ui_data: its own ask)
-CORRIDOR_SAY = "say so on the building"         # the words that ask for it
+OTHER_LEVELS = "other_level_egress_into_corridors"   # the building block's fact (no Revit mark yet: asked by hand)
 CORRIDOR_QUESTION, CORRIDOR_NONE, CORRIDOR_STORY = "corridor_occupants_served", "none", "whole_story"
 CORRIDOR_BY_HAND = STOPS["stated_not_given"].format(what="the occupant load the corridor serves, worked out by hand")
 CORRIDOR_NOT_RULED_OUT = ("the building doesn't say whether another level's occupants reach its corridors (an "
                           "unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: "
-                          "1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: "
-                          + CORRIDOR_SAY + ", or " + CORRIDOR_BY_HAND)
+                          "1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's (Revit "
+                          "has no mark for that yet): " + CORRIDOR_BY_HAND)
 CORRIDOR_OTHER_LEVELS = ("another level's occupants reach the building's corridors (an unenclosed stairway or ramp, a "
                          "mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the "
                          "story's occupant load doesn't bound the corridor's: " + CORRIDOR_BY_HAND)

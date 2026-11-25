@@ -155,3 +155,10 @@ def test_a_corridor_whose_load_is_not_given_never_passes(ctx, rules):
         given = _given("R-2", False)
         assert _row(r[TABLE], m, given, ctx) != "pass", w
         assert _row(r[CAPACITY], m, given, ctx) == "needs_review", w
+
+
+def test_the_plan_states_the_walks_own_grid():
+    """Review round 1 of group 4a (P3): the plan's status line says how big this walk is; it must be this file's own
+    grid, so a width or load added here can't leave it stale."""
+    plan = (REPO / "docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md").read_text(encoding="utf-8")
+    assert f"{len(WIDTHS)} widths by {len(LOADS)} loads" in plan
