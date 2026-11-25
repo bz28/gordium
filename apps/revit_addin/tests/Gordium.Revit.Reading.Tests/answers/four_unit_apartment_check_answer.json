@@ -83604,7 +83604,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "11ca074e5d91db5532a50283ddd2057995197f3b53143f3fc5044d5d1df91cff",
+  "worker_fingerprint": "dd37b16e2d499513135d2d510ac0bf9fa1ec111311d9a9426d84949414a6f186",
   "rulebook": {
    "new_york/ithaca_city": "e927042b2672bd8caa2769be17818818f4688480d832561d73534fad6781f95d"
   }
