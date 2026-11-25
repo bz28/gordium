@@ -141,6 +141,9 @@ STOPS = {
     "place_story_no_rooms": "the level {name} has no rooms: it isn't placed as a story",
     "place_floor_not_read": "the floor elevation of the room {name} isn't read: {reason}",
     "place_level_not_read": "the elevation of the level {name} isn't read",
+    "place_story_spread": "the rooms of {name} have floors {spread} apart: they may be two stories (a room drawn on a "
+                          "lower level with an offset)",
+    "place_level_inside_story": "the level {name} lies within a story's floors: a story may be drawn on another level",
     "place_split_level": "the floors of {a} and {b} overlap in height (a split level): which story is above which "
                          "isn't clear",
     "place_either": "{name} could be {could}, depending on where the grade plane lies within what the ground stated "
