@@ -487,3 +487,14 @@ def test_only_a_place_inheriting_a_law_that_splits_buildings_lists_building_code
     assert building_code_uses(names, {"../y/state.yaml": b"name: Somewhere\n"}) == []
     assert building_code_uses(names, {"../y/state.yaml": b"scope: building_code\n"}) == ["multiple_family"]
     assert building_code_uses(names, {"../y/state.yaml": None}) == []
+
+
+def test_a_misspelled_fact_is_told_every_fact_gordium_reads_marked_or_not():
+    """Group 2 review round 8 (P3, 2026-11-25): the message for a fact Gordium doesn't read names each fact it does,
+    by its Revit mark where it has one and in words where it hasn't one yet (group 2's R-2 sleeping units and 1031
+    escape openings), so the fact meant is always in the list."""
+    for key in code_scope.FACTS:
+        if key == "facts_not_sent":
+            continue
+        why = code_scope.decide({"use": "one_family_detached"}, {key + "x": True})["why"]
+        assert code_scope.fact_words(key) in why, (key, why)

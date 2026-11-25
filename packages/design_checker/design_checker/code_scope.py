@@ -259,7 +259,7 @@ def _given(building) -> tuple[dict, list[str]]:
              (kind == "names" and isinstance(v, list) and all(isinstance(x, str) for x in v))
         if kind is None:
             bad.append(f"the building block sends {value_words(k)}, which is no fact Gordium reads (it reads "
-                       f"{', '.join(MARK[f] for f in FACTS if f in MARK)})")
+                       f"{', '.join(fact_words(f) for f in FACTS if f != 'facts_not_sent')})")   # each, marked or not
         elif ok:
             out[k] = v
         else:
