@@ -60,6 +60,9 @@ FACTS = {
     # section group 4b: the building has corridors within a dwelling or sleeping unit (1020.2 exception 2; Table
     # 1020.3's 36 in within a dwelling unit)
     "corridors_within_dwelling_units": "yes_no",
+    # section group 5a: an emergency voice/alarm communication system per 907.5.2.2 (1005.3.1 and 1005.3.2's
+    # exception 1: the smaller capacity factors, with a sprinkler system per 903.3.1.1 or 903.3.1.2)
+    "emergency_voice_alarm_system": "yes_no",
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -287,7 +290,7 @@ def _given(building) -> tuple[dict, list[str]]:
 def building_measures(building: dict | None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the ten stated yes/no facts. A fact
+    groups, the three sprinkler systems the limits name from the system, and the eleven stated yes/no facts. A fact
     not stated is left out (its rules need review)."""
     facts, _ = _given(building)
     return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
@@ -315,6 +318,7 @@ DERIVED = {
     "occupied_outdoor_areas": ("occupied_outdoor_areas", lambda v: v),
     "ambulatory_care_facility": ("ambulatory_care_facility", lambda v: v),
     "corridors_within_dwelling_units": ("corridors_within_dwelling_units", lambda v: v),
+    "emergency_voice_alarm_system": ("emergency_voice_alarm_system", lambda v: v),
 }
 
 

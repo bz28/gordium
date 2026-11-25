@@ -15,16 +15,17 @@ second_reading:
     the 27 pieces of section group 3 (1004, Table 1004.5 and 12 definitions), a ninth for the 9 pieces of section
     group 4's corridor width (1005.3.2, 1020.1, 1020.3, Table 1020.3 and 5 definitions, 2026-11-25), a tenth for the 6
     pieces of its corridor rating (1020.2, 1020.2.1, Table 1020.2 and 3 definitions, 2026-11-25), an eleventh for the 5
-    pieces of the rest of Section 1020 (1020.4, 1020.6, 1020.6.1, 1020.7 and 1 definition, 2026-11-25), and a helper for
-    the comparison words)
+    pieces of the rest of Section 1020 (1020.4, 1020.6, 1020.6.1, 1020.7 and 1 definition, 2026-11-25), a twelfth for
+    the 4 pieces of section group 5a (1005.1, 1005.2, 1005.3, 1005.3.1, 2026-11-25), and a helper for the comparison
+    words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), and 3 pages, 6 boxes as step_10 (section group 4c); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), and 2 pages, 5 boxes as step_11 (section group 5a); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 230 pieces, 587 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 234 pieces, 597 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -1881,6 +1882,60 @@ pieces:
     second_reading_numbers:
     - '1004.9'
     second_reading_comparisons:
+    - none
+  '1005.1':
+    piece_sha256: ef156668355d30f9433cb6a3f88c2a2aada7d3a703d34d75ca3af68224a2b47f
+    numbers:
+    - '1005.1'
+    - '1030'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1005.1'
+    - '1030'
+    second_reading_comparisons:
+    - none
+    - none
+  '1005.2':
+    piece_sha256: a6adba5efb6d8c8d056627f511515faa5c372fbd32811fa74791cca7593696a5
+    numbers:
+    - '1005.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1005.2'
+    second_reading_comparisons:
+    - none
+  '1005.3':
+    piece_sha256: 565d6bbbb724efeffb31d81e9ee70fdb8677d7474e8a9e652796c494c31159cf
+    numbers:
+    - '1005.3'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1005.3'
+    second_reading_comparisons:
+    - none
+  1005.3.1:
+    piece_sha256: c9d30de4e86ce6c3ee13059c475f519f364c93a20df5eecfa115d0dcebbcdf75
+    numbers:
+    - 0.3 inch
+    - 7.6 mm
+    - more than one
+    - 0.2 inch
+    - 5.1 mm
+    - '909'
+    second_reading: agrees
+    second_reading_numbers:
+    - 0.3 inch
+    - 7.6 mm
+    - more than one
+    - 0.2 inch
+    - 5.1 mm
+    - '909'
+    second_reading_comparisons:
+    - none
+    - none
+    - '>'
+    - none
+    - none
     - none
   1005.3.2:
     piece_sha256: c3ee309be6c7724ad7150d670b51be58d0eb3e1a9f30556cf0853bb831cd34bf

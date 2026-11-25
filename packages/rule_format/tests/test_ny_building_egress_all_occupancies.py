@@ -275,7 +275,9 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          # section group 4: the corridor sections and tables drafted
          "1020.2": (343, 40, 53), "Table 1020.2": (344, 7, 18), "1020.3": (344, 21, 24), "Table 1020.3": (344, 27, 34),
          "1020.4": (344, 35, 36), "1020.6": (344, 48, 53), "1020.6 (part 2)": (345, 3, 6), "1020.7": (345, 17, 23),
-         "1020.6.1": (345, 7, 16)}      # review round 1 of group 4c: its five conditions quoted too
+         "1020.6.1": (345, 7, 16),
+         # section group 5a: egress capacity
+         "1005.3.1": (313, 51, 55), "1005.3.1 (part 2)": (314, 3, 13), "1005.3.2": (314, 14, 28)}      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -307,13 +309,18 @@ HANDLERS = {
     "1005.1": ("general.bc_1020_3_corridor_capacity", "1005.1"),
     # section group 4c: the rest of Section 1020
     "1005.7": ("general.bc_1020_4_obstruction", "1005.7"), "1016.2": ("general.bc_1020_7_continuity", "1016.2"),
+    # section group 5a: 1005.3.1 and 1005.3.2's exceptions
+    "907.5.2.2": ("general.bc_1020_3_corridor_capacity", "907.5.2.2"),
+    "1030.6.2": ("general.bc_1020_3_corridor_capacity", "1030.6.2"),
+    "1030.6.3": ("general.bc_1020_3_corridor_capacity", "1030.6.3"), "909": ("general.bc_1020_3_corridor_capacity", "909"),
 }
-NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1"}          # the piece naming itself
+NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
             (343, 42), (344, 34),       # group 4: 1020.2's 'Exceptions:', Table 1020.3's 'For SI'
-            (344, 49), (345, 21)}       # group 4c: 1020.6's and 1020.7's 'Exceptions:'
+            (344, 49), (345, 21),       # group 4c: 1020.6's and 1020.7's 'Exceptions:'
+            (313, 55), (314, 17)}       # group 5a: 1005.3.1's and 1005.3.2's 'Exceptions:'
 
 
 def _quoted(book, page, a, b):
@@ -710,17 +717,37 @@ def test_table_1020_3_every_row_passes_at_its_width_and_not_just_short_of_it(ctx
     assert rules["general.bc_table_1020_3_other_occupancies"]["applies_when"] == 'occupancy_group == "mixed"'
 
 
-def test_a_corridor_wide_enough_for_the_table_but_not_its_capacity_needs_review(ctx, rules):
-    """1020.3 asks the capacity of 1005.1 too: 0.2 in per occupant (1005.3.2, p.314 lines 14-16), the most it asks in
-    any group. Past 220 occupants a 44 in corridor may need more: its flag needs review (whatever the group, stated
-    or not), until section group 5 checks capacity in full; within it, not applicable."""
-    flag = rules["general.bc_1020_3_corridor_capacity"]
-    assert flag["kind"] == "flag" and _cites(flag, 314, 15) and _cites(flag, 344, 21)
-    for given in ({"occupancy_group": "B"}, {"occupancy_group": "I-2"}, {"occupancy_group": "mixed"}, {}):
-        assert _one(flag, "corridor", _corridor(44, 220), given, ctx) == "not_applicable", given
-        assert _one(flag, "corridor", _corridor(44, 221), given, ctx) == "needs_review", given
-        assert _one(flag, "corridor", _corridor(80, 400), given, ctx) == "not_applicable", given
-        assert _one(flag, "corridor", _corridor(79.5, 400), given, ctx) == "needs_review", given
+def test_a_corridors_capacity_is_1005_3_2s_factor_at_its_limit_and_just_past_it(ctx, rules):
+    """Section group 5a: 1020.3 asks the capacity of 1005.1, for a corridor 1005.3.2's (p.314): 0.2 in per occupant
+    (lines 14-16), 0.15 with a 903.3.1.1 or 903.3.1.2 system and a voice/alarm system other than in Groups H and I-2
+    (exception 1, lines 18-22); fixed seating not ruled out (exceptions 2 and 3: smoke-protected or open-air seating's
+    own factors) needs review short of it. Was 4a's flag."""
+    r = rules["general.bc_1020_3_corridor_capacity"]
+    assert r["kind"] == "rule" and _cites(r, 314, 15) and _cites(r, 314, 20) and _cites(r, 344, 21)
+    plain = {S1: False, S2: False, "emergency_voice_alarm_system": False, "assembly_fixed_seating": False}
+    for g in ("B", "I-2", "H-3", "mixed"):
+        given = {"occupancy_group": g} | plain
+        assert _one(r, "corridor", _corridor(44, 220), given, ctx) == "pass", g      # 0.2 x 220 = 44
+        assert _one(r, "corridor", _corridor(44, 220.5), given, ctx) == "fail", g
+    voice = {S1: True, S2: False, "emergency_voice_alarm_system": True, "assembly_fixed_seating": False}
+    # review round 1 of group 5a: a building of two or more groups is each portion's (1004.4): between the two
+    # factors, a person's check, never a fail on 0.2 alone
+    for g, want in (("B", "pass"), ("R-2", "pass"), ("I-2", "fail"), ("H-3", "fail"), ("mixed", "needs_review")):
+        assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": g} | voice, ctx) == want, g   # 0.15 x 300
+        assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": g} | voice, ctx) == "fail", g
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "mixed"} | voice | {
+        "emergency_voice_alarm_system": False}, ctx) == "fail"
+    # review round 1 (P1): 903.3.1.2 (13R) counts in Group R; elsewhere it is a person's check, never a pass on 0.15
+    r13r = voice | {S1: False, S2: True}
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "R-2"} | r13r, ctx) == "pass"
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "B"} | r13r, ctx) == "needs_review"
+    assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": "B"} | r13r, ctx) == "fail"
+    no_voice = voice | {"emergency_voice_alarm_system": False}
+    assert _one(r, "corridor", _corridor(45, 300), {"occupancy_group": "B"} | no_voice, ctx) == "fail"
+    seats = voice | {"assembly_fixed_seating": True}
+    assert _one(r, "corridor", _corridor(44.9, 300), {"occupancy_group": "A-3"} | seats, ctx) == "needs_review"
+    # the group not stated: never a pass (the walk, test_ny_building_corridor_walk.py, covers it at every factor)
+    assert _one(r, "corridor", _corridor(80, 400), voice, ctx) == "needs_review"
 
 
 # ---- section group 4b (2026-11-25): Table 1020.2, corridor fire-resistance rating (p.344, lines 7-18) ----------------

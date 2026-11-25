@@ -65,6 +65,16 @@ pieces:
     heading: Occupant load › Posting of occupant load
     rules:
     - general.bc_1004_9_posting
+  1005.3.1:
+    label: flag
+    heading: Required capacity based on occupant load › Stairways
+    rules:
+    - general.bc_1005_3_1_stairway_capacity
+  1005.3.2:
+    label: rule
+    heading: Required capacity based on occupant load › Other egress components
+    rules:
+    - general.bc_1005_3_2_other_components
   1006.2.1:
     label: rule
     heading: Egress based on occupant load and common path of egress travel distance
