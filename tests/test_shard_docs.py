@@ -53,3 +53,11 @@ def test_every_test_listed_as_slow_is_still_a_real_test_id_shape_and_a_second_or
     import json
     listed = json.loads((ROOT / "tests" / "test_durations.json").read_text(encoding="utf-8"))
     assert listed and all("::" in i and s >= 1.0 for i, s in listed.items())
+
+
+def test_a_test_of_a_few_seconds_never_fails_a_part_by_chance():
+    # PR #190 (2026-11-24): four unlisted tests of 3.0 to 3.6 s, quick on the run before, failed two parts on CI;
+    # only a test of 10 s or more fails a part, and a listed one never does
+    c = _conftest()
+    took = {"a::few": {"call": 3.6}, "a::nine": {"call": 9.9}, "a::ten": {"call": 10.0}}
+    assert c.unlisted_slow(took, {}) == [(10.0, "a::ten")]
