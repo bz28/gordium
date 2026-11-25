@@ -22,6 +22,11 @@ public sealed record RevitModel
     /// internal unit), so no point read from the model is converted.</summary>
     public string DisplayUnits { get; init; } = "Feet";
 
+    /// <summary>The project's area display unit (<c>Units.GetFormatOptions(SpecTypeId.Area).GetUnitTypeId()</c>): the
+    /// unit the Setup form shows, takes and words an area mark in (<see cref="AreaUnits"/>), as Revit's own dialogs do.
+    /// What is read and sent is always square feet (Revit's internal unit).</summary>
+    public string AreaDisplayUnits { get; init; } = "SquareFeet";
+
     /// <summary>How near two curve ends must be to count as joined (<c>Application.VertexTolerance</c>, feet).</summary>
     public double VertexTolerance { get; init; } = 0.0005233;
 

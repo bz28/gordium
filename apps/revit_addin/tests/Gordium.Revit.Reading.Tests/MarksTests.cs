@@ -87,7 +87,12 @@ public sealed class MarksTests
             ("Gordium: Special egress spaces", "8efde5e2-df14-4f88-b8ce-da46285b930d", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Merchandise pads", "90d6a3a4-6f52-487c-b98b-21ea864dee45", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Egress balcony increase", "3f260842-2450-44da-902d-3e066984a521", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: R-2 sleeping units", "b8d986fc-ae44-428a-8740-0937a6a8197a", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: 1031 escape openings", "298cd307-3a3f-4c2f-a12d-e8fe3d31b4f6", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Atrium", "8c3211a5-546b-463e-8d8c-b70fd753c1b6", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // group 3's (1004.7, 1004.5.1)
+            ("Gordium: Occupied outdoor areas", "5be49bb1-7c0f-4eea-a360-c6b47d2e9dad", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Occupant load increased", "64b5a6c7-d4ae-4424-b7e1-2c041b09d02a", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // the dwelling's own facts the code decision reads (review round 1: an ask named marks Revit didn't have)
             ("Gordium: Dwelling units", "aa32131a-e757-47a3-abf8-9deb81d7a09a", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Units in the attached building", "bccb088a-c087-475f-9ff9-53fd10133d0e", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
@@ -104,6 +109,17 @@ public sealed class MarksTests
             ("Gordium: Functional family unit", "868efeab-7254-4c46-bf04-564a4c853946", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Garage cars", "08e37847-735e-417a-85fa-fb945a28276f", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Private garages", "92d7674d-e182-407c-a43b-2acb0146265b", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // the lot facts the worker's cards asked for with no mark to set (an area: a new kind, square feet inside)
+            ("Gordium: Abuts R-1 land", "e03a7668-69f3-4286-b79e-7e2fedd51174", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Conversion", "b4ae661a-9d9d-4e7b-addf-cb674911fc28", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Primary buildings", "99739cee-bd25-46a2-9ed4-f552654d1209", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Primary buildings same use", "8c4cda53-f475-42ff-ad64-b7ba1f85979e", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Home occupation area", "78decf20-6a2b-49f3-910c-c09c2e63d90d", MarkValueKind.Area, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Home occupation unit area", "2b6debca-6222-4c69-a0b0-c6d754ef4f0d", MarkValueKind.Area, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: ADU in existing building", "acd7b1f8-d8f1-4001-8a07-362db5e75524", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: ADU bedrooms", "019161da-e9c1-4219-8cfc-01dbd1071761", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: ADU floor area", "41c8f63d-368d-4ea9-b371-85828b769d6a", MarkValueKind.Area, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Main building floor area", "f237131b-5e7e-4c8e-94df-a8538de16954", MarkValueKind.Area, MarkBinding.Instance, ["OST_ProjectInformation"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

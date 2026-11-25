@@ -148,6 +148,7 @@ is in the last column. Coordinates are plan points in `units`, like everything e
 | `use` | a room | one of `corridor`, `lobby`, `day_care`, `accessory_storage`, `kitchen`, `toilet`, `closet`, `workroom`, `other` | the room is end-only (a route may start in it, never cross it) |
 | `lockable`, `pass_through` | a room | true or false: whether it can be locked; whether the architect states it is accessory to the rooms it serves, with a discernible path to an exit (IBC 1014.2 item 1) | the room is end-only |
 | `not_occupied` | a room | true or false: the architect states nobody occupies it (an abandoned space, a door permanently fixed shut, a shaft or chase; not a room visited for storage, maintenance, testing or inspection, NFPA 101 A.3.3.21.6). True: NFPA 101's travel and common path aren't measured from its points (7.6.1(1) "starting from the most remote point subject to occupancy"; A.3.3.47), each such figure saying which rooms it left out; the IBC's still are (1016.1 "the most remote point within a story"); it is crossed only where it otherwise could be. Refused on a sleeping room or a `day_care` room (the room isn't read) ([route note decision 1b](../decisions/2026-11-20_route_measurement.md)) | occupied: measured like any room |
+| `function` | a room | its Table 1004.5 function (BCNYS 1004.5), as the architect states it (in Revit, the room mark Gordium: Function), one of: `accessory_storage_mechanical`, `agricultural`, `aircraft_hangar`, `airport_baggage_claim`, `airport_baggage_handling`, `airport_concourse`, `airport_waiting`, `gaming_floor`, `exhibit_gallery_museum`, `assembly_fixed_seats`, `assembly_concentrated`, `assembly_standing`, `assembly_unconcentrated`, `bowling_center`, `business`, `concentrated_business`, `courtroom`, `day_care`, `dormitory`, `classroom`, `vocational_shop`, `exercise_room`, `h5_fabrication`, `industrial`, `information_technology`, `inpatient_treatment`, `outpatient`, `institutional_sleeping`, `commercial_kitchen`, `library_reading_room`, `library_stack`, `locker_room`, `mall`, `mercantile`, `storage_stock_shipping`, `parking_garage`, `residential`, `rink_pool`, `pool_deck`, `stage_platform`, `warehouse` (the table's rows, in its order: `new_york_state_building/5_building_code_rules/drafted/records/occupant_load_factors.yaml` gives each one's factor, gross or net, and row). Stated, never guessed: a host may suggest one from the room's name (BEDROOM, LIVING: `residential`; STORAGE: `storage_stock_shipping`), shown with its basis and written only when the architect accepts it. The Building Code's occupant loads are worked out from it (`design_checker/occupant_load.py`: area inside the walls / the factor; a gross factor as two readings, the room's own area and grossed up by the story's corridors, stairs and walls; at most one occupant per 7 sq ft where 1004.5.1's increase isn't ruled out). A value not in the list is said, and the room's load not worked out | the room's occupant load, and its story's, aren't worked out (needs review); a corridor, an exit enclosure, or a closet or toilet with none holds no load of its own (an accessory storage room with none is like any other room: Table 1004.5 gives it its own factor; a function stated on a room marked `corridor`, or on an exit enclosure, leaves its story's load not worked out); a room a closet, storeroom or toilet with a load is served through (or a chain of them) has its own load left not worked out (1004.2: theirs adds to it) |
 | `holes` | a room | the outline of each column or chase inside it (`[]` for none) | the room isn't read: its story's routes need review |
 | `obstructions: [{outline, kind, fixed}]` | a room | the plan footprint of each piece of casework, furniture, equipment or fixture (`kind`: `casework`, `furniture`, `equipment`, `fixture`; `fixed` true or false); every one counts (`[]` for none) | the room isn't read: its story's routes need review |
 | `plan: {centre, along, clear_width, wall_thickness}` | a door | its clear opening's centre in the middle of the wall, a direction along the wall, the clear width, the wall's thickness | the door isn't read: its story's routes need review |
@@ -195,7 +196,8 @@ building:
   egress_balcony_increase_taken: false # BCNYS 1017.2.1 (a fact the Building Code's flags read)
   building_has_atrium: false
   assembly_fixed_seating: false        # rooms used for assembly with fixed seating (BCNYS Table 1006.2.1 note c)
-  r2_sleeping_units: false             # a Group R-2 of sleeping units, not dwelling units (Table 1006.3.4(1) note b)
+  r2_sleeping_units: false             # every Group R-2 unit a sleeping unit (true) or a dwelling unit (false); left out
+                                       # for a building of both (Table 1006.3.4(1) note b: neither table fits every story)
   emergency_escape_openings_1031: true # emergency escape and rescue openings per BCNYS 1031 (Table 1006.3.4 note a)
   special_egress_spaces: false         # a space the BCNYS gives its own exits or travel limit: a covered or open
                                        # mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area
@@ -204,6 +206,18 @@ building:
                                        # refrigerated room (1006.2.2.3), an electrical room (1006.2.2.4), a vehicular
                                        # ramp (1006.2.2.5), a temporary structure (3103.4), a pedestrian walkway (3104.9)
   merchandise_pads: false              # Group M merchandise pads (BCNYS 1018.4: their own common path)
+  occupant_load_increased: false       # the design takes BCNYS 1004.5.1's increased occupant load (up to one per
+                                       # 7 sq ft); not stated, the occupant loads' upper reading is at least that
+  other_level_egress_into_corridors: false  # another level's occupants reach a corridor: an unenclosed exit access
+                                       # stairway or ramp (BCNYS 1019), a mezzanine (1004.2.2), stairs converging
+                                       # (1005.6) or an exit stair discharging into one; only where false is a
+                                       # corridor's occupant load bounded by its story's (1004.2.3; Table 1020.3)
+  ambulatory_care_facility: false      # the building is or holds an ambulatory care facility (BCNYS 202, 422):
+                                       # Table 1020.3's 72 in for corridors serving stretcher traffic
+  corridors_within_dwelling_units: false  # a corridor is inside a dwelling unit or sleeping unit (BCNYS 1020.2
+                                       # exception 2: no rating there in Groups I-1 and R; Table 1020.3: 36 in)
+  emergency_voice_alarm_system: false  # an emergency voice/alarm communication system per BCNYS 907.5.2.2 (with a
+                                       # 903.3.1.1 or 903.3.1.2 sprinkler system: 1005.3's smaller capacity factors)
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 

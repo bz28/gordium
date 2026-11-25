@@ -127,15 +127,16 @@ public sealed class DetailPageTests
                 Assert.Equal(questions == 1 ? "Answer 1 question" : $"Answer {questions} questions", page.ActionWords);
             }
         }
-        // the brief's row: two exits from Apartment South L1 waits on the occupancy group among its questions, and on
-        // the occupant load worked out by hand (the checker's asks since #181; their number is the answer's)
+        // the brief's row: two exits from Apartment South L1 waits on the occupancy group among its questions (the
+        // checker's asks; their number is the answer's, and since main's occupant load factors no hand step for the load)
         var exits = pages.First(p => p.Row.Row.Name.Contains("Two exits", StringComparison.Ordinal) && p.Row.Row.Name.Contains("APARTMENT SOUTH L1", StringComparison.Ordinal));
         var exitQuestions = ResultViews.CardsOf(m.Views!, exits.Row.Row.Id).Count(c => c.Kind == FixKind.Answer);
         Assert.True(exitQuestions >= 2, $"{exitQuestions} questions");
         Assert.Equal(CalloutAction.Answer, exits.Page.Action);
         Assert.Equal($"Answer {exitQuestions} questions", exits.Page.ActionWords);
         Assert.Contains("Set the occupancy group.", exits.Page.Steps);
-        Assert.Contains(exits.Page.Steps, st => st.StartsWith("Work out the occupant load by hand", StringComparison.Ordinal));
+        Assert.Equal(exits.Page.Steps.Any(st => st.StartsWith("Work out the occupant load by hand", StringComparison.Ordinal)),
+                     ResultViews.CardsOf(m.Views!, exits.Row.Row.Id).Any(c => c.Headline.StartsWith("Work out the occupant load", StringComparison.Ordinal)));
     }
 
     [Fact]
@@ -164,6 +165,40 @@ public sealed class DetailPageTests
 
     private static FixGroup Answers(ResultModel m) => m.Views!.Fix.Single(g => g.Kind == FixKind.Answer);
 
+    /// <summary>After #193 and #194 the questions card meets an area fact (in the project's area unit) and the R-2 units'
+    /// three words: each answered with the Setup form's own field, said in its own unit, and saved as the form saves it.</summary>
+    [Theory]
+    [InlineData("SquareFeet", "sq ft", "450.5", 450.5)]
+    [InlineData("autodesk.unit.unit:squareMeters-1.0.1", "m²", "30", 30 / 0.09290304)]
+    [InlineData("autodesk.unit.unit:hectares-1.0.1", "sq ft", "640", 640.0)]
+    public void An_area_and_the_R2_choice_are_answered_in_the_card_as_the_setup_form_saves_them(string units, string symbol, string typed, double squareFeet)
+    {
+        var model = new RevitModel { Document = "apartment.rvt", Marked = [], ProjectMarks = new Dictionary<Guid, MarkValue>(), AreaDisplayUnits = units };
+        var fields = SetupScreen.Build(model, [], null).Fields;
+        // the apartment asks an area question: its card's field is the form's area field
+        Assert.Contains(Answers(Apartment()).Cards, c => c.Field == "facts.home_occupation_area");
+        var area = ProjectQuestions.FieldFor("facts.home_occupation_area", fields)!;
+        Assert.Equal((Marks.HomeOccupationArea, FieldKind.Feet, "area"), (area.Mark, area.Kind, area.LengthUnit.Quantity));
+        var words = ProjectQuestions.UnitWords(area.LengthUnit);
+        Assert.StartsWith(symbol, words, StringComparison.Ordinal);
+        Assert.Equal(!area.LengthUnit.Known, words.EndsWith("type square feet)", StringComparison.Ordinal));
+        Assert.DoesNotContain("type feet", words, StringComparison.Ordinal);
+        Assert.EndsWith("type feet)", ProjectQuestions.UnitWords(LengthUnits.Of("hectares")), StringComparison.Ordinal);
+        var draft = new SetupDraft();
+        draft.Choose(Marks.HomeOccupationArea, typed);
+        var questions = ProjectQuestions.Of(Answers(Apartment()), fields);
+        Assert.Same(area, questions.Single(q => q.Card.Field == "facts.home_occupation_area").Field);
+        Assert.Equal(squareFeet, Assert.Single(ProjectQuestions.Writes(questions, draft).Writes).Value.Number!.Value, 9);
+        // the R-2 units: a choice of the three words, saved as the word's value
+        var r2 = ProjectQuestions.FieldFor("building.r2_sleeping_units", fields)!;
+        Assert.Equal((Marks.R2SleepingUnits, FieldKind.Choice), (r2.Mark, r2.Kind));
+        Assert.Equal(R2UnitWords.Table.Words, r2.Choices.Select(c => c.Value).Where(v => v.Length > 0));
+        var choose = new SetupDraft();
+        choose.Choose(Marks.R2SleepingUnits, "Both");
+        var asked = new[] { new ProjectQuestion(questions[0].Card, r2) };          // the card's words don't matter to Save
+        Assert.Equal("Both", Assert.Single(ProjectQuestions.Writes(asked, choose).Writes).Value.Text);
+    }
+
     [Fact]
     public void Each_question_is_answered_with_the_setup_forms_own_field_and_one_without_is_said()
     {
@@ -175,7 +210,14 @@ public sealed class DetailPageTests
         Assert.Equal(FieldKind.Choice, questions.Single(q => q.Card == Card("building.occupancy_groups")).Field!.Kind);
         Assert.Equal(FieldKind.YesNo, questions.Single(q => q.Card == Card("facts.corner_lot")).Field!.Kind);
         Assert.Equal(FieldKind.Number, questions.Single(q => q.Card == Card("facts.dwelling_units")).Field!.Kind);
-        Assert.Null(questions.Single(q => q.Card == Card("facts.adu_existing_building")).Field);  // no mark for it yet
+        Assert.Equal(FieldKind.YesNo, questions.Single(q => q.Card == Card("facts.adu_existing_building")).Field!.Kind);  // a mark since #193
+        // every question has the form's field that feeds it, and none only where no mark feeds it (said, never dropped)
+        static bool Feeds(SetupField f, string? fact) => f.Mark.Feeds == fact || f.Mark.Feeds.StartsWith(fact + " ", StringComparison.Ordinal);
+        foreach (var q in questions)
+            if (q.Field is { } f)
+                Assert.True(Feeds(f, q.Card.Field), $"{q.Card.Field} answered with {f.Mark.Name}");
+            else
+                Assert.DoesNotContain(Fields(), f => Feeds(f, q.Card.Field) && f.Kind != FieldKind.StreetPick);
         Assert.Equal(Card("building.sprinkler_system").Rows.Count, questions.Single(q => q.Card == Card("building.sprinkler_system")).Affects);
         Assert.True(questions.Single(q => q.Card == Card("building.sprinkler_system")).Affects > 1);
         Assert.Equal("affects 28 results", ProjectQuestions.Affects(28));
@@ -321,7 +363,7 @@ public sealed class DetailPageTests
     {
         var list = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs"));
         Assert.Contains("var unit = f.Kind == FieldKind.Feet ? f.LengthUnit : null;", list, StringComparison.Ordinal);
-        Assert.Contains("unit.Known ? unit.Symbol :", list, StringComparison.Ordinal);
+        Assert.Contains("Muted(ProjectQuestions.UnitWords(unit))", list, StringComparison.Ordinal);
         var metric = SetupScreen.Build(new RevitModel { Document = "m.rvt", Marked = [], ProjectMarks = new Dictionary<Guid, MarkValue>(),
                                                         DisplayUnits = "autodesk.unit.unit:meters-1.0.1" }, [], null).Fields;
         var stream = ProjectQuestions.FieldFor("facts.stream_distance", metric);

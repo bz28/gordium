@@ -55,6 +55,56 @@ pieces:
     heading: Accessory occupancies › Separation of occupancies
     rules:
     - general.bc_508_2_4_separation
+  '1004.7':
+    label: flag
+    heading: Occupant load › Outdoor areas
+    rules:
+    - general.bc_1004_7_outdoor_areas
+  '1004.9':
+    label: flag
+    heading: Occupant load › Posting of occupant load
+    rules:
+    - general.bc_1004_9_posting
+  1005.3.1:
+    label: flag
+    heading: Required capacity based on occupant load › Stairways
+    rules:
+    - general.bc_1005_3_1_stairway_capacity
+  1005.3.2:
+    label: rule
+    heading: Required capacity based on occupant load › Other egress components
+    rules:
+    - general.bc_1005_3_2_other_components
+  '1005.4':
+    label: flag
+    heading: Continuity
+    rules:
+    - general.bc_1005_4_continuity
+  '1005.5':
+    label: flag
+    heading: Distribution of minimum width and required capacity
+    rules:
+    - general.bc_1005_5_distribution
+  '1005.6':
+    label: flag
+    heading: Egress convergence
+    rules:
+    - general.bc_1005_6_convergence
+  1005.7.1:
+    label: flag
+    heading: Encroachment › Doors
+    rules:
+    - general.bc_1005_7_1_door_encroachment
+  1005.7.2:
+    label: flag
+    heading: Encroachment › Other projections
+    rules:
+    - general.bc_1005_7_2_projections
+  1005.7.3:
+    label: flag
+    heading: Encroachment › Protruding objects
+    rules:
+    - general.bc_1005_7_3_protruding_objects
   1006.2.1:
     label: rule
     heading: Egress based on occupant load and common path of egress travel distance
@@ -217,6 +267,45 @@ pieces:
     heading: Aisle accessways in Group M
     rules:
     - general.bc_1018_4_merchandise_pads
+  '1020.2':
+    label: rule
+    heading: Construction
+    rules:
+    - general.bc_1020_2_fire_partitions
+  Table 1020.2:
+    label: rule
+    heading: Corridor fire-resistance rating
+    rules:
+    - general.bc_table_1020_2_h1_h2_h3
+    - general.bc_table_1020_2_h4_h5
+    - general.bc_table_1020_2_a_b_e_f_m_s_u
+    - general.bc_table_1020_2_r
+    - general.bc_table_1020_2_i2
+    - general.bc_table_1020_2_i1_i3
+    - general.bc_table_1020_2_i4
+    - general.bc_table_1020_2_other_occupancies
+    - general.bc_table_1020_2_note_a_group_i2
+  1020.2.1:
+    label: flag
+    heading: Construction › Hoistway protection
+    rules:
+    - general.bc_1020_2_1_hoistway_protection
+  '1020.3':
+    label: rule
+    heading: Width and capacity
+    rules:
+    - general.bc_1020_3_corridor_capacity
+  Table 1020.3:
+    label: rule
+    heading: Minimum corridor width
+    rules:
+    - general.bc_table_1020_3_corridor_width
+    - general.bc_table_1020_3_other_occupancies
+  '1020.4':
+    label: flag
+    heading: Obstruction
+    rules:
+    - general.bc_1020_4_obstruction
   '1020.5':
     label: rule
     heading: Dead ends
@@ -224,6 +313,16 @@ pieces:
     - general.bc_1020_5_dead_end
     - general.bc_1020_5_other_occupancies
     - general.bc_1020_5_dead_end_other_groups
+  '1020.6':
+    label: flag
+    heading: Air movement in corridors
+    rules:
+    - general.bc_1020_6_air_movement
+  '1020.7':
+    label: flag
+    heading: Corridor continuity
+    rules:
+    - general.bc_1020_7_continuity
   '1030.8':
     label: flag
     heading: Common path of egress travel
