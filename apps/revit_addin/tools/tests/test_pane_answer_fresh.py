@@ -3,8 +3,9 @@ four_unit_apartment_check_answer.json, read by ResultViewsTests, ResultViewListT
 checker's own answer to that building's trial request, so the pane is tested on what an architect would see. When a
 rulebook change alters the answer, this fails until the file is made again (apps/revit_addin/README.md says how).
 PR #181 review round 13: group 1's rules took the answer from 108 results to 247 while the file kept the old 108.
-Round 14: the whole view, not a few fields of it; round 15: the whole answer (the pane also reads
-result.which_code and result.measurements)."""
+Round 14: the whole view, not a few fields of it; round 15: the whole result (the pane also reads
+result.which_code and result.measurements); round 16: the result only, never the answer's `about` fingerprints, which
+change with any file of the worker's and which the pane never reads (its tests stand in an About of their own)."""
 
 from __future__ import annotations
 
@@ -22,8 +23,9 @@ SAVED = REPO / "apps/revit_addin/tests/Gordium.Revit.Reading.Tests/answers/four_
 
 
 def _stale(saved: dict, got: dict) -> bool:
-    """Whether the saved answer differs from the checker's in any key (JSON as written, so tuples are lists)."""
-    return json.loads(json.dumps(got, ensure_ascii=False)) != saved
+    """Whether the saved answer's result (all the pane reads) differs from the checker's in any key (JSON as written,
+    so tuples are lists)."""
+    return json.loads(json.dumps(got["result"], ensure_ascii=False)) != saved["result"]
 
 
 @pytest.fixture(scope="module")
@@ -49,3 +51,10 @@ def test_any_change_the_pane_reads_makes_it_stale(saved):
         moved = copy.deepcopy(saved)
         change(moved["result"])
         assert _stale(saved, moved)
+
+
+def test_a_new_fingerprint_alone_never_makes_it_stale(saved):
+    moved = copy.deepcopy(saved)
+    moved["about"]["worker_fingerprint"] = "0" * 64
+    moved["about"]["rulebook"] = {k: "0" * 64 for k in moved["about"].get("rulebook") or {"x": 0}}
+    assert not _stale(saved, moved)
