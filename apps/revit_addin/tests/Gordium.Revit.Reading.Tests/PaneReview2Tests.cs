@@ -53,7 +53,7 @@ public sealed class PaneReview2Tests
         var row = ResultList.Place(cancelled).First(r => r.Row.Elements.Count > 0);
         var uid = row.Row.Elements[0];
         Assert.Contains("before the check you cancelled", SelectionMap.Of(cancelled, at).Answer([uid], _ => "it").Line, StringComparison.Ordinal);
-        Assert.Contains("the model changed since", SelectionMap.Of(changed, at).Answer([uid], _ => "it").Line, StringComparison.Ordinal);
+        Assert.Contains("The model changed since", SelectionMap.Of(changed, at).Answer([uid], _ => "it").Line, StringComparison.Ordinal);
         Assert.Contains("before the check you cancelled", ComplianceSummary.Refusal(cancelled, at), StringComparison.Ordinal);
         Assert.StartsWith("The model changed after the check at 14:32", ComplianceSummary.Refusal(changed, at), StringComparison.Ordinal);
     }

@@ -6,8 +6,8 @@ namespace Gordium.Revit.Addin;
 
 /// <summary>
 /// The pane's selection strip (docs/revit/ui_design_pass.md, change 14): what is selected in Revit and the results that
-/// mention it (<see cref="SelectionMap.Answer"/>), each a link to its detail with its own status glyph, eight shown
-/// then "Show all N", and "Show every result" to put the strip away. Plain WPF with no Revit type, so it is drawn
+/// mention it (<see cref="SelectionMap.Answer"/>), each a link to its detail with its own status glyph,
+/// the top three then "Show all N" (UI polish change 41), and Clear to put the strip away. Plain WPF with no Revit type, so it is drawn
 /// off-screen too; every colour a theme token (it sits in the pane, so it follows Revit's theme with it). It never
 /// says a verdict of its own: the line and each glyph are the rows' (stale once the model changed).
 /// </summary>
@@ -17,16 +17,16 @@ internal static class SelectionStrip
     internal const string Tag = "pane.selection";
 
     /// <summary>The strip for <paramref name="answer"/>: <paramref name="open"/> opens a result's detail,
-    /// <paramref name="close"/> puts the strip away; <paramref name="all"/> lists every result, not the first eight;
+    /// <paramref name="close"/> puts the strip away; <paramref name="all"/> lists every result, not the top SelectionMap.Shown (three);
     /// <paramref name="folded"/> (once a result is opened from it, so the detail has the pane) only its title, its line
     /// and "List them" (<paramref name="unfold"/>).</summary>
     internal static W.FrameworkElement Build(SelectionAnswer answer, Action<string> open, Action close, bool all, Action showAll,
                                              bool folded = false, Action? unfold = null)
     {
         var inner = new C.StackPanel();
-        inner.Children.Add(Words("SELECTED IN REVIT", "type.caption", PanelTokens.TextMuted, semi: true));
-        inner.Children.Add(Words(answer.Title, "type.body", PanelTokens.Text, semi: true, top: 2));
-        inner.Children.Add(Words(answer.Line, "type.body", PanelTokens.Text, top: 2));
+        // change 41: "Selected: Wall …", "8 results mention it · 8 need review", the top three, "Show all 8", Clear
+        inner.Children.Add(Words("Selected: " + answer.Title, "type.body", PanelTokens.Text, semi: true));
+        inner.Children.Add(Words(answer.Line, "type.caption", PanelTokens.Text, top: 2));
         var shown = folded ? [] : all ? answer.Rows : answer.Rows.Take(SelectionMap.Shown).ToList();
         foreach (var row in shown)
         {
@@ -53,7 +53,7 @@ internal static class SelectionStrip
             more.Margin = new W.Thickness(0, 0, 14, 4);
             foot.Children.Add(more);
         }
-        var every = new C.Button { Content = "Show every result", Padding = new W.Thickness(8, 1, 8, 1), Margin = new W.Thickness(0, 0, 0, 4),
+        var every = new C.Button { Content = "Clear", Padding = new W.Thickness(8, 1, 8, 1), Margin = new W.Thickness(0, 0, 0, 4),
                                    ToolTip = "Put this away: the pane lists every result again" };
         every.Click += (_, e) =>
         {
