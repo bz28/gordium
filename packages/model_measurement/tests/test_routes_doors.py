@@ -325,9 +325,20 @@ def test_egress_direction_is_known_only_where_travel_can_cross_the_door_one_way_
                        door("xb", (20.25, 5), (0, 1), ("b", "outside"), exit_id="B")])
     got = {p["id"]: p for p in measure(two)["parts"]["means_of_egress_door"]}
     assert _why(got["hx"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="hx")
+    # round 4: a door to outside that isn't an exit leads out only as an exit's own way out: a room's patio door, or an
+    # exterior balcony's door back into the corridor (egress comes in through it), is not known
     patio = _office()
     patio["doors"].append(door("p", (10, -0.25), (1, 0), ("r", "outside"), swings_into="outside"))
-    assert _parts(patio)["p"]["measures"]["moe_door_swings_with_egress"] is True
+    assert _why(_parts(patio)["p"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="p")
+    balcony = _office()
+    balcony["doors"].append(door("b", (30.25, 19.5), (0, 1), ("c", "outside"), swings_into="outside"))
+    assert _why(_parts(balcony)["b"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="b")
+    stair = description([room("c", rect(0, 0, 20, 8)), room("s", rect(20.5, 0, 30, 8), use="other", lockable=False,
+                                                              pass_through=False)],
+                        [door("e", (20.25, 4), (0, 1), ("c", "s"), exit_id="s", kind="exit_enclosure"),
+                         door("so", (30.25, 4), (0, 1), ("s", "outside"), swings_into="outside")])
+    got = {p["id"]: p for p in measure(stair)["parts"]["means_of_egress_door"]}
+    assert got["so"]["measures"]["moe_door_swings_with_egress"] is True       # the stair's own way out
 
 
 def test_only_an_exterior_exit_door_at_discharge_surely_leads_outside():
@@ -341,7 +352,6 @@ def test_only_an_exterior_exit_door_at_discharge_surely_leads_outside():
                           swings_into="outside")])
     got = {p["id"]: p for p in measure(d)["parts"]["means_of_egress_door"]}
     assert _why(got["rf"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="rf")
-    got = _parts(_office())                                  # x: an exterior door at discharge
     d = _office()
     d["doors"][1]["swings_into"] = "outside"
     assert _parts(d)["x"]["measures"]["moe_door_swings_with_egress"] is True

@@ -166,8 +166,10 @@ def _egress_sides(story, access) -> dict:
       not known (the routes count it an exit for the rooms on both its sides; it is often used both ways, 1026). An
       exterior exit door at the level of exit discharge: outside; any other exit door with outside on one side (a
       stair's door onto an occupiable roof, whose occupants egress into the stair: 1004.7): not known.
-    - Any other door to outside: outside. Whether an occupied patio or roof egresses back in through it (1004.7) is the
-      swing rule's own condition (the building's occupied outdoor areas), so the panel asks that fact.
+    - Any other door to outside: outside only where it is an exit stair's or passageway's own way out (its room is the
+      exit an exit door on the story enters); else not known (review round 4: an exterior balcony's door back into the
+      corridor carries egress in). Whether an occupied patio or roof egresses back in through even an exit's way out
+      (1004.7) is the swing rule's own condition (the building's occupied outdoor areas), so the panel asks that fact.
     - Any other: away from the one room whose exit access it is (a door from which a route reaches an exit without
       coming back into the room), only where that room is stated end-only (sleeping, an end-only use, lockable, or
       pass_through stated false: `end_only_stated`), so no one else's route runs back through the door into it (a
@@ -177,6 +179,7 @@ def _egress_sides(story, access) -> dict:
     Else not known; a story whose routes aren't measured: every door not known."""
     out = {}
     outside_doors = {d.id for d in story.doors.values() if OUTSIDE_SIDE in d.sides}
+    exit_rooms = {d.exit_id for d in story.doors.values() if d.exit_kind in ("exit_enclosure", "exit_passageway")}
     unclear = lambda d: Stop("egress_side_unclear", name=d.name)
     for d in story.doors.values():
         if access is None:
@@ -191,8 +194,8 @@ def _egress_sides(story, access) -> dict:
             else:
                 out[d.id] = unclear(d)
             continue
-        if OUTSIDE_SIDE in d.sides:
-            out[d.id] = OUTSIDE_SIDE
+        if OUTSIDE_SIDE in d.sides:                  # round 4: only an exit's own way out (a balcony's door back in)
+            out[d.id] = OUTSIDE_SIDE if any(s in exit_rooms for s in d.sides) else unclear(d)
             continue
         rooms = [s for s in d.sides if s != OUTSIDE_SIDE]
         if any(isinstance(access.get(s), Stop) for s in rooms):
