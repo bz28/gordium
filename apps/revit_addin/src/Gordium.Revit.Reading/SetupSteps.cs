@@ -264,6 +264,8 @@ public static class SetupSteps
             "exit_door" => "Gordium suggests the doors to the outside.",
             "escape_opening" => "Gordium suggests each sleeping room's largest operable window.",
             "sleeping_room" => "Gordium suggests the rooms named as bedrooms.",
+            // a function comes from a room's name, or from its Use when that is Accessory storage (review round 5)
+            "room_function" => $"Gordium suggests {l.Suggestions.Count} from their names or their {Marks.Use.Name}.",
             _ => $"Gordium suggests {l.Suggestions.Count} from their names.",
         };
     }
