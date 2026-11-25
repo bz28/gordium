@@ -484,6 +484,7 @@ MEASURE_NAMES = {
     "merchandise_pads": "merchandise pads (whether a store has any)",
     "r2_sleeping_units": "R-2 sleeping units (whether the Group R-2 is of sleeping units, not dwelling units)",
     "emergency_escape_openings_1031": "emergency escape openings (whether every sleeping room has one, per 1031)",
+    "occupied_outdoor_areas": "occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7)",
     "space_is_exit": "exit status (whether the space is itself an exit)",
     "space_occupant_load": "occupant load",
     "story_first_above_or_below_grade": "whether the story is the first above or below grade",

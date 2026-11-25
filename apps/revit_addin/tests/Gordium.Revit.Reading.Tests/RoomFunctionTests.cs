@@ -48,6 +48,7 @@ public sealed class RoomFunctionTests
         if (File.Exists(Factors))
         {
             var keys = File.ReadAllLines(Factors).SkipWhile(l => l != "functions:").Skip(1)
+                .TakeWhile(l => l.Length == 0 || l[0] == ' ')          // the functions block only, never increase_cap's
                 .Where(l => l.Length > 2 && l[..2] == "  " && l[2] != ' ' && l.TrimEnd().EndsWith(':')).Select(l => l.Trim().TrimEnd(':'));
             Assert.Equal(TableRows, keys);
         }

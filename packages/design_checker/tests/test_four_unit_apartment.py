@@ -1,11 +1,14 @@
 """The Building Code eval (test_data/test_sites/new_york/ithaca_city/four_unit_apartment): Gordium's two-story,
 four-unit building, as the Revit reader reads it once built from revit_build_data.json and marked by eval_marks.yaml
 (make_ny_build_data.interior_of), checked against its hand-worked expected.yaml: the Building Code governs, its rules
-run on the routes' stories and spaces, the occupant-load rules say they need a figure not read yet, its group's
+run on the routes' stories and spaces, each apartment's occupant load is worked out from its stated function (Table
+1004.5, two readings: section group 3) so 1006.2.1.1 passes, and with no function stated it needs review, its group's
 table rows give real verdicts (2026-11-23), and every flag is its own needs-review line. Never a pass the hand-work
 doesn't give."""
 
+import copy
 import math
+import re
 import sys
 
 import pytest
@@ -27,8 +30,29 @@ def laws():
 
 
 @pytest.fixture(scope="module")
-def got(laws):
-    return egress.check(laws, build.interior_of(), VALUES, ALLOWED)
+def routes():
+    """The building's routes, measured once (a room's function changes no geometry)."""
+    return egress.measure_routes(build.interior_of())
+
+
+def _check(desc, routes):
+    with pytest.MonkeyPatch.context() as m:
+        m.setattr(egress, "measure_routes", lambda interior: copy.deepcopy(routes))
+        return egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), desc, VALUES, ALLOWED)
+
+
+@pytest.fixture(scope="module")
+def got(routes):
+    return _check(build.interior_of(), routes)
+
+
+@pytest.fixture(scope="module")
+def before(routes):
+    """The same building with no room function stated: as it was before section group 3."""
+    desc = build.interior_of()
+    for r in desc["rooms"]:
+        r.pop("function", None)
+    return _check(desc, routes)
 
 
 @pytest.fixture(scope="module")
@@ -61,20 +85,66 @@ def test_the_story_figures_are_the_hand_worked_ones(got, expected):
                for p in got["interior"]["parts"]["space"])
 
 
-def test_a_rule_reading_a_figure_not_measured_yet_says_so(got):
-    rows = [i for i in got["items"] if i["rule"] == "general.bc_1006_2_1_1_three_or_more_exits"]
-    review = [i for i in rows if i["status"] == present.REVIEW]
-    assert len(rows) == 8 and len(review) == 4        # the four stair enclosures are exits (space_is_exit): pass
-    assert all("occupant load not measured" in i["reason"] for i in review)   # its plain name (C4)
+def test_the_r2_story_rows_wait_only_on_whether_its_units_are_dwelling_units(routes, got):
+    """Group 3 review round 12 (2026-11-25): what expected.yaml says of the R-2 story rows and 508.2.3 holds. The
+    story's occupant load is at most 500 at both readings (so its two exits satisfy either table), and stating the
+    R-2 is of dwelling units settles Table 1006.3.4(1)'s row on both stories; 508.2.3 reads the story's measured gross
+    floor area (1,800 sq ft), its net still not measured."""
+    for s in got["interior"]["parts"]["story"]:
+        values = [r["value"] for r in s["readings"]["story_occupant_load"]]
+        assert len(values) == 2 and max(values) <= 500 and s["measures"]["story_gross_floor_area"] == pytest.approx(1800)
+    rows = [r for r in got["rows"] if r["rule"] == "general.bc_508_2_3_accessory_area"]
+    assert rows and all(r["values"]["story_gross_floor_area"] == pytest.approx(1800)
+                        and r["values"].get("story_net_floor_area") is None for r in rows)
+    desc = build.interior_of()
+    desc["building"] = {**(desc.get("building") or {}), "r2_sleeping_units": False}
+    stated = _check(desc, routes)
+    assert stated["results"]["general.bc_table_1006_3_4_1__r2_dwelling_units"] == "pass"
+    assert stated["results"]["general.bc_table_1006_3_4_2__h_i_r"] == "not_applicable"
+
+
+def test_the_occupant_loads_come_from_each_rooms_function(got):
+    """Section group 3 (2026-11-23): each apartment's stated function (residential, 200 gross) gives its occupant
+    load as two readings, 690 / 200 from its own area and 690 / 7 while 1004.5.1's increase isn't ruled out; both at
+    most 500, so 1006.2.1.1 needs no third exit; the stair enclosures are exits and hold no load."""
+    for p in got["interior"]["parts"]["space"]:
+        values = [r["value"] for r in (p.get("readings") or {}).get("space_occupant_load") or []]
+        if p["name"].startswith("Apartment"):
+            assert values == pytest.approx([690 / 200, 690 / 7])
+        else:
+            assert values == [] and "space_occupant_load" not in p["measures"]
+    rows = [r for r in got["rows"] if r["rule"] == "general.bc_1006_2_1_1_three_or_more_exits"]
+    assert len(rows) == 8 and {r["outcome"] for r in rows} == {"pass"}
+
+
+def test_before_and_after_the_functions_only_rules_reading_an_occupant_load_change_and_only_from_needs_review(
+        got, before):
+    """The apartment before section group 3 (no function stated: 1006.2.1.1 needs review, its reason naming the
+    missing function) and after (residential: it passes). Stating a function only settles a rule that
+    reads an occupant load and needed review for want of one; it never turns a verdict over."""
+    rule = "general.bc_1006_2_1_1_three_or_more_exits"
+    assert before["results"][rule] == present.REVIEW and got["results"][rule] == "pass"
+    rows = [i for i in before["items"] if i["rule"] == rule]
+    assert len(rows) == 8 and sum("Table 1004.5 function" in i["reason"] for i in rows) == 4     # each apartment's
+    assert [i["status"] for i in rows].count(present.REVIEW) == 4                            # the stairs are exits
+    rules = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+                                      / "5_building_code_rules/drafted/general.yaml")["rules"]}
+    changed = {k for k in got["results"] if got["results"][k] != before["results"].get(k)}
+    assert rule in changed
+    for k in changed:
+        r = rules[k.split(":")[0]] if k.split(":")[0] in rules else None
+        assert r is not None and re.search(r"(space|story)_occupant_load", str(
+            [r.get(f) for f in ("check", "review_when", "applies_when")])), k
+        assert before["results"][k] == present.REVIEW, (k, before["results"][k])
 
 
 def test_each_flag_is_its_own_line_with_its_section(got):
-    """22 of the rulebook's 32 flags show (2026-11-23; 1006.2.2's five rooms by use since review round 1; the
+    """23 of the rulebook's 34 flags show (2026-11-23; 1006.2.2's five rooms by use since review round 1; the
     mixed-occupancy single-exit flags not applicable since section group 2; 1030.8's on its fact alone since round
     2): those narrowed to a building of two or more groups, or to another group (F-1 and S-1's increase, H-5's,
     Group H's sprinkler system), are not applicable to a one-group R-2."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 22 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 23 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -141,15 +211,3 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
                          "bc_1006_2_2_3_refrigerated_rooms", "bc_1006_2_2_4_electrical_rooms",
                          "bc_1006_2_2_5_vehicular_ramps", "bc_table_1017_2_note_a", "bc_1017_2_1_balcony_increase",
                          "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")}}
-
-
-def test_a_rooms_function_changes_no_result_until_the_occupant_loads_read_it(got, laws):
-    """The Revit add-in sends a room's Table 1004.5 function (Gordium: Function, rooms[].function) before the checker
-    reads it: group 3 (feat/ny-building-egress-g3) works the occupant loads out from it. Until then a stated function
-    changes no result, so a host sending one can't move a verdict. Group 3's merge replaces this with its own tests of
-    the loads it gives (this test then fails, on purpose)."""
-    interior = build.interior_of()
-    for room in interior["rooms"]:
-        room["function"] = "residential"
-    now = egress.check(laws, interior, VALUES, ALLOWED)
-    assert now["results"] == got["results"]

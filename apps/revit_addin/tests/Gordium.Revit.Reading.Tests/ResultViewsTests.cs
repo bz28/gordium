@@ -36,8 +36,8 @@ public sealed class ResultViewsTests
     public void The_top_says_the_checker_s_counts_and_what_they_mean()
     {
         var m = ResultViews.Build(Apartment());
-        Assert.Equal("225 need review · 8 not checked yet · 21 comply · 1 doesn't apply", m.Summary);   // group 2's story exits: +8
-        Assert.Equal("Nothing fails yet. 225 results can't be decided until the questions below are answered.", m.Headline);
+        Assert.Equal("227 need review · 8 not checked yet · 21 comply · 1 doesn't apply", m.Summary);   // group 2's story exits: +8; group 3's 1004.7 and 1004.9 flags: +2
+        Assert.Equal("Nothing fails yet. 227 results can't be decided until the questions below are answered.", m.Headline);
         Assert.Equal("1 fails · 2 need review", ResultViews.Summary([Verdict.NeedsReview, Verdict.DoesNotComply, Verdict.NeedsReview]));
         Assert.Equal("1 rule fails. Fix it first; 2 results also need review.",
                      ResultViews.Headline([(Verdict.NeedsReview, "a"), (Verdict.DoesNotComply, "b"), (Verdict.NeedsReview, "c")]));
@@ -68,6 +68,23 @@ public sealed class ResultViewsTests
             }
         // a group's rows are its cards' rows, each once
         Assert.All(m.Fix, g => Assert.Equal(g.Cards.SelectMany(c => c.Rows).Select(r => r.Id).Distinct().Count(), g.Rows.Count));
+    }
+
+    [Fact]
+    public void A_room_with_no_function_is_one_card_setting_the_gordium_function_mark()
+    {
+        // group 3 (PR #192) end to end with PR #191: the worker's answer for the trial apartment (no room function
+        // marked) asks for the room's function by its field, and that field is the room mark Revit writes it from
+        var m = ResultViews.Build(Apartment());
+        var card = m.Fix.SelectMany(g => g.Cards).Single(c => c.Field == "rooms[].function");
+        Assert.Equal(FixKind.Mark, card.Kind);
+        Assert.Equal("Set the room's function", card.Headline);
+        Assert.Equal(Marks.RoomFunction, Marks.All.Single(k => k.Feeds == card.Field));
+        // the rooms only (the four apartments), never a story's level: the mark is on Rooms (round 14)
+        Assert.Equal(4, card.Elements.Count);
+        Assert.DoesNotContain("933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e", card.Elements);
+        Assert.DoesNotContain("6341822b-d4f3-11d3-a039-0000863f1523-000026da", card.Elements);
+        Assert.DoesNotContain(m.Fix.SelectMany(g => g.Cards), c => c.Headline.Contains("occupant load", StringComparison.Ordinal));
     }
 
     [Fact]

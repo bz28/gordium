@@ -332,6 +332,72 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1004_7_outdoor_areas
+  kind: flag
+  topic: means_of_egress
+  title: 'Outdoor areas: means of egress and occupant load (BCNYS 1004.7)'
+  applies_when: occupied_outdoor_areas
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 313
+    lines:
+    - 29
+    - 36
+    quote: '1004.7 Outdoor areas. Yards, patios, occupiable roofs, courts and similar outdoor areas accessible to and usable
+      by the building occupants shall be provided with means of egress as required by this chapter. The occupant load of such
+      outdoor areas shall be assigned by the building official in accordance with the anticipated use. Where outdoor areas
+      are to be used by persons in addition to the occupants of the building, and the path of egress travel from the outdoor
+      areas passes through the building, means of egress requirements for the building shall be based on the sum of the occupant
+      loads of the building plus the outdoor areas. Exceptions: 1. Outdoor areas used exclusively for service of the building
+      need only have one means of egress. 2. Both outdoor areas associated with Group R-3 and individual dwelling units of
+      Group R-2.'
+  examples:
+  - given:
+      occupied_outdoor_areas: true
+    expect: needs_review
+    note: 'Yards, patios, occupiable roofs or courts the occupants use: their means of egress and the occupant load the building
+      official assigns are a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupied_outdoor_areas: false
+    expect: not_applicable
+    note: 'None, as the architect states it: not applicable.'
+  notes: '1004.7: outdoor areas usable by the occupants need means of egress per Chapter 10, their occupant load assigned
+    by the building official, added to the building''s where their egress passes through it; exception 1 (service-only areas:
+    one means of egress) and 2 (Group R-3''s and Group R-2 dwelling units'' own outdoor areas) loosen it. Outdoor areas aren''t
+    drawn in the interior description. Hand-drafted in a Claude Code session (2026-11-23, section group 3).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1004_9_posting
+  kind: flag
+  topic: means_of_egress
+  title: An assembly room's occupant load posted (BCNYS 1004.9)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 313
+    lines:
+    - 41
+    - 43
+    quote: 1004.9 Posting of occupant load. Every room or space that is an assembly occupancy shall have the occupant load
+      of the room or space posted in a conspicuous place, near the main exit or exit access doorway from the room or space,
+      for the intended configurations. Posted signs shall be of an approved legible permanent design and shall be maintained
+      by the owner or the owner’s authorized agent.
+  examples:
+  - given:
+      occupancy_group: A-2
+    expect: needs_review
+    note: 'A sign near the main exit of each assembly room giving its occupant load: a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: 'Not an assembly occupancy: not applicable.'
+  notes: '1004.9: every room or space that is an assembly occupancy posts its occupant load near its main exit or exit access
+    doorway; a sign isn''t in the model. Hand-drafted in a Claude Code session (2026-11-23, section group 3).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_407_4_2_sleeping_room_travel
   kind: rule
   topic: means_of_egress
@@ -687,13 +753,12 @@ rules:
     two exits where the common path exceeds it, so a space with two exits and a common path over 75 ft (or any, unsprinklered)
     needs review (the open question), never a pass. Exception 1 (foyers and lobbies counted without the loads discharging
     through them) and exception 3 (unoccupied mechanical rooms and penthouses need not meet the common path) only loosen the
-    test: a person''s check where they apply. The cumulative occupant load (1004.2, not brought in) is in the occupant load
-    the architect states for the space. Most restrictive where the 2009 IBC applied (Maine): 1015.1 and Table 1015.1 set the
-    same 10 for day care. Hand-drafted in a Claude Code session (2026-11-21). Review round 2 (2026-11-23): a room with fixed
-    seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft); a one-exit space where a 1006.2.2
-    room is stated or not ruled out needs review (as its siblings). Review round 3 (2026-11-23): with fixed seating stated
-    or not ruled out, the row needs review at any common path, as its travel does (202, 1030.7), where it would otherwise
-    pass.'
+    test: a person''s check where they apply. The cumulative occupant load (1004.2) is in the space''s occupant load. Most
+    restrictive where the 2009 IBC applied (Maine): 1015.1 and Table 1015.1 set the same 10 for day care. Hand-drafted in
+    a Claude Code session (2026-11-21). Review round 2 (2026-11-23): a room with fixed seating, in any group, stated or not
+    ruled out, needs review over 1030.8''s 30 ft (75 ft); a one-exit space where a 1006.2.2 room is stated or not ruled out
+    needs review (as its siblings). Review round 3 (2026-11-23): with fixed seating stated or not ruled out, the row needs
+    review at any common path, as its travel does (202, 1030.7), where it would otherwise pass.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_other_occupancies
@@ -5278,6 +5343,20 @@ rules:
     note: 'Over 1,000: four needed.'
   - given: {}
     parts:
+      space:
+      - id: p9
+        name: Exit stair enclosure
+        measures:
+          space_is_exit: true
+          space_exit_count: 1
+    rows:
+    - part: p9
+      outcome: pass
+    expect: pass
+    note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
+      it asks nothing of it (section group 3, 2026-11-23).'
+  - given: {}
+    parts:
       space: []
     rows:
     - outcome: needs_review
@@ -5285,7 +5364,8 @@ rules:
     note: 'No space: with none, the rule needs review.'
   notes: For every occupancy. The 500 is Table 1006.3.3's printed two-exit band ('1-500', a story's), used for a space by
     analogy; a fractional load over 500 needs three (the finding on loads over 500). Hand-drafted in a Claude Code session
-    (2026-11-21).
+    (2026-11-21). Since 2026-11-23 a space that is itself an exit (an exit stair enclosure, which holds no occupant load of
+    its own) is not one it counts, as Table 1006.2.1's rows.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   findings:
