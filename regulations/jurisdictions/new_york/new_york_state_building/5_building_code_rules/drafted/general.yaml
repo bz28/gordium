@@ -14074,7 +14074,8 @@ rules:
     expect: needs_review
     note: 'Hardware that unlatches by push or pull needs at most 15 pounds, by rotation at most 28 inch-pounds; an interior
       manually operated swinging door not required to be fire rated opens with at most 5 pounds; any other swinging, sliding
-      or folding door, and a fire-rated one, is set in motion by at most 30 pounds and opens fully at most 15 pounds; each
+      or folding door, and one required to be fire rated, is set in motion by at most 30 pounds and opens fully under at
+      most 15 pounds; each
       force applied at the latch side (1010.1.3.1): door hardware and forces aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-25), section group 6c. Whether a door must be fire rated, how its
     hardware operates and the forces it takes aren't in the model.
@@ -14273,12 +14274,12 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Two doors in a series (a vestibule) are at least 48 inches apart plus the width of a door swinging into the space,
+    note: 'Two doors in a series (in a vestibule or anywhere else on the way out) are at least 48 inches apart plus the width of a door swinging into the space,
       and swing the same way or away from the space between them; horizontal sliding power-operated doors need only 48 inches,
       storm and screen doors serving Group R-2 and R-3 dwelling units need not be 48 inches from the other door (they still
       swing as above), and doors within those units, other than within Type A units, are excepted: doors in a series and the space between them aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-25), section group 6c. The routes pass doors one after another, but
-    a vestibule, the distance between its doors and which way each swings (the side each door swings into, as the
+    which two doors are in a series, the distance between them and which way each swings (the side each door swings into, as the
     description states it, no Revit mark yet) aren't read together.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
