@@ -1986,15 +1986,12 @@ pieces:
     - less than 50 percent
     second_reading_comparisons:
     - none
-    - none
-    - none
+    - '>'
+    - '>'
     - none
     - none
     - '>='
     flags:
-    - '''more than one'' (none), twice: ''Where more than one exit, or access to more than one exit, is required''
-      says when the section applies, not a limit a design meets; recorded ''>'' from the words. The second reading
-      (none) is right.'
     - '''less than 50 percent'' (>=): ''shall not reduce the available capacity or width to less than 50 percent of
       the required'' sets the least that must remain; recorded ''<'' from the words before it. The second reading
       is right.'
