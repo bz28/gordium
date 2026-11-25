@@ -13,16 +13,17 @@ second_reading:
     brought in by review round 1 on 2026-11-23 (1006.2.2, 1018.4, 1030.8, 407.4.2 and the 13 definitions their italics
     name), a seventh for 1030.7 and SMOKE-PROTECTED ASSEMBLY SEATING (review round 2, 2026-11-23), an eighth for
     the 27 pieces of section group 3 (1004, Table 1004.5 and 12 definitions), a ninth for the 9 pieces of section
-    group 4's corridor width (1005.3.2, 1020.1, 1020.3, Table 1020.3 and 5 definitions, 2026-11-25), and a helper for
-    the comparison words)
+    group 4's corridor width (1005.3.2, 1020.1, 1020.3, Table 1020.3 and 5 definitions, 2026-11-25), a tenth for the 6
+    pieces of its corridor rating (1020.2, 1020.2.1, Table 1020.2 and 3 definitions, 2026-11-25), and a helper for the
+    comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
-    as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), and 8 pages, 9 boxes as
-    step_8 (section group 4); p.47''s two and pp.42,
+    as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
+    step_8 (section group 4a), and 4 pages, 6 boxes as step_9 (section group 4b); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 219 pieces, 547 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 225 pieces, 577 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -218,6 +219,15 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:building_element:
+    piece_sha256: ddc7bd84392f0ad6360b9829020ce99efe3343bc73c4f74ae851281f5e6b19c5
+    numbers:
+    - '601'
+    second_reading: agrees
+    second_reading_numbers:
+    - '601'
+    second_reading_comparisons:
+    - none
   202:building_height:
     piece_sha256: 58510809e175b09667875e7ad704953c9fc6ec7d0f08343bee8f6c6e895fe840
     numbers: []
@@ -570,6 +580,21 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:fire_partition:
+    piece_sha256: 7b18317fa0cd93ac4325b7f63770ed609747b4d17b7219c76358368426d30b01
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:fire_resistance_rating:
+    piece_sha256: ab291c8db4785dc1eac628068d1a6988557c3e8c2f341e2f613253a61fdc7ded
+    numbers:
+    - '703'
+    second_reading: agrees
+    second_reading_numbers:
+    - '703'
+    second_reading_comparisons:
+    - none
   202:fire_wall:
     piece_sha256: 13baefb78e6958cd35ec518f1244fe88b8fbe0602fd3fbdd92e3a81e3875ceee
     numbers: []
@@ -2918,6 +2943,119 @@ pieces:
     - '1020.7'
     second_reading_comparisons:
     - none
+    - none
+    - none
+  '1020.2':
+    piece_sha256: fb7fa8b5724e18ce5774c6e0394124cf085c9af0ede5f6f381600b0f481e0c9a
+    numbers:
+    - '1020.2'
+    - '1020.2'
+    - '708'
+    - not less than one
+    - not less than one
+    - half
+    - '1006.2'
+    - '705.5'
+    - '705.9'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1020.2'
+    - '1020.2'
+    - '708'
+    - not less than one
+    - not less than one
+    - half
+    - '1006.2'
+    - '705.5'
+    - '705.9'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - '>='
+    - '>='
+    - '>='
+    - none
+    - none
+    - none
+    flags:
+    - '''half'' (>=): exception 1''s ''not less than one- half of the required means of egress doors'', which the
+      line''s end splits into ''one-'' and ''half'', so the recorded words give the comparison to ''one'' alone and
+      record ''half'' ''none''; the least share of an assembly room''s exit doors that open straight outside. The
+      second reading is right.'
+  Table 1020.2:
+    piece_sha256: 8caec5a85e56fb6bac660726e4bf74e5f91038a4fd14463d4aa98496823ba665
+    numbers:
+    - '1020.2'
+    - '1'
+    - greater than 30
+    - '1'
+    - greater than 30
+    - '1'
+    - '0'
+    - greater than 10
+    - '0.5'
+    - '1'
+    - '0'
+    - '1'
+    - '1'
+    - '0'
+    - '407.2'
+    - and 407.3
+    - '408.8'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1020.2'
+    - '1'
+    - greater than 30
+    - '1'
+    - greater than 30
+    - '1'
+    - '0'
+    - greater than 10
+    - '0.5'
+    - '1'
+    - '0'
+    - '1'
+    - '1'
+    - '0'
+    - '407.2'
+    - and 407.3
+    - '408.8'
+    second_reading_comparisons:
+    - none
+    - '>='
+    - '>'
+    - '>='
+    - '>'
+    - '>='
+    - '>='
+    - '>'
+    - '>='
+    - '>='
+    - '>='
+    - '>='
+    - '>='
+    - '>='
+    - none
+    - none
+    - none
+    flags:
+    - 'Rating cells: ''1'', ''0'', ''0.5'' (>=), each the least fire-resistance rating in hours a corridor must have
+      (the table prints ''(hours)'' only in its heading REQUIRED FIRE-RESISTANCE RATING, never beside the number;
+      read on the page image and by position, each raised note letter 5.04-point beside 8.4-point digits). The table
+      prints no comparison words, so each is recorded ''none''; 1020.2 says corridors ''shall be fire-resistance rated
+      in accordance with Table 1020.2'', so each is the least: the second reading is right.'
+  1020.2.1:
+    piece_sha256: 8a508542ed4c9e0ec67245fd38808dbd0c3fff23291df46fad83def384312fe1
+    numbers:
+    - '716'
+    - '3006.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '716'
+    - '3006.2'
+    second_reading_comparisons:
     - none
     - none
   '1020.3':

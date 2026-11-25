@@ -97,8 +97,12 @@ def statements_of_lines(lines: list[str]) -> list[dict]:
 
 
 def _plain(text: str) -> str:
-    """Text as the numbers are read from it: sealed markers out ("m[fn2]" -> "m"), spaces made single. A hyphen before a space is kept: "one- or two-family" is two
+    """Text as the numbers are read from it: sealed markers out ("m[fn2]" -> "m"; one before a slash ends a cell, so
+    "0.5[fnc]/1[fnd]" is "0.5 / 1"), spaces made single. A hyphen before a space is kept: "one- or two-family" is two
     numbers (joining it as a word broken at a line end would lose the "one")."""
+    # a marker before a slash ends a table cell: "0.5[fnc]/1[fnd]" (Table 1020.2: 0.5 with note c, 1 with note d) is
+    # two numbers either side of a slash, never the fraction "0.5/1" (which reads as neither)
+    text = re.sub(r"\[fn[^\]]*\]/", " / ", text)
     text = re.sub(r"\[fn[^\]]*\]", "", text)
     return re.sub(r"\s+", " ", text).strip()
 

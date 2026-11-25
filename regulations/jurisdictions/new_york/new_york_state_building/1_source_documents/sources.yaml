@@ -69,11 +69,14 @@ documents:
       # and Table 1004.5 (2026-11-23, section group 3: a room's function gives its occupant load). 1020.1 (corridors
       # in general, p.343) and 1020.3 with Table 1020.3 (corridor width, p.344, with 1020.4 after; 2026-11-25,
       # section group 4), and 1005.3.2 alone (other egress components' capacity, 0.2 inch per occupant, p.314, with
-      # 1005.4 after: Table 1020.3's width passes only where the corridor's capacity can't need more).
+      # 1005.4 after: Table 1020.3's width passes only where the corridor's capacity can't need more). 1020.2 with
+      # 1020.2.1 and Table 1020.2 (corridor fire-resistance rating, pp.343-344, with 1020.3 after; 2026-11-25, section
+      # group 4b).
       pages: 32-68, 79, 99, 147, 273-274, 311-318, 340-344, 354-355
       sections: ['308.5', '508.2', '1004', Table 1004.5, '1006.2.1', Table 1006.2.1, '1006.2.2', '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(1),
                  Table 1006.3.4(2),
-                 '1007.1', '1016.2', '1017', Table 1017.2, '1018.4', '1020.1', '1020.3', Table 1020.3, '1020.5']
+                 '1007.1', '1016.2', '1017', Table 1017.2, '1018.4', '1020.1', '1020.2', Table 1020.2, '1020.3', Table 1020.3,
+                 '1020.5']
       alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1005.3.2', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
@@ -121,6 +124,14 @@ documents:
         - {ocr: '100a', printed: '100[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
         p.315 line 33:
         - {ocr: '75a', printed: '75[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.344 line 7:
+        - {ocr: '1c', printed: '1[fnc]', why: 'Table 1020.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.344 line 8:
+        - {ocr: '1c', printed: '1[fnc]', why: 'Table 1020.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.344 line 10:
+        - {ocr: '0.5c/1d', printed: '0.5[fnc]/1[fnd]', why: 'Table 1020.2 prints both footnote letters raised and smaller (position reading: 5.04-point letters beside 8.4-point digits; the page image)'}
+        p.344 line 11:
+        - {ocr: 'I-2a', printed: 'I-2[fna]', why: 'Table 1020.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
         p.341 line 28:
         - {ocr: '200e', printed: '200[fne]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
         - {ocr: '250b', printed: '250[fnb]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
