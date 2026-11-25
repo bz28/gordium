@@ -139,6 +139,10 @@ public sealed record ResultModel(Verdict State, string Headline, string Checked,
     /// <summary>The worker's cause cards, in its order (<see cref="CauseCards.Read"/>): "Fix these first".</summary>
     public IReadOnlyList<CauseCard> Causes { get; init; } = [];
 
+    /// <summary>The same answer as "What to fix" and "By code" (<see cref="ResultViews.Build"/>; UI polish PR 3), or
+    /// null for a model made without one (the pane then shows the plain list).</summary>
+    public ResultViewsModel? Views { get; init; }
+
     /// <summary>The state's colour: green only for a check that complies and still stands; red for one that
     /// doesn't; amber otherwise; grey once the model changed.</summary>
     public Tone StateTone => Stale is not null ? Tone.Neutral : State switch
@@ -199,7 +203,7 @@ public static class ResultRows
         return new ResultModel(result.State, ResultText.Headline(result), ResultText.CheckedWords(phase, options, street),
                                Counts(result), groups, ResultText.InsideWords(inside))
         {
-            Code = WhichCode.Read(result.Raw), Causes = CauseCards.Read(result),
+            Code = WhichCode.Read(result.Raw), Causes = CauseCards.Read(result), Views = ResultViews.Build(result),
         };
     }
 

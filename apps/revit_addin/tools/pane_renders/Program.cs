@@ -38,6 +38,7 @@ internal static class Program
         var house = Load(Path.Combine(answers, "ithaca_106_house_check_answer.json"));
         var houseAfter = Load(Path.Combine(answers, "ithaca_106_house_after_check_answer.json"));
         var childcare = Load(Path.Combine(answers, "children_odyssey_check_answer.json"));
+        var apartment = Load(Path.Combine(answers, "four_unit_apartment_check_answer.json"));
         // the four-unit apartment's Setup records (Ben's Revit trial, 2026-11-23): the Building Code governs its use
         foreach (var (n, r) in new[] { ("house", house), ("childcare", childcare) })
         {
@@ -97,6 +98,46 @@ internal static class Program
                         Settle(p.View);
                         Check(!FindAll<Border>(p.View).Any(b => b.IsVisible && Equals(b.Tag, ResultsView.PickTag)) && FindAll<DockPanel>(p.View).Any(d => d.IsVisible && Equals(d.Tag, SetupView.StepTag)),
                               "picking ended: the form back, the card gone");
+                    });
+                }
+                // the results as two views (UI polish PR 3): the four-unit apartment's real answer (Ben's 2026-11-23
+                // request), What to fix (the default) and By code, light and dark; stale By code never green
+                {
+                    const string title = "Four-unit apartment";
+                    var when = new DateTime(2026, 11, 23, 11, 42, 0);
+                    var rows = ResultRows.Build(apartment, "New Construction", [], null);
+                    var views = rows.Views!;
+                    Check(views.Fix.Count > 0 && views.Code.Count > 0, "apartment: both views have entries");
+                    Step(make(theme, []), "13_what_to_fix_apartment", 900, dark, p => p.Show(title, when, rows, Labels(apartment)));
+                    Step(make(theme, []), "13b_what_to_fix_card_open_apartment", 900, dark, p =>
+                    {
+                        p.Show(title, when, rows, Labels(apartment));
+                        p.Toggle(ResultViewList.CardKey(views.Fix.First(g => g.Kind == FixKind.Answer).Cards[0]));
+                    });
+                    Step(make(theme, []), "14_by_code_apartment", 900, dark, p =>
+                    {
+                        p.Show(title, when, rows, Labels(apartment));
+                        p.UseView(ResultsViewKind.ByCode);
+                        // the Building Code's Chapter 10 opened (the apartment's egress rules)
+                        var bc = views.Code.Select((d, i) => (d, i)).First(x => x.d.Title.StartsWith("2025 Building Code", StringComparison.Ordinal));
+                        var ch10 = bc.d.Children.Select((c, i) => (c, i)).First(x => x.c.Number == "10");
+                        p.Toggle($"/{bc.i}/{ch10.i}");
+                        // review round 5: the list item the keyboard focuses carries the words a screen reader says and
+                        // the tooltip (which code governs, the law's quoted words), not only the drawing inside it
+                        Settle(p.View);
+                        var items = FindAll<ListBoxItem>(p.View).ToList();
+                        var book = items.FirstOrDefault(i => System.Windows.Automation.AutomationProperties.GetName(i).Contains("Governs this building", StringComparison.Ordinal));
+                        Check(book is not null && (book.ToolTip as string ?? "").Contains("R101.2", StringComparison.Ordinal),
+                              "14 By code: the governing book's list item says which code governs, with the law's words in its tooltip");
+                        Check(items.Where(i => i.DataContext is CodeNodeItem).All(i => System.Windows.Automation.AutomationProperties.GetName(i).Length > 0),
+                              "14 By code: every node's list item has words for a screen reader");
+                    });
+                    Step(make(theme, []), "15_by_code_stale_apartment", 900, dark, p =>
+                    {
+                        p.Show(title, when, rows, Labels(apartment));
+                        p.UseView(ResultsViewKind.ByCode);
+                        p.Stale();
+                        NoComplies(p.View, "15 By code stale");
                     });
                 }
                 foreach (var (tag, title, setupFile, answer) in new[] { ("house", "106 Ithaca Rd", "setup_ithaca106.json", house), ("childcare", "Children's Odyssey", "setup_childcare.json", childcare) })

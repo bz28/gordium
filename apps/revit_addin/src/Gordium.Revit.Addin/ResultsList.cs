@@ -19,6 +19,9 @@ internal interface IListHost
 
     /// <summary>A row's "looked at" tick changed.</summary>
     void TickRow(ListRow row, bool ticked);
+
+    /// <summary>A "What to fix" group or card, or a "By code" node, opened or folded (UI polish PR 3).</summary>
+    void ToggleOpen(string key);
 }
 
 /// <summary>One item of the list's ItemsSource: what <see cref="EntryView"/> draws.</summary>
@@ -27,6 +30,12 @@ internal abstract class ListItem
     protected ListItem(IListHost host) => Host = host;
 
     internal IListHost Host { get; }
+
+    /// <summary>What a screen reader says for this item and its tooltip, set on its list item (the container the
+    /// keyboard focuses) by <see cref="EntryStyles"/>; null: the item's own words inside say it.</summary>
+    internal virtual string? Spoken => null;
+
+    internal virtual string? Tip => null;
 }
 
 internal sealed class HeadingItem(IListHost host, ListHeading heading) : ListItem(host)
@@ -43,6 +52,34 @@ internal sealed class SubItem(IListHost host, ListSubheading sub) : ListItem(hos
 internal sealed class RowItem(IListHost host, ListRow row) : ListItem(host)
 {
     internal ListRow Row { get; } = row;
+}
+
+/// <summary>A "What to fix" group's heading (UI polish PR 3).</summary>
+internal sealed class FixGroupItem(IListHost host, FixGroupEntry entry) : ListItem(host)
+{
+    internal FixGroupEntry Entry { get; } = entry;
+
+    internal override string? Spoken => ResultViewList.Spoken(Entry);
+}
+
+/// <summary>One card of an open "What to fix" group.</summary>
+internal sealed class FixCardItem(IListHost host, FixCardEntry entry) : ListItem(host)
+{
+    internal FixCardEntry Entry { get; } = entry;
+
+    internal override string? Spoken => ResultViewList.Spoken(Entry);
+
+    internal override string? Tip => ResultViewList.Tip(Entry);
+}
+
+/// <summary>One node of "By code".</summary>
+internal sealed class CodeNodeItem(IListHost host, CodeNodeEntry entry) : ListItem(host)
+{
+    internal CodeNodeEntry Entry { get; } = entry;
+
+    internal override string? Spoken => ResultViewList.Spoken(Entry);
+
+    internal override string? Tip => ResultViewList.Tip(Entry);
 }
 
 /// <summary>The list's first entry: the worker's state and counts, made afresh each time it scrolls into view.</summary>
@@ -72,8 +109,28 @@ internal sealed class FoldItem(IListHost host, string title, Func<W.UIElement> b
 /// (list.row); a heading, a sub-heading or a fold is plain, never selected or focused (list.heading).</summary>
 internal sealed class EntryStyles : C.StyleSelector
 {
-    public override W.Style SelectStyle(object item, W.DependencyObject container) =>
-        (W.Style)((W.FrameworkElement)container).FindResource(item is RowItem ? "list.row" : "list.heading");
+    public override W.Style SelectStyle(object item, W.DependencyObject container)
+    {
+        var c = (W.FrameworkElement)container;
+        // the words on the list item itself, the element the keyboard focuses and a screen reader reads (review round
+        // 5); set every time, so a container reused for another item never keeps the last one's words
+        if (item is ListItem { Spoken: { } spoken } li)
+        {
+            W.Automation.AutomationProperties.SetName(c, spoken);
+            c.ToolTip = li.Tip;
+        }
+        else
+        {
+            c.ClearValue(W.Automation.AutomationProperties.NameProperty);
+            c.ClearValue(W.FrameworkElement.ToolTipProperty);
+        }
+        return (W.Style)c.FindResource(item switch
+        {
+            RowItem => "list.row",
+            FixGroupItem or FixCardItem or CodeNodeItem => "list.opener",   // reached and opened by the keyboard too
+            _ => "list.heading",
+        });
+    }
 }
 
 /// <summary>
@@ -103,8 +160,106 @@ public sealed class EntryView : C.Border
             FoldItem f => Fold(f),
             SummaryItem m => Summary(m),
             CausesItem c => Causes(c),
+            FixGroupItem g => FixGroupView(g),
+            FixCardItem c => FixCardView(c),
+            CodeNodeItem n => CodeNodeView(n),
             _ => null,
         };
+    }
+
+    // ---- UI polish PR 3: the two views' entries -------------------------------------------------------------
+
+    /// <summary>A line the whole of which opens or folds <paramref name="key"/> (a chevron when it can), its glyph
+    /// and words; never selected.</summary>
+    private static C.DockPanel Opener(IListHost host, string key, bool canOpen, bool open, PanelStatus status, double glyph,
+                                      W.Thickness margin)
+    {
+        var line = new C.DockPanel { Margin = margin };
+        line.SetResourceReference(C.Panel.BackgroundProperty, PanelTokens.BgPane);   // the whole line takes the click
+        var chevron = new S.Path
+        {
+            Width = 10, Height = 10, Margin = new W.Thickness(0, 0, 4, 0), VerticalAlignment = W.VerticalAlignment.Top,
+            Data = W.Media.Geometry.Parse(open ? "M 2,3.5 L 5,6.5 L 8,3.5" : "M 3.5,2 L 6.5,5 L 3.5,8"),
+            StrokeThickness = 1.5, StrokeStartLineCap = W.Media.PenLineCap.Round, StrokeEndLineCap = W.Media.PenLineCap.Round,
+            Visibility = canOpen ? W.Visibility.Visible : W.Visibility.Hidden,
+        };
+        chevron.SetResourceReference(S.Shape.StrokeProperty, PanelTokens.TextMuted);
+        C.DockPanel.SetDock(chevron, C.Dock.Left);
+        line.Children.Add(chevron);
+        var g = PanelLook.Glyph(status, glyph);
+        g.Margin = new W.Thickness(0, 0, 6, 0);
+        g.VerticalAlignment = W.VerticalAlignment.Top;
+        g.ToolTip = StatusLook.Word(status);
+        C.DockPanel.SetDock(g, C.Dock.Left);
+        line.Children.Add(g);
+        if (canOpen)
+        {
+            line.Cursor = I.Cursors.Hand;
+            line.MouseLeftButtonDown += (_, e) =>
+            {
+                e.Handled = true;
+                host.ToggleOpen(key);
+            };
+        }
+        return line;
+    }
+
+    private static W.UIElement FixGroupView(FixGroupItem item)
+    {
+        var e = item.Entry;
+        var line = Opener(item.Host, e.Key, canOpen: true, e.Open, e.Status, 14, new W.Thickness(0, 10, 0, 4));
+        var see = Typed(new C.TextBlock { Text = e.Open ? "Hide" : e.Group.SeeWords, Margin = new W.Thickness(8, 0, 0, 0) }, "type.caption");
+        Ink(see, PanelTokens.Accent);
+        C.DockPanel.SetDock(see, C.Dock.Right);
+        line.Children.Add(see);
+        var words = new C.StackPanel();
+        words.Children.Add(Ink(Typed(new C.TextBlock { Text = e.Group.Title, TextWrapping = W.TextWrapping.Wrap, FontWeight = W.FontWeights.SemiBold }, "type.body"),
+                               e.Status == PanelStatus.NotChecked ? PanelTokens.TextMuted : PanelTokens.Text));
+        if (e.Group.Sub is { } sub)
+            words.Children.Add(Ink(Typed(new C.TextBlock { Text = sub, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
+        line.Children.Add(words);
+        // its words for a screen reader are on its list item (EntryStyles: ResultViewList.Spoken)
+        return line;
+    }
+
+    private static W.UIElement FixCardView(FixCardItem item)
+    {
+        var e = item.Entry;
+        var line = Opener(item.Host, e.Key, canOpen: true, e.Open, e.Status, 11, new W.Thickness(14, 2, 0, 2));
+        var count = Typed(new C.TextBlock { Text = PaneWords.Results(e.Card.Rows.Count), Margin = new W.Thickness(8, 0, 0, 0) }, "type.caption");
+        Ink(count, PanelTokens.TextMuted);
+        C.DockPanel.SetDock(count, C.Dock.Right);
+        line.Children.Add(count);
+        // the headline on one line (change 25), the checker's words behind it on hover ("Why?")
+        var head = Typed(new C.TextBlock { Text = e.Card.Headline, TextTrimming = W.TextTrimming.CharacterEllipsis }, "type.body");
+        line.ToolTip = ResultViewList.Tip(e);
+        line.Children.Add(head);
+        // its words for a screen reader are on its list item (EntryStyles: ResultViewList.Spoken)
+        return line;
+    }
+
+    private static W.UIElement CodeNodeView(CodeNodeItem item)
+    {
+        var e = item.Entry;
+        var n = e.Node;
+        var top = e.Depth == 0 ? 10 : 2;
+        var line = Opener(item.Host, e.Key, e.CanOpen, e.Open, e.Status, e.Depth == 0 ? 14 : 11,
+                          new W.Thickness(14 * e.Depth, top, 0, 2));
+        var words = new C.StackPanel();
+        var title = ResultViewList.Title(n);
+        words.Children.Add(Ink(Typed(new C.TextBlock
+        {
+            Text = title, TextWrapping = W.TextWrapping.Wrap,
+            FontWeight = e.Depth == 0 ? W.FontWeights.SemiBold : W.FontWeights.Normal,
+        }, "type.body"), n.Greyed ? PanelTokens.TextMuted : PanelTokens.Text));
+        if (n.Note is { } note)                                  // which code governs, the law's quoted words on hover
+            words.Children.Add(Ink(Typed(new C.TextBlock { Text = note, TextWrapping = W.TextWrapping.Wrap, ToolTip = n.NoteTooltip }, "type.caption"), PanelTokens.TextMuted));
+        words.Children.Add(Ink(Typed(new C.TextBlock { Text = n.Line, TextWrapping = W.TextWrapping.Wrap }, "type.caption"), PanelTokens.TextMuted));
+        line.Children.Add(words);
+        // which code governs and the law's words: said and shown on its list item (EntryStyles: ResultViewList.Spoken,
+        // Tip, review round 5), and on hover here
+        line.ToolTip = ResultViewList.Tip(e);
+        return line;
     }
 
     private static W.UIElement Heading(HeadingItem item)

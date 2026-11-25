@@ -3,7 +3,7 @@ namespace Gordium.Revit.Reading;
 /// <summary>What the panel draws for a verdict, a group or a count: its shape and word as well as its colour (colour
 /// is never the only sign). Stale is its own: results the model changed after are never drawn as any verdict's
 /// colour, least of all a pass's.</summary>
-public enum PanelStatus { Fails, Review, Complies, NotApplicable, Stale }
+public enum PanelStatus { Fails, Review, Complies, NotApplicable, Stale, NotChecked }
 
 /// <summary>One status glyph (16 by 16, WPF path markup): its outline, drawn in the status colour and filled with
 /// <see cref="Fill"/> when it has one, and its mark inside, stroked.</summary>
@@ -38,6 +38,7 @@ public static class StatusLook
         PanelStatus.Complies => "Complies",
         PanelStatus.NotApplicable => "Not applicable",
         PanelStatus.Stale => "Stale: these results may not hold for the model now",   // why: the banner (PaneWords.StaleTitle)
+        PanelStatus.NotChecked => "Not checked yet by Gordium",
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
 
@@ -49,6 +50,7 @@ public static class StatusLook
         PanelStatus.Complies => PanelTokens.StatusPass,
         PanelStatus.NotApplicable => PanelTokens.StatusNa,
         PanelStatus.Stale => PanelTokens.StatusStale,
+        PanelStatus.NotChecked => PanelTokens.StatusNa,
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
 
@@ -58,8 +60,16 @@ public static class StatusLook
     // the mockup's glyphs (ui_mockup/index.html, ICONS), in WPF's path markup (a circle as two arcs)
     private const string Circle = "M 1.6,8 A 6.4,6.4 0 1 1 14.4,8 A 6.4,6.4 0 1 1 1.6,8 Z";
 
+    // not checked yet (UI polish change 45): a dashed circle, eight arcs of 6.4 around (8,8) with gaps between, and a
+    // dot: never filled, never green
+    private const string DashedCircle =
+        "M 14.4,8 A 6.4,6.4 0 0 1 13.91,10.45 M 12.53,12.53 A 6.4,6.4 0 0 1 10.45,13.91 M 8,14.4 A 6.4,6.4 0 0 1 5.55,13.91 " +
+        "M 3.47,12.53 A 6.4,6.4 0 0 1 2.09,10.45 M 1.6,8 A 6.4,6.4 0 0 1 2.09,5.55 M 3.47,3.47 A 6.4,6.4 0 0 1 5.55,2.09 " +
+        "M 8,1.6 A 6.4,6.4 0 0 1 10.45,2.09 M 12.53,3.47 A 6.4,6.4 0 0 1 13.91,5.55";
+
     /// <summary>The status's glyph: fail an octagon with ✕, needs review a triangle with ?, complies a circle with
-    /// ✓, not applicable an open circle with a dash, stale an open circle with a clock's hands.</summary>
+    /// ✓, not applicable an open circle with a dash, stale an open circle with a clock's hands, not checked yet a
+    /// dashed circle with a dot.</summary>
     public static Glyph GlyphOf(PanelStatus s) => s switch
     {
         PanelStatus.Fails => new("M 5.2,1.5 H 10.8 L 14.5,5.2 V 10.8 L 10.8,14.5 H 5.2 L 1.5,10.8 V 5.2 Z",
@@ -69,6 +79,7 @@ public static class StatusLook
         PanelStatus.Complies => new(Circle, "M 5,8.2 L 7,10.2 L 11,5.8", PanelTokens.StatusPassFill),
         PanelStatus.NotApplicable => new(Circle, "M 5,8 H 11", null),
         PanelStatus.Stale => new(Circle, "M 8,4.5 V 8 L 10.4,9.6", null),
+        PanelStatus.NotChecked => new(DashedCircle, "M 8,7.9 V 8.1", null),
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
 
