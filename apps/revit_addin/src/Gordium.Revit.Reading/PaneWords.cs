@@ -275,6 +275,12 @@ public static class PaneWords
             : $"{change.Said} more result{(change.Said == 1 ? " says" : "s say")} something new with the same verdict.";
     }
 
+    private static bool Same(SetupField a, SetupField b) =>
+        a.Current == b.Current
+        || a.Kind == b.Kind && a.Problem is null && b.Problem is null
+           && (a.Kind == FieldKind.Feet ? a.HeldFeet is { } x && b.HeldFeet is { } y && x == y
+               : a.CurrentChoice is { } c && b.CurrentChoice is { } d && c.Value == d.Value);
+
     /// <summary>What the architect changed between the two checks (change 40: "You changed: …"), from both checks'
     /// project facts as the Setup form reads them (null: not known for one of them); null when nothing changed.</summary>
     public static string? FactsChanged(IReadOnlyList<SetupField>? before, IReadOnlyList<SetupField>? after)
@@ -289,7 +295,10 @@ public static class PaneWords
             // said as cleared, and a change into it is said; review after #190/#191)
             // a problem counts only when both reads could tell (the zone's and use's lists come with the place's options,
             // which one read may not have had: the same value is then no change)
-            if (!old.TryGetValue(f.Mark.Guid, out var o) || o.Current == f.Current && (o.Problem == f.Problem || o.Kind != f.Kind))
+            // the same value held is no change, whatever the project's units now show it in (a length or an area: its
+            // exact feet or square feet) or however a word is typed (a choice the check reads the same; review after
+            // main 7bdad7c5: m² for sq ft said "You changed" of an area nobody touched)
+            if (!old.TryGetValue(f.Mark.Guid, out var o) || Same(o, f) && (o.Problem == f.Problem || o.Kind != f.Kind))
                 continue;
             var label = SetupSteps.Title(f.Mark, f.Label);
             said.Add(f.Problem is not null && o.Kind == f.Kind ? $"{label}: a value Gordium can't read"
