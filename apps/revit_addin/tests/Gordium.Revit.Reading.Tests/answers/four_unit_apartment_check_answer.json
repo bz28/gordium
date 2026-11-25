@@ -99925,9 +99925,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "93d96b4ebf69a8ea126539acd37c69ca03f56ef7838f7121f74d528710dd42b5",
+  "worker_fingerprint": "ed7e9bed788f27ede79f7523256452e68689fc7925bd1ee05bf439942380ee1d",
   "rulebook": {
-   "new_york/ithaca_city": "812cefdcc618ea6a5b0fedcb7906bd93be17a3246f89ac173959065557439a85"
+   "new_york/ithaca_city": "b3a4fea4d543cdd97d944fe5effec38a4cab9579c518b31ebe06a2764b80d4c3"
   }
  }
 }

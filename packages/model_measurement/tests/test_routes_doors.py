@@ -338,7 +338,13 @@ def test_egress_direction_is_known_only_where_travel_can_cross_the_door_one_way_
                         [door("e", (20.25, 4), (0, 1), ("c", "s"), exit_id="s", kind="exit_enclosure"),
                          door("so", (30.25, 4), (0, 1), ("s", "outside"), swings_into="outside")])
     got = {p["id"]: p for p in measure(stair)["parts"]["means_of_egress_door"]}
-    assert got["so"]["measures"]["moe_door_swings_with_egress"] is True       # the stair's own way out
+    assert got["so"]["measures"]["moe_door_swings_with_egress"] is True       # the stair's own way out, at ground
+    # round 5: the same on an upper story (the building's lowest level is another): its door to outside may be a
+    # walkway's way into the stair, so not known
+    upper = copy.deepcopy(stair)
+    upper["levels"] = [{"id": "L0", "name": "Level 0", "elevation": -10}] + upper["levels"]
+    got = {p["id"]: p for p in measure(upper)["parts"]["means_of_egress_door"]}
+    assert _why(got["so"], "moe_door_swings_with_egress") == STOPS["egress_side_unclear"].format(name="so")
 
 
 def test_only_an_exterior_exit_door_at_discharge_surely_leads_outside():

@@ -78,10 +78,13 @@ def measure(description, clearance: float = CLEARANCE) -> dict:
     unknown = [u for u in description.get("unknown_spaces") or [] if isinstance(u, dict)]
     parts = {k: [] for k in KINDS}
     toward = {}                                     # door id -> the side egress travel goes into, or why not known
+    heights = {lv["id"]: lv["elevation"] for lv in description.get("levels") or []}   # read by floor.read already
+    lowest = min(heights.values()) if heights else None
     for level, story in floor.stories.items():
         uses = {rid: (items.get(rid) or {}).get("use") for rid in story.rooms}
         here = [u for u in unknown if u.get("level") == level]
-        toward.update(_egress_sides(story, _story_parts(story, uses, items, here, parts, clearance)))
+        toward.update(_egress_sides(story, _story_parts(story, uses, items, here, parts, clearance),
+                                    ground=heights.get(level) == lowest))
     parts["means_of_egress_door"] = door_parts(description, floor, toward)   # every door given (section group 6a)
     if floor.stops:                                      # a part that can't be placed on a story: none is "none"
         for u in unknown:
@@ -155,7 +158,7 @@ def _story_parts(story, uses, items, unknown, parts, r):
     return access if routes is not None else None
 
 
-def _egress_sides(story, access) -> dict:
+def _egress_sides(story, access, ground=False) -> dict:
     """{door id: the side (a room id, or "outside") egress travel goes into through it, or the Stop why that isn't
     known} for each door the story's routes read (section group 6b, 1010.1.2.1: "swing in the direction of egress
     travel"). Known only where the door can carry egress one way alone (review round 1 of section group 6b):
@@ -167,8 +170,9 @@ def _egress_sides(story, access) -> dict:
       exterior exit door at the level of exit discharge: outside; any other exit door with outside on one side (a
       stair's door onto an occupiable roof, whose occupants egress into the stair: 1004.7): not known.
     - Any other door to outside: outside only where it is an exit stair's or passageway's own way out (its room is the
-      exit an exit door on the story enters); else not known (review round 4: an exterior balcony's door back into the
-      corridor carries egress in). Whether an occupied patio or roof egresses back in through even an exit's way out
+      exit an exit door on the story enters) on the building's lowest story (`ground`: the level of exit discharge it
+      can be); else not known (review rounds 4 and 5: an exterior balcony's door back into the corridor, or into the
+      stair on an upper story, carries egress in). Whether an occupied patio or roof egresses back in through even an exit's way out
       (1004.7) is the swing rule's own condition (the building's occupied outdoor areas), so the panel asks that fact.
     - Any other: away from the one room whose exit access it is (a door from which a route reaches an exit without
       coming back into the room), only where that room is stated end-only (sleeping, an end-only use, lockable, or
@@ -195,7 +199,7 @@ def _egress_sides(story, access) -> dict:
                 out[d.id] = unclear(d)
             continue
         if OUTSIDE_SIDE in d.sides:                  # round 4: only an exit's own way out (a balcony's door back in)
-            out[d.id] = OUTSIDE_SIDE if any(s in exit_rooms for s in d.sides) else unclear(d)
+            out[d.id] = OUTSIDE_SIDE if ground and any(s in exit_rooms for s in d.sides) else unclear(d)
             continue
         rooms = [s for s in d.sides if s != OUTSIDE_SIDE]
         if any(isinstance(access.get(s), Stop) for s in rooms):
