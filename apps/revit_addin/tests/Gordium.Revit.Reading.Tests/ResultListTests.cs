@@ -340,18 +340,17 @@ public sealed class ResultListTests
         Assert.StartsWith("    private void ListKeys(object sender, I.KeyEventArgs e)\n    {\n        // only a key on a row, or on the list itself", keys, StringComparison.Ordinal);
         // a row, or an opener of the two results views (UI polish PR 3 review round 1: the keyboard opens what a click does);
         // never a fold after the rows
-        Assert.Contains("var on = Within<C.ListBoxItem>(e.OriginalSource)?.DataContext;\n" +
-                        "        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem,\n" +
+        Assert.Contains("var on = Within<C.ListBoxItem>(e.OriginalSource)?.DataContext;\n", keys, StringComparison.Ordinal);
+        Assert.Contains("        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem or AnswerFootItem,\n" +
                         "                                     onList: ReferenceEquals(e.OriginalSource, _list)))\n            return;", keys, StringComparison.Ordinal);
         Assert.DoesNotContain("FoldItem", keys[..keys.IndexOf("return;", StringComparison.Ordinal)], StringComparison.Ordinal);
         // the add-in half of the keyboard fix (review round 2): an opener is focusable and drawn where the keyboard is,
         // it stays selected (never sent to Revit), and a key on it opens or folds it with the keyboard kept on it
-        Assert.Contains("var at = _list.SelectedIndex;\n" +
-                        "        if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.KeyToggles(_entries[at], e.Key.ToString()) is { } toggles)\n" +
+        Assert.Contains("        if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.KeyToggles(_entries[at], e.Key.ToString()) is { } toggles)\n" +
                         "        {\n            ToggleOpen(toggles);\n            FocusEntry(at);", keys, StringComparison.Ordinal);
         var selected = view[view.IndexOf("    private void Selected()", StringComparison.Ordinal)..];
-        Assert.Contains("_list.SelectedItem is not null and not (FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem)", selected[..selected.IndexOf("_select(", StringComparison.Ordinal)], StringComparison.Ordinal);
-        Assert.Contains("FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem => \"list.opener\"", Addin("ResultsList.cs"), StringComparison.Ordinal);
+        Assert.Contains("_list.SelectedItem is not null and not (FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem or AnswerFootItem)", selected[..selected.IndexOf("_select(", StringComparison.Ordinal)], StringComparison.Ordinal);
+        Assert.Contains("FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem or AnswerFootItem => \"list.opener\"", Addin("ResultsList.cs"), StringComparison.Ordinal);
         var stylesText = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "PanelStyles.xaml"));
         var opener = stylesText[stylesText.IndexOf("x:Key=\"list.opener\"", StringComparison.Ordinal)..];
         opener = opener[..opener.IndexOf("</Style>", StringComparison.Ordinal)];

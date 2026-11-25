@@ -1073,7 +1073,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         if (_list.SelectedItem is not RowItem row)
         {
             // a heading is never the selection; an opener of the two views is (the keyboard is on it), sent to Revit never
-            if (!_quiet && _list.SelectedItem is not null and not (FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem))
+            if (!_quiet && _list.SelectedItem is not null and not (FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem or AnswerFootItem))
                 _list.SelectedItem = null;
             return;
         }
@@ -1099,7 +1099,31 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     {
         // only a key on a row, or on the list itself: never one meant for a fold after the rows (Space on Details)
         var on = Within<C.ListBoxItem>(e.OriginalSource)?.DataContext;
-        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem,
+        // in a question's controls: Tab and Shift+Tab move between them (Yes, No), Esc goes back to its line in the list
+        // (the list takes Tab once: without this the keyboard could never reach No; review round 1)
+        if (on is QuestionItem && OwnKeys(e.OriginalSource) && Within<C.ListBoxItem>(e.OriginalSource) is { } inItem)
+        {
+            if (e.Key == I.Key.Escape)
+            {
+                inItem.Focus();
+                e.Handled = true;
+                return;
+            }
+            if (e.Key == I.Key.Tab)
+            {
+                var controls = Controls(inItem);
+                var here = controls.FindIndex(c => c.IsKeyboardFocusWithin);
+                var shift = (I.Keyboard.Modifiers & I.ModifierKeys.Shift) != 0;
+                var to = here + (shift ? -1 : 1);
+                if (here >= 0 && to >= 0 && to < controls.Count)
+                {
+                    controls[to].Focus();
+                    e.Handled = true;
+                    return;
+                }
+            }
+        }
+        if (!ResultList.ListTakesKey(onRow: on is RowItem or FixGroupItem or FixCardItem or CodeNodeItem or QuestionItem or MoreQuestionsItem or AnswerFootItem,
                                      onList: ReferenceEquals(e.OriginalSource, _list)))
             return;
         // a key in a question's own control (its dropdown, its box, its Yes / No) is the control's: never the list's
@@ -1107,8 +1131,22 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         if (OwnKeys(e.OriginalSource))
             return;
         var ctrl = (I.Keyboard.Modifiers & I.ModifierKeys.Control) != 0;
-        // an opener of the two views: the key opens or folds it, as a click does, and the keyboard stays on it
+        // a question: Enter or Space goes into its control; the card's foot: Enter or Space saves (review round 1)
         var at = _list.SelectedIndex;
+        if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.EntersControl(_entries[at], e.Key.ToString())
+            && _list.ItemContainerGenerator.ContainerFromIndex(at) is C.ListBoxItem item)
+        {
+            Controls(item).FirstOrDefault()?.Focus();
+            e.Handled = true;
+            return;
+        }
+        if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.Saves(_entries[at], e.Key.ToString()) && _entries[at] is AnswerFootEntry foot)
+        {
+            SaveAnswers(foot.Questions);
+            e.Handled = true;
+            return;
+        }
+        // an opener of the two views: the key opens or folds it, as a click does, and the keyboard stays on it
         if (!ctrl && at >= 0 && at < _entries.Count && ResultViewList.KeyToggles(_entries[at], e.Key.ToString()) is { } toggles)
         {
             ToggleOpen(toggles);
@@ -1139,6 +1177,10 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
 
     /// <summary>Whether a key's source is a control inside an entry that takes keys itself (a dropdown, a text box, a
     /// button): the list leaves the key to it.</summary>
+    /// <summary>A question's own controls, in order (its dropdown, its Yes and No, its box).</summary>
+    private static List<C.Control> Controls(W.DependencyObject item) =>
+        [.. Descendants(item).OfType<C.Control>().Where(c => c is C.ComboBox or C.Primitives.ToggleButton or C.TextBox && c.TemplatedParent is null && c.IsVisible && c.Focusable)];
+
     internal static bool OwnKeys(object? source) =>
         Within<C.ComboBox>(source) is not null || Within<C.TextBox>(source) is not null || Within<C.Primitives.ButtonBase>(source) is not null;
 
@@ -1375,16 +1417,18 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     /// keyboard on it (the view chosen for the project is not changed by this).</summary>
     public void Answer()
     {
-        if (_content?.Model?.Views is not { } views || views.Fix.FirstOrDefault(g => g.Kind == FixKind.Answer) is not { } group)
+        if (_content?.Model?.Views is not { } views || _detailId is not { } id || ResultViewList.AnswerKeys(views, id) is not { Count: > 0 } keys)
             return;
         _detailId = null;
         _bodyHost.Child = _results;
         _view = ResultsViewKind.WhatToFix;
-        _openView.Add(ResultViewList.GroupKey(group));
+        _openView.UnionWith(keys);
         ShowSearch(false);
         Chips(Stale);
         Relayout();
-        FocusEntry(_items.FindIndex(i => i is FixGroupItem g && g.Entry.Group.Kind == FixKind.Answer));
+        // the keyboard on the result's first question (review round 1), else the group
+        var first = _items.FindIndex(i => i is QuestionItem q && q.Entry.Question.Card.Rows.Any(r => r.Id == id));
+        FocusEntry(first >= 0 ? first : _items.FindIndex(i => i is FixGroupItem g && g.Entry.Group.Kind == FixKind.Answer));
     }
 
     // ---- the questions card (UI polish changes 22, 23; IListHost) --------------------------------------------

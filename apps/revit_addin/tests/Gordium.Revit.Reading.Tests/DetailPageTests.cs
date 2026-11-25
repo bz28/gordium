@@ -231,10 +231,79 @@ public sealed class DetailPageTests
         // the keyboard stops on a question and on "+ N more", and opens them
         Assert.True(ResultList.Stops(first.OfType<QuestionEntry>().First()));
         Assert.Equal(more.Key, ResultViewList.KeyToggles(more, "Enter"));
-        Assert.False(ResultList.Stops(foot));
+        // review round 1: the keyboard answers a question (Enter goes into its control, Right opens its results) and
+        // reaches Save (the foot is a stop, Enter saves)
+        var question = first.OfType<QuestionEntry>().First(q => q.Question.Field is not null);
+        Assert.True(ResultViewList.EntersControl(question, "Enter"));
+        Assert.True(ResultViewList.EntersControl(question, "Space"));
+        Assert.Null(ResultViewList.KeyToggles(question, "Enter"));
+        Assert.Equal(question.Key, ResultViewList.KeyToggles(question, "Right"));
+        Assert.True(ResultList.Stops(foot));
+        Assert.True(ResultViewList.Saves(foot, "Enter"));
+        Assert.False(ResultViewList.Saves(question, "Enter"));
+        Assert.Contains("Save and check again", ResultViewList.Spoken(foot), StringComparison.Ordinal);
+        var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
+        Assert.Contains("ResultViewList.EntersControl(_entries[at], e.Key.ToString())", view, StringComparison.Ordinal);
+        Assert.Contains("ResultViewList.Saves(_entries[at], e.Key.ToString())", view, StringComparison.Ordinal);
+        Assert.Contains("or AnswerFootItem => \"list.opener\"",
+                        File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs")), StringComparison.Ordinal);
         // without the fields (not read): the cards as before
         Assert.Contains(ResultViewList.Layout(m.Views!, ResultList.Place(m), ResultsViewKind.WhatToFix, open, null, null, false),
                         e => e is FixCardEntry { Card.Kind: FixKind.Answer });
+    }
+
+    /// <summary>Review round 1: the detail's "Answer N questions" opens the questions card so the result's own questions
+    /// show, even one past the first few (behind "+ N more questions").</summary>
+    [Fact]
+    public void Answer_opens_the_card_so_the_results_own_questions_show()
+    {
+        var m = Apartment();
+        var answers = Answers(m);
+        var fields = Fields();
+        foreach (var row in answers.Rows)
+        {
+            var keys = ResultViewList.AnswerKeys(m.Views!, row.Id);
+            Assert.Contains(ResultViewList.GroupKey(answers), keys);
+            var shown = ResultViewList.Layout(m.Views!, ResultList.Place(m), ResultsViewKind.WhatToFix, keys.ToHashSet(), null, null, false, fields)
+                                      .OfType<QuestionEntry>().Select(q => q.Question.Card).ToList();
+            Assert.All(answers.Cards.Where(c => c.Rows.Any(r => r.Id == row.Id)), c => Assert.Contains(c, shown));
+        }
+        // a row whose question is past the first five: "+ N more" opened for it
+        var late = answers.Cards.Skip(ProjectQuestions.ShownAtFirst).SelectMany(c => c.Rows).First();
+        Assert.Contains(ResultViewList.MoreQuestionsKey, ResultViewList.AnswerKeys(m.Views!, late.Id));
+        // a row that asks no question: nothing to open
+        var none = ResultList.Place(m).First(p => answers.Rows.All(r => r.Id != p.Row.Id)).Row.Id;
+        Assert.Empty(ResultViewList.AnswerKeys(m.Views!, none));
+    }
+
+    /// <summary>Review round 1: a Save Revit took only part of says what it saved (and that Ctrl+Z undoes it), never
+    /// that the answers weren't saved; a Save that wrote nothing says so.</summary>
+    [Fact]
+    public void A_partly_saved_answer_set_says_what_was_saved()
+    {
+        var part = PaneWords.AnswersNotSaved(["Gordium: Sprinkler system isn't on Project Information"], 1, "Committed");
+        Assert.StartsWith("Saved 1 (Ctrl+Z undoes it)", part, StringComparison.Ordinal);
+        Assert.DoesNotContain("weren't saved", part, StringComparison.Ordinal);
+        Assert.Contains("Nothing was checked", part, StringComparison.Ordinal);
+        var none = PaneWords.AnswersNotSaved(["x"], 0, "RolledBack");
+        Assert.StartsWith("Your answers weren't saved", none, StringComparison.Ordinal);
+        Assert.Contains("PaneWords.AnswersNotSaved(refused, applied.Count, status)",
+                        File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsPane.cs")), StringComparison.Ordinal);
+    }
+
+    /// <summary>Review round 1: a length question says its unit beside the box (the project's, as the Setup form's
+    /// label does), so "20" in a metric project is never read in a unit the architect didn't see.</summary>
+    [Fact]
+    public void A_length_question_says_its_unit()
+    {
+        var list = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsList.cs"));
+        Assert.Contains("var unit = f.Kind == FieldKind.Feet ? f.LengthUnit : null;", list, StringComparison.Ordinal);
+        Assert.Contains("unit.Known ? unit.Symbol :", list, StringComparison.Ordinal);
+        var metric = SetupScreen.Build(new RevitModel { Document = "m.rvt", Marked = [], ProjectMarks = new Dictionary<Guid, MarkValue>(),
+                                                        DisplayUnits = "autodesk.unit.unit:meters-1.0.1" }, [], null).Fields;
+        var stream = ProjectQuestions.FieldFor("facts.stream_distance", metric);
+        Assert.Equal(FieldKind.Feet, stream!.Kind);
+        Assert.Equal("m", stream.LengthUnit.Symbol);
     }
 
     [Fact]

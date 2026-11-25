@@ -52,7 +52,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
         });
         if (refused.Count > 0 || status is not ("Committed" or "Nothing"))
         {
-            Say(PaneWords.AnswersNotSaved(refused, status));
+            Say(PaneWords.AnswersNotSaved(refused, applied.Count, status));
             return;
         }
         Say(applied.Count == 0 ? "" : $"Saved {applied.Count} (Ctrl+Z undoes it).");

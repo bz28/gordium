@@ -176,6 +176,9 @@ public static class ResultViewList
         };
         if (k is null || !canOpen)
             return null;
+        // a question with a control: Enter and Space go into its control (EntersControl), Right and Left open its results
+        if (e is QuestionEntry { Question.Field: not null } && key is "Enter" or "Return" or "Space")
+            return null;
         return key switch
         {
             "Enter" or "Return" or "Space" => k,
@@ -183,6 +186,31 @@ public static class ResultViewList
             "Left" when open => k,
             _ => null,
         };
+    }
+
+    /// <summary>Whether a key on <paramref name="e"/> moves the keyboard into the question's own control (its dropdown,
+    /// Yes / No or box: review round 1, the keyboard could reach a question but never answer it): Enter or Space on a
+    /// question Gordium has a field for.</summary>
+    public static bool EntersControl(ListEntry e, string key) =>
+        e is QuestionEntry { Question.Field: not null } && key is "Enter" or "Return" or "Space";
+
+    /// <summary>Whether a key on <paramref name="e"/> presses the questions card's Save and check again (Enter or Space
+    /// on its foot, which the keyboard stops on: review round 1).</summary>
+    public static bool Saves(ListEntry e, string key) => e is AnswerFootEntry && key is "Enter" or "Return" or "Space";
+
+    /// <summary>The keys to open so a result's questions show in the questions card (the detail's "Answer N
+    /// questions": review round 1, a result's question past the first few was left behind "+ N more questions"): the
+    /// "Answer" group, and "+ N more" when any of the result's questions is past the first few; empty when the result
+    /// asks no question.</summary>
+    public static IReadOnlyList<string> AnswerKeys(ResultViewsModel model, string rowId)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        if (model.Fix.FirstOrDefault(g => g.Kind == FixKind.Answer) is not { } group)
+            return [];
+        var at = group.Cards.Select((c, i) => (c, i)).Where(x => x.c.Rows.Any(r => r.Id == rowId)).Select(x => x.i).ToList();
+        if (at.Count == 0)
+            return [];
+        return at.Any(i => i >= ProjectQuestions.ShownAtFirst) ? [GroupKey(group), MoreQuestionsKey] : [GroupKey(group)];
     }
 
     /// <summary>What a screen reader says for an opener (review round 5: on the list item the keyboard is on, not
@@ -196,6 +224,7 @@ public static class ResultViewList
         QuestionEntry q => $"{q.Question.Card.Headline}, {ProjectQuestions.Affects(q.Question.Affects)}"
                            + (q.Question.Field is null ? ", " + ProjectQuestions.NoField : "") + (q.Open ? ", results shown" : ""),
         MoreQuestionsEntry m => ProjectQuestions.MoreWords(m.Hidden, m.Open),
+        AnswerFootEntry f => "Save and check again: Enter saves the answers chosen in this card. " + ProjectQuestions.NothingSaved,
         _ => null,
     };
 
