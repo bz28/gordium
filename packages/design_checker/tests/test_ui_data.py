@@ -661,3 +661,15 @@ def test_the_plan_never_says_a_marked_facts_revit_mark_is_still_to_come():
         if re.search(r"Revit mark\S* (is|are) a follow-up|marks? join group", sentence):
             named = [k for k in code_scope.MARK if k in sentence]
             assert not named, (named, sentence[:200])
+
+
+def test_a_door_whose_leaves_arent_given_is_asked_for_by_the_field_its_type_mark_answers():
+    # the door-type mark (Revit's Gordium: Leaves, doors[].leaves): before it, "Mark the door leaves in the model", a
+    # mark Revit didn't have; now the ask names the field, so the host's card opens its mark
+    from model_measurement.routes.stops import STOPS
+    why = "door leaves: " + STOPS["door_leaves_not_given"].format(name="D01")
+    got = ui_data._from_cause({"kind": "mark", "key": "mark:means_of_egress_door:moe_door_leaves", "words": why,
+                               "measure": "moe_door_leaves"}, "means_of_egress_door")
+    assert (got["kind"], got["field"], got["key"]) == ("mark", "doors[].leaves", "field:doors[].leaves")
+    assert got["headline"] == "Set how many leaves each door type has (1, or 2 for a pair with no mullion)"
+    assert "no mark for it" not in STOPS["door_leaves_not_given"]
