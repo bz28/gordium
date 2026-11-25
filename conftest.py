@@ -83,7 +83,7 @@ def pytest_collection_modifyitems(config, items):
 # recorded on, so a test near a second would otherwise fail by chance. A test of a few seconds hardly moves a part's
 # time, and its time on CI's machines varies run to run (PR #190, 2026-11-24: four tests of 3.0 to 3.6 s failed two
 # parts that had passed before), so a part fails only for an unlisted test of TOO_SLOW, 30 s, or more: CI's run times
-# vary run to run by 2x or more (#203, 2026-11-25: a test listed at under a second's margin took 12 s), and a test
+# vary a lot run to run (#203, 2026-11-25: a test recorded under a second, so not in the list, took 12 s), and a test
 # under 30 s barely moves a part's ~20 minutes; the list still keeps every test of a second or more when recorded.
 TOO_SLOW = 30.0
 # The list balances the parts by Linux's times, and only a Linux part fails for an unlisted slow test: CI's Windows
