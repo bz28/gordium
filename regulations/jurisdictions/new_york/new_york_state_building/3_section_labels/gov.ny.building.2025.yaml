@@ -54,6 +54,22 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:accessible_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines ACCESSIBLE UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 32
+      lines:
+      - 32
+      - 33
+      quote: '[BE] ACCESSIBLE UNIT. A dwelling unit or sleeping unit that complies with this code and the provisions for Accessible
+        units in ICC A117.1.'
+    piece_sha256: 3324feb626458076a684e2c2614aaa33f3d85d1301d25ed55b68240d1d1f1e60
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:addition:
     label: reference
     topic: definitions
@@ -1680,6 +1696,22 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:overhead_doorstop:
+    label: reference
+    topic: definitions
+    reason: 'Defines OVERHEAD DOORSTOP, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 6
+      - 7
+      quote: '[BE] OVERHEAD DOORSTOP. Door hardware mounted at the top of the door and to the door frame that limits the swing
+        of the door in the opening.'
+    piece_sha256: fe7e9cd1315fd3fcc3242c0e146260cd57b253d3162cf54d5b396b0ee8a84264
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:owner:
     label: reference
     topic: definitions
@@ -1781,6 +1813,22 @@ labels:
     piece_sha256: cba47445614836ec18b24c06d1f38091ad465872a996a4a8e81d0bcd4f1654b9
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
       3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:plumbing_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: 'Defines PLUMBING CODE OF NEW YORK STATE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 57
+      lines:
+      - 36
+      - 37
+      quote: '[NY] PLUMBING CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Plumbing Code of New York
+        State”, published by the International Code Council, Inc. (publication date July 2025).'
+    piece_sha256: 1d1e666b5250e6f76b3e98251099e4533448cbce3ff3152a850f71c500a95a3e
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:public_way:
@@ -1989,6 +2037,25 @@ labels:
         in successive floors,'
     piece_sha256: e71439843471aa2ff123ab5ce97601fda6d8516eac49321eca77972a76bd8d60
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:shower:
+    label: reference
+    topic: definitions
+    reason: 'Defines SHOWER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 27
+      - 33
+      quote: '[NY] SHOWER. A device that sprays water on the body. [NY] Cleansing. A shower located within a hygiene facility
+        using warm water and soap. The purpose of showers is to remove contaminants including perianal fecal material, sweat,
+        skin cells, personal care products, and dirt before bathers enter the aquatic venue. [NY] Rinse. A shower typically
+        located in the pool deck area with ambient temperature water. The main purpose is to remove dirt, sand, or organic material
+        prior to entering the aquatic venue to reduce the introduction of contaminants and the formation of disinfection byproduct.'
+    piece_sha256: 2d11d59170848ae3e34dbc53ce98df7407a0acd2c8acdbc0fd2a8612c2108d2d
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:site:
@@ -2307,6 +2374,39 @@ labels:
     piece_sha256: a50c365023e107da8eab8f57defaddf42c7c9a7db84a49d484e64c9ba5f4e6da
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group 5c
       (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term 1005.7.2 uses, by the book''s italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:type_a_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines TYPE A UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 65
+      lines:
+      - 34
+      - 35
+      quote: '[BE] TYPE A UNIT. A dwelling unit or sleeping unit designed and constructed for accessibility in accordance with
+        this code and the provisions for Type A units in ICC A117.1.'
+    piece_sha256: af41f2f6852fed20551c5a7669196c2c62200a0d947fd5ea7c6cff92e139cb53
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:type_b_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines TYPE B UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 65
+      lines:
+      - 36
+      - 37
+      quote: '[BE] TYPE B UNIT. A dwelling unit or sleeping unit designed and constructed for accessibility in accordance with
+        this code and the provisions for Type B units in ICC A117.1, consistent with the design and construction requirements
+        of the federal Fair Housing Act.'
+    piece_sha256: e6ba8254a2a98fee8232a0fb07f252b60f7a7bf0e547c6040d18f22af1b99cda
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:underlayment:
@@ -3622,6 +3722,92 @@ labels:
         the required means of egress, not less than two shall be arranged in accordance with Section 1007.1.3.
     piece_sha256: 95666aa8d19504985ae889a9bcbcdf0c1685f7465ee3ad784ab548c7c4e310c2
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1010.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'Doors in the means of egress are readily distinguishable as doors, carry no mirrors and aren''t concealed by curtains
+      or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and turnstiles 1010.5 (not brought in): none of it
+      is in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 322
+      lines:
+      - 28
+      - 36
+      quote: 1010.1 General. Doors in the means of egress shall comply with the requirements of Sections 1010.1.1 through 1010.3.4.
+        Exterior exit doors shall also comply with the requirements of Section 1022.2. Gates in the means of egress shall comply
+        with the requirements of Sections 1010.4 and 1010.4.1. Turnstiles in the means of egress shall comply with the requirements
+        of Sections 1010.5 through 1010.5.4. Doors, gates and turnstiles provided for egress purposes in numbers greater than
+        required by this code shall comply with the requirements of this section. Doors in the means of egress shall be readily
+        distinguishable from the adjacent construction and finishes such that the doors are easily recognizable as doors. Mirrors
+        or similar reflecting materials shall not be used on means of egress doors. Means of egress doors shall not be concealed
+        by curtains, drapes, decorations or similar materials.
+    piece_sha256: c1e2ce1fde03033ec7eec8d0217bc8b6732499263e79d2a42b83fc0720085261
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Each door opening''s clear width (32 inches, 41 1/2 inches for Group I-2 bed movement) and clear height (80 inches),
+      with exceptions that loosen them within dwelling and sleeping units, for small storage closets and for compartments: measurable
+      per door from its maker''s stated clear opening. Its capacity for the occupant load is a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 322
+      lines:
+      - 37
+      - 58
+      quote: '1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof
+        and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging
+        doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where
+        this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves
+        without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving
+        as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches
+        (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm). Exceptions: 1. In
+        Group R-2 and R-3 dwelling and sleeping units that are not required to be an Accessible unit, Type A unit or Type B
+        unit, the minimum width shall not apply to door openings that are not part of the required means of egress. 2. In Group
+        I-3, door openings to resident sleeping units that are not required to be an Accessible unit shall have a mini- mum
+        clear opening width of 28 inches (711 mm). 3. Door openings to storage closets less than 10 square feet (0.93 m[fn2])
+        in area shall not be limited by the minimum clear opening width. 4. Door openings within a dwelling unit or sleeping
+        unit shall have a minimum clear opening height of 78 inches (1981 mm). 5. In dwelling and sleeping units that are not
+        required to be Accessible, Type A or Type B units, exterior door openings other than the required exit door shall have
+        a minimum clear opening height of 76 inches (1930 mm). 6. In Groups I-1, R-2, R-3 and R-4, in dwelling and sleeping
+        units that are not required to be Accessible, Type A or Type B units, the minimum clear opening widths shall not apply
+        to interior egress doors. 7. Door openings required to be accessible within Type B units intended for user passage shall
+        have a minimum clear opening width of 31.75 inches (806 mm).'
+    - file: gov.ny.building.2025.pdf
+      page: 323
+      lines:
+      - 3
+      - 5
+      quote: 8. Doors serving sauna compartments, toilet compartments or dressing, fitting or changing compartments that are
+        not required to be accessible shall have a minimum clear opening width of 20 inches (508 mm). 9. Doors serving shower
+        compartments shall comply with Section 421.4.2 of the Plumbing Code of New York State.
+    piece_sha256: 112c58f8b7ca46cda115ba232f295d1f56b73dcb902b0c8d8520a936c010a49d
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.1.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Nothing projects into a door''s required clear width below 34 inches, and at most 4 inches between 34 and 80 inches
+      (closers, stops and the like down to 78 inches): door hardware isn''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 323
+      lines:
+      - 6
+      - 10
+      quote: '1010.1.1.1 Projections into clear opening. There shall not be projections into the required clear opening width
+        lower than 34 inches (864 mm) above the floor or ground. Projections into the clear opening width between 34 inches
+        (864 mm) and 80 inches (2032 mm) above the floor or ground shall not exceed 4 inches (102 mm). Exception: Door closers,
+        overhead doorstops, frame stops, power door operators, and electromagnetic door locks shall proj- ect into the door
+        opening height not lower than 78 inches (1980 mm) above the floor.'
+    piece_sha256: 510625f8fefc1d31569155bbb4d0b0fa8b26eedd717388b481591941632e1231
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1016.2':

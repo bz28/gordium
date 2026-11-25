@@ -121,6 +121,17 @@ results:
   general.bc_1005_7_1_door_encroachment: needs_review
   general.bc_1005_7_2_projections: needs_review
   general.bc_1005_7_3_protruding_objects: needs_review
+  # section group 6a: 1010.1.1's door size for every door (ten: four a story, and the two stairs' outside doors on Level
+  # 1), from each one's maker's stated clear opening (eval_marks.yaml door_types: 34 in by 80 in), never its 36 by 84
+  # leaf. Width: 34 in is past 32 in and Group R-2 isn't Group I-2, but how many leaves each door has isn't stated (no
+  # Revit mark yet), and a pair's one leaf must give the 32 in: needs review. Height: 80 in, 1010.1.1's own, on every
+  # door: complies. The capacity (its occupants per door aren't worked out), 1010.1's look and 1010.1.1.1's projections
+  # are flags
+  general.bc_1010_1_1_door_width: needs_review
+  general.bc_1010_1_1_door_height: pass
+  general.bc_1010_1_1_door_capacity: needs_review
+  general.bc_1010_1_1_1_projections: needs_review
+  general.bc_1010_1_doors_general: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review
