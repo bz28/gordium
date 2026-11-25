@@ -87,6 +87,12 @@ public static class RouteReader
         // left out, and the room is occupied (measured), so no note: blank is the usual answer
         if (r.NotOccupied is { } notOccupied)
             room["not_occupied"] = notOccupied;
+        // its Table 1004.5 function (the Building Code's occupant loads): sent only as one of Gordium's words; a word
+        // not in the list is said and not sent (its load needs review); blank is the usual answer (a house, a corridor)
+        if (r.Function is { } function)
+            room["function"] = function;
+        else if (r.FunctionWord is { } typed)
+            notes.Add(new(r.Id, "function", $"{Marks.RoomFunction.Name} is \"{typed}\", not one of Table 1004.5's functions Gordium lists: its occupant load needs review"));
     }
 
     // ---- everything else, once the rooms and doors are read ----------------------------------------------------

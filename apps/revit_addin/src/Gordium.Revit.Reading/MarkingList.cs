@@ -13,7 +13,8 @@ public enum MarkedKind { Room, Window, Door, Level, SiteSlab, SiteObject }
 /// <summary>A room's marks, read: each null when not stated. <see cref="Use"/> is the description's word (null for a
 /// word not in <see cref="RoomUses"/>), <see cref="UseWord"/> what the architect typed.</summary>
 public sealed record RoomMarks(string Id, string? Name, bool? Sleeping, string? Use = null, string? UseWord = null,
-                               bool? Lockable = null, bool? PassThrough = null, bool? NotOccupied = null);
+                               bool? Lockable = null, bool? PassThrough = null, bool? NotOccupied = null,
+                               string? Function = null, string? FunctionWord = null);
 
 /// <summary>A window's or door's marks as an opening: null when not stated (an operation word not in the list, or a
 /// door's word that isn't a door's, is not stated).</summary>
@@ -70,7 +71,8 @@ public static class MarkReading
             .Select(e => new RoomMarks(e.UniqueId, e.Name, Marks.YesNo(Get(e, Marks.SleepingRoom)),
                                        RoomUses.Table.Of(Marks.Text(Get(e, Marks.Use))), Marks.Text(Get(e, Marks.Use)),
                                        Marks.YesNo(Get(e, Marks.CanBeLocked)), Marks.YesNo(Get(e, Marks.PassThrough)),
-                                       Marks.YesNo(Get(e, Marks.NotOccupied)))).ToList();
+                                       Marks.YesNo(Get(e, Marks.NotOccupied)),
+                                       RoomFunctions.Table.Of(Marks.Text(Get(e, Marks.RoomFunction))), Marks.Text(Get(e, Marks.RoomFunction)))).ToList();
 
     public static IReadOnlyList<OpeningMarks> Openings(RevitModel model) =>
         InDesign(model).Where(e => KindOf(e) is MarkedKind.Window or MarkedKind.Door)
@@ -452,6 +454,40 @@ public static class MarkingList
     /// the one table both the marking list and the Setup checklist suggest from.</summary>
     internal static string? UseFromName(string? name) =>
         name is { } n && UseNames.FirstOrDefault(u => u.Name.IsMatch(n)) is { Name: not null } hit ? RoomUses.Table.WordFor(hit.Use) : null;
+
+    /// <summary>Room names a Table 1004.5 function is suggested from (BCNYS occupant loads), the first that matches, each
+    /// with the function and when it may be offered. Only a suggestion, only on a room whose function is unset, written
+    /// only when the architect accepts it (SetupWrites.Accept). Never one for a corridor, an exit enclosure, a closet or
+    /// a toilet (FunctionFromName's caller rules those out first).</summary>
+    private static readonly (Regex Name, string Function)[] FunctionNames =
+    [
+        (new(@"\b(mechanical|mech|boiler|furnace)(\s*room)?\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "accessory_storage_mechanical"),
+        (new(@"\b(storage|store\s*room|stock\s*room)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "storage_stock_shipping"),
+        (new(@"\b(bed\s*room|bedrm|bdrm|living(\s*room)?)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "residential"),
+    ];
+
+    /// <summary>Rooms a function is never suggested for, by name: a corridor, a closet, a toilet (and the stairs, which
+    /// an exit enclosure holds).</summary>
+    private static readonly Regex NoFunctionName =
+        new(@"\b(corridor|hall\s*way|hall|circulation|passage|closet|janitor|custodial|toilet|restroom|rest\s*room|wc|lavatory|bath\s*room|bath|stair(s|way|well)?)\b",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    /// <summary>The Table 1004.5 function a room's name suggests, as the description's word, or null. <paramref name="use"/>:
+    /// the room's use as marked (the description's word): an accessory storage room is Table 1004.5's accessory storage
+    /// row whatever its name; a corridor, a closet or a toilet is offered none. <paramref name="residentialGroups"/>: the
+    /// building's stated groups are all Group R (Residential is never offered otherwise: a dormitory's rooms are
+    /// Dormitories, 50 gross, not Residential's 200).</summary>
+    internal static string? FunctionFromName(string? name, string? use, bool residentialGroups)
+    {
+        if (use is "corridor" or "closet" or "toilet")
+            return null;
+        if (use == "accessory_storage")
+            return "accessory_storage_mechanical";
+        if (name is not { } n || NoFunctionName.IsMatch(n))
+            return null;
+        var hit = FunctionNames.FirstOrDefault(f => f.Name.IsMatch(n)).Function;
+        return hit == "residential" && !residentialGroups ? null : hit;
+    }
 
     /// <summary>A word mark read through its table: given, not a word Gordium reads (to mark), or blank, whose meaning
     /// is said (nothing to mark: a house never needs it).</summary>

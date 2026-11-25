@@ -158,6 +158,18 @@ public static class Marks
         "Yes when nobody occupies this space: abandoned, its door permanently fixed shut, a shaft or chase (not a room visited for storage, maintenance, testing or inspection, NFPA 101 A.3.3.21.6). " +
         "Then NFPA 101's travel distance and common path aren't measured from it (7.6.1: from points subject to occupancy), each saying so; the IBC's still are (1016.1). Blank or No: occupied, measured.");
 
+    /// <summary>A room's function as BCNYS Table 1004.5 lists them (<c>rooms[].function</c>), one of
+    /// <see cref="RoomFunctions.Words"/>: the Building Code's occupant loads are worked out from it (its factor, gross or
+    /// net). Stated by the architect, never guessed: the Setup form may suggest one from the room's name, written only
+    /// when the architect accepts it. Blank, or a word not in the list: not sent, and the room's occupant load (and its
+    /// story's) needs review.</summary>
+    public static readonly MarkDefinition RoomFunction = new(
+        "Gordium: Function", new("de595662-5386-4cab-9245-600eefb9462d"), MarkValueKind.Text, MarkBinding.Instance,
+        [Rooms], "rooms[].function",
+        "The room's function as the 2025 Building Code of New York State's Table 1004.5 lists them (its occupant load factor is read from it), one of: " +
+        RoomFunctions.Listed + ". Leave it blank for a corridor, an exit stair enclosure, a closet or a toilet with none. " +
+        "Blank, or a word not in the list: the room's occupant load and its story's need review.");
+
     public static readonly MarkDefinition LotSurveyed = new(
         "Gordium: Lot surveyed", new("133d30e3-832f-4956-88c3-6b48989ac3f7"), MarkValueKind.YesNo, MarkBinding.Instance,
         [ProjectInformation], "facts.lot_surveyed",
@@ -507,7 +519,7 @@ public static class Marks
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
-        CanBeLocked, PassThrough, Exit, Stories, NotOccupied,
+        CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, Atrium,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
@@ -623,6 +635,37 @@ public static class RoomUses
         ("Kitchen", "kitchen"), ("Toilet", "toilet"), ("Closet", "closet"), ("Workroom", "workroom"), ("Other", "other"));
 
     public static IReadOnlyList<string> Words => Table.Words;
+}
+
+/// <summary>A room's function (<c>Gordium: Function</c> on a Room) → <c>rooms[].function</c>: BCNYS Table 1004.5's rows
+/// in its order (the BCNYS rulebook's records/occupant_load_factors.yaml <c>functions</c>, each with its factor), each
+/// in words close to the table's own.</summary>
+public static class RoomFunctions
+{
+    public static WordTable Table { get; } = new(
+        ("Accessory storage or mechanical equipment room", "accessory_storage_mechanical"), ("Agricultural building", "agricultural"),
+        ("Aircraft hangar", "aircraft_hangar"), ("Airport baggage claim", "airport_baggage_claim"),
+        ("Airport baggage handling", "airport_baggage_handling"), ("Airport concourse", "airport_concourse"),
+        ("Airport waiting area", "airport_waiting"), ("Gaming floor", "gaming_floor"),
+        ("Exhibit gallery or museum", "exhibit_gallery_museum"), ("Assembly with fixed seats", "assembly_fixed_seats"),
+        ("Assembly concentrated (chairs only, not fixed)", "assembly_concentrated"), ("Assembly standing space", "assembly_standing"),
+        ("Assembly unconcentrated (tables and chairs)", "assembly_unconcentrated"), ("Bowling center", "bowling_center"),
+        ("Business area", "business"), ("Concentrated business use area", "concentrated_business"),
+        ("Courtroom (other than fixed seating)", "courtroom"), ("Day care", "day_care"), ("Dormitory", "dormitory"),
+        ("Classroom", "classroom"), ("Shop or vocational room", "vocational_shop"), ("Exercise room", "exercise_room"),
+        ("Group H-5 fabrication or manufacturing area", "h5_fabrication"), ("Industrial area", "industrial"),
+        ("Information technology equipment facility", "information_technology"), ("Inpatient treatment area", "inpatient_treatment"),
+        ("Outpatient area", "outpatient"), ("Institutional sleeping area", "institutional_sleeping"),
+        ("Commercial kitchen", "commercial_kitchen"), ("Library reading room", "library_reading_room"),
+        ("Library stack area", "library_stack"), ("Locker room", "locker_room"), ("Mall building (covered or open)", "mall"),
+        ("Mercantile", "mercantile"), ("Storage, stock or shipping area", "storage_stock_shipping"),
+        ("Parking garage", "parking_garage"), ("Residential", "residential"), ("Rink or pool", "rink_pool"),
+        ("Pool deck", "pool_deck"), ("Stage or platform", "stage_platform"), ("Warehouse", "warehouse"));
+
+    public static IReadOnlyList<string> Words => Table.Words;
+
+    /// <summary>The words in a sentence: separated by semicolons, since some hold a comma.</summary>
+    public static string Listed => string.Join("; ", Table.Words);
 }
 
 /// <summary>The occupancy groups <c>Gordium: Occupancy groups</c> takes (BCNYS Chapter 3; code_scope.GROUPS).</summary>

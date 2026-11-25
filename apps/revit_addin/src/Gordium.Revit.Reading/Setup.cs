@@ -167,7 +167,7 @@ public sealed record SetupScreen(string Noun, IReadOnlyList<SetupField> Fields, 
             f.Mark == Marks.StreetEdge && streetOnLot == false && f.Current is not null && f.Problem is null
                 ? f with { Problem = SetupSteps.StreetOffLot } : f).ToList();
         var routes = !SetupWords.IsDwelling(use) && use is not null || SetupChecklist.AnyRouteMark(model);
-        var lines = SetupChecklist.Build(model, sides ?? [], noun, routes);
+        var lines = SetupChecklist.Build(model, sides ?? [], noun, routes, governs);
         var fixFirst = MarkReading.RoomBlockers(model).Select(e =>
             $"Room {ElementNames.Of("Rooms", e.Name, e.Number, null, 0)} " + (e.Placement switch
             {
@@ -712,7 +712,9 @@ public static class SetupChecklist
     /// <param name="sides">Each window's and door's rooms and level.</param>
     /// <param name="noun">The building in words.</param>
     /// <param name="routes">Show the escape-route lines (a building that isn't a house, or one already marked).</param>
-    public static IReadOnlyList<ChecklistLine> Build(RevitModel model, IReadOnlyList<OpeningSides> sides, string noun, bool routes)
+    /// <param name="buildingCode">The Building Code governs: show the rooms' functions line (its occupant loads).</param>
+    public static IReadOnlyList<ChecklistLine> Build(RevitModel model, IReadOnlyList<OpeningSides> sides, string noun, bool routes,
+                                                     bool buildingCode = false)
     {
         ArgumentNullException.ThrowIfNull(model);
         ArgumentNullException.ThrowIfNull(sides);
@@ -890,7 +892,46 @@ public static class SetupChecklist
                 CountWords = $"Exits: {exits} {(exits == 1 ? "door" : "doors")} marked as {(exits == 1 ? "an exit" : "exits")}",
             });
         }
+        if (buildingCode)
+            lines.Add(FunctionLine(model, rooms, doors, side, roomById));
         return lines;
+    }
+
+    /// <summary>The rooms' Table 1004.5 functions (the Building Code's occupant loads), with a suggestion from each unset
+    /// room's name (<see cref="MarkingList.FunctionFromName"/>), written only when accepted. Never one for a room an
+    /// exit enclosure or exit passageway door opens onto (either side: the enclosure, never guessed which), a corridor,
+    /// a closet or a toilet. Not needed to check: a room left blank has its occupant load at needs review.</summary>
+    private static ChecklistLine FunctionLine(RevitModel model, List<MarkedElement> rooms, List<MarkedElement> doors,
+                                              Dictionary<string, OpeningSides> side, Dictionary<string, MarkedElement> roomById)
+    {
+        var groups = Marks.Text(SetupFacts.Get(model, Marks.OccupancyGroups)) is { } typed ? OccupancyGroupWords.Parse(typed) : null;
+        var residential = groups is { Count: > 0 } && groups.All(g => g.StartsWith("R-", StringComparison.Ordinal));
+        var enclosed = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var d in doors)
+            if (ExitKinds.Table.Of(Marks.Text(MarkReading.Value(d, Marks.Exit))) is ExitKinds.Enclosure or ExitKinds.Passageway
+                && side.TryGetValue(d.UniqueId, out var s))
+                foreach (var id in new[] { s.FromRoom, s.ToRoom })
+                    if (id is not null)
+                        enclosed.Add(id);
+        bool Set(MarkedElement r) => RoomFunctions.Table.Of(Marks.Text(MarkReading.Value(r, Marks.RoomFunction))) is not null;
+        var suggestions = new List<Suggestion>();
+        foreach (var r in rooms.Where(r => Marks.Text(MarkReading.Value(r, Marks.RoomFunction)) is null && !enclosed.Contains(r.UniqueId)))
+        {
+            var use = RoomUses.Table.Of(Marks.Text(MarkReading.Value(r, Marks.Use)));
+            if (MarkingList.FunctionFromName(r.Name, use, residential) is not { } function)
+                continue;
+            var word = RoomFunctions.Table.WordFor(function);
+            var basis = use == "accessory_storage" && function == "accessory_storage_mechanical"
+                ? $"its {Marks.Use.Name} is Accessory storage"
+                : $"named \"{r.Name!.Trim()}\"" + (function == "residential"
+                    ? $"; the building's groups are {string.Join(", ", groups!)} (a dormitory's rooms are Dormitory instead)" : "");
+            suggestions.Add(new(r.UniqueId, false, Marks.RoomFunction, new MarkValue(true, Text: word), word, RoomName(r), basis));
+        }
+        return new("room_function", Marks.RoomFunction, "Room function (occupant loads)", "rooms", rooms.Count(Set), rooms.Count,
+                   rooms.Where(r => !Set(r)).Select(r => r.UniqueId).ToList(), false, false,
+                   "What each room is used for, in Table 1004.5's words, gives its occupant load factor; Revit doesn't record it.",
+                   "A room left blank has its occupant load, and its story's, at needs review. Leave corridors, exit stair enclosures, closets and toilets blank.",
+                   suggestions, []);
     }
 }
 
