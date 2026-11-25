@@ -97839,7 +97839,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "273896272439ce5529c824364d4aa8c67e37d168bd10bc9e4dc18316c975e12a",
+  "worker_fingerprint": "7a78c0a972b3f6177a2589d38c0009a05b496058725054326e5d8fa8e0566f4b",
   "rulebook": {
    "new_york/ithaca_city": "9cf1d8db2f468d5cda2e7a5aeb791de17bb24a22b83bc7c30355049a2563aaf3"
   }
