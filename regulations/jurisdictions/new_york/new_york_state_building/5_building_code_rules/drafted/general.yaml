@@ -13253,7 +13253,7 @@ rules:
       and not corridors_within_dwelling_units)
     reason: 'Under 32 in, but exception 7 allows 31.75 in for a door for user passage within a Type B unit, and whether this
       door is one isn''t shown: a person checks.'
-  - when: moe_door_clear_width >= 20 and moe_door_clear_width < 32 and not moe_door_exit
+  - when: moe_door_clear_width >= 20 and moe_door_clear_width < 32 and not (moe_door_exit and not moe_door_exterior)
     reason: 'Under 32 in, but exceptions 8 and 9 allow less for a door serving a sauna, toilet, shower, dressing, fitting
       or changing compartment (20 in; a shower compartment''s per the Plumbing Code of New York State''s 421.4.2), and whether
       this door is one isn''t shown: a person checks.'
@@ -13373,6 +13373,25 @@ rules:
       outcome: fail
     expect: fail
     note: 'A door into an exit enclosure serves no compartment and is in no unit: 32 in.'
+  - given:
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Outdoor sauna's door, an exit to the outside, 24 in clear
+        measures:
+          moe_door_clear_width: 24
+          moe_door_leaves: 1
+          moe_door_exit: true
+          moe_door_exterior: true
+          moe_door_to_corridor: false
+          moe_door_to_room_under_10_sf: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A compartment opening straight outside has that door marked an exit; it may still serve a sauna or changing compartment
+      (exception 8: 20 in): a person checks.'
   - given:
       occupancy_group: B
     parts:
@@ -13555,9 +13574,10 @@ rules:
     State 421.4.2). A door is ruled out of a unit only on a corridor the building states is in no dwelling unit, or marked
     an exit into an enclosure, passageway or horizontal exit (Gordium''s reading: a unit''s entrance door and a door into
     an exit are part of the required means of egress and no interior door within the unit, so exceptions 1 and 6 don''t reach
-    them); of a compartment, only marked an exit (exception 8 says nothing of what the door opens onto: a fitting room or
-    sauna may open onto a corridor or outside; review round 1). The capacity for the occupant load is its own flag. Hand-drafted
-    in a Claude Code session (2026-11-25).'
+    them); of a compartment, only marked an exit into an enclosure, passageway or horizontal exit (exception 8 says nothing
+    of what the door opens onto: a fitting room or sauna may open onto a corridor, or straight outside by a door marked an
+    exit; review rounds 1 and 2; Gordium''s reading: a door into an exit serves the exit, no compartment). The capacity for
+    the occupant load is its own flag. Hand-drafted in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1010_1_1_door_height

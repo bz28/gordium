@@ -15,7 +15,8 @@ law here, never from the rules:
 - **Loosest** (a fail is allowed only here): the size is measured and under the least any exception that may apply
   allows: no width at all for a door that may be in a dwelling or sleeping unit of Groups R-2, R-3, I-1 or R-4
   (exceptions 1 and 6) or to a storage closet under 10 sq ft (3); 28 in to a Group I-3 resident sleeping unit (2);
-  31.75 in within a Type B unit (7); 20 in for a compartment (8, 9: any door not marked an exit); 78 in high within a unit (4), 76 in for a
+  31.75 in within a Type B unit (7); 20 in for a compartment (8, 9: any door but one into an exit enclosure,
+  passageway or horizontal exit); 78 in high within a unit (4), 76 in for a
   unit's exterior door (5). A door may be in a unit unless it is marked an exit into an enclosure, passageway or
   horizontal exit, or it is on a corridor the building states is in no unit; within one also unless it is outside
   or marked an exit.
@@ -64,8 +65,9 @@ def may_be_within_unit(exit_, exterior, corridor, within):
 
 def may_be_compartment(exit_, exterior, corridor):
     """Exception 8 says nothing of what the door opens onto (a fitting room or sauna off a corridor, a cabana
-    outside: review round 1); only a door into an exit serves no compartment."""
-    return not exit_ is True
+    outside, its door then marked an exit: review rounds 1 and 2); only a door into an exit enclosure, passageway or
+    horizontal exit serves no compartment."""
+    return not (exit_ is True and exterior is False)
 
 
 def width_strict(group):

@@ -931,10 +931,12 @@ def test_1010_1_1_width_at_its_limits_and_just_past(ctx, rules):
     assert one(_door(41.5), i2) == "pass" and one(_door(41.49), i2) == "needs_review" and one(_door(31.99, moe_door_exit=True), i2) == "fail"
     i3 = {"occupancy_group": "I-3"} | NO_UNITS
     assert one(_door(28), i3) == "needs_review" and one(_door(27.99, moe_door_exit=True), i3) == "fail" and one(_door(32), i3) == "pass"
-    # exception 7 (31.75, within a Type B unit) and 8 (20, a compartment): only a door between two rooms may be one
+    # exception 7 (31.75, within a Type B unit: only a door between two rooms) and 8 (20, a compartment: any door but
+    # one into an exit enclosure, passageway or horizontal exit, review rounds 1 and 2)
     assert one(_door(31.75, **BETWEEN_ROOMS)) == "needs_review" and one(_door(19.99, **BETWEEN_ROOMS)) == "fail"
     assert one(_door(20, **BETWEEN_ROOMS)) == "needs_review" and one(_door(31.75, moe_door_exit=True)) == "fail"
     assert one(_door(24, **OUTSIDE)) == "needs_review"   # a compartment may open outside (review round 1)
+    assert one(_door(24, **(OUTSIDE | {"moe_door_exit": True}))) == "needs_review"   # by a door marked an exit (round 2)
     # exception 3: a storage closet under 10 sq ft, no width
     assert one(_door(10, moe_door_to_room_under_10_sf=True)) == "needs_review"
     # exceptions 1 and 6 (Groups R-2, R-3; I-1, R-2, R-3, R-4): no width for a door that may be in a unit

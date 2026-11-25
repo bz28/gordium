@@ -13,7 +13,7 @@ Each part says:
   figure the routes pass the door by. Never the door's size, its leaf, or a plan width alone: a door with no stated
   clear opening (or a malformed one) has neither size measured, so BCNYS 1010.1.1 needs review for it, never a
   pass. Every other figure given for a size must agree with the maker's within 1/16 in, or that size isn't
-  measured either (which is the door's is unclear): the plan's clear width (the routes' figure), and the drawn door
+  measured either (which is the door's is unclear), and where they agree the smallest of them counts: the plan's clear width (the routes' figure), and the drawn door
   where its drawing is given (its stops, hinge pin and closed leaf; its threshold and head stop, measured as the
   house reading measures them, model_measurement.interior.doors), or that drawing can't be measured.
 - `moe_door_leaves` (count): the description's `leaves` (1, or 2 for a pair with no mullion): 1010.1.1 asks one
@@ -93,9 +93,10 @@ def _sizes(part, item, reader) -> None:
     part["more"]["stated_clear"] = {**stated, "source": maker["source"]}
     # every other figure the description gives for a size must agree with the maker's (within 1/16 in), else the
     # size isn't measured: the drawn door (as the house reading draws it: its stops, hinge pin and closed leaf; its
-    # threshold and head stop) and, for the width, the plan's clear width the routes pass it by. Never the larger of
-    # two figures, and never a size taken from anything but the maker's (review round 1 of section group 6a: a door
-    # drawn 70 in high was measured at its stated 84)
+    # threshold and head stop) and, for the width, the plan's clear width the routes pass it by. Where they agree, the
+    # smallest counts (drawing noise read on the cautious side, as the house reading reads it). Never the larger of
+    # two figures, and never a size taken from anything but the maker's within 1/16 in (review rounds 1 and 2 of
+    # section group 6a: a door drawn 70 in high was measured at its stated 84; one drawn 79 31/32 in at its 80)
     plan = item.get("plan")
     others = {"width": [("plan", plan.get("clear_width") if isinstance(plan, dict) else None, None)],
               "height": []}
@@ -103,7 +104,7 @@ def _sizes(part, item, reader) -> None:
         if any(item.get(k) is not None for k in DRAWN[key]):
             others[key].append(("drawing", None, fn))
     for key, name_ in (("width", "moe_door_clear_width"), ("height", "moe_door_clear_height")):
-        why_not = None
+        why_not, least = None, stated[key]
         for where, value, fn in others[key]:
             if value is None and fn is None:
                 continue
@@ -117,10 +118,11 @@ def _sizes(part, item, reader) -> None:
                 why_not = Stop("door_clear_disagree", name=name, where=where, size=key, other=got,
                                stated=stated[key]).reason
                 break
+            least = min(least, got)          # within 1/16 in: the less favourable counts (review round 2)
         if why_not:
             why[name_] = why_not
         else:
-            m[name_] = stated[key]
+            m[name_] = least
 
 
 def _leaves(part, item) -> None:
