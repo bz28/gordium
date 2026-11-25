@@ -11609,9 +11609,9 @@ rules:
   check: corridor_occupant_load <= 10 or ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours
     >= 0.5) or (occupancy_group in ["R-3", "R-4"] and sprinklered_903_3_1_3 and corridor_fire_rating_hours >= 1)
   review_when:
-  - when: corridors_within_dwelling_units and corridor_occupant_load > 10 and not ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
-      and corridor_fire_rating_hours >= 0.5) and not (occupancy_group in ["R-3", "R-4"] and sprinklered_903_3_1_3 and corridor_fire_rating_hours
-      >= 1)
+  - when: corridor_occupant_load > 10 and not ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours
+      >= 0.5) and not (occupancy_group in ["R-3", "R-4"] and sprinklered_903_3_1_3 and corridor_fire_rating_hours >= 1) and
+      corridors_within_dwelling_units
     reason: 'Unless the corridor is within a dwelling unit or sleeping unit (exception 2: no rating required there), which
       the building states or doesn''t rule out, the table''s rating isn''t met: a person checks.'
   for_each: corridor
@@ -11869,8 +11869,8 @@ rules:
       system is the one the column means is a person''s check (never a pass on it).'
   - when: occupancy_group == "I-3" and sprinklered_903_3_1_1 and corridor_fire_rating_hours < 1
     reason: 'Group I-3 under 1 hour: note b''s reduction (408.8, not brought in) may allow less: a person checks.'
-  - when: occupancy_group == "I-1" and corridors_within_dwelling_units and not (sprinklered_903_3_1_1 and corridor_fire_rating_hours
-      >= 1)
+  - when: occupancy_group == "I-1" and not ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and corridor_fire_rating_hours
+      >= 1) and corridors_within_dwelling_units
     reason: 'Unless the corridor is within a dwelling unit or sleeping unit (exception 2: no rating required there), which
       the building states or doesn''t rule out, the table''s rating isn''t met: a person checks.'
   for_each: corridor
@@ -12324,7 +12324,7 @@ rules:
   - when: corridor_width >= 24 and corridor_width < 36
     reason: 'Under 36 in, but within Table 1020.3''s 24 in for a corridor that gives access to and use of mechanical, plumbing
       or electrical systems or equipment, which the model doesn''t show: a person checks what the corridor serves.'
-  - when: corridors_within_dwelling_units and corridor_width >= 36 and corridor_width < 44 and corridor_occupant_load >= 50
+  - when: corridor_width >= 36 and corridor_width < 44 and corridor_occupant_load >= 50 and corridors_within_dwelling_units
     reason: 'Under 44 in, but within Table 1020.3''s 36 in for a corridor within a dwelling unit, which the building states
       it has or doesn''t rule out and the model doesn''t show: a person checks whether the corridor is within one.'
   - when: occupancy_group == "I-2" and corridor_width >= (36 if corridor_occupant_load < 50 else 44) and corridor_width
