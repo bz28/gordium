@@ -1098,6 +1098,13 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private void ListKeys(object sender, I.KeyEventArgs e)
     {
         // only a key on a row, or on the list itself: never one meant for a fold after the rows (Space on Details)
+        // an open dropdown's own item (a ComboBoxItem is a ListBoxItem, in the dropdown's popup): its keys are the
+        // dropdown's, never the list's (review round 2: Enter, Up and Down were taken from an open question's dropdown)
+        if (OwnKeys(e.OriginalSource))
+        {
+            if (Within<C.ComboBoxItem>(e.OriginalSource) is not null)
+                return;
+        }
         var on = Within<C.ListBoxItem>(e.OriginalSource)?.DataContext;
         // in a question's controls: Tab and Shift+Tab move between them (Yes, No), Esc goes back to its line in the list
         // (the list takes Tab once: without this the keyboard could never reach No; review round 1)
@@ -1175,14 +1182,15 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         }
     }
 
-    /// <summary>Whether a key's source is a control inside an entry that takes keys itself (a dropdown, a text box, a
-    /// button): the list leaves the key to it.</summary>
     /// <summary>A question's own controls, in order (its dropdown, its Yes and No, its box).</summary>
     private static List<C.Control> Controls(W.DependencyObject item) =>
         [.. Descendants(item).OfType<C.Control>().Where(c => c is C.ComboBox or C.Primitives.ToggleButton or C.TextBox && c.TemplatedParent is null && c.IsVisible && c.Focusable)];
 
+    /// <summary>Whether a key's source is a control inside an entry that takes keys itself (a dropdown or an item of
+    /// its open list, a text box, a button): the list leaves the key to it.</summary>
     internal static bool OwnKeys(object? source) =>
-        Within<C.ComboBox>(source) is not null || Within<C.TextBox>(source) is not null || Within<C.Primitives.ButtonBase>(source) is not null;
+        Within<C.ComboBoxItem>(source) is not null || Within<C.ComboBox>(source) is not null || Within<C.TextBox>(source) is not null
+        || Within<C.Primitives.ButtonBase>(source) is not null;
 
     private void SearchKeys(object sender, I.KeyEventArgs e)
     {

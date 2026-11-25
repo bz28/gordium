@@ -213,6 +213,10 @@ public static class ResultViewList
         return at.Any(i => i >= ProjectQuestions.ShownAtFirst) ? [GroupKey(group), MoreQuestionsKey] : [GroupKey(group)];
     }
 
+    /// <summary>The questions card's foot, for a screen reader (review round 2: its scope note said first, and nothing
+    /// promised that isn't chosen).</summary>
+    public const string FootWords = "Save and check again: Enter saves what you chose in this card, once you have chosen. " + ProjectQuestions.NothingSaved;
+
     /// <summary>What a screen reader says for an opener (review round 5: on the list item the keyboard is on, not
     /// inside it): its title, which code governs (a book's note), its status, and its counts; null for other entries.</summary>
     public static string? Spoken(ListEntry e) => e switch
@@ -224,7 +228,7 @@ public static class ResultViewList
         QuestionEntry q => $"{q.Question.Card.Headline}, {ProjectQuestions.Affects(q.Question.Affects)}"
                            + (q.Question.Field is null ? ", " + ProjectQuestions.NoField : "") + (q.Open ? ", results shown" : ""),
         MoreQuestionsEntry m => ProjectQuestions.MoreWords(m.Hidden, m.Open),
-        AnswerFootEntry f => "Save and check again: Enter saves the answers chosen in this card. " + ProjectQuestions.NothingSaved,
+        AnswerFootEntry f => string.Join(" ", new[] { f.Scope, FootWords }.OfType<string>()),
         _ => null,
     };
 

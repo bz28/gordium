@@ -38,7 +38,7 @@ public static class PaneWords
         var saved = applied > 0 && status == "Committed";
         var why = refused.Count > 0 ? string.Join("; ", refused) : $"Revit didn't take the change ({status})";
         return saved
-            ? $"Saved {applied} (Ctrl+Z undoes it), but not written: {why}. Nothing was checked: answer the rest, then Save again."
+            ? $"Saved {applied} (Ctrl+Z undoes it), but not written: {why}. Nothing was checked: fix that on Project Information, or click Check again."
             : $"Your answers weren't saved, so nothing was checked: {why}. They are still chosen in the card: try Save again.";
     }
 

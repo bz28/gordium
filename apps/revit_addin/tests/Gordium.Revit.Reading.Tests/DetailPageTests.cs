@@ -242,7 +242,13 @@ public sealed class DetailPageTests
         Assert.True(ResultViewList.Saves(foot, "Enter"));
         Assert.False(ResultViewList.Saves(question, "Enter"));
         Assert.Contains("Save and check again", ResultViewList.Spoken(foot), StringComparison.Ordinal);
+        // review round 2: the foot says the scope note drawn in it, and promises no answer that isn't chosen
+        Assert.StartsWith(m.Views!.Scope!, ResultViewList.Spoken(foot), StringComparison.Ordinal);
+        Assert.DoesNotContain("the answers chosen", ResultViewList.Spoken(foot), StringComparison.Ordinal);
         var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
+        // review round 2: an open dropdown's item keeps its keys (a ComboBoxItem is a ListBoxItem)
+        Assert.Contains("Within<C.ComboBoxItem>(source) is not null ||", view, StringComparison.Ordinal);
+        Assert.Contains("if (Within<C.ComboBoxItem>(e.OriginalSource) is not null)\n                return;", view.Replace("\r\n", "\n"), StringComparison.Ordinal);
         Assert.Contains("ResultViewList.EntersControl(_entries[at], e.Key.ToString())", view, StringComparison.Ordinal);
         Assert.Contains("ResultViewList.Saves(_entries[at], e.Key.ToString())", view, StringComparison.Ordinal);
         Assert.Contains("or AnswerFootItem => \"list.opener\"",
@@ -285,6 +291,8 @@ public sealed class DetailPageTests
         Assert.StartsWith("Saved 1 (Ctrl+Z undoes it)", part, StringComparison.Ordinal);
         Assert.DoesNotContain("weren't saved", part, StringComparison.Ordinal);
         Assert.Contains("Nothing was checked", part, StringComparison.Ordinal);
+        Assert.DoesNotContain("answer the rest", part, StringComparison.Ordinal);       // review round 2: the refused ones were answered
+        Assert.Contains("Check again", part, StringComparison.Ordinal);
         var none = PaneWords.AnswersNotSaved(["x"], 0, "RolledBack");
         Assert.StartsWith("Your answers weren't saved", none, StringComparison.Ordinal);
         Assert.Contains("PaneWords.AnswersNotSaved(refused, applied.Count, status)",
