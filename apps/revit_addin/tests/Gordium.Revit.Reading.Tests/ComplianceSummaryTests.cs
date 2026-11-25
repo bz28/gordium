@@ -71,7 +71,7 @@ public sealed class ComplianceSummaryTests
         foreach (var doc in model.Views!.Code)
             Assert.Contains($"<h2>{WebUtility.HtmlEncode(doc.Title)}</h2>", html, StringComparison.Ordinal);
         Assert.Contains("<p class=\"which-code\">Governs this building:", html, StringComparison.Ordinal);
-        Assert.Contains($"<p class=\"scope\">{WebUtility.HtmlEncode(ResultViews.ScopeWords)}</p>", html, StringComparison.Ordinal);
+        Assert.Contains($"<p class=\"scope\">{WebUtility.HtmlEncode(model.Views!.Code.Single(d => d.Scope is not null).Scope)}</p>", html, StringComparison.Ordinal);
         var greyed = Regex.Matches(html, "<p class=\"muted greyed\" data-greyed=\"(?<s>[A-Za-z]+)\">(?<t>.*?)</p>").ToList();
         Assert.NotEmpty(greyed);
         Assert.All(greyed, g => Assert.Contains(g.Groups["s"].Value, new[] { "NotCheckedYet", "NothingToCheck" }));
