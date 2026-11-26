@@ -149,6 +149,10 @@ def test_route_reasons_as_read_have_no_back_quotes_underscored_fields_or_coordin
     d = room_on_corridor()
     d["rooms"][0]["obstructions"] = "a desk"
     cases.append(d)
+    d = room_on_corridor()                 # a corridor's stated facts given wrongly: said by their marks, never keys
+    corridor = next(r for r in d["rooms"] if r.get("use") == "corridor")
+    corridor.update(fire_rating_hours="1 HR", walls_smoke_partitions="yes")
+    cases.append(d)
     said = []
     for d in cases:
         floor = read(d)
@@ -164,6 +168,10 @@ def test_route_reasons_as_read_have_no_back_quotes_underscored_fields_or_coordin
         assert not re.search(r"\b[a-z]+_[a-z_]+\b", w), w            # no field name of the file format
     assert any("the room r isn't read: it gives whether it is not occupied as the text 'yes', not as a yes/no value" in w for w in said), said
     assert any("story outline #1 isn't on one of the model's levels" in w for w in said), said
+    # a reason naming what a host states names its mark (CORRIDOR_STATED), for every such fact
+    from model_measurement.routes import CORRIDOR_STATED
+    for _, _, mark in CORRIDOR_STATED.values():
+        assert any(f"the room's {mark} mark" in w for w in said), (mark, said)
 
 
 def test_a_dead_ends_door_off_its_legs_is_named_without_coordinates():

@@ -214,7 +214,7 @@ def test_a_corridors_stated_rating_and_smoke_partitions_are_its_measures(stated,
     assert c["measures"]["corridor_fire_rating_hours"] == rating
     assert "corridor_fire_rating_hours" not in c["not_measured"]
     if smoke is None:
-        assert "walls_smoke_partitions" in c["not_measured"]["corridor_walls_smoke_partitions"]
+        assert "the room's Smoke partition walls mark" in c["not_measured"]["corridor_walls_smoke_partitions"]
     else:
         assert c["measures"]["corridor_walls_smoke_partitions"] is smoke
 
@@ -229,10 +229,12 @@ def test_a_corridor_fact_not_of_its_kind_is_said_never_read(stated):
     assert m not in c["measures"] and " is given as " in c["not_measured"][m], c["not_measured"][m]
 
 
-def test_a_corridor_fact_left_out_is_said_by_its_key(plain):
+def test_a_corridor_fact_left_out_is_said_by_its_mark(plain):
     c, = plain["parts"]["corridor"]
     assert c["not_measured"]["corridor_fire_rating_hours"].startswith("not stated for this corridor:")
-    assert "fire_rating_hours" in c["not_measured"]["corridor_fire_rating_hours"]
+    assert "the room's Corridor rating minutes mark" in c["not_measured"]["corridor_fire_rating_hours"]
+    assert "the room's Smoke partition walls mark" in c["not_measured"]["corridor_walls_smoke_partitions"]
+    assert "fire_rating_hours" not in c["not_measured"]["corridor_fire_rating_hours"]
     assert "no mark for it" not in c["not_measured"]["corridor_fire_rating_hours"]
 
 
@@ -435,3 +437,14 @@ def test_a_room_stopped_by_a_tie_is_not_measured_with_its_own_reason_never_calle
     shown = _over_rooms_measured(story, {"c": Stop("too_many_ties", most=64, x=63.232, y=37.844)})
     assert "no route" not in shown["label"] and "has none" not in shown["label"]
     assert shown["rooms_not_measured"] == {"CORRIDOR (26)": Stop("too_many_ties", most=64, x=63.232, y=37.844).reason}
+
+
+def test_each_corridor_fact_names_the_revit_mark_that_states_it():
+    """A reason for a corridor fact not stated names the host's mark, never the file's key (CI on #229:
+    test_plain_words); the mark it names is one the Revit add-in defines, feeding that very key."""
+    import re
+    from model_measurement.routes import CORRIDOR_STATED
+    text = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    for key, _, mark in CORRIDOR_STATED.values():
+        assert re.search(r'"Gordium: ' + re.escape(mark) + r'", new\("[^"]+"\), MarkValueKind\.\w+,\s*MarkBinding\.\w+, '
+                         r'\[Rooms\], "rooms\[\]\.' + re.escape(key) + '"', text), (mark, key)

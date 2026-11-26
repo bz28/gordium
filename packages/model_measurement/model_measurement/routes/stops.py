@@ -97,7 +97,7 @@ STOPS = {
     # the parts handed to the rules (__init__.py)
     "stated_not_given": "stated by the architect ({what}), and Gordium has no mark for it in the model yet",
     # a corridor's fact the architect states on its room (CORRIDOR_STATED): left out, or not of its kind
-    "corridor_fact_not_stated": "not stated for this corridor: {what} (the corridor room's {key})",
+    "corridor_fact_not_stated": "not stated for this corridor: {what} (the room's {mark} mark)",
     "corridor_fact_not_read": "{what} is given as {got}, not {kind}",
     "not_measured_yet": "Gordium doesn't measure this yet",
     "readings": "given as two readings for open question {question} of the route note ({words}): a rule reading it "

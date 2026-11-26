@@ -67,9 +67,10 @@ STATED = {"story_occupant_load": "the story's design occupant load", "space_occu
 QUESTIONS = {areas.STORY_AREA_QUESTION: "3", areas.ACCESSORY_AREA_QUESTION: "3", dead_ends.QUESTION: "7"}
 # a corridor's facts the architect states on the corridor's room (docs/interior/interior_description_format.md): the
 # model can't show them for certain (a wall type's rating is the architect's statement of its assembly), so each is
-# read from its own key, never guessed: {measure: (the room's key, its kind)}
-CORRIDOR_STATED = {"corridor_fire_rating_hours": ("fire_rating_hours", "hours"),
-                   "corridor_walls_smoke_partitions": ("walls_smoke_partitions", "yes_no")}
+# read from its own key, never guessed: {measure: (the room's key, its kind, the host mark that states it)}. A reason
+# names the mark (Gordium: <its name>), never the key (an architect reads it: test_plain_words)
+CORRIDOR_STATED = {"corridor_fire_rating_hours": ("fire_rating_hours", "hours", "Corridor rating minutes"),
+                   "corridor_walls_smoke_partitions": ("walls_smoke_partitions", "yes_no", "Smoke partition walls")}
 
 
 def measure(description, clearance: float = CLEARANCE) -> dict:
@@ -531,10 +532,10 @@ def _space_part(rid, name, story, routes, room, access, figures, why_not) -> dic
 def _corridor_stated(p: dict, item: dict) -> None:
     """The corridor's stated facts (CORRIDOR_STATED) from its room's own keys: a value of the right kind is the
     measure; one given but not of its kind, or one left out, is said, never guessed (needs review)."""
-    for m, (key, kind) in CORRIDOR_STATED.items():
+    for m, (key, kind, mark) in CORRIDOR_STATED.items():
         v = item.get(key) if isinstance(item, dict) else None
         if v is None:
-            p["not_measured"][m] = Stop("corridor_fact_not_stated", what=STATED[m], key=key).reason
+            p["not_measured"][m] = Stop("corridor_fact_not_stated", what=STATED[m], mark=mark).reason
         elif kind == "yes_no" and type(v) is bool or kind == "hours" and type(v) in (int, float) and v == v                 and 0 <= v < float("inf"):
             p["measures"][m] = v
         else:
