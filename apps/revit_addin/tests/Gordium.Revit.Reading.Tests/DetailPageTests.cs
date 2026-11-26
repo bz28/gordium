@@ -43,7 +43,7 @@ public sealed class DetailPageTests
     private static readonly Regex Passes = new(@"\b(will|would|now) (pass|comply|complies)\b|\bpasses\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     [Fact]
-    public void Every_page_ends_with_check_again_unless_settled_and_never_says_it_will_pass()
+    public void Every_page_ends_with_what_moves_it_unless_settled_and_never_says_it_will_pass()
     {
         foreach (var m in new[] { Apartment(), House() })
             foreach (var (row, d, page) in Pages(m))
@@ -57,11 +57,53 @@ public sealed class DetailPageTests
                 else
                 {
                     Assert.NotNull(page.Headline);
-                    Assert.Equal(DetailPages.CheckAgainStep, page.Steps[^1]);
+                    // egress UI audit, finding 2: a result only a person can settle ends with the tick, never Check again
+                    // (which changes nothing for it); anything a check can change ends with Check again
+                    var asks = ResultViews.CardsOf(m.Views!, row.Row.Id).Where(c => c.Kind is not (FixKind.Fails or FixKind.NotChecked or FixKind.Done)).ToList();
+                    var byHand = row.Section != ListSection.Fails && asks.All(a => DetailPages.ByHand(a.Kind));
+                    Assert.Equal(byHand ? DetailPages.CheckAfterChangeStep : DetailPages.CheckAgainStep, page.Steps[^1]);   // not stale here
+                    Assert.Equal(byHand, page.Steps.Contains(DetailPages.LookedStep));
+                    Assert.Equal(!byHand, page.Steps.Contains(DetailPages.CheckAgainStep));
+                    if (byHand)
+                    {
+                        Assert.True(LookedAt.Tickable(row));                       // the tick it points to is on the page
+                        Assert.DoesNotContain("check again", page.Headline!, StringComparison.OrdinalIgnoreCase);
+                    }
                 }
                 foreach (var words in page.Steps.Append(page.Headline ?? ""))
                     Assert.DoesNotMatch(Passes, words);
             }
+    }
+
+    /// <summary>Egress UI audit, finding 2: the apartment's hand checks (the corridor's fire partitions: a rating
+    /// worked out by hand and a judgment) say what to check and to tick it; the model changed after the check, Check
+    /// again comes first, then the tick.</summary>
+    [Fact]
+    public void A_result_only_a_person_settles_ends_with_the_tick_and_check_again_only_when_the_model_changed()
+    {
+        var pages = Pages(Apartment());
+        var hand = pages.Where(p => p.Row.Section != ListSection.Complies && p.Page.Steps[^1] == DetailPages.CheckAfterChangeStep).ToList();
+        Assert.NotEmpty(hand);
+        Assert.Contains(hand, p => p.Page.Headline!.StartsWith("Gordium can't decide this result yet. Look at these ", StringComparison.Ordinal));
+        Assert.All(hand, p => Assert.Equal(DetailPages.LookedStep, p.Page.Steps[^2]));
+        Assert.Contains(pages, p => p.Page.Steps[^1] == DetailPages.CheckAgainStep);              // and the rest still do
+        var stale = Pages(Apartment(), new DateTime(2026, 11, 23, 14, 32, 0));
+        var after = stale.Single(p => p.Row.Row.Id == hand[0].Row.Row.Id);
+        Assert.Equal([DetailPages.CheckAgainStep, DetailPages.LookedStep], after.Page.Steps.TakeLast(2));
+        Assert.DoesNotContain(DetailPages.CheckAfterChangeStep, after.Page.Steps);
+        // the step names the tick by its own label, which the page draws (confirm round)
+        Assert.Contains(DetailPages.LookedLabel, DetailPages.LookedStep, StringComparison.Ordinal);
+        Assert.Contains("host.TickDetail, DetailPages.LookedLabel)",
+                        File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "DetailView.cs")), StringComparison.Ordinal);
+        Assert.DoesNotMatch(Passes, DetailPages.LookedStep);
+        Assert.DoesNotMatch(Passes, DetailPages.CheckAfterChangeStep);
+        // review round 1: never "it stays Needs review" as if for good (spot grades, a design change, a reading met can
+        // let a later check decide it), never "check by hand" for an open question about the law, and "yet"
+        Assert.DoesNotContain("stays", DetailPages.LookedStep + DetailPages.CheckAfterChangeStep, StringComparison.Ordinal);
+        Assert.Contains("not a verdict", DetailPages.LookedStep, StringComparison.Ordinal);
+        Assert.Contains("yet", DetailPages.SeveralByHand(2), StringComparison.Ordinal);
+        Assert.DoesNotContain("by hand", DetailPages.SeveralByHand(2), StringComparison.Ordinal);
+        Assert.Contains("only a check does", LookedAt.Tip, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -117,7 +159,7 @@ public sealed class DetailPageTests
             if (asks.Count == 1)
                 Assert.Equal(DetailPages.Sentence(asks[0].Headline), page.Headline);
             else if (asks.Count > 1)
-                Assert.Equal(DetailPages.Several(asks.Count), page.Headline);
+                Assert.Equal(asks.All(a => DetailPages.ByHand(a.Kind)) ? DetailPages.SeveralByHand(asks.Count) : DetailPages.Several(asks.Count), page.Headline);
             // every ask is a step, in its order
             Assert.Equal(asks.Select(a => DetailPages.Sentence(a.Headline)), page.Steps.Where(s => asks.Any(a => DetailPages.Sentence(a.Headline) == s)));
             var questions = asks.Count(a => a.Kind == FixKind.Answer);

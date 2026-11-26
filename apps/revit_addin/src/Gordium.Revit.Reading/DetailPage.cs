@@ -8,7 +8,8 @@ namespace Gordium.Revit.Reading;
 // the title, the first quote of the law shown with the rest folded, and "Measured against the limit" only when
 // something was measured. Revit-free and tested; DetailView only draws it. The rules: every word here is the checker's
 // (its asks' headlines, its reason, its quotes and links) or a fixed sentence of the pane's; no step ever says a result
-// will pass; a result that isn't settled always ends with "Check again"; nothing measured is never shown as measured.
+// will pass; a result that isn't settled always ends with what moves it: "Check again", or for one a person looks at,
+// the tick and when a check can decide it; nothing measured is never shown as measured.
 
 /// <summary>What the callout's one button does.</summary>
 public enum CalloutAction
@@ -73,6 +74,28 @@ public static class DetailPages
     /// that doing it decides the result (the checker's reason may name more: it is behind "Why?").</summary>
     public static string Several(int n) => $"Gordium can't decide this result yet. Start with these {n} things, then check again.";
 
+    /// <summary>The callout's headline when every one of several asks is for a person to look at: never "then check
+    /// again", which by itself changes nothing for these (egress UI audit, finding 2); "yet", as a later check may decide
+    /// it (review round 1).</summary>
+    public static string SeveralByHand(int n) => $"Gordium can't decide this result yet. Look at these {n} things yourself.";
+
+    /// <summary>The step of a result a person looks at (every ask one for a person, or none): the tick at the page's
+    /// foot, which is the architect's own note and never a verdict (egress UI audit, finding 2).</summary>
+    public const string LookedStep = "When you've looked at it, tick " + LookedLabel + " below: it's your own note, not a verdict.";
+
+    /// <summary>The tick's label at the page's foot (DetailView draws it), which <see cref="LookedStep"/> names.</summary>
+    public const string LookedLabel = "Mark as looked at";
+
+    /// <summary>Its last step: a check decides it only once something changes (the design, or a fact Gordium reads: spot
+    /// grades for sloped ground, a curved surface modelled flat, a design that meets every reading of the law), so
+    /// Check again is said with when it helps, never as the way forward by itself (review round 1).</summary>
+    public const string CheckAfterChangeStep = "Check again after a change to the design or its facts: a check decides it once Gordium can.";
+
+    /// <summary>Whether an ask is for a person to look at (to measure, to decide, an open question about the law): a
+    /// check again with nothing changed doesn't decide it (some a later check can, once the design or a fact Gordium
+    /// reads changes).</summary>
+    public static bool ByHand(FixKind kind) => kind is FixKind.Measure or FixKind.Decide or FixKind.OpenQuestion;
+
     /// <summary>The section "Why?" opens on.</summary>
     public const string WhyHeading = "In the checker's words";
 
@@ -91,6 +114,8 @@ public static class DetailPages
         var action = CalloutAction.None;
         string? actionWords = null;
         var steps = new List<string>();
+        // a result only a person can settle: every ask a check by hand, or none (never one that fails)
+        var byHand = row.Section != ListSection.Fails && asks.All(a => ByHand(a.Kind));
         switch (row.Section)
         {
             case ListSection.Complies:
@@ -105,7 +130,7 @@ public static class DetailPages
             default:
                 if (asks.Count > 0)
                 {
-                    headline = asks.Count == 1 ? Sentence(asks[0].Headline) : Several(asks.Count);
+                    headline = asks.Count == 1 ? Sentence(asks[0].Headline) : byHand ? SeveralByHand(asks.Count) : Several(asks.Count);
                     if (r.Hint is not null)
                         steps.Add(Sentence(r.Hint));
                     steps.AddRange(asks.Select(a => Sentence(a.Headline)));
@@ -128,8 +153,18 @@ public static class DetailPages
         // the one button: answering is in the questions card; else the elements to fix or look at, when the model has them
         if (headline is not null && action == CalloutAction.None && inModel.Count > 0)
             (action, actionWords) = (CalloutAction.Show, "Show in model");
-        // anything not settled, and anything settled the model changed after, ends with Check again
-        if (row.Section != ListSection.Complies || d.Stale is not null)
+        // anything not settled, and anything settled the model changed after, ends with Check again; a result a person
+        // looks at ends with the tick, then Check again after a change; when the model changed after its check, Check
+        // again comes first (its asks may be out of date), then the tick (confirm round)
+        if (row.Section != ListSection.Complies && byHand)
+        {
+            if (d.Stale is not null)
+                steps.Add(CheckAgainStep);
+            steps.Add(LookedStep);
+            if (d.Stale is null)
+                steps.Add(CheckAfterChangeStep);
+        }
+        else if (row.Section != ListSection.Complies || d.Stale is not null)
             steps.Add(CheckAgainStep);
         var measured = d.Bar is not null || d.HowFar is not null || d.Figures.Any(f => f.Measured is not null);
         var more = d.Quotes.Skip(1).ToList();
