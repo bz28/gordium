@@ -11,9 +11,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
 
-# A newer push replaces the older run; a label never cancels a run already going. Pushes to main are never cancelled.
+# A newer push or the merge-ready label replaces the PR's older Windows run (the label's run replaces the push run
+# that only said Windows hasn't run). Any other label gets a group of its own name, so it never cancels Windows.
+# Pushes to main are never cancelled.
 concurrency:
-  group: windows-${{ github.event.pull_request.number || github.sha }}${{ github.event.action == 'labeled' && '-label' || '' }}
+  group: windows-${{ github.event.pull_request.number || github.sha }}${{ (github.event.action == 'labeled' && github.event.label.name != 'merge-ready') && format('-label-{0}', github.event.label.name) || '' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
