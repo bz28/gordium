@@ -28,15 +28,16 @@ second_reading:
     definition, 2026-11-26), a twenty-third for the 7 of section group 8c (1031.5 to 1031.6, 2026-11-26), a twenty-fourth for
     the 38 of section group 9a (Sections 1003 and 1012 and 3 definitions, 2026-11-26), a twenty-fifth for the
     31 of section group 9b (Sections 1008 and 1013 and 10 definitions, 2026-11-26), a twenty-sixth for the
-    34 of section group 9c (Section 1009 and 4 definitions, 2026-11-26), and a helper for the comparison words)
+    34 of section group 9c (Section 1009 and 4 definitions, 2026-11-26), a twenty-seventh for the 11 of section
+    group 9d (1018.1 to 1018.5 and Section 1019 and 2 definitions, 2026-11-26), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 439 pieces, 1250 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 450 pieces, 1282 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -1080,6 +1081,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:live_work_unit:
+    piece_sha256: 088271b43c22b4cbad6ffceb275a7873d0eeb9591a75997b76125391ba44c113
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:load_factor:
     piece_sha256: d9a041f27abe72f6129cbced94a6d69a0f26089a61318f306762ac641f1a7dc0
     numbers:
@@ -1510,6 +1517,12 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:shaft_enclosure:
+    piece_sha256: 3bd99dcd092d885a677ef806629a25f2d998397938d27264b59275131019d734
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:shower:
     piece_sha256: 2d11d59170848ae3e34dbc53ce98df7407a0acd2c8acdbc0fd2a8612c2108d2d
     numbers: []
@@ -6076,6 +6089,57 @@ pieces:
     - <=
     - none
     - none
+  '1018.1':
+    piece_sha256: 79beb0674c0a466d6005b948f03ee6010b4e74bba7962a52ba0c7a1cbcdeb941
+    numbers:
+    - '1018.1'
+    - '1005.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1018.1'
+    - '1005.7'
+    second_reading_comparisons:
+    - none
+    - none
+  '1018.2':
+    piece_sha256: ed11c3890f0473dc46c6a04e461b59ff1ed08f36933fbc4a20b695c2d9f9c9d6
+    numbers:
+    - '1018.2'
+    - '1030'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1018.2'
+    - '1030'
+    second_reading_comparisons:
+    - none
+    - none
+  '1018.3':
+    piece_sha256: 67ec6fd6daee8d2729419eeeb27d0931e6d63e92181424746d074e7d2b3c5968
+    numbers:
+    - '1018.3'
+    - '1005.1'
+    - '1020.3'
+    - less than 50
+    - '11'
+    - not exceed 28 inch
+    - 711 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1018.3'
+    - '1005.1'
+    - '1020.3'
+    - less than 50
+    - '11'
+    - not exceed 28 inch
+    - 711 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - <
+    - none
+    - <=
+    - none
   '1018.4':
     piece_sha256: e65270e1b455b7c9657e82137cd74acdc9ee50d7432e92e54773f50dfa77b8df
     numbers:
@@ -6123,6 +6187,112 @@ pieces:
       30-inch (762 mm) minimum clear width''; the recorded words miss it (numbers.py reads comparison words only
       directly before a number or after its unit). The second reading is right. Used by no rule yet (aisle accessways
       aren''t drawn).'
+  '1018.5':
+    piece_sha256: a22925ff44226abe396076b8115a4fefc00445ef7aef94bc4b5f757f040da234
+    numbers:
+    - '1018.5'
+    - '1005.1'
+    - '1020.3'
+    - less than 50
+    - '11'
+    - not exceed 28 inch
+    - 711 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1018.5'
+    - '1005.1'
+    - '1020.3'
+    - less than 50
+    - '11'
+    - not exceed 28 inch
+    - 711 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - <
+    - none
+    - <=
+    - none
+  '1019':
+    piece_sha256: b355e9243ec1fdaf130bd5756dba2ca4d8f003d6d6a7395525427887583ed992
+    numbers:
+    - '1019'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1019'
+    second_reading_comparisons:
+    - none
+  '1019.1':
+    piece_sha256: 24c211bd6d20fa0be56743dc42cfc5a01e5cf17e6d3aa3f7f4d61a3241fb1818
+    numbers:
+    - '1019.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1019.1'
+    second_reading_comparisons:
+    - none
+  '1019.2':
+    piece_sha256: 799c805a258a75ba99ec5890c6a2b4ac26d30c13303d3d358ae780b1d74240be
+    numbers:
+    - '1019.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1019.2'
+    second_reading_comparisons:
+    - none
+  '1019.3':
+    piece_sha256: ba5cdcc12b53dcf226a901c04392a25637410fc747eedfbe74c5d4e4a7165fe8
+    numbers:
+    - '1019.3'
+    - '713'
+    - two
+    - four
+    - 13 inch
+    - not connect more than four
+    - '404'
+    - '1030.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1019.3'
+    - '713'
+    - two
+    - four
+    - 13 inch
+    - not connect more than four
+    - '404'
+    - '1030.7'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - none
+    flags:
+    - '''four'' (<=): exception 2''s ''connecting four stories or less'', the ''or less'' after the word ''stories''; the
+      recorded words miss it (numbers.py reads comparison words only directly before a number or after its unit). The second
+      reading is right.'
+    - '''13 inch'': ''NFPA 13. In other than Group B and M occupancies'', the standard''s number before the next sentence''s
+      ''In''; the number reader takes the next sentence''s first word for a unit (fixed by PR #235, not merged yet). A standard''s
+      name, no limit, so the second reading (none) is right.'
+  '1019.4':
+    piece_sha256: 1595ded9eb1f550e166c0ff73d60c5c9577be665923f7f66b6b11a185788d96e
+    numbers:
+    - '1019.4'
+    - '713'
+    - '408'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1019.4'
+    - '713'
+    - '408'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
   '1020.1':
     piece_sha256: e089431fd652d4b812d499e864d0d17a933f666ecabb468e2b49b995348ab6d2
     numbers:

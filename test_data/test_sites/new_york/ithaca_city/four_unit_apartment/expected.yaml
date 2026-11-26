@@ -270,6 +270,12 @@ results:
   general.bc_1009_9_accessibility_signage: needs_review
   general.bc_1009_10_directional_signage: needs_review
   general.bc_1009_11_instructions: needs_review
+  # section group 9d: 1018's aisles and 1019's exit access stairways, each a person's check (aisles between fixtures and stair enclosures aren't in the model); Groups B and M's aisles and Groups I-2 and I-3's stairways don't apply to an R-2
+  general.bc_1018_1_aisles_general: needs_review
+  general.bc_1018_3_aisles_groups_b_m: not_applicable   # Group R-2
+  general.bc_1018_5_aisles_other_occupancies: needs_review
+  general.bc_1019_3_exit_access_stairway_enclosure: needs_review
+  general.bc_1019_4_exit_access_stairways_groups_i2_i3: not_applicable   # Group R-2
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review
