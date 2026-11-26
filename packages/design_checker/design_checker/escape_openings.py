@@ -123,7 +123,8 @@ def link(parts: dict, description) -> None:
             reason = None
         for mine, (theirs, worked) in LINKED.items():
             story = stories.get(level) if reason is None else None
-            raw = (story.get("measures") or {}).get(theirs) if story is not None else None
+            given = story.get("measures") if story is not None else None
+            raw = given.get(theirs) if isinstance(given, dict) else None
             if story is not None and theirs in (story.get("measures") or {}) and mine == "sleeping_room_story_one_exit"                     and (isinstance(raw, bool) or not isinstance(raw, (int, float))
                          or (isinstance(raw, float) and not math.isfinite(raw))):
                 # a count that isn't a number (null, text, NaN): not known, never a crash and never two exits

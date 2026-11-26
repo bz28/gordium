@@ -250,3 +250,9 @@ def test_a_huge_whole_exit_count_is_two_or_more_never_a_crash():
     p = _linked(story=story)
     assert "sleeping_room_story_one_exit" not in p["measures"]
 
+
+
+@pytest.mark.parametrize("measures", [["x"], "text"])
+def test_a_storys_measures_that_arent_a_mapping_are_never_a_crash(measures):
+    p = _linked(story={"id": "L1", "measures": measures})
+    assert "sleeping_room_story_one_exit" not in p["measures"]
