@@ -21077,7 +21077,7 @@ rules:
       rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading "EXIT"
       in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren''t in the model,
       so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.  ICC A117.1 isn't brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. ICC A117.1 isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1013_5_internally_illuminated_exit_signs
