@@ -435,6 +435,14 @@ def test_a_door_whose_hardware_isnt_stated_never_passes_where_1010_2_8_may_ask_i
                 given = _given(g, U) | ({} if outdoor is U else {"occupied_outdoor_areas": outdoor})
                 part = _panic_part(True, U, U, False, load)
                 assert _row(rule, part, given, ctx) == "needs_review", (g, load, outdoor)
+    # review round 4: under 50 as stated, Groups A and E aren't asked (p.326 lines 31-33), so it complies whatever
+    # its hardware, as the interior format now says; Group H, two or more groups and an unstated one still need review
+    for g, want in (("A-3", "pass"), ("E", "pass"), ("H-2", "needs_review"), ("mixed", "needs_review"),
+                    (U, "needs_review")):
+        assert _row(rule, _panic_part(True, U, U, False, 30), _given(g, U) | {"occupied_outdoor_areas": False},
+                    ctx) == want, g
+    doc = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
+    assert "or Group A or E unless the door's load is stated under 50" in doc
 
 
 def test_an_electric_lock_on_panic_hardware_never_passes_where_group_h_may_be_served(rules, ctx):
