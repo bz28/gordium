@@ -281,6 +281,22 @@ def test_a_compiled_module_beside_a_validator_module_makes_the_certificate_stale
         shadow.unlink()
     assert published.stale(copy / MAINE, repo=copy) == []
 
+
+def test_a_new_package_folder_makes_every_certificate_stale(copy):
+    """Review round 4 (two sceptics): the fresh compile imports from every folder of packages/, before Python's own
+    installation, but New York's certificates didn't list packages/ itself, so a new package folder (which could hold
+    a module named like one the compile imports, yaml say) left them current while a fresh compile differed."""
+    new = copy / "packages/aaa_new"
+    new.mkdir()
+    try:
+        for law in LAWS:
+            assert any("folder packages" in w for w in published.stale(copy / law, repo=copy)), law
+        code, out = _run(copy, "--check", NY)
+        assert code == 1 and "packages" in out, out
+    finally:
+        new.rmdir()
+    assert [published.stale(copy / law, repo=copy) for law in LAWS] == [[]] * len(LAWS)
+
 # ---- in-process -----------------------------------------------------------------------------------------------------
 
 def test_the_typed_json_keeps_dates_and_sets_and_refuses_what_it_cant_keep():
