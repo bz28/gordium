@@ -13233,8 +13233,9 @@ rules:
   check: moe_door_clear_width >= 32
   review_when:
   - when: moe_door_clear_width >= 32 and moe_door_leaves != 1
-    reason: 'Two leaves with no mullion between them (or how many isn''t stated): 1010.1.1 asks one leaf for the 32 in, and
-      the maker''s clear opening is the whole opening''s: a person checks the leaf.'
+    reason: 'Two leaves with no mullion between them, a mullioned pair not stated at its narrower leaf''s own opening, or how
+      many isn''t stated: 1010.1.1 asks one leaf (each opening of a mullioned pair) for the 32 in, and the maker''s clear
+      opening may be the whole pair''s: a person checks each leaf.'
   - when: moe_door_clear_width >= 32 and moe_door_clear_width < 41.5 and occupancy_group in ["I-2", "mixed"]
     reason: 'Group I-2 (stated, or not ruled out in a building of two or more groups): a door used for the movement of beds
       needs 41 1/2 in, and which doors are isn''t shown: a person checks.'
@@ -13566,7 +13567,10 @@ rules:
   notes: 'Section group 6a (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): every door the model gives,
     each with its maker''s stated clear opening only (never its size or its leaf: a door with none isn''t measured and needs
     review). 32 in, from one leaf where two leaves meet with no mullion (the number of leaves is stated; not stated, a pair
-    isn''t ruled out). Group I-2''s 41 1/2 in for bed movement needs review between 32 and 41 1/2 in (which doors move beds
+    isn''t ruled out). Gordium''s reading of the section''s own words, shown to confirm: a pair with a mullion between its
+    leaves is two door openings, each of which "shall provide a minimum clear opening width of 32 inches" ("each door
+    opening", its first sentence); the one-leaf words cover only "two door leaves without a mullion". So a mullioned pair is
+    stated 1 leaf only where its stated clear width is the narrower leaf''s own opening, else 2 (needs review at 32 in or more). Group I-2''s 41 1/2 in for bed movement needs review between 32 and 41 1/2 in (which doors move beds
     isn''t shown), in a building of two or more groups too (1004.4). The exceptions only loosen it, each where the model can''t
     rule it out and only down to its own width: a door that may be in a dwelling or sleeping unit (1 and 6: Groups R-2, R-3,
     I-1 and R-4), to a Group I-3 resident sleeping unit (2: 28 in), to a storage closet under 10 sq ft (3), within a Type
