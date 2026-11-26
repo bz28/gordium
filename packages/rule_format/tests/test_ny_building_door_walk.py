@@ -426,8 +426,9 @@ def test_the_panic_hardware_walks_collapse_keeps_the_groups_the_law_tells_apart(
 
 
 def test_a_door_whose_hardware_isnt_stated_never_passes_where_1010_2_8_may_ask_it(rules, ctx):
-    """The new fact: a swinging door whose hardware isn't stated (no Revit mark yet) needs review in every building
-    that may be Group A, E or H (stated, two or more groups, or not stated), never a pass."""
+    """The new fact: a swinging door whose hardware isn't stated (no Revit mark yet) needs review, never a pass, in
+    every building that may be Group H, or Group A or E unless its load is stated under 50 (two or more groups, or
+    none stated, included)."""
     rule = {r["id"]: r for r in rules}[PANIC_RULE]
     for g in A_GROUPS + H_GROUPS + ("E", "mixed", U):
         for load in (U, 50, 120):
