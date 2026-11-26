@@ -22,9 +22,6 @@ LEVEL = 1 / 16          # in: a nosing's ends may differ this much in height, or
 # height, a skirt board or a stringer, at most a 2x stringer's actual 1 1/2 in. Farther, the side isn't this stair's
 STRINGER = 1.5
 STRINGER_WORDS = "1 1/2"
-# in: the most a nosing projects past the riser below (BCNYS 1011.5.5.1: "The nosings shall project not more than 1 1/4
-# inches"), so "one tread depth beyond the bottom riser" (1011.3) reaches at most this much farther than from the nosing
-NOSING = 1.25
 
 
 class Flight:
@@ -303,11 +300,13 @@ def headroom(st: dict, flight: Flight, reader) -> float:
 def headroom_past_bottom(st: dict, flight: Flight, reader) -> float:
     """The 2025 Building Code of New York State's 1011.3 headroom past the foot of the flight: "Such headroom shall be
     continuous above the stairway to the point where the line intersects the landing below, one tread depth beyond
-    the bottom riser." The least height from the line connecting the nosings, carried on down at its first slope, to
-    anything overhead, over the first nosing's width, from the first nosing back past both places the law's words
-    can mean: one tread depth (the flight's deepest) beyond the bottom riser's face, which stands up to NOSING behind
-    the nosing, and wherever the line carried down meets the floor or landing at the foot (a bottom riser taller
-    than the next puts that farther back; review round 1). Needs two nosings (the flight placed in plan). Used by the
+    the bottom riser." The least height to anything overhead, over the first nosing's width, from the first nosing
+    back to the farther of one tread depth (the flight's deepest: treads are measured between nosings, and the bottom
+    riser's face stands at or behind the first nosing, never in front of it) and wherever the line connecting the
+    nosings, carried on down at its first slope, meets the floor or landing at the foot (a bottom riser taller than
+    the next puts that farther back; review round 1). The height is taken from that line, and from the floor or
+    landing wherever the line has gone below it (a bottom riser shorter than the next; review round 2), never from
+    under the floor. Needs two nosings (the flight placed in plan). Used by the
     Building Code check only (model_measurement/routes/stair_rooms.py): the house code's R318.7.2 has no such
     stretch."""
     given = st.get("overhead")
@@ -321,13 +320,19 @@ def headroom_past_bottom(st: dict, flight: Flight, reader) -> float:
                 for n, p in enumerate(given, 1)]
     (s1, z1), (s2, z2) = flight.line()[:2]
     slope = (z2 - z1) / (s2 - s1)
-    back = max(max(flight.treads_most) + NOSING, (z1 - flight.bottom) / slope if slope > 0 else 0)
+    meets = (z1 - flight.bottom) / slope if slope > 0 else 0       # how far back the line reaches the floor
+    back = max(max(flight.treads_most), meets)
     right, left = flight.ends[0]
     with shapes("what is overhead"):
-        stretch = Polygon([(s1 - back, right), (s1, right), (s1, left), (s1 - back, left)])
+        # over the line where it stands above the floor; over the floor beyond (each reference flat or straight over
+        # its piece, so the least gap is at a piece's corner)
+        pieces = [(Polygon([(s1 - meets, right), (s1, right), (s1, left), (s1 - meets, left)]),
+                   lambda s, a: z1 - (s1 - s) * slope)] if meets > 0 else []
+        if back > meets:
+            pieces.append((Polygon([(s1 - back, right), (s1 - meets, right), (s1 - meets, left), (s1 - back, left)]),
+                           lambda s, a: flight.bottom))
         framed = [InFrame(f, flight) for f in surfaces]
-    return least_gap(framed, [(stretch, lambda s, a: z1 - (s1 - s) * slope)], "what is overhead",
-                     "stretch one tread depth past the flight's bottom riser")
+    return least_gap(framed, pieces, "what is overhead", "stretch one tread depth past the flight's bottom riser")
 
 
 class InFrame:
