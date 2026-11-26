@@ -11,8 +11,9 @@ Building Code's own reading of the building already knows of it, with no new geo
   1031.2 item 1, Group R-2 "in stories with only one exit or access to only one exit"); a story with two or more
   doesn't show that the room's occupants have access to more than one (each dwelling unit may reach only one, as
   Table 1006.3.4(1) permits: review round 1), so there it is no only where the routes show every way out of the
-  room reaches two or more separate and distinct exits through its own space and the corridors and lobbies only (the
-  routes' space part, `exits_reached`: 1006.3, 202 COMMON PATH OF EGRESS TRAVEL, 1016.2.1), else not measured. A
+  room reaches two or more separate and distinct exits that surely lead the story out, through its own space and,
+  where the building states no corridor is within a dwelling unit, the corridors only (the routes' space part,
+  `exits_reached`: 1006.3, 202 COMMON PATH OF EGRESS TRAVEL, 1016.2.1), else not measured. A
   `confirm` the routes give the room's exit count is said beside it too.
 - `sleeping_room_door_to_outside`: whether any door of the room (the routes' door parts whose sides name it) has
   outside on its other side (1031.2 exception 2: an exit door or exit access door that opens directly into a public
@@ -141,7 +142,8 @@ def _reach(found: list, name):
     got = (found[0].get("more") or {}).get("exits_reached")
     if not isinstance(got, dict):
         return None, (found[0].get("not_measured") or {}).get("space_exit_count") or "its routes aren't measured"
-    if got.get("two") is not True or not isinstance(got.get("doors"), dict) or not got["doors"] or             not all(isinstance(v, list) and len(set(v)) >= 2 for v in got["doors"].values()):
+    whole = got.get("two") is True and isinstance(got.get("doors"), dict) and bool(got["doors"]) and         all(isinstance(v, list) and len(set(v)) >= 2 for v in got["doors"].values())
+    if not whole:
         return None, str(got.get("why") or "not every way out of it reaches two exits")
     return False, got["doors"]
 

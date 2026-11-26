@@ -21,7 +21,7 @@ from routes_layouts import description, door, rect, room  # noqa: E402
 from model_measurement.routes import EXITS_REACHED, measure  # noqa: E402
 
 
-def corridor(split=False, exits=("x", "y"), bedroom_exit=False, served=False, passage=False):
+def corridor(split=False, exits=("x", "y"), bedroom_exit=False, served=False, passage=False, within=False):
     """A corridor 0-35.5 by -6.5 to -0.5 ft, exits at its west (x) and east (y) ends (each a door to outside at
     discharge), three bedrooms off it (b0-b2, 12 ft apart); `split`: a wall at x 17.75 cuts it in two (c and c2);
     `served`: b1 opens only into a living room routes may cross (marked pass-through), which opens into the corridor."""
@@ -54,7 +54,10 @@ def corridor(split=False, exits=("x", "y"), bedroom_exit=False, served=False, pa
             doors.append(door(f"e{i}", (x0 + 3, -0.25), (1, 0), (f"b{i}", side)))
     if bedroom_exit:
         doors.append(door("bx", (12.25 + 11.5, 5), (0, 1), ("b1", "outside"), exit_id="z"))
-    return description(rooms, doors, passages)
+    desc = description(rooms, doors, passages)
+    if within is not None:                               # the building states whether a corridor is within a unit
+        desc["building"] = {"corridors_within_dwelling_units": within}
+    return desc
 
 
 def reached(desc) -> dict:
@@ -133,3 +136,41 @@ def test_an_exit_reached_only_through_another_units_room_never_counts():
     desc["doors"].append(door("j", (11.75, 5), (0, 1), ("b0", "b1")))
     got = reached(desc)
     assert got["b0"]["two"] is False and "2 ways out" in got["b0"]["why"], got["b0"]
+
+
+# --- review round 1 (PR 3): each finding's pin ----------------------------------------------------------------------
+
+@pytest.mark.parametrize("within", [None, True, False])
+def test_a_corridor_is_shared_only_where_the_building_states_none_is_within_a_unit(within):
+    """A neighbour's own hall marked a corridor, with its own exit door, off a public corridor with one exit: unless
+    the building states no corridor is within a dwelling unit, that hall may be inside the neighbour's unit, so its
+    exit never counts (1016.2.1); and with no such statement no corridor is crossed at all (not two)."""
+    desc = corridor(exits=("x",), within=within)
+    desc["rooms"].append(room("ah", rect(12, -12, 24, -7), use="corridor", pass_through=True))
+    desc["doors"] += [door("aentry", (14, -6.75), (1, 0), ("ah", "c")),
+                      door("aback", (18, -12.25), (1, 0), ("ah", "outside"), exit_id="z")]
+    got = reached(desc)
+    for b in ("b0", "b1", "b2"):
+        if within is False:                              # stated: the hall is shared, its exit door one of two
+            assert got[b] == {"two": True, "doors": {f"e{b[1]}": ["x", "z"]}}, got[b]
+        else:
+            assert got[b]["two"] is False and "states none is within a dwelling unit" in got[b]["why"], got[b]
+    assert reached(corridor(within=None))["b0"]["two"] is False         # the plain corridor: not stated, not two
+
+
+@pytest.mark.parametrize("how", ["no_door_out", "door_out_unmarked", "door_out_marked"])
+def test_a_stair_entered_on_the_level_it_discharges_is_no_second_exit_unless_its_own_door_out_is_marked(how):
+    """A stair enclosure off a corridor whose only exit door to outside is the front door: on that level the stair
+    may discharge back through the corridor (1028.1), so its door is no second exit there, nor where its own door out
+    isn't marked an exterior exit door; marked, it is one (`_egress_sides`' own test)."""
+    desc = corridor(exits=("x",))
+    desc["rooms"].append(room("S", rect(36, -6.5, 44, -0.5), use="other", lockable=True))
+    desc["doors"].append(door("dS", (35.75, -3.5), (0, 1), ("c", "S"), exit_id="S", kind="exit_enclosure"))
+    if how != "no_door_out":
+        desc["doors"].append(door("So", (44.25, -3.5), (0, 1), ("S", "outside"),
+                                  **({"exit_id": "S"} if how == "door_out_marked" else {})))
+    got = reached(desc)
+    if how == "door_out_marked":
+        assert got["b0"] == {"two": True, "doors": {"e0": ["S", "x"]}}, got["b0"]
+    else:
+        assert got["b0"]["two"] is False and "not surely leading this story out" in got["b0"]["why"], got["b0"]

@@ -464,25 +464,34 @@ def test_escape_openings_as_sent_and_with_one_room_stated_a_sleeping_room(got):
     """Before: each apartment is one room said not to be a sleeping room, so no sleeping room is read and 1031.2's rule
     needs review (a dwelling's bedrooms aren't drawn), never a pass. After, one apartment stated a sleeping room (the
     description gives no openings): it is read and linked to its story, Level 1 with two exits. A story's two exits
-    alone don't show the room's occupants reach two (group 8a review round 1); its routes do: its one door, into the
-    shared corridor, reaches both stair enclosures (1006.3's separate and distinct exits), so it isn't on a story
-    "with only one exit or access to only one exit" (1031.2 item 1) and Group R-2 asks it no escape opening: the row
-    passes, saying the door and the exits it reaches; only that rule's rows change."""
+    alone don't show the room's occupants reach two (group 8a review round 1); its routes may: its one door opens into
+    the corridor, which reaches both stair enclosures. As sent, the stairs' doors to outside aren't marked exterior
+    exit doors (each stair may discharge back through the corridor, 1028.1) and the building doesn't state that no
+    corridor is within a dwelling unit, so the one-exit question stays open and the rule needs review, never a pass.
+    With both stated, it isn't on a story "with only one exit or access to only one exit" (1031.2 item 1), so Group
+    R-2 asks it no escape opening: the row passes, saying the door and the exits it reaches; only that rule's rows
+    change. With the east stair unmarked (one exit), it doesn't pass."""
     assert got["results"][ESCAPE] == present.REVIEW
     assert [r["outcome"] for r in got["rows"] if r["rule"] == ESCAPE] == [present.REVIEW]
     desc = build.interior_of()
     desc["rooms"][0]["sleeping"] = True
     stated = _check(desc, egress.measure_routes(desc))
     rows = [r for r in stated["rows"] if r["rule"] == ESCAPE]
-    assert [(r["id"], r["outcome"]) for r in rows] == [(desc["rooms"][0]["id"] + " (sleeping room)", "pass")]
+    assert [(r["id"], r["outcome"]) for r in rows] == [(desc["rooms"][0]["id"] + " (sleeping room)", present.REVIEW)]
     part = next(p for p in stated["interior"]["parts"]["sleeping_room"] if p["id"] == rows[0]["id"])
+    assert "sleeping_room_story_one_exit" not in part["measures"]
+    for d in desc["doors"]:                              # the stairs' doors out marked; no corridor within a unit
+        if d["id"] in ("L1WO", "L1EO"):
+            d["exit_kind"], d["exit_id"] = "exterior_at_discharge", next(x for x in d["sides"] if x != "outside")
+    desc["building"] = {**(desc.get("building") or {}), "corridors_within_dwelling_units": False}
+    marked = _check(desc, egress.measure_routes(desc))
+    rows = [r for r in marked["rows"] if r["rule"] == ESCAPE]
+    assert [r["outcome"] for r in rows] == ["pass"], rows
+    part = next(p for p in marked["interior"]["parts"]["sleeping_room"] if p["id"] == rows[0]["id"])
     assert part["measures"]["sleeping_room_story_one_exit"] is False
     assert part["more"]["exits_reached"] == {"L1DS": ["L1SE", "L1SW"]}
-    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {ESCAPE}
-    # the east stair's doors unmarked (one exit on the story): one exit, Group R-2 asks the opening, none marked
-    for d in desc["doors"]:
+    for d in desc["doors"]:                              # the east stair not an exit: one exit on the story
         if d.get("exit_id") == "L1SE":
             d.pop("exit_kind"), d.pop("exit_id")
     one = _check(desc, egress.measure_routes(desc))
     assert [r["outcome"] for r in one["rows"] if r["rule"] == ESCAPE] != ["pass"]
-
