@@ -8,6 +8,7 @@ first on PYTHONPATH; the fresh compile checks it imported the copy's code).
 """
 
 import datetime
+import importlib.machinery
 import json
 import os
 import shutil
@@ -229,6 +230,56 @@ def test_publishing_and_the_repo_walk_leave_out_the_same_names():
     for name in ("__pycache__", ".git", "bin", "obj", "x.egg-info", "general.published.json", published.PUBLISHED):
         assert rulebook.generated_name(name), name
 
+
+
+def test_every_name_the_repos_gitignore_files_ignore_is_a_generated_name():
+    """Review round 2 (P3): Rhino's <model>.rhl lock and .3dmbak backup (in .gitignore) sat beside committed models in
+    folders Maine's compile walks, so opening a test model made its certificate stale. Every simple pattern of every
+    .gitignore (a name, a folder, or *.suffix) is a name the listings and the repo walk leave out."""
+    from fnmatch import fnmatch
+    from rule_format import rulebook
+    checked = 0
+    for ignore in [REPO / ".gitignore", *REPO.glob("apps/*/.gitignore")]:
+        for line in ignore.read_text(encoding="utf-8").splitlines():
+            pattern = line.strip().rstrip("/")
+            if not pattern or pattern.startswith("#") or "/" in pattern:
+                continue                          # a path (under one folder), not a name: its last part is below
+            name = pattern.replace("*", "x").replace("[cod]", "c")
+            assert fnmatch(name, pattern), pattern
+            if name.endswith(tuple(importlib.machinery.all_suffixes())):
+                assert not rulebook.generated_name(name), pattern    # importable: it must show (the test below)
+                continue
+            assert rulebook.generated_name(name), (ignore.name, pattern)
+            checked += 1
+    assert checked >= 10
+    for path_pattern in ("regulations/jurisdictions/*/*/7_published_rulebooks/*.published.json", ".claude/worktrees"):
+        assert any(rulebook.generated_name(part.replace("*", "x")) for part in path_pattern.split("/")), path_pattern
+
+
+def test_a_rhino_lock_beside_a_model_leaves_mains_certificate_current(copy):
+    models = copy / "test_data/host_conformance/models"
+    lock = models / "01_box_house.rhl"
+    assert models.is_dir() and lock.parent.relative_to(copy).as_posix() in json.loads((copy / CERT).read_bytes())["listed"]
+    lock.write_bytes(b"locked")
+    try:
+        assert published.stale(copy / MAINE, repo=copy) == []
+    finally:
+        lock.unlink()
+
+
+def test_a_compiled_module_beside_a_validator_module_makes_the_certificate_stale(copy):
+    """Review round 3 (two sceptics): .pyd and .pyc names were left out of listings, but Python imports a compiled
+    extension beside rulebook.py in its place, so stale() said current while a fresh compile ran other code. No
+    name Python can import is a generated name."""
+    from rule_format import rulebook
+    assert not any(rulebook.generated_name("m" + s) for s in importlib.machinery.all_suffixes())
+    shadow = copy / "packages/rule_format/rule_format" / f"state_law{importlib.machinery.EXTENSION_SUFFIXES[0]}"
+    shadow.write_bytes(b"not a module")
+    try:
+        assert any("packages/rule_format/rule_format" in w for w in published.stale(copy / MAINE, repo=copy))
+    finally:
+        shadow.unlink()
+    assert published.stale(copy / MAINE, repo=copy) == []
 
 # ---- in-process -----------------------------------------------------------------------------------------------------
 
