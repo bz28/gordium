@@ -340,6 +340,15 @@ def test_compile_law_is_the_one_place_a_state_law_is_validated_and_never_raises(
     assert egress.compile_law(folder, book) == {"problems": ["its sources can't be read (OSError: disk gone)"],
                                                 "documents": {}, "kinds": {}}
     assert egress.laws(ITHACA)["laws"][0]["rules"] == []
+    monkeypatch.undo()
+
+    def bad_kinds(self):        # e.g. a proposed measure's unit that isn't a word: its sources were read, then this
+        raise TypeError("bad unit")
+    monkeypatch.setattr(Context, "allowed", bad_kinds)
+    late = egress.compile_law(folder, book)          # as before the split: the sources kept, no kinds, no rules
+    assert late == {"problems": ["its sources can't be read (TypeError: bad unit)"], "documents": good["documents"],
+                    "kinds": {}}
+    assert egress.laws(ITHACA)["laws"][0]["rules"] == []
 
 
 def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer():
