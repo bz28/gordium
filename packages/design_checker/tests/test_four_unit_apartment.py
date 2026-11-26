@@ -463,14 +463,15 @@ ESCAPE = "general.bc_1031_2_escape_opening_where_required"
 def test_escape_openings_as_sent_and_with_one_room_stated_a_sleeping_room(got):
     """Before: each apartment is one room said not to be a sleeping room, so no sleeping room is read and 1031.2's rule
     needs review (a dwelling's bedrooms aren't drawn), never a pass. After, one apartment stated a sleeping room (the
-    description gives no openings, so none is counted): it is read, linked to its story (Level 1, two exits: Group R-2 is asked only on a story with one exit), so it complies with
-    no escape opening marked; only that rule changes."""
+    description gives no openings): it is read and linked to its story, Level 1 with two exits, which doesn't show that
+    the room's occupants reach two (review round 1: Group R-2 is asked where they have access to only one), so it still
+    needs review with no escape opening marked, never a pass; only that rule's rows change."""
     assert got["results"][ESCAPE] == present.REVIEW
     assert [r["outcome"] for r in got["rows"] if r["rule"] == ESCAPE] == [present.REVIEW]
     desc = build.interior_of()
     desc["rooms"][0]["sleeping"] = True
     stated = _check(desc, egress.measure_routes(desc))
     rows = [r for r in stated["rows"] if r["rule"] == ESCAPE]
-    assert [(r["id"], r["outcome"]) for r in rows] == [(desc["rooms"][0]["id"] + " (sleeping room)", "pass")]
-    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {ESCAPE}
+    assert [(r["id"], r["outcome"]) for r in rows] == [(desc["rooms"][0]["id"] + " (sleeping room)", present.REVIEW)]
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == set()
 

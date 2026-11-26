@@ -105717,9 +105717,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "9a87d7039702de55c75c9d278a6fa25ebacedf7f1c76a582c5200554b6a5678b",
+  "worker_fingerprint": "f63a22cec0c0a10799c5e21aa2b992881035eb04e0ff373f512ed6206a78962b",
   "rulebook": {
-   "new_york/ithaca_city": "e0c97f762eb9864b4b6c7a010545614fe2df6841bde8a5ea82567129ab2047b5"
+   "new_york/ithaca_city": "a99819ab90ff2ab4d58effbf4ced8a4aee455a49a5c97a1bc9a46dae07814580"
   }
  }
 }

@@ -15474,7 +15474,7 @@ rules:
     parts:
       sleeping_room:
       - id: r1
-        name: Apartment bedroom with none, its story with two exits
+        name: Apartment bedroom with none, its occupants shown to reach two exits
         measures:
           sleeping_room_escape_openings: 0
           sleeping_room_fourth_or_higher: false
@@ -15484,7 +15484,8 @@ rules:
     - part: r1
       outcome: pass
     expect: pass
-    note: Group R-2 is asked only in stories with one exit, or access to only one exit, as Tables 1006.3.4(1) and (2) permit.
+    note: Group R-2 is asked only in stories with one exit, or access to only one exit, as Tables 1006.3.4(1) and (2) permit;
+      its occupants reach two.
   - given:
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
@@ -15597,7 +15598,9 @@ rules:
     it is below the fourth story above grade plane, and its story''s exits, are its story''s, as the routes read them (not
     measured: a review). It complies with an opening marked (each opening''s own requirements are its own checks: 1031.2''s
     public way and 1031.2.1''s operation here, 1031.3 to 1031.6 to follow), on the fourth story or higher, or in Group R-2
-    on a story with two or more exits (Gordium''s reading of item 1: no Table 1006.3.4 one-exit allowance is taken there).
+    where its occupants are shown to have access to two or more exits (item 1: "stories with only one exit or access to
+    only one exit"; a story''s two exits don''t show it, since each dwelling unit may reach only one under Table 1006.3.4(1),
+    so there it needs review: review round 1).
     It fails a sleeping room with none in Group R-3 or R-4, or Group R-2 on a story with one exit, below the fourth story,
     with no door to outside (exception 2) and, in Group R-2 or R-3, no sprinkler system (exception 5). Exceptions 1 and 3
     are for basements (their own flag); exception 4''s storm shelters (ICC 500) aren''t sleeping rooms (Gordium''s reading).

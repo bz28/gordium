@@ -7,9 +7,10 @@ Building Code's own reading of the building already knows of it, with no new geo
   interior measuring's openings within it); the openings not read, not measured.
 - `sleeping_room_fourth_or_higher`: its story's `story_fourth_or_higher_above_grade_plane`, the routes' story part
   of the room's own `level` (1031.2: "sleeping rooms below the fourth story above grade plane").
-- `sleeping_room_story_one_exit`: that story has one exit, from its `story_exit_count` (1031.2 item 1: Group R-2
-  "in stories with only one exit or access to only one exit"; two or more: no, Gordium's reading that no Table
-  1006.3.4 one-exit allowance is taken there).
+- `sleeping_room_story_one_exit`: yes where the room's story has one exit (its `story_exit_count` under two:
+  1031.2 item 1, Group R-2 "in stories with only one exit or access to only one exit"); a story with two or more
+  doesn't show that the room's occupants have access to more than one (each dwelling unit may reach only one, as
+  Table 1006.3.4(1) permits: review round 1), so not measured there.
 - `sleeping_room_door_to_outside`: whether any door of the room (the routes' door parts whose sides name it) has
   outside on its other side (1031.2 exception 2: an exit door or exit access door that opens directly into a public
   way, yard, court or exterior egress balcony); no, only where every door of the description has both its sides
@@ -25,7 +26,7 @@ KIND = "sleeping_room"
 OPENINGS = "emergency_escape_opening"
 OUTSIDE = "outside"
 LINKED = {"sleeping_room_fourth_or_higher": ("story_fourth_or_higher_above_grade_plane", lambda v: v),
-          "sleeping_room_story_one_exit": ("story_exit_count", lambda v: v < 2)}
+          "sleeping_room_story_one_exit": ("story_exit_count", lambda v: True if v < 2 else None)}
 WHY = {
     "no_room": "the sleeping room {name} isn't one room of the description's (no room, or more than one, has its id)",
     "no_level": "the sleeping room {name} doesn't say which level it is on",
@@ -36,6 +37,10 @@ WHY = {
                       "outside isn't known",
     "door_sides_not_read": "a door's sides aren't read, so whether the sleeping room {name} has a door to outside "
                            "isn't known",
+    "two_exits": "the sleeping room {name}'s story has two or more exits, but whether its occupants have access to "
+                 "more than one (not only one, as Table 1006.3.4(1) permits) isn't worked out",
+    "room_id_shared": "the sleeping room {name}'s id is more than one room's, so which openings and doors are its "
+                      "isn't known",
 }
 NEW_MEASURES = ("sleeping_room_escape_openings", *LINKED, "sleeping_room_door_to_outside")
 
@@ -64,13 +69,15 @@ def link(parts: dict, description) -> None:
         name = part.get("name") or part.get("id")
         pid = part.get("id")
         rid = (part.get("more") or {}).get("described_id", pid)       # the description's id (egress._escape_openings)
-        # the openings marked in it
-        if isinstance(openings, list):
+        same = by_id.get(rid, [])
+        # the openings marked in it (none counted where the id is more than one room's: review round 1)
+        if len(same) > 1:
+            why["sleeping_room_escape_openings"] = WHY["room_id_shared"].format(name=name)
+        elif isinstance(openings, list):
             m["sleeping_room_escape_openings"] = sum(1 for o in openings if isinstance(o, dict) and o.get("within") == pid)
         else:
             why["sleeping_room_escape_openings"] = WHY["openings_not_read"]
         # its story's place and exits
-        same = by_id.get(rid, [])
         level = same[0].get("level") if len(same) == 1 else None
         if len(same) != 1:
             reason = WHY["no_room"].format(name=name)
@@ -83,13 +90,20 @@ def link(parts: dict, description) -> None:
         for mine, (theirs, worked) in LINKED.items():
             story = stories.get(level) if reason is None else None
             if story is not None and theirs in (story.get("measures") or {}):
-                m[mine] = worked(story["measures"][theirs])
+                value = worked(story["measures"][theirs])
+                if value is None:
+                    why[mine] = WHY["two_exits"].format(name=name)
+                else:
+                    m[mine] = value
             elif story is not None:
                 why[mine] = WHY["story_not_measured"].format(
                     name=name, reason=(story.get("not_measured") or {}).get(theirs, "not measured"))
             else:
                 why[mine] = reason
         # a door of its own to outside
+        if len(same) > 1:
+            why["sleeping_room_door_to_outside"] = WHY["room_id_shared"].format(name=name)
+            continue
         if not isinstance(doors, list):
             why["sleeping_room_door_to_outside"] = WHY["doors_not_read"].format(name=name)
             continue

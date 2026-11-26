@@ -64,10 +64,17 @@ def test_a_room_said_not_to_be_a_sleeping_room_never_becomes_one():
 
 
 def test_a_houses_claims_never_reach_a_building():
+    """Review round 1: a house's claims (here, that the house has no patio covers) set opening measures in the house
+    measuring; the building's openings carry none of them."""
     d = _description()
-    d["has_none"] = {"sleeping_loft": True}
-    got = egress._measured(_law(STORY_RULE, ROOM_RULE), d, {})
+    house = egress.measure_interior({**d, "has_none": [{"kind": "patio_cover", "source": "the test", "reading": False}]})
+    claimed = {k for o in house["parts"]["emergency_escape_opening"] for k in o["measures"]} - {
+        k for o in egress.measure_interior(d)["parts"]["emergency_escape_opening"] for k in o["measures"]}
+    assert claimed, "the claim must set something in the house measuring, or this test pins nothing"
+    got = egress._measured(_law(STORY_RULE, ROOM_RULE), {**d, "has_none": [{"kind": "patio_cover", "source": "the test", "reading": False}]}, {})
     assert got["has_none"] == {}
+    for o in got["parts"]["emergency_escape_opening"]:
+        assert not set(o["measures"]) & claimed
 
 
 def _parts(level="L1", story=None, doors=None, openings=None):
@@ -88,8 +95,10 @@ def _linked(**kw):
 
 def test_each_sleeping_room_is_linked_to_its_story_its_openings_and_its_doors():
     p = _linked()
-    assert p["measures"] == {"sleeping_room_escape_openings": 1, "sleeping_room_story_one_exit": False,
-                             "sleeping_room_door_to_outside": False}
+    assert p["measures"] == {"sleeping_room_escape_openings": 1, "sleeping_room_door_to_outside": False}
+    # review round 1 (a false pass): a story's two exits don't show the room's occupants reach two (each dwelling unit
+    # may reach only one, Table 1006.3.4(1)), so the one-exit question stays open there
+    assert p["not_measured"]["sleeping_room_story_one_exit"].endswith("isn't worked out")
     # its story's place not measured: the room's isn't either, with the story's reason (never a guess)
     assert "sleeping_room_fourth_or_higher" not in p["measures"]
     assert p["not_measured"]["sleeping_room_fourth_or_higher"].endswith("Gordium doesn't measure this yet")
@@ -131,5 +140,16 @@ def test_the_links_measures_replace_the_house_measurings_not_measured_yet():
     escape_openings.link(parts, desc)
     p = parts["sleeping_room"][0]
     assert not set(p["measures"]) & set(p["not_measured"])
-    assert set(p["measures"]) == {"sleeping_room_escape_openings", "sleeping_room_story_one_exit",
-                                  "sleeping_room_door_to_outside"}
+    assert set(p["measures"]) == {"sleeping_room_escape_openings", "sleeping_room_door_to_outside"}
+
+
+def test_a_room_id_two_rooms_share_counts_no_openings_and_no_doors():
+    """Review round 1 (a false pass): two rooms with one id, one a sleeping room: an opening marked in that id may be in
+    the other room, so none is counted (nor its doors), and the rule needs review, never a pass on it."""
+    parts, desc = _parts()
+    desc["rooms"].append({"id": "b", "level": "L1"})
+    escape_openings.link(parts, desc)
+    p = parts["sleeping_room"][0]
+    for k in ("sleeping_room_escape_openings", "sleeping_room_door_to_outside", "sleeping_room_fourth_or_higher"):
+        assert k not in p["measures"] and p["not_measured"][k], k
+
