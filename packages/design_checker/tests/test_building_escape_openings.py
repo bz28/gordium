@@ -178,8 +178,9 @@ def test_each_escape_opening_carries_its_rooms_three_facts():
     assert parts["emergency_escape_opening"][0]["not_measured"]["opening_room_one_exit"].endswith("isn't worked out")
 
 
-LIMITS = [{"id": "a", "for_each": "emergency_escape_opening", "limit": "opening_net_clear_area >= 5.7"},
-          {"id": "h", "for_each": "emergency_escape_opening", "limit": "opening_net_clear_height >= 24"}]
+LIMITS = [{"id": i, "for_each": "emergency_escape_opening", "within": "sleeping_room", "when_none": "not_applicable",
+           "limit": lim, "check": f"({lim}) or opening_room_fourth_or_higher"}
+          for i, lim in (("a", "opening_net_clear_area >= 5.7"), ("h", "opening_net_clear_height >= 24"))]
 
 
 def _two(first, second, rules=LIMITS):
@@ -318,3 +319,52 @@ def test_an_unknown_count_names_the_opening_and_the_figures_missing():
     escape_openings.link(parts, desc, _ny_rules())
     why = parts["sleeping_room"][0]["not_measured"]["sleeping_room_compliant_openings"]
     assert "North window" in why and "opening_net_clear_area" in why
+
+
+def test_a_limit_its_own_rules_validation_refuses_never_counts():
+    """Review round 3 of 8d (a false pass): a rule whose limit drifted from its check (refused by rule_format) gives
+    no limits at all, so a 5.2 sq ft window (5.7 required off grade) can't pass 1031.2 on the drifted 5."""
+    rules = _ny_rules()
+    drift = [dict(r, limit=r["limit"].replace("5.7", "5")) if r["id"].endswith("min_area") else r for r in rules]
+    assert escape_openings.limits(rules) and escape_openings.limits(drift) == []
+
+
+def _small_beside(other):
+    """1031.2's row for the room and 1031.3.1's row for a small opening w in it, beside `other` (R-3, no
+    sprinklers, the room on a one-exit story below the fourth)."""
+    from rule_format import parts as part_rules
+    from rule_format.rulebook import Context
+    ny = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+    rules = {r["id"]: r for r in _ny_rules()}
+    one = {"id": "L1", "measures": {"story_exit_count": 1, "story_fourth_or_higher_above_grade_plane": False}}
+    parts, desc = _parts(story=one, openings=[{"id": "w", "within": "b", "measures": dict(SMALL)}, other])
+    escape_openings.link(parts, desc, list(rules.values()))
+    given = {"occupancy_group": "R-3", **{f"sprinklered_903_3_1_{n}": False for n in (1, 2, 3)}}
+    allowed = Context.for_jurisdiction(ny).allowed()
+    room = part_rules.rows(rules["general.bc_1031_2_escape_opening_where_required"], parts, given, allowed)
+    sizes = part_rules.rows(rules["general.bc_1031_3_1_escape_opening_min_area"], parts, given, allowed)
+    return [r["outcome"] for r in room], {r.get("id"): r["outcome"] for r in sizes}
+
+
+def test_an_opening_that_may_be_the_rooms_never_lets_it_or_its_neighbour_fail():
+    """Review round 3 of 8d (a wrong fail): an opening within no room read (none named, a mistyped id), or one that
+    can't be read (beside the small one, or with no `within`), could be the room's compliant one: 1031.2 and the
+    small opening's row need review, never a fail."""
+    for other in ({"id": "v", "measures": dict(GOOD)}, {"id": "v", "within": "typo", "measures": dict(GOOD)},
+                  {"id": "v", "within": "b", "measures": "big"}, {"id": "v", "measures": "big"},
+                  {"id": "w", "within": "b", "measures": dict(GOOD)}):
+        room, sizes = _small_beside(other)
+        assert room == ["needs_review"], other
+        assert sizes.get("w") != "fail", other
+    room, sizes = _small_beside({"id": "v", "within": "b", "measures": dict(SMALL)})
+    assert room == ["fail"] and sizes["w"] == "fail"
+
+
+def test_the_unknown_reason_names_only_the_figures_that_left_it_unknown():
+    """Review round 3 of 8d: an opening above grade isn't asked for its area well's figures (its well limits hold
+    whatever they are), so the reason names only the one figure missing."""
+    parts, desc = _parts(openings=[{"id": "w", "name": "North window", "within": "b",
+                                    "measures": {k: v for k, v in GOOD.items() if k != "opening_net_clear_area"}}])
+    escape_openings.link(parts, desc, _ny_rules())
+    why = parts["sleeping_room"][0]["not_measured"]["sleeping_room_compliant_openings"]
+    assert "opening_net_clear_area" in why and "area_well" not in why

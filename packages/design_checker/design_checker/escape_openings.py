@@ -159,6 +159,8 @@ def limits(rules) -> list[str]:
     counting = [r for r in rules if isinstance(r.get("check"), str) and COUNT in r["check"]]
     if not over or any(not isinstance(r.get("limit"), str) for r in over):
         return []
+    if any(part_rules.rule_problems(r) for r in over + counting):   # review round 3: a rule its own validation
+        return []                                                     # refuses (a drifted limit) never counts
     if len({_when(r) for r in over + counting}) != 1:
         return []
     return [r["limit"] for r in over]
@@ -194,7 +196,8 @@ def _missing(opening, held) -> list[str]:
     values = opening.get("measures") if isinstance(opening, dict) else None
     if not isinstance(values, dict):
         return []
-    return sorted({n for t in held for n in formula.names(t)} & set(measure_kinds(OPENINGS)) - set(values))
+    unsure = [t for t in held if complies(opening, [t]) is None]       # only the limits it isn't known on
+    return sorted({n for t in unsure for n in formula.names(t)} & set(measure_kinds(OPENINGS)) - set(values))
 
 
 def _unknown_why(answers, held) -> str:
@@ -204,12 +207,27 @@ def _unknown_why(answers, held) -> str:
         "whether its escape openings comply isn't known (one of them can't be read)"
 
 
+def _stray(parts, openings) -> bool:
+    """An opening within no sleeping room read (no `within`, a mistyped one, or one two parts share), as
+    rule_format.parts.rows reads it: it could be any room's, so no room's count is known (review round 3 of 8d). One
+    within a part of another kind it may sit in (a basement) is that part's, not a stray."""
+    ids = part_rules._ids(parts)
+    kind_of = {p["id"]: k for k, given in parts.items() if isinstance(given, list)
+               for p in given if isinstance(p, dict) and isinstance(p.get("id"), str)}
+    may = part_rules.registry()[OPENINGS].get("within", [])
+    for o in openings:
+        where = o.get("within")
+        if ids.get(where) != 1 or kind_of.get(where) not in may:
+            return True
+    return False
+
+
 def _compliance(parts, rooms: list, openings, rules) -> None:
     held = limits(rules)
     by_room, unread = {}, set()
     good, _, doubtful = part_rules._read(parts, OPENINGS, part_rules._ids(parts)) if isinstance(openings, list) \
         else ([], [], set())
-    anywhere = any(d is part_rules.ANYWHERE for d in doubtful)
+    anywhere = any(d is part_rules.ANYWHERE for d in doubtful) or _stray(parts, good or [])
     unread = {d for d in doubtful if isinstance(d, str)}
     for o in good or []:
         by_room.setdefault(o.get("within"), []).append(o)

@@ -15786,9 +15786,9 @@ rules:
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_net_clear_area >= 5.7 or (opening_at_grade and opening_net_clear_area
       >= 5)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
       opening_room_other_compliant
-    reason: 'The opening is smaller than 1031.3.1 allows, but its room has another escape opening marked: 1031.2 asks each
-      sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
-      a person checks.'
+    reason: 'The opening is smaller than 1031.3.1 allows, but another escape opening in its room is known to comply: 1031.2
+      asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet
+      1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (opening_net_clear_area >= 5.7 or (opening_at_grade and opening_net_clear_area
       >= 5))
     reason: 'The opening is smaller than 1031.3.1 allows, in a building of two or more groups: whether its room is in a Group
@@ -16056,8 +16056,9 @@ rules:
     where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade
     plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review where
     the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building
-    of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review round 1), or
-    where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    of two or more groups, where another escape opening in the room is known to comply (it fails where every other one is
+    known not to) (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured yet).
+    Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_3_2_escape_opening_min_height
@@ -16081,7 +16082,9 @@ rules:
       and an escape opening, which the model doesn''t show: a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_net_clear_height >= 24) and not opening_room_fourth_or_higher
       and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening is lower than 24 inches clear, but another escape opening in its room complies: 1031.2 asks each sleeping room for not fewer than one, and an extra window needn''t meet 1031.3 (where none other complies, it fails): a person checks.'
+    reason: 'The opening is lower than 24 inches clear, but another escape opening in its room complies: 1031.2 asks each
+      sleeping room for not fewer than one, and an extra window needn''t meet 1031.3 (where none other complies, it fails):
+      a person checks.'
   - when: occupancy_group in ["mixed"] and not (opening_net_clear_height >= 24)
     reason: 'The opening is lower than 24 inches clear, in a building of two or more groups: whether its room is in a Group
       R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
@@ -16338,8 +16341,9 @@ rules:
     or more. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the
     fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits;
     it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
-    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
-    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    5), in a building of two or more groups, where another escape opening in the room is known to comply (it fails where every
+    other one is known not to) (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured
+    yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_3_2_escape_opening_min_width
@@ -16363,9 +16367,9 @@ rules:
       one and an escape opening, which the model doesn''t show: a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_net_clear_width >= 20) and not opening_room_fourth_or_higher
       and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening is narrower than 20 inches clear, but its room has another escape opening marked: 1031.2 asks each
-      sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
-      a person checks.'
+    reason: 'The opening is narrower than 20 inches clear, but another escape opening in its room is known to comply: 1031.2
+      asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet
+      1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (opening_net_clear_width >= 20)
     reason: 'The opening is narrower than 20 inches clear, in a building of two or more groups: whether its room is in a Group
       R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
@@ -16623,8 +16627,9 @@ rules:
     or more. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the
     fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits;
     it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
-    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
-    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    5), in a building of two or more groups, where another escape opening in the room is known to comply (it fails where every
+    other one is known not to) (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured
+    yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_3_3_escape_opening_max_sill_height
@@ -16648,9 +16653,9 @@ rules:
       or one and an escape opening, which the model doesn''t show: a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_sill_height <= 44) and not opening_room_fourth_or_higher
       and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening has its sill higher than 44 inches above the floor, but its room has another escape opening marked:
-      1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t
-      meet 1031.3): a person checks.'
+    reason: 'The opening has its sill higher than 44 inches above the floor, but another escape opening in its room is known
+      to comply: 1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra
+      window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (opening_sill_height <= 44)
     reason: 'The opening has its sill higher than 44 inches above the floor, in a building of two or more groups: whether
       its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
@@ -16907,8 +16912,9 @@ rules:
     the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher, or
     in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review where the room has a door
     to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups,
-    where the room has another escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story
-    isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    where another escape opening in the room is known to comply (it fails where every other one is known not to) (1031.2 asks
+    one per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code
+    session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_4_escape_door_swinging_or_sliding
@@ -16933,9 +16939,9 @@ rules:
       or one and an escape opening, which the model doesn''t show: a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_is_door or opening_door_hinged_or_sliding) and not
       opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening is a door that isn''t swinging or sliding, but its room has another escape opening marked: 1031.2
-      asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet
-      1031.3): a person checks.'
+    reason: 'The opening is a door that isn''t swinging or sliding, but another escape opening in its room is known to comply:
+      1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t
+      meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_is_door or opening_door_hinged_or_sliding)
     reason: 'The opening is a door that isn''t swinging or sliding, in a building of two or more groups: whether its room
       is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
@@ -17200,8 +17206,9 @@ rules:
     It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth
     story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it
     needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
-    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
-    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    5), in a building of two or more groups, where another escape opening in the room is known to comply (it fails where every
+    other one is known not to) (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured
+    yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_area_well_required
@@ -17234,8 +17241,8 @@ rules:
       <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
       not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
     reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded, or not known), but
-      its room has another escape opening marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not
-      be the one relied on (an extra window needn''t meet 1031.3): a person checks.'
+      another escape opening in its room is known to comply: 1031.2 asks each sleeping room for not fewer than one, so this
+      one may not be the one relied on (an extra window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment
       <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))))
     reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded, or not known), in
@@ -17682,9 +17689,9 @@ rules:
     no well read is no area. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it
     complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach
     two or more exits; it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3
-    building (exception 5), in a building of two or more groups, where the room has another escape opening marked (1031.2
-    asks one per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude
-    Code session (2026-11-26).'
+    building (exception 5), in a building of two or more groups, where another escape opening in the room is known to comply
+    (it fails where every other one is known not to) (1031.2 asks one per room: review round 1), or where the room''s story
+    isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_1_area_well_min_projection
@@ -17715,9 +17722,9 @@ rules:
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment
       <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
       not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), but its room has another
-      escape opening marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied
-      on (an extra window needn''t meet 1031.3): a person checks.'
+    reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), but another escape
+      opening in its room is known to comply: 1031.2 asks each sleeping room for not fewer than one, so this one may not be
+      the one relied on (an extra window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment
       <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))))
     reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), in a building of two
@@ -18155,9 +18162,9 @@ rules:
     36 inches it fails whatever stands in it (review rounds 1 to 3). It applies only where 1031.2 requires the opening: its
     room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2 where
     the room''s occupants are shown to reach two or more exits; it needs review where the room has a door to outside (exception
-    2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the room has
-    another escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not
-    measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where another escape
+    opening in the room is known to comply (it fails where every other one is known not to) (1031.2 asks one per room: review
+    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_1_area_well_min_width
@@ -18188,9 +18195,9 @@ rules:
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment
       <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
       not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), but its room has another
-      escape opening marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied
-      on (an extra window needn''t meet 1031.3): a person checks.'
+    reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), but another escape
+      opening in its room is known to comply: 1031.2 asks each sleeping room for not fewer than one, so this one may not be
+      the one relied on (an extra window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment
       <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))))
     reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), in a building of two
@@ -18628,9 +18635,9 @@ rules:
     fails whatever stands in it (review rounds 1 to 3). It applies only where 1031.2 requires the opening: its room''s facts
     are copied onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s
     occupants are shown to reach two or more exits; it needs review where the room has a door to outside (exception 2), in
-    a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the room has another
-    escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured
-    yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where another escape opening
+    in the room is known to comply (it fails where every other one is known not to) (1031.2 asks one per room: review round
+    1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_1_area_well_allows_full_opening
@@ -18655,9 +18662,9 @@ rules:
       one and an escape opening, which the model doesn''t show: a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or opening_fully_openable) and not opening_room_fourth_or_higher
       and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening can''t open fully in its area well, but its room has another escape opening marked: 1031.2 asks each
-      sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
-      a person checks.'
+    reason: 'The opening can''t open fully in its area well, but another escape opening in its room is known to comply: 1031.2
+      asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet
+      1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or opening_fully_openable)
     reason: 'The opening can''t open fully in its area well, in a building of two or more groups: whether its room is in a
       Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
@@ -18922,9 +18929,9 @@ rules:
     house code''s). Its area well allows the opening to be fully opened. It applies only where 1031.2 requires the opening:
     its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2
     where the room''s occupants are shown to reach two or more exits; it needs review where the room has a door to outside
-    (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the
-    room has another escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known
-    (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where another
+    escape opening in the room is known to comply (it fails where every other one is known not to) (1031.2 asks one per room:
+    review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_2_area_well_ladder_over_44
@@ -18949,9 +18956,9 @@ rules:
       means of egress, or one and an escape opening, which the model doesn''t show: a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or not area_well_depth > 44 or area_well_ladder)
       and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening is in an area well over 44 inches deep with no ladder or steps, but its room has another escape opening
-      marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window
-      needn''t meet 1031.3): a person checks.'
+    reason: 'The opening is in an area well over 44 inches deep with no ladder or steps, but another escape opening in its
+      room is known to comply: 1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied
+      on (an extra window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or not area_well_depth > 44 or area_well_ladder)
     reason: 'The opening is in an area well over 44 inches deep with no ladder or steps, in a building of two or more groups:
       whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
@@ -19226,9 +19233,9 @@ rules:
     window or door. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies
     on the fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or
     more exits; it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building
-    (exception 5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one
-    per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session
-    (2026-11-26).'
+    (exception 5), in a building of two or more groups, where another escape opening in the room is known to comply (it fails
+    where every other one is known not to) (1031.2 asks one per room: review round 1), or where the room''s story isn''t known
+    (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_2_1_area_well_ladder
@@ -19260,9 +19267,9 @@ rules:
       or area_well_steps or (area_well_ladder_width >= 12 and area_well_ladder_projection >= 3 and area_well_rung_spacing
       <= 18 and area_well_ladder_full_height)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and
       not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening has an area well ladder short of 1031.5.2.1, but its room has another escape opening marked: 1031.2
-      asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet
-      1031.3): a person checks.'
+    reason: 'The opening has an area well ladder short of 1031.5.2.1, but another escape opening in its room is known to comply:
+      1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t
+      meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or not area_well_depth > 44 or not area_well_ladder
       or area_well_steps or (area_well_ladder_width >= 12 and area_well_ladder_projection >= 3 and area_well_rung_spacing
       <= 18 and area_well_ladder_full_height))
@@ -19588,10 +19595,11 @@ rules:
     the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher, or
     in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review where the room has a door
     to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups,
-    where the room has another escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story
-    isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26). Section group 8d: it asks only a
-    ladder or steps 1031.5.2 requires (a well over 44 inches deep: ''Ladders or steps required by this section''), as the
-    house code''s R319.4.2.1 reads it, so the limit says exactly what the opening''s figures show.'
+    where another escape opening in the room is known to comply (it fails where every other one is known not to) (1031.2 asks
+    one per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code
+    session (2026-11-26). Section group 8d: it asks only a ladder or steps 1031.5.2 requires (a well over 44 inches deep:
+    ''Ladders or steps required by this section''), as the house code''s R319.4.2.1 reads it, so the limit says exactly what
+    the opening''s figures show.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_2_2_area_well_steps
@@ -19621,9 +19629,9 @@ rules:
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or not area_well_depth > 44 or not area_well_steps
       or (area_well_ladder_width >= 12 and area_well_step_tread > 5 and area_well_step_riser <= 18 and area_well_ladder_full_height))
       and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening has area well steps short of 1031.5.2.2, but its room has another escape opening marked: 1031.2 asks
-      each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
-      a person checks.'
+    reason: 'The opening has area well steps short of 1031.5.2.2, but another escape opening in its room is known to comply:
+      1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t
+      meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or not area_well_depth > 44 or not area_well_steps
       or (area_well_ladder_width >= 12 and area_well_step_tread > 5 and area_well_step_riser <= 18 and area_well_ladder_full_height))
     reason: 'The opening has area well steps short of 1031.5.2.2, in a building of two or more groups: whether its room is
@@ -19939,11 +19947,11 @@ rules:
     no higher than 18 inches for the full height of the well. It applies only where 1031.2 requires the opening: its room''s
     facts are copied onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s
     occupants are shown to reach two or more exits; it needs review where the room has a door to outside (exception 2), in
-    a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the room has another
-    escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured
-    yet). Hand-drafted in a Claude Code session (2026-11-26). Section group 8d: it asks only a ladder or steps 1031.5.2 requires
-    (a well over 44 inches deep: ''Ladders or steps required by this section''), as the house code''s R319.4.2.1 reads it,
-    so the limit says exactly what the opening''s figures show.'
+    a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where another escape opening
+    in the room is known to comply (it fails where every other one is known not to) (1031.2 asks one per room: review round
+    1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26). Section
+    group 8d: it asks only a ladder or steps 1031.5.2 requires (a well over 44 inches deep: ''Ladders or steps required by
+    this section''), as the house code''s R319.4.2.1 reads it, so the limit says exactly what the opening''s figures show.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_3_area_well_drainage
