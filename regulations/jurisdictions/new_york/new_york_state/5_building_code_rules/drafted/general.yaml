@@ -2721,11 +2721,10 @@ rules:
   topic: means_of_egress
   title: Area well horizontal area at least 9 sf (R319.4.1)
   applies_when: opening_below_grade
-  check: area_well_area >= 9
+  check: area_well_area >= 9 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))
   review_when:
-  - when: area_well_ladder and area_well_area < 9
-    reason: The exception lets the ladder or steps encroach into the required dimensions of the area well, but the
-      text does not say how that changes the required horizontal area, so a person checks it.
+  - when: area_well_ladder and not (area_well_area >= 9) and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))
+    reason: 'The exception lets the ladder or steps encroach into the required dimensions of the area well, but the text does not say how that changes the required horizontal area, so a person checks it.'
   for_each: emergency_escape_opening
   when_none: not_applicable
   sources:
@@ -2743,6 +2742,13 @@ rules:
     - 13
     quote: 'Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more
       than 6 inches (152 mm)'
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 15
+    - 16
+    quote: Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved,
+      permanently affixed ladder or steps.
   examples:
   - given: {}
     parts:
@@ -2753,6 +2759,8 @@ rules:
           opening_below_grade: true
           area_well_area: 10
           area_well_ladder: false
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 0
     rows:
     - part: o1
       outcome: pass
@@ -2766,6 +2774,8 @@ rules:
           opening_below_grade: true
           area_well_area: 8
           area_well_ladder: false
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 0
     rows:
     - part: o1
       outcome: fail
@@ -2777,8 +2787,86 @@ rules:
         name: Window
         measures:
           opening_below_grade: true
+          area_well_area: 10
+          area_well_ladder: false
+          area_well_other_encroachment: 3
+          area_well_ladder_encroachment: 0
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_area: 10
+          area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 6
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_area: 10
+          area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 7
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_area: 10
+          area_well_ladder: true
+          area_well_depth: 44
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_area: 10
+    rows:
+    - part: o1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
           area_well_area: 8
           area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
     rows:
     - part: o1
       outcome: needs_review
@@ -2793,8 +2881,6 @@ rules:
   - The book prints '9 square feet (0.9 m²)' and 9 square feet is 0.84 m². Gordium reads the square feet as governing,
     the square metres being a conversion printed after them.
   - How much the ladder or steps encroachment (exception) may reduce the horizontal area is not stated.
-  - Whether the exception applies only where the ladder is required by R319.4.2 (depth greater than 44 inches) is
-    decided in R319.4.2.
   research:
   - question: The book prints '9 square feet (0.9 m²)' and 9 square feet is 0.84 m². Gordium reads the square feet
       as governing, the square metres being a conversion printed after them.
@@ -2805,24 +2891,66 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Whether the exception applies only where the ladder is required by R319.4.2 (depth greater than 44
-      inches) is decided in R319.4.2.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  findings:
+  - id: ladder_encroaches_only_where_required
+    question: 'Whether the exception applies only where the ladder is required by R319.4.2 (depth greater than 44 inches) is decided in R319.4.2.'
+    kind: law
+    answer: 'Yes. The exception is for "The ladder or steps required by Section R319.4.2", and R319.4.2 requires
+      them only in an area well with a vertical depth greater than 44 inches; in a shallower well no ladder
+      or steps are required, so none may encroach, and anything else in the required dimensions has no
+      exception at all.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 13
+      - 13
+      quote: 'Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more
+        than 6 inches (152 mm)'
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 15
+      - 16
+      quote: Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved,
+        permanently affixed ladder or steps.
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: check
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: review_when
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: sources
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: examples
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: open_questions
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: findings
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
 - id: general.r319_4_1_area_well_min_projection
   kind: rule
   topic: means_of_egress
   title: Area well horizontal projection at least 36 in (R319.4.1)
   applies_when: opening_below_grade
-  check: area_well_projection >= 36
+  check: area_well_projection >= 36 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))
   review_when:
-  - when: area_well_ladder and area_well_projection >= 36 - 6
-    reason: The well has a ladder or steps, which may encroach not more than 6 in into the required dimensions (exception),
-      and only if R319.4.2 requires them; how far this one reaches into the well isn't measured. A person checks.
+  - when: area_well_ladder and area_well_projection >= 36 - 6 and not (area_well_projection >= 36) and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))
+    reason: 'The well is 30 in to under 36 in with a ladder or steps, nothing else in it: whether the 6 in the exception lets the ladder or steps take may come off the well''s own size, or only out of a 36 in well, isn''t settled (the answer key needs review here). A person checks.'
   for_each: emergency_escape_opening
   when_none: not_applicable
   sources:
@@ -2839,6 +2967,13 @@ rules:
     - 13
     quote: 'Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more
       than 6 inches (152 mm)'
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 15
+    - 16
+    quote: Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved,
+      permanently affixed ladder or steps.
   examples:
   - given: {}
     parts:
@@ -2849,6 +2984,8 @@ rules:
           opening_below_grade: true
           area_well_projection: 40
           area_well_ladder: false
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 0
     rows:
     - part: o1
       outcome: pass
@@ -2860,8 +2997,10 @@ rules:
         name: Window
         measures:
           opening_below_grade: true
-          area_well_projection: 30
+          area_well_projection: 28
           area_well_ladder: false
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 0
     rows:
     - part: o1
       outcome: fail
@@ -2873,8 +3012,70 @@ rules:
         name: Window
         measures:
           opening_below_grade: true
-          area_well_projection: 31
+          area_well_projection: 40
+          area_well_ladder: false
+          area_well_other_encroachment: 3
+          area_well_ladder_encroachment: 0
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_projection: 40
           area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 6
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_projection: 40
+          area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 7
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_projection: 40
+          area_well_ladder: true
+          area_well_depth: 44
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_projection: 40
     rows:
     - part: o1
       outcome: needs_review
@@ -2886,8 +3087,11 @@ rules:
         name: Window
         measures:
           opening_below_grade: true
-          area_well_projection: 40
+          area_well_projection: 33
           area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
     rows:
     - part: o1
       outcome: needs_review
@@ -2901,6 +3105,9 @@ rules:
           opening_below_grade: true
           area_well_projection: 24
           area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 6
     rows:
     - part: o1
       outcome: fail
@@ -2911,13 +3118,29 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-  open_questions:
-  - Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?
-  research:
-  - question: Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  findings:
+  - id: ladder_encroaches_only_where_required
+    question: 'Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?'
+    kind: law
+    answer: 'Yes. The exception is for "The ladder or steps required by Section R319.4.2", and R319.4.2 requires
+      them only in an area well with a vertical depth greater than 44 inches; in a shallower well no ladder
+      or steps are required, so none may encroach, and anything else in the required dimensions has no
+      exception at all.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 13
+      - 13
+      quote: 'Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more
+        than 6 inches (152 mm)'
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 15
+      - 16
+      quote: Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved,
+        permanently affixed ladder or steps.
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
@@ -2942,16 +3165,39 @@ rules:
       one of 36 in or more with a ladder that may reach more than 6 in into it (a false pass on missing data, shown
       once the full-opening flag became a rule). Now a well with a ladder fails under 30 in and needs review from
       30 in up, as the answer key does. Cause r319_4_1_ladder_review_too_wide, resolutions.yaml.'
+  - field: check
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: review_when
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: sources
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: examples
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: open_questions
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: findings
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
 - id: general.r319_4_1_area_well_min_width
   kind: rule
   topic: means_of_egress
   title: Area well width at least 36 in (R319.4.1)
   applies_when: opening_below_grade
-  check: area_well_width >= 36
+  check: area_well_width >= 36 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))
   review_when:
-  - when: area_well_ladder and area_well_width >= 36 - 6
-    reason: The well has a ladder or steps, which may encroach not more than 6 in into the required dimensions (exception),
-      and only if R319.4.2 requires them; how far this one reaches into the well isn't measured. A person checks.
+  - when: area_well_ladder and area_well_width >= 36 - 6 and not (area_well_width >= 36) and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))
+    reason: 'The well is 30 in to under 36 in with a ladder or steps, nothing else in it: whether the 6 in the exception lets the ladder or steps take may come off the well''s own size, or only out of a 36 in well, isn''t settled (the answer key needs review here). A person checks.'
   for_each: emergency_escape_opening
   when_none: not_applicable
   sources:
@@ -2968,6 +3214,13 @@ rules:
     - 13
     quote: 'Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more
       than 6 inches (152 mm)'
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 15
+    - 16
+    quote: Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved,
+      permanently affixed ladder or steps.
   examples:
   - given: {}
     parts:
@@ -2978,6 +3231,8 @@ rules:
           opening_below_grade: true
           area_well_width: 40
           area_well_ladder: false
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 0
     rows:
     - part: o1
       outcome: pass
@@ -2989,8 +3244,10 @@ rules:
         name: Window
         measures:
           opening_below_grade: true
-          area_well_width: 30
+          area_well_width: 28
           area_well_ladder: false
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 0
     rows:
     - part: o1
       outcome: fail
@@ -3002,8 +3259,70 @@ rules:
         name: Window
         measures:
           opening_below_grade: true
-          area_well_width: 31
+          area_well_width: 40
+          area_well_ladder: false
+          area_well_other_encroachment: 3
+          area_well_ladder_encroachment: 0
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_width: 40
           area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 6
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_width: 40
+          area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 7
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_width: 40
+          area_well_ladder: true
+          area_well_depth: 44
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_width: 40
     rows:
     - part: o1
       outcome: needs_review
@@ -3015,8 +3334,11 @@ rules:
         name: Window
         measures:
           opening_below_grade: true
-          area_well_width: 40
+          area_well_width: 33
           area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
     rows:
     - part: o1
       outcome: needs_review
@@ -3030,6 +3352,9 @@ rules:
           opening_below_grade: true
           area_well_width: 24
           area_well_ladder: true
+          area_well_depth: 50
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 6
     rows:
     - part: o1
       outcome: fail
@@ -3040,13 +3365,29 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-  open_questions:
-  - Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?
-  research:
-  - question: Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  findings:
+  - id: ladder_encroaches_only_where_required
+    question: 'Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?'
+    kind: law
+    answer: 'Yes. The exception is for "The ladder or steps required by Section R319.4.2", and R319.4.2 requires
+      them only in an area well with a vertical depth greater than 44 inches; in a shallower well no ladder
+      or steps are required, so none may encroach, and anything else in the required dimensions has no
+      exception at all.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 13
+      - 13
+      quote: 'Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more
+        than 6 inches (152 mm)'
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 15
+      - 16
+      quote: Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved,
+        permanently affixed ladder or steps.
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
@@ -3071,6 +3412,30 @@ rules:
       one of 36 in or more with a ladder that may reach more than 6 in into it (a false pass on missing data, shown
       once the full-opening flag became a rule). Now a well with a ladder fails under 30 in and needs review from
       30 in up, as the answer key does. Cause r319_4_1_ladder_review_too_wide, resolutions.yaml.'
+  - field: check
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: review_when
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: sources
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: examples
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: open_questions
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
+  - field: findings
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'R319.4.1 exception: "The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well." R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." The two reaches are now facts of their own (area_well_ladder_encroachment, area_well_other_encroachment, parts.yaml; stated in Revit by the window''s Gordium: Well marks, PR #247), so the rule reads them as BCNYS 1031.5.1''s do (the same words): the well''s size, and nothing in its required dimensions but the ladder or steps a well over 44 in deep requires, 6 in at most. Before, the rule read the size alone and the ladder fact for what might encroach, so a 36 in well with a meter in it, stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps needs review, as before.'
 - id: general.r319_4_1_area_well_allows_full_opening
   kind: rule
   topic: means_of_egress

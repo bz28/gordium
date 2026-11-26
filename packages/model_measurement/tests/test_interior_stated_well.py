@@ -87,27 +87,26 @@ def test_the_ladder_word_gives_both_ladder_measures(word):
     assert m["area_well_ladder"] is (word in ("ladder", "steps"))
 
 
-@pytest.mark.parametrize("word", ["none", "ladder_blocked", "steps_blocked"])
-@pytest.mark.parametrize("reach", [{"ladder_encroachment": 8}, {"other_encroachment": 10}, {"other_encroachment": None},
-                                   {"ladder_encroachment": None}])
-def test_a_wells_size_is_held_back_while_anything_but_the_required_ladder_may_reach_into_it(word, reach):
-    # review round 1 (a false pass): the house code's size rules (RCNYS R319.4.1) read the size alone, so a 36 in well
-    # with a meter (or a blocked ladder) in it passed them; held back, they need review
-    well = {k: v for k, v in {**FULL, "ladder": word, "ladder_encroachment": 0, **reach}.items() if v is not None}
-    if word == "none" and "ladder_encroachment" in reach:
-        well.pop("ladder_encroachment", None)                            # with none, it is 0 by itself
-        well["other_encroachment"] = 10
-    m, stopped, _ = opening_measures(stated(well))
+@pytest.mark.parametrize("word", ["none", "ladder", "ladder_blocked", "steps_blocked"])
+@pytest.mark.parametrize("reach, outcome", [({"other_encroachment": 10}, "fail"), ({"ladder_encroachment": 8}, "fail"),
+                                            ({"other_encroachment": None}, "needs_review"),
+                                            ({"ladder_encroachment": None}, "needs_review")])
+def test_a_crowded_well_fails_both_codes_size_rules_and_one_not_stated_needs_review(word, reach, outcome):
+    # PR #247's review round 1 found the house code's size rules (RCNYS R319.4.1) reading the size alone, so a 36 in
+    # well with a meter in it passed; they read the two reaches now, as BCNYS 1031.5.1's do (the same words)
+    well = {k: v for k, v in {**FULL, "ladder": word, "depth": 50, "width": 40, "projection": 40, "area": 40 * 40,
+                              "ladder_encroachment": 0, **reach}.items() if v is not None}
+    if word == "none" and "ladder_encroachment" in reach:          # with none, the ladder's reach is 0 by itself
+        well.pop("ladder_encroachment", None)
+        well["other_encroachment"] = 10 if outcome == "fail" else None
+        well = {k: v for k, v in well.items() if v is not None}
+    m, _, _ = opening_measures(stated(well))
     for k in ("area_well_area", "area_well_width", "area_well_projection"):
-        assert k not in m and "isn't handed to the rules" in stopped[k], (word, reach, k)
-    # review round 2: the card opens the reach's mark that settles it, never the size's (already set)
-    from design_checker import panel_data
-    # exactly the mark that settles it: anything else's reach, else the ladder's reach (8 in: past what any ladder may)
-    want = "ladder_encroachment" if well.get("other_encroachment") == 0 else "other_encroachment"
-    assert panel_data.field_of_why("area_well_width", stopped["area_well_width"]) == f"openings[].stated_well.{want}"
-    assert (m["area_well_ladder"], m["area_well_steps"]) == LADDER_WORDS[word]
-    got = _house_outcomes({**well, "depth": 30, "width": 36, "projection": 36, "area": 36 * 36})
-    assert "pass" not in {got[r] for r in HOUSE_SIZE_RULES}, got
+        assert k in m, k                                         # the size reaches the rules as stated
+    house = _house_outcomes(well)
+    building = _outcomes(well)
+    for got in [house[r] for r in HOUSE_SIZE_RULES] + [building[r] for r in WELL_RULES[:3]]:
+        assert got == outcome, (word, reach, house, building)
 
 
 def test_no_ladder_means_nothing_climbs_into_the_well_and_a_reach_stated_besides_refuses():
@@ -222,10 +221,10 @@ def test_the_pr_example_well_stated_in_revit_passes_its_size_and_ladder_rules():
 def test_a_ladder_the_open_window_blocks_fails_1031_5_2_and_a_blank_ladder_needs_review():
     got = _outcomes(dict(FULL, ladder="ladder_blocked", ladder_encroachment=0))
     assert got["general.bc_1031_5_2_area_well_ladder_over_44"] == "fail", got
-    # reaching into the well besides: still no ladder it accepts, and its size held back, so no size rule passes
+    # reaching 4 in into the well besides: still no ladder it accepts, so 1031.5.2 fails it (the size rules read the
+    # reach as for any ladder or steps in a well over 44 in deep)
     got = _outcomes(dict(FULL, ladder="ladder_blocked"))
     assert got["general.bc_1031_5_2_area_well_ladder_over_44"] == "fail", got
-    assert "pass" not in {got[r] for r in WELL_RULES[:3]}, got
     # not stated whether it is a ladder, steps or none: the 50 in well's ladder rule needs review; the ladder's and the
     # steps' own sizes pass where every one stated is within both (either way it complies), and need review where one
     # falls short (an 11 in ladder or steps: which it is decides)
@@ -300,14 +299,28 @@ def test_a_drawn_wells_size_not_stated_says_the_drawing_gives_it():
     assert "drawn area well gives" in stopped["area_well_width"] and "doesn't give it" not in stopped["area_well_width"]
 
 
-@pytest.mark.parametrize("ladder, depth, reach, handed", [
-    ("ladder", 50, 6, True), ("ladder", 50, 7, False), ("ladder", 44, 2, False), ("steps", 45, 6, True),
-    ("ladder_blocked", 50, 2, False), ("ladder", 30, 0, True), (None, 50, 2, False)])
-def test_only_the_required_ladder_may_reach_into_the_well_for_its_size_to_be_handed_on(ladder, depth, reach, handed):
-    well = {k: v for k, v in {**FULL, "ladder": ladder, "depth": depth, "ladder_encroachment": reach}.items()
-            if v is not None}
-    m, _, _ = opening_measures(stated(well))
-    assert ("area_well_width" in m) is handed, (ladder, depth, reach)
+@pytest.mark.parametrize("ladder, depth, reach, outcome", [
+    ("ladder", 50, 6, "pass"), ("ladder", 50, 7, "fail"), ("ladder", 44, 2, "fail"), ("steps", 45, 6, "pass"),
+    ("ladder", 30, 0, "pass"), ("ladder", None, 2, "needs_review"), ("ladder", 50, None, "needs_review")])
+def test_only_the_required_ladder_may_reach_into_the_well_and_6_in_at_most(ladder, depth, reach, outcome):
+    # R319.4.1 exception: "The ladder or steps required by Section R319.4.2" (a well over 44 in deep) "shall be
+    # permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well."
+    well = {k: v for k, v in {**FULL, "ladder": ladder, "depth": depth, "ladder_encroachment": reach, "width": 40,
+                              "projection": 40, "area": 40 * 40}.items() if v is not None}
+    house, building = _house_outcomes(well), _outcomes(well)
+    assert {house[r] for r in HOUSE_SIZE_RULES} == {outcome}, (ladder, depth, reach, house)
+    assert {building[r] for r in WELL_RULES[:3]} == {outcome}, (ladder, depth, reach, building)
+
+
+def test_a_house_well_30_to_36_in_with_a_ladder_keeps_the_answer_keys_review():
+    # the answer key needs review for a well 30 to under 36 in with a ladder or steps: kept (whether the 6 in may come
+    # off the well's own size isn't settled); under 30 in it fails, and anything else in it fails
+    base_ = {**FULL, "width": 33, "projection": 40, "area": 33 * 40, "ladder_encroachment": 3}
+    assert _house_outcomes(base_)["general.r319_4_1_area_well_min_width"] == "needs_review"
+    assert _house_outcomes({**base_, "width": 29, "area": 29 * 40})["general.r319_4_1_area_well_min_width"] == "fail"
+    assert _house_outcomes({**base_, "other_encroachment": 1})["general.r319_4_1_area_well_min_width"] == "fail"
+    assert _house_outcomes({**base_, "ladder": "none", "ladder_encroachment": 0})[
+        "general.r319_4_1_area_well_min_width"] == "fail"
 
 
 def test_not_below_grade_cant_stand_beside_a_ground_where_no_clear_bottom_is_known():
@@ -315,33 +328,3 @@ def test_not_below_grade_cant_stand_beside_a_ground_where_no_clear_bottom_is_kno
     d = stated({"below_grade": False}, ground_outside=30, operation="awning")       # awning: needs a maker's opening
     m, stopped, _ = opening_measures(d)
     assert "opening_below_grade" not in m and "bottom isn't known" in stopped["opening_below_grade"]
-
-
-@pytest.mark.parametrize("left, field, words", [
-    ({"depth": None}, "depth", "doesn't state the well's depth"),
-    ({"ladder": None}, "ladder", "doesn't state what it has to climb out by"),
-    ({"other_encroachment": "abc"}, "other_encroachment", "states of how far anything else reaches into its well isn't read"),
-    ({"ladder": "ladder_blocked"}, "ladder", "that the open window or door blocks, reaching 4 in"),
-    ({"ladder": "steps_blocked"}, "ladder", "that the open window or door blocks, reaching 4 in"),
-    # round 5: past what any ladder may (over 6 in, or a well 44 in deep or less), the reach settles it, whatever the ladder
-    ({"ladder": "ladder_blocked", "ladder_encroachment": 8}, "ladder_encroachment", "reaching 8 in"),
-    ({"ladder": "ladder_blocked", "depth": 44, "ladder_encroachment": 3}, "ladder_encroachment", "reaching 3 in"),
-    # round 6, kept as chosen: a blocked ladder within 6 in and no depth stated opens the ladder (no single mark
-    # settles it; the blocked ladder is the defect 1031.5.2 names, and the depth is asked next)
-    ({"ladder": "ladder_blocked", "depth": None}, "ladder", "that the open window or door blocks, reaching 4 in"),
-    ({"other_encroachment": None}, "other_encroachment", "doesn't state how far anything other"),
-    ({"ladder_encroachment": None}, "ladder_encroachment", "doesn't state how far its ladder or steps reach")])
-def test_a_held_back_size_names_what_settles_it(left, field, words):
-    # review round 3: a 4 in reach waiting on the depth or the ladder named the reach; one stated but refused said
-    # it wasn't stated
-    from design_checker import panel_data
-    well = {k: v for k, v in {**FULL, **left}.items() if v is not None}
-    m, stopped, _ = opening_measures(stated(well))
-    why = stopped["area_well_width"]
-    assert "area_well_width" not in m and words in why, why
-    assert panel_data.field_of_why("area_well_width", why) == f"openings[].stated_well.{field}"
-
-
-def test_a_reach_stated_beside_no_ladder_is_said_unread_not_unstated():
-    m, stopped, _ = opening_measures(stated(dict(FULL, ladder="none", ladder_encroachment=4)))
-    assert "area_well_width" not in m and "isn't read (its own reason says why)" in stopped["area_well_width"]

@@ -303,17 +303,6 @@ def well_field(key: str) -> str:
     return f"openings[].stated_well.{key}"
 
 
-# what a held-back size's reason names, for the reach mark that settles it (panel_data: its card opens that mark)
-REACH_MARKS = {"other_encroachment": "its mark for anything else reaching into the well",
-               "ladder_encroachment": "its mark for the ladder's or steps' reach into the well",
-               "ladder": "its mark for what the well has to climb out by",
-               "depth": "its mark for the well's depth"}
-REACH_FIELDS = {words: well_field(key) for key, words in REACH_MARKS.items()}
-# a statement given but not read, by its short name in a reason
-UNREAD_NAMES = {"other_encroachment": "how far anything else reaches into its well",
-                "ladder_encroachment": "how far its ladder or steps reach into its well",
-                "ladder": "what its well has to climb out by", "depth": "its well's depth"}
-
 # {measure: (the field that states it, the marks its reasons name)}: what panel_data names in a mark's cause
 WELL_FIELDS = {**{m: (well_field(k), mark) for k, (m, _, _, mark) in STATED_WELL.items() if m},
                **{m: (well_field("ladder"), STATED_WELL["ladder"][3]) for m in LADDER_MEASURES}}
@@ -326,11 +315,8 @@ def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict]:
     the same measure, the two must agree within 1/16 in (1/16 sq ft for the area), else neither is used; a stated area
     over the stated width times projection can't be. Not below grade can't stand beside a drawn well, or a ground
     given above the clear opening's bottom (`bottoms`, every bottom it could have), or beside a ground given where no
-    bottom is known. The well's size (area, width, projection) is handed to the rules only once its required
-    dimensions are stated clear but for the required ladder or steps (6 in at most, a well over 44 in deep): the house
-    code's size rules (RCNYS R319.4.1) read the size alone (review round 1: a well crowded by a meter passed them), so
-    a reach past the law is a review there and here, never a pass (round 2: a fail BCNYS 1031.5.1 would give is a
-    review until R319.4.1's rules read the reaches). A key the format doesn't know, or `stated_well` not a mapping,
+    bottom is known. What reaches into the well's required dimensions is two facts of its own, which both codes' size
+    rules read (BCNYS 1031.5.1, RCNYS R319.4.1). A key the format doesn't know, or `stated_well` not a mapping,
     refuses every stated measure (a mistyped key must never read as settled)."""
     name = name_of(o)
     s = o.get("stated_well")
@@ -403,56 +389,6 @@ def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict]:
         for m in climb:
             measures.pop(m, None)
             stopped[m] = s_.reason
-    # the well's size goes to the rules only once its required dimensions are stated clear, as BCNYS 1031.5.1 and
-    # RCNYS R319.4.1 ask (nothing in them but the required ladder or steps, a well over 44 in deep, those 6 in at most):
-    # the house code's size rules read the size alone (review round 1: a 36 in well with a meter in it passed them)
-    other, reach = measures.get("area_well_other_encroachment"), measures.get("area_well_ladder_encroachment")
-    depth = measures.get("area_well_depth")
-    ladder = measures.get("area_well_ladder")
-    law = Words("only the ladder or steps required in a well over 44 in deep may, 6 in at most")
-
-    def missing(key, which, given):
-        # a reach (or what decides one) left out says so; one given but not read points to its own reason (round 3),
-        # by a short name of its own (round 4)
-        if given is None:
-            return Stop("well_size_reach_not_stated", name=name, which=Words(which),
-                        mark=Words(REACH_MARKS[key])).reason
-        return Stop("well_size_reach_unread", name=name, which=Words(UNREAD_NAMES[key]),
-                    mark=Words(REACH_MARKS[key])).reason
-
-    why = None
-    if other is None:
-        why = missing("other_encroachment", "how far anything other than its ladder or steps reaches into the well's "
-                      "required dimensions (0 for nothing)", s.get("other_encroachment"))
-    elif other != 0:
-        why = Stop("well_size_reach_over", name=name, which=Words("something other than its ladder or steps"),
-                   got=Words(f"{other:g} in"), law=Words("no exception allows it"),
-                   mark=Words(REACH_MARKS["other_encroachment"])).reason
-    elif reach is None:
-        why = missing("ladder_encroachment", "how far its ladder or steps reach into the well's required "
-                      "dimensions (0 for nothing)", s.get("ladder_encroachment"))
-    elif reach != 0 and (reach > 6 or (depth is not None and depth <= 44)):
-        why = Stop("well_size_reach_over", name=name, which=Words("its ladder or steps"), got=Words(f"{reach:g} in"),
-                   law=law, mark=Words(REACH_MARKS["ladder_encroachment"])).reason
-    elif reach != 0 and ladder is False:
-        # a blocked ladder or steps (none can't reach) reaching what a required one may: 1031.5.2 doesn't accept
-        # them, so what settles it is the ladder itself (round 4: the card named the reach); a reach past what
-        # any ladder may (above) is the reach's own, whatever the ladder (round 5)
-        why = Stop("well_size_ladder_not_accepted", name=name, got=Words(f"{reach:g} in"),
-                   mark=Words(REACH_MARKS["ladder"])).reason
-    elif reach != 0 and ladder is None:
-        # a reach of 6 in or less waits on whether it is a ladder or steps the well accepts (round 3: the card named
-        # the reach, which setting wouldn't settle)
-        why = missing("ladder", "what it has to climb out by, which decides whether its ladder's or steps' reach is "
-                      "allowed", s.get("ladder"))
-    elif reach != 0 and depth is None:
-        why = missing("depth", "the well's depth, which decides whether its ladder's or steps' reach is allowed",
-                      s.get("depth"))
-    if why:
-        for m in ("area_well_area", "area_well_width", "area_well_projection"):
-            if m in measures:
-                measures.pop(m)
-                stopped[m] = why
     return measures, stopped
 
 

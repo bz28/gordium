@@ -224,8 +224,4 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `well_no_ladder_reaches` | the opening {name}'s area well has no ladder or steps, yet {what} is stated as {got} ({mark}) |
 | `well_drawn_not_stated` | the opening {name}'s drawn area well gives {what}, but a drawn well's sizes aren't handed to the rules yet, and it isn't stated ({mark}) |
 | `well_below_disagree` | the opening {name} is stated not to be below the adjacent grade, yet the model shows {shown}: which is right isn't clear ({mark}) |
-| `well_size_reach_not_stated` | the opening {name} doesn't state {which}, so its area well's size isn't handed to the rules ({mark}) |
-| `well_size_reach_unread` | what the opening {name} states of {which} isn't read (its own reason says why), so the well's size isn't handed to the rules ({mark}) |
-| `well_size_ladder_not_accepted` | the opening {name}'s area well has a ladder or steps that the open window or door blocks, reaching {got} into its required dimensions, so no reach is allowed them, as BCNYS 1031.5.2 and RCNYS R319.4.2 read, and the well's size isn't handed to the rules ({mark}) |
-| `well_size_reach_over` | the opening {name}'s area well has {which} reaching {got} into its required dimensions, where {law}: a person checks the well's size, which isn't handed to the rules ({mark}) |
 | `well_stated_unread` | the opening {name}'s stated area well isn't read: {what} |

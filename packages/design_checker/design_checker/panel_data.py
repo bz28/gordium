@@ -33,7 +33,7 @@ import re
 from rule_format import formula, parts
 from rule_format.rulebook import _kinds
 
-from model_measurement.interior.openings import REACH_FIELDS, WELL_FIELDS
+from model_measurement.interior.openings import WELL_FIELDS
 
 from design_checker import present
 
@@ -72,11 +72,6 @@ def field_of_why(measure: str, why: str) -> str | None:
     STATED_FIELDS only where the reason names its mark)."""
     if measure in MEASURE_FIELDS:
         return MEASURE_FIELDS[measure]
-    if measure in ("area_well_area", "area_well_width", "area_well_projection") and isinstance(why, str):
-        # a well's size held back for what reaches into it: the reach's own mark settles it, never the size's
-        for words, field in REACH_FIELDS.items():
-            if words in why:
-                return field
     field, mark = STATED_FIELDS.get(measure, (None, None))
     return field if field and isinstance(why, str) and mark in why else None
 
