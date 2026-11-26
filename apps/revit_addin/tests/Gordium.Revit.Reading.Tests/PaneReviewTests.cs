@@ -92,9 +92,10 @@ public sealed class PaneReviewTests
         Assert.Equal(StaleReason.ModelChanged, ResultRows.Stale(model, at).StaleKind);
         Assert.Equal(StaleReason.Cancelled, ResultRows.Stale(model, at, CheckWords.CancelledStale(at), StaleReason.Cancelled).StaleKind);
         Assert.Null(model.StaleKind);
-        Assert.Equal("These results are from 14:32, before the check you cancelled", PaneWords.StaleTitle(StaleReason.Cancelled, at));
-        Assert.DoesNotContain("model changed", PaneWords.StaleTitle(StaleReason.Cancelled, at), StringComparison.OrdinalIgnoreCase);
-        Assert.Equal("The model changed after this check (14:32)", PaneWords.StaleTitle(StaleReason.ModelChanged, at));
+        Assert.Equal("Check cancelled", PaneWords.StaleTitle(StaleReason.Cancelled, at));
+        Assert.DoesNotContain("model changed", PaneWords.StaleTitle(StaleReason.Cancelled, at) + PaneWords.StaleWords(StaleReason.Cancelled, at), StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("The model changed after this check", PaneWords.StaleTitle(StaleReason.ModelChanged, at));
+        Assert.StartsWith("These results are from 14:32 and may be out of date.", PaneWords.StaleWords(StaleReason.ModelChanged, at), StringComparison.Ordinal);
         var view = Read("ResultsView.cs");
         Assert.Contains("PaneWords.StaleTitle(why,", view, StringComparison.Ordinal);
         Assert.Contains("CheckWords.CancelledStale(content.When), StaleReason.Cancelled)", view, StringComparison.Ordinal);

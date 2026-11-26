@@ -429,8 +429,8 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         var readAndSend = Between(check, "    internal static void ReadAndSend(", "\n    }\n");
         Assert.Contains("bool Active() => ui.ActiveUIDocument?.Document.Equals(doc) == true;", readAndSend, StringComparison.Ordinal);
         Assert.Contains("var view = Active() && ShowsPropertyLine(ui.ActiveUIDocument!);", readAndSend, StringComparison.Ordinal);
-        Assert.Contains("if (ask == StreetAsk.Pick && Active())\n                check.Clock.Architect(\"street_pick\", () => PickStreet(", readAndSend, StringComparison.Ordinal);
-        Assert.Contains("if (ask == StreetAsk.Pick && Active() && check.Clock.Architect(\"street_pick\", () => PickStreet(", readAndSend, StringComparison.Ordinal);
+        // each pick behind the guard (UI polish PR 5: both written one way, so a pick that wrote is known: CheckRun.Wrote)
+        Assert.Equal(2, readAndSend.Split("if (ask == StreetAsk.Pick && Active() && check.Clock.Architect(\"street_pick\", () => PickStreet(").Length - 1);
         Assert.Equal(2, readAndSend.Split("PickStreet(").Length - 1);
         Assert.Equal(2, readAndSend.Split(", Active());").Length - 1);            // both asks told whether it is active
     }
@@ -616,7 +616,7 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         // the flow's send: the worker and the check_site under the check's token, on a pool thread
         var flow = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Reading", "CheckFlow.cs"));
         Assert.Contains("var client = await worker.WaitAsync(cancel).ConfigureAwait(false);", flow, StringComparison.Ordinal);
-        Assert.Contains("return await ProjectCheck.SendAsync(client, request, cancel).ConfigureAwait(false);", flow, StringComparison.Ordinal);
+        Assert.Contains("return await ProjectCheck.SendAsync(client, request, cancel, silence, step).ConfigureAwait(false);", flow, StringComparison.Ordinal);
         // and the command no longer waits for the worker on Revit's thread
         var check = Addin("CheckProject.cs");
         var readAndSend = Between(check, "    internal static void ReadAndSend(", "\n    }\n");
@@ -632,7 +632,7 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         Assert.Contains("var use = CheckRun.Flow.Arrived(check.Ticket, sent);", answered, StringComparison.Ordinal);
         Assert.True(answered.IndexOf("if (use == AnswerUse.Ignore)", StringComparison.Ordinal) < answered.IndexOf("Answer(doc, check.Prepared!, sent.Result, log)", StringComparison.Ordinal));
         Assert.True(answered.IndexOf("if (use == AnswerUse.ShowError)", StringComparison.Ordinal) < answered.IndexOf("Answer(doc, check.Prepared!, sent.Result, log)", StringComparison.Ordinal));
-        Assert.Contains("ResultsPane.Failed(CheckWords.CheckerStopped(", answered, StringComparison.Ordinal);
+        Assert.Contains("ResultsPane.Failed(CheckFailures.Of(why, CheckWords.CheckerStopped(", answered, StringComparison.Ordinal);
         Assert.Contains("stale: use == AnswerUse.ShowStale", answered, StringComparison.Ordinal);
         var show = Between(check, "    private static void Show(UIApplication ui, Document doc, Ran run,", "\n    }\n");
         Assert.Contains("if (stale)\n                model = ResultRows.Stale(model, when, CheckWords.ChangedWhileChecking(when));", show, StringComparison.Ordinal);
@@ -664,7 +664,7 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         Assert.Contains("switch (restored)", restore, StringComparison.Ordinal);
         Assert.Contains("Say(why ?? CheckWords.Cancelled(restored));", restore, StringComparison.Ordinal);
         Assert.Contains("case PanelHad.Results when _content is { Model: { } model } content:\n                Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When), StaleReason.Cancelled),", restore, StringComparison.Ordinal);
-        Assert.Contains("Failed(\"\");", restore, StringComparison.Ordinal);
+        Assert.Contains("Failed(null);", restore, StringComparison.Ordinal);
         Assert.Contains("_again.Content = CheckWords.Button(stage);", view, StringComparison.Ordinal);
         Assert.Contains("internal PanelHad Had => CheckFlow.Had(_content is not null, _content?.Model is not null, _failed);", view, StringComparison.Ordinal);
         var cancel = Between(Addin("CheckRun.cs"), "    internal static void Cancel(", "\n    }\n");
