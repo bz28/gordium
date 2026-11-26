@@ -233,3 +233,13 @@ def test_an_opening_within_no_sleeping_room_read_leaves_every_rooms_count_unknow
         assert "may be this room's" in p["not_measured"]["sleeping_room_escape_openings"]
     assert _linked()["measures"]["sleeping_room_escape_openings"] == 1
 
+
+@pytest.mark.parametrize("count", [None, "2", True, float("nan")])
+def test_a_story_exit_count_that_isnt_a_number_is_not_known_never_a_crash(count):
+    """A hand-written description may give a story's exit count as null or text: the room's one-exit question is
+    not known (its rows need review), never a crash and never read as two exits."""
+    story = {"id": "L1", "measures": {"story_exit_count": count, "story_fourth_or_higher_above_grade_plane": False}}
+    p = _linked(story=story)
+    assert "sleeping_room_story_one_exit" not in p["measures"]
+    assert "not a number" in p["not_measured"]["sleeping_room_story_one_exit"]
+
