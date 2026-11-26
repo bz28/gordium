@@ -175,9 +175,13 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
     plane, why = _plane(ground, stories, description, reader)
     if why:
         return none(why)
+    lowest = min(elevation.values())
+    if lowest > plane["lowest"] + 6 * FT + SAME:         # a story with no level of its own may stand under the lowest
+        return none(Stop("place_under_lowest", gap=f"{(lowest - plane['lowest']) / FT:g} ft").reason)   # (an undercroft)
     seen = {lid: [] for lid in order}                    # every reading's facts (or UNPLACED) for each story placed
-    for lid in mezzanines:
-        seen[lid].append(UNPLACED)
+    for lid in mezzanines:                               # a possible mezzanine, and the story it would be part of (its
+        seen[lid].append(UNPLACED)                       # occupants then that story's, 505.2): never placed
+        seen[order[order.index(lid) - 1]].append(UNPLACED)
     for chosen in itertools.product((False, True), repeat=len(roomless)):
         for kept in itertools.product((True, False), repeat=len(mezzanines)):
             dropped = {m for m, k in zip(mezzanines, kept) if not k}
@@ -321,7 +325,7 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
             return None, Stop("ground_disagrees", flat=f"{ground['flat']:g} ft", high=f"{max(given) / FT:g} ft").reason
         # the grade plane at most the flat ground (an areaway, a well, a walk-out door may be lower: never a basement
         # proven); the flat ground itself a known point of finished ground (item 2)
-        return {"high": z, "point": z}, None
+        return {"high": z, "point": z, "lowest": z}, None
     spots = [p for p in ground.get("spots") or []
              if isinstance(p, (list, tuple)) and len(p) == 3 and all(_number(v) for v in p)]
     if not spots or len(spots) != len(ground.get("spots") or []):
@@ -358,5 +362,6 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
         return None, Stop("ground_disagrees_spots", high=f"{high / FT:g} ft", stated=f"{max(stated) / FT:g} ft").reason
     # item 2's "finished ground level at any point": never a spot (it may stand in an areaway or a window well,
     # whose floor as "ground" is an open question: docs/questions_for_architects.md 4.6), only flat ground
-    return {"high": high, "point": None,
+    beside = [z for p, z in at if not any(o.buffer(-SAME).contains(p) for o in outlines)] or used
+    return {"high": high, "point": None, "lowest": min(beside),     # the lowest ground beside it (a spot under it isn't)
             "reading": SPOTS_READING.format(high=f"{high / FT:g} ft")}, None
