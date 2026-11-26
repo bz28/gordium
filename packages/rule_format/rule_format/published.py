@@ -18,7 +18,9 @@ machine:
 - `listed`: {folder: sha256 of its entry names} of every repo folder the compile listed (the same audit hook's
   os.scandir and os.listdir): the compile's answer can turn on which names exist, not only on what files say (a
   rule's notes may name a repo file: rulebook._in_repo walks the repo's names), so a name that appears or goes in
-  any of them makes the certificate stale. Names tools make as they run are left out (GENERATED);
+  any of them makes the certificate stale. Every folder of the law folder and of the shared files is listed too,
+  whatever the compile lists (it also asks whether a file exists, which no audit event shows). Names tools make as
+  they run, and what publish writes, are left out (rulebook.generated_name, the same rule the repo walk follows);
 - `validator`: {path: sha256} of the repo's modules the compile imported (packages/);
 - `outside_repo_reads`: files the compile opened outside the repo and outside Python's own installation (the code
   cache, say): must be empty, and publish refuses a certificate otherwise;
@@ -40,12 +42,13 @@ import sysconfig
 import time
 from pathlib import Path
 
-from .rulebook import REPO, Context, building_code_rulebook, load, rulebook_file_problems, state_folders
+from .rulebook import (PUBLISHED_SUFFIX, REPO, Context, building_code_rulebook, generated_name, load,
+                       rulebook_file_problems, state_folders)
 from .state_law import state_settings_problems
 
 FORMAT = "gordium.published_law/1"
 PUBLISHED = "7_published_rulebooks"
-SUFFIX = ".published.json"
+SUFFIX = PUBLISHED_SUFFIX
 SOURCES = "1_source_documents/sources.yaml"
 PUBLISH = "python -m rule_format publish"
 LOCK = REPO / "regulations/jurisdictions/.publishing.lock"     # one publish at a time (pytest-xdist workers)
@@ -117,19 +120,31 @@ def _rel(path: Path, repo: Path) -> str:
     return Path(path).relative_to(repo).as_posix()
 
 
-# Names never counted in a folder's listing: made by tools as they run (Python's caches, pip's egg-info, the
-# add-in's build folders, hidden files such as a publish's lock and temporary files) and the certificates themselves.
-# The one walk of the whole repo a compile makes (rulebook._in_repo: whether a name a rule's notes mention is a repo
-# file) skips the same folders, so leaving them out never hides a name the compile could see.
-GENERATED = ("__pycache__", "bin", "obj", "TestResults")
+# Names never counted in a folder's listing (rulebook.generated_name): made by tools as they run, and what publish
+# writes (the 7_published_rulebooks folders and the certificates). The one walk of the whole repo a compile makes
+# (rulebook._in_repo: whether a name a rule's notes mention is a repo file) skips exactly these, so leaving them out
+# never hides a name the compile could see, and publishing one law never changes another's listings.
+_left_out = generated_name
 
 
 def _generated(rel: Path) -> bool:
     return any(_left_out(part) for part in rel.parts)
 
 
-def _left_out(name: str) -> bool:
-    return name.startswith(".") or name in GENERATED or name.endswith((".egg-info", SUFFIX))
+def _always_listed(folder: Path, repo: Path) -> set[str]:
+    """Every folder of the law folder (1_source_documents too) and of the shared files, listed whether or not the
+    compile lists it: the compile also asks whether a file exists (a stat, which no audit event shows: a copy of a
+    book kept outside the repo in 1_source_documents is a problem), so a name that appears or goes anywhere there
+    must make the certificate stale."""
+    tops = [Path(folder), Path(repo) / "docs/research"]
+    regulations = Path(repo) / "regulations"
+    out = {_rel(regulations, repo)}
+    tops += [d for d in regulations.iterdir() if d.is_dir() and d.name != "jurisdictions" and not _left_out(d.name)]
+    for top in tops:
+        for here, dirs, _ in os.walk(top):
+            dirs[:] = [d for d in dirs if not _left_out(d)]
+            out.add(_rel(Path(here), repo))
+    return out
 
 
 def _listing(folder: Path) -> str | None:
@@ -275,9 +290,12 @@ def _certificate(folder: Path, book: Path, result: dict, seen: list, modules: li
                 listed.add(rel.as_posix())
         elif "__pycache__" in rel.parts or (p.suffix == ".py" and p.is_relative_to(packages)):
             continue                                   # code: counted below as the validator
+        elif PUBLISHED in rel.parts:
+            continue                                   # what publish writes, never an input of its own
         else:
             inputs.add(rel.as_posix())
     inputs |= _folder_inputs(folder, REPO)
+    listed |= _always_listed(folder, REPO)
     validator = {_rel(m, REPO): _sha(m) for m in modules if m.is_relative_to(packages)}
     sources = load(folder / SOURCES).get("documents") or []
     return {
@@ -295,11 +313,7 @@ def _certificate(folder: Path, book: Path, result: dict, seen: list, modules: li
 
 
 def fresh(folder: Path) -> bytes:
-    """A law folder's certificate, compiled now in a fresh Python process running this repo's code. The law's
-    7_published_rulebooks/ is made first, so the folder lists the same at the first compile as at every later one."""
-    book = building_code_rulebook(folder)
-    if book is not None:
-        certificate_path(folder, book).parent.mkdir(parents=True, exist_ok=True)
+    """A law folder's certificate, compiled now in a fresh Python process running this repo's code."""
     # this repo's packages alone: another entry (an empty one is the folder it runs in) would change what the import
     # lists, so the certificate would differ by machine; everything else comes from Python's own installation
     ours = [str(p) for p in sorted((REPO / "packages").iterdir()) if p.is_dir() and not _left_out(p.name)]
