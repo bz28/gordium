@@ -102,10 +102,10 @@ public sealed class ResultViewsTests
         // the cards most results wait on come first: the occupancy group, then (NY Building Code egress for every
         // group, PR #181) the special egress spaces and fixed seating, then the sprinkler system
         Assert.Equal("building.occupancy_groups", answer.Cards[0].Field);
-        Assert.Equal(192, answer.Cards[0].Rows.Count);                 // the occupant loads' ceiling: the four apartments' 1006.2.1.1 rows (2026-11-26); group 2's story-exit rules read it too; group 4a's corridor width (2); group 4b's Table 1020.2 rows (7 x 2); group 5a's corridor capacity rule (2); group 6a's door width (10 doors: Group I-2's 41 1/2 in)
+        Assert.Equal(188, answer.Cards[0].Rows.Count);                 // group 2's story-exit rules read it too; group 4a's corridor width (2); group 4b's Table 1020.2 rows (7 x 2); group 5a's corridor capacity rule (2); group 6a's door width (10 doors: Group I-2's 41 1/2 in)
         Assert.Equal(60, answer.Cards.Single(c => c.Field == "building.sprinkler_system").Rows.Count);   // group 4b: Table 1020.2 rows whose answer turns on the system (8)
         Assert.Equal(82, answer.Cards.Single(c => c.Field == "building.special_egress_spaces").Rows.Count);
-        Assert.Equal(88, answer.Cards.Single(c => c.Field == "building.assembly_fixed_seating").Rows.Count);   // group 5a: the corridor capacity rule (2); the occupant loads' ceiling: 1006.2.1.1 (4)
+        Assert.Equal(84, answer.Cards.Single(c => c.Field == "building.assembly_fixed_seating").Rows.Count);   // group 5a: the corridor capacity rule (2)
         Assert.Equal($"Answer {answer.Cards.Count} questions about the project", answer.Title);
         Assert.DoesNotContain(m.Fix.Where(g => g.Kind != FixKind.Answer).SelectMany(g => g.Cards),
                               c => c.Field is { } f && (f.StartsWith("facts.", StringComparison.Ordinal) || f.StartsWith("building.", StringComparison.Ordinal)));
