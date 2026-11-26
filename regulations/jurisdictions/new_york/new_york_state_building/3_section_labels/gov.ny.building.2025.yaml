@@ -2005,6 +2005,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:live_work_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines LIVE/WORK UNIT, a term 1019.3 prints in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 38
+      - 39
+      quote: '[BG] LIVE/WORK UNIT. A dwelling unit or sleeping unit in which a significant portion of the space includes a
+        nonresidential use that is operated by the tenant.'
+    piece_sha256: 088271b43c22b4cbad6ffceb275a7873d0eeb9591a75997b76125391ba44c113
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:load_factor:
     label: reference
     topic: definitions
@@ -2857,6 +2873,21 @@ labels:
         in successive floors,'
     piece_sha256: e71439843471aa2ff123ab5ce97601fda6d8516eac49321eca77972a76bd8d60
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:shaft_enclosure:
+    label: reference
+    topic: definitions
+    reason: 'Defines SHAFT ENCLOSURE, a term 1019.3 and 1019.4 print in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 15
+      - 15
+      quote: '[BF] SHAFT ENCLOSURE. The walls or construction forming the boundaries of a shaft.'
+    piece_sha256: 3bd99dcd092d885a677ef806629a25f2d998397938d27264b59275131019d734
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:shower:
@@ -7520,6 +7551,65 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '1018.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'Aisles or aisle accessways are provided from every occupied portion of the exit access holding seats, tables,
+      furnishings, displays and similar fixtures or equipment, their minimum width or required capacity unobstructed but for
+      encroachments complying with 1005.7; in a room or space used for assembly, aisles and aisle accessways comply with 1030
+      (1018.2): furniture and fixtures aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 40
+      - 44
+      quote: '1018.1 General. Aisles and aisle accessways serving as a portion of the exit access in the means of egress system
+        shall comply with the requirements of this section. Aisles or aisle accessways shall be provided from all occupied
+        portions of the exit access that contain seats, tables, furnishings, displays and similar fixtures or equipment. The
+        minimum width or required capacity of aisles shall be unobstructed. Exception: Encroachments complying with Section
+        1005.7.'
+    piece_sha256: 79beb0674c0a466d6005b948f03ee6010b4e74bba7962a52ba0c7a1cbcdeb941
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1018.2':
+    label: reference
+    topic: means_of_egress
+    reason: 'A pointer: aisles and aisle accessways serving assembly spaces comply with 1030 (not brought in but 1030.7 and
+      1030.8); quoted by 1018.1''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 45
+      - 46
+      quote: 1018.2 Aisles in assembly spaces. Aisles and aisle accessways serving a room or space used for assembly purposes
+        shall comply with Section 1030.
+    piece_sha256: ed11c3890f0473dc46c6a04e461b59ff1ed08f36933fbc4a20b695c2d9f9c9d6
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1018.3':
+    label: flag
+    topic: means_of_egress
+    reason: 'In Groups B and M, an aisle is at least as wide as 1005.1 requires for the occupant load it serves and at least
+      as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible
+      by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren''t drawn, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 47
+      - 50
+      quote: '1018.3 Aisles in Groups B and M. In Group B and M occupancies, the minimum clear aisle width shall be determined
+        by Section 1005.1 for the occupant load served, but shall be not less than that required for corridors by Section
+        1020.3. Exception: Nonpublic aisles serving less than 50 people and not required to be accessible by Chapter 11 need
+        not exceed 28 inches (711 mm) in width.'
+    piece_sha256: 67ec6fd6daee8d2729419eeeb27d0931e6d63e92181424746d074e7d2b3c5968
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   '1018.4':
     label: flag
     topic: means_of_egress
@@ -7541,6 +7631,136 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
       of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
       table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1018.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'Outside rooms or spaces used for assembly and outside Groups B and M, an aisle has the capacity 1005.1 requires
+      for the occupant load it serves and is at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer
+      than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures
+      aren''t drawn, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 343
+      lines:
+      - 3
+      - 7
+      quote: '1018.5 Aisles in other than assembly spaces and Groups B and M. In other than rooms or spaces used for assembly
+        purposes and Group B and M occupancies, the minimum clear aisle capacity shall be determined by Section 1005.1 for
+        the occupant load served, but the width shall be not less than that required for corridors by Section 1020.3. Exception:
+        Nonpublic aisles serving less than 50 people and not required to be accessible by Chapter 11 need not exceed 28 inches
+        (711 mm) in width.'
+    piece_sha256: a22925ff44226abe396076b8115a4fefc00445ef7aef94bc4b5f757f040da234
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1019':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 343
+      lines:
+      - 8
+      - 8
+      quote: SECTION 1019—EXIT ACCESS STAIRWAYS AND RAMPS
+    piece_sha256: b355e9243ec1fdaf130bd5756dba2ca4d8f003d6d6a7395525427887583ed992
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1019.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Scope: exit access stairways and ramps comply with 1019, the stories they connect counting basements but not
+      mezzanines; quoted by 1019.3''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 343
+      lines:
+      - 9
+      - 11
+      quote: 1019.1 General. Exit access stairways and ramps serving as an exit access component in a means of egress system
+        shall comply with the requirements of this section. The number of stories connected by exit access stairways and ramps
+        shall include basements, but not mezzanines.
+    piece_sha256: 24c211bd6d20fa0be56743dc42cfc5a01e5cf17e6d3aa3f7f4d61a3241fb1818
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1019.2':
+    label: reference
+    topic: means_of_egress
+    reason: 'A permission: an exit access stairway or ramp serving floor levels within one story needs no enclosure; quoted
+      by 1019.3''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 343
+      lines:
+      - 12
+      - 12
+      quote: 1019.2 All occupancies. Exit access stairways and ramps that serve floor levels within a single story are not
+        required to be enclosed.
+    piece_sha256: 799c805a258a75ba99ec5890c6a2b4ac26d30c13303d3d358ae780b1d74240be
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1019.3':
+    label: flag
+    topic: means_of_egress
+    reason: 'Outside Groups I-2 and I-3, a floor opening holding an exit access stairway or ramp is enclosed in a shaft built
+      to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs
+      no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within
+      one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; within a Group R-3 congregate residence or a Group R-4
+      facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway''s
+      or ramp''s projected area, with a draft curtain and closely spaced sprinklers per NFPA 13 (outside Groups B and M, connecting
+      no more than four stories); within an atrium complying with 404; in an open parking garage it alone serves; serving
+      smoke-protected or open-air assembly seating within 1030.7''s travel; between a balcony, gallery or press box and the
+      main assembly floor; and exterior ones between occupiable roofs: which stairways are exit access stairways, and their
+      enclosures, aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 343
+      lines:
+      - 13
+      - 32
+      quote: '1019.3 Occupancies other than Groups I-2 and I-3. In other than Group I-2 and I-3 occupancies, floor openings
+        containing exit access stairways or ramps shall be enclosed with a shaft enclosure constructed in accordance with
+        Section 713. Exceptions: 1. Exit access stairways and ramps within a two-story opening complying with Section 712.1.9.
+        2. In Group R-1, R-2 or R-3 occupancies, exit access stairways and ramps connecting four stories or less serving and
+        contained within an individual dwelling unit or sleeping unit or live/work unit. 3. Exit access stairways serving
+        and contained within a Group R-3 congregate residence or a Group R-4 facility are not required to be enclosed. 4.
+        Exit access stairways and ramps in buildings equipped throughout with an automatic sprinkler system in accordance
+        with Section 903.3.1.1, where the area of the vertical opening between stories does not exceed twice the horizontal
+        projected area of the stairway or ramp and the opening is protected by a draft curtain and closely spaced sprinklers
+        in accordance with NFPA 13. In other than Group B and M occupancies, this provision is limited to openings that do
+        not connect more than four stories. 5. Exit access stairways and ramps within an atrium complying with the provisions
+        of Section 404. 6. Exit access stairways and ramps in open parking garages that serve only the parking garage. 7.
+        Exit access stairways and ramps serving smoke-protected or open-air assembly seating complying with the exit access
+        travel distance requirements of Section 1030.7. 8. Exit access stairways and ramps between the balcony, gallery or
+        press box and the main assembly floor in occupancies such as theaters, places of religious worship, auditoriums and
+        sports facilities. 9. Exterior exit access stairways or ramps between occupiable roofs.'
+    piece_sha256: ba5cdcc12b53dcf226a901c04392a25637410fc747eedfbe74c5d4e4a7165fe8
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1019.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in
+      a shaft built to 713, but Group I-3''s built to 408 need none: enclosures aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 343
+      lines:
+      - 33
+      - 36
+      quote: '1019.4 Group I-2 and I-3 occupancies. In Group I-2 and I-3 occupancies, floor openings between stories containing
+        exit access stair- ways or ramps are required to be enclosed with a shaft enclosure constructed in accordance with
+        Section 713. Exception: In Group I-3 occupancies, exit access stairways or ramps constructed in accordance with Section
+        408 are not required to be enclosed.'
+    piece_sha256: 1595ded9eb1f550e166c0ff73d60c5c9577be665923f7f66b6b11a185788d96e
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1020.1':

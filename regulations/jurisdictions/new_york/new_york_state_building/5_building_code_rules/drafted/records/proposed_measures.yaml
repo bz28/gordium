@@ -220,7 +220,11 @@ occupancy_group:
   - general.bc_1016_2_other_occupancies
   - general.bc_1017_2_2_f1_s1_increase
   - general.bc_1017_2_3_h5_increase
+  - general.bc_1018_3_aisles_groups_b_m
   - general.bc_1018_4_merchandise_pads
+  - general.bc_1018_5_aisles_other_occupancies
+  - general.bc_1019_3_exit_access_stairway_enclosure
+  - general.bc_1019_4_exit_access_stairways_groups_i2_i3
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_1020_5_other_occupancies
