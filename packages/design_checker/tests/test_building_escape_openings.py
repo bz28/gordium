@@ -184,3 +184,14 @@ def test_an_opening_knows_its_room_has_another_marked_one():
     escape_openings.link(parts, desc)
     assert [o["measures"]["opening_room_has_other_openings"] for o in parts["emergency_escape_opening"]] == [True, True]
 
+
+def test_an_opening_within_no_sleeping_room_read_leaves_every_rooms_count_unknown():
+    """An escape opening whose room isn't a sleeping room read (none named, a mistyped room), or that can't be read,
+    may be this room's: its count isn't known, never 0 (a wrong fail on 1031.2 once the room's story is placed, as
+    main's stated ground now does); one in the room itself still counts."""
+    for other in ({"id": "v"}, {"id": "v", "within": "typo"}, {"id": "w", "within": "b"}, "not a part"):
+        p = _linked(openings=[{"id": "w", "within": "b", "measures": {}}, other])
+        assert "sleeping_room_escape_openings" not in p["measures"], other
+        assert "may be this room's" in p["not_measured"]["sleeping_room_escape_openings"]
+    assert _linked()["measures"]["sleeping_room_escape_openings"] == 1
+
