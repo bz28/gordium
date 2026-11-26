@@ -436,6 +436,49 @@ public sealed class RealModelTests
         Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
     }
 
+    /// <summary>The level row's Not a story cell (#239's to-do): its blank says what it means (the level is tried both as
+    /// a story and not) and never makes the row one to mark, so a list with every level unset is as it was; a level is
+    /// listed for it once it is set either way, never asked for its No rooms mark when nothing needs one.</summary>
+    [Fact]
+    public void A_levels_not_a_story_cell_shows_its_blank_and_never_marks_a_level_to_mark()
+    {
+        // level 0 with an area with no Room: the row is to mark for No rooms on this level alone
+        var house = Ranch();
+        house.Areas.Add(Unroomed());
+        var row = MarkingList.Build(house.Model()).Rows.Single(r => r.Kind == MarkedKind.Level);
+        Assert.Equal([Marks.NoRoomsOnLevel, Marks.NotAStory], row.Cells.Select(c => c.Mark));
+        var story = row.Cells[1];
+        Assert.Equal((MarkState.LeftBlank, MarkingList.NotAStoryBlank), (story.State, story.Words));
+        Assert.False(story.NeedsMarking);
+        Assert.Equal([Marks.NoRoomsOnLevel], row.Cells.Where(c => c.NeedsMarking).Select(c => c.Mark));
+        // marked No rooms: nothing left to mark, Not a story still blank
+        house = Ranch(noRooms: true);
+        var list = MarkingList.Build(house.Model());
+        row = list.Rows.Single(r => r.Kind == MarkedKind.Level);
+        Assert.False(row.NeedsMarking);
+        Assert.Equal(MarkState.LeftBlank, row.Cells[1].State);
+
+        // a datum level with nothing on it: not listed while unset (no row for every level), listed once set either way
+        house = Ranch();
+        house.Marked.Add(new MarkedElement { UniqueId = "tof", BuiltInCategory = Marks.Levels, Name = "Top of foundation" });
+        list = MarkingList.Build(house.Model());
+        Assert.DoesNotContain(list.Rows, r => r.Kind == MarkedKind.Level);
+        Assert.Equal(MarkingListResult.AllMarked, list.Headline);
+        foreach (var (value, state, word) in new[] { (1, MarkState.Yes, "Yes"), (0, MarkState.No, "No") })
+        {
+            house.Marked[^1] = house.Marked[^1] with { Instance = new Dictionary<Guid, MarkValue> { [Marks.NotAStory.Guid] = new(true, value) } };
+            list = MarkingList.Build(house.Model());
+            row = list.Rows.Single(r => r.Kind == MarkedKind.Level);
+            Assert.Equal("Top of foundation", row.Label);
+            Assert.Equal((state, word), (row.Cells[1].State, row.Cells[1].Value));
+            // no area with no Room on it: its blank No rooms on this level asks nothing
+            Assert.Equal((MarkState.LeftBlank, MarkingList.NoRoomsBlank), (row.Cells[0].State, row.Cells[0].Words));
+            Assert.False(row.NeedsMarking);
+            Assert.Equal(MarkingListResult.AllMarked, list.Headline);
+            Assert.Contains(Marks.NotAStory.Name, MarkingList.Text(list), StringComparison.Ordinal);
+        }
+    }
+
     [Fact]
     public void An_area_with_no_room_holds_back_no_basements_attics_or_lofts_and_the_checker_refuses_them_too()
     {
@@ -484,7 +527,9 @@ public sealed class RealModelTests
         var list = MarkingList.Build(house.Model());
         Assert.Equal(stairs, list.StairBlockers);
         Assert.Equal(areas, list.UnknownAreas);
-        Assert.True(MarkingList.Text(list).Split('\n').Length < 60);
+        // one line more than before for the level row's Not a story cell (#239's to-do): still tens, never hundreds
+        var lines = MarkingList.Text(list).Split('\n').Length;
+        Assert.True(lines < 62, lines.ToString(System.Globalization.CultureInfo.InvariantCulture));
         Assert.Contains(list.Summary, s => s.StartsWith("20 enclosed areas have no Room", StringComparison.Ordinal));
         // each one still in the reading, by id and place: the description's spaces and the log's words
         var read = InteriorReader.Read(house.Model());

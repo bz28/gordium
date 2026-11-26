@@ -368,17 +368,31 @@ public static class MarkingList
     }
 
     /// <summary>A level's row: shown when it has an enclosed area with no Room (unset is then to mark: place the Rooms,
-    /// or fix the walls closing off one Revit can't locate, or say the level has none), or when its mark is set either way; never a suggestion (a suggested Yes could hide a
-    /// bedroom).</summary>
+    /// or fix the walls closing off one Revit can't locate, or say the level has none), or when either of its marks is set either way; never a suggestion (a suggested Yes could hide a
+    /// bedroom). Its two cells: <c>Gordium: No rooms on this level</c>, and <c>Gordium: Not a story</c>, whose blank
+    /// has a meaning of its own (the level is tried both as a story and not), so it is shown with that meaning and never
+    /// makes the row one to mark (#239's to-do: an unset cell must not mark every level row).</summary>
     private static MarkingRow? LevelRow(MarkedElement e, List<EnclosedArea> areas)
     {
         var cell = YesNo(e, Marks.NoRoomsOnLevel, null);
+        var story = YesNo(e, Marks.NotAStory, null) is { State: MarkState.Unset } blank
+            ? blank with { State = MarkState.LeftBlank, Words = NotAStoryBlank } : YesNo(e, Marks.NotAStory, null);
         var count = areas.Count(a => a.LevelId == e.UniqueId);
-        if (cell.State == MarkState.Unset && count == 0)
+        if (cell.State == MarkState.Unset && story.State == MarkState.LeftBlank && count == 0)
             return null;
+        // shown for its Not a story mark alone: with no enclosed area without a Room on it, a blank No rooms on this
+        // level asks nothing (the row is never one to mark for it)
+        if (cell.State == MarkState.Unset && count == 0)
+            cell = cell with { State = MarkState.LeftBlank, Words = NoRoomsBlank };
         var label = (e.Name ?? e.UniqueId) + (count == 0 ? "" : count == 1 ? " (1 enclosed area with no Room)" : $" ({count} enclosed areas with no Room)");
-        return new(e.UniqueId, MarkedKind.Level, label, [cell]);
+        return new(e.UniqueId, MarkedKind.Level, label, [cell, story]);
     }
+
+    /// <summary>What a blank <c>Gordium: Not a story</c> means, said in its cell (nothing to mark).</summary>
+    internal const string NotAStoryBlank = "not set: a level with no rooms is tried both as a story and not";
+
+    /// <summary>What a blank <c>Gordium: No rooms on this level</c> means on a level with no enclosed area without a Room.</summary>
+    internal const string NoRoomsBlank = "not set: no enclosed area without a Room is on this level";
 
     /// <summary>A floor outside the house, as a row: its one mark, what it is.</summary>
     private static MarkingRow SlabRow(SiteSlab s)
