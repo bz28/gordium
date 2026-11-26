@@ -97866,7 +97866,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "e76c0f8869c24ee5fccafa7d4adc8f55ce268d862834ee59a4314e23e3060729",
+  "worker_fingerprint": "8ff2923c0251e8b7bf2e268d390931cf8fabcd9d18aa4cce7fa33d75d2448e22",
   "rulebook": {
    "new_york/ithaca_city": "a7b12d670e3b58cd5730d902669a0e4a993811d9be2a8a94a3dfc4ecbe470568"
   }
