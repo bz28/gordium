@@ -4,14 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:   # every PR, including PRs stacked on other PRs
-    types: [opened, synchronize, reopened, labeled]
 
-# Windows runs only where a merge is near (Ben, 2026-11-26: GitHub runs about one CI run at a time, and Windows is
-# half of each run's jobs). A push to a PR runs Linux, plus the Revit client on Ubuntu. When the merge script
-# (gordium_handoff_tools/merge_when_green.py) takes a PR, it labels it `merge-ready`: that labelled run is Windows
-# only (Linux already passed on the same commit), and every later push to a labelled PR runs everything. A push to
-# main runs everything. The merge script merges only when the Windows checks ran on the head and passed: a skipped
-# Windows job never counts as passing.
+# The Windows jobs are in windows.yml (Ben, 2026-11-26): GitHub runs about one CI run at a time and Windows is half
+# of the jobs, so a push to a PR runs this file (Linux, and the Revit client on Ubuntu), and Windows runs once the
+# merge script labels the PR merge-ready, and on every push to main. Two files, so the two never share a check name.
 
 # A newer push to the same PR replaces the older run, so the queue only holds
 # each branch's latest commit. Pushes to main are never cancelled.
@@ -33,7 +29,6 @@ env:
 jobs:
   linux_tests:
     name: linux tests (part ${{ matrix.part }} of 4)
-    if: github.event.action != 'labeled'   # the merge label adds Windows; Linux already ran on this commit
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -50,7 +45,6 @@ jobs:
         run: pytest -n auto --dist worksteal --shard ${{ matrix.part }}/${{ env.SHARDS }}
 
   linux_checks:
-    if: github.event.action != 'labeled'   # the merge label adds Windows; Linux already ran on this commit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -83,7 +77,7 @@ jobs:
   # The old single Linux job's name: passes only when every Linux test part and the Linux checks passed (a
   # skipped or cancelled part fails it too)
   check:
-    if: always() && github.event.action != 'labeled'
+    if: always()
     needs: [linux_tests, linux_checks]
     runs-on: ubuntu-latest
     steps:
@@ -92,76 +86,6 @@ jobs:
           echo "tests: ${{ needs.linux_tests.result }}, checks: ${{ needs.linux_checks.result }}"
           test "${{ needs.linux_tests.result }}" = success && test "${{ needs.linux_checks.result }}" = success
 
-  # The same tests on Windows, where Python reads files as cp1252 unless told UTF-8. PYTHONUTF8 is deliberately
-  # not set: the job proves the code names its encodings, as an architect's Windows PC runs it.
-  windows_tests:
-    name: windows tests (${{ matrix.python-version }}, part ${{ matrix.part }} of 4)
-    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'merge-ready')
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # PRs: Windows on 3.14 only (Linux covers 3.12); main: both versions
-        python-version: ${{ fromJSON(github.event_name == 'pull_request' && '["3.14"]' || '["3.12", "3.14"]') }}
-        part: [1, 2, 3, 4]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-      - run: pip install -e ".[dev]"
-      - name: Tests (this part, on every CPU)
-        run: pytest -n auto --dist worksteal --shard ${{ matrix.part }}/${{ env.SHARDS }}
-
-  windows_checks:
-    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'merge-ready')
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ${{ fromJSON(github.event_name == 'pull_request' && '["3.14"]' || '["3.12", "3.14"]') }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-      - run: pip install -e ".[dev]"
-      - name: The test parts add up to the whole suite (every test in exactly one part)
-        run: python tests/check_shards.py ${{ env.SHARDS }}
-      - name: Extracted text matches a fresh extraction (reproducible)
-        run: python -m document_extraction --check
-      - name: Rule files are valid (sources, quotes, worked examples, section labels)
-        run: python -m rule_format
-      - name: Every line of the law is in exactly one piece; coverage report is current (no AI)
-        run: python -m section_labeling coverage --check
-      - name: The residential coverage audit (every rule and flag piece x district) matches a fresh build (no AI)
-        run: python -m section_labeling audit --check
-      - name: The rules workbook matches a fresh build (generated, never hand-edited)
-        run: python -m rule_export --check
-      - name: The measured example models match a fresh measurement (Rhino files measured by code, no AI)
-        run: python -m model_measurement --check
-      - name: The example project reports match a fresh build (results from the rule checker only)
-        run: python -m project_report --check
-      - name: Every golden answer is the same (check and start on the test sites, scenarios and 200 stress designs)
-        run: python -m design_checker.goldens --check
-
-  # The old Windows job's names (`windows (3.14)`; on main also `windows (3.12)`): each passes only when every
-  # Windows test part and Windows check passed
-  windows:
-    if: always() && (github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'merge-ready'))
-    needs: [windows_tests, windows_checks]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ${{ fromJSON(github.event_name == 'pull_request' && '["3.14"]' || '["3.12", "3.14"]') }}
-    steps:
-      - name: Every Windows test part and check passed
-        run: |
-          echo "tests: ${{ needs.windows_tests.result }}, checks: ${{ needs.windows_checks.result }}"
-          test "${{ needs.windows_tests.result }}" = success && test "${{ needs.windows_checks.result }}" = success
-
   # The Revit add-in's worker client (apps/revit_addin: C#, no Revit needed) against the real Python worker,
   # installed with the Windows job's install step (Python 3.12, the version the trial installs). Windows is where the add-in runs; Ubuntu is a cheap second.
   revit_worker_client:
@@ -169,8 +93,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Windows only when a merge is near (above); on the merge label's own run, only Windows (Ubuntu already ran)
-        os: ${{ fromJSON(github.event.action == 'labeled' && '["windows-latest"]' || ((github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'merge-ready')) && '["windows-latest", "ubuntu-latest"]' || '["ubuntu-latest"]')) }}
+        # Ubuntu here on every push; the Windows leg is in windows.yml, which runs where a merge is near
+        os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
