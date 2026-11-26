@@ -104,3 +104,7 @@ The routes read `has_none` loosely, taking claims the format refuses (contradict
 ## Review round 8 of step 2 (2026-11-26)
 
 One more wrong "no": a stair with its top nosings in no room (a stairwell left out of the room's outline) and its lower ones under the corridor counted as outside the space. Now a stair is outside only when every nosing stands in another room. A malformed openings list beside a basement claim no longer stops the measuring. One test.
+
+## Review round 9 of step 2 (2026-11-26)
+
+One more wrong "no": a stair wholly in a room drawn with no door or opening (the unit's own stairwell with its opening left out) counted as elsewhere. Now only rooms joined to something place a stair outside a space, and a nosing that isn't two ends makes its stair one that may be anywhere. One test.

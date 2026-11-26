@@ -375,3 +375,16 @@ def test_a_stair_partly_in_no_room_may_be_within_the_space():
     bad["has_none"].append({"kind": "basement", "source": "s"})
     bad["openings"] = 5
     measure(bad)                                         # returns: never a crash
+
+
+def test_a_stair_in_a_room_with_no_door_may_be_the_spaces_own():
+    """Review round 9 (PR 2): a stair wholly in a room drawn with no door or opening (the unit's own stairwell, its
+    opening left out) counted as elsewhere: "no". Only rooms joined to something place a stair elsewhere. A nosing
+    that isn't two ends makes its stair one that may be anywhere."""
+    from model_measurement.routes import _stair_points
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    desc["rooms"].append(room("S", rect(0, -6.5, 10, -0.5), use="other", lockable=False, pass_through=False))
+    desc["stairs"] = [{"id": "st", "nosings": [[[2, -5, 0], [4, -5, 0]], [[2, -4, 0.6], [4, -4, 0.6]],
+                                               [[2, -1.5, 1.2], [4, -1.5, 1.2]]]}]
+    assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False
+    assert {"points": []} in _stair_points({**desc, "stairs": [{"nosings": [[[22, 2, 0], [24, 2, 0]], []]}]})
