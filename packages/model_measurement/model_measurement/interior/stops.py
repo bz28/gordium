@@ -179,9 +179,10 @@ STOPS = {
                              "to the rules yet, and it isn't stated ({mark})",
     "well_below_disagree": "the opening {name} is stated not to be below the adjacent grade, yet the model shows {shown}: "
                            "which is right isn't clear ({mark})",
-    "well_size_reach_not_stated": "the opening {name} doesn't state how far {which} reaches into its area well's "
-                                  "required dimensions (0 for nothing), so the well's size isn't handed to the rules "
-                                  "({mark})",
+    "well_size_reach_not_stated": "the opening {name} doesn't state {which}, so its area well's size isn't handed "
+                                  "to the rules ({mark})",
+    "well_size_reach_unread": "the opening {name}'s statement of {which} isn't read (its own reason says why), so the "
+                              "well's size isn't handed to the rules ({mark})",
     "well_size_reach_over": "the opening {name}'s area well has {which} reaching {got} into its required dimensions, "
                             "where {law}: a person checks the well's size, which isn't handed to the rules ({mark})",
     "well_stated_unread": "the opening {name}'s stated area well isn't read: {what}",

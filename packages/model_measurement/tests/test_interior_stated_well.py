@@ -314,3 +314,25 @@ def test_not_below_grade_cant_stand_beside_a_ground_where_no_clear_bottom_is_kno
     d = stated({"below_grade": False}, ground_outside=30, operation="awning")       # awning: needs a maker's opening
     m, stopped, _ = opening_measures(d)
     assert "opening_below_grade" not in m and "bottom isn't known" in stopped["opening_below_grade"]
+
+
+@pytest.mark.parametrize("left, field, words", [
+    ({"depth": None}, "depth", "doesn't state the well's depth"),
+    ({"ladder": None}, "ladder", "doesn't state what it has to climb out by"),
+    ({"other_encroachment": "abc"}, "other_encroachment", "isn't read (its own reason says why)"),
+    ({"other_encroachment": None}, "other_encroachment", "doesn't state how far anything other"),
+    ({"ladder_encroachment": None}, "ladder_encroachment", "doesn't state how far its ladder or steps reach")])
+def test_a_held_back_size_names_what_settles_it(left, field, words):
+    # review round 3: a 4 in reach waiting on the depth or the ladder named the reach; one stated but refused said
+    # it wasn't stated
+    from design_checker import panel_data
+    well = {k: v for k, v in {**FULL, **left}.items() if v is not None}
+    m, stopped, _ = opening_measures(stated(well))
+    why = stopped["area_well_width"]
+    assert "area_well_width" not in m and words in why, why
+    assert panel_data.field_of_why("area_well_width", why) == f"openings[].stated_well.{field}"
+
+
+def test_a_reach_stated_beside_no_ladder_is_said_unread_not_unstated():
+    m, stopped, _ = opening_measures(stated(dict(FULL, ladder="none", ladder_encroachment=4)))
+    assert "area_well_width" not in m and "isn't read (its own reason says why)" in stopped["area_well_width"]

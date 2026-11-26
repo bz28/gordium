@@ -305,7 +305,9 @@ def well_field(key: str) -> str:
 
 # what a held-back size's reason names, for the reach mark that settles it (panel_data: its card opens that mark)
 REACH_MARKS = {"other_encroachment": "its mark for anything else reaching into the well",
-               "ladder_encroachment": "its mark for the ladder's or steps' reach into the well"}
+               "ladder_encroachment": "its mark for the ladder's or steps' reach into the well",
+               "ladder": "its mark for what the well has to climb out by",
+               "depth": "its mark for the well's depth"}
 REACH_FIELDS = {words: well_field(key) for key, words in REACH_MARKS.items()}
 
 # {measure: (the field that states it, the marks its reasons name)}: what panel_data names in a mark's cause
@@ -402,22 +404,36 @@ def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict]:
     # the house code's size rules read the size alone (review round 1: a 36 in well with a meter in it passed them)
     other, reach = measures.get("area_well_other_encroachment"), measures.get("area_well_ladder_encroachment")
     depth = measures.get("area_well_depth")
-    allowed = measures.get("area_well_ladder") is True and depth is not None and depth > 44
+    ladder = measures.get("area_well_ladder")
+    law = Words("only the ladder or steps required in a well over 44 in deep may, 6 in at most")
+
+    def missing(key, which, given):
+        # a reach (or what decides one) left out says so; one given but not read points to its own reason (round 3)
+        return Stop("well_size_reach_not_stated" if given is None else "well_size_reach_unread", name=name,
+                    which=Words(which), mark=Words(REACH_MARKS[key])).reason
+
     why = None
     if other is None:
-        why = Stop("well_size_reach_not_stated", name=name, which=Words("anything other than its ladder or steps"),
-                   mark=Words(REACH_MARKS["other_encroachment"])).reason
+        why = missing("other_encroachment", "how far anything other than its ladder or steps reaches into the well's "
+                      "required dimensions (0 for nothing)", s.get("other_encroachment"))
     elif other != 0:
         why = Stop("well_size_reach_over", name=name, which=Words("something other than its ladder or steps"),
                    got=Words(f"{other:g} in"), law=Words("no exception allows it"),
                    mark=Words(REACH_MARKS["other_encroachment"])).reason
     elif reach is None:
-        why = Stop("well_size_reach_not_stated", name=name, which=Words("its ladder or steps"),
-                   mark=Words(REACH_MARKS["ladder_encroachment"])).reason
-    elif reach != 0 and not (allowed and reach <= 6):
+        why = missing("ladder_encroachment", "how far its ladder or steps reach into the well's required "
+                      "dimensions (0 for nothing)", s.get("ladder_encroachment"))
+    elif reach != 0 and (reach > 6 or ladder is False or (depth is not None and depth <= 44)):
         why = Stop("well_size_reach_over", name=name, which=Words("its ladder or steps"), got=Words(f"{reach:g} in"),
-                   law=Words("only the ladder or steps required in a well over 44 in deep may, 6 in at most"),
-                   mark=Words(REACH_MARKS["ladder_encroachment"])).reason
+                   law=law, mark=Words(REACH_MARKS["ladder_encroachment"])).reason
+    elif reach != 0 and ladder is None:
+        # a reach of 6 in or less waits on whether it is a ladder or steps the well accepts (round 3: the card named
+        # the reach, which setting wouldn't settle)
+        why = missing("ladder", "what it has to climb out by, which decides whether its ladder's or steps' reach is "
+                      "allowed", s.get("ladder"))
+    elif reach != 0 and depth is None:
+        why = missing("depth", "the well's depth, which decides whether its ladder's or steps' reach is allowed",
+                      s.get("depth"))
     if why:
         for m in ("area_well_area", "area_well_width", "area_well_projection"):
             if m in measures:

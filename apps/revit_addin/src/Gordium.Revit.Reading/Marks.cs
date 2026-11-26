@@ -122,17 +122,17 @@ public static class Marks
         "Gordium: Well area", new("6e368439-8dd1-48c8-99bf-eff9afd45b39"), MarkValueKind.Area, MarkBinding.Instance,
         [Windows, Doors], "openings[].stated_well.area",
         AreaWords + " (Manage > Project Units: 9 typed is 9 sq ft in a square-feet project, 9 m² in a square-meters one): the horizontal area inside this escape opening's area well, as built (a curved well's own area, never its width times its projection; at least 9 sq ft, BCNYS 1031.5.1). " +
-        "Blank: the well's area needs review. It is checked once Gordium: Well other encroachment and Gordium: Well ladder encroachment are set (the well's required dimensions are then known to be clear).");
+        "Blank: the well's area needs review. It is checked once Gordium: Well other encroachment is 0 and Gordium: Well ladder encroachment is 0 (or at most 6 in for the ladder or steps a well over 44 in deep needs; with Gordium: Well ladder or steps None it is 0 by itself).");
 
     public static readonly MarkDefinition WellWidth = new(
         "Gordium: Well width", new("6305ccee-e00f-4870-868f-e58241f9a0ef"), MarkValueKind.Length, MarkBinding.Instance,
         [Windows, Doors], "openings[].stated_well.width",
-        LengthWords + Projected + "the inside width of this escape opening's area well, measured along the wall (at least 36 in, BCNYS 1031.5.1). Blank: the well's width needs review. It is checked once Gordium: Well other encroachment and Gordium: Well ladder encroachment are set (the well's required dimensions are then known to be clear).");
+        LengthWords + Projected + "the inside width of this escape opening's area well, measured along the wall (at least 36 in, BCNYS 1031.5.1). Blank: the well's width needs review. It is checked once Gordium: Well other encroachment is 0 and Gordium: Well ladder encroachment is 0 (or at most 6 in for the ladder or steps a well over 44 in deep needs; with Gordium: Well ladder or steps None it is 0 by itself).");
 
     public static readonly MarkDefinition WellProjection = new(
         "Gordium: Well projection", new("8814e090-d06c-467c-ae0f-c0518835997f"), MarkValueKind.Length, MarkBinding.Instance,
         [Windows, Doors], "openings[].stated_well.projection",
-        LengthWords + Projected + "how far the inside of this escape opening's area well projects out from the wall (at least 36 in, BCNYS 1031.5.1). Blank: the well's projection needs review. It is checked once Gordium: Well other encroachment and Gordium: Well ladder encroachment are set (the well's required dimensions are then known to be clear).");
+        LengthWords + Projected + "how far the inside of this escape opening's area well projects out from the wall (at least 36 in, BCNYS 1031.5.1). Blank: the well's projection needs review. It is checked once Gordium: Well other encroachment is 0 and Gordium: Well ladder encroachment is 0 (or at most 6 in for the ladder or steps a well over 44 in deep needs; with Gordium: Well ladder or steps None it is 0 by itself).");
 
     public static readonly MarkDefinition WellDepth = new(
         "Gordium: Well depth", new("8aba2fba-b56c-4825-ab0f-86247ec221c8"), MarkValueKind.Length, MarkBinding.Instance,
