@@ -226,10 +226,12 @@ def _no_rooms(interior) -> bool:
     return isinstance(interior, dict) and interior.get("format") == INTERIOR_FORMAT and interior.get("rooms") == []
 
 
-def check(found: dict, interior, values: dict, allowed: dict) -> dict:
+def check(found: dict, interior, values: dict, allowed: dict, ground: dict | None = None) -> dict:
     """Every inherited law's rows and items for one design. `interior`: the interior description
     (gordium.interior/1, docs/interior/interior_description_format.md), or None when none is drawn. `values`: the
-    building's measures (dwelling units…), `allowed`: the place's allowed values (its uses).
+    building's measures (dwelling units…), `allowed`: the place's allowed values (its uses), `ground`: the ground the
+    architect stated (model_measurement.routes.story_place.ground_of; None: none), for where each story sits against
+    the grade plane.
 
     Where the place inherits laws that each cover some buildings (state.yaml `scope`: New York's Residential Code and
     Building Code), code_scope.decide picks the one that covers this building from `values` and the description's
@@ -246,7 +248,7 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
     undecided = scope is not None and scope["code"] is None
     sections, items, rows, results, ids, readings = [], [], [], {}, set(), {}
     for law in run:
-        measured = None if waiting else _measured(law, interior, readings)
+        measured = None if waiting else _measured(law, interior, readings, ground)
         law_values, law_allowed = _law_values(law, values, allowed, building)
         # rules that can't be used are said whether or not rooms are drawn: never hidden behind "waiting"
         mine = _law_items(law, measured, law_values, law_allowed, rows, results) if not waiting or law["problems"]             else [_waiting_item(law)]
@@ -282,6 +284,7 @@ def which_code(got: dict) -> dict | None:
 
 
 ROUTES = "routes"
+ROUTES_AND_INTERIOR = "routes and the interior's stairs and guards"
 SCOPE_ID = "code_scope"
 SCOPE_OPEN_NAME = "Which code governs this building: can't tell yet"
 SCOPE_OPEN_WHY = ("Gordium can't tell whether the Residential Code or the Building Code of New York State covers this "
@@ -293,19 +296,56 @@ SCOPE_WHY = "The {book} covers this building: {why} ({cites})"
 OCCUPANT_LOAD_FACTORS = "5_building_code_rules/drafted/records/occupant_load_factors.yaml"   # Table 1004.5, frozen
 
 
-def _measured(law: dict, interior, readings: dict) -> dict:
+# the interior measuring's part kinds the Building Code also reads (section group 7: stairs 1011, handrails 1014,
+# guards 1015, for every occupancy), measured as the house code's are, from the description's own `stairs` and
+# `guards`: never its rooms, openings or exit door, which are the house code's (a commercial story's rooms aren't
+# sleeping rooms to check)
+BUILDING_INTERIOR_KINDS = ("stair", "guard")
+# the part kinds a rule may name that these give (open_side: a guard stands in, each_part.STAND_INS; a stair's
+# handrail is within it): a Building Code law with a rule over any of them has its stairs and guards measured
+READS_INTERIOR = ("stair", "guard", "open_side", "handrail", "ramp")
+
+
+def _reads_interior(law: dict) -> bool:
+    """Whether any of the law's rules repeats over, or sits within, a kind the interior measuring gives
+    (READS_INTERIOR): only then are its stairs and guards measured, so a check whose rules read none of them says
+    nothing about stairs it doesn't check."""
+    return any(isinstance(r, dict) and (r.get("for_each") in READS_INTERIOR or r.get("within") in READS_INTERIOR)
+               for r in law.get("rules") or [])
+
+
+def _stairs_and_guards(interior) -> dict:
+    """The interior measuring of the description's stairs and guards alone (BUILDING_INTERIOR_KINDS): the measuring
+    run on the description with its rooms, openings and doors given as none and no `has_none` (a house's claims), so
+    its only parts and problems are the stairs' and guards' own. A kind the description doesn't give is not read
+    (None, with the measuring's problem saying so): its rules need review, never pass. A description that isn't a
+    mapping is measured as it is (its problem said)."""
+    if isinstance(interior, dict):
+        keep = {k: interior[k] for k in ("format", "units", "stairs", "guards") if k in interior}
+        interior = {**keep, "rooms": [], "openings": [], "doors": []}
+    got = measure_interior(interior)
+    return {"parts": {k: got["parts"].get(k) for k in BUILDING_INTERIOR_KINDS}, "problems": got["problems"]}
+
+
+def _measured(law: dict, interior, readings: dict, ground: dict | None = None) -> dict:
     """The parts a law's rules read, measured once per kind of reading: the house code's from the interior measuring
     (model_measurement.interior), the Building Code's from the routes (model_measurement.routes: story, space,
-    corridor and every door), in the same shape."""
+    corridor and every door) and, for its stairs and guards, the interior measuring's (_stairs_and_guards), in the
+    same shape."""
     kind = ROUTES if law.get("scope") == code_scope.BUILDING else "interior"
+    if kind == ROUTES and _reads_interior(law):
+        kind = ROUTES_AND_INTERIOR
     if kind not in readings:
-        if kind == ROUTES:
-            got = measure_routes(interior)
+        if kind in (ROUTES, ROUTES_AND_INTERIOR):
+            got = measure_routes(interior, ground=ground)
             factors = Path(law["folder"]) / OCCUPANT_LOAD_FACTORS
             if factors.exists() and isinstance(interior, dict):      # 1004.5: each room's function's load
                 occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors),
                                     interior.get("building"))
-            readings[kind] = {"parts": got["parts"], "problems": [str(p) for p in got["problems"]],
+            inside = _stairs_and_guards(interior) if kind == ROUTES_AND_INTERIOR else {"parts": {}, "problems": []}
+            problems = [str(p) for p in got["problems"]]
+            problems += [str(p) for p in inside["problems"] if str(p) not in problems]
+            readings[kind] = {"parts": {**got["parts"], **inside["parts"]}, "problems": problems,
                               "not_checked": [], "has_none": {}}
         else:
             readings[kind] = measure_interior(interior)

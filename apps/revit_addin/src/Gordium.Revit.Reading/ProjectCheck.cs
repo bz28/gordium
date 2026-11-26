@@ -90,11 +90,13 @@ public static class ProjectCheck
     }
 
     /// <summary>The one check_site: the site, the facts and the interior, together.</summary>
-    public static Task<CheckResult> SendAsync(WorkerClient worker, ProjectRequest request, CancellationToken cancel = default)
+    public static Task<CheckResult> SendAsync(WorkerClient worker, ProjectRequest request, CancellationToken cancel = default,
+                                              TimeSpan? silence = null, IProgress<string>? step = null)
     {
         ArgumentNullException.ThrowIfNull(worker);
         ArgumentNullException.ThrowIfNull(request);
-        return worker.CheckSiteAsync(request.Site, request.Facts, interior: request.Interior, cancel: cancel);
+        return worker.CheckSiteAsync(request.Site, request.Facts, interior: request.Interior, cancel: cancel, silence: silence, step: step,
+                                     total: silence is { } s ? CheckFailures.Ceiling(s) : null);
     }
 
     /// <summary>Why the two reads aren't of the same design (phases, option sets, the option being edited), or null.</summary>

@@ -39,8 +39,8 @@ corridor's rating and smoke partitions) are marks the description doesn't carry 
 import copy
 import math
 
-from model_measurement.interior.read import name_of
-from model_measurement.routes import areas, dead_ends, straight
+from model_measurement.interior.read import Reader, name_of
+from model_measurement.routes import areas, dead_ends, story_place, straight
 from model_measurement.routes.common_path import _TravelOnly, at_point, story_figure
 from model_measurement.routes.doors import door_parts
 from model_measurement.routes.floor import CLEARANCE, OUTSIDE as OUTSIDE_SIDE, READING, read, region
@@ -67,13 +67,18 @@ STATED = {"story_occupant_load": "the story's design occupant load", "space_occu
 QUESTIONS = {areas.STORY_AREA_QUESTION: "3", areas.ACCESSORY_AREA_QUESTION: "3", dead_ends.QUESTION: "7"}
 
 
-def measure(description, clearance: float = CLEARANCE) -> dict:
+def measure(description, clearance: float = CLEARANCE, ground: dict | None = None) -> dict:
+    """`ground`: the ground the architect stated, story_place.ground_of's (None: none stated), for where each story
+    sits against the grade plane (story_place.py)."""
     out = {"format": MEASURED_FORMAT, "units": {"travel": "ft", "corridor_width": "in", "area": "sf"},
            "parts": {k: None for k in KINDS}, "problems": []}
     floor = read(description)
     out["problems"] = list(floor.stops)
     if not floor.stories:
         return out
+    placed = story_place.places(description, Reader(description["units"]),
+                                {lid: s.name for lid, s in floor.stories.items()}, floor.stories, ground,
+                                floor.stops)
     items = {r["id"]: r for r in description.get("rooms") or [] if isinstance(r, dict) and isinstance(r.get("id"), str)}
     unknown = [u for u in description.get("unknown_spaces") or [] if isinstance(u, dict)]
     parts = {k: [] for k in KINDS}
@@ -82,6 +87,11 @@ def measure(description, clearance: float = CLEARANCE) -> dict:
         uses = {rid: (items.get(rid) or {}).get("use") for rid in story.rooms}
         here = [u for u in unknown if u.get("level") == level]
         toward.update(_egress_sides(story, _story_parts(story, uses, items, here, parts, clearance)))
+    for sp in parts["story"]:                            # where each story sits against the grade plane
+        got = placed[sp["id"]]
+        sp["measures"].update(got["measures"])
+        sp["not_measured"].update(got["not_measured"])
+        sp["more"].update(got["more"])
     parts["means_of_egress_door"] = door_parts(description, floor, toward)   # every door given (section group 6a)
     if floor.stops:                                      # a part that can't be placed on a story: none is "none"
         for u in unknown:
