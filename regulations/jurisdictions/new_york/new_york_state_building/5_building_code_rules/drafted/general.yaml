@@ -17209,32 +17209,35 @@ rules:
   topic: means_of_egress
   title: An area well of at least 9 sq ft below grade (BCNYS 1031.5, 1031.5.1)
   applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
-  limit: not opening_below_grade or (area_well_area >= 9 and (not area_well_ladder or area_well_ladder_encroachment <= 6))
-  check: (not opening_below_grade or (area_well_area >= 9 and (not area_well_ladder or area_well_ladder_encroachment <= 6)))
-    or opening_room_fourth_or_higher or (occupancy_group in ["R-2"] and not opening_room_one_exit)
+  limit: not opening_below_grade or (area_well_area >= 9 and area_well_encroachment <= 6)
+  check: (not opening_below_grade or (area_well_area >= 9 and area_well_encroachment <= 6)) or opening_room_fourth_or_higher
+    or (occupancy_group in ["R-2"] and not opening_room_one_exit)
   review_when:
-  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_area >= 9 and (not area_well_ladder
-      or area_well_ladder_encroachment <= 6))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and
-      not opening_room_one_exit) and opening_room_door_to_outside
-    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft, but its room has a door to outside: exception
-      2 sets the opening aside where that door is an exit or exit access door opening directly into a public way, or a yard,
-      court or exterior egress balcony leading to one, which the model doesn''t show: a person checks.'
-  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_area >= 9 and (not area_well_ladder
-      or area_well_ladder_encroachment <= 6))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and
-      not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
-    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft, in a Group R-2 or R-3 building sprinklered
-      throughout (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two
-      means of egress, or one and an escape opening, which the model doesn''t show: a person checks.'
-  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_area >= 9 and (not area_well_ladder
-      or area_well_ladder_encroachment <= 6))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and
-      not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft, but its room has another escape opening
-      marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window
-      needn''t meet 1031.3): a person checks.'
-  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_area >= 9 and (not area_well_ladder
-      or area_well_ladder_encroachment <= 6)))
-    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft, in a building of two or more groups: whether
-      its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_encroachment
+      <= 6)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_door_to_outside
+    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded past 6 inches, or
+      not known), but its room has a door to outside: exception 2 sets the opening aside where that door is an exit or exit
+      access door opening directly into a public way, or a yard, court or exterior egress balcony leading to one, which the
+      model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_encroachment
+      <= 6)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded past 6 inches, or
+      not known), in a Group R-2 or R-3 building sprinklered throughout (stated, or not ruled out): exception 5 sets the opening
+      aside for a sleeping room in a basement with two means of egress, or one and an escape opening, which the model doesn''t
+      show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_encroachment
+      <= 6)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_other_compliant
+    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded past 6 inches, or
+      not known), but its room has another escape opening marked: 1031.2 asks each sleeping room for not fewer than one, so
+      this one may not be the one relied on (an extra window needn''t meet 1031.3): a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_encroachment
+      <= 6))
+    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded past 6 inches, or
+      not known), in a building of two or more groups: whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks
+      it of isn''t shown: a person checks.'
   for_each: emergency_escape_opening
   within: sleeping_room
   when_none: not_applicable
@@ -17269,7 +17272,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_area: 9
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -17296,7 +17299,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_area: 8
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -17310,7 +17313,7 @@ rules:
       outcome: fail
     expect: fail
     note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening is below the adjacent grade
-      with no area well of 9 sq ft.'
+      with no area well of 9 sq ft clear (short, crowded past 6 inches, or not known).'
   - given:
       occupancy_group: R-3
       sprinklered_903_3_1_1: false
@@ -17324,7 +17327,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_area: 8
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: true
       sleeping_room:
       - id: r1
@@ -17349,7 +17352,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_area: 8
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -17377,7 +17380,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_area: 8
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: true
       sleeping_room:
@@ -17403,7 +17406,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_area: 8
-          area_well_ladder: false
+          area_well_encroachment: 0
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -17427,7 +17430,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_area: 8
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: true
@@ -17454,7 +17457,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_area: 8
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -17508,52 +17511,23 @@ rules:
       outcome: not_applicable
     expect: not_applicable
     note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
-  - expect: pass
-    given:
-      occupancy_group: R-3
-      sprinklered_903_3_1_1: false
-      sprinklered_903_3_1_2: false
-      sprinklered_903_3_1_3: false
-    note: 'A ladder taking 6 inches of the required dimensions: the exception allows it.'
-    parts:
-      emergency_escape_opening:
-      - id: o1
-        measures:
-          area_well_area: 9
-          area_well_ladder: true
-          opening_below_grade: true
-          opening_room_door_to_outside: false
-          opening_room_fourth_or_higher: false
-          opening_room_other_compliant: false
-          area_well_ladder_encroachment: 6
-        name: Escape window, its well with a ladder
-        within: r1
-      sleeping_room:
-      - id: r1
-        measures: {}
-        name: Bedroom
-    rows:
-    - outcome: pass
-      part: o1
-      within: r1
   - expect: fail
     given:
       occupancy_group: R-3
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
-    note: 'A ladder taking 7 inches: more than the 6 the exception allows.'
+    note: 'Something in the well reaches 7 inches into its required dimensions: more than the 6 the exception allows.'
     parts:
       emergency_escape_opening:
       - id: o1
         measures:
           area_well_area: 9
-          area_well_ladder: true
           opening_below_grade: true
           opening_room_door_to_outside: false
           opening_room_fourth_or_higher: false
           opening_room_other_compliant: false
-          area_well_ladder_encroachment: 7
+          area_well_encroachment: 7
         name: Escape window, its well with a ladder
         within: r1
       sleeping_room:
@@ -17570,13 +17544,12 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
-    note: 'A ladder in the well, how far it reaches into the required dimensions not measured: a person checks.'
+    note: 'Whether anything in the well reaches into its required dimensions isn''t measured: a person checks.'
     parts:
       emergency_escape_opening:
       - id: o1
         measures:
           area_well_area: 9
-          area_well_ladder: true
           opening_below_grade: true
           opening_room_door_to_outside: false
           opening_room_fourth_or_higher: false
@@ -17593,14 +17566,13 @@ rules:
       within: r1
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). An opening whose bottom is below the adjacent grade has an area well (1031.5) of at least 9 sq ft horizontal
-    area (1031.5.1), to its walls; with a ladder or steps in it (or not known), how much they take isn''t measured, a review;
-    no well read is no area. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it
-    complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach
-    two or more exits; it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3
-    building (exception 5), in a building of two or more groups, where the room has another escape opening marked (1031.2
-    asks one per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude
-    Code session (2026-11-26). Section group 8d: the ladder or steps'' encroachment is in the limit, a measure of its own
-    (not measured yet, so with one there it needs review), so the limit says exactly what the opening''s figures show.'
+    area (1031.5.1), to its walls, with nothing standing in it reaching more than 6 inches into its required dimensions (the
+    exception: a ladder or steps; not measured yet, a review); no well read is no area. It applies only where 1031.2 requires
+    the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher, or
+    in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review where the room has a door
+    to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups,
+    where the room has another escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story
+    isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_1_area_well_min_projection
@@ -17608,33 +17580,35 @@ rules:
   topic: means_of_egress
   title: Area well at least 36 in out from the wall (BCNYS 1031.5.1)
   applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
-  limit: not opening_below_grade or (area_well_projection >= 36 and (not area_well_ladder or area_well_ladder_encroachment
-    <= 6))
-  check: (not opening_below_grade or (area_well_projection >= 36 and (not area_well_ladder or area_well_ladder_encroachment
-    <= 6))) or opening_room_fourth_or_higher or (occupancy_group in ["R-2"] and not opening_room_one_exit)
+  limit: not opening_below_grade or (area_well_projection >= 36 and area_well_encroachment <= 6)
+  check: (not opening_below_grade or (area_well_projection >= 36 and area_well_encroachment <= 6)) or opening_room_fourth_or_higher
+    or (occupancy_group in ["R-2"] and not opening_room_one_exit)
   review_when:
-  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_projection >= 36 and (not
-      area_well_ladder or area_well_ladder_encroachment <= 6))) and not opening_room_fourth_or_higher and not (occupancy_group
-      in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
-    reason: 'The opening has an area well under 36 inches out, but its room has a door to outside: exception 2 sets the opening
-      aside where that door is an exit or exit access door opening directly into a public way, or a yard, court or exterior
-      egress balcony leading to one, which the model doesn''t show: a person checks.'
-  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_projection >= 36 and (not area_well_ladder
-      or area_well_ladder_encroachment <= 6))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and
-      not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
-    reason: 'The opening has an area well under 36 inches out, in a Group R-2 or R-3 building sprinklered throughout (stated,
-      or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or
-      one and an escape opening, which the model doesn''t show: a person checks.'
-  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_projection >= 36 and (not
-      area_well_ladder or area_well_ladder_encroachment <= 6))) and not opening_room_fourth_or_higher and not (occupancy_group
-      in ["R-2"] and not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening has an area well under 36 inches out, but its room has another escape opening marked: 1031.2 asks
-      each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_encroachment
+      <= 6)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_door_to_outside
+    reason: 'The opening has an area well short of 36 inches out clear (short, crowded past 6 inches, or not known), but its
+      room has a door to outside: exception 2 sets the opening aside where that door is an exit or exit access door opening
+      directly into a public way, or a yard, court or exterior egress balcony leading to one, which the model doesn''t show:
       a person checks.'
-  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_projection >= 36 and (not area_well_ladder
-      or area_well_ladder_encroachment <= 6)))
-    reason: 'The opening has an area well under 36 inches out, in a building of two or more groups: whether its room is in
-      a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_encroachment
+      <= 6)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+    reason: 'The opening has an area well short of 36 inches out clear (short, crowded past 6 inches, or not known), in a
+      Group R-2 or R-3 building sprinklered throughout (stated, or not ruled out): exception 5 sets the opening aside for
+      a sleeping room in a basement with two means of egress, or one and an escape opening, which the model doesn''t show:
+      a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_encroachment
+      <= 6)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_other_compliant
+    reason: 'The opening has an area well short of 36 inches out clear (short, crowded past 6 inches, or not known), but its
+      room has another escape opening marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not be
+      the one relied on (an extra window needn''t meet 1031.3): a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_encroachment
+      <= 6))
+    reason: 'The opening has an area well short of 36 inches out clear (short, crowded past 6 inches, or not known), in a
+      building of two or more groups: whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown:
+      a person checks.'
   for_each: emergency_escape_opening
   within: sleeping_room
   when_none: not_applicable
@@ -17662,7 +17636,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_projection: 36
-          area_well_ladder: false
+          area_well_encroachment: 6
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -17689,7 +17663,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_projection: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -17702,8 +17676,8 @@ rules:
       within: r1
       outcome: fail
     expect: fail
-    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening has an area well under 36 inches
-      out.'
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening has an area well short of 36
+      inches out clear (short, crowded past 6 inches, or not known).'
   - given:
       occupancy_group: R-3
       sprinklered_903_3_1_1: false
@@ -17717,7 +17691,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_projection: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: true
       sleeping_room:
       - id: r1
@@ -17742,7 +17716,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_projection: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -17770,7 +17744,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_projection: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: true
       sleeping_room:
@@ -17796,7 +17770,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_projection: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -17820,7 +17794,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_projection: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: true
@@ -17847,7 +17821,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_projection: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -17901,52 +17875,23 @@ rules:
       outcome: not_applicable
     expect: not_applicable
     note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
-  - expect: pass
-    given:
-      occupancy_group: R-3
-      sprinklered_903_3_1_1: false
-      sprinklered_903_3_1_2: false
-      sprinklered_903_3_1_3: false
-    note: 'A ladder taking 6 inches of the required dimensions: the exception allows it.'
-    parts:
-      emergency_escape_opening:
-      - id: o1
-        measures:
-          area_well_ladder: true
-          area_well_projection: 36
-          opening_below_grade: true
-          opening_room_door_to_outside: false
-          opening_room_fourth_or_higher: false
-          opening_room_other_compliant: false
-          area_well_ladder_encroachment: 6
-        name: Escape window, its well with a ladder
-        within: r1
-      sleeping_room:
-      - id: r1
-        measures: {}
-        name: Bedroom
-    rows:
-    - outcome: pass
-      part: o1
-      within: r1
   - expect: fail
     given:
       occupancy_group: R-3
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
-    note: 'A ladder taking 7 inches: more than the 6 the exception allows.'
+    note: 'Something in the well reaches 7 inches into its required dimensions: more than the 6 the exception allows.'
     parts:
       emergency_escape_opening:
       - id: o1
         measures:
-          area_well_ladder: true
           area_well_projection: 36
           opening_below_grade: true
           opening_room_door_to_outside: false
           opening_room_fourth_or_higher: false
           opening_room_other_compliant: false
-          area_well_ladder_encroachment: 7
+          area_well_encroachment: 7
         name: Escape window, its well with a ladder
         within: r1
       sleeping_room:
@@ -17963,12 +17908,11 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
-    note: 'A ladder in the well, how far it reaches into the required dimensions not measured: a person checks.'
+    note: 'Whether anything in the well reaches into its required dimensions isn''t measured: a person checks.'
     parts:
       emergency_escape_opening:
       - id: o1
         measures:
-          area_well_ladder: true
           area_well_projection: 36
           opening_below_grade: true
           opening_room_door_to_outside: false
@@ -17985,15 +17929,14 @@ rules:
       part: o1
       within: r1
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
-    house code''s). Its area well''s horizontal projection is 36 inches or more to its walls; a ladder or steps in it may
-    take up to 6 inches of it, which isn''t measured (a review); short of 36 inches it fails whatever stands in it (review
-    round 1). It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the
-    fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits;
-    it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
-    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
-    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).
-    Section group 8d: the ladder or steps'' encroachment is in the limit, a measure of its own (not measured yet, so with
-    one there it needs review), so the limit says exactly what the opening''s figures show.'
+    house code''s). Its area well''s horizontal projection is 36 inches or more to its walls, and nothing standing in it (a
+    ladder or steps, the exception) reaches more than 6 inches into it (not measured yet, a review); short of 36 inches it
+    fails whatever stands in it (review rounds 1 and 2). It applies only where 1031.2 requires the opening: its room''s facts
+    are copied onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s
+    occupants are shown to reach two or more exits; it needs review where the room has a door to outside (exception 2), in
+    a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the room has another
+    escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured
+    yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_1_area_well_min_width
@@ -18001,32 +17944,35 @@ rules:
   topic: means_of_egress
   title: Area well at least 36 in wide (BCNYS 1031.5.1)
   applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
-  limit: not opening_below_grade or (area_well_width >= 36 and (not area_well_ladder or area_well_ladder_encroachment <= 6))
-  check: (not opening_below_grade or (area_well_width >= 36 and (not area_well_ladder or area_well_ladder_encroachment <=
-    6))) or opening_room_fourth_or_higher or (occupancy_group in ["R-2"] and not opening_room_one_exit)
+  limit: not opening_below_grade or (area_well_width >= 36 and area_well_encroachment <= 6)
+  check: (not opening_below_grade or (area_well_width >= 36 and area_well_encroachment <= 6)) or opening_room_fourth_or_higher
+    or (occupancy_group in ["R-2"] and not opening_room_one_exit)
   review_when:
-  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_width >= 36 and (not area_well_ladder
-      or area_well_ladder_encroachment <= 6))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and
-      not opening_room_one_exit) and opening_room_door_to_outside
-    reason: 'The opening has an area well under 36 inches wide, but its room has a door to outside: exception 2 sets the opening
-      aside where that door is an exit or exit access door opening directly into a public way, or a yard, court or exterior
-      egress balcony leading to one, which the model doesn''t show: a person checks.'
-  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_width >= 36 and (not area_well_ladder
-      or area_well_ladder_encroachment <= 6))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and
-      not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
-    reason: 'The opening has an area well under 36 inches wide, in a Group R-2 or R-3 building sprinklered throughout (stated,
-      or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or
-      one and an escape opening, which the model doesn''t show: a person checks.'
-  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_width >= 36 and (not area_well_ladder
-      or area_well_ladder_encroachment <= 6))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and
-      not opening_room_one_exit) and opening_room_other_compliant
-    reason: 'The opening has an area well under 36 inches wide, but its room has another escape opening marked: 1031.2 asks
-      each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_encroachment
+      <= 6)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_door_to_outside
+    reason: 'The opening has an area well short of 36 inches wide clear (short, crowded past 6 inches, or not known), but
+      its room has a door to outside: exception 2 sets the opening aside where that door is an exit or exit access door opening
+      directly into a public way, or a yard, court or exterior egress balcony leading to one, which the model doesn''t show:
       a person checks.'
-  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_width >= 36 and (not area_well_ladder
-      or area_well_ladder_encroachment <= 6)))
-    reason: 'The opening has an area well under 36 inches wide, in a building of two or more groups: whether its room is in
-      a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_encroachment
+      <= 6)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+    reason: 'The opening has an area well short of 36 inches wide clear (short, crowded past 6 inches, or not known), in a
+      Group R-2 or R-3 building sprinklered throughout (stated, or not ruled out): exception 5 sets the opening aside for
+      a sleeping room in a basement with two means of egress, or one and an escape opening, which the model doesn''t show:
+      a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_encroachment
+      <= 6)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_other_compliant
+    reason: 'The opening has an area well short of 36 inches wide clear (short, crowded past 6 inches, or not known), but
+      its room has another escape opening marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not
+      be the one relied on (an extra window needn''t meet 1031.3): a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_encroachment
+      <= 6))
+    reason: 'The opening has an area well short of 36 inches wide clear (short, crowded past 6 inches, or not known), in a
+      building of two or more groups: whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown:
+      a person checks.'
   for_each: emergency_escape_opening
   within: sleeping_room
   when_none: not_applicable
@@ -18054,7 +18000,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_width: 36
-          area_well_ladder: false
+          area_well_encroachment: 6
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -18081,7 +18027,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_width: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -18094,8 +18040,8 @@ rules:
       within: r1
       outcome: fail
     expect: fail
-    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening has an area well under 36 inches
-      wide.'
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening has an area well short of 36
+      inches wide clear (short, crowded past 6 inches, or not known).'
   - given:
       occupancy_group: R-3
       sprinklered_903_3_1_1: false
@@ -18109,7 +18055,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_width: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: true
       sleeping_room:
       - id: r1
@@ -18134,7 +18080,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_width: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -18162,7 +18108,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_width: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: true
       sleeping_room:
@@ -18188,7 +18134,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_width: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -18212,7 +18158,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_width: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: true
@@ -18239,7 +18185,7 @@ rules:
         measures:
           opening_below_grade: true
           area_well_width: 35
-          area_well_ladder: false
+          area_well_encroachment: 0
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
           opening_room_other_compliant: false
@@ -18293,52 +18239,23 @@ rules:
       outcome: not_applicable
     expect: not_applicable
     note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
-  - expect: pass
-    given:
-      occupancy_group: R-3
-      sprinklered_903_3_1_1: false
-      sprinklered_903_3_1_2: false
-      sprinklered_903_3_1_3: false
-    note: 'A ladder taking 6 inches of the required dimensions: the exception allows it.'
-    parts:
-      emergency_escape_opening:
-      - id: o1
-        measures:
-          area_well_ladder: true
-          area_well_width: 36
-          opening_below_grade: true
-          opening_room_door_to_outside: false
-          opening_room_fourth_or_higher: false
-          opening_room_other_compliant: false
-          area_well_ladder_encroachment: 6
-        name: Escape window, its well with a ladder
-        within: r1
-      sleeping_room:
-      - id: r1
-        measures: {}
-        name: Bedroom
-    rows:
-    - outcome: pass
-      part: o1
-      within: r1
   - expect: fail
     given:
       occupancy_group: R-3
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
-    note: 'A ladder taking 7 inches: more than the 6 the exception allows.'
+    note: 'Something in the well reaches 7 inches into its required dimensions: more than the 6 the exception allows.'
     parts:
       emergency_escape_opening:
       - id: o1
         measures:
-          area_well_ladder: true
           area_well_width: 36
           opening_below_grade: true
           opening_room_door_to_outside: false
           opening_room_fourth_or_higher: false
           opening_room_other_compliant: false
-          area_well_ladder_encroachment: 7
+          area_well_encroachment: 7
         name: Escape window, its well with a ladder
         within: r1
       sleeping_room:
@@ -18355,12 +18272,11 @@ rules:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
       sprinklered_903_3_1_3: false
-    note: 'A ladder in the well, how far it reaches into the required dimensions not measured: a person checks.'
+    note: 'Whether anything in the well reaches into its required dimensions isn''t measured: a person checks.'
     parts:
       emergency_escape_opening:
       - id: o1
         measures:
-          area_well_ladder: true
           area_well_width: 36
           opening_below_grade: true
           opening_room_door_to_outside: false
@@ -18377,15 +18293,14 @@ rules:
       part: o1
       within: r1
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
-    house code''s). Its area well''s width is 36 inches or more to its walls; a ladder or steps in it may take up to 6 inches
-    of it, which isn''t measured (a review); short of 36 inches it fails whatever stands in it (review round 1). It applies
-    only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth story above
-    grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review
-    where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building
-    of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review round 1), or
-    where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26). Section group
-    8d: the ladder or steps'' encroachment is in the limit, a measure of its own (not measured yet, so with one there it needs
-    review), so the limit says exactly what the opening''s figures show.'
+    house code''s). Its area well''s width is 36 inches or more to its walls, and nothing standing in it (a ladder or steps,
+    the exception) reaches more than 6 inches into it (not measured yet, a review); short of 36 inches it fails whatever stands
+    in it (review rounds 1 and 2). It applies only where 1031.2 requires the opening: its room''s facts are copied onto it,
+    so it complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown
+    to reach two or more exits; it needs review where the room has a door to outside (exception 2), in a sprinklered Group
+    R-2 or R-3 building (exception 5), in a building of two or more groups, where the room has another escape opening marked
+    (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in
+    a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_1_area_well_allows_full_opening
