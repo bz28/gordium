@@ -179,7 +179,8 @@ def test_no_escape_opening_passes_short_of_its_limit_or_fails_where_1031_2_may_n
     rule = {r["id"]: r for r in rules}[rid]
     # the rule reads the group only in lists of R-2, R-3, R-4 and mixed, so one group outside them walks every such one
     import re
-    named = set(re.findall(r'"([A-Z]-\d|mixed)"', " ".join([rule["applies_when"], rule["check"]] + [w["when"] for w in rule["review_when"]])))
+    # every quoted name in its formulas (review round 2: a single-letter group like "H" too)
+    named = set(re.findall(r'"([^"]*)"', " ".join([rule["applies_when"], rule["check"]] + [w["when"] for w in rule["review_when"]])))
     assert named <= {"R-2", "R-3", "R-4", "mixed"}, named
     bad_rows, seen = [], set()
     for group in ("B", "I-1", "R-1", "R-2", "R-3", "R-4", "mixed", U):
