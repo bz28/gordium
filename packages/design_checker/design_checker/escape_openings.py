@@ -127,7 +127,7 @@ def link(parts: dict, description) -> None:
 
 
 def _to_openings(rooms: list, openings) -> None:
-    """Copy each sleeping room's three facts onto the escape openings within it (FROM_ROOM): its value, or its reason
+    """Copy each sleeping room's four facts onto the escape openings within it (FROM_ROOM): its value, or its reason
     for having none; an opening within no sleeping room read (or a `maybe` one) gets neither, so its rows need review."""
     if not isinstance(openings, list):
         return

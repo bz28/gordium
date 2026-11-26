@@ -156,7 +156,7 @@ def test_a_room_id_two_rooms_share_counts_no_openings_and_no_doors():
 
 
 
-def test_each_escape_opening_carries_its_rooms_three_facts():
+def test_each_escape_opening_carries_its_rooms_four_facts():
     """Section group 8b: an opening's size rules fail only where 1031.2 requires it, which is its room's to say (its
     story's place, one exit, a door to outside): each is copied from the room, or its reason why not; an opening in no
     one sleeping room read gets none of them, so its rows need review."""
