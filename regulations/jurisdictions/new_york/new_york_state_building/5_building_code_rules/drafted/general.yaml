@@ -13250,7 +13250,7 @@ rules:
     note: 'Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials
       and aren''t concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1,
       and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn''t in the model, so a person''s check.
-      1010.1.1''s clear width and height are rules of their own; 1010.1.2 to 1010.3.4 follow in section group 6.'
+      1010.1.1''s, 1010.1.2''s and 1010.1.2.1''s are rules of their own; 1010.1.3 to 1010.3.4 follow in section group 6c.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 6a. 1010.1 applies the rest of Section 1010 to
     every door in the means of egress, extra doors included ("in numbers greater than required"): the door rules read every
     door the model gives, required or not.'
@@ -13819,5 +13819,263 @@ rules:
       overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn''t
       in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-25), section group 6a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_1_2_door_types
+  kind: flag
+  topic: means_of_egress
+  title: An egress door that isn't swinging (BCNYS 1010.1.2)
+  applies_when: not moe_door_swinging
+  for_each: means_of_egress_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 323
+    lines:
+    - 11
+    - 23
+    quote: '1010.1.2 Egress door types. Egress doors shall be of the side-hinged swinging door, pivoted door, or balanced
+      door types. Exceptions: 1. Private garages, office areas, factory and storage areas with an occupant load of 10 or less.
+      2. Group I-3 occupancies used as a place of detention. 3. Critical or intensive care patient rooms within suites of
+      health care facilities. 4. Doors within or serving a single dwelling unit in Groups R-2 and R-3. 5. In other than Group
+      H occupancies, revolving doors complying with Section 1010.3.1. 6. In other than Group H occupancies, special purpose
+      horizontal sliding, accordion or folding door assemblies comply- ing with Section 1010.3.3. 7. Power-operated doors
+      in accordance with Section 1010.3.2. 8. Doors serving a bathroom within an individual dwelling unit or sleeping unit
+      in Group R-1. 9. In other than Group H occupancies, manually operated horizontal sliding doors are permitted in a means
+      of egress from spaces with an occupant load of 10 or less.'
+  examples:
+  - given: {}
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Sliding door
+        measures:
+          moe_door_swinging: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not a side-hinged, pivoted or balanced door, but 1010.1.2''s exceptions allow other kinds the model doesn''t tell
+      apart: a power-operated door per 1010.3.2 in any group; a revolving door per 1010.3.1 or a special-purpose horizontal
+      sliding, accordion or folding door per 1010.3.3 other than in Group H; doors within or serving a single dwelling unit
+      in Groups R-2 and R-3; a bathroom door in a Group R-1 unit; private garages, office, factory and storage areas, and
+      other than in Group H spaces left by a manual sliding door, with 10 occupants or fewer; Group I-3 detention; critical
+      or intensive care rooms in health care suites: a person checks.'
+  - given: {}
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Side-hinged door
+        measures:
+          moe_door_swinging: true
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'A side-hinged swinging door is one of 1010.1.2''s own kinds: nothing to check.'
+  - given: {}
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door whose operation isn't stated
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'How the door operates isn''t stated (or is given as other: a pivoted or balanced door, or another kind): a person
+      checks.'
+  - given: {}
+    parts:
+      means_of_egress_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No door: nothing to check here (the door size rules need review where no door is read).'
+  notes: 'Section group 6b (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): every door the model gives,
+    its kind from the description''s door operation (side-hinged: swinging; sliding, folding, pocket: not; other: not known,
+    a pivoted or balanced door among them). A door that isn''t swinging, or whose kind isn''t known, is a person''s check,
+    never a fail: exception 7''s power-operated doors (1010.3.2) are allowed in every group and the model doesn''t say whether
+    a door is power-operated. Hand-drafted in a Claude Code session (2026-11-25).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_1_2_1_direction_of_swing
+  kind: rule
+  topic: means_of_egress
+  title: Door swings with egress travel at 50 or more, or Group H (BCNYS 1010.1.2.1)
+  check: not moe_door_swinging or moe_door_swings_with_egress or (moe_door_occupant_load < 50 and occupancy_group not in
+    ["H-1", "H-2", "H-3", "H-4", "H-5", "mixed"])
+  review_when:
+  - when: moe_door_swinging and moe_door_exterior and not moe_door_exit and occupied_outdoor_areas
+    reason: 'A door to outside that isn''t an exit, in a building whose occupants use outdoor areas (stated, or not ruled
+      out): a patio''s or roof''s occupants may come in through it (1004.7), so which way egress travel goes through it isn''t
+      known: a person checks.'
+  - when: moe_door_swinging and not moe_door_swings_with_egress and occupancy_group not in ["H-1", "H-2", "H-3", "H-4", "H-5"]
+      and not moe_door_occupant_load >= 50 and not moe_door_occupant_load < 50
+    reason: 'Swinging against egress travel (or which way isn''t known), but 1010.1.2.1 asks it to swing with egress travel
+      only where it serves 50 or more or a Group H occupancy, and how many each door serves isn''t worked out (a door may
+      serve other stories, or outdoor areas, the model doesn''t hold): a person checks.'
+  - when: occupancy_group == "mixed" and moe_door_occupant_load < 50 and moe_door_swinging and not moe_door_swings_with_egress
+    reason: 'Swinging against egress travel and serving under 50, in a building of two or more groups: it must swing with
+      egress travel only if a Group H occupancy is among them or it serves one, which isn''t shown: a person checks.'
+  for_each: means_of_egress_door
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 323
+    lines:
+    - 24
+    - 25
+    quote: 1010.1.2.1 Direction of swing. Side-hinged swinging doors, pivoted doors and balanced doors shall swing in the
+      direction of egress travel where serving a room or area containing an occupant load of 50 or more persons or a Group
+      H occupancy.
+  examples:
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door swinging out of a room into the corridor
+        measures:
+          moe_door_swinging: true
+          moe_door_swings_with_egress: true
+          moe_door_occupant_load: 120
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: It swings in the direction of egress travel.
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door swinging into a room of 49
+        measures:
+          moe_door_swinging: true
+          moe_door_swings_with_egress: false
+          moe_door_occupant_load: 49
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Under 50 occupants, not Group H: either way.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door swinging against egress, serving 50
+        measures:
+          moe_door_swinging: true
+          moe_door_swings_with_egress: false
+          moe_door_occupant_load: 50
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: '50 or more occupants: it must swing with egress travel.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: H-2
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Group H door swinging against egress, serving 5
+        measures:
+          moe_door_swinging: true
+          moe_door_swings_with_egress: false
+          moe_door_occupant_load: 5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group H: with egress travel whatever the load.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: mixed
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door swinging against egress, serving 5, in a building of two groups
+        measures:
+          moe_door_swinging: true
+          moe_door_swings_with_egress: false
+          moe_door_occupant_load: 5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether a Group H occupancy is among them isn''t shown.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door whose swing isn't stated, serving 120
+        measures:
+          moe_door_swinging: true
+          moe_door_occupant_load: 120
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Which way it swings isn''t stated: a person checks.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Sliding door
+        measures:
+          moe_door_swinging: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Not a swinging door: 1010.1.2.1 asks only side-hinged, pivoted and balanced doors (its kind is 1010.1.2''s flag).'
+  - given:
+      occupied_outdoor_areas: true
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Patio door swinging out, not an exit, serving 120
+        measures:
+          moe_door_swinging: true
+          moe_door_swings_with_egress: true
+          moe_door_exterior: true
+          moe_door_exit: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A door to an occupied outdoor area that isn''t an exit: the area''s occupants may come in through it (1004.7), so
+      which way egress travel goes through it isn''t known.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: B
+    parts:
+      means_of_egress_door: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No door read: a person checks.'
+  notes: 'Section group 6b: every door the model gives; one that isn''t swinging complies (1010.1.2.1 asks it nothing), one
+    whose operation is other or not stated may be swinging. Whether it swings with egress travel: the side it swings into,
+    as the description states it (no Revit mark yet), against the side egress travel goes into through it, as the routes
+    find it, known only where travel crosses the door one way alone (into an exit stair or passageway where its room has
+    its own door marked an exterior exit door at discharge on the story, or the story has none to outside; outside through
+    a door marked an exterior exit door at discharge only: any unmarked door to outside, a stair''s own included, may be
+    a patio''s, a walkway''s or a balcony''s way in; a horizontal exit is used both ways; else away from the one room it
+    is an exit access door of, where that room is stated end-only; review rounds 1 to 7). How many people each door serves
+    isn''t worked out (the routes don''t split occupants between doors, a door may serve other stories, outdoor areas
+    1004.7 adds, or stories the model doesn''t hold: review rounds 1 and 7), so it complies swinging with egress travel,
+    or under 50 only where that is stated by hand; it fails swinging against egress travel in a building stated Group H,
+    or serving 50 or more as stated; else it needs review. Hand-drafted in a Claude Code session (2026-11-25).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
