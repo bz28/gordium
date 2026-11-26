@@ -17622,12 +17622,13 @@ rules:
     house code''s). An opening whose bottom is below the adjacent grade has an area well (1031.5) of at least 9 sq ft horizontal
     area (1031.5.1), to its walls, with nothing standing in it reaching into its required dimensions but the ladder or steps
     1031.5.2 requires (a well over 44 inches deep), and those no more than 6 inches (the exception; not measured yet, a review);
-    no well read is no area. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it
-    complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach
-    two or more exits; it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3
-    building (exception 5), in a building of two or more groups, where the room has another escape opening marked (1031.2
-    asks one per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude
-    Code session (2026-11-26).'
+    no well read is no area. Past those limits (something else in the required dimensions, the ladder or steps more than 6
+    inches into them, or any in a well no deeper than 44 inches) it fails too (review round 4). It applies only where 1031.2
+    requires the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher,
+    or in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review where the room has a
+    door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more
+    groups, where the room has another escape opening marked (1031.2 asks one per room: review round 1), or where the room''s
+    story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_1_area_well_min_projection
@@ -18093,12 +18094,13 @@ rules:
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). Its area well''s horizontal projection is 36 inches or more to its walls, and nothing standing in it reaches
     into it but the ladder or steps 1031.5.2 requires, those no more than 6 inches (not measured yet, a review); short of
-    36 inches it fails whatever stands in it (review rounds 1 to 3). It applies only where 1031.2 requires the opening: its
-    room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2 where
-    the room''s occupants are shown to reach two or more exits; it needs review where the room has a door to outside (exception
-    2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the room has
-    another escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not
-    measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    36 inches it fails whatever stands in it (review rounds 1 to 3). Past those limits (something else in the required dimensions,
+    the ladder or steps more than 6 inches into them, or any in a well no deeper than 44 inches) it fails too (review round
+    4). It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth
+    story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it
+    needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
+    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
+    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_1_area_well_min_width
@@ -18564,12 +18566,13 @@ rules:
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). Its area well''s width is 36 inches or more to its walls, and nothing standing in it reaches into it but
     the ladder or steps 1031.5.2 requires, those no more than 6 inches (not measured yet, a review); short of 36 inches it
-    fails whatever stands in it (review rounds 1 to 3). It applies only where 1031.2 requires the opening: its room''s facts
-    are copied onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s
-    occupants are shown to reach two or more exits; it needs review where the room has a door to outside (exception 2), in
-    a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the room has another
-    escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured
-    yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    fails whatever stands in it (review rounds 1 to 3). Past those limits (something else in the required dimensions, the
+    ladder or steps more than 6 inches into them, or any in a well no deeper than 44 inches) it fails too (review round 4).
+    It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth
+    story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it
+    needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
+    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
+    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_5_1_area_well_allows_full_opening
