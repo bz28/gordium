@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 208 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 232 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1561,6 +1561,30 @@
     "Egress · Smokeproof enclosures end at an exit discharge or public way: A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings into the passageway are allowed where it is protected and pressurized as the enclosure is and the openings are protected as for access from other floors, the barrier between the enclosure and the passageway isn't needed where the passageway is protected and pressurized as the enclosure is, and the enclosure may egress through areas on the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
     "Egress · Smokeproof enclosures entered by a vestibule or open balcony: A person checks this (Gordium doesn't decide it): A stairway or ramp in a smokeproof enclosure is entered through a vestibule or an open exterior balcony, but not where it uses the pressurization alternative per 909.20.4: smokeproof enclosures aren't in the model, so a person's check.",
     "Egress · Standpipes in exit stairways where 905.3 and 905.4 require them: A person checks this (Gordium doesn't decide it): Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren't in the model, so a person's check.",
+    "Egress · Exit passageways used only for egress: A person checks this (Gordium doesn't decide it): An exit passageway serving as an exit component is used for nothing but a means of egress and a circulation path: what a room is used for isn't in the model, so a person's check.",
+    "Egress · Exit passageways at least 44 in wide: A person checks this (Gordium doesn't decide it): An exit passageway has the capacity 1005.1 requires and is at least 44 inches wide, or 36 inches where it serves fewer than 50 occupants, its minimum width or required capacity unobstructed but for encroachments complying with 1005.7: the routes measure corridors' width, not an exit passageway's, so a person's check.",
+    "Egress · Exit passageways rated at least 1 hour: A person checks this (Gordium doesn't decide it): An exit passageway's walls, floors and ceilings are rated at least 1 hour and at least as any interior exit stairway or ramp it connects to, built as fire barriers per 707 or horizontal assemblies per 711: ratings aren't in the model, so a person's check.",
+    "Egress · Exit passageways end at an exit discharge: A person checks this (Gordium doesn't decide it): An exit passageway on the level of exit discharge ends at an exit discharge, and one on another level ends at an exit: where a passageway ends isn't in the model, so a person's check.",
+    "Egress · Openings into exit passageways limited: A person checks this (Gordium doesn't decide it): Opening protectives of an exit passageway meet 716; except as 402.8.7 permits, its openings, other than unprotected exterior openings, are only those needed to enter it from normally occupied spaces and to leave it; one extending an interior exit stairway or ramp meets 1023.3.1; and no elevator opens into it: the openings aren't in the model, so a person's check.",
+    "Egress · Penetrations of exit passageways limited: A person checks this (Gordium doesn't decide it): Nothing penetrates an exit passageway but its own ventilation or pressurization, fire protection, security and two-way communication systems, raceways for fire department communication or serving it (ending at a steel box of at most 16 square inches), and structural elements supporting a floor or roof at its top, each protected per 714; no penetration or opening joins two adjacent exit passageways; membrane penetrations on the outside are allowed per 714.4.2: penetrations aren't in the model, so a person's check.",
+    "Egress · Exit passageway ventilation kept separate: A person checks this (Gordium doesn't decide it): Equipment and ductwork ventilating an exit passageway is outside the building with ducts enclosed as shafts, or within the passageway taking air from and discharging it directly outdoors (or through ducts enclosed as shafts), or within the building separated as shafts; openings into the rated construction are only those needed for maintenance and operation, protected per 716 for shaft enclosures; and the system is independent of the building's other ventilation: ventilation isn't in the model, so a person's check.",
+    "Egress · Exterior walls of exit passageways and the walls near them: A person checks this (Gordium doesn't decide it): An exit passageway's exterior walls meet 705; where nonrated walls or unprotected openings enclose its exterior and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway's floor or to the roof line, whichever is lower: ratings and angles aren't in the model, so a person's check.",
+    "Egress · Standpipes in exit passageways where 905.3 and 905.4 require them: A person checks this (Gordium doesn't decide it): Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren't in the model, so a person's check.",
+    "Egress · Luminous egress path markings in high-rise buildings: A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+    "Egress · Luminous stripes on the leading edge of each step: A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+    "Egress · Luminous stripes on the leading edge of landings: A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+    "Egress · Luminous stripes on handrails and their extensions: A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+    "Egress · Perimeter demarcation lines in exit enclosures: A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+    "Egress · Floor-mounted demarcation lines: A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+    "Egress · Wall-mounted demarcation lines: A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+    "Egress · Demarcation lines continuous from wall to floor: A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+    "Egress · Obstacles in the exit path outlined: A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+    "Egress · Low-location emergency exit symbol on exit path doors: A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+    "Egress · Luminous markings on exit path door hardware: A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+    "Egress · Luminous stripes on exit path door frames: A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+    "Egress · Luminous markings uniform within an enclosure: A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+    "Egress · Luminous marking materials: A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+    "Egress · Light for photoluminescent markings: A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
@@ -78116,6 +78140,1698 @@
      }
     },
     {
+     "id": "egress.general.bc_1024_1_exit_passageways_general",
+     "rule": "general.bc_1024_1_exit_passageways_general",
+     "name": "Egress · Exit passageways used only for egress (BCNYS 1024.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An exit passageway serving as an exit component is used for nothing but a means of egress and a circulation path: what a room is used for isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An exit passageway serving as an exit component is used for nothing but a means of egress and a circulation path: what a room is used for isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1024.1 General. Exit passageways serving as an exit component in a means of egress system shall comply with the requirements of this section. An exit passageway shall not be used for any purpose other than as a means of egress and a circulation path.",
+        "where": "1024.1, 2025 Building Code of New York State (BCNYS), PDF p.348"
+       }
+      ],
+      "citation": "1024.1, 2025 Building Code of New York State (BCNYS), PDF p.348",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1024.1",
+      "quote": "1024.1 General. Exit passageways serving as an exit component in a means of egress system shall comply with the requirements of this section. An exit passageway shall not be used for any purpose other than as a means of egress and a circulation path."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1024_1_exit_passageways_general",
+       "words": "A person checks this (Gordium doesn't decide it): An exit passageway serving as an exit component is used for nothing but a means of egress and a circulation path: what a room is used for isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1024_1_exit_passageways_general",
+       "why": "A person checks this (Gordium doesn't decide it): An exit passageway serving as an exit component is used for nothing but a means of egress and a circulation path: what a room is used for isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit passageways used only for egress",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1024",
+      "section_title": "Exit Passageways",
+      "piece": "1024.1",
+      "piece_title": "General"
+     }
+    },
+    {
+     "id": "egress.general.bc_1024_2_exit_passageway_width",
+     "rule": "general.bc_1024_2_exit_passageway_width",
+     "name": "Egress · Exit passageways at least 44 in wide, 36 in under 50 occupants (BCNYS 1024.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An exit passageway has the capacity 1005.1 requires and is at least 44 inches wide, or 36 inches where it serves fewer than 50 occupants, its minimum width or required capacity unobstructed but for encroachments complying with 1005.7: the routes measure corridors' width, not an exit passageway's, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An exit passageway has the capacity 1005.1 requires and is at least 44 inches wide, or 36 inches where it serves fewer than 50 occupants, its minimum width or required capacity unobstructed but for encroachments complying with 1005.7: the routes measure corridors' width, not an exit passageway's, so a person's check.",
+      "quotes": [
+       {
+        "text": "1024.2 Width and capacity. The required capacity of exit passageways shall be determined as specified in Section 1005.1 but the minimum width shall be not less than 44 inches (1118 mm), except that exit passageways serving an occupant load of less than 50 shall be not less than 36 inches (914 mm) in width. The minimum width or required capacity of exit passageways shall be unobstructed. Exception: Encroachments complying with Section 1005.7.",
+        "where": "1024.2, 2025 Building Code of New York State (BCNYS), PDF p.348"
+       }
+      ],
+      "citation": "1024.2, 2025 Building Code of New York State (BCNYS), PDF p.348",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1024.2",
+      "quote": "1024.2 Width and capacity. The required capacity of exit passageways shall be determined as specified in Section 1005.1 but the minimum width shall be not less than 44 inches (1118 mm), except that exit passageways serving an occupant load of less than 50 shall be not less than 36 inches (914 mm) in width. The minimum width or required capacity of exit passageways shall be unobstructed. Exception: Encroachments complying with Section 1005.7."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1024_2_exit_passageway_width",
+       "words": "A person checks this (Gordium doesn't decide it): An exit passageway has the capacity 1005.1 requires and is at least 44 inches wide, or 36 inches where it serves fewer than 50 occupants, its minimum width or required capacity unobstructed but for encroachments complying with 1005.7: the routes measure corridors' width, not an exit passageway's, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1024_2_exit_passageway_width",
+       "why": "A person checks this (Gordium doesn't decide it): An exit passageway has the capacity 1005.1 requires and is at least 44 inches wide, or 36 inches where it serves fewer than 50 occupants, its minimum width or required capacity unobstructed but for encroachments complying with 1005.7: the routes measure corridors' width, not an exit passageway's, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit passageways at least 44 in wide, 36 in under 50 occupants",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1024",
+      "section_title": "Exit Passageways",
+      "piece": "1024.2",
+      "piece_title": "Width and capacity"
+     }
+    },
+    {
+     "id": "egress.general.bc_1024_3_exit_passageway_construction",
+     "rule": "general.bc_1024_3_exit_passageway_construction",
+     "name": "Egress · Exit passageways rated at least 1 hour (BCNYS 1024.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An exit passageway's walls, floors and ceilings are rated at least 1 hour and at least as any interior exit stairway or ramp it connects to, built as fire barriers per 707 or horizontal assemblies per 711: ratings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An exit passageway's walls, floors and ceilings are rated at least 1 hour and at least as any interior exit stairway or ramp it connects to, built as fire barriers per 707 or horizontal assemblies per 711: ratings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1024.3 Construction. Exit passageway enclosures shall have walls, floors and ceilings of not less than a 1-hour fire-resistance rating, and not less than that required for any connecting interior exit stairway or ramp. Exit passageways shall be constructed as fire barri- ers in accordance with Section 707 or horizontal assemblies constructed in accordance with Section 711, or both.",
+        "where": "1024.3, 2025 Building Code of New York State (BCNYS), PDF p.348"
+       }
+      ],
+      "citation": "1024.3, 2025 Building Code of New York State (BCNYS), PDF p.348",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1024.3",
+      "quote": "1024.3 Construction. Exit passageway enclosures shall have walls, floors and ceilings of not less than a 1-hour fire-resistance rating, and not less than that required for any connecting interior exit stairway or ramp. Exit passageways shall be constructed as fire barri- ers in accordance with Section 707 or horizontal assemblies constructed in accordance with Section 711, or both."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1024_3_exit_passageway_construction",
+       "words": "A person checks this (Gordium doesn't decide it): An exit passageway's walls, floors and ceilings are rated at least 1 hour and at least as any interior exit stairway or ramp it connects to, built as fire barriers per 707 or horizontal assemblies per 711: ratings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1024_3_exit_passageway_construction",
+       "why": "A person checks this (Gordium doesn't decide it): An exit passageway's walls, floors and ceilings are rated at least 1 hour and at least as any interior exit stairway or ramp it connects to, built as fire barriers per 707 or horizontal assemblies per 711: ratings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit passageways rated at least 1 hour",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1024",
+      "section_title": "Exit Passageways",
+      "piece": "1024.3",
+      "piece_title": "Construction"
+     }
+    },
+    {
+     "id": "egress.general.bc_1024_4_exit_passageway_termination",
+     "rule": "general.bc_1024_4_exit_passageway_termination",
+     "name": "Egress · Exit passageways end at an exit discharge, or at an exit above it (BCNYS 1024.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An exit passageway on the level of exit discharge ends at an exit discharge, and one on another level ends at an exit: where a passageway ends isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An exit passageway on the level of exit discharge ends at an exit discharge, and one on another level ends at an exit: where a passageway ends isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1024.4 Termination. Exit passageways on the level of exit discharge shall terminate at an exit discharge. Exit passageways on other levels shall terminate at an exit.",
+        "where": "1024.4, 2025 Building Code of New York State (BCNYS), PDF p.348"
+       }
+      ],
+      "citation": "1024.4, 2025 Building Code of New York State (BCNYS), PDF p.348",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1024.4",
+      "quote": "1024.4 Termination. Exit passageways on the level of exit discharge shall terminate at an exit discharge. Exit passageways on other levels shall terminate at an exit."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1024_4_exit_passageway_termination",
+       "words": "A person checks this (Gordium doesn't decide it): An exit passageway on the level of exit discharge ends at an exit discharge, and one on another level ends at an exit: where a passageway ends isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1024_4_exit_passageway_termination",
+       "why": "A person checks this (Gordium doesn't decide it): An exit passageway on the level of exit discharge ends at an exit discharge, and one on another level ends at an exit: where a passageway ends isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit passageways end at an exit discharge, or at an exit above it",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1024",
+      "section_title": "Exit Passageways",
+      "piece": "1024.4",
+      "piece_title": "Termination"
+     }
+    },
+    {
+     "id": "egress.general.bc_1024_5_exit_passageway_openings",
+     "rule": "general.bc_1024_5_exit_passageway_openings",
+     "name": "Egress · Openings into exit passageways limited (BCNYS 1024.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Opening protectives of an exit passageway meet 716; except as 402.8.7 permits, its openings, other than unprotected exterior openings, are only those needed to enter it from normally occupied spaces and to leave it; one extending an interior exit stairway or ramp meets 1023.3.1; and no elevator opens into it: the openings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Opening protectives of an exit passageway meet 716; except as 402.8.7 permits, its openings, other than unprotected exterior openings, are only those needed to enter it from normally occupied spaces and to leave it; one extending an interior exit stairway or ramp meets 1023.3.1; and no elevator opens into it: the openings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1024.5 Openings. Exit passageway opening protectives shall be in accordance with the requirements of Section 716. Except as permitted in Section 402.8.7, openings in exit passageways other than unprotected exterior openings shall be limited to those necessary for exit access to the exit passageway from normally occupied spaces and for egress from the exit passageway. Where an interior exit stairway or ramp is extended to an exit discharge or a public way by an exit passageway, the exit passageway shall comply with Section 1023.3.1. Elevators shall not open into an exit passageway.",
+        "where": "1024.5, 2025 Building Code of New York State (BCNYS), PDF p.348"
+       }
+      ],
+      "citation": "1024.5, 2025 Building Code of New York State (BCNYS), PDF p.348",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1024.5",
+      "quote": "1024.5 Openings. Exit passageway opening protectives shall be in accordance with the requirements of Section 716. Except as permitted in Section 402.8.7, openings in exit passageways other than unprotected exterior openings shall be limited to those necessary for exit access to the exit passageway from normally occupied spaces and for egress from the exit passageway. Where an interior exit stairway or ramp is extended to an exit discharge or a public way by an exit passageway, the exit passageway shall comply with Section 1023.3.1. Elevators shall not open into an exit passageway."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1024_5_exit_passageway_openings",
+       "words": "A person checks this (Gordium doesn't decide it): Opening protectives of an exit passageway meet 716; except as 402.8.7 permits, its openings, other than unprotected exterior openings, are only those needed to enter it from normally occupied spaces and to leave it; one extending an interior exit stairway or ramp meets 1023.3.1; and no elevator opens into it: the openings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1024_5_exit_passageway_openings",
+       "why": "A person checks this (Gordium doesn't decide it): Opening protectives of an exit passageway meet 716; except as 402.8.7 permits, its openings, other than unprotected exterior openings, are only those needed to enter it from normally occupied spaces and to leave it; one extending an interior exit stairway or ramp meets 1023.3.1; and no elevator opens into it: the openings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Openings into exit passageways limited",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1024",
+      "section_title": "Exit Passageways",
+      "piece": "1024.5",
+      "piece_title": "Openings"
+     }
+    },
+    {
+     "id": "egress.general.bc_1024_6_exit_passageway_penetrations",
+     "rule": "general.bc_1024_6_exit_passageway_penetrations",
+     "name": "Egress · Penetrations of exit passageways limited (BCNYS 1024.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Nothing penetrates an exit passageway but its own ventilation or pressurization, fire protection, security and two-way communication systems, raceways for fire department communication or serving it (ending at a steel box of at most 16 square inches), and structural elements supporting a floor or roof at its top, each protected per 714; no penetration or opening joins two adjacent exit passageways; membrane penetrations on the outside are allowed per 714.4.2: penetrations aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Nothing penetrates an exit passageway but its own ventilation or pressurization, fire protection, security and two-way communication systems, raceways for fire department communication or serving it (ending at a steel box of at most 16 square inches), and structural elements supporting a floor or roof at its top, each protected per 714; no penetration or opening joins two adjacent exit passageways; membrane penetrations on the outside are allowed per 714.4.2: penetrations aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1024.6 Penetrations. Penetrations into or through an exit passageway are prohibited except for the following: 1. Equipment and ductwork necessary for independent ventilation or pressurization. 2. Fire protection systems. 3. Security systems. 4. Two-way communication systems. 5. Electrical raceway for fire department communication. 6. Electrical raceway serving the exit passageway and terminating at a steel box not exceeding 16 square inches (0.010 m[fn2]). 7. Structural elements, such as beams or joists, supporting a floor or roof at the top of the exit passageway. Such penetrations shall be protected in accordance with Section 714. There shall not be penetrations or communicating open- ings, whether protected or not, between adjacent exit passageways. Exception: Membrane penetrations shall be permitted on the outside of the exit passageway. Such penetrations shall be protected in accordance with Section 714.4.2.",
+        "where": "1024.6, 2025 Building Code of New York State (BCNYS), PDF p.348"
+       }
+      ],
+      "citation": "1024.6, 2025 Building Code of New York State (BCNYS), PDF p.348",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1024.6",
+      "quote": "1024.6 Penetrations. Penetrations into or through an exit passageway are prohibited except for the following: 1. Equipment and ductwork necessary for independent ventilation or pressurization. 2. Fire protection systems. 3. Security systems. 4. Two-way communication systems. 5. Electrical raceway for fire department communication. 6. Electrical raceway serving the exit passageway and terminating at a steel box not exceeding 16 square inches (0.010 m[fn2]). 7. Structural elements, such as beams or joists, supporting a floor or roof at the top of the exit passageway. Such penetrations shall be protected in accordance with Section 714. There shall not be penetrations or communicating open- ings, whether protected or not, between adjacent exit passageways. Exception: Membrane penetrations shall be permitted on the outside of the exit passageway. Such penetrations shall be protected in accordance with Section 714.4.2."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1024_6_exit_passageway_penetrations",
+       "words": "A person checks this (Gordium doesn't decide it): Nothing penetrates an exit passageway but its own ventilation or pressurization, fire protection, security and two-way communication systems, raceways for fire department communication or serving it (ending at a steel box of at most 16 square inches), and structural elements supporting a floor or roof at its top, each protected per 714; no penetration or opening joins two adjacent exit passageways; membrane penetrations on the outside are allowed per 714.4.2: penetrations aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1024_6_exit_passageway_penetrations",
+       "why": "A person checks this (Gordium doesn't decide it): Nothing penetrates an exit passageway but its own ventilation or pressurization, fire protection, security and two-way communication systems, raceways for fire department communication or serving it (ending at a steel box of at most 16 square inches), and structural elements supporting a floor or roof at its top, each protected per 714; no penetration or opening joins two adjacent exit passageways; membrane penetrations on the outside are allowed per 714.4.2: penetrations aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Penetrations of exit passageways limited",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1024",
+      "section_title": "Exit Passageways",
+      "piece": "1024.6",
+      "piece_title": "Penetrations"
+     }
+    },
+    {
+     "id": "egress.general.bc_1024_7_exit_passageway_ventilation",
+     "rule": "general.bc_1024_7_exit_passageway_ventilation",
+     "name": "Egress · Exit passageway ventilation kept separate (BCNYS 1024.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Equipment and ductwork ventilating an exit passageway is outside the building with ducts enclosed as shafts, or within the passageway taking air from and discharging it directly outdoors (or through ducts enclosed as shafts), or within the building separated as shafts; openings into the rated construction are only those needed for maintenance and operation, protected per 716 for shaft enclosures; and the system is independent of the building's other ventilation: ventilation isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Equipment and ductwork ventilating an exit passageway is outside the building with ducts enclosed as shafts, or within the passageway taking air from and discharging it directly outdoors (or through ducts enclosed as shafts), or within the building separated as shafts; openings into the rated construction are only those needed for maintenance and operation, protected per 716 for shaft enclosures; and the system is independent of the building's other ventilation: ventilation isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1024.7 Ventilation. Equipment and ductwork for exit passageway ventilation as permitted by Section 1024.6 shall comply with one of the following: 1. The equipment and ductwork shall be located exterior to the building and shall be directly connected to the exit passage- way by ductwork enclosed in construction as required for shafts. 2. Where the equipment and ductwork is located within the exit passageway, the intake air shall be taken directly from the outdoors and the exhaust air shall be discharged directly to the outdoors, or the air shall be conveyed through ducts enclosed in construction as required for shafts. 3. Where located within the building, the equipment and ductwork shall be separated from the remainder of the building, including other mechanical equipment, with construction as required for shafts. In each case, openings into the fire-resistance-rated construction shall be limited to those needed for maintenance and operation and shall be protected by opening protectives in accordance with Section 716 for shaft enclosures. Exit passageway ventilation systems shall be independent of other building ventilation systems.",
+        "where": "1024.7, 2025 Building Code of New York State (BCNYS), PDF p.348"
+       }
+      ],
+      "citation": "1024.7, 2025 Building Code of New York State (BCNYS), PDF p.348",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1024.7",
+      "quote": "1024.7 Ventilation. Equipment and ductwork for exit passageway ventilation as permitted by Section 1024.6 shall comply with one of the following: 1. The equipment and ductwork shall be located exterior to the building and shall be directly connected to the exit passage- way by ductwork enclosed in construction as required for shafts. 2. Where the equipment and ductwork is located within the exit passageway, the intake air shall be taken directly from the outdoors and the exhaust air shall be discharged directly to the outdoors, or the air shall be conveyed through ducts enclosed in construction as required for shafts. 3. Where located within the building, the equipment and ductwork shall be separated from the remainder of the building, including other mechanical equipment, with construction as required for shafts. In each case, openings into the fire-resistance-rated construction shall be limited to those needed for maintenance and operation and shall be protected by opening protectives in accordance with Section 716 for shaft enclosures. Exit passageway ventilation systems shall be independent of other building ventilation systems."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1024_7_exit_passageway_ventilation",
+       "words": "A person checks this (Gordium doesn't decide it): Equipment and ductwork ventilating an exit passageway is outside the building with ducts enclosed as shafts, or within the passageway taking air from and discharging it directly outdoors (or through ducts enclosed as shafts), or within the building separated as shafts; openings into the rated construction are only those needed for maintenance and operation, protected per 716 for shaft enclosures; and the system is independent of the building's other ventilation: ventilation isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1024_7_exit_passageway_ventilation",
+       "why": "A person checks this (Gordium doesn't decide it): Equipment and ductwork ventilating an exit passageway is outside the building with ducts enclosed as shafts, or within the passageway taking air from and discharging it directly outdoors (or through ducts enclosed as shafts), or within the building separated as shafts; openings into the rated construction are only those needed for maintenance and operation, protected per 716 for shaft enclosures; and the system is independent of the building's other ventilation: ventilation isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit passageway ventilation kept separate",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1024",
+      "section_title": "Exit Passageways",
+      "piece": "1024.7",
+      "piece_title": "Ventilation"
+     }
+    },
+    {
+     "id": "egress.general.bc_1024_8_exit_passageway_exterior_walls",
+     "rule": "general.bc_1024_8_exit_passageway_exterior_walls",
+     "name": "Egress · Exterior walls of exit passageways and the walls near them (BCNYS 1024.8)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An exit passageway's exterior walls meet 705; where nonrated walls or unprotected openings enclose its exterior and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway's floor or to the roof line, whichever is lower: ratings and angles aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An exit passageway's exterior walls meet 705; where nonrated walls or unprotected openings enclose its exterior and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway's floor or to the roof line, whichever is lower: ratings and angles aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1024.8 Exit passageway exterior walls. Exterior walls of the exit passageway shall comply with Section 705. Where nonrated walls or unprotected openings enclose the exterior of the exit passageway and the walls or openings are exposed by other parts of the building at an angle of less than 180 degrees (3.14 rad), the building exterior walls within 10 feet (3048 mm) horizontally of a nonrated wall or unprotected opening shall have a fire-resistance rating of not less than 1 hour. Openings within such exterior walls shall be",
+        "where": "1024.8, 2025 Building Code of New York State (BCNYS), PDF p.348"
+       },
+       {
+        "text": "protected by opening protectives having a fire protection rating of not less than 3/4 hour. This construction shall extend vertically from the ground to a point 10 feet (3048 mm) above the floor of the exit passageway, or to the roof line, whichever is lower.",
+        "where": "1024.8, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1024.8, 2025 Building Code of New York State (BCNYS), PDF p.348",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1024.8",
+      "quote": "1024.8 Exit passageway exterior walls. Exterior walls of the exit passageway shall comply with Section 705. Where nonrated walls or unprotected openings enclose the exterior of the exit passageway and the walls or openings are exposed by other parts of the building at an angle of less than 180 degrees (3.14 rad), the building exterior walls within 10 feet (3048 mm) horizontally of a nonrated wall or unprotected opening shall have a fire-resistance rating of not less than 1 hour. Openings within such exterior walls shall be"
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1024_8_exit_passageway_exterior_walls",
+       "words": "A person checks this (Gordium doesn't decide it): An exit passageway's exterior walls meet 705; where nonrated walls or unprotected openings enclose its exterior and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway's floor or to the roof line, whichever is lower: ratings and angles aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1024_8_exit_passageway_exterior_walls",
+       "why": "A person checks this (Gordium doesn't decide it): An exit passageway's exterior walls meet 705; where nonrated walls or unprotected openings enclose its exterior and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway's floor or to the roof line, whichever is lower: ratings and angles aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exterior walls of exit passageways and the walls near them",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1024",
+      "section_title": "Exit Passageways",
+      "piece": "1024.8",
+      "piece_title": "Exit passageway exterior walls"
+     }
+    },
+    {
+     "id": "egress.general.bc_1024_9_exit_passageway_standpipes",
+     "rule": "general.bc_1024_9_exit_passageway_standpipes",
+     "name": "Egress · Standpipes in exit passageways where 905.3 and 905.4 require them (BCNYS 1024.9)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1024.9 Standpipes. Standpipes and standpipe hose connections shall be provided where required by Sections 905.3 and 905.4.",
+        "where": "1024.9, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1024.9, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1024.9",
+      "quote": "1024.9 Standpipes. Standpipes and standpipe hose connections shall be provided where required by Sections 905.3 and 905.4."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1024_9_exit_passageway_standpipes",
+       "words": "A person checks this (Gordium doesn't decide it): Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1024_9_exit_passageway_standpipes",
+       "why": "A person checks this (Gordium doesn't decide it): Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Standpipes in exit passageways where 905.3 and 905.4 require them",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1024",
+      "section_title": "Exit Passageways",
+      "piece": "1024.9",
+      "piece_title": "Standpipes"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_1_luminous_markings_where_required",
+     "rule": "general.bc_1025_1_luminous_markings_where_required",
+     "name": "Egress · Luminous egress path markings in high-rise buildings (BCNYS 1025.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.1 General. Approved luminous egress path markings delineating the exit path shall be provided in high-rise buildings of Group A, B, E, I-1, M or R-1 occupancies in accordance with this section. Exception: Luminous egress path markings shall not be required on the level of exit discharge in lobbies that serve as part of the exit path in accordance with Section 1028.2, Exception 1.",
+        "where": "1025.1, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       },
+       {
+        "text": "1025.2 Markings within exit components. Egress path markings shall be provided in interior exit stairways, interior exit ramps and exit passageways, in accordance with Sections 1025.2.1 through 1025.2.6.3.",
+        "where": "1025.2, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1025.1, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.1",
+      "quote": "1025.1 General. Approved luminous egress path markings delineating the exit path shall be provided in high-rise buildings of Group A, B, E, I-1, M or R-1 occupancies in accordance with this section. Exception: Luminous egress path markings shall not be required on the level of exit discharge in lobbies that serve as part of the exit path in accordance with Section 1028.2, Exception 1."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_1_luminous_markings_where_required",
+       "words": "A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_1_luminous_markings_where_required",
+       "why": "A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Luminous egress path markings in high-rise buildings",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.1",
+      "piece_title": "General"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_1_steps",
+     "rule": "general.bc_1025_2_1_steps",
+     "name": "Egress · Luminous stripes on the leading edge of each step (BCNYS 1025.2.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.1 Steps. A solid and continuous stripe shall be applied to the horizontal leading edge of each step and shall extend for the full length of the step. Outlining stripes shall have a minimum horizontal width of 1 inch (25 mm) and a maximum width of 2 inches (51 mm). The leading edge of the stripe shall be placed not more than 1/2 inch (12.7 mm) from the leading edge of the step and the stripe shall not overlap the leading edge of the step by not more than 1/2 inch (12.7 mm) down the vertical face of the step. Exception: The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed in accordance with UL 1994.",
+        "where": "1025.2.1, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1025.2.1, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.1",
+      "quote": "1025.2.1 Steps. A solid and continuous stripe shall be applied to the horizontal leading edge of each step and shall extend for the full length of the step. Outlining stripes shall have a minimum horizontal width of 1 inch (25 mm) and a maximum width of 2 inches (51 mm). The leading edge of the stripe shall be placed not more than 1/2 inch (12.7 mm) from the leading edge of the step and the stripe shall not overlap the leading edge of the step by not more than 1/2 inch (12.7 mm) down the vertical face of the step. Exception: The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed in accordance with UL 1994."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_1_steps",
+       "words": "A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_1_steps",
+       "why": "A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Luminous stripes on the leading edge of each step",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.1",
+      "piece_title": "Steps"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_2_landings",
+     "rule": "general.bc_1025_2_2_landings",
+     "name": "Egress · Luminous stripes on the leading edge of landings (BCNYS 1025.2.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.2 Landings. The leading edge of landings shall be marked with a stripe consistent with the dimensional requirements for steps.",
+        "where": "1025.2.2, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1025.2.2, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.2",
+      "quote": "1025.2.2 Landings. The leading edge of landings shall be marked with a stripe consistent with the dimensional requirements for steps."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_2_landings",
+       "words": "A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_2_landings",
+       "why": "A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Luminous stripes on the leading edge of landings",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.2",
+      "piece_title": "Landings"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_3_handrails",
+     "rule": "general.bc_1025_2_3_handrails",
+     "name": "Egress · Luminous stripes on handrails and their extensions (BCNYS 1025.2.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.3 Handrails. Handrails and handrail extensions shall be marked with a solid and continuous stripe having a minimum width of 1 inch (25 mm). The stripe shall be placed on the top surface of the handrail for the entire length of the handrail, including extensions and newel post caps. Where handrails or handrail extensions bend or turn corners, the stripe shall not have a gap of more than 4 inches (102 mm). Exception: The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed in accordance with UL 1994.",
+        "where": "1025.2.3, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1025.2.3, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.3",
+      "quote": "1025.2.3 Handrails. Handrails and handrail extensions shall be marked with a solid and continuous stripe having a minimum width of 1 inch (25 mm). The stripe shall be placed on the top surface of the handrail for the entire length of the handrail, including extensions and newel post caps. Where handrails or handrail extensions bend or turn corners, the stripe shall not have a gap of more than 4 inches (102 mm). Exception: The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed in accordance with UL 1994."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_3_handrails",
+       "words": "A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_3_handrails",
+       "why": "A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Luminous stripes on handrails and their extensions",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.3",
+      "piece_title": "Handrails"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_4_perimeter_demarcation_lines",
+     "rule": "general.bc_1025_2_4_perimeter_demarcation_lines",
+     "name": "Egress · Perimeter demarcation lines in exit enclosures (BCNYS 1025.2.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.4 Perimeter demarcation lines. Stair landings and other floor areas within interior exit stairways, interior exit ramps and exit passageways, with the exception of the sides of steps, shall be provided with solid and continuous demarcation lines on the floor or on the walls or a combination of both. The stripes shall be 1 to 2 inches (25 mm to 51 mm) wide with interruptions not exceeding 4 inches (102 mm). Exception: The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed in accordance with UL 1994.",
+        "where": "1025.2.4, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1025.2.4, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.4",
+      "quote": "1025.2.4 Perimeter demarcation lines. Stair landings and other floor areas within interior exit stairways, interior exit ramps and exit passageways, with the exception of the sides of steps, shall be provided with solid and continuous demarcation lines on the floor or on the walls or a combination of both. The stripes shall be 1 to 2 inches (25 mm to 51 mm) wide with interruptions not exceeding 4 inches (102 mm). Exception: The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed in accordance with UL 1994."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_4_perimeter_demarcation_lines",
+       "words": "A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_4_perimeter_demarcation_lines",
+       "why": "A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Perimeter demarcation lines in exit enclosures",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.4",
+      "piece_title": "Perimeter demarcation lines"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_4_1_floor_mounted_lines",
+     "rule": "general.bc_1025_2_4_1_floor_mounted_lines",
+     "name": "Egress · Floor-mounted demarcation lines (BCNYS 1025.2.4.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.4.1 Floor-mounted demarcation lines. Perimeter demarcation lines shall be placed within 4 inches (102 mm) of the wall and shall extend to within 2 inches (51 mm) of the markings on the leading edge of landings. The demarcation lines shall continue across the floor in front of all doors. Exception: Demarcation lines shall not extend in front of exit discharge doors that lead out of an exit and through which occupants must travel to complete the exit path.",
+        "where": "1025.2.4.1, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1025.2.4.1, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.4.1",
+      "quote": "1025.2.4.1 Floor-mounted demarcation lines. Perimeter demarcation lines shall be placed within 4 inches (102 mm) of the wall and shall extend to within 2 inches (51 mm) of the markings on the leading edge of landings. The demarcation lines shall continue across the floor in front of all doors. Exception: Demarcation lines shall not extend in front of exit discharge doors that lead out of an exit and through which occupants must travel to complete the exit path."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_4_1_floor_mounted_lines",
+       "words": "A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_4_1_floor_mounted_lines",
+       "why": "A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Floor-mounted demarcation lines",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.4.1",
+      "piece_title": "Floor-mounted demarcation lines"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_4_2_wall_mounted_lines",
+     "rule": "general.bc_1025_2_4_2_wall_mounted_lines",
+     "name": "Egress · Wall-mounted demarcation lines (BCNYS 1025.2.4.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.4.2 Wall-mounted demarcation lines. Perimeter demarcation lines shall be placed on the wall with the bottom edge of the stripe not more than 4 inches (102 mm) above the finished floor. At the top or bottom of the stairs, demarcation lines shall drop vertically to the floor within 2 inches (51 mm) of the step or landing edge. Demarcation lines on walls shall transition vertically to the floor and then extend across the floor where a line on the floor is the only practical method of outlining the path. Where the wall line is broken by a door, demarcation lines on walls shall continue across the face of the door or transition to the floor and extend across the floor in front of such door. Exception: Demarcation lines shall not extend in front of exit discharge doors that lead out of an exit and through which occupants must travel to complete the exit path.",
+        "where": "1025.2.4.2, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1025.2.4.2, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.4.2",
+      "quote": "1025.2.4.2 Wall-mounted demarcation lines. Perimeter demarcation lines shall be placed on the wall with the bottom edge of the stripe not more than 4 inches (102 mm) above the finished floor. At the top or bottom of the stairs, demarcation lines shall drop vertically to the floor within 2 inches (51 mm) of the step or landing edge. Demarcation lines on walls shall transition vertically to the floor and then extend across the floor where a line on the floor is the only practical method of outlining the path. Where the wall line is broken by a door, demarcation lines on walls shall continue across the face of the door or transition to the floor and extend across the floor in front of such door. Exception: Demarcation lines shall not extend in front of exit discharge doors that lead out of an exit and through which occupants must travel to complete the exit path."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_4_2_wall_mounted_lines",
+       "words": "A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_4_2_wall_mounted_lines",
+       "why": "A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Wall-mounted demarcation lines",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.4.2",
+      "piece_title": "Wall-mounted demarcation lines"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_4_3_transition",
+     "rule": "general.bc_1025_2_4_3_transition",
+     "name": "Egress · Demarcation lines continuous from wall to floor (BCNYS 1025.2.4.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.4.3 Transition. Where a wall-mounted demarcation line transitions to a floor-mounted demarcation line, or vice versa, the wall-mounted demarcation line shall drop vertically to the floor to meet a complimentary extension of the floor-mounted demarcation line, thus forming a continuous marking.",
+        "where": "1025.2.4.3, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1025.2.4.3, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.4.3",
+      "quote": "1025.2.4.3 Transition. Where a wall-mounted demarcation line transitions to a floor-mounted demarcation line, or vice versa, the wall-mounted demarcation line shall drop vertically to the floor to meet a complimentary extension of the floor-mounted demarcation line, thus forming a continuous marking."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_4_3_transition",
+       "words": "A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_4_3_transition",
+       "why": "A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Demarcation lines continuous from wall to floor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.4.3",
+      "piece_title": "Transition"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_5_obstacles",
+     "rule": "general.bc_1025_2_5_obstacles",
+     "name": "Egress · Obstacles in the exit path outlined (BCNYS 1025.2.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.5 Obstacles. Obstacles at or below 6 feet 6 inches (1981 mm) in height and projecting more than 4 inches (102 mm) into the egress path shall be outlined with markings not less than 1 inch (25 mm) in width comprised of a pattern of alternating equal bands, of luminous material and black, with the alternating bands not more than 2 inches (51 mm) thick and angled at 45 degrees (0.79 rad). Obstacles shall include, but are not limited to, standpipes, hose cabinets, wall projections and restricted height areas. However, such markings shall not conceal any required information or indicators including but not limited to instructions to occu- pants for the use of standpipes. Exception: The minimum width of 1 inch (25 mm) shall not apply to markings listed in accordance with UL 1994.",
+        "where": "1025.2.5, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1025.2.5, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.5",
+      "quote": "1025.2.5 Obstacles. Obstacles at or below 6 feet 6 inches (1981 mm) in height and projecting more than 4 inches (102 mm) into the egress path shall be outlined with markings not less than 1 inch (25 mm) in width comprised of a pattern of alternating equal bands, of luminous material and black, with the alternating bands not more than 2 inches (51 mm) thick and angled at 45 degrees (0.79 rad). Obstacles shall include, but are not limited to, standpipes, hose cabinets, wall projections and restricted height areas. However, such markings shall not conceal any required information or indicators including but not limited to instructions to occu- pants for the use of standpipes. Exception: The minimum width of 1 inch (25 mm) shall not apply to markings listed in accordance with UL 1994."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_5_obstacles",
+       "words": "A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_5_obstacles",
+       "why": "A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Obstacles in the exit path outlined",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.5",
+      "piece_title": "Obstacles"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_6_1_emergency_exit_symbol",
+     "rule": "general.bc_1025_2_6_1_emergency_exit_symbol",
+     "name": "Egress · Low-location emergency exit symbol on exit path doors (BCNYS 1025.2.6.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.6.1 Emergency exit symbol. The doors shall be identified by a low-location luminous emergency exit symbol comply- ing with NFPA 170. The exit symbol shall be not less than 4 inches (102 mm) in height and shall be mounted on the door, centered horizontally, with the top of the symbol not higher than 18 inches (457 mm) above the finished floor.",
+        "where": "1025.2.6.1, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       },
+       {
+        "text": "1025.2.6 Doors within the exit path. Doors through which occupants must pass in order to complete the exit path shall be provided with markings complying with Sections 1025.2.6.1 through 1025.2.6.3.",
+        "where": "1025.2.6, 2025 Building Code of New York State (BCNYS), PDF p.349"
+       }
+      ],
+      "citation": "1025.2.6.1, 2025 Building Code of New York State (BCNYS), PDF p.349",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.6.1",
+      "quote": "1025.2.6.1 Emergency exit symbol. The doors shall be identified by a low-location luminous emergency exit symbol comply- ing with NFPA 170. The exit symbol shall be not less than 4 inches (102 mm) in height and shall be mounted on the door, centered horizontally, with the top of the symbol not higher than 18 inches (457 mm) above the finished floor."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_6_1_emergency_exit_symbol",
+       "words": "A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_6_1_emergency_exit_symbol",
+       "why": "A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Low-location emergency exit symbol on exit path doors",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.6.1",
+      "piece_title": "Emergency exit symbol"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_6_2_door_hardware_markings",
+     "rule": "general.bc_1025_2_6_2_door_hardware_markings",
+     "name": "Egress · Luminous markings on exit path door hardware (BCNYS 1025.2.6.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.6.2 Door hardware markings. Door hardware shall be marked with not less than 16 square inches (10 323 mm[fn2)] of luminous material. This marking shall be located behind, immediately adjacent to, or on the door handle or escutcheon. Where a panic bar is installed, such material shall be not less than 1 inch (25 mm) wide for the entire length of the actuating bar or touchpad.",
+        "where": "1025.2.6.2, 2025 Building Code of New York State (BCNYS), PDF p.350"
+       }
+      ],
+      "citation": "1025.2.6.2, 2025 Building Code of New York State (BCNYS), PDF p.350",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.6.2",
+      "quote": "1025.2.6.2 Door hardware markings. Door hardware shall be marked with not less than 16 square inches (10 323 mm[fn2)] of luminous material. This marking shall be located behind, immediately adjacent to, or on the door handle or escutcheon. Where a panic bar is installed, such material shall be not less than 1 inch (25 mm) wide for the entire length of the actuating bar or touchpad."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_6_2_door_hardware_markings",
+       "words": "A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_6_2_door_hardware_markings",
+       "why": "A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Luminous markings on exit path door hardware",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.6.2",
+      "piece_title": "Door hardware markings"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_2_6_3_door_frame_markings",
+     "rule": "general.bc_1025_2_6_3_door_frame_markings",
+     "name": "Egress · Luminous stripes on exit path door frames (BCNYS 1025.2.6.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.2.6.3 Door frame markings. The top and sides of the door frame shall be marked with a solid and continuous 1-inch- to 2-inch-wide (25 mm to 51 mm) stripe. Where the door molding does not provide sufficient flat surface on which to locate the stripe, the stripe shall be permitted to be located on the wall surrounding the frame.",
+        "where": "1025.2.6.3, 2025 Building Code of New York State (BCNYS), PDF p.350"
+       }
+      ],
+      "citation": "1025.2.6.3, 2025 Building Code of New York State (BCNYS), PDF p.350",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.2.6.3",
+      "quote": "1025.2.6.3 Door frame markings. The top and sides of the door frame shall be marked with a solid and continuous 1-inch- to 2-inch-wide (25 mm to 51 mm) stripe. Where the door molding does not provide sufficient flat surface on which to locate the stripe, the stripe shall be permitted to be located on the wall surrounding the frame."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_2_6_3_door_frame_markings",
+       "words": "A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_2_6_3_door_frame_markings",
+       "why": "A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Luminous stripes on exit path door frames",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.2.6.3",
+      "piece_title": "Door frame markings"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_3_uniformity",
+     "rule": "general.bc_1025_3_uniformity",
+     "name": "Egress · Luminous markings uniform within an enclosure (BCNYS 1025.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.3 Uniformity. Placement and dimensions of markings shall be consistent and uniform throughout the same enclosure.",
+        "where": "1025.3, 2025 Building Code of New York State (BCNYS), PDF p.350"
+       }
+      ],
+      "citation": "1025.3, 2025 Building Code of New York State (BCNYS), PDF p.350",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.3",
+      "quote": "1025.3 Uniformity. Placement and dimensions of markings shall be consistent and uniform throughout the same enclosure."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_3_uniformity",
+       "words": "A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_3_uniformity",
+       "why": "A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Luminous markings uniform within an enclosure",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.3",
+      "piece_title": "Uniformity"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_4_self_luminous_photoluminescent",
+     "rule": "general.bc_1025_4_self_luminous_photoluminescent",
+     "name": "Egress · Luminous marking materials (BCNYS 1025.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.4 Self-luminous and photoluminescent. Luminous egress path markings shall be permitted to be made of any material, including paint, provided that an electrical charge is not required to maintain the required luminance. Such materials shall include, but not be limited to, self-luminous materials and photoluminescent materials. Materials shall comply with either of the following standards: 1. UL 1994. 2. ASTM E2072, except that the charging source shall be 1 footcandle (11 lux) of fluorescent illumination for 60 minutes, and the minimum luminance shall be 30 milicandelas per square meter at 10 minutes and 5 milicandelas per square meter after 90 minutes.",
+        "where": "1025.4, 2025 Building Code of New York State (BCNYS), PDF p.350"
+       }
+      ],
+      "citation": "1025.4, 2025 Building Code of New York State (BCNYS), PDF p.350",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.4",
+      "quote": "1025.4 Self-luminous and photoluminescent. Luminous egress path markings shall be permitted to be made of any material, including paint, provided that an electrical charge is not required to maintain the required luminance. Such materials shall include, but not be limited to, self-luminous materials and photoluminescent materials. Materials shall comply with either of the following standards: 1. UL 1994. 2. ASTM E2072, except that the charging source shall be 1 footcandle (11 lux) of fluorescent illumination for 60 minutes, and the minimum luminance shall be 30 milicandelas per square meter at 10 minutes and 5 milicandelas per square meter after 90 minutes."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_4_self_luminous_photoluminescent",
+       "words": "A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_4_self_luminous_photoluminescent",
+       "why": "A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Luminous marking materials",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.4",
+      "piece_title": "Self-luminous and photoluminescent"
+     }
+    },
+    {
+     "id": "egress.general.bc_1025_5_illumination",
+     "rule": "general.bc_1025_5_illumination",
+     "name": "Egress · Light for photoluminescent markings (BCNYS 1025.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1025.5 Illumination. Where photoluminescent exit path markings are installed, they shall be provided with not less than 1 footcan- dle (11 lux) of illumination for not less than 60 minutes prior to periods when the building is occupied and continuously during occupancy.",
+        "where": "1025.5, 2025 Building Code of New York State (BCNYS), PDF p.350"
+       }
+      ],
+      "citation": "1025.5, 2025 Building Code of New York State (BCNYS), PDF p.350",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1025.5",
+      "quote": "1025.5 Illumination. Where photoluminescent exit path markings are installed, they shall be provided with not less than 1 footcan- dle (11 lux) of illumination for not less than 60 minutes prior to periods when the building is occupied and continuously during occupancy."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1025_5_illumination",
+       "words": "A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1025_5_illumination",
+       "why": "A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Light for photoluminescent markings",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1025",
+      "section_title": "Luminous Egress Path Markings",
+      "piece": "1025.5",
+      "piece_title": "Illumination"
+     }
+    },
+    {
      "id": "egress.interior#1",
      "rule": null,
      "name": "Interior drawing",
@@ -82552,7 +84268,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 208 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 232 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -83265,6 +84981,30 @@
       "egress.general.bc_1023_12_1_smokeproof_termination",
       "egress.general.bc_1023_12_2_smokeproof_access",
       "egress.general.bc_1023_13_standpipes",
+      "egress.general.bc_1024_1_exit_passageways_general",
+      "egress.general.bc_1024_2_exit_passageway_width",
+      "egress.general.bc_1024_3_exit_passageway_construction",
+      "egress.general.bc_1024_4_exit_passageway_termination",
+      "egress.general.bc_1024_5_exit_passageway_openings",
+      "egress.general.bc_1024_6_exit_passageway_penetrations",
+      "egress.general.bc_1024_7_exit_passageway_ventilation",
+      "egress.general.bc_1024_8_exit_passageway_exterior_walls",
+      "egress.general.bc_1024_9_exit_passageway_standpipes",
+      "egress.general.bc_1025_1_luminous_markings_where_required",
+      "egress.general.bc_1025_2_1_steps",
+      "egress.general.bc_1025_2_2_landings",
+      "egress.general.bc_1025_2_3_handrails",
+      "egress.general.bc_1025_2_4_perimeter_demarcation_lines",
+      "egress.general.bc_1025_2_4_1_floor_mounted_lines",
+      "egress.general.bc_1025_2_4_2_wall_mounted_lines",
+      "egress.general.bc_1025_2_4_3_transition",
+      "egress.general.bc_1025_2_5_obstacles",
+      "egress.general.bc_1025_2_6_1_emergency_exit_symbol",
+      "egress.general.bc_1025_2_6_2_door_hardware_markings",
+      "egress.general.bc_1025_2_6_3_door_frame_markings",
+      "egress.general.bc_1025_3_uniformity",
+      "egress.general.bc_1025_4_self_luminous_photoluminescent",
+      "egress.general.bc_1025_5_illumination",
       "egress.interior#1"
      ],
      "lines": [
@@ -86169,6 +87909,318 @@
        "name": "Egress · Standpipes in exit stairways where 905.3 and 905.4 require them (BCNYS 1023.13)"
       },
       {
+       "key": "review#6e4953cc18",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1024_1_exit_passageways_general"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit passageways used only for egress (BCNYS 1024.1): A person checks this (Gordium doesn't decide it): An exit passageway serving as an exit component is used for nothing but a means of egress and a circulation path: what a room is used for isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit passageways used only for egress (BCNYS 1024.1)"
+      },
+      {
+       "key": "review#7f7474508c",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1024_2_exit_passageway_width"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit passageways at least 44 in wide, 36 in under 50 occupants (BCNYS 1024.2): A person checks this (Gordium doesn't decide it): An exit passageway has the capacity 1005.1 requires and is at least 44 inches wide, or 36 inches where it serves fewer than 50 occupants, its minimum width or required capacity unobstructed but for encroachments complying with 1005.7: the routes measure corridors' width, not an exit passageway's, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit passageways at least 44 in wide, 36 in under 50 occupants (BCNYS 1024.2)"
+      },
+      {
+       "key": "review#4b7c9f3949",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1024_3_exit_passageway_construction"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit passageways rated at least 1 hour (BCNYS 1024.3): A person checks this (Gordium doesn't decide it): An exit passageway's walls, floors and ceilings are rated at least 1 hour and at least as any interior exit stairway or ramp it connects to, built as fire barriers per 707 or horizontal assemblies per 711: ratings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit passageways rated at least 1 hour (BCNYS 1024.3)"
+      },
+      {
+       "key": "review#aeb261d3a3",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1024_4_exit_passageway_termination"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit passageways end at an exit discharge, or at an exit above it (BCNYS 1024.4): A person checks this (Gordium doesn't decide it): An exit passageway on the level of exit discharge ends at an exit discharge, and one on another level ends at an exit: where a passageway ends isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit passageways end at an exit discharge, or at an exit above it (BCNYS 1024.4)"
+      },
+      {
+       "key": "review#ef1959133e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1024_5_exit_passageway_openings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Openings into exit passageways limited (BCNYS 1024.5): A person checks this (Gordium doesn't decide it): Opening protectives of an exit passageway meet 716; except as 402.8.7 permits, its openings, other than unprotected exterior openings, are only those needed to enter it from normally occupied spaces and to leave it; one extending an interior exit stairway or ramp meets 1023.3.1; and no elevator opens into it: the openings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Openings into exit passageways limited (BCNYS 1024.5)"
+      },
+      {
+       "key": "review#ec2e7507c7",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1024_6_exit_passageway_penetrations"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Penetrations of exit passageways limited (BCNYS 1024.6): A person checks this (Gordium doesn't decide it): Nothing penetrates an exit passageway but its own ventilation or pressurization, fire protection, security and two-way communication systems, raceways for fire department communication or serving it (ending at a steel box of at most 16 square inches), and structural elements supporting a floor or roof at its top, each protected per 714; no penetration or opening joins two adjacent exit passageways; membrane penetrations on the outside are allowed per 714.4.2: penetrations aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Penetrations of exit passageways limited (BCNYS 1024.6)"
+      },
+      {
+       "key": "review#ce9317a107",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1024_7_exit_passageway_ventilation"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit passageway ventilation kept separate (BCNYS 1024.7): A person checks this (Gordium doesn't decide it): Equipment and ductwork ventilating an exit passageway is outside the building with ducts enclosed as shafts, or within the passageway taking air from and discharging it directly outdoors (or through ducts enclosed as shafts), or within the building separated as shafts; openings into the rated construction are only those needed for maintenance and operation, protected per 716 for shaft enclosures; and the system is independent of the building's other ventilation: ventilation isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit passageway ventilation kept separate (BCNYS 1024.7)"
+      },
+      {
+       "key": "review#9d9d222fdd",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1024_8_exit_passageway_exterior_walls"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exterior walls of exit passageways and the walls near them (BCNYS 1024.8): A person checks this (Gordium doesn't decide it): An exit passageway's exterior walls meet 705; where nonrated walls or unprotected openings enclose its exterior and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway's floor or to the roof line, whichever is lower: ratings and angles aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exterior walls of exit passageways and the walls near them (BCNYS 1024.8)"
+      },
+      {
+       "key": "review#e7ad82d990",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1024_9_exit_passageway_standpipes"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Standpipes in exit passageways where 905.3 and 905.4 require them (BCNYS 1024.9): A person checks this (Gordium doesn't decide it): Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Standpipes in exit passageways where 905.3 and 905.4 require them (BCNYS 1024.9)"
+      },
+      {
+       "key": "review#d1c8f04801",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_1_luminous_markings_where_required"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Luminous egress path markings in high-rise buildings (BCNYS 1025.1): A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Luminous egress path markings in high-rise buildings (BCNYS 1025.1)"
+      },
+      {
+       "key": "review#1f368f8991",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_1_steps"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Luminous stripes on the leading edge of each step (BCNYS 1025.2.1): A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Luminous stripes on the leading edge of each step (BCNYS 1025.2.1)"
+      },
+      {
+       "key": "review#91f49f4de0",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_2_landings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Luminous stripes on the leading edge of landings (BCNYS 1025.2.2): A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Luminous stripes on the leading edge of landings (BCNYS 1025.2.2)"
+      },
+      {
+       "key": "review#edbba8f67b",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_3_handrails"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Luminous stripes on handrails and their extensions (BCNYS 1025.2.3): A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Luminous stripes on handrails and their extensions (BCNYS 1025.2.3)"
+      },
+      {
+       "key": "review#c50e8d807f",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_4_perimeter_demarcation_lines"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Perimeter demarcation lines in exit enclosures (BCNYS 1025.2.4): A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Perimeter demarcation lines in exit enclosures (BCNYS 1025.2.4)"
+      },
+      {
+       "key": "review#a966f51f73",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_4_1_floor_mounted_lines"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Floor-mounted demarcation lines (BCNYS 1025.2.4.1): A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Floor-mounted demarcation lines (BCNYS 1025.2.4.1)"
+      },
+      {
+       "key": "review#2a9e974a64",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_4_2_wall_mounted_lines"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Wall-mounted demarcation lines (BCNYS 1025.2.4.2): A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Wall-mounted demarcation lines (BCNYS 1025.2.4.2)"
+      },
+      {
+       "key": "review#7ba92c428a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_4_3_transition"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Demarcation lines continuous from wall to floor (BCNYS 1025.2.4.3): A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Demarcation lines continuous from wall to floor (BCNYS 1025.2.4.3)"
+      },
+      {
+       "key": "review#866e057b3e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_5_obstacles"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Obstacles in the exit path outlined (BCNYS 1025.2.5): A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Obstacles in the exit path outlined (BCNYS 1025.2.5)"
+      },
+      {
+       "key": "review#3e8051f2de",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_6_1_emergency_exit_symbol"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Low-location emergency exit symbol on exit path doors (BCNYS 1025.2.6.1): A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Low-location emergency exit symbol on exit path doors (BCNYS 1025.2.6.1)"
+      },
+      {
+       "key": "review#935773ce00",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_6_2_door_hardware_markings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Luminous markings on exit path door hardware (BCNYS 1025.2.6.2): A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Luminous markings on exit path door hardware (BCNYS 1025.2.6.2)"
+      },
+      {
+       "key": "review#28dbdcb35a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_2_6_3_door_frame_markings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Luminous stripes on exit path door frames (BCNYS 1025.2.6.3): A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Luminous stripes on exit path door frames (BCNYS 1025.2.6.3)"
+      },
+      {
+       "key": "review#3052d24670",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_3_uniformity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Luminous markings uniform within an enclosure (BCNYS 1025.3): A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Luminous markings uniform within an enclosure (BCNYS 1025.3)"
+      },
+      {
+       "key": "review#9ca46e5792",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_4_self_luminous_photoluminescent"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Luminous marking materials (BCNYS 1025.4): A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Luminous marking materials (BCNYS 1025.4)"
+      },
+      {
+       "key": "review#397186a0c9",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1025_5_illumination"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Light for photoluminescent markings (BCNYS 1025.5): A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Light for photoluminescent markings (BCNYS 1025.5)"
+      },
+      {
        "key": "review#3b8d16e054",
        "tier": "review",
        "items": [
@@ -86182,7 +88234,7 @@
        "name": "Interior drawing"
       }
      ],
-     "count": 208,
+     "count": 232,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -88389,6 +90441,246 @@
         "egress.general.bc_1023_13_standpipes"
        ],
        "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1024_1_exit_passageways_general",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An exit passageway serving as an exit component is used for nothing but a means of egress and a circulation path: what a room is used for isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1024_1_exit_passageways_general"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1024_2_exit_passageway_width",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An exit passageway has the capacity 1005.1 requires and is at least 44 inches wide, or 36 inches where it serves fewer than 50 occupants, its minimum width or required capacity unobstructed but for encroachments complying with 1005.7: the routes measure corridors' width, not an exit passageway's, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1024_2_exit_passageway_width"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1024_3_exit_passageway_construction",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An exit passageway's walls, floors and ceilings are rated at least 1 hour and at least as any interior exit stairway or ramp it connects to, built as fire barriers per 707 or horizontal assemblies per 711: ratings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1024_3_exit_passageway_construction"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1024_4_exit_passageway_termination",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An exit passageway on the level of exit discharge ends at an exit discharge, and one on another level ends at an exit: where a passageway ends isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1024_4_exit_passageway_termination"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1024_5_exit_passageway_openings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Opening protectives of an exit passageway meet 716; except as 402.8.7 permits, its openings, other than unprotected exterior openings, are only those needed to enter it from normally occupied spaces and to leave it; one extending an interior exit stairway or ramp meets 1023.3.1; and no elevator opens into it: the openings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1024_5_exit_passageway_openings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1024_6_exit_passageway_penetrations",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Nothing penetrates an exit passageway but its own ventilation or pressurization, fire protection, security and two-way communication systems, raceways for fire department communication or serving it (ending at a steel box of at most 16 square inches), and structural elements supporting a floor or roof at its top, each protected per 714; no penetration or opening joins two adjacent exit passageways; membrane penetrations on the outside are allowed per 714.4.2: penetrations aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1024_6_exit_passageway_penetrations"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1024_7_exit_passageway_ventilation",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Equipment and ductwork ventilating an exit passageway is outside the building with ducts enclosed as shafts, or within the passageway taking air from and discharging it directly outdoors (or through ducts enclosed as shafts), or within the building separated as shafts; openings into the rated construction are only those needed for maintenance and operation, protected per 716 for shaft enclosures; and the system is independent of the building's other ventilation: ventilation isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1024_7_exit_passageway_ventilation"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1024_8_exit_passageway_exterior_walls",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An exit passageway's exterior walls meet 705; where nonrated walls or unprotected openings enclose its exterior and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway's floor or to the roof line, whichever is lower: ratings and angles aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1024_8_exit_passageway_exterior_walls"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1024_9_exit_passageway_standpipes",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1024_9_exit_passageway_standpipes"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_1_luminous_markings_where_required",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_1_luminous_markings_where_required"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_1_steps",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_1_steps"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_2_landings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_2_landings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_3_handrails",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_3_handrails"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_4_perimeter_demarcation_lines",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_4_perimeter_demarcation_lines"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_4_1_floor_mounted_lines",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_4_1_floor_mounted_lines"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_4_2_wall_mounted_lines",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_4_2_wall_mounted_lines"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_4_3_transition",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_4_3_transition"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_5_obstacles",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_5_obstacles"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_6_1_emergency_exit_symbol",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_6_1_emergency_exit_symbol"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_6_2_door_hardware_markings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_6_2_door_hardware_markings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_2_6_3_door_frame_markings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_2_6_3_door_frame_markings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_3_uniformity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_3_uniformity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_4_self_luminous_photoluminescent",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_4_self_luminous_photoluminescent"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1025_5_illumination",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1025_5_illumination"
+       ],
+       "rules": 1
       }
      ]
     },
@@ -88742,7 +91034,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "208 to review · 30 comply"
+     "summary": "232 to review · 30 comply"
     }
    ],
    "contents": [
@@ -101009,7 +103301,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 224
+          "not_for_checking": 225
          },
          "pieces": [
           {
@@ -101681,6 +103973,12 @@
           {
            "id": "202:height_building",
            "title": "HEIGHT, BUILDING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:high_rise_building",
+           "title": "HIGH-RISE BUILDING",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -105606,19 +107904,243 @@
          "number": "1024",
          "title": "Exit Passageways",
          "book_page": 327,
-         "coverage": "not_brought_in",
-         "whole": false,
-         "counts": {},
-         "pieces": []
+         "coverage": "flag",
+         "whole": true,
+         "counts": {
+          "flag": 9,
+          "not_for_checking": 1
+         },
+         "pieces": [
+          {
+           "id": "1024.1",
+           "title": "General",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1024_1_exit_passageways_general"
+           ]
+          },
+          {
+           "id": "1024.2",
+           "title": "Width and capacity",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1024_2_exit_passageway_width"
+           ]
+          },
+          {
+           "id": "1024.3",
+           "title": "Construction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1024_3_exit_passageway_construction"
+           ]
+          },
+          {
+           "id": "1024.4",
+           "title": "Termination",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1024_4_exit_passageway_termination"
+           ]
+          },
+          {
+           "id": "1024.5",
+           "title": "Openings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1024_5_exit_passageway_openings"
+           ]
+          },
+          {
+           "id": "1024.6",
+           "title": "Penetrations",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1024_6_exit_passageway_penetrations"
+           ]
+          },
+          {
+           "id": "1024.7",
+           "title": "Ventilation",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1024_7_exit_passageway_ventilation"
+           ]
+          },
+          {
+           "id": "1024.8",
+           "title": "Exit passageway exterior walls",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1024_8_exit_passageway_exterior_walls"
+           ]
+          },
+          {
+           "id": "1024.9",
+           "title": "Standpipes",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1024_9_exit_passageway_standpipes"
+           ]
+          },
+          {
+           "id": "1024",
+           "title": "EXIT PASSAGEWAYS",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "1025",
          "title": "Luminous Egress Path Markings",
          "book_page": 328,
-         "coverage": "not_brought_in",
-         "whole": false,
-         "counts": {},
-         "pieces": []
+         "coverage": "flag",
+         "whole": true,
+         "counts": {
+          "flag": 15,
+          "not_for_checking": 3
+         },
+         "pieces": [
+          {
+           "id": "1025.1",
+           "title": "General",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_1_luminous_markings_where_required"
+           ]
+          },
+          {
+           "id": "1025.2.1",
+           "title": "Steps",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_1_steps"
+           ]
+          },
+          {
+           "id": "1025.2.2",
+           "title": "Landings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_2_landings"
+           ]
+          },
+          {
+           "id": "1025.2.3",
+           "title": "Handrails",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_3_handrails"
+           ]
+          },
+          {
+           "id": "1025.2.4",
+           "title": "Perimeter demarcation lines",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_4_perimeter_demarcation_lines"
+           ]
+          },
+          {
+           "id": "1025.2.4.1",
+           "title": "Floor-mounted demarcation lines",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_4_1_floor_mounted_lines"
+           ]
+          },
+          {
+           "id": "1025.2.4.2",
+           "title": "Wall-mounted demarcation lines",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_4_2_wall_mounted_lines"
+           ]
+          },
+          {
+           "id": "1025.2.4.3",
+           "title": "Transition",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_4_3_transition"
+           ]
+          },
+          {
+           "id": "1025.2.5",
+           "title": "Obstacles",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_5_obstacles"
+           ]
+          },
+          {
+           "id": "1025.2.6.1",
+           "title": "Emergency exit symbol",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_6_1_emergency_exit_symbol"
+           ]
+          },
+          {
+           "id": "1025.2.6.2",
+           "title": "Door hardware markings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_6_2_door_hardware_markings"
+           ]
+          },
+          {
+           "id": "1025.2.6.3",
+           "title": "Door frame markings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_2_6_3_door_frame_markings"
+           ]
+          },
+          {
+           "id": "1025.3",
+           "title": "Uniformity",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_3_uniformity"
+           ]
+          },
+          {
+           "id": "1025.4",
+           "title": "Self-luminous and photoluminescent",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_4_self_luminous_photoluminescent"
+           ]
+          },
+          {
+           "id": "1025.5",
+           "title": "Illumination",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1025_5_illumination"
+           ]
+          },
+          {
+           "id": "1025",
+           "title": "LUMINOUS EGRESS PATH MARKINGS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1025.2",
+           "title": "Markings within exit components",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1025.2.6",
+           "title": "Doors within the exit path",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "1026",
@@ -105822,8 +108344,8 @@
        "coverage": "rules",
        "counts": {
         "rules": 8,
-        "flag": 12,
-        "not_brought_in": 11
+        "flag": 14,
+        "not_brought_in": 9
        }
       },
       {
@@ -109850,6 +112372,30 @@
    "egress.general.bc_1023_12_1_smokeproof_termination": "needs_review",
    "egress.general.bc_1023_12_2_smokeproof_access": "needs_review",
    "egress.general.bc_1023_13_standpipes": "needs_review",
+   "egress.general.bc_1024_1_exit_passageways_general": "needs_review",
+   "egress.general.bc_1024_2_exit_passageway_width": "needs_review",
+   "egress.general.bc_1024_3_exit_passageway_construction": "needs_review",
+   "egress.general.bc_1024_4_exit_passageway_termination": "needs_review",
+   "egress.general.bc_1024_5_exit_passageway_openings": "needs_review",
+   "egress.general.bc_1024_6_exit_passageway_penetrations": "needs_review",
+   "egress.general.bc_1024_7_exit_passageway_ventilation": "needs_review",
+   "egress.general.bc_1024_8_exit_passageway_exterior_walls": "needs_review",
+   "egress.general.bc_1024_9_exit_passageway_standpipes": "needs_review",
+   "egress.general.bc_1025_1_luminous_markings_where_required": "needs_review",
+   "egress.general.bc_1025_2_1_steps": "needs_review",
+   "egress.general.bc_1025_2_2_landings": "needs_review",
+   "egress.general.bc_1025_2_3_handrails": "needs_review",
+   "egress.general.bc_1025_2_4_perimeter_demarcation_lines": "needs_review",
+   "egress.general.bc_1025_2_4_1_floor_mounted_lines": "needs_review",
+   "egress.general.bc_1025_2_4_2_wall_mounted_lines": "needs_review",
+   "egress.general.bc_1025_2_4_3_transition": "needs_review",
+   "egress.general.bc_1025_2_5_obstacles": "needs_review",
+   "egress.general.bc_1025_2_6_1_emergency_exit_symbol": "needs_review",
+   "egress.general.bc_1025_2_6_2_door_hardware_markings": "needs_review",
+   "egress.general.bc_1025_2_6_3_door_frame_markings": "needs_review",
+   "egress.general.bc_1025_3_uniformity": "needs_review",
+   "egress.general.bc_1025_4_self_luminous_photoluminescent": "needs_review",
+   "egress.general.bc_1025_5_illumination": "needs_review",
    "egress.interior#1": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
@@ -109895,7 +112441,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "208 to review · 30 comply"
+    "summary": "232 to review · 30 comply"
    }
   ],
   "egress": {
@@ -115339,7 +117885,31 @@
     "general.bc_1023_12_smokeproof_enclosures": "needs_review",
     "general.bc_1023_12_1_smokeproof_termination": "needs_review",
     "general.bc_1023_12_2_smokeproof_access": "needs_review",
-    "general.bc_1023_13_standpipes": "needs_review"
+    "general.bc_1023_13_standpipes": "needs_review",
+    "general.bc_1024_1_exit_passageways_general": "needs_review",
+    "general.bc_1024_2_exit_passageway_width": "needs_review",
+    "general.bc_1024_3_exit_passageway_construction": "needs_review",
+    "general.bc_1024_4_exit_passageway_termination": "needs_review",
+    "general.bc_1024_5_exit_passageway_openings": "needs_review",
+    "general.bc_1024_6_exit_passageway_penetrations": "needs_review",
+    "general.bc_1024_7_exit_passageway_ventilation": "needs_review",
+    "general.bc_1024_8_exit_passageway_exterior_walls": "needs_review",
+    "general.bc_1024_9_exit_passageway_standpipes": "needs_review",
+    "general.bc_1025_1_luminous_markings_where_required": "needs_review",
+    "general.bc_1025_2_1_steps": "needs_review",
+    "general.bc_1025_2_2_landings": "needs_review",
+    "general.bc_1025_2_3_handrails": "needs_review",
+    "general.bc_1025_2_4_perimeter_demarcation_lines": "needs_review",
+    "general.bc_1025_2_4_1_floor_mounted_lines": "needs_review",
+    "general.bc_1025_2_4_2_wall_mounted_lines": "needs_review",
+    "general.bc_1025_2_4_3_transition": "needs_review",
+    "general.bc_1025_2_5_obstacles": "needs_review",
+    "general.bc_1025_2_6_1_emergency_exit_symbol": "needs_review",
+    "general.bc_1025_2_6_2_door_hardware_markings": "needs_review",
+    "general.bc_1025_2_6_3_door_frame_markings": "needs_review",
+    "general.bc_1025_3_uniformity": "needs_review",
+    "general.bc_1025_4_self_luminous_photoluminescent": "needs_review",
+    "general.bc_1025_5_illumination": "needs_review"
    },
    "interior": {
     "parts": {
@@ -119269,7 +121839,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "3dfa2378a06acd83e184c0e859b5213ce503bce8a18601905eef8052d50476ad"
+   "new_york/ithaca_city": "943b306415bb510d4344d02190c28e556fb6678c692376fcca7bed7b6b3beda2"
   }
  }
 }

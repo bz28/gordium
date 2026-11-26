@@ -20759,8 +20759,7 @@ rules:
       system, to 0.2 footcandle on externally lit walking surfaces, or by marking steps, landings and ramp sides with self-luminous
       materials (1025.2.1, 1025.2.2 and 1025.2.4, systems listed to UL 1994): lighting isn''t in the model, so a person''s
       check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9b. 1025.2.1, 1025.2.2 and 1025.2.4 (luminous egress
-    path markings) aren''t brought in: the exception only loosens, and the flag never passes. UL 1994 isn''t brought in.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9b. 1025.2.1, 1025.2.2 and 1025.2.4 (luminous egress path markings) are 1025''s flags: the exception only loosens, and the flag never passes. UL 1994 isn''t brought in.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1008_2_2_group_i2_exterior_landings
@@ -21273,7 +21272,7 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units must
     be accessible) and ICC A117.1 aren't brought in; how Gordium will read A117.1 isn't settled yet. Accessible means of egress,
     areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's check,
-    never a pass or a fail. 1104, 1026 and 1027 aren't brought in (1024 to 1027 are later PRs of section group 9); 1023 is section group 9e's flags; 1019.3
+    never a pass or a fail. 1104, 1026 and 1027 aren't brought in (1026 and 1027 are later PRs of section group 9); 1023 is section group 9e's flags; 1019.3
     and 1019.4 are section group 9d's flags.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -22386,7 +22385,7 @@ rules:
       isn''t reduced before the exit discharge, and it is continuous from where it is entered to the exit discharge: what
       an exit is used for and its protection aren''t in the model, so a person''s check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9e. Exits comply with 1022 to 1027 and with 1003
-    to 1015 as they apply, each a rule or flag of its own (1006.1 to 1006.3.2, 1010.3 to 1010.5.4, 1011, 1014 and 1015 aren''t brought in yet, and 1024 to 1027 follow in their own section groups).'
+    to 1015 as they apply, each a rule or flag of its own (1006.1 to 1006.3.2, 1010.3 to 1010.5.4, 1011, 1014 and 1015 aren''t brought in yet, 1024 and 1025 are flags of their own, and 1026 and 1027 follow in their own section groups).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1022_2_exterior_exit_door
@@ -22460,7 +22459,7 @@ rules:
       use aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. Whether the building has an interior exit stairway
     or ramp isn't a fact Gordium is given (a door marked an exit enclosure doesn't say so for floors the model doesn't hold),
-    so the 1023 flags show for every building. 1024 and 1028.2 aren't brought in yet (their own section groups).
+    so the 1023 flags show for every building. 1028.2 isn't brought in yet (its own section group); 1024 is flags of its own.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_2_enclosure_construction
@@ -22520,8 +22519,7 @@ rules:
     note: 'An interior exit stairway or ramp ends at an exit discharge or a public way, or continues there through a protected
       enclosure of exit stairways, exit ramps and exit passageways built per 1023.2, 1023.3.1 and 1024: where a stairway ends
       isn''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 1024 isn't brought in yet (its own section
-    group).
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 1024 is flags of its own.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_3_1_extension
@@ -22802,8 +22800,7 @@ rules:
       inches high, its floor number at least 5 inches high in the center, other lettering at least 1 inch, with nonglare,
       contrasting characters, and of 1025.4''s materials in a building 1025 covers: signs aren''t in the model, so a person''s
       check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 1025 and 1025.4 aren't brought in yet (their
-    own section group).
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 1025 and 1025.4 are flags of their own.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_10_elevator_lobby_signs

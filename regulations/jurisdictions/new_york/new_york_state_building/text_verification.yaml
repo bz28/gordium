@@ -30,16 +30,16 @@ second_reading:
     31 of section group 9b (Sections 1008 and 1013 and 10 definitions, 2026-11-26), a twenty-sixth for the
     34 of section group 9c (Section 1009 and 4 definitions, 2026-11-26), a twenty-seventh for the 11 of section
     group 9d (1018.1 to 1018.3, 1018.5 and Section 1019 and 2 definitions, 2026-11-26, and Section 1018's heading,
-    review round 1), a twenty-eighth for the 39 of section group 9e (Sections 1021, 1022 and 1023 and 9 definitions,
-    2026-11-26), and a helper for the comparison words)
+    review round 1), a twenty-eighth for the 39 of section group 9e (Sections 1021, 1022 and 1023 and 9 definitions, 2026-11-26), a
+    twenty-ninth for the 29 of section group 9f (Sections 1024 and 1025 and 1 definition, 2026-11-26), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d), and 1 page, 1 box as step_g9d2 (1018''s heading), and 10 pages, 42 boxes as step_g9e (section group 9e); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d), and 1 page, 1 box as step_g9d2 (1018''s heading), and 10 pages, 42 boxes as step_g9e (section group 9e), and 4 pages, 30 boxes as step_g9f (section group 9f); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 490 pieces, 1394 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 519 pieces, 1518 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -990,6 +990,21 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:high_rise_building:
+    piece_sha256: 2c9ef8382ec9fe199f1c24477190a8ec25ff7ff8eb1a001e4082a7060454b079
+    numbers:
+    - more than 75 foot
+    - 22 mm
+    - 860 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 75 foot
+    - 22 mm
+    - 860 mm
+    second_reading_comparisons:
+    - '>'
+    - none
+    - none
   202:horizontal_assembly:
     piece_sha256: cceab85c133ff9e85ddb883279e03c330ced56f29f2a99c1b30d1c055244ad50
     numbers: []
@@ -7221,6 +7236,576 @@ pieces:
     - none
     - none
     - none
+  '1024':
+    piece_sha256: b4c2b81db0e6861764258fc09d03c2e5e15797b7e5920a37e744b56cc601cc8f
+    numbers:
+    - '1024'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1024'
+    second_reading_comparisons:
+    - none
+  '1024.1':
+    piece_sha256: 654c0d7428c99cdca426320f0d6bd09fa8e1e8c624855c083d9a76a943a8918d
+    numbers:
+    - '1024.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1024.1'
+    second_reading_comparisons:
+    - none
+  '1024.2':
+    piece_sha256: a474f6fb01ec26ce665fdd5f2c56be8de92df83e4c94da4e87ccb1ebaeea4314
+    numbers:
+    - '1024.2'
+    - '1005.1'
+    - not less than 44 inch
+    - 1118 mm
+    - less than 50
+    - not less than 36 inch
+    - 914 mm
+    - '1005.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1024.2'
+    - '1005.1'
+    - not less than 44 inch
+    - 1118 mm
+    - less than 50
+    - not less than 36 inch
+    - 914 mm
+    - '1005.7'
+    second_reading_comparisons:
+    - none
+    - none
+    - '>='
+    - none
+    - <
+    - '>='
+    - none
+    - none
+  '1024.3':
+    piece_sha256: 75a7da4e853566bf4a052b18806375220dec6cf4d750160376deccdb5dc94f92
+    numbers:
+    - '1024.3'
+    - '1'
+    - '707'
+    - '711'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1024.3'
+    - '1'
+    - '707'
+    - '711'
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - none
+    flags:
+    - '''1'' (>=): ''not less than a 1-hour fire-resistance rating'', the ''not less than'' parted from the number by ''a'';
+      the recorded words miss it (numbers.py reads comparison words only directly before a number or after its unit). The
+      second reading is right.'
+  '1024.4':
+    piece_sha256: 14c31b81babc8c2ebdcf902736619b9ba856774a538979ac755702ffbdb1f31a
+    numbers:
+    - '1024.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1024.4'
+    second_reading_comparisons:
+    - none
+  '1024.5':
+    piece_sha256: eff917e781ec8ff1816351dec425a3fe50ddfe76e5f94c642a89d93f4373494d
+    numbers:
+    - '1024.5'
+    - '716'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1024.5'
+    - '716'
+    second_reading_comparisons:
+    - none
+    - none
+  '1024.6':
+    piece_sha256: cc9288b5bd3882da0e508d8780fb2f5baee20b73bae8cfcdbda3905fcd7d6029
+    numbers:
+    - '1024.6'
+    - two
+    - not exceeding 16 square inch
+    - 0.010 m
+    - '714'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1024.6'
+    - two
+    - not exceeding 16 square inch
+    - 0.010 m
+    - '714'
+    second_reading_comparisons:
+    - none
+    - none
+    - <=
+    - none
+    - none
+  '1024.7':
+    piece_sha256: 46ec50c0a87fefd902956968809be8f1f913954a23b18d9a24064547b2f59519
+    numbers:
+    - '1024.7'
+    - '1024.6'
+    - one
+    - '716'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1024.7'
+    - '1024.6'
+    - one
+    - '716'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  '1024.8':
+    piece_sha256: 4affb01f5b34d7c5308be02c55fc3cc926a4f4af044242ec55cd672c832b3f7d
+    numbers:
+    - '1024.8'
+    - '705'
+    - less than 180 degree
+    - 3.14 rad
+    - within 10 foot
+    - 3048 mm
+    - not less than 1
+    - not less than 3/4
+    - 10 foot
+    - 3048 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1024.8'
+    - '705'
+    - less than 180 degree
+    - 3.14 rad
+    - within 10 foot
+    - 3048 mm
+    - not less than 1
+    - not less than 3/4
+    - 10 foot
+    - 3048 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - <
+    - none
+    - <=
+    - none
+    - '>='
+    - '>='
+    - '>='
+    - none
+    flags:
+    - '''10 foot'' (>=), the second: the rated construction extends ''to a point 10 feet (3048 mm) above the floor of the
+      exit passageway, or to the roof line, whichever is lower'', so it reaches at least that high unless the roof line is
+      lower (as 1023.7.1); the recorded words give no comparison. The second reading is right.'
+  '1024.9':
+    piece_sha256: 1e74a934ab08bfb242222f9da802527dc7cf16ae41d1cbaea8bd24f8a0bd598e
+    numbers:
+    - '1024.9'
+    - '905.3'
+    - and 905.4
+    second_reading: agrees
+    second_reading_numbers:
+    - '1024.9'
+    - '905.3'
+    - and 905.4
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  '1025':
+    piece_sha256: c62e33532567f5d8e3b7c599378059955ebee1720f7cda4ed3aa8f64d115f124
+    numbers:
+    - '1025'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1025'
+    second_reading_comparisons:
+    - none
+  '1025.1':
+    piece_sha256: 8239c2a71a0514a84f1063f51c2a708baa2729674854635558ad3cf3c2df4d57
+    numbers:
+    - '1025.1'
+    - '1028.2'
+    - '1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1025.1'
+    - '1028.2'
+    - '1'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  '1025.2':
+    piece_sha256: 0574940a2ee2253241536ba8597a165c3afbcd2c4ab4a3399578f5a1c76a64ee
+    numbers:
+    - '1025.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1025.2'
+    second_reading_comparisons:
+    - none
+  1025.2.1:
+    piece_sha256: 8dadd9f6cbaf86e649b413129656a205210540b26e995e14a1c517131f3b42b1
+    numbers:
+    - 1 inch
+    - 25 mm
+    - 2 inch
+    - 51 mm
+    - not more than 1/2 inch
+    - 12.7 mm
+    - not more than 1/2 inch
+    - 12.7 mm
+    - 1 inch
+    - 25 mm
+    - '1994'
+    second_reading: agrees
+    second_reading_numbers:
+    - 1 inch
+    - 25 mm
+    - 2 inch
+    - 51 mm
+    - not more than 1/2 inch
+    - 12.7 mm
+    - not more than 1/2 inch
+    - 12.7 mm
+    - 1 inch
+    - 25 mm
+    - '1994'
+    second_reading_comparisons:
+    - '>='
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - <=
+    - none
+    - '>='
+    - none
+    - none
+    flags:
+    - '''1 inch'' (>=) and ''2 inch'' (<=): ''a minimum horizontal width of 1 inch (25 mm) and a maximum width of 2 inches
+      (51 mm)'', the ''minimum ... of'' and ''maximum width of'' before each number; the recorded words miss both. The second
+      reading is right.'
+    - '''1 inch'' (>=), the exception''s: ''The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed
+      in accordance with UL 1994'', the minimum it lifts; the recorded words miss the ''minimum width of''. The second reading
+      is right.'
+  1025.2.2:
+    piece_sha256: f3ef11046af46ed0153c8dad8b34199eb692e95e30909422978bd8205ca732fd
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1025.2.3:
+    piece_sha256: 2ed61c60da4a566e6732db6dc1e3d2b265e8597def25142b1f44d88529796647
+    numbers:
+    - 1 inch
+    - 25 mm
+    - not have a gap of more than 4 inch
+    - 102 mm
+    - 1 inch
+    - 25 mm
+    - '1994'
+    second_reading: agrees
+    second_reading_numbers:
+    - 1 inch
+    - 25 mm
+    - not have a gap of more than 4 inch
+    - 102 mm
+    - 1 inch
+    - 25 mm
+    - '1994'
+    second_reading_comparisons:
+    - '>='
+    - none
+    - <=
+    - none
+    - '>='
+    - none
+    - none
+    flags:
+    - '''1 inch'' (>=), both: ''a solid and continuous stripe having a minimum width of 1 inch (25 mm)'' and the exception''s
+      ''The minimum width of 1 inch (25 mm) shall not apply'', the ''minimum width of'' before the number; the recorded words
+      miss it. The second reading is right.'
+  1025.2.4:
+    piece_sha256: 821927348269fdfcf26f10f94bf548c208c8b80f337f789c87ae14d6ce3f0175
+    numbers:
+    - '1'
+    - 2 inch
+    - 25 mm
+    - 51 mm
+    - not exceeding 4 inch
+    - 102 mm
+    - 1 inch
+    - 25 mm
+    - '1994'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1'
+    - 2 inch
+    - 25 mm
+    - 51 mm
+    - not exceeding 4 inch
+    - 102 mm
+    - 1 inch
+    - 25 mm
+    - '1994'
+    second_reading_comparisons:
+    - '>='
+    - <=
+    - none
+    - none
+    - <=
+    - none
+    - '>='
+    - none
+    - none
+    flags:
+    - '''1'' (>=) and ''2 inch'' (<=): ''The stripes shall be 1 to 2 inches (25 mm to 51 mm) wide'', a range from at least
+      1 to at most 2 inches; the recorded words give no comparison. The second reading is right.'
+    - '''1 inch'' (>=), the exception''s: ''The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed
+      in accordance with UL 1994''; the recorded words miss the ''minimum width of''. The second reading is right.'
+  1025.2.4.1:
+    piece_sha256: 6c0112d9e4da8f5dac0627f89ac12a454f558d4a854f5cb079d516deda35ca13
+    numbers:
+    - within 4 inch
+    - 102 mm
+    - within 2 inch
+    - 51 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - within 4 inch
+    - 102 mm
+    - within 2 inch
+    - 51 mm
+    second_reading_comparisons:
+    - <=
+    - none
+    - <=
+    - none
+  1025.2.4.2:
+    piece_sha256: c1da0efc7009d00a12078be8bc1915f47bc02af2f7c61e2f0edbfdcad7c347f5
+    numbers:
+    - not more than 4 inch
+    - 102 mm
+    - within 2 inch
+    - 51 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not more than 4 inch
+    - 102 mm
+    - within 2 inch
+    - 51 mm
+    second_reading_comparisons:
+    - <=
+    - none
+    - <=
+    - none
+  1025.2.4.3:
+    piece_sha256: 6e504418d16666cb9e5283278d6845a759ee0d3af978cd11c1a8e4b0bec38ce8
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1025.2.5:
+    piece_sha256: 54fb44dcbd86c80c2f3978d4493868cc117be949c8b097a79370f954b1c7c6da
+    numbers:
+    - 6 foot
+    - 6 inch
+    - 1981 mm
+    - more than 4 inch
+    - 102 mm
+    - not less than 1 inch
+    - 25 mm
+    - not more than 2 inch
+    - 51 mm
+    - 45 degree
+    - 0.79 rad
+    - 1 inch
+    - 25 mm
+    - '1994'
+    second_reading: agrees
+    second_reading_numbers:
+    - 6 foot
+    - 6 inch
+    - 1981 mm
+    - more than 4 inch
+    - 102 mm
+    - not less than 1 inch
+    - 25 mm
+    - not more than 2 inch
+    - 51 mm
+    - 45 degree
+    - 0.79 rad
+    - 1 inch
+    - 25 mm
+    - '1994'
+    second_reading_comparisons:
+    - <=
+    - <=
+    - none
+    - '>'
+    - none
+    - '>='
+    - none
+    - <=
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    flags:
+    - '''6 foot'' and ''6 inch'' (<=): ''Obstacles at or below 6 feet 6 inches (1981 mm) in height'', one height of 6 feet
+      6 inches with ''at or below'' before it; the recorded words miss it. The second reading is right.'
+    - '''1 inch'' (>=), the exception''s: ''The minimum width of 1 inch (25 mm) shall not apply to markings listed in accordance
+      with UL 1994''; the recorded words miss the ''minimum width of''. The second reading is right.'
+  1025.2.6:
+    piece_sha256: 46c27ca663c120275ca66b4aeec1117b7b05d2b1ef7088f9250685b2be1029ed
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1025.2.6.1:
+    piece_sha256: 69653ac84982d7e017c52c4f353ea96344a561c791c573bb4a4b694fa33f6480
+    numbers:
+    - '170'
+    - not less than 4 inch
+    - 102 mm
+    - 18 inch
+    - 457 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '170'
+    - not less than 4 inch
+    - 102 mm
+    - 18 inch
+    - 457 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - <=
+    - none
+    flags:
+    - '''18 inch'' (<=): ''with the top of the symbol not higher than 18 inches (457 mm) above the finished floor''; the recorded
+      words don''t read ''not higher than''. The second reading is right.'
+  1025.2.6.2:
+    piece_sha256: ae7648499053ac266ecad07b0a53493f9e752c56303c15b41de2e4537ef73ab6
+    numbers:
+    - not less than 16 square inch
+    - 10 mm
+    - 323 mm
+    - not less than 1 inch
+    - 25 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 16 square inch
+    - 10 mm
+    - 323 mm
+    - not less than 1 inch
+    - 25 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - none
+    - '>='
+    - none
+  1025.2.6.3:
+    piece_sha256: 9092f5dc501fb31b8ef85f8e830a04cfe729fb1fe6dcdf99a311d67d2bff239c
+    numbers:
+    - 1 inch
+    - 2 inch
+    - 25 mm
+    - 51 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 1 inch
+    - 2 inch
+    - 25 mm
+    - 51 mm
+    second_reading_comparisons:
+    - '>='
+    - <=
+    - none
+    - none
+    flags:
+    - '''1 inch'' (>=) and ''2 inch'' (<=): ''a solid and continuous 1-inch- to 2-inch-wide (25 mm to 51 mm) stripe'', a range
+      from at least 1 to at most 2 inches; the recorded words give no comparison. The second reading is right.'
+  '1025.3':
+    piece_sha256: d252b8bbfdb8227e917374b4a23d1394cbf8ba873467c902567bc379274357ea
+    numbers:
+    - '1025.3'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1025.3'
+    second_reading_comparisons:
+    - none
+  '1025.4':
+    piece_sha256: a77dac2ee51d1a4474ad611e0f0fa42b4b70e4b3c5204f00568bc90d2679740d
+    numbers:
+    - '1025.4'
+    - '1994'
+    - 1 footcandle
+    - 11 lux
+    - '60'
+    - '30'
+    - '10'
+    - and 5
+    - '90'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1025.4'
+    - '1994'
+    - 1 footcandle
+    - 11 lux
+    - '60'
+    - '30'
+    - '10'
+    - and 5
+    - '90'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    flags:
+    - '''30'' and ''and 5'' (>=): ''the minimum luminance shall be 30 milicandelas per square meter at 10 minutes and 5 milicandelas
+      per square meter after 90 minutes'', the ''minimum luminance shall be'' governing both; the recorded words miss it (the
+      book prints ''milicandelas''). The second reading is right.'
+  '1025.5':
+    piece_sha256: 75aced510c2e424f3f67977f1499be380b8b57234223bdc95eeef4e2d1b407bd
+    numbers:
+    - '1025.5'
+    - not less than 1
+    - 11 lux
+    - not less than 60
+    second_reading: agrees
+    second_reading_numbers:
+    - '1025.5'
+    - not less than 1
+    - 11 lux
+    - not less than 60
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - '>='
   '1030.7':
     piece_sha256: 0dedbb8deaa95cfacfefff8ad82fb14eb63468c3e6c595eb4bc7e45d398a2fc6
     numbers:

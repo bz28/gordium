@@ -995,6 +995,126 @@ pieces:
     heading: Interior exit stairways and ramps › Standpipes
     rules:
     - general.bc_1023_13_standpipes
+  '1024.1':
+    label: flag
+    heading: Exit passageways › General
+    rules:
+    - general.bc_1024_1_exit_passageways_general
+  '1024.2':
+    label: flag
+    heading: Exit passageways › Width and capacity
+    rules:
+    - general.bc_1024_2_exit_passageway_width
+  '1024.3':
+    label: flag
+    heading: Exit passageways › Construction
+    rules:
+    - general.bc_1024_3_exit_passageway_construction
+  '1024.4':
+    label: flag
+    heading: Exit passageways › Termination
+    rules:
+    - general.bc_1024_4_exit_passageway_termination
+  '1024.5':
+    label: flag
+    heading: Exit passageways › Openings
+    rules:
+    - general.bc_1024_5_exit_passageway_openings
+  '1024.6':
+    label: flag
+    heading: Exit passageways › Penetrations
+    rules:
+    - general.bc_1024_6_exit_passageway_penetrations
+  '1024.7':
+    label: flag
+    heading: Exit passageways › Ventilation
+    rules:
+    - general.bc_1024_7_exit_passageway_ventilation
+  '1024.8':
+    label: flag
+    heading: Exit passageways › Exit passageway exterior walls
+    rules:
+    - general.bc_1024_8_exit_passageway_exterior_walls
+  '1024.9':
+    label: flag
+    heading: Exit passageways › Standpipes
+    rules:
+    - general.bc_1024_9_exit_passageway_standpipes
+  '1025.1':
+    label: flag
+    heading: Luminous egress path markings › General
+    rules:
+    - general.bc_1025_1_luminous_markings_where_required
+  1025.2.1:
+    label: flag
+    heading: Markings within exit components › Steps
+    rules:
+    - general.bc_1025_2_1_steps
+  1025.2.2:
+    label: flag
+    heading: Markings within exit components › Landings
+    rules:
+    - general.bc_1025_2_2_landings
+  1025.2.3:
+    label: flag
+    heading: Markings within exit components › Handrails
+    rules:
+    - general.bc_1025_2_3_handrails
+  1025.2.4:
+    label: flag
+    heading: Markings within exit components › Perimeter demarcation lines
+    rules:
+    - general.bc_1025_2_4_perimeter_demarcation_lines
+  1025.2.4.1:
+    label: flag
+    heading: Perimeter demarcation lines › Floor-mounted demarcation lines
+    rules:
+    - general.bc_1025_2_4_1_floor_mounted_lines
+  1025.2.4.2:
+    label: flag
+    heading: Perimeter demarcation lines › Wall-mounted demarcation lines
+    rules:
+    - general.bc_1025_2_4_2_wall_mounted_lines
+  1025.2.4.3:
+    label: flag
+    heading: Perimeter demarcation lines › Transition
+    rules:
+    - general.bc_1025_2_4_3_transition
+  1025.2.5:
+    label: flag
+    heading: Markings within exit components › Obstacles
+    rules:
+    - general.bc_1025_2_5_obstacles
+  1025.2.6.1:
+    label: flag
+    heading: Doors within the exit path › Emergency exit symbol
+    rules:
+    - general.bc_1025_2_6_1_emergency_exit_symbol
+  1025.2.6.2:
+    label: flag
+    heading: Doors within the exit path › Door hardware markings
+    rules:
+    - general.bc_1025_2_6_2_door_hardware_markings
+  1025.2.6.3:
+    label: flag
+    heading: Doors within the exit path › Door frame markings
+    rules:
+    - general.bc_1025_2_6_3_door_frame_markings
+  '1025.3':
+    label: flag
+    heading: Luminous egress path markings › Uniformity
+    rules:
+    - general.bc_1025_3_uniformity
+  '1025.4':
+    label: flag
+    heading: Luminous egress path markings › Self-luminous and photoluminescent
+    rules:
+    - general.bc_1025_4_self_luminous_photoluminescent
+  '1025.5':
+    label: flag
+    heading: Luminous egress path markings › Illumination
+    rules:
+    - general.bc_1025_5_illumination
   '1030.8':
     label: flag
     heading: Common path of egress travel
