@@ -42,7 +42,7 @@ from rule_format import formula, parts
 from rule_format.place import UnknownPlace
 from rule_format.place import place as place_of_folder
 from rule_format.place import plugin_place
-from rule_format.rulebook import (MEASURE_KINDS, REPO, STATE_SETTINGS, Context, load, load_bytes, outcome, rulebook_for,
+from rule_format.rulebook import (MEASURE_KINDS, REPO, STATE_SETTINGS, load, load_bytes, outcome, rulebook_for,
                                   unknown_settings)
 
 COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
@@ -1008,9 +1008,9 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         path = Path(tmp) / "project.yaml"
         path.write_text(yaml.safe_dump(project, sort_keys=False, allow_unicode=True), encoding="utf-8")
         t = tables(path)              # refuses a project or rulebook that fails its checks (ValueError)
-    rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
+    rules = t["rules"]                  # the frozen rulebook the rows came from, never a second read of the file
     by_id = {r["id"]: r for r in rules}
-    allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
+    allowed = {"use": t["uses"]}
     every = [_why(dict(zip(COLUMNS, r)), by_id, measured, allowed, facts) for r in t["output"]]
     waiting = [r for r in every if waits_on_interior(r, by_id[r["Rule id"]], measured, allowed)]
     for r in waiting:                   # exactly which stated facts each one waits for (its "Enter …" asks those)

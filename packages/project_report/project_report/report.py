@@ -29,8 +29,8 @@ from rule_export.workbook import FONT, INK, citer, page_link, title, write_block
 from . import plain
 from rule_format import formula
 from rule_format.formula import EvaluationError, MissingMeasure
-from rule_format.rulebook import (MEASURE_KINDS, MEASURES_FILE, REPO, Context, load, outcome, rulebook_file_problems,
-                                  rulebook_for, term_file_problems)
+from rule_format.published import frozen
+from rule_format.rulebook import MEASURE_KINDS, MEASURES_FILE, REPO, load, load_bytes, outcome, rulebook_for
 
 # The architects' tab names and headers, copied from their file, in their order.
 INPUTS_TAB, OUTPUT_TAB = "Inputs", "Output"
@@ -265,24 +265,23 @@ def tables(project_path: Path) -> dict:
     j = REPO / project["jurisdiction"]
     book_path = rulebook_for(j, project["zone"])
     # Only a jurisdiction and rulebook that pass the same checks as `python -m rule_format` give results,
-    # so a rule edited and never checked can't give PASS (approval is deferred: code is the last defense).
-    try:
-        ctx = Context.for_jurisdiction(j)             # sources and uses, read once, the way the checker reads them
-    except Exception as e:
-        raise ValueError(f"{project['jurisdiction']}: can't load its sources ({type(e).__name__}: {e})") from e
-    problems = ctx.problems + [f"{p.name}: {x}" for p, found in term_file_problems(j, ctx).items() for x in found] \
-        + rulebook_file_problems(book_path, ctx)
-    if problems:
+    # so a rule edited and never checked can't give PASS (approval is deferred: code is the last defense). Those
+    # checks are made once and frozen (rule_format/published.py: compile, then freeze): the rulebook's certificate,
+    # checked against every file it was worked out from, or no report; never a live check to fall back on.
+    if book_path is None:
+        raise ValueError(f"{project['jurisdiction']}: no rulebook for zone {project['zone']!r}, so no report")
+    got = frozen(j, book_path)
+    if got["problems"]:
         shown = book_path.relative_to(REPO) if book_path.is_relative_to(REPO) else book_path
-        raise ValueError(f"{shown} doesn't pass the rule checks (python -m rule_format), so no report: "
-                         + "; ".join(problems))
-    book = load(book_path)
+        raise ValueError(f"{shown} doesn't pass the rule checks (python -m rule_format) or its frozen copy can't be "
+                         "used, so no report: " + "; ".join(got["problems"]))
+    book = load_bytes(got["book"])                    # the very bytes the certificate was checked against
     uses_file = j / "4_term_definitions/uses.yaml"
     uses = (load(uses_file) or {}) if uses_file.exists() else {}
     use_names = {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}
-    documents = ctx.sources
+    documents = got["documents"]
     values = {k: m["value"] for k, m in project["measurements"].items()}
-    allowed = {"use": ctx.uses}                       # the same list the checker and the tests use
+    allowed = {"use": got["kinds"]["use"]}            # the same list the checker and the tests use
     kinds = MEASURE_KINDS | {k: frozenset(v) for k, v in allowed.items()}
     which = book_path.relative_to(j / "5_zoning_rules").as_posix()
     cite = citer(j, documents)
@@ -312,6 +311,7 @@ def tables(project_path: Path) -> dict:
                            rule.get("id", ""), f"Open p.{first['page']}" if first.get("file") else ""])
             param_links.append(link)
     return {"title": project["title"], "use_names": use_names, "inputs": inputs, "parameters": params,
+            "rules": book.get("rules") or [], "uses": allowed["use"],      # what the rows were worked out from
             "parameter_links": param_links,
             "output": [r for r, _ in rows], "output_links": [l for _, l in rows],
             "not_applicable": [r for r, _ in later], "not_applicable_links": [l for _, l in later]}

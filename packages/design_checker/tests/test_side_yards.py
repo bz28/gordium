@@ -35,18 +35,21 @@ FACTS = {"jurisdiction": ITHACA, "zone": "R-1b", "use": "one_family_detached", "
 
 @pytest.fixture
 def r2b(monkeypatch):
-    """The checker reading R-1b with R-2b's numbers (check_site loads the rulebook itself)."""
-    real = check.load
+    """The checker reading R-1b with R-2b's numbers. check_site takes the rulebook from the report, which parses the
+    very bytes its frozen certificate was checked against (project_report.report.load_bytes), so that read is
+    changed too."""
+    from project_report import report
+    real, real_bytes = check.load, report.load_bytes
 
-    def load(path):
-        book = real(path)
+    def r2b_numbers(book):
         if isinstance(book, dict) and "rules" in book:
             book = copy.deepcopy(book)
             for r in book["rules"]:
                 r["check"] = R2B.get(r["id"], r.get("check"))
         return book
 
-    monkeypatch.setattr(check, "load", load)
+    monkeypatch.setattr(check, "load", lambda path: r2b_numbers(real(path)))
+    monkeypatch.setattr(report, "load_bytes", lambda data: r2b_numbers(real_bytes(data)))
     return check.load(rulebook_for(REPO / ITHACA, "R-1b"))["rules"]
 
 
