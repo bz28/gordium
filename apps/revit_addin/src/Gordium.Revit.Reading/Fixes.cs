@@ -203,7 +203,7 @@ public static class Fixes
         {
             "pi" => $"In Manage › Project Information, set {(marks.Count == 0 ? "the facts" : PaneWords.And(marks))}, then Check again.",
             "nofield" => "Gordium has no field for these in Revit yet: until it does, each result needs review. Decide them by hand.",
-            _ when fix.Action == CardAction.ShowAndProperties => $"Set {PaneWords.And(marks)} in Properties on the elements Show selects, then Check again.",
+            _ when fix.Action == CardAction.ShowAndProperties => $"Set {PaneWords.And(marks)} in Properties on the elements Show selects{CauseCards.OnType(fix.Members.SelectMany(CauseCards.MarksOf).Distinct().ToList())}, then Check again.",
             _ when fix.Action == CardAction.Show => "Fix the model where Show takes you, then Check again.",
             _ when fix.Action == CardAction.None => "Gordium couldn't read these from the model. Check how they are drawn, or measure them by hand.",
             _ when fix.Action == CardAction.ByHand => "Gordium doesn't read these from the model yet: measure each by hand against the law's words.",
