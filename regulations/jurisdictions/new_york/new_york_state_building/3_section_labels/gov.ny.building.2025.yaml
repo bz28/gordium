@@ -7187,7 +7187,7 @@ labels:
   1013.6.1:
     label: flag
     topic: means_of_egress
-    reason: 'An externally lit exit sign (1013.6) and every directional exit sign have plainly legible letters at least 6
+    reason: 'Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6
       inches high with principal strokes at least 3/4 inch wide; the letters of "EXIT", but the I, at least 2 inches wide
       and spaced at least 3/8 inch apart, larger signs in proportion; "EXIT" in high contrast with the background and clearly
       discernible whether or not the sign''s lighting is on, and a chevron, if any, not readily turned: exit signs aren''t
@@ -7230,7 +7230,7 @@ labels:
   1013.6.3:
     label: flag
     topic: means_of_egress
-    reason: 'Externally lit exit signs (1013.6) are lit at all times, connected to an emergency power system (storage batteries, unit equipment or
+    reason: 'Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or
       an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost,
       not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently
       of external power need no connection: exit signs aren''t in the model, so a person''s check.'
