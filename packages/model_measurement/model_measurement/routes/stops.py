@@ -207,8 +207,8 @@ STOPS = {
                              "to isn't known",
     "units_mark_several": "the room {name}'s unit mark names more than one unit ({got!r}): a room belongs to one "
                           "dwelling unit, so the units aren't counted",
-    "units_mark_alike": "the unit marks {names} differ only in capitals or spacing: one dwelling unit or two isn't "
-                        "known",
+    "units_mark_alike": "the unit marks {names} differ only in capitals or in where spaces stand: one dwelling unit or "
+                        "two isn't known",
     "units_mark_apart": "the rooms marked unit {unit!r} come apart on this story ({rooms} not joined to the rest "
                         "through its own rooms): two dwelling units given one name, or a room of it left unmarked "
                         "(mark the rooms between them too)",

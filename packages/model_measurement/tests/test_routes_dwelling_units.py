@@ -509,7 +509,8 @@ def test_a_marked_unit_room_marked_a_hall_or_exit_still_counts(how):
 @pytest.mark.parametrize("mark, key", [("1A, 1B", "units_mark_several"), ("1A and 1B", "units_mark_several"),
                                        ("1A/1B", "units_mark_several"), (["1A"], "units_mark_unreadable"),
                                        (True, "units_mark_unreadable"), (1.5, "units_mark_unreadable"),
-                                       ("apt  1", "units_mark_alike"), ("APT 1", "units_mark_alike")])
+                                       ("apt  1", "units_mark_alike"), ("APT 1", "units_mark_alike"),
+                                       ("Apt1", "units_mark_alike")])    # (review round 4: spaces, not only case)
 def test_a_mark_naming_two_units_or_none_or_alike_names_is_not_measured(mark, key):
     """A room marked with two units, a mark that isn't a name, or two names differing only in capitals or spacing:
     the marks don't settle the count. A whole number is a name, and spacing at the ends is no new name (s1 and s2
@@ -573,7 +574,7 @@ def test_an_unmarked_hall_stating_a_units_function_must_open_into_two_named_unit
         _room(desc, "s0")["unit"], _room(desc, "s2")["unit"] = "A", "B"
         _room(desc, "s1").update(use=hall, function=function)
         assert count(desc) == 2, (hall, function)        # (a studio so marked can't be told apart: the words say so)
-        assert "can't be told from a hall shared between units" in MARKED
+        assert "marked a corridor, lobby or exit can't be told from a room shared between units" in MARKED
 
 
 def test_an_entry_lobby_stating_residential_into_no_unit_stops_with_words_that_dont_ask_a_mark_check():

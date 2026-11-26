@@ -43,8 +43,9 @@ residential no longer joins two units (with no unit mark, it stops the count unt
 or lobby), and a unit's room marked a corridor or lobby still counts by its mark (one the drawing takes as an exit
 stops the count: the two disagree). Not measured where the marks
 and the drawing disagree or don't settle it:
-- a room whose mark isn't a name (not text), or names two or more units ("1A, 1B"), or two names differing only in
-  case or spacing ("Apt 1", "apt 1": one unit or two?);
+- a room whose mark isn't a name (not text or a whole number), or names two or more units ("1A, 1B"), or two names
+  differing only in capitals or in where spaces stand ("Apt 1", "apt1": one unit or two?; spaces at the ends and
+  repeated spaces are no new name);
 - a unit whose rooms on the story come apart (not joined by doors or passages through its own rooms: two units given
   one name?), or whose lived-in rooms all state a listed other use (no dwelling unit), or a room the drawing takes as
   an exit (a stair enclosure) given a unit;
@@ -90,7 +91,7 @@ UNIT = "unit"                                            # rooms[].unit: the arc
 # said with every row reading a count from the marks (parts.yaml `architect_stated`): the statement it stands on
 MARKED = ("counted from the rooms' unit marks (Gordium: Unit), the architect's statement: each name given is one "
           "dwelling unit, and every room of a dwelling unit on the story carries its unit's name (a unit's room left "
-          "unmarked and marked a corridor or lobby can't be told from a hall shared between units)")
+          "unmarked and marked a corridor, lobby or exit can't be told from a room shared between units)")
 # two or more units named in one mark ("1A, 1B", "1A and 1B", "1A/1B"): a room can't be in two units
 _SEVERAL = re.compile(r"[,;&+/|]|\band\b", re.IGNORECASE)
 
@@ -130,7 +131,7 @@ def _marked(story, items: dict, is_exit) -> int:
         by_unit.setdefault(name, set()).add(rid)
     alike = {}
     for name in by_unit:
-        alike.setdefault(name.casefold(), []).append(name)
+        alike.setdefault("".join(name.casefold().split()), []).append(name)   # "Apt1", "apt 1": one or two?
     for same in alike.values():
         if len(same) > 1:
             raise Stop("units_mark_alike", names=", ".join(sorted(same)))
