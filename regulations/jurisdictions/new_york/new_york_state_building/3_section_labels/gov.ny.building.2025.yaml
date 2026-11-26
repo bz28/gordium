@@ -5931,7 +5931,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Doors in the means of egress are readily distinguishable as doors, carry no mirrors and aren''t concealed by curtains
-      or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and turnstiles 1010.5 (not brought in): none of it
+      or decorations; exterior exit doors also meet 1022.2 (its own flag), gates 1010.4 and turnstiles 1010.5 (neither brought in): none of it
       is in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -7547,8 +7547,7 @@ labels:
   1017.2.1:
     label: flag
     topic: means_of_egress
-    reason: 'Permits up to 100 feet more where the last part of the exit access is on an exterior egress balcony (Section
-      1021, not brought in) at least as long as the increase: an allowance a person checks.'
+    reason: 'Permits up to 100 feet more where the last part of the exit access is on an exterior egress balcony (Section 1021, its own flags) at least as long as the increase: an allowance a person checks.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 341
@@ -8336,9 +8335,9 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an
-      exit passageway meeting 1024 (but as 1028.2 allows, through the level of exit discharge), and is used only as a means
-      of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren''t in the
-      model, so a person''s check.'
+      exit passageway meeting 1024, except as 1028.2 permits (through areas on the level of exit discharge or a vestibule),
+      and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and
+      their use aren''t in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 345
@@ -8359,8 +8358,9 @@ labels:
     topic: means_of_egress
     reason: 'An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711,
       rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not
-      mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; but in Group I-3 per 408.3.8,
-      within an atrium enclosed per 404.6, and per 510.2: the enclosure''s rating isn''t in the model, so a person''s check.'
+      mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; except, as those sections
+      allow, exit stairways and ramps in Group I-3 per 408.3.8, and exit stairways (not ramps) within an atrium enclosed per
+      404.6 or per 510.2: the enclosure''s rating isn''t in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 345
@@ -8544,8 +8544,7 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior
-      exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground up to 10
-      feet above the topmost landing or to the roof line, whichever is lower: walls'' ratings aren''t in the model, so a person''s
+      exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground to a point 10 feet above the topmost landing or to the roof line, whichever is lower: walls'' ratings aren''t in the model, so a person''s
       check.'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -8567,9 +8566,10 @@ labels:
     topic: means_of_egress
     reason: 'Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated
       at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway''s exterior wall
-      or to the roof''s perimeter, whichever is less; but not beside the stairway''s penthouse, nor where the stairway''s
-      exterior wall is rated 1 hour with openings protected 3/4 hour up to 10 feet above the roof: roof ratings aren''t in
-      the model, so a person''s check.'
+      or to the roof''s perimeter, whichever is less; but the roof need not be rated nor its openings protected beside the
+      stairway''s penthouse, unless the code otherwise requires it, nor where the stairway''s exterior wall is rated 1 hour
+      with openings protected at least 3/4 hour, extending at least 10 feet above the roof: roof ratings aren''t in the model,
+      so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 347
@@ -8721,9 +8721,11 @@ labels:
     topic: means_of_egress
     reason: 'A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway
       with no openings but 1023.3.1''s fire door assembly and those for leaving it, separated by 2-hour fire barriers per
-      707 or horizontal assemblies per 711; but openings are allowed, and the barrier from the enclosure isn''t needed, where
-      the passageway is protected and pressurized as the enclosure is, and it may egress through the level of exit discharge
-      or vestibules as 1028 allows: smokeproof enclosures aren''t in the model, so a person''s check.'
+      707 or horizontal assemblies per 711; but openings into the passageway are allowed where it is protected and pressurized
+      as the enclosure is and the openings are protected as for access from other floors, the barrier between the enclosure
+      and the passageway isn''t needed where the passageway is protected and pressurized as the enclosure is, and the enclosure
+      may egress through areas on the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren''t
+      in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 347

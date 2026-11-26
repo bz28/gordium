@@ -1405,7 +1405,7 @@
     "Egress · Table 1017.2 in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy isn't marked yet, so a person checks.",
     "Egress · Table 1017.2 note a: sections that change the distance: A person checks this (Gordium doesn't decide it): A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure or a pedestrian walkway: each has its own distance (note a), not brought in.",
     "Egress · Group H's sprinkler system: A person checks this (Gordium doesn't decide it): Group H: the sprinklered columns ask for a system per 903.2.5 and 903.2.5.1 (Group H's own requirement, not brought in); the rows read the stated NFPA 13 system as one, a person confirms it.",
-    "Egress · Exterior egress balcony increase: A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, section group 9e's flags) and its length are a person's check.",
+    "Egress · Exterior egress balcony increase: A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, checked by its own flags) and its length are a person's check.",
     "Egress · Groups F-1 and S-1 increase to 400 ft: A person checks this (Gordium doesn't decide it): The increase's group: its conditions (not measured) are a person's check.",
     "Egress · Group H-5 increase to 300 ft: A person checks this (Gordium doesn't decide it): The increase's group: its conditions (not measured) are a person's check.",
     "Egress · Travel within an atrium at most 200 ft: A person checks this (Gordium doesn't decide it): Which part of a path is within an atrium, above or below the level of exit discharge, is not measured from the drawing yet: a person checks.",
@@ -1426,7 +1426,7 @@
     "Egress · Doors take at most 7 in: A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
     "Egress · Trim at most 1 1/2 in each side into the width: A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
     "Egress · Protruding objects per 1003.3: A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (brought in by section group 9a, each of 1003.3.1 to 1003.3.4 its own flag): a person's check.",
-    "Egress · Doors recognizable as doors: A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (section group 9e's flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
+    "Egress · Doors recognizable as doors: A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (its own flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
     "Egress · Each door's capacity for its occupant load: A person checks this (Gordium doesn't decide it): Each door opening's capacity is enough for the occupants it serves (1005.3.2: 0.2 in each, 0.15 in with a sprinkler system and an emergency voice/alarm system, other than Groups H and I-2): which occupants each door serves isn't worked out, so a person's check.",
     "Egress · Nothing projects into a door's clear opening: A person checks this (Gordium doesn't decide it): No projection into a door's required clear width below 34 in, at most 4 in between 34 and 80 in, and door closers, overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn't in the model, so a person's check.",
     "Egress · Forces to unlatch and open each door: A person checks this (Gordium doesn't decide it): Hardware that unlatches by push or pull needs at most 15 pounds, by rotation at most 28 inch-pounds; an interior manually operated swinging door not required to be fire rated opens with at most 5 pounds; any other swinging, sliding or folding door, and one required to be fire rated, is set in motion by at most 30 pounds and opens fully under at most 15 pounds; each force applied at the latch side (1010.1.3.1): door hardware and forces aren't in the model, so a person's check.",
@@ -1542,23 +1542,23 @@
     "Egress · Exits kept for egress and continuous to the exit discharge: A person checks this (Gordium doesn't decide it): An exit is used for nothing that interferes with its use as a means of egress, its level of protection once reached isn't reduced before the exit discharge, and it is continuous from where it is entered to the exit discharge: what an exit is used for and its protection aren't in the model, so a person's check.",
     "Egress · At least one exterior door meeting 1010.1.1: A person checks this (Gordium doesn't decide it): A building used for human occupancy has at least one exterior door meeting 1010.1.1's size, and exterior exit doors meet 1010.1 as it applies (1022.2.1): each door's clear width and height are checked by 1010.1.1's rule, but that the building has such a door to the outside isn't worked out, so a person's check.",
     "Egress · Exterior exit doors lead to the exit discharge or public way: A person checks this (Gordium doesn't decide it): An exterior exit door leads directly to the exit discharge or the public way: what is outside a door isn't in the model, so a person's check.",
-    "Egress · Interior exit stairways and ramps enclosed and leading outside: A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024 (but as 1028.2 allows, through the level of exit discharge), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
-    "Egress · Fire-resistance rating of exit stairway enclosures: A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; but in Group I-3 per 408.3.8, within an atrium enclosed per 404.6, and per 510.2: the enclosure's rating isn't in the model, so a person's check.",
+    "Egress · Interior exit stairways and ramps enclosed and leading outside: A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024, except as 1028.2 permits (through areas on the level of exit discharge or a vestibule), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
+    "Egress · Fire-resistance rating of exit stairway enclosures: A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; except, as those sections allow, exit stairways and ramps in Group I-3 per 408.3.8, and exit stairways (not ramps) within an atrium enclosed per 404.6 or per 510.2: the enclosure's rating isn't in the model, so a person's check.",
     "Egress · Exit stairways and ramps end at an exit discharge or public way: A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp ends at an exit discharge or a public way, or continues there through a protected enclosure of exit stairways, exit ramps and exit passageways built per 1023.2, 1023.3.1 and 1024: where a stairway ends isn't in the model, so a person's check.",
     "Egress · Exit passageway extensions separated from the stairway: A person checks this (Gordium doesn't decide it): Where an exit passageway extends an interior exit stairway or ramp, a fire barrier per 707 or horizontal assembly per 711 rated at least as the stairway separates them, with a fire door assembly per 716 the only opening and no penetrations; but penetrations per 1023.5 are allowed, and no separation is needed where the extension has no openings or where the stairway and extension are pressurized per 909.20.4: the enclosures aren't in the model, so a person's check.",
     "Egress · Openings into interior exit stairways and ramps limited: A person checks this (Gordium doesn't decide it): Opening protectives of an interior exit stairway or ramp meet 716; its openings, other than unprotected exterior openings, are only those needed to enter it from normally occupied spaces and to leave it; and no elevator opens into it: the enclosure's openings aren't in the model, so a person's check.",
     "Egress · Penetrations of interior exit stairways and ramps limited: A person checks this (Gordium doesn't decide it): Nothing penetrates an interior exit stairway or ramp but its own ventilation or pressurization, fire protection, security and two-way communication systems, raceways for fire department communication or serving it (ending at a steel box of at most 16 square inches), and structural elements supporting it or a roof at its top, each protected per 714; no penetration or opening joins two adjacent exit stairways or ramps; membrane penetrations on the outside are allowed per 714.4.2: penetrations aren't in the model, so a person's check.",
     "Egress · Interior exit stairway and ramp ventilation kept separate: A person checks this (Gordium doesn't decide it): Equipment and ductwork ventilating an interior exit stairway or ramp is outside the building with ducts enclosed as shafts, or within the enclosure taking air from and discharging it directly outdoors (or through ducts enclosed as shafts), or within the building separated as shafts; openings into the rated construction are only those needed for maintenance and operation, protected per 716 for shaft enclosures; and the system is independent of the building's other ventilation: ventilation isn't in the model, so a person's check.",
     "Egress · Exterior walls of interior exit stairways and ramps: A person checks this (Gordium doesn't decide it): The exterior walls of an interior exit stairway or ramp meet 705; where nonrated walls or unprotected openings enclose its exterior and other parts of the building expose them at an angle under 180 degrees, construction within 10 feet meets 1023.7.1 and 1023.7.2: walls' ratings and the angles between them aren't in the model, so a person's check.",
-    "Egress · Exterior walls near an exit stairway's unprotected openings: A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground up to 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
-    "Egress · Roofs beside an exit stairway that rises above them: A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but not beside the stairway's penthouse, nor where the stairway's exterior wall is rated 1 hour with openings protected 3/4 hour up to 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
+    "Egress · Exterior walls near an exit stairway's unprotected openings: A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground to a point 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
+    "Egress · Roofs beside an exit stairway that rises above them: A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but the roof need not be rated nor its openings protected beside the stairway's penthouse, unless the code otherwise requires it, nor where the stairway's exterior wall is rated 1 hour with openings protected at least 3/4 hour, extending at least 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
     "Egress · A barrier where an exit stairway goes below its discharge level: A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp continues below its level of exit discharge only with an approved barrier at that level to keep people from going on to the levels below, with directional exit signs per 1013: whether a stairway continues below is not in the model, so a person's check.",
     "Egress · Stairway identification signs at each floor landing: A person checks this (Gordium doesn't decide it): At each floor landing of an interior exit stairway or ramp connecting more than three stories, a sign states the floor level, the top and bottom terminus, the stairway's identification, the story of and direction to the exit discharge, and whether the roof can be reached for the fire department, its bottom at least 5 feet above the landing and readily visible with the doors open or closed: signs aren't in the model, so a person's check.",
     "Egress · Stairway identification signs' size: A person checks this (Gordium doesn't decide it): A stairway identification sign is at least 18 by 12 inches, its stairway identification letters at least 1 1/2 inches high, its floor number at least 5 inches high in the center, other lettering at least 1 inch, with nonglare, contrasting characters, and of 1025.4's materials in a building 1025 covers: signs aren't in the model, so a person's check.",
     "Egress · \"Elevator Lobby\" signs at exit stairway doors: A person checks this (Gordium doesn't decide it): At an interior exit stairway landing where two or more doors lead to the floor, a door opening directly into an enclosed elevator lobby is identified \"Elevator Lobby\" on or beside it, per 1023.9.1 items 4, 5 and 6: doors' signs and elevator lobbies aren't in the model, so a person's check.",
     "Egress · Tactile floor-level signs in exit stairways: A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp has floor level signs, a floor-level sign in visual characters, raised characters and braille per ICC A117.1 is at each floor-level landing beside the door into the corridor: signs aren't in the model, so a person's check.",
     "Egress · Smokeproof enclosures where required: A person checks this (Gordium doesn't decide it): Where 403.5.4 (high-rise buildings), 405.7.2 (underground buildings) or 412.2.2.1 (airport traffic control towers) requires it, an interior exit stairway or ramp is a smokeproof enclosure per 909.20: whether the building is one of these isn't a fact Gordium is given, so a person's check.",
-    "Egress · Smokeproof enclosures end at an exit discharge or public way: A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings are allowed, and the barrier from the enclosure isn't needed, where the passageway is protected and pressurized as the enclosure is, and it may egress through the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
+    "Egress · Smokeproof enclosures end at an exit discharge or public way: A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings into the passageway are allowed where it is protected and pressurized as the enclosure is and the openings are protected as for access from other floors, the barrier between the enclosure and the passageway isn't needed where the passageway is protected and pressurized as the enclosure is, and the enclosure may egress through areas on the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
     "Egress · Smokeproof enclosures entered by a vestibule or open balcony: A person checks this (Gordium doesn't decide it): A stairway or ramp in a smokeproof enclosure is entered through a vestibule or an open exterior balcony, but not where it uses the pressurization alternative per 909.20.4: smokeproof enclosures aren't in the model, so a person's check.",
     "Egress · Standpipes in exit stairways where 905.3 and 905.4 require them: A person checks this (Gordium doesn't decide it): Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren't in the model, so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
@@ -67051,11 +67051,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, section group 9e's flags) and its length are a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, checked by its own flags) and its length are a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, section group 9e's flags) and its length are a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, checked by its own flags) and its length are a person's check.",
       "quotes": [
        {
         "text": "1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs on an exterior egress",
@@ -67080,14 +67080,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1017_2_1_balcony_increase",
-       "words": "A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, section group 9e's flags) and its length are a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, checked by its own flags) and its length are a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1017_2_1_balcony_increase",
-       "why": "A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, section group 9e's flags) and its length are a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, checked by its own flags) and its length are a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -68569,11 +68569,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (section group 9e's flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
+     "reason": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (its own flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (section group 9e's flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
+      "line": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (its own flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
       "quotes": [
        {
         "text": "1010.1 General. Doors in the means of egress shall comply with the requirements of Sections 1010.1.1 through 1010.3.4. Exterior exit doors shall also comply with the requirements of Section 1022.2. Gates in the means of egress shall comply with the requirements of Sections 1010.4 and 1010.4.1. Turnstiles in the means of egress shall comply with the requirements of Sections 1010.5 through 1010.5.4. Doors, gates and turnstiles provided for egress purposes in numbers greater than required by this code shall comply with the requirements of this section. Doors in the means of egress shall be readily distinguishable from the adjacent construction and finishes such that the doors are easily recognizable as doors. Mirrors or similar reflecting materials shall not be used on means of egress doors. Means of egress doors shall not be concealed by curtains, drapes, decorations or similar materials.",
@@ -68598,14 +68598,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1010_1_doors_general",
-       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (section group 9e's flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
+       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (its own flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1010_1_doors_general",
-       "why": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (section group 9e's flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
+       "why": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (its own flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -76789,11 +76789,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024 (but as 1028.2 allows, through the level of exit discharge), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024, except as 1028.2 permits (through areas on the level of exit discharge or a vestibule), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024 (but as 1028.2 allows, through the level of exit discharge), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024, except as 1028.2 permits (through areas on the level of exit discharge or a vestibule), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1023.1 General. Interior exit stairways and ramps serving as an exit component in a means of egress system shall comply with the requirements of this section. Interior exit stairways and ramps shall be enclosed and lead directly to the exterior of the building or shall be extended to the exterior of the building with an exit passageway conforming to the requirements of Section 1024, except as permitted in Section 1028.2. An interior exit stairway or ramp shall not be used for any purpose other than as a means of egress and a circulation path.",
@@ -76818,14 +76818,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1023_1_interior_exit_stairways_general",
-       "words": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024 (but as 1028.2 allows, through the level of exit discharge), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024, except as 1028.2 permits (through areas on the level of exit discharge or a vestibule), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1023_1_interior_exit_stairways_general",
-       "why": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024 (but as 1028.2 allows, through the level of exit discharge), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024, except as 1028.2 permits (through areas on the level of exit discharge or a vestibule), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -76859,11 +76859,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; but in Group I-3 per 408.3.8, within an atrium enclosed per 404.6, and per 510.2: the enclosure's rating isn't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; except, as those sections allow, exit stairways and ramps in Group I-3 per 408.3.8, and exit stairways (not ramps) within an atrium enclosed per 404.6 or per 510.2: the enclosure's rating isn't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; but in Group I-3 per 408.3.8, within an atrium enclosed per 404.6, and per 510.2: the enclosure's rating isn't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; except, as those sections allow, exit stairways and ramps in Group I-3 per 408.3.8, and exit stairways (not ramps) within an atrium enclosed per 404.6 or per 510.2: the enclosure's rating isn't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1023.2 Construction. Enclosures for interior exit stairways and ramps shall be constructed as fire barriers in accordance with Section 707 or horizontal assemblies constructed in accordance with Section 711, or both. Interior exit stairway and ramp enclosures",
@@ -76892,14 +76892,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1023_2_enclosure_construction",
-       "words": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; but in Group I-3 per 408.3.8, within an atrium enclosed per 404.6, and per 510.2: the enclosure's rating isn't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; except, as those sections allow, exit stairways and ramps in Group I-3 per 408.3.8, and exit stairways (not ramps) within an atrium enclosed per 404.6 or per 510.2: the enclosure's rating isn't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1023_2_enclosure_construction",
-       "why": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; but in Group I-3 per 408.3.8, within an atrium enclosed per 404.6, and per 510.2: the enclosure's rating isn't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; except, as those sections allow, exit stairways and ramps in Group I-3 per 408.3.8, and exit stairways (not ramps) within an atrium enclosed per 404.6 or per 510.2: the enclosure's rating isn't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -77357,11 +77357,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground up to 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground to a point 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground up to 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground to a point 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1023.7.1 Building exterior walls. Building exterior walls within 10 feet (3048 mm) horizontally of a nonrated wall or unprotected opening in an interior exit stairway or ramp shall have a fire-resistance rating of not less than 1 hour. Openings within such exterior walls shall be protected by opening protectives having a fire protection rating of not less than 3/4 hour. This construction shall extend vertically from the ground to a point 10 feet (3048 mm) above the topmost landing of the stairway or ramp, or to the roof line, whichever is lower.",
@@ -77386,14 +77386,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1023_7_1_building_exterior_walls",
-       "words": "A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground up to 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground to a point 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1023_7_1_building_exterior_walls",
-       "why": "A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground up to 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground to a point 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -77427,11 +77427,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but not beside the stairway's penthouse, nor where the stairway's exterior wall is rated 1 hour with openings protected 3/4 hour up to 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but the roof need not be rated nor its openings protected beside the stairway's penthouse, unless the code otherwise requires it, nor where the stairway's exterior wall is rated 1 hour with openings protected at least 3/4 hour, extending at least 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but not beside the stairway's penthouse, nor where the stairway's exterior wall is rated 1 hour with openings protected 3/4 hour up to 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but the roof need not be rated nor its openings protected beside the stairway's penthouse, unless the code otherwise requires it, nor where the stairway's exterior wall is rated 1 hour with openings protected at least 3/4 hour, extending at least 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1023.7.2 Roof assemblies. Where the interior exit stairway or ramp extends above an adjacent roof of the same building, the adjacent roof assembly shall have a fire-resistance rating of not less than 1 hour and openings shall be protected by opening protectives having a fire protection rating of not less than 3/4 hour. The fire-resistance rating and opening protection shall extend horizontally not less than 10 feet (3048 mm) from the exterior wall of the stairway or ramp, or to the perimeter of the adjacent roof, whichever is less. Exceptions: 1. The roof assembly need not be rated and openings in the roof need not be protected where they are adjacent to the penthouse of the stairway or ramp, unless otherwise required by this code. 2. The adjacent roof assembly need not be rated and adjacent openings in the roof need not be protected where the exterior wall of the stairway or ramp has a fire-resistance rating of 1 hour and openings are protected by opening protectives having a fire protection rating of not less than 3/4 hour, extending not less than 10 feet (3048 mm) above the roof.",
@@ -77456,14 +77456,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1023_7_2_roof_assemblies",
-       "words": "A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but not beside the stairway's penthouse, nor where the stairway's exterior wall is rated 1 hour with openings protected 3/4 hour up to 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but the roof need not be rated nor its openings protected beside the stairway's penthouse, unless the code otherwise requires it, nor where the stairway's exterior wall is rated 1 hour with openings protected at least 3/4 hour, extending at least 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1023_7_2_roof_assemblies",
-       "why": "A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but not beside the stairway's penthouse, nor where the stairway's exterior wall is rated 1 hour with openings protected 3/4 hour up to 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but the roof need not be rated nor its openings protected beside the stairway's penthouse, unless the code otherwise requires it, nor where the stairway's exterior wall is rated 1 hour with openings protected at least 3/4 hour, extending at least 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -77917,11 +77917,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings are allowed, and the barrier from the enclosure isn't needed, where the passageway is protected and pressurized as the enclosure is, and it may egress through the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings into the passageway are allowed where it is protected and pressurized as the enclosure is and the openings are protected as for access from other floors, the barrier between the enclosure and the passageway isn't needed where the passageway is protected and pressurized as the enclosure is, and the enclosure may egress through areas on the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings are allowed, and the barrier from the enclosure isn't needed, where the passageway is protected and pressurized as the enclosure is, and it may egress through the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings into the passageway are allowed where it is protected and pressurized as the enclosure is and the openings are protected as for access from other floors, the barrier between the enclosure and the passageway isn't needed where the passageway is protected and pressurized as the enclosure is, and the enclosure may egress through areas on the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1023.12.1 Termination and extension. A smokeproof enclosure shall terminate at an exit discharge or a public way. The smoke- proof enclosure shall be permitted to be extended by an exit passageway in accordance with Section 1023.3. The exit passageway shall be without openings other than the fire door assembly required by Section 1023.3.1 and those necessary for egress from the exit passageway. The exit passageway shall be separated from the remainder of the building by 2-hour fire barriers constructed in accordance with Section 707 or horizontal assemblies constructed in accordance with Section 711, or both. Exceptions: 1. Openings in the exit passageway serving a smokeproof enclosure are permitted where the exit passageway is protected and pressurized in the same manner as the smokeproof enclosure, and openings are protected as required for access from other floors. 2. The fire barrier separating the smokeproof enclosure from the exit passageway is not required, provided that the exit passageway is protected and pressurized in the same manner as the smokeproof enclosure.",
@@ -77950,14 +77950,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1023_12_1_smokeproof_termination",
-       "words": "A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings are allowed, and the barrier from the enclosure isn't needed, where the passageway is protected and pressurized as the enclosure is, and it may egress through the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings into the passageway are allowed where it is protected and pressurized as the enclosure is and the openings are protected as for access from other floors, the barrier between the enclosure and the passageway isn't needed where the passageway is protected and pressurized as the enclosure is, and the enclosure may egress through areas on the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1023_12_1_smokeproof_termination",
-       "why": "A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings are allowed, and the barrier from the enclosure isn't needed, where the passageway is protected and pressurized as the enclosure is, and it may egress through the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings into the passageway are allowed where it is protected and pressurized as the enclosure is and the openings are protected as for access from other floors, the barrier between the enclosure and the passageway isn't needed where the passageway is protected and pressurized as the enclosure is, and the enclosure may egress through areas on the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -84149,7 +84149,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1): A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, section group 9e's flags) and its length are a person's check.",
+       "title": "Egress · Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1): A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, checked by its own flags) and its length are a person's check.",
        "mark": "?",
        "name": "Egress · Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)"
       },
@@ -84422,7 +84422,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Doors recognizable as doors, no mirrors, not concealed (BCNYS 1010.1): A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (section group 9e's flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
+       "title": "Egress · Doors recognizable as doors, no mirrors, not concealed (BCNYS 1010.1): A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (its own flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
        "mark": "?",
        "name": "Egress · Doors recognizable as doors, no mirrors, not concealed (BCNYS 1010.1)"
       },
@@ -85930,7 +85930,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Interior exit stairways and ramps enclosed and leading outside (BCNYS 1023.1): A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024 (but as 1028.2 allows, through the level of exit discharge), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
+       "title": "Egress · Interior exit stairways and ramps enclosed and leading outside (BCNYS 1023.1): A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024, except as 1028.2 permits (through areas on the level of exit discharge or a vestibule), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Interior exit stairways and ramps enclosed and leading outside (BCNYS 1023.1)"
       },
@@ -85943,7 +85943,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Fire-resistance rating of exit stairway enclosures (BCNYS 1023.2): A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; but in Group I-3 per 408.3.8, within an atrium enclosed per 404.6, and per 510.2: the enclosure's rating isn't in the model, so a person's check.",
+       "title": "Egress · Fire-resistance rating of exit stairway enclosures (BCNYS 1023.2): A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; except, as those sections allow, exit stairways and ramps in Group I-3 per 408.3.8, and exit stairways (not ramps) within an atrium enclosed per 404.6 or per 510.2: the enclosure's rating isn't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Fire-resistance rating of exit stairway enclosures (BCNYS 1023.2)"
       },
@@ -86034,7 +86034,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Exterior walls near an exit stairway's unprotected openings (BCNYS 1023.7.1): A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground up to 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
+       "title": "Egress · Exterior walls near an exit stairway's unprotected openings (BCNYS 1023.7.1): A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground to a point 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Exterior walls near an exit stairway's unprotected openings (BCNYS 1023.7.1)"
       },
@@ -86047,7 +86047,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Roofs beside an exit stairway that rises above them (BCNYS 1023.7.2): A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but not beside the stairway's penthouse, nor where the stairway's exterior wall is rated 1 hour with openings protected 3/4 hour up to 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
+       "title": "Egress · Roofs beside an exit stairway that rises above them (BCNYS 1023.7.2): A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but the roof need not be rated nor its openings protected beside the stairway's penthouse, unless the code otherwise requires it, nor where the stairway's exterior wall is rated 1 hour with openings protected at least 3/4 hour, extending at least 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Roofs beside an exit stairway that rises above them (BCNYS 1023.7.2)"
       },
@@ -86138,7 +86138,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Smokeproof enclosures end at an exit discharge or public way (BCNYS 1023.12.1): A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings are allowed, and the barrier from the enclosure isn't needed, where the passageway is protected and pressurized as the enclosure is, and it may egress through the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
+       "title": "Egress · Smokeproof enclosures end at an exit discharge or public way (BCNYS 1023.12.1): A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings into the passageway are allowed where it is protected and pressurized as the enclosure is and the openings are protected as for access from other floors, the barrier between the enclosure and the passageway isn't needed where the passageway is protected and pressurized as the enclosure is, and the enclosure may egress through areas on the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Smokeproof enclosures end at an exit discharge or public way (BCNYS 1023.12.1)"
       },
@@ -86833,7 +86833,7 @@
       {
        "key": "reason:egress.general.bc_1017_2_1_balcony_increase",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, section group 9e's flags) and its length are a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The design takes the increase: the balcony (Section 1021, checked by its own flags) and its length are a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1017_2_1_balcony_increase"
@@ -87043,7 +87043,7 @@
       {
        "key": "reason:egress.general.bc_1010_1_doors_general",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (section group 9e's flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
+       "words": "A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2 (its own flag), gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (neither brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
        "elements": [],
        "items": [
         "egress.general.bc_1010_1_doors_general"
@@ -88203,7 +88203,7 @@
       {
        "key": "reason:egress.general.bc_1023_1_interior_exit_stairways_general",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024 (but as 1028.2 allows, through the level of exit discharge), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an exit passageway meeting 1024, except as 1028.2 permits (through areas on the level of exit discharge or a vestibule), and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their use aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1023_1_interior_exit_stairways_general"
@@ -88213,7 +88213,7 @@
       {
        "key": "reason:egress.general.bc_1023_2_enclosure_construction",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; but in Group I-3 per 408.3.8, within an atrium enclosed per 404.6, and per 510.2: the enclosure's rating isn't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711, rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; except, as those sections allow, exit stairways and ramps in Group I-3 per 408.3.8, and exit stairways (not ramps) within an atrium enclosed per 404.6 or per 510.2: the enclosure's rating isn't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1023_2_enclosure_construction"
@@ -88283,7 +88283,7 @@
       {
        "key": "reason:egress.general.bc_1023_7_1_building_exterior_walls",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground up to 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): Building exterior walls within 10 feet horizontally of a nonrated wall or unprotected opening of an interior exit stairway or ramp are rated at least 1 hour, their openings protected at least 3/4 hour, from the ground to a point 10 feet above the topmost landing or to the roof line, whichever is lower: walls' ratings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1023_7_1_building_exterior_walls"
@@ -88293,7 +88293,7 @@
       {
        "key": "reason:egress.general.bc_1023_7_2_roof_assemblies",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but not beside the stairway's penthouse, nor where the stairway's exterior wall is rated 1 hour with openings protected 3/4 hour up to 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): Where an interior exit stairway or ramp rises above an adjacent roof of the same building, that roof is rated at least 1 hour and its openings protected at least 3/4 hour, for at least 10 feet from the stairway's exterior wall or to the roof's perimeter, whichever is less; but the roof need not be rated nor its openings protected beside the stairway's penthouse, unless the code otherwise requires it, nor where the stairway's exterior wall is rated 1 hour with openings protected at least 3/4 hour, extending at least 10 feet above the roof: roof ratings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1023_7_2_roof_assemblies"
@@ -88363,7 +88363,7 @@
       {
        "key": "reason:egress.general.bc_1023_12_1_smokeproof_termination",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings are allowed, and the barrier from the enclosure isn't needed, where the passageway is protected and pressurized as the enclosure is, and it may egress through the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A smokeproof enclosure ends at an exit discharge or a public way, or is extended per 1023.3 by an exit passageway with no openings but 1023.3.1's fire door assembly and those for leaving it, separated by 2-hour fire barriers per 707 or horizontal assemblies per 711; but openings into the passageway are allowed where it is protected and pressurized as the enclosure is and the openings are protected as for access from other floors, the barrier between the enclosure and the passageway isn't needed where the passageway is protected and pressurized as the enclosure is, and the enclosure may egress through areas on the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1023_12_1_smokeproof_termination"
@@ -119269,7 +119269,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "a0869ea029f0c05a66d644257e56fe352b6bcbcf4bbddae00344b7a049838f5b"
+   "new_york/ithaca_city": "3dfa2378a06acd83e184c0e859b5213ce503bce8a18601905eef8052d50476ad"
   }
  }
 }
