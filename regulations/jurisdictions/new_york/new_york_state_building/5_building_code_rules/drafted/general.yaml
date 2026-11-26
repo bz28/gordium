@@ -5641,18 +5641,24 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
-  notes: 'Table 1006.3.3: two exits up to 500 occupants, three from 501 to 1,000, four above, for every occupancy. One exit
-    is enough only where 1006.3.4 allows it: this rule reads item 1 for Group I-4 (Table 1006.3.4(2)''s I row: the first story
-    above or below grade plane, at most 10 occupants and 75 ft of exit access travel; Group I is not in the second-story row,
-    and the third story and higher are NP), and gives needs review, never fail, where item 2 is stated, on any story (rooms
-    that exit directly outside at the level of exit discharge, which on a sloping site may be an upper story), or left blank
-    or the building is in another occupancy (its rows are the rule “Tables 1006.3.4(1) and (2) in a building of two or more
-    groups (BCNYS)”). Items 3 to 5 (mechanical parking, Groups R-3 and R-4, dwelling units) are for other groups. Hand-drafted
-    in a Claude Code session (2026-11-21). Since 2026-11-23 it applies to Group I-4 and a building of two or more groups (or
-    one whose groups aren''t stated: needs review); every other group is the rules for its rows or, Group R-2 of dwelling
-    units, the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”. Review round 4 (2026-11-23): a story
-    allowed one exit only by its travel needs review while fixed seating (1030.7) or a space the code gives its own exits
-    or travel limit is stated or not ruled out.'
+  notes: 'Table 1006.3.3: two exits up to 500 occupants, three from 501 to 1,000, four above, for every occupancy. One
+    exit is enough only where 1006.3.4 allows it: this rule reads item 1 for Group I-4 (Table 1006.3.4(2)''s I row: the
+    first story above or below grade plane, at most 10 occupants and 75 ft of exit access travel; Group I is not in the
+    second-story row, and the third story and higher are NP), and gives needs review, never fail, where item 2 is
+    stated, on any story (rooms that exit directly outside at the level of exit discharge, which on a sloping site may
+    be an upper story), or left blank or the building is in another occupancy (its rows are the rule “Tables 1006.3.4(1)
+    and (2) in a building of two or more groups (BCNYS)”). Items 3 to 5 (mechanical parking, Groups R-3 and R-4,
+    dwelling units) are for other groups. Hand-drafted in a Claude Code session (2026-11-21). Since 2026-11-23 it
+    applies to Group I-4 and a building of two or more groups (or one whose groups aren''t stated: needs review); every
+    other group is the rules for its rows or, Group R-2 of dwelling units, the rule “A story''s one exit, R-2 dwelling
+    units (BCNYS Table 1006.3.4(1))”. Review round 4 (2026-11-23): a story allowed one exit only by its travel needs
+    review while fixed seating (1030.7) or a space the code gives its own exits or travel limit is stated or not ruled
+    out. The story''s place against the grade plane is worked out from the model (2026-11-25): the floor elevations of
+    each level''s rooms and the ground the architect states (202 GRADE PLANE, STORY ABOVE GRADE PLANE, BASEMENT),
+    measured only where every grade plane that ground allows gives the same place, else needs review. A basement is never
+    proven (review round 6). With spot grades, Gordium''s reading, shown to confirm: the ground between spots lies between their
+    values, so the grade plane is at most the highest finished spot grade outside the building itself; the slope-away rule can only lower
+    it, so a basement is never proven from spot grades. No ground stated, or existing ground: needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   applies_when: occupancy_group_i4 or occupancy_group == "mixed"
@@ -6039,20 +6045,26 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
-  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (the
-    rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling units (Table
-    1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with 1006.3.4''s single exits:
-    item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants and 75
-    ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units 10 and
-    75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13; the
-    second story: B, F, M and S 29 and 75 ft (note b''s 100 ft is printed on the first story''s rows only, p.317); the third
-    story and higher NP), and item 4 (Groups R-3 and R-4). Item 2 (rooms exiting directly outside, stated or not ruled out)
-    and Group S-2''s items 3 and note d need review where they could allow one exit. Item 5 (a dwelling unit''s own single
-    exit) is a unit''s, not a story''s. Occupiable roofs are not measured. The story''s place (first, second, fourth or higher
-    above grade plane) and its occupant load are the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23).
-    Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed seating (1030.7) or
-    a space the code gives its own exits or travel limit is stated or not ruled out. Group 2 review round 1 (2026-11-24):
-    the second story''s travel is 75 ft in B and F too, sprinklered or not (note b is printed on the first story''s rows only).'
+  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
+    (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
+    units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
+    1006.3.4''s single exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F,
+    M and U 49 occupants and 75 ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1
+    and R-2 of sleeping units 10 and 75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29
+    and 75 ft, 100 ft with NFPA 13; the second story: B, F, M and S 29 and 75 ft (note b''s 100 ft is printed on the
+    first story''s rows only, p.317); the third story and higher NP), and item 4 (Groups R-3 and R-4). Item 2 (rooms
+    exiting directly outside, stated or not ruled out) and Group S-2''s items 3 and note d need review where they could
+    allow one exit. Item 5 (a dwelling unit''s own single exit) is a unit''s, not a story''s. Occupiable roofs are not
+    measured. Hand-drafted in a Claude Code session (2026-11-23). Review round 4 (2026-11-23): a story allowed one exit
+    only by its travel needs review while fixed seating (1030.7) or a space the code gives its own exits or travel limit
+    is stated or not ruled out. Group 2 review round 1 (2026-11-24): the second story''s travel is 75 ft in B and F too,
+    sprinklered or not (note b is printed on the first story''s rows only). The story''s place against the grade plane
+    is worked out from the model (2026-11-25): the floor elevations of each level''s rooms and the ground the architect
+    states (202 GRADE PLANE, STORY ABOVE GRADE PLANE, BASEMENT), measured only where every grade plane that ground
+    allows gives the same place, else needs review. A basement is never proven (review round 6). With spot grades, Gordium''s reading,
+    shown to confirm: the ground between spots lies between their values, so the grade plane is at most the highest finished
+    spot grade outside the building itself; the slope-away rule can only lower it, so a basement is never proven from spot grades. No
+    ground stated, or existing ground: needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_3_4_2__h_i_r
@@ -6262,20 +6274,26 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
-  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (the
-    rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling units (Table
-    1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with 1006.3.4''s single exits:
-    item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants and 75
-    ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units 10 and
-    75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13; the
-    second story: B, F, M and S 29 and 75 ft (note b''s 100 ft is printed on the first story''s rows only, p.317); the third
-    story and higher NP), and item 4 (Groups R-3 and R-4). Item 2 (rooms exiting directly outside, stated or not ruled out)
-    and Group S-2''s items 3 and note d need review where they could allow one exit. Item 5 (a dwelling unit''s own single
-    exit) is a unit''s, not a story''s. Occupiable roofs are not measured. The story''s place (first, second, fourth or higher
-    above grade plane) and its occupant load are the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23).
-    Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed seating (1030.7) or
-    a space the code gives its own exits or travel limit is stated or not ruled out. Review round 5 (2026-11-24): Group I-3
-    allowed one exit by its travel needs review (408.6.1''s smoke-barrier distances aren''t drawn).'
+  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
+    (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
+    units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
+    1006.3.4''s single exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F,
+    M and U 49 occupants and 75 ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1
+    and R-2 of sleeping units 10 and 75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29
+    and 75 ft, 100 ft with NFPA 13; the second story: B, F, M and S 29 and 75 ft (note b''s 100 ft is printed on the
+    first story''s rows only, p.317); the third story and higher NP), and item 4 (Groups R-3 and R-4). Item 2 (rooms
+    exiting directly outside, stated or not ruled out) and Group S-2''s items 3 and note d need review where they could
+    allow one exit. Item 5 (a dwelling unit''s own single exit) is a unit''s, not a story''s. Occupiable roofs are not
+    measured. Hand-drafted in a Claude Code session (2026-11-23). Review round 4 (2026-11-23): a story allowed one exit
+    only by its travel needs review while fixed seating (1030.7) or a space the code gives its own exits or travel limit
+    is stated or not ruled out. Review round 5 (2026-11-24): Group I-3 allowed one exit by its travel needs review
+    (408.6.1''s smoke-barrier distances aren''t drawn). The story''s place against the grade plane is worked out from
+    the model (2026-11-25): the floor elevations of each level''s rooms and the ground the architect states (202 GRADE
+    PLANE, STORY ABOVE GRADE PLANE, BASEMENT), measured only where every grade plane that ground allows gives the same
+    place, else needs review. A basement is never proven (review round 6). With spot grades, Gordium''s reading, shown to confirm: the
+    ground between spots lies between their values, so the grade plane is at most the highest finished spot grade outside the building
+    itself; the slope-away rule can only lower it, so a basement is never proven from spot grades. No ground stated, or
+    existing ground: needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_3_4_2__s
@@ -6496,20 +6514,26 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
-  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (the
-    rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling units (Table
-    1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with 1006.3.4''s single exits:
-    item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants and 75
-    ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units 10 and
-    75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13; the
-    second story: B, F, M and S 29 and 75 ft (note b''s 100 ft is printed on the first story''s rows only, p.317); the third
-    story and higher NP), and item 4 (Groups R-3 and R-4). Item 2 (rooms exiting directly outside, stated or not ruled out)
-    and Group S-2''s items 3 and note d need review where they could allow one exit. Item 5 (a dwelling unit''s own single
-    exit) is a unit''s, not a story''s. Occupiable roofs are not measured. The story''s place (first, second, fourth or higher
-    above grade plane) and its occupant load are the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23).
-    Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed seating (1030.7) or
-    a space the code gives its own exits or travel limit is stated or not ruled out. Group 2 review round 1 (2026-11-24):
-    the second story''s travel is 75 ft, sprinklered or not (note b is printed on the first story''s S row only).'
+  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
+    (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
+    units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
+    1006.3.4''s single exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F,
+    M and U 49 occupants and 75 ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1
+    and R-2 of sleeping units 10 and 75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29
+    and 75 ft, 100 ft with NFPA 13; the second story: B, F, M and S 29 and 75 ft (note b''s 100 ft is printed on the
+    first story''s rows only, p.317); the third story and higher NP), and item 4 (Groups R-3 and R-4). Item 2 (rooms
+    exiting directly outside, stated or not ruled out) and Group S-2''s items 3 and note d need review where they could
+    allow one exit. Item 5 (a dwelling unit''s own single exit) is a unit''s, not a story''s. Occupiable roofs are not
+    measured. Hand-drafted in a Claude Code session (2026-11-23). Review round 4 (2026-11-23): a story allowed one exit
+    only by its travel needs review while fixed seating (1030.7) or a space the code gives its own exits or travel limit
+    is stated or not ruled out. Group 2 review round 1 (2026-11-24): the second story''s travel is 75 ft, sprinklered or
+    not (note b is printed on the first story''s S row only). The story''s place against the grade plane is worked out
+    from the model (2026-11-25): the floor elevations of each level''s rooms and the ground the architect states (202
+    GRADE PLANE, STORY ABOVE GRADE PLANE, BASEMENT), measured only where every grade plane that ground allows gives the
+    same place, else needs review. A basement is never proven (review round 6). With spot grades, Gordium''s reading, shown to confirm:
+    the ground between spots lies between their values, so the grade plane is at most the highest finished spot grade outside the
+    building itself; the slope-away rule can only lower it, so a basement is never proven from spot grades. No ground stated,
+    or existing ground: needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_3_4_1__r2_dwelling_units
@@ -6770,13 +6794,19 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
-  notes: 'Table 1006.3.4(1) for Group R-2 of dwelling units (note b; one of sleeping units is Table 1006.3.4(2)''s): a basement
-    or the first, second or third story above grade plane may have one exit with at most 4 dwelling units and 125 ft of exit
-    access travel, only in a building sprinklered per 903.3.1.1 or 903.3.1.2 with emergency escape and rescue openings per
-    1031 (note a, the row''s R-2[a]); the fourth story and higher NP. Otherwise Table 1006.3.3''s two, three or four. Item
-    2 as in the other rows. Note c''s occupiable roofs are not measured. Hand-drafted in a Claude Code session (2026-11-23).
-    Review round 4 (2026-11-23): a story allowed one exit only by its travel needs review while fixed seating (1030.7) or
-    a space the code gives its own exits or travel limit is stated or not ruled out.'
+  notes: 'Table 1006.3.4(1) for Group R-2 of dwelling units (note b; one of sleeping units is Table 1006.3.4(2)''s): a
+    basement or the first, second or third story above grade plane may have one exit with at most 4 dwelling units and
+    125 ft of exit access travel, only in a building sprinklered per 903.3.1.1 or 903.3.1.2 with emergency escape and
+    rescue openings per 1031 (note a, the row''s R-2[a]); the fourth story and higher NP. Otherwise Table 1006.3.3''s
+    two, three or four. Item 2 as in the other rows. Note c''s occupiable roofs are not measured. Hand-drafted in a
+    Claude Code session (2026-11-23). Review round 4 (2026-11-23): a story allowed one exit only by its travel needs
+    review while fixed seating (1030.7) or a space the code gives its own exits or travel limit is stated or not ruled
+    out. The story''s place against the grade plane is worked out from the model (2026-11-25): the floor elevations of
+    each level''s rooms and the ground the architect states (202 GRADE PLANE, STORY ABOVE GRADE PLANE, BASEMENT),
+    measured only where every grade plane that ground allows gives the same place, else needs review. A basement is never
+    proven (review round 6). With spot grades, Gordium''s reading, shown to confirm: the ground between spots lies between their
+    values, so the grade plane is at most the highest finished spot grade outside the building itself; the slope-away rule can only lower
+    it, so a basement is never proven from spot grades. No ground stated, or existing ground: needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_1_remoteness
@@ -13234,8 +13264,9 @@ rules:
   check: moe_door_clear_width >= 32
   review_when:
   - when: moe_door_clear_width >= 32 and moe_door_leaves != 1
-    reason: 'Two leaves with no mullion between them (or how many isn''t stated): 1010.1.1 asks one leaf for the 32 in, and
-      the maker''s clear opening is the whole opening''s: a person checks the leaf.'
+    reason: 'Two leaves with no mullion between them, a mullioned pair not stated at its narrower leaf''s own opening, or how
+      many isn''t stated: 1010.1.1 asks one leaf (each opening of a mullioned pair) for the 32 in, and the maker''s clear
+      opening may be the whole pair''s: a person checks each leaf.'
   - when: moe_door_clear_width >= 32 and moe_door_clear_width < 41.5 and occupancy_group in ["I-2", "mixed"]
     reason: 'Group I-2 (stated, or not ruled out in a building of two or more groups): a door used for the movement of beds
       needs 41 1/2 in, and which doors are isn''t shown: a person checks.'
@@ -13567,7 +13598,10 @@ rules:
   notes: 'Section group 6a (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): every door the model gives,
     each with its maker''s stated clear opening only (never its size or its leaf: a door with none isn''t measured and needs
     review). 32 in, from one leaf where two leaves meet with no mullion (the number of leaves is stated; not stated, a pair
-    isn''t ruled out). Group I-2''s 41 1/2 in for bed movement needs review between 32 and 41 1/2 in (which doors move beds
+    isn''t ruled out). Gordium''s reading of the section''s own words, shown to confirm: a pair with a mullion between its
+    leaves is two door openings, each of which "shall provide a minimum clear opening width of 32 inches" ("each door
+    opening", its first sentence); the one-leaf words cover only "two door leaves without a mullion". So a mullioned pair is
+    stated 1 leaf only where its stated clear width is the narrower leaf''s own opening, else 2 (needs review at 32 in or more). Group I-2''s 41 1/2 in for bed movement needs review between 32 and 41 1/2 in (which doors move beds
     isn''t shown), in a building of two or more groups too (1004.4). The exceptions only loosen it, each where the model can''t
     rule it out and only down to its own width: a door that may be in a dwelling or sleeping unit (1 and 6: Groups R-2, R-3,
     I-1 and R-4), to a Group I-3 resident sleeping unit (2: 28 in), to a storage closet under 10 sq ft (3), within a Type

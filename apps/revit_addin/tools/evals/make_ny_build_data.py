@@ -435,6 +435,8 @@ def interior_of() -> dict:
             doors.append(door)
     return {"format": "gordium.interior/1", "units": "ft",
             "levels": [{"id": lv["id"], "name": lv["name"], "elevation": lv["elevation"]} for lv in a["levels"]],
+            # every level of the model (RouteReader.cs all_levels): the building has only its two
+            "all_levels": [{"id": lv["id"], "name": lv["name"], "elevation": lv["elevation"]} for lv in a["levels"]],
             "rooms": rooms, "doors": doors, "passages": [],
             "story_outlines": [{"level": lv["id"], "outer": [list(p) for p in _rect([x0 - t, y0 - t, x1 + t, y1 + t])],
                                 "inner": [list(p) for p in _rect(a["inside"])]} for lv in a["levels"]],
