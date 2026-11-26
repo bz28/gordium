@@ -313,7 +313,9 @@ def test_a_stair_within_a_space_on_the_shared_corridor_is_never_a_no():
     assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_stair"].format(name="r0")
     desc["stairs"] = [{"id": "st", "nosings": [[[2, 50, 0], [4, 50, 0]]]}]          # in no room at all: may be
     assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False                 # anywhere
-    desc["stairs"] = [{"id": "st", "nosings": [[[22, 2, 0], [24, 2, 0]]]}]          # in room 2, another space
+    desc["stairs"] = [{"id": "st", "nosings": [[[22, 2, 0], [24, 2, 0]]]}]          # in room 2, a space opening only
+    assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False                 # outside: may be room 0's own
+    desc["stairs"] = [{"id": "st", "nosings": [[[13, 2, 0], [15, 2, 0]]]}]          # in room 1, on the corridor
     assert _story(desc)["measures"][OUTSIDE_FACT] is False
     desc["stairs"] = [{"id": "st", "nosings": "unreadable"}]
     assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False
@@ -388,3 +390,30 @@ def test_a_stair_in_a_room_with_no_door_may_be_the_spaces_own():
                                                [[2, -1.5, 1.2], [4, -1.5, 1.2]]]}]
     assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False
     assert {"points": []} in _stair_points({**desc, "stairs": [{"nosings": [[[22, 2, 0], [24, 2, 0]], []]}]})
+
+
+@pytest.mark.parametrize("case", ["pair", "closet", "outside_door"])
+def test_a_stair_in_rooms_joined_only_to_each_other_or_the_outside_may_be_the_spaces_own(case):
+    """Review round 10 (PR 2): a stair in rooms joined only to each other (a stairwell and its landing) or only to the
+    outside (a unit's stair hall holding its front door), the opening into the unit left out, still counted as
+    elsewhere: "no". Only the shared circulation (halls, exits, and spaces opening into them) places a stair
+    elsewhere; a stair in a room of the shared corridor's other space still leaves the "no"."""
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    nosings = [[[1, -5, 0], [3, -5, 0]], [[1, -4, 0.6], [3, -4, 0.6]], [[1, -1.5, 1.2], [3, -1.5, 1.2]]]
+    if case == "pair":
+        desc["rooms"] += [room("S", rect(0, -6.5, 5, -0.5), use="other", lockable=False, pass_through=False),
+                          room("L", rect(5, -6.5, 10, -0.5), use="other", lockable=False, pass_through=False)]
+        desc["passages"].append({"rooms": ["S", "L"], "line": [[5, -6.5], [5, -0.5]]})
+    elif case == "closet":
+        desc["rooms"] += [room("S", rect(0, -6.5, 5, -0.5), use="other", lockable=False, pass_through=False),
+                          room("K", rect(5.5, -6.5, 10, -0.5), use="closet", lockable=False, pass_through=False)]
+        desc["doors"].append(door("dk", (5.25, -3.5), (0, 1), ("S", "K")))
+    else:
+        desc["rooms"].append(room("S", rect(0, -12.5, 10, -0.5), use="other", lockable=False, pass_through=False))
+        desc["doors"].append(door("so", (-0.25, -8), (0, 1), ("S", "outside")))
+        nosings = [[[1, -11, 0], [3, -11, 0]], [[1, -10, 0.6], [3, -10, 0.6]]]
+    desc["stairs"] = [{"id": "st", "nosings": nosings}]
+    assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False, case
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    desc["stairs"] = [{"id": "st", "nosings": [[[13, 2, 0], [15, 2, 0]]]}]          # in room 1, on the corridor
+    assert _story(desc)["measures"][OUTSIDE_FACT] is False

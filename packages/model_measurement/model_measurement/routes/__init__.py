@@ -630,11 +630,29 @@ def _stair_in(stair, group, story) -> bool:
     rooms = {r: room for r, room in story.rooms.items() if room is not None}
     if any(rooms[r].outline.buffer(1).contains(Point(p)) for p in points for r in group if r in rooms):
         return True
-    # elsewhere only in rooms joined to something (a door or an opening): a room drawn with none may be this space's
-    # own stairwell with its opening left out
-    joined = {r for d in story.doors.values() for r in d.sides} | {r for a, b, _ in story.passages for r in (a, b)}
-    return not all(any(room.outline.contains(Point(p)) for r, room in rooms.items() if r not in group and r in joined)
+    # elsewhere only in the building's shared circulation: a corridor, lobby or exit, or a room of a space opening into
+    # one; a room joined to nothing, or only to rooms like it or the outside, may be this space's own stairwell with
+    # its opening left out
+    try:
+        shared = _circulation(story)
+    except Stop:
+        return True
+    return not all(any(room.outline.contains(Point(p)) for r, room in rooms.items() if r not in group and r in shared)
                    for p in points)
+
+
+def _circulation(story) -> set:
+    """The rooms of the story's shared circulation: its halls (corridors, lobbies), its exits, and every room of a
+    space that opens into one of them (spaces.py), so a stair placed wholly in them is another space's."""
+    found, halls = spaces.spaces(story, _is_exit)
+    hall_rooms = set().union(*[h for h, _ in halls]) if halls else set()
+    exits = {r for r in story.rooms if r not in hall_rooms and not any(r in g for g in found)}
+    out = hall_rooms | exits
+    links = [set(d.sides) for d in story.doors.values()] + [{a, b} for a, b, _ in story.passages]
+    for g in found:
+        if any(sides & g and sides - g and (sides - g) <= out for sides in links):
+            out |= g
+    return out
 
 
 def _is_exit(story, rid) -> bool:
