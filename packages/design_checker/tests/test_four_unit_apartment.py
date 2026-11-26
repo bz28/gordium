@@ -37,7 +37,7 @@ def routes():
 
 def _check(desc, routes):
     with pytest.MonkeyPatch.context() as m:
-        m.setattr(egress, "measure_routes", lambda interior: copy.deepcopy(routes))
+        m.setattr(egress, "measure_routes", lambda interior, **_: copy.deepcopy(routes))
         return egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), desc, VALUES, ALLOWED)
 
 
