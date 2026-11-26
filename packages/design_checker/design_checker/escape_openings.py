@@ -25,6 +25,7 @@ reading it needs review. A sleeping room is only a room the description states i
 enclosed space with no room drawn in it (the interior measuring's `maybe`, every row about it a review): never a
 room the description says isn't one. Plain code, no AI.
 """
+
 KIND = "sleeping_room"
 OPENINGS = "emergency_escape_opening"
 OUTSIDE = "outside"
