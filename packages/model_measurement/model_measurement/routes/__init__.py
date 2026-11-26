@@ -544,8 +544,9 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
     a lobby may be a dwelling's own foyer) reaches an exit itself (a door outside, or into an exit), two or more of the
     spaces opening into it hold a room whose function is residential, this one among them, the corridor is this
     space's one way out of itself (no other door, opening or stair within it), and the building states no corridor is
-    within a dwelling unit (`corridors_within_dwelling_units` no, BCNYS 1020.2 exception 2's fact); a corridor otherwise may be a hallway within one dwelling or tenant
-    space (a house's hall, a shop's back corridor to its toilets). Every other case is not measured (Stop): a door to
+    within a dwelling unit (`corridors_within_dwelling_units` no, BCNYS 1020.2 exception 2's fact); a corridor
+    otherwise may be a hallway within one dwelling or tenant space (a house's hall, a shop's back corridor to its
+    toilets). Every other case is not measured (Stop): a door to
     the outside not marked so, or onto an exterior stair or ramp; a space whose way out is through such a corridor,
     or only through an exit, or none. A story whose routes aren't read isn't measured either."""
     if story.stops:
@@ -615,7 +616,8 @@ def _links_listed(description) -> list:
     whose rooms can't be read (or a list that isn't one) as ("unread", None, []): it may be any room's."""
     out = []
     given_doors = description.get("doors")
-    door_ids = {d.get("id") for d in given_doors if isinstance(d, dict) and isinstance(d.get("id"), str)}         if isinstance(given_doors, list) else set()
+    door_ids = {d.get("id") for d in given_doors if isinstance(d, dict) and isinstance(d.get("id"), str)} \
+        if isinstance(given_doors, list) else set()
     for key, kind, sides_key in (("doors", "door", "sides"), ("passages", "passage", "rooms"),
                                  ("openings", "opening", "room")):
         given = description.get(key)
