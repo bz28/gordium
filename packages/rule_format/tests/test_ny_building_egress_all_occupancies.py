@@ -755,8 +755,8 @@ def test_no_text_calls_a_brought_in_section_not_brought_in():
     def key(n):
         return tuple(int(x) for x in n.split("."))
 
-    def in_range(a, b):
-        return any(key(a) <= key(s) <= key(b) + (999,) for s in secs + alone)
+    def in_range(a, b):            # review round 3: an end inside a section brought in whole counts too
+        return brought_in(a) or brought_in(b) or any(key(a) <= key(s) <= key(b) + (999,) for s in secs + alone)
 
     def said_stale(t):
         out = []
@@ -781,6 +781,7 @@ def test_no_text_calls_a_brought_in_section_not_brought_in():
         return out
 
     assert said_stale("1023 isn't brought in yet.") and said_stale("1006.1 to 1006.3.2 and 1011 aren't brought in.")
+    assert said_stale("1023.9 to 1023.11 aren't brought in yet.") and said_stale("1012.2 to 1012.10 aren't brought in.")
     assert not said_stale("1104 and 3006 aren't brought in (1023 is its own).")
     assert not said_stale("Exits meet 1003 to 1015 (1011 and 1014 aren't brought in yet).")
     assert not said_stale("1012.9 was a reference, so nothing showed while 1015 isn't brought in.")
@@ -1532,7 +1533,8 @@ SHOWN_MUST_SAY = {
     "general.bc_1023_3_termination": (["that form one continuous protected enclosure"], []),
     "general.bc_1023_7_2_roof_assemblies": (["unless the code otherwise requires it", "extending at least 10 feet above the roof"],
                                             ["up to 10 feet"]),
-    "general.bc_1023_12_1_smokeproof_termination": (["and the openings are protected as for access from other floors"], []),
+    "general.bc_1023_12_1_smokeproof_termination": (["and the openings are protected as for access from other floors",
+                                                     "(1028.2: no more than half of the exit stairways and ramps"], []),
 }
 
 
