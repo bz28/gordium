@@ -65,10 +65,11 @@ def _stray(parts, openings) -> bool:
                for p in given if isinstance(p, dict) and isinstance(p.get("id"), str)}
     may = part_rules.registry()[OPENINGS].get("within", [])
     for o in openings:
-        if not (isinstance(o, dict) and isinstance(o.get("id"), str) and ids.get(o["id"]) == 1):
+        if not (isinstance(o, dict) and isinstance(o.get("id"), str) and o["id"].strip() and ids.get(o["id"]) == 1
+                and isinstance(o.get("measures", {}), dict)):
             return True
         where = o.get("within")
-        if ids.get(where) != 1 or kind_of.get(where) not in may:
+        if not isinstance(where, str) or ids.get(where) != 1 or kind_of.get(where) not in may:
             return True
     return False
 
