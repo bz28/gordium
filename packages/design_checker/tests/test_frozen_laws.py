@@ -160,3 +160,19 @@ def test_writing_goldens_publishes_stale_certificates_first_and_checking_only_mi
     monkeypatch.setattr(goldens, "write", lambda texts: wrote.append("goldens written"))
     monkeypatch.setattr(sheets_main.goldens, "write", lambda name: wrote.append("sheets written"))
     assert goldens.main(["--write"]) == 1 and sheets_main.main(["--write"]) == 1 and wrote == []
+
+
+def test_the_odyssey_answer_is_not_written_while_maines_law_cant_be_published(monkeypatch, tmp_path):
+    """Review round 3 of PR 3: the Odyssey answer maker's refusal had no test. With a law that can't be published, no
+    answer is worked out and no file is written (every Maine row would be needs review)."""
+    import pytest
+    sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
+    import make_odyssey_answer as maker
+    worked = []
+    monkeypatch.setattr(published, "ensure", lambda missing_only=False: ["x: refused"])
+    monkeypatch.setattr(maker, "answer", lambda interior: worked.append(interior) or {})
+    src = tmp_path / "interior.json"
+    src.write_text("{}", encoding="utf-8")
+    with pytest.raises(SystemExit, match="not written: x: refused"):
+        maker.main(src, tmp_path / "out.json")
+    assert worked == [] and not (tmp_path / "out.json").exists()
