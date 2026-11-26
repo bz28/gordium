@@ -128,3 +128,7 @@ One more wrong "no": a patio door listed among the `openings` (every window and 
 ## Review round 14 of step 2 (2026-11-26)
 
 Two more (never a pass): an opening whose id isn't text crashed round 13's check (now it is never a door read on the story, so the story isn't measured), and an opening reusing a door's id for another room was taken as that door (now only one naming the door's own room, or none, is). A fixed unit doesn't open, so, like a window, it is never a way out (it no longer stops the fact). Pins for each.
+
+## Review round 15 of step 2 (2026-11-26)
+
+One low finding (never a pass): a unit marked fixed but stating a maker's clear opening contradicts itself, and was skipped as never a way out. Now only a fixed unit stating no clear opening is skipped; one stating one may be a door, so the story isn't measured. One test.

@@ -542,3 +542,18 @@ def test_an_opening_reusing_a_doors_id_for_another_room_is_never_a_no():
     assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False
     desc["openings"][0]["room"] = "r1"                   # the door's own room: that door, still "no"
     assert _story(desc)["measures"][OUTSIDE_FACT] is False
+
+
+def test_a_fixed_unit_stating_a_clear_opening_may_be_a_door():
+    """Review round 15 (PR 2): a unit marked fixed whose maker's clear opening says it opens (door-sized, at the floor)
+    contradicts itself: it may be the room's own door out, so the story isn't measured; a plain fixed unit is still
+    never a way out."""
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    desc["openings"] = [{"id": "p1", "room": "r0", "operation": "fixed", "escape": False,
+                         "frame": {"left": 0, "right": 36, "bottom": 0, "top": 80},
+                         "stated_clear": {"width": 34, "height": 78, "bottom": 0, "source": "maker"}}]
+    got = _story(desc)
+    assert got["measures"].get(OUTSIDE_FACT) is not False
+    assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_link_elsewhere"].format(name="r0")
+    del desc["openings"][0]["stated_clear"]
+    assert _story(desc)["measures"][OUTSIDE_FACT] is False
