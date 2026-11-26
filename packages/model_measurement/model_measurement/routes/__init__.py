@@ -163,7 +163,7 @@ def _readings(part, name, readings, words) -> None:
     part["not_measured"][name] = Stop("readings", question=question, words=words).reason
 
 
-def _story_parts(story, uses, items, unknown, parts, r, building=None, stairs=()) -> None:
+def _story_parts(story, uses, items, unknown, parts, r, building, stairs) -> None:
     sp = _part(story.level, story.name)
     parts["story"].append(sp)
     routes = None
