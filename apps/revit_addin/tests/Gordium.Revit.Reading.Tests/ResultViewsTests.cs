@@ -126,7 +126,9 @@ public sealed class ResultViewsTests
         Assert.Equal(60, answer.Cards.Single(c => c.Field == "building.sprinkler_system").Rows.Count);   // group 4b: Table 1020.2 rows whose answer turns on the system (8)
         Assert.Equal(82, answer.Cards.Single(c => c.Field == "building.special_egress_spaces").Rows.Count);
         Assert.Equal(84, answer.Cards.Single(c => c.Field == "building.assembly_fixed_seating").Rows.Count);   // group 5a: the corridor capacity rule (2)
-        Assert.Equal($"Answer {answer.Cards.Count} questions about the project", answer.Title);
+        // the title counts the questions shown: the six ADU follow-ups wait until "Is there an ADU?" is answered
+        Assert.Equal($"Answer {answer.Cards.Count - 6} questions about the project", answer.Title);
+        Assert.Equal(6, answer.Cards.Count(c => c.DependsOn is not null));
         Assert.DoesNotContain(m.Fix.Where(g => g.Kind != FixKind.Answer).SelectMany(g => g.Cards),
                               c => c.Field is { } f && (f.StartsWith("facts.", StringComparison.Ordinal) || f.StartsWith("building.", StringComparison.Ordinal)));
         Assert.Equal("Not checked yet by Gordium", m.Fix.Single(g => g.Kind == FixKind.NotChecked).Title);

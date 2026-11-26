@@ -28,6 +28,13 @@ internal sealed class Pane
 
     public void Progress(CheckStage stage, DateTime since) => _view.Progress(stage, since);
 
+    /// <summary>An answer chosen in the questions card (the draft only), as a click on its control does it.</summary>
+    public void Answer(MarkDefinition mark, string value)
+    {
+        _view.Answers.Choose(mark, value);
+        _view.Answered();
+    }
+
     public void Show(string project, DateTime when, ResultModel model, IReadOnlyDictionary<string, string> labels,
                      IReadOnlyList<SetupField>? questions = null, string? key = null)
     {

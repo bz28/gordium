@@ -29,7 +29,17 @@ public enum FixKind { Fails, Answer, Mark, FixModel, Survey, Measure, Decide, Op
 /// <param name="Elements">The elements it names (UniqueIds), each once.</param>
 /// <param name="Rows">The rows waiting on it, each once, in the answer's order.</param>
 public sealed record FixCard(string Key, FixKind Kind, string Headline, string? Why, string? Field,
-                             IReadOnlyList<string> Elements, IReadOnlyList<ResultRow> Rows);
+                             IReadOnlyList<string> Elements, IReadOnlyList<ResultRow> Rows)
+{
+    /// <summary>On a follow-up question, the question it hangs on (the ask's <c>depends_on</c>), else null.</summary>
+    public DependsOn? DependsOn { get; init; }
+}
+
+/// <summary>A follow-up question's parent (an ask's <c>depends_on</c>, docs/revit/checker_ui_data.md): the fact of the
+/// question it hangs on ("facts.accessory_dwelling_unit" for "Is the ADU detached?"), and that question's answers that
+/// make the follow-up moot, in the form's words ("No" for the checker's <c>false</c>, "Yes" for <c>true</c>, a word
+/// as it is).</summary>
+public sealed record DependsOn(string Field, IReadOnlyList<string> MootIf);
 
 /// <summary>One group of "What to fix": its kind, title, the cards in it and every row it holds (each once).</summary>
 public sealed record FixGroup(FixKind Kind, string Title, string? Sub, IReadOnlyList<FixCard> Cards, IReadOnlyList<ResultRow> Rows)
@@ -112,11 +122,13 @@ public static class ResultViews
         var fix = FixGroups(rows);
         // the results in review that wait on a question of the questions card (never more than there are)
         var answers = fix.Where(g => g.Kind == FixKind.Answer).ToList();
+        // a follow-up held back until its parent is answered still waits on the questions (on its parent): its rows
+        // are the group's; only the questions shown are "the question(s) below"
         var onQuestions = answers.SelectMany(g => g.Rows)
                                  .Where(r => r.Verdict == Verdict.NeedsReview).Select(r => r.Id).Distinct(StringComparer.Ordinal).Count();
         return new ResultViewsModel(Summary(rows.Select(r => r.Row.Verdict)),
                                     Headline(rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id)), onQuestions,
-                                             answers.Sum(g => g.Cards.Count)),
+                                             answers.Sum(g => ProjectQuestions.Of(g, null).Count)),
                                     fix, CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
         {
             Scope = scoped.Count == 0 ? null : ScopeWords(scoped.Count),
@@ -243,7 +255,9 @@ public static class ResultViews
         // card key -> (kind, headline, why, field, elements, rows), in the order first asked
         var cards = new Dictionary<(FixKind, string), (string Headline, string? Why, string? Field, List<string> Elements, List<ResultRow> Rows)>();
         var order = new List<(FixKind, string)>();
-        void Add(FixKind kind, string key, string headline, string? why, string? field, IEnumerable<string> elements, ResultRow row)
+        var parents = new Dictionary<(FixKind, string), DependsOn>();
+        void Add(FixKind kind, string key, string headline, string? why, string? field, IEnumerable<string> elements, ResultRow row,
+                 DependsOn? dependsOn = null)
         {
             if (!cards.TryGetValue((kind, key), out var c))
             {
@@ -251,6 +265,8 @@ public static class ResultViews
                 cards[(kind, key)] = c;
                 order.Add((kind, key));
             }
+            if (dependsOn is not null)
+                parents.TryAdd((kind, key), dependsOn);              // the first ask with the key that names one
             foreach (var e in elements)
                 if (!c.Elements.Contains(e))
                     c.Elements.Add(e);
@@ -279,15 +295,19 @@ public static class ResultViews
                 continue;
             }
             foreach (var a in asks)
-                Add(KindOf(a.Kind, a.Field), a.Key, a.Headline, a.Why, a.Field, a.Elements, row);
+                Add(KindOf(a.Kind, a.Field), a.Key, a.Headline, a.Why, a.Field, a.Elements, row, a.DependsOn);
         }
         return order.GroupBy(k => k.Item1).OrderBy(g => g.Key).Select(g =>
         {
             var list = g.Select(k => (k, c: cards[k]))
-                        .Select(x => new FixCard(x.k.Item2, x.k.Item1, x.c.Headline, x.c.Why, x.c.Field, x.c.Elements, x.c.Rows))
+                        .Select(x => new FixCard(x.k.Item2, x.k.Item1, x.c.Headline, x.c.Why, x.c.Field, x.c.Elements, x.c.Rows)
+                        {
+                            DependsOn = parents.GetValueOrDefault(x.k),
+                        })
                         .OrderByDescending(c => c.Rows.Count).ToList();   // stable: ties keep the answer's order
             var all = rows.Select(r => r.Row).Where(r => list.Any(c => c.Rows.Contains(r))).ToList();
-            var (title, sub) = GroupWords(g.Key, list, all.Count);
+            // the questions card counts the questions it shows: a follow-up held back until its parent is answered isn't one yet
+            var (title, sub) = GroupWords(g.Key, g.Key == FixKind.Answer ? ProjectQuestions.Arrange(list, _ => null) : list, all.Count);
             return new FixGroup(g.Key, title, sub, list, all);
         }).ToList();
     }
@@ -320,8 +340,10 @@ public static class ResultViews
         return [.. model.Fix.SelectMany(g => g.Cards).Where(c => c.Rows.Any(r => r.Id == rowId))];
     }
 
-    /// <summary>One ask as the checker sent it (<c>asks[]</c>).</summary>
-    public sealed record Ask(string Kind, string Key, string Headline, string? Why, string? Field, IReadOnlyList<string> Elements);
+    /// <summary>One ask as the checker sent it (<c>asks[]</c>): its kind, key, headline, why, field and elements, and
+    /// on a follow-up question the question it hangs on (<c>depends_on</c>), else null.</summary>
+    public sealed record Ask(string Kind, string Key, string Headline, string? Why, string? Field, IReadOnlyList<string> Elements,
+                             DependsOn? DependsOn = null);
 
     /// <summary>A row's asks; an ask without a key or a headline is not one the pane can show, so it is left out here
     /// and the row, if that leaves it none, is shown for a person to decide (never dropped).</summary>
@@ -337,9 +359,28 @@ public static class ResultViews
             var elements = a.TryGetProperty("elements", out var es) && es.ValueKind == JsonValueKind.Array
                 ? es.EnumerateArray().Where(e => e.ValueKind == JsonValueKind.String).Select(e => e.GetString()!).Distinct().ToList()
                 : [];
-            list.Add(new Ask(Str(a, "kind") ?? "decide", key, headline, Str(a, "why"), Str(a, "field"), elements));
+            list.Add(new Ask(Str(a, "kind") ?? "decide", key, headline, Str(a, "why"), Str(a, "field"), elements, DependsOnOf(a)));
         }
         return list;
+    }
+
+    /// <summary>An ask's <c>depends_on</c> ({field, moot_if?}), its moot answers in the form's words (true "Yes", false
+    /// "No", a word or a number as written); null when it has none or names no field (then it is asked as any other).</summary>
+    public static DependsOn? DependsOnOf(JsonElement ask)
+    {
+        if (ask.ValueKind != JsonValueKind.Object || !ask.TryGetProperty("depends_on", out var d) || Str(d, "field") is not { Length: > 0 } field)
+            return null;
+        var moot = new List<string>();
+        if (d.TryGetProperty("moot_if", out var m) && m.ValueKind == JsonValueKind.Array)
+            foreach (var v in m.EnumerateArray())
+                switch (v.ValueKind)
+                {
+                    case JsonValueKind.True: moot.Add("Yes"); break;
+                    case JsonValueKind.False: moot.Add("No"); break;
+                    case JsonValueKind.String: moot.Add(v.GetString()!); break;
+                    case JsonValueKind.Number: moot.Add(v.GetRawText()); break;
+                }
+        return new DependsOn(field, moot);
     }
 
     private static string? Str(JsonElement o, string name) =>

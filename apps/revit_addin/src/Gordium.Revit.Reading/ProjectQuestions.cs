@@ -28,12 +28,108 @@ public static class ProjectQuestions
     /// <summary>What a question Gordium has no field for says.</summary>
     public const string NoField = "Gordium has no field for this in Revit yet. Decide it by hand from its results.";
 
-    /// <summary>The questions of an "Answer" group, in its cards' order (the most results first), each with its field.</summary>
-    public static IReadOnlyList<ProjectQuestion> Of(FixGroup group, IReadOnlyList<SetupField>? fields)
+    /// <summary>The questions of an "Answer" group the card shows, each with its field: in its cards' order (the most
+    /// results first), a follow-up right after the question it hangs on (<see cref="FixCard.DependsOn"/>). A follow-up
+    /// whose parent is asked here is held back until the parent is answered (chosen in <paramref name="draft"/>, or
+    /// what its mark holds), hidden once that answer makes it moot, and shown once it is answered otherwise. Its results
+    /// are never dropped: a follow-up not shown leaves them on its nearest shown parent (they wait on that question
+    /// first), still in review.</summary>
+    public static IReadOnlyList<ProjectQuestion> Of(FixGroup group, IReadOnlyList<SetupField>? fields, SetupDraft? draft = null)
     {
         ArgumentNullException.ThrowIfNull(group);
-        return [.. group.Cards.Select(c => new ProjectQuestion(c, FieldFor(c.Field, fields ?? [])))];
+        var all = fields ?? [];
+        string? AnswerOf(FixCard parent) =>
+            FieldFor(parent.Field, all) is not { } f ? null
+            : draft?.Chosen(f.Mark) ?? (f.IsSet ? f.CurrentChoice?.Value ?? f.Current : null);
+        return [.. Arrange(group.Cards, AnswerOf).Select(c => new ProjectQuestion(c, FieldFor(c.Field, all)))];
     }
+
+    /// <summary>What a follow-up question is in the card now.</summary>
+    private enum Shown { Yes, Held, Moot }
+
+    /// <summary>The cards the questions card shows, in its order (<see cref="Of"/>), given the answer each parent question
+    /// has (<paramref name="answerOf"/>: null while unanswered). A follow-up is held back or hidden only when the
+    /// question it hangs on is one of <paramref name="cards"/> (else its parent is answered in the project already,
+    /// and the checker still asks it); a shown card carries the results of the follow-ups not shown under it.</summary>
+    public static IReadOnlyList<FixCard> Arrange(IReadOnlyList<FixCard> cards, Func<FixCard, string?> answerOf)
+    {
+        ArgumentNullException.ThrowIfNull(cards);
+        ArgumentNullException.ThrowIfNull(answerOf);
+        var byField = new Dictionary<string, FixCard>(StringComparer.Ordinal);
+        foreach (var c in cards)
+            if (c.Field is { Length: > 0 } f)
+                byField.TryAdd(f, c);
+        FixCard? Named(FixCard c) =>
+            c.DependsOn is { } d && byField.TryGetValue(d.Field, out var p) && !ReferenceEquals(p, c) ? p : null;
+        // a card whose chain of parents loops (two follow-ups naming each other) is asked as any other: never held
+        // back on a question that is itself held back on it
+        bool Loops(FixCard c)
+        {
+            var seen = new HashSet<FixCard>(ReferenceEqualityComparer.Instance) { c };
+            for (var p = Named(c); p is not null; p = Named(p))
+                if (!seen.Add(p))
+                    return true;
+            return false;
+        }
+        var looping = cards.Where(Loops).ToHashSet(ReferenceEqualityComparer.Instance);
+        FixCard? ParentOf(FixCard c) => looping.Contains(c) ? null : Named(c);
+        var state = new Dictionary<FixCard, Shown>(ReferenceEqualityComparer.Instance);
+        Shown StateOf(FixCard c)
+        {
+            if (state.TryGetValue(c, out var s))
+                return s;
+            if (ParentOf(c) is not { } parent)
+                return Shown.Yes;                                // no parent asked here (or a loop): asked as any other
+            var ps = StateOf(parent);
+            s = ps != Shown.Yes ? ps                             // under a parent held back or moot: so is this one
+                : answerOf(parent) is not { } answer ? Shown.Held
+                : c.DependsOn!.MootIf.Any(m => Same(m, answer)) ? Shown.Moot : Shown.Yes;
+            state[c] = s;
+            return s;
+        }
+        FixCard ShownAbove(FixCard c)
+        {
+            while (StateOf(c) != Shown.Yes && ParentOf(c) is { } p)    // a card not shown has a parent; no loop is followed
+                c = p;
+            return c;
+        }
+        // the results of the follow-ups not shown, on the question shown above each
+        var carried = new Dictionary<FixCard, List<ResultRow>>(ReferenceEqualityComparer.Instance);
+        foreach (var c in cards.Where(c => StateOf(c) != Shown.Yes))
+        {
+            var above = ShownAbove(c);
+            if (!carried.TryGetValue(above, out var list))
+                carried[above] = list = [.. above.Rows];
+            foreach (var r in c.Rows)
+                if (!list.Contains(r))
+                    list.Add(r);
+        }
+        FixCard Carrying(FixCard c) =>
+            carried.TryGetValue(c, out var rows) && rows.Count > c.Rows.Count ? c with { Rows = rows } : c;
+        // each question shown, then the follow-ups shown under it (in the cards' order)
+        var shown = cards.Where(c => StateOf(c) == Shown.Yes).ToList();
+        var placed = new HashSet<FixCard>(ReferenceEqualityComparer.Instance);
+        var order = new List<FixCard>();
+        void Place(FixCard c)
+        {
+            if (!placed.Add(c))
+                return;
+            order.Add(Carrying(c));
+            foreach (var child in shown.Where(x => ReferenceEquals(ParentOf(x), c)))
+                Place(child);
+        }
+        foreach (var c in shown.Where(c => ParentOf(c) is null))   // a card shown has no parent, or one shown
+            Place(c);
+        return order;
+    }
+
+    /// <summary>Whether an answer is one of the moot ones: the same word (Yes, No, a choice's word, in any case), or
+    /// the same number.</summary>
+    private static bool Same(string moot, string answer) =>
+        string.Equals(moot.Trim(), answer.Trim(), StringComparison.OrdinalIgnoreCase)
+        || double.TryParse(moot, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var a)
+           && double.TryParse(answer, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var b)
+           && a == b;
 
     /// <summary>The Setup field that answers <paramref name="field"/> (an ask's fact: the mark that feeds it), or null
     /// when Gordium has none in Revit for it (or the fact is the street edge, picked on the plan).</summary>

@@ -1176,7 +1176,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         var labels = _content?.Labels;
         var stale = _content?.Model?.Stale is not null;
         var layout = _content?.Model?.Views is { } views
-            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale, _content?.Questions)
+            ? ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, labels, stale, _content?.Questions, _answers)
             : ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),
                                     _summary is not null && AllCards.Count > 0, _filter, _search.Text);
         _entries = _summary is null ? layout : ResultList.WithSummary(layout);
@@ -1607,7 +1607,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     /// keyboard on it (the view chosen for the project is not changed by this).</summary>
     public void Answer()
     {
-        if (_content?.Model?.Views is not { } views || _detailId is not { } id || ResultViewList.AnswerKeys(views, id) is not { Count: > 0 } keys)
+        if (_content?.Model?.Views is not { } views || _detailId is not { } id || ResultViewList.AnswerKeys(views, id, _content?.Questions, _answers) is not { Count: > 0 } keys)
             return;
         _detailId = null;
         _bodyHost.Child = _results;
@@ -1625,9 +1625,24 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
 
     public SetupDraft Answers => _answers;
 
-    /// <summary>A question answered (in the draft only): the card's Save says how many answers it would write.</summary>
+    /// <summary>A question answered (in the draft only): the card's Save says how many answers it would write; and when
+    /// the answer brings in or hides a follow-up question ("Is the ADU detached?" once "Is there an ADU?" is Yes), the
+    /// list again, the keyboard kept on the question answered.</summary>
     public void Answered()
     {
+        if (_content?.Model?.Views is { } views)
+        {
+            var after = ResultViewList.Layout(views, _placed, _view, _openView, _search.Text, _content.Labels, _content.Model.Stale is not null,
+                                              _content.Questions, _answers);
+            if (ResultViewList.QuestionsDiffer(_entries, after))
+            {
+                var on = Within<C.ListBoxItem>(I.Keyboard.FocusedElement as W.DependencyObject)?.DataContext is QuestionItem q ? q.Entry.Key : null;
+                Relayout();
+                var at = on is null ? -1 : _items.FindIndex(i => i is QuestionItem x && x.Entry.Key == on);
+                if (at >= 0)
+                    FocusEntry(at);
+            }
+        }
         foreach (var e in Descendants(_list))
             if (e is C.Button { Tag: AnswerFootItem foot } save)
             {
@@ -1756,7 +1771,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             _filter = ListFilter.All;
             _opened.Add(ListSection.Complies);
             if (_content?.Model?.Views is { } views)
-                _openView.UnionWith(ResultViewList.PathTo(views, _view, id));
+                _openView.UnionWith(ResultViewList.PathTo(views, _view, id, _content?.Questions, _answers));
             _search.Text = "";
             Chips(_content?.Model?.Stale is not null);
             Relayout();
