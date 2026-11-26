@@ -176,7 +176,9 @@ public sealed class ReadStepsTests
         // PR 8: the worker is started on a pool thread before the read, and waited for on Revit's thread only when
         // the read asks it which objects are left out (the step worker_wait, inside prepare)
         Assert.DoesNotContain("worker_start", source);
-        Assert.Contains("new WorkerLeftOut(ReadSteps.Time(\"worker_wait\", () => worker.GetAwaiter().GetResult()))", source);
+        // (UI polish PR 5: the wait's failure is the checker's, WorkerUnavailableException; the step is still timed)
+        Assert.Contains("client = ReadSteps.Time(\"worker_wait\", () => worker.GetAwaiter().GetResult());", source);
+        Assert.Contains("return new WorkerLeftOut(client).AskAsync(", source);
         Assert.Contains("ReadSteps.Time(\"prepare\", () => ProjectCheck.PrepareAsync(outside, inside, new StartedLeftOut(worker), anyway: anyway).GetAwaiter().GetResult())", source);
         Assert.Contains("using (ReadSteps.Step(\"log_request\"))", source);
         // logged when nothing is sent, when it is, and on a failure (then rethrown)
