@@ -326,6 +326,9 @@ def test_not_below_grade_cant_stand_beside_a_ground_where_no_clear_bottom_is_kno
     # round 5: past what any ladder may (over 6 in, or a well 44 in deep or less), the reach settles it, whatever the ladder
     ({"ladder": "ladder_blocked", "ladder_encroachment": 8}, "ladder_encroachment", "reaching 8 in"),
     ({"ladder": "ladder_blocked", "depth": 44, "ladder_encroachment": 3}, "ladder_encroachment", "reaching 3 in"),
+    # round 6, kept as chosen: a blocked ladder within 6 in and no depth stated opens the ladder (no single mark
+    # settles it; the blocked ladder is the defect 1031.5.2 names, and the depth is asked next)
+    ({"ladder": "ladder_blocked", "depth": None}, "ladder", "that the open window or door blocks, reaching 4 in"),
     ({"other_encroachment": None}, "other_encroachment", "doesn't state how far anything other"),
     ({"ladder_encroachment": None}, "ladder_encroachment", "doesn't state how far its ladder or steps reach")])
 def test_a_held_back_size_names_what_settles_it(left, field, words):
