@@ -1987,7 +1987,8 @@ STOP_CASES = {
         area_well={"floor_elevation": -10, "width": 36, "projection": 36}, stated_well={})),
     "well_below_disagree": _with(base, lambda d: d["openings"][0].update(ground_outside=30,
                                                                           stated_well={"below_grade": False})),
-    "well_size_held_back": _set(("openings", 0, "stated_well"), {"width": 36, "other_encroachment": 2}),
+    "well_size_reach_not_stated": _set(("openings", 0, "stated_well"), {"width": 36}),
+    "well_size_reach_over": _set(("openings", 0, "stated_well"), {"width": 36, "other_encroachment": 2}),
 }
 
 

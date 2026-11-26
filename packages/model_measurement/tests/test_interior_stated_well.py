@@ -99,7 +99,11 @@ def test_a_wells_size_is_held_back_while_anything_but_the_required_ladder_may_re
         well["other_encroachment"] = 10
     m, stopped, _ = opening_measures(stated(well))
     for k in ("area_well_area", "area_well_width", "area_well_projection"):
-        assert k not in m and "size isn't handed to the rules" in stopped[k], (word, reach, k)
+        assert k not in m and "isn't handed to the rules" in stopped[k], (word, reach, k)
+    # review round 2: the card opens the reach's mark that settles it, never the size's (already set)
+    from design_checker import panel_data
+    assert panel_data.field_of_why("area_well_width", stopped["area_well_width"]) in (
+        "openings[].stated_well.other_encroachment", "openings[].stated_well.ladder_encroachment")
     assert (m["area_well_ladder"], m["area_well_steps"]) == LADDER_WORDS[word]
     got = _house_outcomes({**well, "depth": 30, "width": 36, "projection": 36, "area": 36 * 36})
     assert "pass" not in {got[r] for r in HOUSE_SIZE_RULES}, got
@@ -303,3 +307,10 @@ def test_only_the_required_ladder_may_reach_into_the_well_for_its_size_to_be_han
             if v is not None}
     m, _, _ = opening_measures(stated(well))
     assert ("area_well_width" in m) is handed, (ladder, depth, reach)
+
+
+def test_not_below_grade_cant_stand_beside_a_ground_where_no_clear_bottom_is_known():
+    # review round 2: with the clear opening unread, a ground given can't be compared, so "not below" isn't taken
+    d = stated({"below_grade": False}, ground_outside=30, operation="awning")       # awning: needs a maker's opening
+    m, stopped, _ = opening_measures(d)
+    assert "opening_below_grade" not in m and "bottom isn't known" in stopped["opening_below_grade"]
