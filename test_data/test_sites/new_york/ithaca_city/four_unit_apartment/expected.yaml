@@ -187,6 +187,16 @@ results:
   general.bc_1031_3_2_escape_opening_min_width: needs_review
   general.bc_1031_3_3_escape_opening_max_sill_height: needs_review
   general.bc_1031_4_escape_door_swinging_or_sliding: needs_review
+  # section group 8c: the same for the area-well rules (openings not read); drainage and bars are person's checks
+  general.bc_1031_5_area_well_required: needs_review
+  general.bc_1031_5_1_area_well_min_projection: needs_review
+  general.bc_1031_5_1_area_well_min_width: needs_review
+  general.bc_1031_5_1_area_well_allows_full_opening: needs_review
+  general.bc_1031_5_2_area_well_ladder_over_44: needs_review
+  general.bc_1031_5_2_1_area_well_ladder: needs_review
+  general.bc_1031_5_2_2_area_well_steps: needs_review
+  general.bc_1031_5_3_area_well_drainage: needs_review
+  general.bc_1031_6_bars_grilles_covers_screens: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

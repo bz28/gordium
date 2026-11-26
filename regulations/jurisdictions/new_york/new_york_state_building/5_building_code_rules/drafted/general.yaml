@@ -17149,3 +17149,2293 @@ rules:
     round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1031_5_area_well_required
+  kind: rule
+  topic: means_of_egress
+  title: An area well of at least 9 sq ft below grade (BCNYS 1031.5, 1031.5.1)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (not opening_below_grade or area_well_area >= 9) or opening_room_fourth_or_higher or (occupancy_group in ["R-2"]
+    and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or area_well_area >= 9) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft, but its room has a door to outside: exception
+      2 sets the opening aside where that door is an exit or exit access door opening directly into a public way, or a yard,
+      court or exterior egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or area_well_area >= 9) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      or sprinklered_903_3_1_3)
+    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft, in a Group R-2 or R-3 building sprinklered
+      throughout (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two
+      means of egress, or one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or area_well_area >= 9) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft, but its room has another escape opening
+      marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window
+      needn''t meet 1031.3): a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or area_well_area >= 9)
+    reason: 'The opening is below the adjacent grade with no area well of 9 sq ft, in a building of two or more groups: whether
+      its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 38
+    - 39
+    quote: 1031.5 Area wells. An emergency escape and rescue opening with the bottom of the clear opening below the adjacent
+      grade shall be provided with an area well in accordance with Sections 1031.5.1 through 1031.5.3.
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 40
+    - 44
+    quote: '1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with
+      a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape
+      and rescue opening to be fully opened. Exception: The ladder or steps required by Section 1031.5.2 shall be permitted
+      to encroach not more than 6 inches (152 mm) into the required dimensions of the area well.'
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 9
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 8
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening is below the adjacent grade
+      with no area well of 9 sq ft.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 8
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 8
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 8
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 8
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 8
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 8
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). An opening whose bottom is below the adjacent grade has an area well (1031.5) of at least 9 sq ft horizontal
+    area (1031.5.1); no well read is no area. It applies only where 1031.2 requires the opening: its room''s facts are copied
+    onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are
+    shown to reach two or more exits; it needs review where the room has a door to outside (exception 2), in a sprinklered
+    Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the room has another escape opening
+    marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted
+    in a Claude Code session (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_5_1_area_well_min_projection
+  kind: rule
+  topic: means_of_egress
+  title: Area well at least 36 in out from the wall (BCNYS 1031.5.1)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (not opening_below_grade or area_well_projection >= 36) or opening_room_fourth_or_higher or (occupancy_group in ["R-2"]
+    and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or area_well_projection >= 36) and not
+      opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening has an area well under 36 inches out, but its room has a door to outside: exception 2 sets the opening
+      aside where that door is an exit or exit access door opening directly into a public way, or a yard, court or exterior
+      egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or area_well_projection >= 36) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      or sprinklered_903_3_1_3)
+    reason: 'The opening has an area well under 36 inches out, in a Group R-2 or R-3 building sprinklered throughout (stated,
+      or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or
+      one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or area_well_projection >= 36) and not
+      opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening has an area well under 36 inches out, but its room has another escape opening marked: 1031.2 asks
+      each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
+      a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or area_well_projection >= 36) and not
+      opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and area_well_ladder
+    reason: 'The area well is under 36 inches there, but it has a ladder or steps, which may encroach up to 6 inches into
+      the required dimensions (1031.5.1 exception): a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or area_well_projection >= 36)
+    reason: 'The opening has an area well under 36 inches out, in a building of two or more groups: whether its room is in
+      a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 40
+    - 44
+    quote: '1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with
+      a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape
+      and rescue opening to be fully opened. Exception: The ladder or steps required by Section 1031.5.2 shall be permitted
+      to encroach not more than 6 inches (152 mm) into the required dimensions of the area well.'
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 36
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening has an area well under 36 inches
+      out.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 35
+          area_well_ladder: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). Its area well''s horizontal projection is 36 inches or more; a ladder or steps may encroach up to 6 inches
+    (a review). It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on
+    the fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more
+    exits; it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building
+    (exception 5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one
+    per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session
+    (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_5_1_area_well_min_width
+  kind: rule
+  topic: means_of_egress
+  title: Area well at least 36 in wide (BCNYS 1031.5.1)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (not opening_below_grade or area_well_width >= 36) or opening_room_fourth_or_higher or (occupancy_group in ["R-2"]
+    and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or area_well_width >= 36) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening has an area well under 36 inches wide, but its room has a door to outside: exception 2 sets the opening
+      aside where that door is an exit or exit access door opening directly into a public way, or a yard, court or exterior
+      egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or area_well_width >= 36) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      or sprinklered_903_3_1_3)
+    reason: 'The opening has an area well under 36 inches wide, in a Group R-2 or R-3 building sprinklered throughout (stated,
+      or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or
+      one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or area_well_width >= 36) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening has an area well under 36 inches wide, but its room has another escape opening marked: 1031.2 asks
+      each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
+      a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or area_well_width >= 36) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and area_well_ladder
+    reason: 'The area well is under 36 inches there, but it has a ladder or steps, which may encroach up to 6 inches into
+      the required dimensions (1031.5.1 exception): a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or area_well_width >= 36)
+    reason: 'The opening has an area well under 36 inches wide, in a building of two or more groups: whether its room is in
+      a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 40
+    - 44
+    quote: '1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with
+      a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape
+      and rescue opening to be fully opened. Exception: The ladder or steps required by Section 1031.5.2 shall be permitted
+      to encroach not more than 6 inches (152 mm) into the required dimensions of the area well.'
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 36
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening has an area well under 36 inches
+      wide.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 35
+          area_well_ladder: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 35
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). Its area well''s width is 36 inches or more; a ladder or steps may encroach up to 6 inches (a review).
+    It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth
+    story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it
+    needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
+    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
+    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_5_1_area_well_allows_full_opening
+  kind: rule
+  topic: means_of_egress
+  title: Area well lets the escape opening open fully (BCNYS 1031.5.1)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (not opening_below_grade or opening_fully_openable) or opening_room_fourth_or_higher or (occupancy_group in ["R-2"]
+    and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or opening_fully_openable) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening can''t open fully in its area well, but its room has a door to outside: exception 2 sets the opening
+      aside where that door is an exit or exit access door opening directly into a public way, or a yard, court or exterior
+      egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or opening_fully_openable) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      or sprinklered_903_3_1_3)
+    reason: 'The opening can''t open fully in its area well, in a Group R-2 or R-3 building sprinklered throughout (stated,
+      or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or
+      one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or opening_fully_openable) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening can''t open fully in its area well, but its room has another escape opening marked: 1031.2 asks each
+      sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
+      a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or opening_fully_openable)
+    reason: 'The opening can''t open fully in its area well, in a building of two or more groups: whether its room is in a
+      Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 40
+    - 42
+    quote: 1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with
+      a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape
+      and rescue opening to be fully opened.
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          opening_fully_openable: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          opening_fully_openable: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening can''t open fully in its area
+      well.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_below_grade: true
+          opening_fully_openable: false
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          opening_fully_openable: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_below_grade: true
+          opening_fully_openable: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_below_grade: true
+          opening_fully_openable: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          opening_fully_openable: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          opening_fully_openable: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). Its area well allows the opening to be fully opened. It applies only where 1031.2 requires the opening:
+    its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2
+    where the room''s occupants are shown to reach two or more exits; it needs review where the room has a door to outside
+    (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the
+    room has another escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known
+    (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_5_2_area_well_ladder_over_44
+  kind: rule
+  topic: means_of_egress
+  title: A ladder or steps in an area well over 44 in deep (BCNYS 1031.5.2)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (not opening_below_grade or not area_well_depth > 44 or area_well_ladder) or opening_room_fourth_or_higher or (occupancy_group
+    in ["R-2"] and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or not area_well_depth > 44 or area_well_ladder)
+      and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening is in an area well over 44 inches deep with no ladder or steps, but its room has a door to outside:
+      exception 2 sets the opening aside where that door is an exit or exit access door opening directly into a public way,
+      or a yard, court or exterior egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or not area_well_depth > 44 or area_well_ladder)
+      and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1
+      or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+    reason: 'The opening is in an area well over 44 inches deep with no ladder or steps, in a Group R-2 or R-3 building sprinklered
+      throughout (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two
+      means of egress, or one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or not area_well_depth > 44 or area_well_ladder)
+      and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening is in an area well over 44 inches deep with no ladder or steps, but its room has another escape opening
+      marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window
+      needn''t meet 1031.3): a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or not area_well_depth > 44 or area_well_ladder)
+    reason: 'The opening is in an area well over 44 inches deep with no ladder or steps, in a building of two or more groups:
+      whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 45
+    - 48
+    quote: 1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped
+      with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape
+      and rescue opening when the window or door is in the open position. Ladders or steps required by this section shall
+      not be required to comply with Section 1011.
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening is in an area well over 44
+      inches deep with no ladder or steps.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: false
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). An area well deeper than 44 inches has a permanently affixed ladder or steps, not obstructed by the open
+    window or door. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies
+    on the fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or
+    more exits; it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building
+    (exception 5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one
+    per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session
+    (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_5_2_1_area_well_ladder
+  kind: rule
+  topic: means_of_egress
+  title: Area well ladder size and rung spacing (BCNYS 1031.5.2.1)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (not opening_below_grade or not area_well_ladder or area_well_steps or (area_well_ladder_width >= 12 and area_well_ladder_projection
+    >= 3 and area_well_rung_spacing <= 18 and area_well_ladder_full_height)) or opening_room_fourth_or_higher or (occupancy_group
+    in ["R-2"] and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or not area_well_ladder or area_well_steps
+      or (area_well_ladder_width >= 12 and area_well_ladder_projection >= 3 and area_well_rung_spacing <= 18 and area_well_ladder_full_height))
+      and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening has an area well ladder short of 1031.5.2.1, but its room has a door to outside: exception 2 sets
+      the opening aside where that door is an exit or exit access door opening directly into a public way, or a yard, court
+      or exterior egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or not area_well_ladder or area_well_steps or
+      (area_well_ladder_width >= 12 and area_well_ladder_projection >= 3 and area_well_rung_spacing <= 18 and area_well_ladder_full_height))
+      and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1
+      or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+    reason: 'The opening has an area well ladder short of 1031.5.2.1, in a Group R-2 or R-3 building sprinklered throughout
+      (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress,
+      or one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or not area_well_ladder or area_well_steps
+      or (area_well_ladder_width >= 12 and area_well_ladder_projection >= 3 and area_well_rung_spacing <= 18 and area_well_ladder_full_height))
+      and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening has an area well ladder short of 1031.5.2.1, but its room has another escape opening marked: 1031.2
+      asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet
+      1031.3): a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or not area_well_ladder or area_well_steps
+      or (area_well_ladder_width >= 12 and area_well_ladder_projection >= 3 and area_well_rung_spacing <= 18 and area_well_ladder_full_height))
+      and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and not area_well_depth
+      > 44
+    reason: 'The area well''s ladder or steps fall short, but the well is no deeper than 44 inches (or its depth isn''t known),
+      so 1031.5.2 may not require them: whether a ladder the well doesn''t need must meet 1031.5.2.1 or 1031.5.2.2 isn''t
+      settled: a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or not area_well_ladder or area_well_steps or (area_well_ladder_width
+      >= 12 and area_well_ladder_projection >= 3 and area_well_rung_spacing <= 18 and area_well_ladder_full_height))
+    reason: 'The opening has an area well ladder short of 1031.5.2.1, in a building of two or more groups: whether its room
+      is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 49
+    - 51
+    quote: 1031.5.2.1 Ladders. Ladders or rungs shall have an inside width of at least 12 inches (305 mm), shall project at
+      least 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center (o.c.) vertically
+      for the full height of the area well.
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 45
+    - 48
+    quote: 1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped
+      with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape
+      and rescue opening when the window or door is in the open position. Ladders or steps required by this section shall
+      not be required to comply with Section 1011.
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_width: 12
+          area_well_ladder_projection: 3
+          area_well_rung_spacing: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_width: 11
+          area_well_ladder_projection: 3
+          area_well_rung_spacing: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening has an area well ladder short
+      of 1031.5.2.1.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_width: 11
+          area_well_ladder_projection: 3
+          area_well_rung_spacing: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_width: 11
+          area_well_ladder_projection: 3
+          area_well_rung_spacing: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_width: 11
+          area_well_ladder_projection: 3
+          area_well_rung_spacing: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_width: 11
+          area_well_ladder_projection: 3
+          area_well_rung_spacing: 18
+          area_well_ladder_full_height: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_width: 11
+          area_well_ladder_projection: 3
+          area_well_rung_spacing: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_width: 11
+          area_well_ladder_projection: 3
+          area_well_rung_spacing: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). Its area well''s ladder or rungs are at least 12 inches wide inside, project at least 3 inches from the
+    wall and are no more than 18 inches apart on center for the full height of the well. It applies only where 1031.2 requires
+    the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher, or
+    in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review where the room has a door
+    to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups,
+    where the room has another escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story
+    isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_5_2_2_area_well_steps
+  kind: rule
+  topic: means_of_egress
+  title: Area well steps' width, treads and risers (BCNYS 1031.5.2.2)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (not opening_below_grade or not area_well_steps or (area_well_ladder_width >= 12 and area_well_step_tread > 5 and
+    area_well_step_riser <= 18 and area_well_ladder_full_height)) or opening_room_fourth_or_higher or (occupancy_group in
+    ["R-2"] and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or not area_well_steps or (area_well_ladder_width
+      >= 12 and area_well_step_tread > 5 and area_well_step_riser <= 18 and area_well_ladder_full_height)) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening has area well steps short of 1031.5.2.2, but its room has a door to outside: exception 2 sets the
+      opening aside where that door is an exit or exit access door opening directly into a public way, or a yard, court or
+      exterior egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or not area_well_steps or (area_well_ladder_width
+      >= 12 and area_well_step_tread > 5 and area_well_step_riser <= 18 and area_well_ladder_full_height)) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      or sprinklered_903_3_1_3)
+    reason: 'The opening has area well steps short of 1031.5.2.2, in a Group R-2 or R-3 building sprinklered throughout (stated,
+      or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or
+      one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or not area_well_steps or (area_well_ladder_width
+      >= 12 and area_well_step_tread > 5 and area_well_step_riser <= 18 and area_well_ladder_full_height)) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening has area well steps short of 1031.5.2.2, but its room has another escape opening marked: 1031.2 asks
+      each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
+      a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or not area_well_steps or (area_well_ladder_width
+      >= 12 and area_well_step_tread > 5 and area_well_step_riser <= 18 and area_well_ladder_full_height)) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and not area_well_depth > 44
+    reason: 'The area well''s ladder or steps fall short, but the well is no deeper than 44 inches (or its depth isn''t known),
+      so 1031.5.2 may not require them: whether a ladder the well doesn''t need must meet 1031.5.2.1 or 1031.5.2.2 isn''t
+      settled: a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_below_grade or not area_well_steps or (area_well_ladder_width
+      >= 12 and area_well_step_tread > 5 and area_well_step_riser <= 18 and area_well_ladder_full_height))
+    reason: 'The opening has area well steps short of 1031.5.2.2, in a building of two or more groups: whether its room is
+      in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 52
+    - 53
+    quote: 1031.5.2.2 Steps. Steps shall have an inside width of not less than 12 inches (305 mm), shall have treads greater
+      than 5 inches (127 mm) in depth and a riser height not greater than 18 inches (457 mm) for the full height of the area
+      well.
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 45
+    - 48
+    quote: 1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped
+      with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape
+      and rescue opening when the window or door is in the open position. Ladders or steps required by this section shall
+      not be required to comply with Section 1011.
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_steps: true
+          area_well_ladder_width: 12
+          area_well_step_tread: 6
+          area_well_step_riser: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_steps: true
+          area_well_ladder_width: 12
+          area_well_step_tread: 5
+          area_well_step_riser: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening has area well steps short of
+      1031.5.2.2.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_steps: true
+          area_well_ladder_width: 12
+          area_well_step_tread: 5
+          area_well_step_riser: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_steps: true
+          area_well_ladder_width: 12
+          area_well_step_tread: 5
+          area_well_step_riser: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_steps: true
+          area_well_ladder_width: 12
+          area_well_step_tread: 5
+          area_well_step_riser: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_steps: true
+          area_well_ladder_width: 12
+          area_well_step_tread: 5
+          area_well_step_riser: 18
+          area_well_ladder_full_height: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_steps: true
+          area_well_ladder_width: 12
+          area_well_step_tread: 5
+          area_well_step_riser: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_depth: 50
+          area_well_steps: true
+          area_well_ladder_width: 12
+          area_well_step_tread: 5
+          area_well_step_riser: 18
+          area_well_ladder_full_height: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). Its area well''s steps are at least 12 inches wide inside, with treads deeper than 5 inches and risers
+    no higher than 18 inches for the full height of the well. It applies only where 1031.2 requires the opening: its room''s
+    facts are copied onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s
+    occupants are shown to reach two or more exits; it needs review where the room has a door to outside (exception 2), in
+    a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the room has another
+    escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured
+    yet). Hand-drafted in a Claude Code session (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_5_3_area_well_drainage
+  kind: flag
+  topic: means_of_egress
+  title: Area wells drain to the foundation drainage system (BCNYS 1031.5.3)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 54
+    - 57
+    quote: '1031.5.3 Drainage. Area wells shall be designed for proper drainage by connecting to the building’s foundation
+      drainage system required by Section 1805. Exception: A drainage system for area wells is not required where the foundation
+      is on well-drained soil or sand-gravel mixture soils in accordance with the United Soil Classification System, Group
+      I Soils, in accordance with Section 1803.5.1.'
+  examples:
+  - given:
+      occupancy_group: R-3
+    expect: needs_review
+    note: 'Each escape opening''s area well is designed for proper drainage, connected to the building''s foundation drainage
+      system (1805), except on well-drained soil or sand-gravel mixtures (Group I Soils, 1803.5.1): drainage and soils aren''t
+      in the model, so a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: Not Group R-2, R-3 or R-4.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 8c.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_6_bars_grilles_covers_screens
+  kind: flag
+  topic: means_of_egress
+  title: Bars, grilles, covers and screens over escape openings (BCNYS 1031.6)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 58
+    - 59
+    quote: 1031.6 Bars, grilles, covers and screens. Where bars, grilles, covers, screens or similar devices are placed over
+      emergency escape and rescue openings or area wells that serve such openings, the minimum net clear opening size shall
+      comply with Sections 1031.3
+  - file: gov.ny.building.2025.pdf
+    page: 361
+    lines:
+    - 3
+    - 4
+    quote: and 1031.5. Such devices shall be releasable or removable from the inside without the use of a key, tool or force
+      greater than that which is required for normal operation of the emergency escape and rescue opening.
+  examples:
+  - given:
+      occupancy_group: R-3
+    expect: needs_review
+    note: 'Bars, grilles, covers, screens or similar devices over escape openings or their area wells leave the net clear
+      opening of 1031.3 and 1031.5, and are releasable or removable from inside without a key, tool or more force than the
+      opening''s normal operation: such devices aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: Not Group R-2, R-3 or R-4.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 8c.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft

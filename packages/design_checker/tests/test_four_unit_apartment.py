@@ -202,9 +202,9 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     1010.1.6 and 1010.1.7 (42; 1010.1.3.2's is a door's row, not a building line); section group 6d 1010.2 to
     1010.2.6 and Table 1010.2.4 (50; 1010.2.7's is for Groups E, B and I-4); section group 6e 1010.2.8.1 to
     1010.2.12.1, 1010.2.14 and 1010.2.15 (61; 1010.2.13's is for Groups I-1 and I-2); section group 8a 1031.2's basements and public way and
-    1031.2.1 (64)."""
+    1031.2.1 (64); section group 8c 1031.5.3's drainage and 1031.6's bars (66)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 64 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 66 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -478,7 +478,12 @@ def test_escape_openings_as_sent_and_with_one_room_stated_a_sleeping_room(got):
 
 SIZES = ("general.bc_1031_3_1_escape_opening_min_area", "general.bc_1031_3_2_escape_opening_min_height",
          "general.bc_1031_3_2_escape_opening_min_width", "general.bc_1031_3_3_escape_opening_max_sill_height",
-         "general.bc_1031_4_escape_door_swinging_or_sliding")
+         "general.bc_1031_4_escape_door_swinging_or_sliding",
+         # section group 8c: the area-well rules, per opening the same way
+         "general.bc_1031_5_area_well_required", "general.bc_1031_5_1_area_well_min_projection",
+         "general.bc_1031_5_1_area_well_min_width", "general.bc_1031_5_1_area_well_allows_full_opening",
+         "general.bc_1031_5_2_area_well_ladder_over_44", "general.bc_1031_5_2_1_area_well_ladder",
+         "general.bc_1031_5_2_2_area_well_steps")
 
 
 def test_escape_opening_sizes_as_sent_and_with_the_openings_stated_none(got):

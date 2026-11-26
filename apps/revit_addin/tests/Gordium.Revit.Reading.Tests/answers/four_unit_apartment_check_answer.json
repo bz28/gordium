@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 105 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 107 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1371,6 +1371,13 @@
     "Emergency escape openings · Escape opening at least 20 in wide: Emergency escape openings: the emergency escape openings aren't read yet",
     "Emergency escape openings · Escape opening's sill at most 44 in above the floor: Emergency escape openings: the emergency escape openings aren't read yet",
     "Emergency escape openings · An escape door is a swinging or sliding door: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · An area well of at least 9 sq ft below grade: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · Area well at least 36 in out from the wall: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · Area well at least 36 in wide: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · Area well lets the escape opening open fully: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · A ladder or steps in an area well over 44 in deep: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · Area well ladder size and rung spacing: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · Area well steps' width: Emergency escape openings: the emergency escape openings aren't read yet",
     "Egress · Group I-4: A person checks this (Gordium doesn't decide it): Which group the building is in decides every limit below; the architect states it, a person confirms.",
     "Egress · Child day care classified Group E: A person checks this (Gordium doesn't decide it): More than five but not more than 100 children 2 1/2 or younger, in rooms on a level of exit discharge each with an exit door directly outside: Group E, not I-4; the architect states it.",
     "Egress · Care during religious functions: A person checks this (Gordium doesn't decide it): Part of the primary occupancy: the architect states it.",
@@ -1451,6 +1458,8 @@
     "Egress · An escape opening in each basement: A person checks this (Gordium doesn't decide it): A basement has at least one emergency escape and rescue opening (each of its sleeping rooms one, its adjoining areas none), except a basement with a ceiling under 80 inches, one with an exit door or exit access door opening directly into a public way, or a yard, court or exterior egress balcony leading to one, one without habitable spaces of 200 square feet or less, and a storm shelter built to ICC 500 (in Group R-2, only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit): basements aren't read in the model, so a person's check.",
     "Egress · Escape openings open to a public way: A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening opens directly into a public way, or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way: what lies outside each opening isn't in the model, so a person's check.",
     "Egress · Escape openings work from inside without keys or tools: A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening operates from inside the room without keys or tools; window-opening control devices complying with ASTM F2090 are permitted on a window serving as one: how each opening works isn't in the model, so a person's check.",
+    "Egress · Area wells drain to the foundation drainage system: A person checks this (Gordium doesn't decide it): Each escape opening's area well is designed for proper drainage, connected to the building's foundation drainage system (1805), except on well-drained soil or sand-gravel mixtures (Group I Soils, 1803.5.1): drainage and soils aren't in the model, so a person's check.",
+    "Egress · Bars: A person checks this (Gordium doesn't decide it): Bars, grilles, covers, screens or similar devices over escape openings or their area wells leave the net clear opening of 1031.3 and 1031.5, and are releasable or removable from inside without a key, tool or more force than the opening's normal operation: such devices aren't in the model, so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
@@ -63766,6 +63775,1193 @@
      }
     },
     {
+     "id": "general.bc_1031_5_area_well_required@-/-",
+     "rule": "general.bc_1031_5_area_well_required",
+     "name": "Emergency escape openings · An area well of at least 9 sq ft below grade (BCNYS 1031.5, 1031.5.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.5 Area wells. An emergency escape and rescue opening with the bottom of the clear opening below the adjacent grade shall be provided with an area well in accordance with Sections 1031.5.1 through 1031.5.3.",
+        "where": "1031.5, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         38,
+         39
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape and rescue opening to be fully opened. Exception: The ladder or steps required by Section 1031.5.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well.",
+        "where": "1031.5.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         40,
+         44
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.5, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         38,
+         39
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         40,
+         44
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "words": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:area_well_area:",
+       "words": "area well area not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_area"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.5",
+      "quote": "1031.5 Area wells. An emergency escape and rescue opening with the bottom of the clear opening below the adjacent grade shall be provided with an area well in accordance with Sections 1031.5.1 through 1031.5.3."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "why": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade",
+       "kind": "fix_model",
+       "headline": "Fix the model so the below grade can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:area_well_area:",
+       "why": "area well area not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_area",
+       "kind": "fix_model",
+       "headline": "Fix the model so the area well area can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "An area well of at least 9 sq ft below grade",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.5",
+      "piece_title": "Area wells"
+     }
+    },
+    {
+     "id": "general.bc_1031_5_1_area_well_min_projection@-/-",
+     "rule": "general.bc_1031_5_1_area_well_min_projection",
+     "name": "Emergency escape openings · Area well at least 36 in out from the wall (BCNYS 1031.5.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape and rescue opening to be fully opened. Exception: The ladder or steps required by Section 1031.5.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well.",
+        "where": "1031.5.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         40,
+         44
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.5.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         40,
+         44
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "words": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:area_well_projection:",
+       "words": "area well projection not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_projection"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.5.1",
+      "quote": "1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape and rescue opening to be fully opened. Exception: The ladder or steps required by Section 1031.5.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "why": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade",
+       "kind": "fix_model",
+       "headline": "Fix the model so the below grade can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:area_well_projection:",
+       "why": "area well projection not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_projection",
+       "kind": "fix_model",
+       "headline": "Fix the model so the area well projection can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "Area well at least 36 in out from the wall",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.5.1",
+      "piece_title": "Minimum size"
+     }
+    },
+    {
+     "id": "general.bc_1031_5_1_area_well_min_width@-/-",
+     "rule": "general.bc_1031_5_1_area_well_min_width",
+     "name": "Emergency escape openings · Area well at least 36 in wide (BCNYS 1031.5.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape and rescue opening to be fully opened. Exception: The ladder or steps required by Section 1031.5.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well.",
+        "where": "1031.5.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         40,
+         44
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.5.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         40,
+         44
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "words": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:area_well_width:",
+       "words": "area well width not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_width"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.5.1",
+      "quote": "1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape and rescue opening to be fully opened. Exception: The ladder or steps required by Section 1031.5.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "why": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade",
+       "kind": "fix_model",
+       "headline": "Fix the model so the below grade can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:area_well_width:",
+       "why": "area well width not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_width",
+       "kind": "fix_model",
+       "headline": "Fix the model so the area well width can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "Area well at least 36 in wide",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.5.1",
+      "piece_title": "Minimum size"
+     }
+    },
+    {
+     "id": "general.bc_1031_5_1_area_well_allows_full_opening@-/-",
+     "rule": "general.bc_1031_5_1_area_well_allows_full_opening",
+     "name": "Emergency escape openings · Area well lets the escape opening open fully (BCNYS 1031.5.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape and rescue opening to be fully opened.",
+        "where": "1031.5.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         40,
+         42
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.5.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         40,
+         42
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "words": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_fully_openable:",
+       "words": "fully openable not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_fully_openable"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_room_fourth_or_higher:",
+       "words": "room fourth or higher not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_room_fourth_or_higher"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.5.1",
+      "quote": "1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape and rescue opening to be fully opened."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "why": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade",
+       "kind": "fix_model",
+       "headline": "Fix the model so the below grade can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_fully_openable:",
+       "why": "fully openable not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_fully_openable",
+       "kind": "fix_model",
+       "headline": "Fix the model so the fully openable can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_room_fourth_or_higher:",
+       "why": "room fourth or higher not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_room_fourth_or_higher",
+       "kind": "fix_model",
+       "headline": "Fix the model so the room fourth or higher can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "Area well lets the escape opening open fully",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.5.1",
+      "piece_title": "Minimum size"
+     }
+    },
+    {
+     "id": "general.bc_1031_5_2_area_well_ladder_over_44@-/-",
+     "rule": "general.bc_1031_5_2_area_well_ladder_over_44",
+     "name": "Emergency escape openings · A ladder or steps in an area well over 44 in deep (BCNYS 1031.5.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the window or door is in the open position. Ladders or steps required by this section shall not be required to comply with Section 1011.",
+        "where": "1031.5.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.5.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "words": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:area_well_depth:",
+       "words": "area well depth not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_depth"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.5.2",
+      "quote": "1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the window or door is in the open position. Ladders or steps required by this section shall not be required to comply with Section 1011."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "why": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade",
+       "kind": "fix_model",
+       "headline": "Fix the model so the below grade can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:area_well_depth:",
+       "why": "area well depth not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_depth",
+       "kind": "fix_model",
+       "headline": "Fix the model so the area well depth can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "A ladder or steps in an area well over 44 in deep",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.5.2",
+      "piece_title": "Ladders or steps"
+     }
+    },
+    {
+     "id": "general.bc_1031_5_2_1_area_well_ladder@-/-",
+     "rule": "general.bc_1031_5_2_1_area_well_ladder",
+     "name": "Emergency escape openings · Area well ladder size and rung spacing (BCNYS 1031.5.2.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.5.2.1 Ladders. Ladders or rungs shall have an inside width of at least 12 inches (305 mm), shall project at least 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center (o.c.) vertically for the full height of the area well.",
+        "where": "1031.5.2.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         49,
+         51
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the window or door is in the open position. Ladders or steps required by this section shall not be required to comply with Section 1011.",
+        "where": "1031.5.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.5.2.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         49,
+         51
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "words": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:area_well_ladder:",
+       "words": "area well ladder not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_ladder"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:area_well_steps:",
+       "words": "area well steps not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_steps"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:area_well_ladder_width:",
+       "words": "area well ladder width not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_ladder_width"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.5.2.1",
+      "quote": "1031.5.2.1 Ladders. Ladders or rungs shall have an inside width of at least 12 inches (305 mm), shall project at least 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center (o.c.) vertically for the full height of the area well."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "why": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade",
+       "kind": "fix_model",
+       "headline": "Fix the model so the below grade can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:area_well_ladder:",
+       "why": "area well ladder not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_ladder",
+       "kind": "fix_model",
+       "headline": "Fix the model so the area well ladder can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:area_well_steps:",
+       "why": "area well steps not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_steps",
+       "kind": "fix_model",
+       "headline": "Fix the model so the area well steps can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:area_well_ladder_width:",
+       "why": "area well ladder width not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_ladder_width",
+       "kind": "fix_model",
+       "headline": "Fix the model so the area well ladder width can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "Area well ladder size and rung spacing",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.5.2.1",
+      "piece_title": "Ladders"
+     }
+    },
+    {
+     "id": "general.bc_1031_5_2_2_area_well_steps@-/-",
+     "rule": "general.bc_1031_5_2_2_area_well_steps",
+     "name": "Emergency escape openings · Area well steps' width, treads and risers (BCNYS 1031.5.2.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.5.2.2 Steps. Steps shall have an inside width of not less than 12 inches (305 mm), shall have treads greater than 5 inches (127 mm) in depth and a riser height not greater than 18 inches (457 mm) for the full height of the area well.",
+        "where": "1031.5.2.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         52,
+         53
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the window or door is in the open position. Ladders or steps required by this section shall not be required to comply with Section 1011.",
+        "where": "1031.5.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.5.2.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         52,
+         53
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "words": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:area_well_steps:",
+       "words": "area well steps not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_steps"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:area_well_ladder_width:",
+       "words": "area well ladder width not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_ladder_width"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.5.2.2",
+      "quote": "1031.5.2.2 Steps. Steps shall have an inside width of not less than 12 inches (305 mm), shall have treads greater than 5 inches (127 mm) in depth and a riser height not greater than 18 inches (457 mm) for the full height of the area well."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_below_grade:",
+       "why": "below grade not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_below_grade",
+       "kind": "fix_model",
+       "headline": "Fix the model so the below grade can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:area_well_steps:",
+       "why": "area well steps not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_steps",
+       "kind": "fix_model",
+       "headline": "Fix the model so the area well steps can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:area_well_ladder_width:",
+       "why": "area well ladder width not measured (or not usable)",
+       "elements": [],
+       "measure": "area_well_ladder_width",
+       "kind": "fix_model",
+       "headline": "Fix the model so the area well ladder width can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "Area well steps' width, treads and risers",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.5.2.2",
+      "piece_title": "Steps"
+     }
+    },
+    {
      "id": "egress.general.bc_308_5_classification",
      "rule": "general.bc_308_5_classification",
      "name": "Egress · Group I-4, day care facilities (BCNYS 308.5)",
@@ -69458,6 +70654,150 @@
      }
     },
     {
+     "id": "egress.general.bc_1031_5_3_area_well_drainage",
+     "rule": "general.bc_1031_5_3_area_well_drainage",
+     "name": "Egress · Area wells drain to the foundation drainage system (BCNYS 1031.5.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each escape opening's area well is designed for proper drainage, connected to the building's foundation drainage system (1805), except on well-drained soil or sand-gravel mixtures (Group I Soils, 1803.5.1): drainage and soils aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each escape opening's area well is designed for proper drainage, connected to the building's foundation drainage system (1805), except on well-drained soil or sand-gravel mixtures (Group I Soils, 1803.5.1): drainage and soils aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1031.5.3 Drainage. Area wells shall be designed for proper drainage by connecting to the building’s foundation drainage system required by Section 1805. Exception: A drainage system for area wells is not required where the foundation is on well-drained soil or sand-gravel mixture soils in accordance with the United Soil Classification System, Group I Soils, in accordance with Section 1803.5.1.",
+        "where": "1031.5.3, 2025 Building Code of New York State (BCNYS), PDF p.360"
+       }
+      ],
+      "citation": "1031.5.3, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.5.3",
+      "quote": "1031.5.3 Drainage. Area wells shall be designed for proper drainage by connecting to the building’s foundation drainage system required by Section 1805. Exception: A drainage system for area wells is not required where the foundation is on well-drained soil or sand-gravel mixture soils in accordance with the United Soil Classification System, Group I Soils, in accordance with Section 1803.5.1."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1031_5_3_area_well_drainage",
+       "words": "A person checks this (Gordium doesn't decide it): Each escape opening's area well is designed for proper drainage, connected to the building's foundation drainage system (1805), except on well-drained soil or sand-gravel mixtures (Group I Soils, 1803.5.1): drainage and soils aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1031_5_3_area_well_drainage",
+       "why": "A person checks this (Gordium doesn't decide it): Each escape opening's area well is designed for proper drainage, connected to the building's foundation drainage system (1805), except on well-drained soil or sand-gravel mixtures (Group I Soils, 1803.5.1): drainage and soils aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Area wells drain to the foundation drainage system",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.5.3",
+      "piece_title": "Drainage"
+     }
+    },
+    {
+     "id": "egress.general.bc_1031_6_bars_grilles_covers_screens",
+     "rule": "general.bc_1031_6_bars_grilles_covers_screens",
+     "name": "Egress · Bars, grilles, covers and screens over escape openings (BCNYS 1031.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Bars, grilles, covers, screens or similar devices over escape openings or their area wells leave the net clear opening of 1031.3 and 1031.5, and are releasable or removable from inside without a key, tool or more force than the opening's normal operation: such devices aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Bars, grilles, covers, screens or similar devices over escape openings or their area wells leave the net clear opening of 1031.3 and 1031.5, and are releasable or removable from inside without a key, tool or more force than the opening's normal operation: such devices aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1031.6 Bars, grilles, covers and screens. Where bars, grilles, covers, screens or similar devices are placed over emergency escape and rescue openings or area wells that serve such openings, the minimum net clear opening size shall comply with Sections 1031.3",
+        "where": "1031.6, 2025 Building Code of New York State (BCNYS), PDF p.360"
+       },
+       {
+        "text": "and 1031.5. Such devices shall be releasable or removable from the inside without the use of a key, tool or force greater than that which is required for normal operation of the emergency escape and rescue opening.",
+        "where": "1031.6, 2025 Building Code of New York State (BCNYS), PDF p.361"
+       }
+      ],
+      "citation": "1031.6, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.6",
+      "quote": "1031.6 Bars, grilles, covers and screens. Where bars, grilles, covers, screens or similar devices are placed over emergency escape and rescue openings or area wells that serve such openings, the minimum net clear opening size shall comply with Sections 1031.3"
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1031_6_bars_grilles_covers_screens",
+       "words": "A person checks this (Gordium doesn't decide it): Bars, grilles, covers, screens or similar devices over escape openings or their area wells leave the net clear opening of 1031.3 and 1031.5, and are releasable or removable from inside without a key, tool or more force than the opening's normal operation: such devices aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1031_6_bars_grilles_covers_screens",
+       "why": "A person checks this (Gordium doesn't decide it): Bars, grilles, covers, screens or similar devices over escape openings or their area wells leave the net clear opening of 1031.3 and 1031.5, and are releasable or removable from inside without a key, tool or more force than the opening's normal operation: such devices aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Bars, grilles, covers and screens over escape openings",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.6",
+      "piece_title": "Bars, grilles, covers and screens"
+     }
+    },
+    {
      "id": "egress.interior#1",
      "rule": null,
      "name": "Interior drawing",
@@ -73894,7 +75234,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 105 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 107 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -74417,6 +75757,13 @@
       "general.bc_1031_3_2_escape_opening_min_width@-/-",
       "general.bc_1031_3_3_escape_opening_max_sill_height@-/-",
       "general.bc_1031_4_escape_door_swinging_or_sliding@-/-",
+      "general.bc_1031_5_area_well_required@-/-",
+      "general.bc_1031_5_1_area_well_min_projection@-/-",
+      "general.bc_1031_5_1_area_well_min_width@-/-",
+      "general.bc_1031_5_1_area_well_allows_full_opening@-/-",
+      "general.bc_1031_5_2_area_well_ladder_over_44@-/-",
+      "general.bc_1031_5_2_1_area_well_ladder@-/-",
+      "general.bc_1031_5_2_2_area_well_steps@-/-",
       "egress.general.bc_308_5_classification",
       "egress.general.bc_308_5_1_group_e",
       "egress.general.bc_308_5_2_religious_worship",
@@ -74497,6 +75844,8 @@
       "egress.general.bc_1031_2_basements",
       "egress.general.bc_1031_2_openings_to_public_way",
       "egress.general.bc_1031_2_1_operational_constraints",
+      "egress.general.bc_1031_5_3_area_well_drainage",
+      "egress.general.bc_1031_6_bars_grilles_covers_screens",
       "egress.interior#1"
      ],
      "lines": [
@@ -75005,12 +76354,19 @@
         "general.bc_1031_3_2_escape_opening_min_height@-/-",
         "general.bc_1031_3_2_escape_opening_min_width@-/-",
         "general.bc_1031_3_3_escape_opening_max_sill_height@-/-",
-        "general.bc_1031_4_escape_door_swinging_or_sliding@-/-"
+        "general.bc_1031_4_escape_door_swinging_or_sliding@-/-",
+        "general.bc_1031_5_area_well_required@-/-",
+        "general.bc_1031_5_1_area_well_min_projection@-/-",
+        "general.bc_1031_5_1_area_well_min_width@-/-",
+        "general.bc_1031_5_1_area_well_allows_full_opening@-/-",
+        "general.bc_1031_5_2_area_well_ladder_over_44@-/-",
+        "general.bc_1031_5_2_1_area_well_ladder@-/-",
+        "general.bc_1031_5_2_2_area_well_steps@-/-"
        ],
        "folded": true,
        "status": "needs_review",
-       "rules": 5,
-       "title": "Emergency escape openings: 5 need review: to give: the emergency escape openings weren't sent from the model",
+       "rules": 12,
+       "title": "Emergency escape openings: 12 need review: to give: the emergency escape openings weren't sent from the model",
        "mark": "?",
        "name": "Emergency escape openings"
       },
@@ -76055,6 +77411,32 @@
        "name": "Egress · Escape openings work from inside without keys or tools (BCNYS 1031.2.1)"
       },
       {
+       "key": "review#ad4d28f940",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1031_5_3_area_well_drainage"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Area wells drain to the foundation drainage system (BCNYS 1031.5.3): A person checks this (Gordium doesn't decide it): Each escape opening's area well is designed for proper drainage, connected to the building's foundation drainage system (1805), except on well-drained soil or sand-gravel mixtures (Group I Soils, 1803.5.1): drainage and soils aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Area wells drain to the foundation drainage system (BCNYS 1031.5.3)"
+      },
+      {
+       "key": "review#ff2d6d503d",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1031_6_bars_grilles_covers_screens"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Bars, grilles, covers and screens over escape openings (BCNYS 1031.6): A person checks this (Gordium doesn't decide it): Bars, grilles, covers, screens or similar devices over escape openings or their area wells leave the net clear opening of 1031.3 and 1031.5, and are releasable or removable from inside without a key, tool or more force than the opening's normal operation: such devices aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Bars, grilles, covers and screens over escape openings (BCNYS 1031.6)"
+      },
+      {
        "key": "review#3b8d16e054",
        "tier": "review",
        "items": [
@@ -76068,7 +77450,7 @@
        "name": "Interior drawing"
       }
      ],
-     "count": 105,
+     "count": 107,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -76240,9 +77622,16 @@
         "general.bc_1031_3_2_escape_opening_min_height@-/-",
         "general.bc_1031_3_2_escape_opening_min_width@-/-",
         "general.bc_1031_3_3_escape_opening_max_sill_height@-/-",
-        "general.bc_1031_4_escape_door_swinging_or_sliding@-/-"
+        "general.bc_1031_4_escape_door_swinging_or_sliding@-/-",
+        "general.bc_1031_5_area_well_required@-/-",
+        "general.bc_1031_5_1_area_well_min_projection@-/-",
+        "general.bc_1031_5_1_area_well_min_width@-/-",
+        "general.bc_1031_5_1_area_well_allows_full_opening@-/-",
+        "general.bc_1031_5_2_area_well_ladder_over_44@-/-",
+        "general.bc_1031_5_2_1_area_well_ladder@-/-",
+        "general.bc_1031_5_2_2_area_well_steps@-/-"
        ],
-       "rules": 45,
+       "rules": 52,
        "field": "facts.occupancy_group"
       },
       {
@@ -77238,6 +78627,26 @@
         "egress.general.bc_1031_2_1_operational_constraints"
        ],
        "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1031_5_3_area_well_drainage",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each escape opening's area well is designed for proper drainage, connected to the building's foundation drainage system (1805), except on well-drained soil or sand-gravel mixtures (Group I Soils, 1803.5.1): drainage and soils aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1031_5_3_area_well_drainage"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1031_6_bars_grilles_covers_screens",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Bars, grilles, covers, screens or similar devices over escape openings or their area wells leave the net clear opening of 1031.3 and 1031.5, and are releasable or removable from inside without a key, tool or more force than the opening's normal operation: such devices aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1031_6_bars_grilles_covers_screens"
+       ],
+       "rules": 1
       }
      ]
     },
@@ -77591,7 +79000,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "105 to review · 30 comply"
+     "summary": "107 to review · 30 comply"
     }
    ],
    "contents": [
@@ -93376,8 +94785,8 @@
          "coverage": "rules",
          "whole": false,
          "counts": {
-          "rules": 5,
-          "flag": 1,
+          "rules": 10,
+          "flag": 3,
           "not_for_checking": 2
          },
          "pieces": [
@@ -93430,6 +94839,64 @@
            "coverage": "rules",
            "rules": [
             "general.bc_1031_4_escape_door_swinging_or_sliding"
+           ]
+          },
+          {
+           "id": "1031.5",
+           "title": "Area wells",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1031_5_area_well_required"
+           ]
+          },
+          {
+           "id": "1031.5.1",
+           "title": "Minimum size",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1031_5_1_area_well_min_projection",
+            "general.bc_1031_5_1_area_well_min_width",
+            "general.bc_1031_5_1_area_well_allows_full_opening"
+           ]
+          },
+          {
+           "id": "1031.5.2",
+           "title": "Ladders or steps",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1031_5_2_area_well_ladder_over_44"
+           ]
+          },
+          {
+           "id": "1031.5.2.1",
+           "title": "Ladders",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1031_5_2_1_area_well_ladder"
+           ]
+          },
+          {
+           "id": "1031.5.2.2",
+           "title": "Steps",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1031_5_2_2_area_well_steps"
+           ]
+          },
+          {
+           "id": "1031.5.3",
+           "title": "Drainage",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1031_5_3_area_well_drainage"
+           ]
+          },
+          {
+           "id": "1031.6",
+           "title": "Bars, grilles, covers and screens",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1031_6_bars_grilles_covers_screens"
            ]
           },
           {
@@ -97288,6 +98755,13 @@
    "general.bc_1031_3_2_escape_opening_min_width@-/-": "needs_review",
    "general.bc_1031_3_3_escape_opening_max_sill_height@-/-": "needs_review",
    "general.bc_1031_4_escape_door_swinging_or_sliding@-/-": "needs_review",
+   "general.bc_1031_5_area_well_required@-/-": "needs_review",
+   "general.bc_1031_5_1_area_well_min_projection@-/-": "needs_review",
+   "general.bc_1031_5_1_area_well_min_width@-/-": "needs_review",
+   "general.bc_1031_5_1_area_well_allows_full_opening@-/-": "needs_review",
+   "general.bc_1031_5_2_area_well_ladder_over_44@-/-": "needs_review",
+   "general.bc_1031_5_2_1_area_well_ladder@-/-": "needs_review",
+   "general.bc_1031_5_2_2_area_well_steps@-/-": "needs_review",
    "egress.general.bc_308_5_classification": "needs_review",
    "egress.general.bc_308_5_1_group_e": "needs_review",
    "egress.general.bc_308_5_2_religious_worship": "needs_review",
@@ -97368,6 +98842,8 @@
    "egress.general.bc_1031_2_basements": "needs_review",
    "egress.general.bc_1031_2_openings_to_public_way": "needs_review",
    "egress.general.bc_1031_2_1_operational_constraints": "needs_review",
+   "egress.general.bc_1031_5_3_area_well_drainage": "needs_review",
+   "egress.general.bc_1031_6_bars_grilles_covers_screens": "needs_review",
    "egress.interior#1": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
@@ -97413,7 +98889,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "105 to review · 30 comply"
+    "summary": "107 to review · 30 comply"
    }
   ],
   "egress": {
@@ -102511,6 +103987,97 @@
      "none": false,
      "unknown": [],
      "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_5_area_well_required",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_5_1_area_well_min_projection",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_5_1_area_well_min_width",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_5_1_area_well_allows_full_opening",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_5_2_area_well_ladder_over_44",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_5_2_1_area_well_ladder",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_5_2_2_area_well_steps",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
     }
    ],
    "results": {
@@ -102577,6 +104144,13 @@
     "general.bc_1031_3_2_escape_opening_min_width": "needs_review",
     "general.bc_1031_3_3_escape_opening_max_sill_height": "needs_review",
     "general.bc_1031_4_escape_door_swinging_or_sliding": "needs_review",
+    "general.bc_1031_5_area_well_required": "needs_review",
+    "general.bc_1031_5_1_area_well_min_projection": "needs_review",
+    "general.bc_1031_5_1_area_well_min_width": "needs_review",
+    "general.bc_1031_5_1_area_well_allows_full_opening": "needs_review",
+    "general.bc_1031_5_2_area_well_ladder_over_44": "needs_review",
+    "general.bc_1031_5_2_1_area_well_ladder": "needs_review",
+    "general.bc_1031_5_2_2_area_well_steps": "needs_review",
     "general.bc_308_5_classification": "needs_review",
     "general.bc_308_5_1_group_e": "needs_review",
     "general.bc_308_5_2_religious_worship": "needs_review",
@@ -102656,7 +104230,9 @@
     "general.bc_1010_2_15_correctional_facilities": "needs_review",
     "general.bc_1031_2_basements": "needs_review",
     "general.bc_1031_2_openings_to_public_way": "needs_review",
-    "general.bc_1031_2_1_operational_constraints": "needs_review"
+    "general.bc_1031_2_1_operational_constraints": "needs_review",
+    "general.bc_1031_5_3_area_well_drainage": "needs_review",
+    "general.bc_1031_6_bars_grilles_covers_screens": "needs_review"
    },
    "interior": {
     "parts": {
@@ -106584,9 +108160,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "744daf4fa8863fb485c7a15672460990ec901303fb8f614cba831a387fee1084",
+  "worker_fingerprint": "49ae2bc4212455669ea5ea81d39bcba3bb37eefc9c07b2f0767863e02b647507",
   "rulebook": {
-   "new_york/ithaca_city": "af859b9e64afc7f0871a96c5fb68a68e5d21622a524d656dd0d002259326a7de"
+   "new_york/ithaca_city": "2c2812df9522f5dd730dd50cceda5e4a7a0308802034c56ba60dcd37a9efcd0d"
   }
  }
 }

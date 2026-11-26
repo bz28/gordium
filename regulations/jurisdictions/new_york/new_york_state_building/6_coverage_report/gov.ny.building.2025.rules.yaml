@@ -528,4 +528,41 @@ pieces:
     heading: Emergency escape and rescue doors
     rules:
     - general.bc_1031_4_escape_door_swinging_or_sliding
+  '1031.5':
+    label: rule
+    heading: Area wells
+    rules:
+    - general.bc_1031_5_area_well_required
+  1031.5.1:
+    label: rule
+    heading: Area wells › Minimum size
+    rules:
+    - general.bc_1031_5_1_area_well_min_projection
+    - general.bc_1031_5_1_area_well_min_width
+    - general.bc_1031_5_1_area_well_allows_full_opening
+  1031.5.2:
+    label: rule
+    heading: Area wells › Ladders or steps
+    rules:
+    - general.bc_1031_5_2_area_well_ladder_over_44
+  1031.5.2.1:
+    label: rule
+    heading: Ladders or steps › Ladders
+    rules:
+    - general.bc_1031_5_2_1_area_well_ladder
+  1031.5.2.2:
+    label: rule
+    heading: Ladders or steps › Steps
+    rules:
+    - general.bc_1031_5_2_2_area_well_steps
+  1031.5.3:
+    label: flag
+    heading: Area wells › Drainage
+    rules:
+    - general.bc_1031_5_3_area_well_drainage
+  '1031.6':
+    label: flag
+    heading: Bars, grilles, covers and screens
+    rules:
+    - general.bc_1031_6_bars_grilles_covers_screens
 not_checked_yet: []

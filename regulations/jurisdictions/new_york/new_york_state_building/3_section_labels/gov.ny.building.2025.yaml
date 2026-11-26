@@ -5917,3 +5917,138 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '1031.5':
+    label: rule
+    topic: means_of_egress
+    reason: 'An escape opening whose bottom is below the adjacent grade has an area well: checkable per marked escape opening,
+      where 1031.2 requires it.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 38
+      - 39
+      quote: 1031.5 Area wells. An emergency escape and rescue opening with the bottom of the clear opening below the adjacent
+        grade shall be provided with an area well in accordance with Sections 1031.5.1 through 1031.5.3.
+    piece_sha256: 68748088058c90b3accbb330e431cda36054cb6054b7be9b1d9856cc9a965550
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1031.5.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'The area well at least 9 sq ft, 36 inches out and 36 inches wide (a ladder or steps may encroach 6 inches), letting
+      the opening open fully: checkable per marked escape opening, where 1031.2 requires it.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 40
+      - 44
+      quote: '1031.5.1 Minimum size. The minimum horizontal area of the area well shall be 9 square feet (0.84 m[fn2]), with
+        a horizontal projec- tion and width of not less than 36 inches (914 mm). The area well shall allow the emergency escape
+        and rescue opening to be fully opened. Exception: The ladder or steps required by Section 1031.5.2 shall be permitted
+        to encroach not more than 6 inches (152 mm) into the required dimensions of the area well.'
+    piece_sha256: a8c7a82674546498f0f065317f84bdd8e6d6d5d596b46dfab5da5062969a4e62
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1031.5.2:
+    label: rule
+    topic: means_of_egress
+    reason: 'An area well deeper than 44 inches has a fixed ladder or steps the open window doesn''t block: checkable per
+      marked escape opening, where 1031.2 requires it.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 45
+      - 48
+      quote: 1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped
+        with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency
+        escape and rescue opening when the window or door is in the open position. Ladders or steps required by this section
+        shall not be required to comply with Section 1011.
+    piece_sha256: 2783068ab9f5b71babf39b33b2554f3b8ab54fd19f28e0742bd1881913985477
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1031.5.2.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'The area well''s ladder: 12 inches wide inside, 3 inches out from the wall, rungs 18 inches apart, full height:
+      checkable per marked escape opening, where 1031.2 requires it.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 49
+      - 51
+      quote: 1031.5.2.1 Ladders. Ladders or rungs shall have an inside width of at least 12 inches (305 mm), shall project
+        at least 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center (o.c.) vertically
+        for the full height of the area well.
+    piece_sha256: 5c2283bc20ecf846a0b7bb167535f4587016186cdb02a73b328c1fec0ee40deb
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1031.5.2.2:
+    label: rule
+    topic: means_of_egress
+    reason: 'The area well''s steps: 12 inches wide inside, treads over 5 inches, risers 18 inches at most, full height: checkable
+      per marked escape opening, where 1031.2 requires it.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 52
+      - 53
+      quote: 1031.5.2.2 Steps. Steps shall have an inside width of not less than 12 inches (305 mm), shall have treads greater
+        than 5 inches (127 mm) in depth and a riser height not greater than 18 inches (457 mm) for the full height of the
+        area well.
+    piece_sha256: 1ba3c3d33fb8a46fa60f28ae4680d30de721224ff507ca80a4dbe4bca98e6268
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1031.5.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Area wells drain to the foundation drainage system, except on well-drained soils: drainage isn''t in the model,
+      a person''s check where the building may be Group R-2, R-3 or R-4.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 54
+      - 57
+      quote: '1031.5.3 Drainage. Area wells shall be designed for proper drainage by connecting to the building’s foundation
+        drainage system required by Section 1805. Exception: A drainage system for area wells is not required where the foundation
+        is on well-drained soil or sand-gravel mixture soils in accordance with the United Soil Classification System, Group
+        I Soils, in accordance with Section 1803.5.1.'
+    piece_sha256: b79b4103c28cbf74af44915f220eceab4bb9893d13982ebc7d48cf6ba621b139
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1031.6':
+    label: flag
+    topic: means_of_egress
+    reason: 'Bars, grilles, covers and screens over escape openings keep their size and release from inside: such devices
+      aren''t in the model, a person''s check where the building may be Group R-2, R-3 or R-4.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 58
+      - 59
+      quote: 1031.6 Bars, grilles, covers and screens. Where bars, grilles, covers, screens or similar devices are placed
+        over emergency escape and rescue openings or area wells that serve such openings, the minimum net clear opening size
+        shall comply with Sections 1031.3
+    - file: gov.ny.building.2025.pdf
+      page: 361
+      lines:
+      - 3
+      - 4
+      quote: and 1031.5. Such devices shall be releasable or removable from the inside without the use of a key, tool or force
+        greater than that which is required for normal operation of the emergency escape and rescue opening.
+    piece_sha256: d884e0779fcbde1eab23289444130900a02cce7316a1f75819573f99cfc30b1e
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
