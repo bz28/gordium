@@ -40,6 +40,8 @@ parts:
         stair_tread_depth: 10.0
         stair_headroom: 85.5                # under the upper floor at s = 20: 108 - (7.5 + 0.75 x 20) = 108 - 22.5
         stair_clear_width: 36.0             # wall to wall above the handrail
+        stair_clear_width_at_handrail: 32.5 # 36 - 3.5
+        stair_handrail_sides: 1
       more:
         stair_tread_variation: 0.0
         stair_clear_width_at_handrail: 32.5 # 36 - 3.5

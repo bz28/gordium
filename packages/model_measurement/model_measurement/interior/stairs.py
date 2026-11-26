@@ -373,11 +373,13 @@ def measure_stair(st: dict, reader) -> tuple[dict, dict, dict, Flight | None]:
         if low is None:
             stop(["stair_clear_width_at_handrail", "stair_handrail_sides"], why)
         else:
-            more["stair_clear_width_at_handrail"] = tidy(low)
+            # given to the rules (section group 7c, 2026-11-26: worked out and tested since 2026-11-13, kept in
+            # `more` until a rule needed it), and kept in `more` too, where the panel has shown it
+            more["stair_clear_width_at_handrail"] = measures["stair_clear_width_at_handrail"] = tidy(low)
             if why:
                 stop(["stair_handrail_sides"], why)
             else:
-                more["stair_handrail_sides"] = rails
+                more["stair_handrail_sides"] = measures["stair_handrail_sides"] = rails
     except Stop as s:
         stop(["stair_clear_width", "stair_clear_width_at_handrail", "stair_handrail_sides"], s.reason)
     return measures, more, stopped, flight

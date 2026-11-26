@@ -24,6 +24,8 @@ parts:
         stair_tread_depth: 9.75             # 0.8125 ft
         stair_headroom: 84.0                # ceiling at 7 ft over the top nosing at 0
         stair_clear_width: 36.0             # 3 ft between the wall and the guard's inside
+        stair_clear_width_at_handrail: 30.0 # 2.75 - 0.25 = 2.5 ft
+        stair_handrail_sides: 2
       more:
         stair_tread_variation: 0.0
         stair_clear_width_at_handrail: 30.0 # 2.75 - 0.25 = 2.5 ft

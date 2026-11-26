@@ -23,6 +23,8 @@ parts:
         stair_tread_depth: 7.0              # 177.8 mm
         stair_headroom: 98.5                # at the top nosing: roof 4267.2 + 0.5 x 1955.8 = 5245.1; - 2743.2 = 2501.9 mm
         stair_clear_width: 24.0             # 609.6 mm
+        stair_clear_width_at_handrail: 21.0 # 609.6 - 76.2 = 533.4 mm
+        stair_handrail_sides: 1
       more:
         stair_tread_variation: 0.0
         stair_clear_width_at_handrail: 21.0 # 609.6 - 76.2 = 533.4 mm
