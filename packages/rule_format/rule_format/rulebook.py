@@ -1546,18 +1546,37 @@ def generated_name(name: str) -> bool:
     return name.startswith(".") or name in GENERATED_NAMES or name.endswith(GENERATED_SUFFIXES)
 
 
-def _in_repo(name: str) -> bool:
-    """Whether a file of this name is in the repo's top folders (read once, skipping generated names:
-    generated_name)."""
-    global _repo_file_names
-    if _repo_file_names is None:
-        names = set()
+# What a publish's fresh compile records (rule_format/published.py): every name _in_repo was asked, with its answer.
+# The answer turns on that name alone, so a law's certificate keeps these, not the listing of every folder of the
+# repo (with that, any new file anywhere, a Revit recording, a test, made every certificate stale). While it walks,
+# WALKING is set, and the compile's audit hook leaves the walk's own listings out. None outside a publish.
+names_asked: dict[str, bool] | None = None
+WALKING = [False]
+
+
+def repo_file_names(repo: Path = REPO) -> set[str]:
+    """The names of the files in the repo's top folders, generated names left out (generated_name)."""
+    names = set()
+    WALKING[0] = True
+    try:
         for top in _TOP_FOLDERS:
-            for _, dirs, files in os.walk(REPO / top):
+            for _, dirs, files in os.walk(Path(repo) / top):
                 dirs[:] = [d for d in dirs if not generated_name(d)]
                 names.update(f for f in files if not generated_name(f))
-        _repo_file_names = names
-    return name in _repo_file_names
+    finally:
+        WALKING[0] = False
+    return names
+
+
+def _in_repo(name: str) -> bool:
+    """Whether a file of this name is in the repo's top folders (read once: repo_file_names)."""
+    global _repo_file_names
+    if _repo_file_names is None:
+        _repo_file_names = repo_file_names()
+    found = name in _repo_file_names
+    if names_asked is not None:
+        names_asked[name] = found
+    return found
 
 
 def _set_aside_references(text: str) -> str:

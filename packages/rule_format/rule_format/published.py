@@ -1,5 +1,6 @@
 """Compile, then freeze (CLAUDE.md principle 1; docs/decisions/2026-11-23_laws_validation_speed.md): a state law's
-validation (compile_law) is worked out once, in a fresh process, and frozen as a certificate beside it,
+validation (compile_law), and each of a place's zoning rulebooks' checks (compile_zoning), is worked out once, in a
+fresh process, and frozen as a certificate beside it,
 <state folder>/7_published_rulebooks/<book stem>.published.json, with the sha256 of everything it was worked out
 from. While rules are draft (approval is deferred, principle 2) certificates are generated files, never committed
 (.gitignore): built by `python -m rule_format publish` (CI before the tests, a session-wide pytest fixture, the
@@ -21,6 +22,8 @@ machine:
   any of them makes the certificate stale. Every folder of the law folder and of the shared files is listed too,
   whatever the compile lists (it also asks whether a file exists, which no audit event shows). Names tools make as
   they run, and what publish writes, are left out (rulebook.generated_name, the same rule the repo walk follows);
+- `repo_names`: {name: whether a repo file has it} for each file name the compile asked about (a rule's notes may
+  name a repo file: rulebook._in_repo), in place of listing every folder of the repo (its walk is left out of `listed`);
 - `validator`: {path: sha256} of the repo's modules the compile imported (packages/);
 - `outside_repo_reads`: files the compile opened outside the repo and outside Python's own installation (the code
   cache, say): must be empty, and publish refuses a certificate otherwise;
@@ -43,8 +46,9 @@ import tempfile
 import time
 from pathlib import Path
 
-from .rulebook import (PUBLISHED_SUFFIX, REPO, Context, building_code_rulebook, generated_name, load,
-                       rulebook_file_problems, state_folders)
+from .rulebook import (PUBLISHED_SUFFIX, REPO, STATE_SETTINGS, Context, building_code_rulebook, generated_name,
+                       law_folders, load, repo_file_names, rulebook_file_problems, rulebook_for, rulebook_paths,
+                       rules_folder, term_file_problems)
 from .state_law import state_settings_problems
 
 FORMAT = "gordium.published_law/1"
@@ -83,6 +87,28 @@ def unreadable(e: Exception) -> str:
     return f"its sources can't be read ({type(e).__name__}: {e})"
 
 
+def compile_zoning(folder: Path, book: Path) -> dict:
+    """The costly part of reading one of a place's zoning rulebooks (what project_report.tables checked at every
+    check before it was frozen): {"problems": everything wrong with the place's sources and definitions and with the
+    rulebook, "documents": its sources.yaml entries, "kinds": {"use": the uses its rules may name}}. Never raises.
+    Reads nothing from the code cache (use_cache=False)."""
+    out = {"problems": [], "documents": {}, "kinds": {}}
+    try:
+        ctx = Context.for_jurisdiction(folder, use_cache=False)
+        out["problems"] = ctx.problems + [f"{p.name}: {x}" for p, found in term_file_problems(folder, ctx).items()
+                                          for x in found] + rulebook_file_problems(book, ctx)
+        out["documents"] = ctx.sources
+        out["kinds"] = {"use": set(ctx.uses)}
+    except Exception as e:
+        out["problems"] = [unreadable(e)]
+    return out
+
+
+def compiled(folder: Path, book: Path) -> dict:
+    """compile_law for a state law's rulebook, compile_zoning for a place's: what its certificate freezes."""
+    return compile_law(folder, book) if (Path(folder) / STATE_SETTINGS).is_file() else compile_zoning(folder, book)
+
+
 # ---- which files ----------------------------------------------------------------------------------------------------
 
 def place_files(folder: Path) -> list[Path]:
@@ -117,9 +143,19 @@ def certificate_path(folder: Path, book: Path) -> Path:
     return Path(folder) / PUBLISHED / f"{Path(book).stem}{SUFFIX}"
 
 
+def books_of(folder: Path) -> list[Path]:
+    """The rulebooks a law folder's certificates are of, one certificate each: a state law's one rulebook; a place's
+    rulebook for each zone (rulebook_for: the hand-drafted one where there is one, else the drafted)."""
+    folder = Path(folder)
+    if (folder / STATE_SETTINGS).is_file():
+        return [b] if (b := building_code_rulebook(folder)) is not None else []
+    zones = sorted({p.stem for p in rulebook_paths(rules_folder(folder))})
+    return [b for z in zones if (b := rulebook_for(folder, z)) is not None]
+
+
 def published_folders(repo: Path = REPO) -> list[tuple[Path, Path]]:
-    """(state law folder, its rulebook) for every state law folder that has a rulebook, in a stable order."""
-    return [(f, b) for f in state_folders(repo) if (b := building_code_rulebook(f)) is not None]
+    """(law folder, rulebook) for every rulebook of every state law and place, in a stable order."""
+    return [(f, b) for f in law_folders(repo) for b in books_of(f)]
 
 
 def _rel(path: Path, repo: Path) -> str:
@@ -239,7 +275,9 @@ import sys
 on, seen = [True], []
 def _hook(event, args):
     if on and event in ("open", "os.scandir", "os.listdir"):
-        seen.append((event, args[0] if args else None))
+        walk = sys.modules.get("rule_format.rulebook")       # the repo walk's own listings: its names_asked instead
+        if not (event != "open" and walk is not None and getattr(walk, "WALKING", [False])[0]):
+            seen.append((event, args[0] if args else None))
 sys.addaudithook(_hook)
 out, sys.stdout = sys.stdout.buffer, sys.stderr
 from rule_format import published
@@ -249,20 +287,26 @@ out.flush()
 
 
 def _child(folder: str, repo: str, seen: list, on: list) -> bytes:
-    """In the fresh process: compile the law, then build its certificate from what was opened, listed and
-    imported."""
+    """In the fresh process: compile each of the folder's rulebooks, then build their certificates from what was
+    opened, listed and imported (by all of them: one compile process per folder): {rulebook: certificate}."""
     if Path(repo).resolve() != REPO:
         raise PublishError(f"the fresh process imported the code of {REPO}, not of {repo}")
     folder = Path(folder).resolve()
-    book = building_code_rulebook(folder)
-    if book is None:
+    books = books_of(folder)
+    if not books:
         raise PublishError(f"no rulebook in {folder}")
-    result = compile_law(folder, book)
+    from . import rulebook
+    results, asked = {}, {}
+    for book in books:
+        rulebook.names_asked = {}
+        results[book] = compiled(folder, book)
+        asked[book], rulebook.names_asked = rulebook.names_asked, None
     on.clear()                                          # nothing opened after this point is the compile's
     opened = list(seen)
     modules = sorted({Path(f).resolve() for m in list(sys.modules.values())
                       if isinstance(f := getattr(m, "__file__", None), str)})
-    return dumps(_certificate(folder, book, result, opened, modules))
+    return json.dumps({_rel(b, REPO): _certificate(folder, b, r, opened, modules, asked[b]) for b, r in results.items()},
+                      sort_keys=True).encode("utf-8")
 
 
 def _python_roots() -> list[Path]:
@@ -280,7 +324,7 @@ def _python_roots() -> list[Path]:
     return roots
 
 
-def _certificate(folder: Path, book: Path, result: dict, seen: list, modules: list[Path]) -> dict:
+def _certificate(folder: Path, book: Path, result: dict, seen: list, modules: list[Path], asked: dict) -> dict:
     roots, packages = _python_roots(), REPO / "packages"
     inputs, listed, outside = set(), set(), set()
     for event, raw in seen:
@@ -317,6 +361,7 @@ def _certificate(folder: Path, book: Path, result: dict, seen: list, modules: li
         "code_version": {d.get("file"): d.get("sha256") for d in sources if isinstance(d, dict)},
         "inputs": {p: _sha(REPO / p) for p in sorted(inputs)},
         "listed": {d: _listing(REPO / d) for d in sorted(listed)},
+        "repo_names": dict(sorted(asked.items())),     # each name the compile asked is a repo file's, and the answer
         "validator": dict(sorted(validator.items())),
         "outside_repo_reads": sorted(outside),
         "result": _encode({"problems": result["problems"], "kinds": result["kinds"],
@@ -324,8 +369,9 @@ def _certificate(folder: Path, book: Path, result: dict, seen: list, modules: li
     }
 
 
-def fresh(folder: Path) -> bytes:
-    """A law folder's certificate, compiled now in a fresh Python process running this repo's code."""
+def fresh(folder: Path) -> dict[Path, bytes]:
+    """A law folder's certificates ({rulebook: its certificate's bytes}), compiled now in a fresh Python process
+    running this repo's code."""
     # this repo's packages alone: another entry (an empty one is the folder it runs in) would change what the import
     # lists, so the certificate would differ by machine; everything else comes from Python's own installation
     ours = [str(p) for p in _import_path(REPO)]
@@ -340,7 +386,7 @@ def fresh(folder: Path) -> bytes:
     if done.returncode != 0:
         why = done.stderr.decode("utf-8", "replace").strip().splitlines()
         raise PublishError(f"the fresh compile of {_shown(folder)} failed: {why[-1] if why else done.returncode}")
-    return done.stdout
+    return {REPO / rel: dumps(cert) for rel, cert in json.loads(done.stdout).items()}
 
 
 def refusals(certificate: dict) -> list[str]:
@@ -353,33 +399,41 @@ def refusals(certificate: dict) -> list[str]:
 
 # ---- publish, check, stale ------------------------------------------------------------------------------------------
 
-def publish(folder: Path) -> list[str]:
-    """Write a law folder's certificate from a fresh compile: [] when written, else why it was refused (nothing is
-    written then; an older certificate is left as it is, and stale() refuses it)."""
+def publish(folder: Path) -> dict[Path, list[str]]:
+    """Write a law folder's certificates from one fresh compile: {rulebook: [] when written, else why it was refused}
+    (nothing is written for a refused one; an older certificate is left as it is, and stale() refuses it)."""
     folder = Path(folder).resolve()
-    book = building_code_rulebook(folder)
-    if book is None:
-        return []
-    data = fresh(folder)
-    if why := refusals(json.loads(data)):
-        return why
-    path = certificate_path(folder, book)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_name(f".{path.name}.{os.getpid()}.tmp")      # a dot file: never one of the folder's inputs
-    temp.write_bytes(data)
-    os.replace(temp, path)
-    return []
+    if not books_of(folder):
+        return {}
+    out = {}
+    for book, data in fresh(folder).items():
+        if why := refusals(_parsed(data)):
+            out[book] = why
+            continue
+        path = certificate_path(folder, book)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temp = path.with_name(f".{path.name}.{os.getpid()}.tmp")      # a dot file: never one of the folder's inputs
+        temp.write_bytes(data)
+        os.replace(temp, path)
+        out[book] = []
+    return out
 
 
-def check(folder: Path) -> list[str]:
-    """[] when the certificate on disk is exactly what a fresh compile gives now, else what differs, by name."""
+def check(folder: Path) -> dict[Path, list[str]]:
+    """{rulebook: [] when its certificate on disk is exactly what a fresh compile gives now, else what differs}."""
     folder = Path(folder).resolve()
-    book = building_code_rulebook(folder)
-    if book is None:
-        return []
-    path = certificate_path(folder, book)
-    data = fresh(folder)
-    new = json.loads(data)
+    if not books_of(folder):
+        return {}
+    return {book: _check_one(certificate_path(folder, book), data) for book, data in fresh(folder).items()}
+
+
+def _parsed(data: bytes) -> dict:
+    """A certificate's bytes read back (one JSON document, not JSON lines)."""
+    return json.loads(data)
+
+
+def _check_one(path: Path, data: bytes) -> list[str]:
+    new = _parsed(data)
     why = refusals(new)
     try:
         old_bytes = path.read_bytes()
@@ -406,7 +460,7 @@ def differences(old: dict, new: dict) -> list[str]:
         if old.get(key) != new.get(key):
             out.append(f"{what} changed: {new[key]['path']}")
     for key, what in (("code_version", "source"), ("inputs", "input"), ("validator", "validator file"),
-                      ("listed", "folder listing")):
+                      ("listed", "folder listing"), ("repo_names", "repo file name")):
         a, b = old.get(key) or {}, new.get(key) or {}
         for name in sorted(set(a) | set(b)):
             if name not in a:
@@ -480,6 +534,11 @@ def _read(folder: Path, book: Path, repo: Path) -> tuple[list[str], dict | None,
         for name, sha in cert["listed"].items():
             if _listing(Path(repo) / name) != sha:
                 out.append(f"a name appeared in or went from the folder {name}")
+        if cert["repo_names"]:
+            names = repo_file_names(repo)
+            for name, found in cert["repo_names"].items():
+                if (name in names) != found:
+                    out.append(f"a file named {name} " + ("went from" if found else "appeared in") + " the repo")
         for name in sorted(_folder_inputs(folder, Path(repo)) - set(cert["inputs"])):
             out.append(f"new file: {name}")
         out += refusals(cert)
@@ -497,7 +556,7 @@ def ensure(missing_only: bool = False, repo: Path = REPO) -> list[str]:
         out = []
         for folder, book in published_folders(repo):
             why = stale(folder, book, repo)
-            if why and (not missing_only or not certificate_path(folder, book).is_file()):
+            if why and (not missing_only or not certificate_path(folder, book).is_file()) and folder not in out:
                 out.append(folder)
         return out
     if not todo():
@@ -506,7 +565,7 @@ def ensure(missing_only: bool = False, repo: Path = REPO) -> list[str]:
         notes = []
         for folder in todo():
             try:
-                notes += [f"{_shown(folder)}: {w}" for w in publish(folder)]
+                notes += [f"{_shown(book)}: {w}" for book, why in publish(folder).items() for w in why]
             except PublishError as e:
                 notes.append(str(e))
     return notes + (_left_stale(repo) if missing_only else [])
@@ -541,33 +600,37 @@ def _shown(path) -> str:
     return p.relative_to(REPO).as_posix() if p.is_absolute() and p.is_relative_to(REPO) else str(p)
 
 
-def folders_named(where: str | None) -> list[Path]:
-    """The state law folders a command names: none named, every one with a rulebook; a state law folder, itself; a
-    place, the state law folders it inherits."""
+def folders_named(where: list[str]) -> list[Path]:
+    """The law folders a command names: none named, every one with a rulebook; a state law folder, itself; a place,
+    itself and the state law folders it inherits."""
     if not where:
-        return [f for f, _ in published_folders()]
+        return list(dict.fromkeys(f for f, _ in published_folders()))
     from .place import folder_of, place
-    folder = folder_of(where).resolve()
-    if (folder / "state.yaml").is_file():
-        return [folder]
-    return list(place(folder).inherits)
+    out = []
+    for w in where:
+        folder = folder_of(w).resolve()
+        out += [folder] if (folder / STATE_SETTINGS).is_file() else [folder, *place(folder).inherits]
+    return list(dict.fromkeys(out))
 
 
 def main(argv: list[str]) -> int:
     import argparse
     parser = argparse.ArgumentParser(prog=PUBLISH)
-    parser.add_argument("folder", nargs="?", help="a state law folder or a place (default: every state law)")
+    parser.add_argument("folder", nargs="*", help="state law folders or places (default: every law with a rulebook)")
     parser.add_argument("--check", action="store_true", help="a fresh compile must give the same bytes")
     args = parser.parse_args(argv)
     failed = 0
+    verb = "matches a fresh compile" if args.check else "written"
     for folder in folders_named(args.folder):
         try:
-            why = check(folder) if args.check else publish(folder)
+            found = check(folder) if args.check else publish(folder)
         except PublishError as e:
-            why = [str(e)]
-        book = building_code_rulebook(folder)
-        shown = _shown(certificate_path(folder, book)) if book else f"{_shown(folder)} (no rulebook)"
-        verb = "matches a fresh compile" if args.check else "written"
-        print(f"{'✗' if why else '✓'} {shown}" + ("" if why else f": {verb}") + "".join(f"\n    {w}" for w in why))
-        failed += bool(why)
+            found = {None: [str(e)]}
+        if not found:
+            print(f"- {_shown(folder)}: no rulebook")
+        for book, why in found.items():
+            shown = _shown(certificate_path(folder, book)) if book else _shown(folder)
+            mark = "\u2717" if why else "\u2713"
+            print(f"{mark} {shown}" + ("" if why else f": {verb}") + "".join(f"\n    {w}" for w in why))
+            failed += bool(why)
     return 1 if failed else 0
