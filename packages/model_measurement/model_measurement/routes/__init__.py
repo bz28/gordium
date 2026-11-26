@@ -567,6 +567,8 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
     read_doors = set(story.doors)
     read_pairs = {frozenset((a, b)) for a, b, _ in story.passages}
     for kind, key, sides in listed:
+        if kind == "unread":                             # a door or opening whose rooms can't be read: any room's
+            raise Stop("outside_link_elsewhere", name="of this story")
         if not set(sides) & here:
             continue
         if (kind == "door" and key not in read_doors) or (kind == "passage" and frozenset(sides) not in read_pairs):
@@ -630,14 +632,22 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
 
 
 def _links_listed(description) -> list:
-    """Every door and passage the description gives: (kind, id, sides as room ids) for each one readable that far."""
+    """Every door and passage the description gives: (kind, id, sides as room ids); one whose sides can't be read
+    (or a list that isn't one) as ("unread", None, []): it may be any room's."""
     out = []
-    for d in description.get("doors") or []:
-        if isinstance(d, dict) and isinstance(d.get("sides"), list):
-            out.append(("door", d.get("id"), [x for x in d["sides"] if isinstance(x, str)]))
-    for g in description.get("passages") or []:
-        if isinstance(g, dict) and isinstance(g.get("rooms"), list):
-            out.append(("passage", None, [x for x in g["rooms"] if isinstance(x, str)]))
+    for key, kind, sides_key in (("doors", "door", "sides"), ("passages", "passage", "rooms")):
+        given = description.get(key)
+        if given is None:
+            continue
+        if not isinstance(given, list):
+            out.append(("unread", None, []))
+            continue
+        for d in given:
+            sides = d.get(sides_key) if isinstance(d, dict) else None
+            if not isinstance(sides, list) or not all(isinstance(x, str) for x in sides):
+                out.append(("unread", None, []))
+                continue
+            out.append((kind, d.get("id") if kind == "door" else None, list(sides)))
     return out
 
 
@@ -668,16 +678,22 @@ def _stair_in(stair, group, story) -> bool:
 
 
 def _circulation(story) -> set:
-    """The rooms of the story's shared circulation: its halls (corridors, lobbies), its exits, and every room of a
-    space that opens into one of them (spaces.py), so a stair placed wholly in them is another space's."""
+    """The rooms of the story's circulation shared between spaces: each hall (corridors, lobbies) opening into two or
+    more spaces, the exits entered from one, and every room of the spaces such a hall opens into (spaces.py), so a
+    stair placed wholly in them is another space's. A hall or exit only one space (or none) opens into may be that
+    space's own: not shared."""
     found, halls = spaces.spaces(story, _is_exit)
-    hall_rooms = set().union(*[h for h, _ in halls]) if halls else set()
-    exits = {r for r in story.rooms if r not in hall_rooms and not any(r in g for g in found)}
-    out = hall_rooms | exits
+    shared_halls = [(h, touched) for h, touched in halls if len(touched) >= 2]
+    hall_rooms = set().union(*[h for h, _ in shared_halls]) if shared_halls else set()
+    grouped = set().union(*found) if found else set()
+    all_halls = set().union(*[h for h, _ in halls]) if halls else set()
+    exits = {r for r in story.rooms if r not in grouped and r not in all_halls}
     links = [set(d.sides) for d in story.doors.values()] + [{a, b} for a, b, _ in story.passages]
-    for g in found:
-        if any(sides & g and sides - g and (sides - g) <= out for sides in links):
-            out |= g
+    entered = {r for r in exits if any(r in sides and sides & hall_rooms for sides in links)}
+    out = hall_rooms | entered
+    for _, touched in shared_halls:
+        for i in touched:
+            out |= found[i]
     return out
 
 
