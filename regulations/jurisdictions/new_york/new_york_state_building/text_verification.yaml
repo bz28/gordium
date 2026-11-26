@@ -27,16 +27,16 @@ second_reading:
     1031.2.1 and 2 definitions, 2026-11-26), a twenty-second for the 6 of section group 8b (1031.3 to 1031.4 and 1
     definition, 2026-11-26), a twenty-third for the 7 of section group 8c (1031.5 to 1031.6, 2026-11-26), a twenty-fourth for
     the 38 of section group 9a (Sections 1003 and 1012 and 3 definitions, 2026-11-26), a twenty-fifth for the
-    31 of section group 9b (Sections 1008 and 1013 and 10 definitions, 2026-11-26), and a helper for the comparison
-    words)
+    31 of section group 9b (Sections 1008 and 1013 and 10 definitions, 2026-11-26), a twenty-sixth for the
+    34 of section group 9c (Section 1009 and 4 definitions, 2026-11-26), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 405 pieces, 1113 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 439 pieces, 1250 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -996,6 +996,18 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:international_symbol_of_accessibility:
+    piece_sha256: ba746d8fc321bd748cbba0841bfa5b783f98bbbf744acd63b55fa82d9c880ed5
+    numbers:
+    - '19'
+    - '300'
+    second_reading: agrees
+    second_reading_numbers:
+    - '19'
+    - '300'
+    second_reading_comparisons:
+    - none
+    - none
   202:joint:
     piece_sha256: a690bdf6ce7fa7db83da15e50daf3893ae2cbbb5b1f9665c6a1fbeb99f2529af
     numbers: []
@@ -1519,6 +1531,12 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:smoke_barrier:
+    piece_sha256: 2362bf8f9765ea07a0781a2aa97a6e85dcd42105b1868731ffc1abb41c737ea4
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:smoke_detector:
     piece_sha256: 522da15a335b767701eedf42bdfb4c346aca491af705eb998bf698ea50e567df
     numbers: []
@@ -1676,6 +1694,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:supervising_station:
+    piece_sha256: 2f05b8a7d28ac0a8cfe71ee33da4528b55c19817aeae78f410a128b7a38f0524
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:supervisory_signal_initiating_device:
     piece_sha256: 6e0e706319eef21505ea4e93da0244898cabec2aaf1e70dc6f478d0b40e6833f
     numbers: []
@@ -1709,6 +1733,75 @@ pieces:
     flags:
     - '''180'' (<=): ''for a period of 180 days or less''; days is no unit numbers.py knows, so its ''or less''
       is missed. The second reading is right. Used by no rule.'
+  202:toxic:
+    piece_sha256: 9de644cc23aeec8fa18518c873b3349d8b892f0d485233d63848da54634770cb
+    numbers:
+    - more than 50
+    - not more than 500
+    - '50'
+    - between 200
+    - and 300
+    - more than 200
+    - not more than 1,000
+    - '50'
+    - '24'
+    - within 24
+    - between 2
+    - and 3
+    - more than 200
+    - not more than 2,000
+    - '50'
+    - more than 2
+    - not more than 20
+    - '1'
+    - within 1
+    - between 200
+    - and 300
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 50
+    - not more than 500
+    - '50'
+    - between 200
+    - and 300
+    - more than 200
+    - not more than 1,000
+    - '50'
+    - '24'
+    - within 24
+    - between 2
+    - and 3
+    - more than 200
+    - not more than 2,000
+    - '50'
+    - more than 2
+    - not more than 20
+    - '1'
+    - within 1
+    - between 200
+    - and 300
+    second_reading_comparisons:
+    - '>'
+    - <=
+    - none
+    - between
+    - between
+    - '>'
+    - <=
+    - none
+    - none
+    - <=
+    - between
+    - between
+    - '>'
+    - <=
+    - none
+    - '>'
+    - <=
+    - none
+    - <=
+    - between
+    - between
   202:trim:
     piece_sha256: a50c365023e107da8eab8f57defaddf42c7c9a7db84a49d484e64c9ba5f4e6da
     numbers: []
@@ -3709,6 +3802,558 @@ pieces:
     - '''40'' (<=): ''A maximum-to-minimum illumination uniformity ratio of 40 to 1 shall not be exceeded''; the recorded
       words miss it (numbers.py reads comparison words only directly before a number or after its unit). The second reading
       is right.'
+  '1009':
+    piece_sha256: a92933cbfc296360914e8515c8a34834b409ed1e9e716b8b4bdc9ea5e3237ad2
+    numbers:
+    - '1009'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009'
+    second_reading_comparisons:
+    - none
+  '1009.1':
+    piece_sha256: e8810f0ade7671dcfafafc7f4b4ded038902367e0c413ea7f25d97e4d219b3c4
+    numbers:
+    - '1009.1'
+    - not less than one
+    - more than one
+    - '1006.2'
+    - '1006.3'
+    - not less than two
+    - one
+    - '1009.3'
+    - '1009.4'
+    - 1009.5 inch
+    - one
+    - '1030.8'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.1'
+    - not less than one
+    - more than one
+    - '1006.2'
+    - '1006.3'
+    - not less than two
+    - one
+    - '1009.3'
+    - '1009.4'
+    - 1009.5 inch
+    - one
+    - '1030.8'
+    second_reading_comparisons:
+    - none
+    - '>='
+    - '>'
+    - none
+    - none
+    - '>='
+    - '>='
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    flags:
+    - '''one'' (>=): exception 1''s ''One accessible means of egress is required from an accessible mezzanine level'', the
+      least where two would otherwise be; the recorded words miss it (numbers.py reads comparison words only directly before
+      a number or after its unit). The second reading is right.'
+    - '''one'' (>=): exception 2''s ''one accessible means of egress is permitted'', again the least allowed; the recorded
+      words miss it (numbers.py reads comparison words only directly before a number or after its unit). The second reading
+      is right.'
+    - '''1009.5 inch'': the section number 1009.5 before the next sentence''s ''In'' (''Section 1009.3, 1009.4 or 1009.5.
+      2. In''); the number reader takes the next sentence''s first word for a unit (fixed on main by PR #235). A cross-reference,
+      no limit, so the second reading (none) is right.'
+  '1009.2':
+    piece_sha256: 0e9e6c892f67c40b1b2908aed75bf4601bb7a731ea215ca393ed7ef30175d213
+    numbers:
+    - '1009.2'
+    - one or more
+    - '1104'
+    - '1009.3'
+    - and 1023
+    - '1009.3'
+    - and 1019.3
+    - '1019.4'
+    - '1009.3'
+    - and 1027
+    - '1009.4'
+    - '1009.5'
+    - '1026'
+    - '1012'
+    - '1009.6'
+    - '1009.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.2'
+    - one or more
+    - '1104'
+    - '1009.3'
+    - and 1023
+    - '1009.3'
+    - and 1019.3
+    - '1019.4'
+    - '1009.3'
+    - and 1027
+    - '1009.4'
+    - '1009.5'
+    - '1026'
+    - '1012'
+    - '1009.6'
+    - '1009.7'
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+  1009.2.1:
+    piece_sha256: ef97b732d3eee1c5745c199cbd828c6af9bfa4f3334f9492a04447022412a6c3
+    numbers:
+    - four or more
+    - three or more
+    - not less than one
+    - '1009.4'
+    - '1012'
+    second_reading: agrees
+    second_reading_numbers:
+    - four or more
+    - three or more
+    - not less than one
+    - '1009.4'
+    - '1012'
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - '>='
+    - none
+    - none
+  1009.2.2:
+    piece_sha256: 0a343a66a5052a3a6f91074c850e7814147fee15370121bfb965550ff71656ab
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  '1009.3':
+    piece_sha256: 4cd1075109fc152210ebd854bb28a5512902329f87d72389b44ea45eadc64913
+    numbers:
+    - '1009.3'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.3'
+    second_reading_comparisons:
+    - none
+  1009.3.1:
+    piece_sha256: 6000b6ce87a44ed48ee52ca64018f8942538e8418242814c1fdd3e345acedc5d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1009.3.2:
+    piece_sha256: 04858c781fc6ca4a06ee23947688b14e3ce5d2bba6982aecd7c77319ec91ae7e
+    numbers:
+    - 48 inch
+    - 1219 mm
+    - 48 inch
+    - 1219 mm
+    - 48 inch
+    - 1219 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 48 inch
+    - 1219 mm
+    - 48 inch
+    - 1219 mm
+    - 48 inch
+    - 1219 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    flags:
+    - '''48 inch'' (>=): ''a clear width of 48 inches (1219 mm) minimum between handrails'', and both exceptions name the
+      same minimum (''The clear width of 48 inches ... is not required''); the recorded words miss it (numbers.py reads comparison
+      words only directly before a number or after its unit). The second reading is right.'
+  1009.3.3:
+    piece_sha256: ff74570b59b2616db640da7d5f97c14beb62627ba92a069bcd684f5055c5a814
+    numbers:
+    - '1009.6'
+    - two
+    - '1009.8'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.6'
+    - two
+    - '1009.8'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  '1009.4':
+    piece_sha256: 4b5bee7200659e39d51a2345a4df7d88d4922e0e3ca78130b39898c14cc6d279
+    numbers:
+    - '1009.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.4'
+    second_reading_comparisons:
+    - none
+  1009.4.1:
+    piece_sha256: 618058e550927d6f9e9a1d9680fd624de7fd3ba5db4e59b7e4c646ff3d9d7d35
+    numbers:
+    - '2.27'
+    - '27'
+    - '3003'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2.27'
+    - '27'
+    - '3003'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  1009.4.2:
+    piece_sha256: 0a09ecbcdf20cb97baecb95fa862576147908c4dad2588ce903f7f828511ba54
+    numbers:
+    - '1009.6'
+    - '712'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.6'
+    - '712'
+    second_reading_comparisons:
+    - none
+    - none
+  '1009.5':
+    piece_sha256: 76b2441802253a7f950ef500450ac635cd4f41db233b2322dc70fe0a71892863
+    numbers:
+    - '1009.5'
+    - '1110.11'
+    - '10'
+    - '27'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.5'
+    - '1110.11'
+    - '10'
+    - '27'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  '1009.6':
+    piece_sha256: 60b4eba6e9bfc2669e2de11e2e9c74c5011e1231cf75c53b7b1bba55bd9a607a
+    numbers:
+    - '1009.6'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.6'
+    second_reading_comparisons:
+    - none
+  1009.6.1:
+    piece_sha256: d715de1c7b2851e2b662927472dd1f2d210ee5881daf753c2f65aae58fdd3845
+    numbers:
+    - '1017.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1017.1'
+    second_reading_comparisons:
+    - none
+  1009.6.2:
+    piece_sha256: cbf0e8f131025518b0dff42107e69b9d31a60792fa3617187c72a8152d5a83c8
+    numbers:
+    - '1009.3'
+    - and 1023
+    - '1009.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.3'
+    - and 1023
+    - '1009.4'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  1009.6.3:
+    piece_sha256: 2051aa4454a3a735a616600b28e2d71c214d69a372b88e3c5d6918b4a686f5b5
+    numbers:
+    - one
+    - 30 inch
+    - 52 inch
+    - 762 mm
+    - 1320 mm
+    - '200'
+    - not be obstructed by more than one
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 30 inch
+    - 52 inch
+    - 762 mm
+    - 1320 mm
+    - '200'
+    - not be obstructed by more than one
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - '>='
+    - none
+    - none
+    - none
+    - <=
+    flags:
+    - '''one'' (>=): ''sized to accommodate one wheelchair space ... for each 200 occupants'', at least one per 200; the recorded
+      words miss it (numbers.py reads comparison words only directly before a number or after its unit). The second reading
+      is right.'
+    - '''30 inch'' (>=): the wheelchair space ''30 inches by 52 inches'', the least each space measures (''sized to accommodate'');
+      the recorded words miss it (numbers.py reads comparison words only directly before a number or after its unit). The
+      second reading is right.'
+    - '''52 inch'' (>=): as the 30 inches; the recorded words miss it (numbers.py reads comparison words only directly before
+      a number or after its unit). The second reading is right.'
+  1009.6.4:
+    piece_sha256: ad2ec689db9e52ec6765ec005e2f39f7221c15c46a2eea107115e8ba14d220d0
+    numbers:
+    - '709'
+    - '1026'
+    - '1023'
+    second_reading: agrees
+    second_reading_numbers:
+    - '709'
+    - '1026'
+    - '1023'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  1009.6.5:
+    piece_sha256: 84f9bcbcc15626dd3af62d5533aa1ed26df475dde6360e0d1558bebf7d1f5c8c
+    numbers:
+    - two
+    - two
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    - two
+    second_reading_comparisons:
+    - none
+    - none
+  '1009.7':
+    piece_sha256: 17d24ff87e23eccde16c054e60eb14ae23fdcac91e32e3cf10682b66df155f28
+    numbers:
+    - '1009.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.7'
+    second_reading_comparisons:
+    - none
+  1009.7.1:
+    piece_sha256: ea5d4d85c2b4126529fbd03c70dd1441e6ddbf67c0b596fac7105843bb4f5fd5
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1009.7.2:
+    piece_sha256: 91960746ce4b4a42dc4d15fd058e02bf0eaba5e8bb723447772469db4d5784b9
+    numbers:
+    - '1'
+    - not less than 10 foot
+    - 3048 mm
+    - not less than 4 foot
+    - 1219 mm
+    - not less than 10 foot
+    - 3048 mm
+    - '716'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1'
+    - not less than 10 foot
+    - 3048 mm
+    - not less than 4 foot
+    - 1219 mm
+    - not less than 10 foot
+    - 3048 mm
+    - '716'
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - none
+    flags:
+    - '''1'' (>=): ''a minimum fire-resistance rating of 1 hour'', the 1 read without its unit; the recorded words miss it
+      (numbers.py reads comparison words only directly before a number or after its unit). The second reading is right.'
+  1009.7.3:
+    piece_sha256: 5c0ad8d46157bcae876874dd7c7a9fceb3e6c3526d2de157ae506ceb334f85cf
+    numbers:
+    - not less than 50 percent
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 50 percent
+    second_reading_comparisons:
+    - '>='
+  1009.7.4:
+    piece_sha256: 2888eb5359c432433ece04810cc599ce2f6271326e23695ea8160eab9e0e846a
+    numbers:
+    - 48 inch
+    - 1219 mm
+    - 48 inch
+    - 1219 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 48 inch
+    - 1219 mm
+    - 48 inch
+    - 1219 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+    - '>='
+    - none
+    flags:
+    - '''48 inch'' (>=): ''a mini- mum clear width of 48 inches (1219 mm) between handrails'', the word broken across the
+      line, and the exception''s ''minimum clear width of 48 inches''; the recorded words miss it (numbers.py reads comparison
+      words only directly before a number or after its unit). The second reading is right.'
+  '1009.8':
+    piece_sha256: 6377ed86b50e141e9cf923331ab50dadf00f94e80476b61d5be2cbdc15ff8ddf
+    numbers:
+    - '1009.8'
+    - two
+    - two
+    - one or more
+    - two
+    - two
+    - two
+    - '1012'
+    - two
+    - two
+    - two
+    - two
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.8'
+    - two
+    - two
+    - one or more
+    - two
+    - two
+    - two
+    - '1012'
+    - two
+    - two
+    - two
+    - two
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+  1009.8.1:
+    piece_sha256: eefec7e98111410e0dd135dcb603c9ddb2910777a524cf12ef6caae385112924
+    numbers:
+    - two
+    - two
+    - two
+    - two
+    - '2525'
+    - '72'
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    - two
+    - two
+    - two
+    - '2525'
+    - '72'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+  1009.8.2:
+    piece_sha256: 67a0941a26bb263e6decf668f8d4226085a36d1027ba69b1ab2f554a921f90f9
+    numbers:
+    - two
+    - two
+    - two
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    - two
+    - two
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  '1009.9':
+    piece_sha256: 1a62f451054e14fe1b39de6a2a9ebddcdae8fb477927902039d83a9167c16080
+    numbers:
+    - '1009.9'
+    - '1013.3'
+    - '1013.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.9'
+    - '1013.3'
+    - '1013.4'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  '1009.10':
+    piece_sha256: d6b7dd42cf4a0ca31f45b71688c54d0937197bcf19b6854cd3a9ea061d3beb58
+    numbers:
+    - '1009.10'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.10'
+    second_reading_comparisons:
+    - none
+  '1009.11':
+    piece_sha256: 25330446eb6241cc6b886ea4df89bb81b4f20b1d57fcf2bc2e640ac49415f868
+    numbers:
+    - '1009.11'
+    - two
+    - '1009.8'
+    - two
+    second_reading: agrees
+    second_reading_numbers:
+    - '1009.11'
+    - two
+    - '1009.8'
+    - two
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
   '1010.1':
     piece_sha256: c1e2ce1fde03033ec7eec8d0217bc8b6732499263e79d2a42b83fc0720085261
     numbers:

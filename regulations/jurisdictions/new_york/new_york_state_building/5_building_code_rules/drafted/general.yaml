@@ -21229,10 +21229,11 @@ rules:
       mezzanine (1009.3, 1009.4 or 1009.5) and in assembly areas with ramped or stepped aisles where the common path is accessible
       and meets 1030.8: which spaces must be accessible (Chapter 11) and their accessible means of egress aren''t in the model,
       so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units
-    must be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible
-    means of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009
-    is a person's check, never a pass or a fail.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units must
+    be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible means
+    of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's
+    check, never a pass or a fail. 1006.2 and 1006.3 aren't brought in whole (only parts of them are), so how many means of
+    egress a space needs is part of the check.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_2_continuity_and_components
@@ -21261,10 +21262,11 @@ rules:
       and 1027) serving levels other than the level of exit discharge, elevators (1009.4), platform lifts (1009.5), horizontal
       exits (1026), ramps (1012), areas of refuge (1009.6) or exterior areas for assisted rescue (1009.7) serving exits at
       the level of exit discharge: accessible means of egress aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units
-    must be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible
-    means of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009
-    is a person's check, never a pass or a fail.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units must
+    be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible means
+    of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's
+    check, never a pass or a fail. 1104, 1019.3, 1019.4, 1023, 1026 and 1027 aren't brought in (1019 to 1027 are later PRs of
+    section group 9).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_2_1_elevators_required
@@ -21339,7 +21341,7 @@ rules:
 - id: general.bc_1009_3_1_exit_access_stairways
   kind: flag
   topic: means_of_egress
-  title: Exit access stairways within a story not an accessible means of egress (BCNYS 1009.3.1)
+  title: Same-story stairways not an accessible means of egress (BCNYS 1009.3.1)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 320
@@ -21451,8 +21453,9 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Neither the occupancy nor the sprinkler system is stated: a person checks.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered
-    throughout per 903.3.1.1 or 903.3.1.2 (exception 2), or stated Group R-2 alone (exception 5).
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered throughout
+    per 903.3.1.1 or 903.3.1.2 (exception 2), or stated Group R-2 alone (exception 5). 1030.6.2 and 1030.6.3 (smoke-protected
+    and open-air seating) aren't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_4_1_elevator_standby_power
@@ -21480,10 +21483,10 @@ rules:
     note: 'An elevator counts toward an accessible means of egress only as 1009.4.1 and 1009.4.2 allow (1009.4); it meets
       the emergency operation and signaling requirements of ASME A17.1/CSA B44 Section 2.27, with standby power per Chapter
       27 and 3003: elevators aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units
-    must be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible
-    means of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009
-    is a person's check, never a pass or a fail.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units must
+    be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible means
+    of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's
+    check, never a pass or a fail. ASME A17.1, Chapter 27 and 3003 aren't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_4_2_elevator_area_of_refuge
@@ -21522,8 +21525,8 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered
-    throughout per 903.3.1.1 or 903.3.1.2 (exception 2).
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered throughout
+    per 903.3.1.1 or 903.3.1.2 (exception 2). 712 (shafts), 1030.6.2 and 1030.6.3 aren't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_5_platform_lifts
@@ -21545,10 +21548,10 @@ rules:
     note: 'A platform lift serves as part of an accessible means of egress only where 1110.11 allows it in a required accessible
       route (not under its item 10), with standby power per Chapter 27: platform lifts aren''t in the model, so a person''s
       check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units
-    must be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible
-    means of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009
-    is a person's check, never a pass or a fail.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units must
+    be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible means
+    of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's
+    check, never a pass or a fail. 1110.11 and Chapter 27 aren't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_6_areas_of_refuge
@@ -21617,10 +21620,10 @@ rules:
     note: 'Every required area of refuge has direct access to a stairway complying with 1009.3 and 1023 or an elevator complying
       with 1009.4 (or, at the level of exit discharge, an interior area of refuge to an exterior exit door): areas of refuge
       aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units
-    must be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible
-    means of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009
-    is a person's check, never a pass or a fail.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units must
+    be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible means
+    of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's
+    check, never a pass or a fail. 1023 (interior exit stairways) isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_6_3_area_of_refuge_size
@@ -21670,10 +21673,10 @@ rules:
     note: 'Each area of refuge is separated from the rest of the story by a smoke barrier (709) or a horizontal exit (1026)
       and designed to keep smoke out; not required within an interior exit stairway enclosure (1023), or in outdoor facilities
       whose exit access is essentially open to the outside: areas of refuge aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units
-    must be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible
-    means of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009
-    is a person's check, never a pass or a fail.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units must
+    be accessible) and ICC A117.1 aren't brought in; how Gordium reads A117.1 is a decision still pending. Accessible means
+    of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's
+    check, never a pass or a fail. 709 (smoke barriers), 1023 and 1026 aren't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_6_5_area_of_refuge_two_way_communication
@@ -21788,8 +21791,8 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered
-    throughout per 903.3.1.1 or 903.3.1.2 (its exception removes the whole requirement).
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered throughout
+    per 903.3.1.1 or 903.3.1.2 (its exception removes the whole requirement). 716 (opening protectives) isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_7_3_assisted_rescue_openness
@@ -21920,7 +21923,7 @@ rules:
       point the fire department approves, with timed automatic telephone dial-out to an approved supervising station or emergency
       services where that point isn''t constantly attended, audible and visible signals, listed to UL 2525 and installed per
       NFPA 72: such systems aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. UL 2525 and NFPA 72 aren't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_8_2_two_way_communication_directions
@@ -21942,7 +21945,8 @@ rules:
     note: 'Directions for using the two-way communication system, instructions for summoning help through it and written identification
       of the location are posted beside it, in ICC A117.1''s visual characters: such systems aren''t in the model, so a person''s
       check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. ICC A117.1 isn't brought in; how Gordium reads
+    it is a decision still pending.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_9_accessibility_signage
