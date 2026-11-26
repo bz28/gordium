@@ -1335,7 +1335,7 @@ def test_no_title_puts_a_bare_apostrophe_after_a_word_not_ending_in_s():
 # own examples didn't catch a wrong condition (hiding 1018.5 for two or more groups passed them all). Written from the
 # law, never from the rules: where each section group 9 flag with a condition is NOT applicable (its exception spares the
 # whole building, or its own words exclude the group); everywhere else, the unstated cases included, it shows.
-SPRINKLED = ("nfpa_13", "nfpa_13r")              # 903.3.1.1 and 903.3.1.2, "equipped throughout"
+SPRINKLED = ("nfpa_13", "nfpa_13r", "nfpa_13 alone", "nfpa_13r alone")   # 903.3.1.1 or 903.3.1.2 stated, "equipped throughout"
 HIDDEN_WHERE = {
     "general.bc_1008_2_illumination_required": lambda g, s: g == "U",                       # exception 1
     "general.bc_1013_1_exit_signs_where_required": lambda g, s: g == "U",                   # exception 3
@@ -1356,14 +1356,17 @@ GROUPS_9 = ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H
             "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U", "mixed", None]
 SPRINKLERS_9 = {"none": {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False},
                 "nfpa_13": {"sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False},
-                "nfpa_13r": {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True}, None: {}}
+                "nfpa_13r": {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True}, None: {},
+                # review round 2 of section group 9d: one of the two facts stated, the other not
+                "nfpa_13 alone": {"sprinklered_903_3_1_1": True}, "nfpa_13r alone": {"sprinklered_903_3_1_2": True},
+                "not 13 alone": {"sprinklered_903_3_1_1": False}, "not 13r alone": {"sprinklered_903_3_1_2": False}}
 
 
 def test_each_section_group_9_flag_with_a_condition_hides_only_where_the_law_spares_the_building(ctx, rules):
     from rule_format.rulebook import outcome
     conditioned = {rid for rid, r in rules.items() if r.get("kind") == "flag" and r.get("applies_when")
-                   and rid.removeprefix("general.bc_").split("_")[0] in GROUP_9_SECTIONS
-                   and "section group 9" in (r.get("notes") or "")}            # 1018.4's is round 1's (2026-11-23)
+                   and rid.removeprefix("general.bc_").split("_")[0] in GROUP_9_SECTIONS}
+    conditioned -= {"general.bc_1018_4_merchandise_pads"}       # round 1's (2026-11-23), walked with Table 1006.2.1
     assert conditioned == set(HIDDEN_WHERE), conditioned ^ set(HIDDEN_WHERE)      # a new condition needs its oracle
     for rid, hidden in HIDDEN_WHERE.items():
         for g in GROUPS_9:
