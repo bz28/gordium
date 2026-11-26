@@ -25,7 +25,7 @@ Ben, 2026-11-25: everything the model can show is worked out by Gordium; only wh
 
 **How we know:** `packages/model_measurement/tests/test_routes_story_place.py` walks 15 stacks of floors (basements, sunken rooms, floors on each threshold) with 5 sets of levels with no rooms (none, a garage under the rooms, a datum, a roof, a gap) over 21 grounds and none: an oracle written from the three definitions lists every world the stated ground allows (a grade plane anywhere at or below its top end, the lowest ground, the ground along half the perimeter, which height of a stepped floor counts as "the floor next above", each level with no rooms a story or not) and every fact measured must be the oracle's one value; flat ground must settle every stack whose lowest story is above it and clear of the thresholds. The real models: the four-unit apartment (as sent, its levels not all listed and no ground: not placed; with every level listed and its flat ground at 0, Level 1 first and Level 2 second; at 5 ft, Level 1 the first above or below and Level 2 not placed), and 106 Ithaca Rd's levels and four spot grades (Level 1 the first story; the Roof tried as a story and not). Through the check (`packages/design_checker/tests/test_story_place_check.py`), a one-exit Group A version of the apartment fails Table 1006.3.4(2) on flat ground at 0 (its second story), needs review at 5 ft, and needs review, never a pass, wherever the place isn't measured.
 
-**Not done:** the Residential Code's stated `stories_above_grade_plane` isn't used as a cross-check (a different book: Ben through the coordinator, 2026-11-25). A level with rooms whose outline is at most 2/3 of the story below's (or not given) may be a mezzanine (505.2: part of the story below): tried both ways, never placed itself (review round 7).
+**Not done:** the Residential Code's stated `stories_above_grade_plane` isn't used as a cross-check (a different book: Ben through the coordinator, 2026-11-25). A level whose rooms' floor area is at most 2/3 of the story below's outline (or a room not read, or no outline) may be a mezzanine (505.2: part of the story below): tried both ways, never placed itself (review round 7).
 
 ## Steps 2 and 3 (next PRs)
 
@@ -65,6 +65,14 @@ Two more, each a possible false pass: a spot under an upper story's overhang mor
 
 Two more possible false passes: the story under a possible mezzanine was still placed, though the mezzanine's occupants would then be its own (505.2) and its single-exit row could pass on too few (now neither is placed); and a story with no level of its own under the lowest level (an undercroft drawn from the level above with an offset) was never tried (now a lowest level more than 6 ft over the lowest ground stated, flat or the lowest finished spot beside the building, places nothing). A known cost noted by the round: from spot grades, every wall of every story needs a spot outside it, so a stepped building (an upper story set back) is never placed; a later step may judge only the walls that meet the ground. One test each.
 
+## Review round 9 (2026-11-26)
+
+One more possible false pass: round 8's lowest ground left out spots under an overhang (the ground at the ground floor's own walls), so a ground floor 7 ft over them was still placed; now every spot outside some story's outline counts. Recorded as **Gordium's reading**, shown with every place (`levels_reading`), for Ben to confirm: a story stands where the model has a level for it (each tried as a story or not), or under the lowest level where that is more than 6 ft over the lowest ground stated (then nothing is placed); a story with no level of its own below that isn't looked for. Taken to the end, the grade plane's own rules (it may lie below the stated ground) would let an undrawn story stand under any building, and nothing could ever be placed. The reasons for a possible mezzanine now say so.
+
+## Review round 10 (2026-11-26)
+
+Two more possible false passes: a mezzanine's level outline is the building's own (it stands within the exterior walls), so the outline test never flagged it (now judged by its rooms' floor area, and a level whose rooms aren't read may be one); and ground stated lower at an opening or a well's floor wasn't counted in the lowest ground under the lowest level (now it is, flat ground and spots alike). One test each.
+
 ## Review round 1 of step 2 (2026-11-25)
 
 The first reading took every room as needing its own door outside: a bedroom off a living room with its own exit, or a workroom off a shop, made the story "no", which removed the item 2 review and let a one-exit story fail outright (never a pass: the fact is read only in review conditions). A closet whose room had no use given was likewise a room "without an exit". Fixed as a class: the answer is per space (rooms joined by doors or passages), "no" only for a space reaching the outside through a shared corridor or lobby, every other unsettled case not measured. The walk now has a corridor and its oracle the spaces reading; one test per case found.
@@ -88,6 +96,10 @@ One more wrong "no": a stair within a space (a two-story unit's own stair down t
 ## Review round 6 of step 2 (2026-11-26)
 
 Round 5's stair check read a description with no stairs list (stairs not read: the format's silence) as one with no stairs, so the upper floor of a two-story unit could still read "no". Now "no" needs the stairs listed (each placed outside the space; one that can't be read may be anywhere) and ramps, alternating tread devices and ship's ladders given as empty or said to be none (`has_none`, with a source); malformed stair data no longer stops the measuring. One test.
+
+## Review round 7 of step 2 (2026-11-26)
+
+The routes read `has_none` loosely, taking claims the format refuses (contradicted by a ramp list, a mistyped key, a reading not true or false, a kind said twice) as "no ramps", a wrong "no"; an unhashable kind stopped the measuring. Now only the format's own claims (`interior.has_none.read`, not a reading) rule a ramp, alternating tread device or ship's ladder out, and a stair in no room of the story may be anywhere (only a stair placed in another room is outside the space). One test for the claims.
 
 ## Review round 1 of step 3 (2026-11-25)
 
