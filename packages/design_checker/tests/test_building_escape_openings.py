@@ -156,10 +156,11 @@ def test_a_room_id_two_rooms_share_counts_no_openings_and_no_doors():
 
 
 
-def test_each_escape_opening_carries_its_rooms_four_facts():
+def test_each_escape_opening_carries_its_rooms_three_facts():
     """Section group 8b: an opening's size rules fail only where 1031.2 requires it, which is its room's to say (its
-    story's place, one exit, a door to outside, another marked opening): each is copied from the room, or its reason
-    why not; an opening in no one sleeping room read gets none of them, so its rows need review."""
+    story's place, one exit, a door to outside): each is copied from the room, or its reason why not; an opening in no
+    one sleeping room read gets none of them, so its rows need review (8d: whether another opening complies is worked
+    out from the law's limits, test_which_openings_comply_*)."""
     one = {"id": "L1", "measures": {"story_exit_count": 1, "story_fourth_or_higher_above_grade_plane": False}}
     parts, desc = _parts(story=one)
     parts["emergency_escape_opening"][0]["not_measured"] = {k: "Gordium doesn't measure this yet"
@@ -168,7 +169,7 @@ def test_each_escape_opening_carries_its_rooms_four_facts():
     escape_openings.link(parts, desc)
     w, x = parts["emergency_escape_opening"]
     assert w["measures"] == {"opening_room_fourth_or_higher": False, "opening_room_one_exit": True,
-                             "opening_room_door_to_outside": False, "opening_room_has_other_openings": False}
+                             "opening_room_door_to_outside": False}
     assert not set(w["measures"]) & set(w["not_measured"])
     assert not set(escape_openings.FROM_ROOM) & set(x["measures"])
     assert set(escape_openings.FROM_ROOM) <= set(x["not_measured"])
@@ -177,10 +178,71 @@ def test_each_escape_opening_carries_its_rooms_four_facts():
     assert parts["emergency_escape_opening"][0]["not_measured"]["opening_room_one_exit"].endswith("isn't worked out")
 
 
-def test_an_opening_knows_its_room_has_another_marked_one():
-    """Review round 1 of group 8b: 1031.2 asks each sleeping room for not fewer than one opening, so a room with two
-    marked tells each that another may be the one relied on (its size rules then need review, never fail)."""
-    parts, desc = _parts(openings=[{"id": "w", "within": "b", "measures": {}}, {"id": "v", "within": "b", "measures": {}}])
-    escape_openings.link(parts, desc)
-    assert [o["measures"]["opening_room_has_other_openings"] for o in parts["emergency_escape_opening"]] == [True, True]
+LIMITS = [{"id": "a", "for_each": "emergency_escape_opening", "limit": "opening_net_clear_area >= 5.7"},
+          {"id": "h", "for_each": "emergency_escape_opening", "limit": "opening_net_clear_height >= 24"}]
 
+
+def _two(first, second, rules=LIMITS):
+    parts, desc = _parts(openings=[{"id": "w", "within": "b", "measures": dict(first)},
+                                   {"id": "v", "within": "b", "measures": dict(second)}])
+    escape_openings.link(parts, desc, rules)
+    return parts["sleeping_room"][0], parts["emergency_escape_opening"]
+
+
+def test_which_openings_comply_counts_only_known_ones():
+    """Section group 8d: an opening complies only where every limit is known true; any known false, it doesn't; else not
+    known. The room counts the known compliant ones (not measured where none is known to and one is unknown), and each
+    opening says whether another in its room is known to comply."""
+    good, small, unknown = {"opening_net_clear_area": 6, "opening_net_clear_height": 30},         {"opening_net_clear_area": 4, "opening_net_clear_height": 30}, {"opening_net_clear_height": 30}
+    room, (w, v) = _two(small, good)                            # the coordinator's case 1
+    assert room["measures"]["sleeping_room_compliant_openings"] == 1
+    assert w["measures"]["opening_room_other_compliant"] is True and v["measures"]["opening_room_other_compliant"] is False
+    room, (w, v) = _two(small, small)                           # the coordinator's case 2
+    assert room["measures"]["sleeping_room_compliant_openings"] == 0
+    assert w["measures"]["opening_room_other_compliant"] is False
+    room, (w, v) = _two(small, unknown)                         # never compliant on an unknown
+    assert "sleeping_room_compliant_openings" not in room["measures"]
+    assert "opening_room_other_compliant" not in w["measures"]
+    room, (w, v) = _two(good, unknown)
+    assert room["measures"]["sleeping_room_compliant_openings"] == 1
+    room, (w, v) = _two(good, good, rules=[])                   # no limits read: nothing complies on nothing
+    assert "sleeping_room_compliant_openings" not in room["measures"]
+    assert escape_openings.complies({"measures": good}, escape_openings.limits(LIMITS)) is True
+    assert escape_openings.complies({"measures": small}, escape_openings.limits(LIMITS)) is False
+    assert escape_openings.complies({"measures": unknown}, escape_openings.limits(LIMITS)) is None
+    assert escape_openings.complies({"measures": good}, []) is None
+
+
+GOOD = {"opening_net_clear_area": 6, "opening_net_clear_height": 30, "opening_net_clear_width": 24,
+        "opening_sill_height": 40, "opening_is_door": False, "opening_below_grade": False}
+SMALL = {**GOOD, "opening_net_clear_area": 4, "opening_at_grade": False}
+
+
+def _room_check(first, second):
+    """The two openings linked with the law's own rules (their limits), then 1031.2's row for the room and 1031.3.1's
+    rows for the openings, Group R-3, no sprinkler system, the room below the fourth story with no door to outside."""
+    from rule_format import parts as part_rules
+    from rule_format.rulebook import Context, load
+    ny = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+    rules = {r["id"]: r for r in load(ny / "5_building_code_rules/drafted/general.yaml")["rules"]}
+    one = {"id": "L1", "measures": {"story_exit_count": 1, "story_fourth_or_higher_above_grade_plane": False}}
+    parts, desc = _parts(story=one, openings=[{"id": "w", "within": "b", "measures": dict(first)},
+                                              {"id": "v", "within": "b", "measures": dict(second)}])
+    escape_openings.link(parts, desc, list(rules.values()))
+    given = {"occupancy_group": "R-3", **{f"sprinklered_903_3_1_{n}": False for n in (1, 2, 3)}}
+    allowed = Context.for_jurisdiction(ny).allowed()
+    room = part_rules.rows(rules["general.bc_1031_2_escape_opening_where_required"], parts, given, allowed)
+    sizes = part_rules.rows(rules["general.bc_1031_3_1_escape_opening_min_area"], parts, given, allowed)
+    return [r["outcome"] for r in room], {r["id"]: r["outcome"] for r in sizes}
+
+
+def test_a_small_opening_beside_a_compliant_one_passes_1031_2_and_every_small_one_fails_it():
+    """The coordinator's two cases (section group 8d), through the law's own rules: one marked opening too small and
+    another that complies: 1031.2 passes, and the small one needs review on its size, never a fail (it isn't the one
+    relied on); every marked opening too small: 1031.2 fails where it requires one, and so does each small one."""
+    room, sizes = _room_check(SMALL, GOOD)
+    assert room == ["pass"] and sizes == {"w": "needs_review", "v": "pass"}
+    room, sizes = _room_check(SMALL, SMALL)
+    assert room == ["fail"] and sizes == {"w": "fail", "v": "fail"}
+    room, sizes = _room_check(SMALL, {k: v for k, v in GOOD.items() if k != "opening_sill_height"})   # one not known
+    assert room == ["needs_review"] and sizes["w"] == "needs_review"

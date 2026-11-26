@@ -18,7 +18,11 @@ from . import formula
 from .formula import EvaluationError, FormulaError, MissingMeasure
 
 PARTS_FILE = Path(__file__).with_name("parts.yaml")
-PART_FIELDS = ("for_each", "within", "when_none")      # a rule's fields for repeating over parts
+PART_FIELDS = ("for_each", "within", "when_none", "limit")   # a rule's fields for repeating over parts
+# `limit` (section group 8d): the part's own requirement, apart from whether the law asks it of this part, so code can
+# tell which parts comply (design_checker/escape_openings.py counts a sleeping room's compliant escape openings). The
+# check must be exactly "(<limit>) or <the condition setting the requirement aside>", and every review_when that reads
+# a measure the limit reads must say "not (<limit>)": the two can't drift apart (limit_problems).
 EXAMPLE_FIELDS = ("parts", "rows")                     # a per-part rule's worked example: the parts, the rows expected
 PART_ENTRY_FIELDS = {"id", "name", "within", "measures"}
 ROW_FIELDS = {"part", "within", "outcome"}             # an expected row: the part's id, the id of the part it sits in
@@ -139,9 +143,52 @@ def rule_problems(rule: dict) -> list[str]:
                      f"(when_none: {none}) can't rule parts out, or a {_words(rule.get('within') or 'building')} "
                      f"whose every {_words(kind)} is ruled out has no row that fails; say how parts differ inside "
                      f"'check' (a if condition else b)")
+    p += limit_problems(rule)
     if none not in WHEN_NONE:
         p.append(f"when_none: what the law says when there is nothing to check, one of {WHEN_NONE} "
                  f"(never pass), got {none!r}")
+    return p
+
+
+def _spaced(text: str) -> str:
+    return " ".join(text.split())
+
+
+def limit_problems(rule: dict) -> list[str]:
+    """A rule's `limit` (section group 8d), in its one fixed shape: a formula over the part's own measures only (never
+    a building value: the part's own requirement), the check exactly "(<limit>) or <set-aside>" where the set-aside reads
+    none of the limit's measures, and every review_when reading one of them saying "not (<limit>)" word for word. A
+    check or band that drifts from its limit could pass what the limit fails: refused."""
+    if "limit" not in rule:
+        return []
+    limit, check, kind = rule.get("limit"), rule.get("check"), rule.get("for_each")
+    if not isinstance(limit, str) or not limit.strip():
+        return ["limit: the part's own requirement, a formula"]
+    try:
+        reads = formula.names(limit)
+    except FormulaError as e:
+        return [f"limit can't be read: {e}"]
+    own = set(measure_kinds(kind)) if isinstance(kind, str) else set()
+    if reads - own:
+        return [f"limit reads {sorted(reads - own)}, not measures of the {_words(kind or 'part')}: a limit is the part's "
+                f"own requirement"]
+    head = f"({_spaced(limit)}) or "
+    if not isinstance(check, str) or not _spaced(check).startswith(head):
+        return [f"check must be exactly \"({_spaced(limit)}) or <the condition setting it aside>\", its limit first"]
+    rest = _spaced(check)[len(head):]
+    try:
+        if formula.names(rest) & reads:
+            return [f"check's set-aside condition reads {sorted(formula.names(rest) & reads)}, the limit's own measures"]
+    except FormulaError as e:
+        return [f"check can't be read: {e}"]
+    p = []
+    for n, r in enumerate(rule.get("review_when") or [], 1):
+        when = r.get("when") if isinstance(r, dict) else None
+        try:
+            if isinstance(when, str) and formula.names(when) & reads and f"not ({_spaced(limit)})" not in _spaced(when):
+                p.append(f"review_when {n} reads the limit's measures but not as \"not ({_spaced(limit)})\"")
+        except FormulaError:
+            continue                                   # reported with the formula
     return p
 
 
