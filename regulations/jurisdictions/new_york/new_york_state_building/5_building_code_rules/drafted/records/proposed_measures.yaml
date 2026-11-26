@@ -228,6 +228,21 @@ occupancy_group:
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_1020_5_other_occupancies
+  - general.bc_1025_1_luminous_markings_where_required
+  - general.bc_1025_2_1_steps
+  - general.bc_1025_2_2_landings
+  - general.bc_1025_2_3_handrails
+  - general.bc_1025_2_4_1_floor_mounted_lines
+  - general.bc_1025_2_4_2_wall_mounted_lines
+  - general.bc_1025_2_4_3_transition
+  - general.bc_1025_2_4_perimeter_demarcation_lines
+  - general.bc_1025_2_5_obstacles
+  - general.bc_1025_2_6_1_emergency_exit_symbol
+  - general.bc_1025_2_6_2_door_hardware_markings
+  - general.bc_1025_2_6_3_door_frame_markings
+  - general.bc_1025_3_uniformity
+  - general.bc_1025_4_self_luminous_photoluminescent
+  - general.bc_1025_5_illumination
   - general.bc_1031_2_1_operational_constraints
   - general.bc_1031_2_basements
   - general.bc_1031_2_escape_opening_where_required

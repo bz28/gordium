@@ -1807,6 +1807,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:high_rise_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines HIGH-RISE BUILDING, a term 1025.1 prints in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 3
+      - 4
+      quote: '[BG] HIGH-RISE BUILDING. A building with an occupied floor or occupiable roof located more than 75 feet (22
+        860 mm) above the lowest level of fire department vehicle access.'
+    piece_sha256: 2c9ef8382ec9fe199f1c24477190a8ec25ff7ff8eb1a001e4082a7060454b079
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:horizontal_assembly:
     label: reference
     topic: definitions
@@ -8785,6 +8801,575 @@ labels:
         and 905.4.
     piece_sha256: cb8638c21e9f92784bf0ba89ae8821a898dd35cf12f207125235f3ae9c12a7ea
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1024':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 348
+      lines:
+      - 10
+      - 10
+      quote: SECTION 1024—EXIT PASSAGEWAYS
+    piece_sha256: b4c2b81db0e6861764258fc09d03c2e5e15797b7e5920a37e744b56cc601cc8f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1024.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exit passageway serving as an exit component is used for nothing but a means of egress and a circulation path:
+      what a room is used for isn''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 348
+      lines:
+      - 11
+      - 12
+      quote: 1024.1 General. Exit passageways serving as an exit component in a means of egress system shall comply with the
+        requirements of this section. An exit passageway shall not be used for any purpose other than as a means of egress
+        and a circulation path.
+    piece_sha256: 654c0d7428c99cdca426320f0d6bd09fa8e1e8c624855c083d9a76a943a8918d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1024.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exit passageway has the capacity 1005.1 requires and is at least 44 inches wide, or 36 inches where it serves
+      fewer than 50 occupants, its minimum width or required capacity unobstructed but for encroachments complying with 1005.7:
+      the routes measure corridors'' width, not an exit passageway''s, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 348
+      lines:
+      - 13
+      - 17
+      quote: '1024.2 Width and capacity. The required capacity of exit passageways shall be determined as specified in Section
+        1005.1 but the minimum width shall be not less than 44 inches (1118 mm), except that exit passageways serving an occupant
+        load of less than 50 shall be not less than 36 inches (914 mm) in width. The minimum width or required capacity of
+        exit passageways shall be unobstructed. Exception: Encroachments complying with Section 1005.7.'
+    piece_sha256: a474f6fb01ec26ce665fdd5f2c56be8de92df83e4c94da4e87ccb1ebaeea4314
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1024.3':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exit passageway''s walls, floors and ceilings are rated at least 1 hour and at least as any interior exit
+      stairway or ramp it connects to, built as fire barriers per 707 or horizontal assemblies per 711: ratings aren''t in
+      the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 348
+      lines:
+      - 18
+      - 20
+      quote: 1024.3 Construction. Exit passageway enclosures shall have walls, floors and ceilings of not less than a 1-hour
+        fire-resistance rating, and not less than that required for any connecting interior exit stairway or ramp. Exit passageways
+        shall be constructed as fire barri- ers in accordance with Section 707 or horizontal assemblies constructed in accordance
+        with Section 711, or both.
+    piece_sha256: 75a7da4e853566bf4a052b18806375220dec6cf4d750160376deccdb5dc94f92
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1024.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exit passageway on the level of exit discharge ends at an exit discharge, and one on another level ends at
+      an exit: where a passageway ends isn''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 348
+      lines:
+      - 21
+      - 22
+      quote: 1024.4 Termination. Exit passageways on the level of exit discharge shall terminate at an exit discharge. Exit
+        passageways on other levels shall terminate at an exit.
+    piece_sha256: 14c31b81babc8c2ebdcf902736619b9ba856774a538979ac755702ffbdb1f31a
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1024.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'Opening protectives of an exit passageway meet 716; except as 402.8.7 permits, its openings, other than unprotected
+      exterior openings, are only those needed to enter it from normally occupied spaces and to leave it; one extending an
+      interior exit stairway or ramp meets 1023.3.1; and no elevator opens into it: the openings aren''t in the model, so
+      a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 348
+      lines:
+      - 23
+      - 28
+      quote: 1024.5 Openings. Exit passageway opening protectives shall be in accordance with the requirements of Section
+        716. Except as permitted in Section 402.8.7, openings in exit passageways other than unprotected exterior openings
+        shall be limited to those necessary for exit access to the exit passageway from normally occupied spaces and for egress
+        from the exit passageway. Where an interior exit stairway or ramp is extended to an exit discharge or a public way
+        by an exit passageway, the exit passageway shall comply with Section 1023.3.1. Elevators shall not open into an exit
+        passageway.
+    piece_sha256: eff917e781ec8ff1816351dec425a3fe50ddfe76e5f94c642a89d93f4373494d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1024.6':
+    label: flag
+    topic: means_of_egress
+    reason: 'Nothing penetrates an exit passageway but its own ventilation or pressurization, fire protection, security and
+      two-way communication systems, raceways for fire department communication or serving it (ending at a steel box of at
+      most 16 square inches), and structural elements supporting a floor or roof at its top, each protected per 714; no penetration
+      or opening joins two adjacent exit passageways; membrane penetrations on the outside are allowed per 714.4.2: penetrations
+      aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 348
+      lines:
+      - 29
+      - 40
+      quote: '1024.6 Penetrations. Penetrations into or through an exit passageway are prohibited except for the following:
+        1. Equipment and ductwork necessary for independent ventilation or pressurization. 2. Fire protection systems. 3.
+        Security systems. 4. Two-way communication systems. 5. Electrical raceway for fire department communication. 6. Electrical
+        raceway serving the exit passageway and terminating at a steel box not exceeding 16 square inches (0.010 m[fn2]).
+        7. Structural elements, such as beams or joists, supporting a floor or roof at the top of the exit passageway. Such
+        penetrations shall be protected in accordance with Section 714. There shall not be penetrations or communicating open-
+        ings, whether protected or not, between adjacent exit passageways. Exception: Membrane penetrations shall be permitted
+        on the outside of the exit passageway. Such penetrations shall be protected in accordance with Section 714.4.2.'
+    piece_sha256: cc9288b5bd3882da0e508d8780fb2f5baee20b73bae8cfcdbda3905fcd7d6029
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1024.7':
+    label: flag
+    topic: means_of_egress
+    reason: 'Equipment and ductwork ventilating an exit passageway is outside the building with ducts enclosed as shafts,
+      or within the passageway taking air from and discharging it directly outdoors (or through ducts enclosed as shafts),
+      or within the building separated as shafts; openings into the rated construction are only those needed for maintenance
+      and operation, protected per 716 for shaft enclosures; and the system is independent of the building''s other ventilation:
+      ventilation isn''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 348
+      lines:
+      - 41
+      - 52
+      quote: '1024.7 Ventilation. Equipment and ductwork for exit passageway ventilation as permitted by Section 1024.6 shall
+        comply with one of the following: 1. The equipment and ductwork shall be located exterior to the building and shall
+        be directly connected to the exit passage- way by ductwork enclosed in construction as required for shafts. 2. Where
+        the equipment and ductwork is located within the exit passageway, the intake air shall be taken directly from the
+        outdoors and the exhaust air shall be discharged directly to the outdoors, or the air shall be conveyed through ducts
+        enclosed in construction as required for shafts. 3. Where located within the building, the equipment and ductwork
+        shall be separated from the remainder of the building, including other mechanical equipment, with construction as
+        required for shafts. In each case, openings into the fire-resistance-rated construction shall be limited to those
+        needed for maintenance and operation and shall be protected by opening protectives in accordance with Section 716
+        for shaft enclosures. Exit passageway ventilation systems shall be independent of other building ventilation systems.'
+    piece_sha256: 46ec50c0a87fefd902956968809be8f1f913954a23b18d9a24064547b2f59519
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1024.8':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exit passageway''s exterior walls meet 705; where nonrated walls or unprotected openings enclose its exterior
+      and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally
+      are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway''s
+      floor or to the roof line, whichever is lower: ratings and angles aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 348
+      lines:
+      - 53
+      - 56
+      quote: 1024.8 Exit passageway exterior walls. Exterior walls of the exit passageway shall comply with Section 705. Where
+        nonrated walls or unprotected openings enclose the exterior of the exit passageway and the walls or openings are exposed
+        by other parts of the building at an angle of less than 180 degrees (3.14 rad), the building exterior walls within
+        10 feet (3048 mm) horizontally of a nonrated wall or unprotected opening shall have a fire-resistance rating of not
+        less than 1 hour. Openings within such exterior walls shall be
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 3
+      - 4
+      quote: protected by opening protectives having a fire protection rating of not less than 3/4 hour. This construction
+        shall extend vertically from the ground to a point 10 feet (3048 mm) above the floor of the exit passageway, or to
+        the roof line, whichever is lower.
+    piece_sha256: 4affb01f5b34d7c5308be02c55fc3cc926a4f4af044242ec55cd672c832b3f7d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1024.9':
+    label: flag
+    topic: means_of_egress
+    reason: 'Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren''t
+      in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 5
+      - 5
+      quote: 1024.9 Standpipes. Standpipes and standpipe hose connections shall be provided where required by Sections 905.3
+        and 905.4.
+    piece_sha256: 1e74a934ab08bfb242222f9da802527dc7cf16ae41d1cbaea8bd24f8a0bd598e
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1025':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 6
+      - 6
+      quote: SECTION 1025—LUMINOUS EGRESS PATH MARKINGS
+    piece_sha256: c62e33532567f5d8e3b7c599378059955ebee1720f7cda4ed3aa8f64d115f124
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1025.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the
+      exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2),
+      but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the
+      building is a high-rise and its markings aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 7
+      - 10
+      quote: '1025.1 General. Approved luminous egress path markings delineating the exit path shall be provided in high-rise
+        buildings of Group A, B, E, I-1, M or R-1 occupancies in accordance with this section. Exception: Luminous egress
+        path markings shall not be required on the level of exit discharge in lobbies that serve as part of the exit path
+        in accordance with Section 1028.2, Exception 1.'
+    piece_sha256: 8239c2a71a0514a84f1063f51c2a708baa2729674854635558ad3cf3c2df4d57
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1025.2':
+    label: reference
+    topic: means_of_egress
+    reason: 'Where the markings go (interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3):
+      quoted by 1025.1''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 11
+      - 12
+      quote: 1025.2 Markings within exit components. Egress path markings shall be provided in interior exit stairways, interior
+        exit ramps and exit passageways, in accordance with Sections 1025.2.1 through 1025.2.6.3.
+    piece_sha256: 0574940a2ee2253241536ba8597a165c3afbcd2c4ab4a3399578f5a1c76a64ee
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A solid, continuous stripe 1 to 2 inches wide runs the full length of each step''s leading edge, placed within
+      1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed
+      per UL 1994): markings aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 13
+      - 17
+      quote: '1025.2.1 Steps. A solid and continuous stripe shall be applied to the horizontal leading edge of each step and
+        shall extend for the full length of the step. Outlining stripes shall have a minimum horizontal width of 1 inch (25
+        mm) and a maximum width of 2 inches (51 mm). The leading edge of the stripe shall be placed not more than 1/2 inch
+        (12.7 mm) from the leading edge of the step and the stripe shall not overlap the leading edge of the step by not more
+        than 1/2 inch (12.7 mm) down the vertical face of the step. Exception: The minimum width of 1 inch (25 mm) shall not
+        apply to outlining stripes listed in accordance with UL 1994.'
+    piece_sha256: 8dadd9f6cbaf86e649b413129656a205210540b26e995e14a1c517131f3b42b1
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren''t in
+      the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 18
+      - 19
+      quote: 1025.2.2 Landings. The leading edge of landings shall be marked with a stripe consistent with the dimensional
+        requirements for steps.
+    piece_sha256: f3ef11046af46ed0153c8dad8b34199eb692e95e30909422978bd8205ca732fd
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their
+      whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying
+      to stripes listed per UL 1994): markings aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 20
+      - 24
+      quote: '1025.2.3 Handrails. Handrails and handrail extensions shall be marked with a solid and continuous stripe having
+        a minimum width of 1 inch (25 mm). The stripe shall be placed on the top surface of the handrail for the entire length
+        of the handrail, including extensions and newel post caps. Where handrails or handrail extensions bend or turn corners,
+        the stripe shall not have a gap of more than 4 inches (102 mm). Exception: The minimum width of 1 inch (25 mm) shall
+        not apply to outlining stripes listed in accordance with UL 1994.'
+    piece_sha256: 2ed61c60da4a566e6732db6dc1e3d2b265e8597def25142b1f44d88529796647
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of
+      steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at
+      most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren''t in the model, so a person''s
+      check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 25
+      - 29
+      quote: '1025.2.4 Perimeter demarcation lines. Stair landings and other floor areas within interior exit stairways, interior
+        exit ramps and exit passageways, with the exception of the sides of steps, shall be provided with solid and continuous
+        demarcation lines on the floor or on the walls or a combination of both. The stripes shall be 1 to 2 inches (25 mm
+        to 51 mm) wide with interruptions not exceeding 4 inches (102 mm). Exception: The minimum width of 1 inch (25 mm)
+        shall not apply to outlining stripes listed in accordance with UL 1994.'
+    piece_sha256: 821927348269fdfcf26f10f94bf548c208c8b80f337f789c87ae14d6ce3f0175
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings'' edge
+      markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out
+      of the exit: markings aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 30
+      - 34
+      quote: '1025.2.4.1 Floor-mounted demarcation lines. Perimeter demarcation lines shall be placed within 4 inches (102
+        mm) of the wall and shall extend to within 2 inches (51 mm) of the markings on the leading edge of landings. The demarcation
+        lines shall continue across the floor in front of all doors. Exception: Demarcation lines shall not extend in front
+        of exit discharge doors that lead out of an exit and through which occupants must travel to complete the exit path.'
+    piece_sha256: 6c0112d9e4da8f5dac0627f89ac12a454f558d4a854f5cb079d516deda35ca13
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.4.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the
+      floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line
+      is the only practical way to outline the path, and continue across a door''s face or the floor in front of it, but not
+      in front of exit discharge doors leading out of the exit: markings aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 35
+      - 42
+      quote: '1025.2.4.2 Wall-mounted demarcation lines. Perimeter demarcation lines shall be placed on the wall with the
+        bottom edge of the stripe not more than 4 inches (102 mm) above the finished floor. At the top or bottom of the stairs,
+        demarcation lines shall drop vertically to the floor within 2 inches (51 mm) of the step or landing edge. Demarcation
+        lines on walls shall transition vertically to the floor and then extend across the floor where a line on the floor
+        is the only practical method of outlining the path. Where the wall line is broken by a door, demarcation lines on
+        walls shall continue across the face of the door or transition to the floor and extend across the floor in front of
+        such door. Exception: Demarcation lines shall not extend in front of exit discharge doors that lead out of an exit
+        and through which occupants must travel to complete the exit path.'
+    piece_sha256: c1da0efc7009d00a12078be8bc1915f47bc02af2f7c61e2f0edbfdcad7c347f5
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.4.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops
+      vertically to the floor to meet the floor line, making one continuous marking: markings aren''t in the model, so a person''s
+      check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 43
+      - 45
+      quote: 1025.2.4.3 Transition. Where a wall-mounted demarcation line transitions to a floor-mounted demarcation line,
+        or vice versa, the wall-mounted demarcation line shall drop vertically to the floor to meet a complimentary extension
+        of the floor-mounted demarcation line, thus forming a continuous marking.
+    piece_sha256: 6e504418d16666cb9e5283278d6845a759ee0d3af978cd11c1a8e4b0bec38ce8
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose
+      cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and
+      black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying
+      to markings listed per UL 1994): markings aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 46
+      - 52
+      quote: '1025.2.5 Obstacles. Obstacles at or below 6 feet 6 inches (1981 mm) in height and projecting more than 4 inches
+        (102 mm) into the egress path shall be outlined with markings not less than 1 inch (25 mm) in width comprised of a
+        pattern of alternating equal bands, of luminous material and black, with the alternating bands not more than 2 inches
+        (51 mm) thick and angled at 45 degrees (0.79 rad). Obstacles shall include, but are not limited to, standpipes, hose
+        cabinets, wall projections and restricted height areas. However, such markings shall not conceal any required information
+        or indicators including but not limited to instructions to occu- pants for the use of standpipes. Exception: The minimum
+        width of 1 inch (25 mm) shall not apply to markings listed in accordance with UL 1994.'
+    piece_sha256: 54fb44dcbd86c80c2f3978d4493868cc117be949c8b097a79370f954b1c7c6da
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.6:
+    label: reference
+    topic: means_of_egress
+    reason: 'Which doors carry the markings of 1025.2.6.1 to 1025.2.6.3 (those occupants pass through to complete the exit
+      path): quoted by 1025.2.6.1''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 53
+      - 54
+      quote: 1025.2.6 Doors within the exit path. Doors through which occupants must pass in order to complete the exit path
+        shall be provided with markings complying with Sections 1025.2.6.1 through 1025.2.6.3.
+    piece_sha256: 46c27ca663c120275ca66b4aeec1117b7b05d2b1ef7088f9250685b2be1029ed
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.6.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6):
+      a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top
+      at most 18 inches above the floor: markings aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 349
+      lines:
+      - 55
+      - 57
+      quote: 1025.2.6.1 Emergency exit symbol. The doors shall be identified by a low-location luminous emergency exit symbol
+        comply- ing with NFPA 170. The exit symbol shall be not less than 4 inches (102 mm) in height and shall be mounted
+        on the door, centered horizontally, with the top of the symbol not higher than 18 inches (457 mm) above the finished
+        floor.
+    piece_sha256: 69653ac84982d7e017c52c4f353ea96344a561c791c573bb4a4b694fa33f6480
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.6.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or
+      escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren''t
+      in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 3
+      - 6
+      quote: 1025.2.6.2 Door hardware markings. Door hardware shall be marked with not less than 16 square inches (10 323
+        mm[fn2)] of luminous material. This marking shall be located behind, immediately adjacent to, or on the door handle
+        or escutcheon. Where a panic bar is installed, such material shall be not less than 1 inch (25 mm) wide for the entire
+        length of the actuating bar or touchpad.
+    piece_sha256: ae7648499053ac266ecad07b0a53493f9e752c56303c15b41de2e4537ef73ab6
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1025.2.6.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall
+      where the molding has too little flat surface: markings aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 7
+      - 9
+      quote: 1025.2.6.3 Door frame markings. The top and sides of the door frame shall be marked with a solid and continuous
+        1-inch- to 2-inch-wide (25 mm to 51 mm) stripe. Where the door molding does not provide sufficient flat surface on
+        which to locate the stripe, the stripe shall be permitted to be located on the wall surrounding the frame.
+    piece_sha256: 9092f5dc501fb31b8ef85f8e830a04cfe729fb1fe6dcdf99a311d67d2bff239c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1025.3':
+    label: flag
+    topic: means_of_egress
+    reason: 'Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren''t in the
+      model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 10
+      - 10
+      quote: 1025.3 Uniformity. Placement and dimensions of markings shall be consistent and uniform throughout the same enclosure.
+    piece_sha256: d252b8bbfdb8227e917374b4a23d1394cbf8ba873467c902567bc379274357ea
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1025.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their
+      luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent
+      light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren''t
+      in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 11
+      - 18
+      quote: '1025.4 Self-luminous and photoluminescent. Luminous egress path markings shall be permitted to be made of any
+        material, including paint, provided that an electrical charge is not required to maintain the required luminance.
+        Such materials shall include, but not be limited to, self-luminous materials and photoluminescent materials. Materials
+        shall comply with either of the following standards: 1. UL 1994. 2. ASTM E2072, except that the charging source shall
+        be 1 footcandle (11 lux) of fluorescent illumination for 60 minutes, and the minimum luminance shall be 30 milicandelas
+        per square meter at 10 minutes and 5 milicandelas per square meter after 90 minutes.'
+    piece_sha256: a77dac2ee51d1a4474ad611e0f0fa42b4b70e4b3c5204f00568bc90d2679740d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1025.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building
+      is occupied and all through occupancy: lighting and markings aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 19
+      - 21
+      quote: 1025.5 Illumination. Where photoluminescent exit path markings are installed, they shall be provided with not
+        less than 1 footcan- dle (11 lux) of illumination for not less than 60 minutes prior to periods when the building
+        is occupied and continuously during occupancy.
+    piece_sha256: 75aced510c2e424f3f67977f1499be380b8b57234223bdc95eeef4e2d1b407bd
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1030.7':
