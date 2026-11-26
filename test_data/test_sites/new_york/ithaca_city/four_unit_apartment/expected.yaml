@@ -132,6 +132,11 @@ results:
   general.bc_1010_1_1_door_capacity: needs_review
   general.bc_1010_1_1_1_projections: needs_review
   general.bc_1010_1_doors_general: needs_review
+  # section group 6b: every door is side-hinged (eval_marks.yaml door_types, Gordium: Operation): 1010.1.2's flag for a
+  # door of another kind sets each aside; 1010.1.2.1's swing needs review: which side each door swings into isn't
+  # stated (no Revit mark yet), and how many people each door serves isn't worked out (50 or more can't be ruled out)
+  general.bc_1010_1_2_door_types: not_applicable
+  general.bc_1010_1_2_1_direction_of_swing: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review
