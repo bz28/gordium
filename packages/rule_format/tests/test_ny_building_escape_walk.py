@@ -180,8 +180,9 @@ SIZE_RULES = {
 
 # ---- section group 8c (2026-11-26): area wells, their ladders and steps (1031.5 to 1031.5.2.2, p.360 lines 38-53) --------
 # Each case's within/past are written from the page: a well is asked of an opening whose bottom is below the adjacent
-# grade; 9 sq ft, 36 in out and wide (a ladder or steps may encroach up to 6 in: within when one may be there and the
-# shortfall is 6 in or less); fully openable; a ladder or steps past 44 in deep; the ladder 12 in, 3 in, 18 in, full
+# grade; 9 sq ft, 36 in out and wide to its walls (a ladder or steps in it may take up to 6 in of them, which isn't
+# measured: with one there or not known, never a pass; short of the size, past whatever stands in it: review round 1);
+# fully openable; a ladder or steps past 44 in deep; the ladder 12 in, 3 in, 18 in, full
 # height; the steps 12 in, treads over 5 in, risers 18 in, full height (a ladder or steps is asked only past 44 in deep
 # in the loosest reading).
 def _well(**m):
@@ -191,8 +192,10 @@ def _well(**m):
 def _required_cases():
     for below in TRI:
         for area in (U, 8, 9):
-            yield _well(opening_below_grade=below, area_well_area=area), \
-                below is False or (area is not U and area >= 9), below is True and area is not U and area < 9
+            for ladder in TRI:
+                ok = below is False or (area is not U and area >= 9 and ladder is False)
+                yield _well(opening_below_grade=below, area_well_area=area, area_well_ladder=ladder), ok, \
+                    below is True and area is not U and area < 9
 
 
 def _side_cases(name):
@@ -201,8 +204,8 @@ def _side_cases(name):
             for v in (U, 29, 30, 35, 36):
                 for ladder in TRI:
                     m = _well(opening_below_grade=below, **{name: v}, area_well_ladder=ladder)
-                    ok = below is False or (v is not U and v >= 36)
-                    past = below is True and v is not U and v < 36 and (ladder is False or v < 30)
+                    ok = below is False or (v is not U and v >= 36 and ladder is False)
+                    past = below is True and v is not U and v < 36
                     yield m, ok, past
     return cases
 
