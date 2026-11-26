@@ -355,4 +355,23 @@ def test_a_has_none_claim_the_format_refuses_never_rules_out_a_ramp(change):
     if change != "unhashable":
         assert _story(desc)["not_measured"][OUTSIDE_FACT] == STOPS["outside_stair"].format(name="r0"), change
     got = measure(desc)["parts"]["story"][0]
-    assert got["measures"].get(OUTSIDE_FACT) is not True or change == "unhashable"
+    if change == "unhashable":
+        assert got["measures"][OUTSIDE_FACT] is False   # the valid claims still stand, and nothing crashed
+    else:
+        assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_stair"].format(name="r0"), change
+
+
+def test_a_stair_partly_in_no_room_may_be_within_the_space():
+    """Review round 8 (PR 2): the upper floor of a two-story unit whose stairwell is left out of its room's outline
+    (its top nosings in no room) and whose lower nosings run under the corridor: one point in another room counted it
+    outside, "no". A stair is outside the space only when every nosing stands in another room. A malformed openings
+    list beside a basement claim never stops the measuring."""
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    desc["rooms"][0]["floor"] = [[0, 0], [10, 0], [10, 10], [3, 10], [3, 7], [0, 7]]
+    desc["stairs"] = [{"id": "st", "nosings": [[[0.5, 8.5, 0], [2.5, 8.5, 0]], [[0.5, 9.5, -0.6], [2.5, 9.5, -0.6]],
+                                               [[0.5, 12, -2], [2.5, 12, -2]], [[0.5, 13, -2.6], [2.5, 13, -2.6]]]}]
+    assert _story(desc)["not_measured"][OUTSIDE_FACT] == STOPS["outside_stair"].format(name="r0")
+    bad = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    bad["has_none"].append({"kind": "basement", "source": "s"})
+    bad["openings"] = 5
+    measure(bad)                                         # returns: never a crash

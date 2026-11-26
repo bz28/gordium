@@ -133,7 +133,10 @@ def _stair_points(description) -> list:
             pts = []
         out.append({"points": pts})
     from model_measurement.interior.has_none import read as has_none
-    claims, _ = has_none(description)                    # the format's own reading of the claims (refused: not said)
+    try:                                                 # the format's own reading of the claims (refused: not said)
+        claims, _ = has_none(description)
+    except (TypeError, AttributeError, KeyError, ValueError):   # malformed beside them: nothing said
+        claims = {}
     said = {kind for kind, c in claims.items() if c["reading"] is False}
     for key, kind in OTHER_WAYS:
         given = description.get(key)
@@ -617,15 +620,16 @@ def _room_name(story, rid) -> str:
 
 def _stair_in(stair, group, story) -> bool:
     """Whether a stair may stand in `group`: a nosing end (plan points, inches) in or within an inch of one of its
-    rooms, or the stair not placed in another room of the story (its points can't be read, or none stands in a room
-    outside the group): only a stair placed elsewhere is outside it."""
+    rooms, or the stair not placed wholly in other rooms of the story (its points can't be read, or one stands in no
+    room outside the group: a stairwell left out of a room's outline): only a stair placed elsewhere is outside it."""
     points = stair.get("points")
     if not points:
         return True
     rooms = {r: room for r, room in story.rooms.items() if room is not None}
     if any(rooms[r].outline.buffer(1).contains(Point(p)) for p in points for r in group if r in rooms):
         return True
-    return not any(room.outline.contains(Point(p)) for p in points for r, room in rooms.items() if r not in group)
+    return not all(any(room.outline.contains(Point(p)) for r, room in rooms.items() if r not in group)
+                   for p in points)
 
 
 def _is_exit(story, rid) -> bool:
