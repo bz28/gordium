@@ -214,3 +214,37 @@ def test_an_opening_never_keeps_a_room_fact_of_its_own():
         escape_openings.link(parts, desc)
         assert parts["emergency_escape_opening"][0]["measures"].get("opening_room_fourth_or_higher") is not True, why
 
+
+def test_a_value_a_room_arrives_with_never_stands_beside_its_reason():
+    """Review (a false pass from a hand-built part): a sleeping room part that already says it is on the fourth story
+    or higher, linked where its level isn't given, keeps no value: only the link's own, here a reason."""
+    parts, desc = _parts()
+    parts["sleeping_room"][0]["measures"] = {"sleeping_room_fourth_or_higher": True, "sleeping_room_escape_openings": 9}
+    desc["rooms"][0]["level"] = None
+    escape_openings.link(parts, desc)
+    room = parts["sleeping_room"][0]
+    assert "sleeping_room_fourth_or_higher" not in room["measures"]
+    assert room["not_measured"]["sleeping_room_fourth_or_higher"]
+    assert room["measures"]["sleeping_room_escape_openings"] == 1
+    for bad in (["sleeping_room_fourth_or_higher"], "text"):
+        parts, desc = _parts()
+        parts["sleeping_room"][0]["measures"] = bad
+        escape_openings.link(parts, desc)                # never a crash
+
+
+def test_an_opening_takes_only_its_rooms_own_facts():
+    """Review (8b): an opening copies a room fact only where the room has it and no reason beside it, and a room that
+    can't be read gives its openings none (never a crash): a stale room value never sets an opening's rule aside."""
+    one = {"id": "L1", "measures": {"story_exit_count": 1, "story_fourth_or_higher_above_grade_plane": False}}
+    for bad in (["sleeping_room_fourth_or_higher"], "text"):
+        parts, desc = _parts(story=one, openings=[{"id": "w", "within": "b", "measures": {}}, {"id": "v"}])
+        parts["sleeping_room"][0]["measures"] = bad
+        escape_openings.link(parts, desc)
+        assert not set(escape_openings.FROM_ROOM) & set(parts["emergency_escape_opening"][0]["measures"]), bad
+    rooms = [{"id": "b", "measures": {"sleeping_room_fourth_or_higher": True},
+              "not_measured": {"sleeping_room_fourth_or_higher": "not known"}}]
+    openings = [{"id": "w", "within": "b", "measures": {}, "not_measured": {}}]
+    escape_openings._to_openings(rooms, openings)
+    assert "opening_room_fourth_or_higher" not in openings[0]["measures"]
+    assert openings[0]["not_measured"]["opening_room_fourth_or_higher"] == "not known"
+

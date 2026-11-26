@@ -92,10 +92,13 @@ def link(parts: dict, description) -> None:
     for part in rooms:
         if not isinstance(part, dict) or part.get("maybe"):
             continue                 # an enclosed space that may not be a room at all: every row of it needs review
-        m = part.setdefault("measures", {})
-        why = part.setdefault("not_measured", {})
-        for k in NEW_MEASURES:           # the house measuring's "not measured yet" for these: this link decides them
-            why.pop(k, None)
+        if not isinstance(part.setdefault("measures", {}), dict) \
+                or not isinstance(part.setdefault("not_measured", {}), dict):
+            continue                 # a room that can't be read: its rows say so (rule_format.parts)
+        m, why = part["measures"], part["not_measured"]
+        for k in NEW_MEASURES:           # the house measuring's "not measured yet" for these, and any value a part
+            why.pop(k, None)             # arrives with: this link decides them, never a stale one beside its reason
+            m.pop(k, None)
         name = part.get("name") or part.get("id")
         pid = part.get("id")
         rid = (part.get("more") or {}).get("described_id", pid)       # the description's id (egress._escape_openings)
@@ -171,12 +174,19 @@ def _to_openings(rooms: list, openings) -> None:
         where = o.get("within")
         same = by_id.get(where, []) if isinstance(where, str) else []
         room = same[0] if len(same) == 1 and not same[0].get("maybe") else None
+        if room is not None and not (isinstance(room.get("measures"), dict)
+                                     and isinstance(room.get("not_measured", {}), dict)):
+            room = None                                    # a room that can't be read gives its openings nothing
         for mine, theirs in FROM_ROOM.items():
             why.pop(mine, None)
-            if room is not None and theirs in (room.get("measures") or {}):
-                m[mine] = WORKED.get(mine, lambda v: v)(room["measures"][theirs])
+            given, said = (room["measures"], room.get("not_measured") or {}) if room is not None else ({}, {})
+            if room is not None and theirs in given and theirs not in said:     # its own value, no reason beside it
+                try:
+                    m[mine] = WORKED.get(mine, lambda v: v)(given[theirs])
+                except TypeError:                          # a value that isn't one (a count that isn't a number)
+                    why[mine] = "its room's isn't known"
             elif room is not None:
-                why[mine] = (room.get("not_measured") or {}).get(theirs, "its room's isn't known")
+                why[mine] = said.get(theirs, "its room's isn't known")
             else:
                 why[mine] = "the room it is in isn't one sleeping room read"
 
