@@ -294,3 +294,20 @@ def test_an_opening_in_a_room_whose_id_another_part_shares_leaves_the_count_unkn
     escape_openings.link(parts, desc)
     assert "sleeping_room_escape_openings" not in parts["sleeping_room"][0]["measures"]
 
+
+
+def test_a_room_that_cant_be_read_or_a_count_that_isnt_one_gives_its_openings_nothing():
+    """Confirming round on 82651de3: a room holding all four facts but reasons that can't be read gives its openings
+    none of them; a room count that isn't a number is "its room's isn't known" on each opening, never a crash."""
+    full = {"sleeping_room_fourth_or_higher": True, "sleeping_room_story_one_exit": True,
+            "sleeping_room_door_to_outside": False, "sleeping_room_escape_openings": 1}
+    for why in ("text", ["sleeping_room_fourth_or_higher"], None):
+        openings = [{"id": "w", "within": "b", "measures": {}, "not_measured": {}}]
+        escape_openings._to_openings([{"id": "b", "measures": dict(full), "not_measured": why}], openings)
+        assert not set(escape_openings.FROM_ROOM) & set(openings[0]["measures"]), why
+    for count in ("2", None):
+        openings = [{"id": "w", "within": "b", "measures": {}, "not_measured": {}}]
+        escape_openings._to_openings([{"id": "b", "measures": {"sleeping_room_escape_openings": count},
+                                       "not_measured": {}}], openings)
+        assert "opening_room_has_other_openings" not in openings[0]["measures"], count
+        assert openings[0]["not_measured"]["opening_room_has_other_openings"] == "its room's isn't known"
