@@ -25,9 +25,6 @@ reading it needs review. A sleeping room is only a room the description states i
 enclosed space with no room drawn in it (the interior measuring's `maybe`, every row about it a review): never a
 room the description says isn't one. Plain code, no AI.
 """
-
-import math
-
 KIND = "sleeping_room"
 OPENINGS = "emergency_escape_opening"
 OUTSIDE = "outside"
@@ -72,6 +69,13 @@ def _stray(parts, openings) -> bool:
     return False
 
 
+def _count(v) -> bool:
+    """A whole count of exits, never negative (a hand-built story's null, text, true, NaN, 1.5 or -3 is none)."""
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return False
+    return v >= 0 and (isinstance(v, int) or (v - v == 0 and v.is_integer()))     # a float: finite and whole
+
+
 def link(parts: dict, description) -> None:
     """Add the four measures to every sleeping room part in `parts` (the routes' parts and the interior measuring's
     sleeping rooms and openings, together), in place."""
@@ -83,7 +87,10 @@ def link(parts: dict, description) -> None:
     for r in given if isinstance(given, list) else []:
         if isinstance(r, dict) and isinstance(r.get("id"), str):
             by_id.setdefault(r["id"], []).append(r)
-    stories = {s["id"]: s for s in _list(parts.get("story")) if isinstance(s, dict) and isinstance(s.get("id"), str)}
+    stories = {}                                         # one story per id: two sharing one are no one story
+    for s in parts.get("story") if isinstance(parts.get("story"), list) else []:
+        if isinstance(s, dict) and isinstance(s.get("id"), str):
+            stories.setdefault(s["id"], []).append(s)
     spaces = {}                                          # the routes' space parts, by (room id, level)
     for s in _list(parts.get("space")):
         if isinstance(s, dict) and isinstance(s.get("id"), str) and isinstance(s.get("within"), str):
@@ -94,17 +101,20 @@ def link(parts: dict, description) -> None:
     for part in rooms:
         if not isinstance(part, dict) or part.get("maybe"):
             continue                 # an enclosed space that may not be a room at all: every row of it needs review
-        if not isinstance(part.setdefault("measures", {}), dict) \
-                or not isinstance(part.setdefault("not_measured", {}), dict):
+        if not isinstance(part.get("not_measured", {}), dict):
+            part["not_measured"] = {}    # reasons that can't be read: the link's own (its values are popped below)
+        if not isinstance(part.setdefault("measures", {}), dict):
             continue                 # a room that can't be read: its rows say so (rule_format.parts)
+        part.setdefault("not_measured", {})
         m, why = part["measures"], part["not_measured"]
         for k in NEW_MEASURES:           # the house measuring's "not measured yet" for these, and any value a part
             why.pop(k, None)             # arrives with: this link decides them, never a stale one beside its reason
             m.pop(k, None)
         name = part.get("name") or part.get("id")
         pid = part.get("id")
-        rid = (part.get("more") or {}).get("described_id", pid)       # the description's id (egress._escape_openings)
-        same = by_id.get(rid, [])
+        more = part.get("more") if isinstance(part.get("more"), dict) else {}
+        rid = more.get("described_id", pid)       # the description's id (egress._escape_openings)
+        same = by_id.get(rid, []) if isinstance(rid, str) else []
         # the openings marked in it (none counted where the id is more than one room's: review round 1)
         if len(same) > 1:
             why["sleeping_room_escape_openings"] = WHY["room_id_shared"].format(name=name)
@@ -120,19 +130,17 @@ def link(parts: dict, description) -> None:
             reason = WHY["no_room"].format(name=name)
         elif not isinstance(level, str):
             reason = WHY["no_level"].format(name=name)
-        elif level not in stories:
+        elif len(stories.get(level, [])) != 1:
             reason = WHY["no_story"].format(name=name, level=level)
         else:
             reason = None
         for mine, (theirs, worked) in LINKED.items():
-            story = stories.get(level) if reason is None else None
+            story = stories[level][0] if reason is None else None
             given = story.get("measures") if story is not None else None
             raw = given.get(theirs) if isinstance(given, dict) else None
             known = isinstance(given, dict) and theirs in given
-            if known and mine == "sleeping_room_story_one_exit" and (
-                    isinstance(raw, bool) or not isinstance(raw, (int, float))
-                    or (isinstance(raw, float) and not (math.isfinite(raw) and raw.is_integer())) or raw < 0):
-                # a count that isn't a number (null, text, NaN): not known, never a crash and never two exits
+            if known and mine == "sleeping_room_story_one_exit" and not _count(raw):
+                # a count that isn't a whole count (null, text, NaN, 1.5, -3): not known, never a crash or two exits
                 why[mine] = WHY["story_not_measured"].format(name=name, reason=f"its {theirs} is not a number")
             elif known:
                 value = worked(raw)
@@ -162,7 +170,8 @@ def link(parts: dict, description) -> None:
         if not isinstance(doors, list):
             why["sleeping_room_door_to_outside"] = WHY["doors_not_read"].format(name=name)
             continue
-        sides = [((d.get("more") or {}).get("sides")) for d in doors if isinstance(d, dict)]
+        sides = [(d["more"].get("sides") if isinstance(d.get("more"), dict) else None)
+                 for d in doors if isinstance(d, dict)]
         if any(not isinstance(s, list) for s in sides) or len(sides) != len(doors):
             if any(isinstance(s, list) and rid in s and OUTSIDE in s for s in sides):
                 m["sleeping_room_door_to_outside"] = True
