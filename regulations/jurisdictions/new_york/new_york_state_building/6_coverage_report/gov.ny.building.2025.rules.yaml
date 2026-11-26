@@ -253,6 +253,46 @@ pieces:
     heading: Remoteness of exit access stairways or ramps › Three or more exit access stairways or ramps
     rules:
     - general.bc_1007_1_3_1_three_or_more_stairways
+  '1008.2':
+    label: flag
+    heading: Means of egress illumination › Illumination required
+    rules:
+    - general.bc_1008_2_illumination_required
+  1008.2.1:
+    label: flag
+    heading: Illumination required › Illumination level under normal power
+    rules:
+    - general.bc_1008_2_1_illumination_level
+  1008.2.2:
+    label: flag
+    heading: Illumination required › Group I-2
+    rules:
+    - general.bc_1008_2_2_group_i2_exterior_landings
+  1008.2.3:
+    label: flag
+    heading: Illumination required › Exit discharge
+    rules:
+    - general.bc_1008_2_3_exit_discharge_illumination
+  1008.2.4:
+    label: flag
+    heading: Illumination required › Power for illumination
+    rules:
+    - general.bc_1008_2_4_power_for_illumination
+  '1008.3':
+    label: flag
+    heading: Means of egress illumination › Illumination required by an emergency electrical system
+    rules:
+    - general.bc_1008_3_emergency_illumination
+  1008.3.1:
+    label: flag
+    heading: Illumination required by an emergency electrical system › Duration
+    rules:
+    - general.bc_1008_3_1_emergency_power_duration
+  1008.3.2:
+    label: flag
+    heading: Illumination required by an emergency electrical system › Illumination level under emergency power
+    rules:
+    - general.bc_1008_3_2_emergency_illumination_level
   '1010.1':
     label: flag
     heading: General
@@ -505,6 +545,51 @@ pieces:
     heading: Ramps › Edge protection
     rules:
     - general.bc_1012_10_edge_protection
+  '1013.1':
+    label: flag
+    heading: Exit signs › Where required
+    rules:
+    - general.bc_1013_1_exit_signs_where_required
+  '1013.2':
+    label: flag
+    heading: Exit signs › Low-level exit signs in Group R-1
+    rules:
+    - general.bc_1013_2_low_level_exit_signs_group_r1
+  '1013.3':
+    label: flag
+    heading: Exit signs › Illumination
+    rules:
+    - general.bc_1013_3_exit_sign_illumination
+  '1013.4':
+    label: flag
+    heading: Exit signs › Raised character and braille exit signs
+    rules:
+    - general.bc_1013_4_raised_character_braille_exit_signs
+  '1013.5':
+    label: flag
+    heading: Exit signs › Internally illuminated exit signs
+    rules:
+    - general.bc_1013_5_internally_illuminated_exit_signs
+  1013.5.1:
+    label: flag
+    heading: Internally illuminated exit signs › Photoluminescent exit signs
+    rules:
+    - general.bc_1013_5_1_photoluminescent_exit_signs
+  1013.6.1:
+    label: flag
+    heading: Externally illuminated exit signs › Graphics
+    rules:
+    - general.bc_1013_6_1_exit_sign_graphics
+  1013.6.2:
+    label: flag
+    heading: Externally illuminated exit signs › Exit sign illumination
+    rules:
+    - general.bc_1013_6_2_exit_sign_illumination_intensity
+  1013.6.3:
+    label: flag
+    heading: Externally illuminated exit signs › Power source
+    rules:
+    - general.bc_1013_6_3_exit_sign_power_source
   '1016.2':
     label: rule
     heading: Egress through intervening spaces

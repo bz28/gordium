@@ -224,6 +224,24 @@ results:
   general.bc_1012_8_handrails: needs_review
   general.bc_1012_9_guards: needs_review
   general.bc_1012_10_edge_protection: needs_review
+  # section group 9b: 1008's means of egress lighting and 1013's exit signs, each a person's check (lighting and signs aren't in the model); Group I-2's landings and Group R-1's low-level signs don't apply to an R-2
+  general.bc_1008_2_illumination_required: needs_review
+  general.bc_1008_2_1_illumination_level: needs_review
+  general.bc_1008_2_2_group_i2_exterior_landings: not_applicable   # Group R-2
+  general.bc_1008_2_3_exit_discharge_illumination: needs_review
+  general.bc_1008_2_4_power_for_illumination: needs_review
+  general.bc_1008_3_emergency_illumination: needs_review
+  general.bc_1008_3_1_emergency_power_duration: needs_review
+  general.bc_1008_3_2_emergency_illumination_level: needs_review
+  general.bc_1013_1_exit_signs_where_required: needs_review
+  general.bc_1013_2_low_level_exit_signs_group_r1: not_applicable   # Group R-2
+  general.bc_1013_3_exit_sign_illumination: needs_review
+  general.bc_1013_4_raised_character_braille_exit_signs: needs_review
+  general.bc_1013_5_internally_illuminated_exit_signs: needs_review
+  general.bc_1013_5_1_photoluminescent_exit_signs: needs_review
+  general.bc_1013_6_1_exit_sign_graphics: needs_review
+  general.bc_1013_6_2_exit_sign_illumination_intensity: needs_review
+  general.bc_1013_6_3_exit_sign_power_source: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

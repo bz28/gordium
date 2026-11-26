@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 133 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 150 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1486,6 +1486,23 @@
     "Egress · Ramp handrails: A person checks this (Gordium doesn't decide it): A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren't measured for the Building Code yet, so a person's check.",
     "Egress · Ramp guards: A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
     "Egress · Ramp edge protection: A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier (a barrier stopping a 4-inch sphere anywhere within 4 inches of the floor or ground) (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Means of egress lit while occupied: A person checks this (Gordium doesn't decide it): The means of egress serving a room or space is lit at all times the room or space is occupied (1008.3's emergency lighting on a power failure); not required in Group U, in self-service storage units of 400 sq ft or less entered directly from outside, in Group A's aisle accessways, within dwelling and sleeping units in Groups R-1, R-2 and R-3, or in Group I sleeping units: lighting isn't in the model, so a person's check.",
+    "Egress · Means of egress lighting level: A person checks this (Gordium doesn't decide it): The means of egress is lit to at least 1 footcandle at the walking surface, and exit access stairways, exit stairways and their required landings to at least 10 footcandles while the stairway is in use; auditoriums, theaters, concert or opera halls and similar assembly spaces may lower it during performances, restored automatically by the fire alarm system, to 0.2 footcandle on externally lit walking surfaces, or by marking steps, landings and ramp sides with self-luminous materials (1025.2.1, 1025.2.2 and 1025.2.4, systems listed to UL 1994): lighting isn't in the model, so a person's check.",
+    "Egress · Group I-2's exterior landings lit despite one lamp failing: A person checks this (Gordium doesn't decide it): In Group I-2 where two or more exits are required, the exterior landings 1010.1.5 requires are lit for the exit discharge so that one lamp failing in a luminaire leaves at least 1 footcandle on the landing: lighting isn't in the model, so a person's check.",
+    "Egress · Exit discharge lit to the public way: A person checks this (Gordium doesn't decide it): The path of the exit discharge is lit from each exit to the public way, or from the exit to a safe dispersal area complying with 1028.5 that is itself lit to at least 1 footcandle at the walking surface: site lighting isn't in the model, so a person's check.",
+    "Egress · Means of egress lighting on the premises' supply: A person checks this (Gordium doesn't decide it): Means of egress lighting is normally powered by the premises' electrical supply: the electrical design isn't in the model, so a person's check.",
+    "Egress · Emergency lighting where required: A person checks this (Gordium doesn't decide it): An emergency electrical system lights, on a power failure: in rooms or spaces requiring two or more exits or access to exits, the aisles, corridors and exit access stairways and ramps; in buildings requiring two or more exits or access to exits, the interior exit access stairways and ramps, interior and exterior exit stairways and ramps, exit passageways, vestibules and discharge areas on the level of discharge (1028.2), and the exterior landings 1010.1.5 requires at exit doorways leading directly to the exit discharge; and electrical equipment rooms, fire command centers, fire pump rooms, generator rooms and public restrooms over 300 sq ft: the electrical design isn't in the model, so a person's check.",
+    "Egress · Emergency lighting for 90 minutes: A person checks this (Gordium doesn't decide it): The emergency power system powers the lighting for at least 90 minutes, from storage batteries, unit equipment or an on-site generator, installed per 2702: the electrical design isn't in the model, so a person's check.",
+    "Egress · Emergency lighting level: A person checks this (Gordium doesn't decide it): Emergency lighting gives at first an average of at least 1 footcandle and at least 0.1 footcandle at any point along the path of egress at floor level, declining to no less than 0.6 average and 0.06 at any point by the end of its duration, with a maximum-to-minimum ratio no more than 40 to 1; in Group I-2 one lamp failing in a luminaire leaves at least 0.2 footcandle: lighting isn't in the model, so a person's check.",
+    "Egress · Exit signs where required: A person checks this (Gordium doesn't decide it): Exits and exit access doors are marked by an approved exit sign readily visible from any direction of egress travel; signs show the direction of travel where an exit or the path isn't immediately visible; intervening doors within exits are marked; and no point in an exit access corridor or exit passageway is farther than 100 feet, or the sign's listed viewing distance if less, from the nearest visible sign; not required in rooms or areas needing only one exit or exit access, at main exterior exit doors or gates obviously identifiable as exits where the building official approves, in Group U, within Group R-1, R-2 or R-3 sleeping or dwelling units, in Group I-3's dayrooms, sleeping rooms and dormitories, or on the seating side of Group A-4 and A-5 vomitories with signs in the concourse: exit signs aren't in the model, so a person's check.",
+    "Egress · Low-level exit signs in Group R-1: A person checks this (Gordium doesn't decide it): Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every area serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall, a wall sign's edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: exit signs aren't in the model, so a person's check.",
+    "Egress · Exit signs lit: A person checks this (Gordium doesn't decide it): Exit signs are internally or externally lit (the tactile signs 1013.4 requires need not be): exit signs aren't in the model, so a person's check.",
+    "Egress · Raised character and braille exit signs: A person checks this (Gordium doesn't decide it): Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading \"EXIT\" in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren't in the model, so a person's check.",
+    "Egress · Internally lit exit signs listed and always lit: A person checks this (Gordium doesn't decide it): Electrically powered, self-luminous and photoluminescent exit signs are listed and labeled to UL 924, installed to the maker's instructions and Chapter 27, and lit at all times: exit signs aren't in the model, so a person's check.",
+    "Egress · Photoluminescent exit signs charged: A person checks this (Gordium doesn't decide it): A photoluminescent exit sign has a light source to charge it as its maker instructs: exit signs aren't in the model, so a person's check.",
+    "Egress · Externally lit exit signs' lettering: A person checks this (Gordium doesn't decide it): An externally lit exit sign (1013.6) and every directional exit sign have plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+    "Egress · Externally lit exit signs' brightness: A person checks this (Gordium doesn't decide it): An exit sign lit from an external source has at least 5 footcandles on its face: exit signs aren't in the model, so a person's check.",
+    "Egress · Exit signs lit 90 minutes after a power loss: A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
@@ -72735,6 +72752,1204 @@
      }
     },
     {
+     "id": "egress.general.bc_1008_2_illumination_required",
+     "rule": "general.bc_1008_2_illumination_required",
+     "name": "Egress · Means of egress lit while occupied (BCNYS 1008.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The means of egress serving a room or space is lit at all times the room or space is occupied (1008.3's emergency lighting on a power failure); not required in Group U, in self-service storage units of 400 sq ft or less entered directly from outside, in Group A's aisle accessways, within dwelling and sleeping units in Groups R-1, R-2 and R-3, or in Group I sleeping units: lighting isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The means of egress serving a room or space is lit at all times the room or space is occupied (1008.3's emergency lighting on a power failure); not required in Group U, in self-service storage units of 400 sq ft or less entered directly from outside, in Group A's aisle accessways, within dwelling and sleeping units in Groups R-1, R-2 and R-3, or in Group I sleeping units: lighting isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1008.1 Means of egress illumination. Illumination shall be provided in the means of egress in accordance with Section 1008.2. In the event of power supply failure, means of egress illumination shall comply with Section 1008.3.",
+        "where": "1008.1, 2025 Building Code of New York State (BCNYS), PDF p.318"
+       },
+       {
+        "text": "1008.2 Illumination required. The means of egress serving a room or space shall be illuminated at all times that the room or space is occupied. Exceptions: 1. Occupancies in Group U. 2. Self-service storage units 400 square feet (37.2 m[fn2]) or less in area and accessed directly from the exterior of the building. 3. Aisle accessways in Group A. 4. Dwelling units and sleeping units in Groups R-1, R-2 and R-3. 5. Sleeping units of Group I occupancies.",
+        "where": "1008.2, 2025 Building Code of New York State (BCNYS), PDF p.318"
+       }
+      ],
+      "citation": "1008.1, 2025 Building Code of New York State (BCNYS), PDF p.318",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1008.1",
+      "quote": "1008.1 Means of egress illumination. Illumination shall be provided in the means of egress in accordance with Section 1008.2. In the event of power supply failure, means of egress illumination shall comply with Section 1008.3."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1008_2_illumination_required",
+       "words": "A person checks this (Gordium doesn't decide it): The means of egress serving a room or space is lit at all times the room or space is occupied (1008.3's emergency lighting on a power failure); not required in Group U, in self-service storage units of 400 sq ft or less entered directly from outside, in Group A's aisle accessways, within dwelling and sleeping units in Groups R-1, R-2 and R-3, or in Group I sleeping units: lighting isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1008_2_illumination_required",
+       "why": "A person checks this (Gordium doesn't decide it): The means of egress serving a room or space is lit at all times the room or space is occupied (1008.3's emergency lighting on a power failure); not required in Group U, in self-service storage units of 400 sq ft or less entered directly from outside, in Group A's aisle accessways, within dwelling and sleeping units in Groups R-1, R-2 and R-3, or in Group I sleeping units: lighting isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Means of egress lit while occupied (BCNYS 1008.2)",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1008",
+      "section_title": "Means of Egress Illumination",
+      "piece": "1008.1",
+      "piece_title": "Means of egress illumination"
+     }
+    },
+    {
+     "id": "egress.general.bc_1008_2_1_illumination_level",
+     "rule": "general.bc_1008_2_1_illumination_level",
+     "name": "Egress · Means of egress lighting level (BCNYS 1008.2.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The means of egress is lit to at least 1 footcandle at the walking surface, and exit access stairways, exit stairways and their required landings to at least 10 footcandles while the stairway is in use; auditoriums, theaters, concert or opera halls and similar assembly spaces may lower it during performances, restored automatically by the fire alarm system, to 0.2 footcandle on externally lit walking surfaces, or by marking steps, landings and ramp sides with self-luminous materials (1025.2.1, 1025.2.2 and 1025.2.4, systems listed to UL 1994): lighting isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The means of egress is lit to at least 1 footcandle at the walking surface, and exit access stairways, exit stairways and their required landings to at least 10 footcandles while the stairway is in use; auditoriums, theaters, concert or opera halls and similar assembly spaces may lower it during performances, restored automatically by the fire alarm system, to 0.2 footcandle on externally lit walking surfaces, or by marking steps, landings and ramp sides with self-luminous materials (1025.2.1, 1025.2.2 and 1025.2.4, systems listed to UL 1994): lighting isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1008.2.1 Illumination level under normal power. The means of egress illumination level shall be not less than 1 footcandle (11 lux) at the walking surface. Along exit access stairways, exit stairways and at their required landings, the illumination level shall not be less than 10 footcandles (108 lux) at the walking surface when the stairway is in use. Exception: For auditoriums, theaters, concert or opera halls and similar assembly occupancies, the illumination at the walking surface is permitted to be reduced during performances by one of the following methods provided that the required illumina- tion is automatically restored upon activation of a premises’ fire alarm system: 1. Externally illuminated walking surfaces shall be permitted to be illuminated to not less than 0.2 footcandle (2.15 lux). 2. Steps, landings and the sides of ramps shall be permitted to be marked with self-luminous materials in accordance with Sections 1025.2.1, 1025.2.2 and 1025.2.4 by systems listed in accordance with UL 1994.",
+        "where": "1008.2.1, 2025 Building Code of New York State (BCNYS), PDF p.318"
+       }
+      ],
+      "citation": "1008.2.1, 2025 Building Code of New York State (BCNYS), PDF p.318",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1008.2.1",
+      "quote": "1008.2.1 Illumination level under normal power. The means of egress illumination level shall be not less than 1 footcandle (11 lux) at the walking surface. Along exit access stairways, exit stairways and at their required landings, the illumination level shall not be less than 10 footcandles (108 lux) at the walking surface when the stairway is in use. Exception: For auditoriums, theaters, concert or opera halls and similar assembly occupancies, the illumination at the walking surface is permitted to be reduced during performances by one of the following methods provided that the required illumina- tion is automatically restored upon activation of a premises’ fire alarm system: 1. Externally illuminated walking surfaces shall be permitted to be illuminated to not less than 0.2 footcandle (2.15 lux). 2. Steps, landings and the sides of ramps shall be permitted to be marked with self-luminous materials in accordance with Sections 1025.2.1, 1025.2.2 and 1025.2.4 by systems listed in accordance with UL 1994."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1008_2_1_illumination_level",
+       "words": "A person checks this (Gordium doesn't decide it): The means of egress is lit to at least 1 footcandle at the walking surface, and exit access stairways, exit stairways and their required landings to at least 10 footcandles while the stairway is in use; auditoriums, theaters, concert or opera halls and similar assembly spaces may lower it during performances, restored automatically by the fire alarm system, to 0.2 footcandle on externally lit walking surfaces, or by marking steps, landings and ramp sides with self-luminous materials (1025.2.1, 1025.2.2 and 1025.2.4, systems listed to UL 1994): lighting isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1008_2_1_illumination_level",
+       "why": "A person checks this (Gordium doesn't decide it): The means of egress is lit to at least 1 footcandle at the walking surface, and exit access stairways, exit stairways and their required landings to at least 10 footcandles while the stairway is in use; auditoriums, theaters, concert or opera halls and similar assembly spaces may lower it during performances, restored automatically by the fire alarm system, to 0.2 footcandle on externally lit walking surfaces, or by marking steps, landings and ramp sides with self-luminous materials (1025.2.1, 1025.2.2 and 1025.2.4, systems listed to UL 1994): lighting isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Means of egress lighting level",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1008",
+      "section_title": "Means of Egress Illumination",
+      "piece": "1008.2.1",
+      "piece_title": "Illumination level under normal power"
+     }
+    },
+    {
+     "id": "egress.general.bc_1008_2_2_group_i2_exterior_landings",
+     "rule": "general.bc_1008_2_2_group_i2_exterior_landings",
+     "name": "Egress · Group I-2's exterior landings lit despite one lamp failing (BCNYS 1008.2.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): In Group I-2 where two or more exits are required, the exterior landings 1010.1.5 requires are lit for the exit discharge so that one lamp failing in a luminaire leaves at least 1 footcandle on the landing: lighting isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): In Group I-2 where two or more exits are required, the exterior landings 1010.1.5 requires are lit for the exit discharge so that one lamp failing in a luminaire leaves at least 1 footcandle on the landing: lighting isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1008.2.2 Group I-2. In Group I-2 occupancies where two or more exits are required, on the exterior landings required by Section 1010.1.5, means of egress illumination levels for the exit discharge shall be provided such that failure of a single lamp in a lumi- naire shall not reduce the illumination level on that landing to less than 1 footcandle (11 lux).",
+        "where": "1008.2.2, 2025 Building Code of New York State (BCNYS), PDF p.318"
+       }
+      ],
+      "citation": "1008.2.2, 2025 Building Code of New York State (BCNYS), PDF p.318",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1008.2.2",
+      "quote": "1008.2.2 Group I-2. In Group I-2 occupancies where two or more exits are required, on the exterior landings required by Section 1010.1.5, means of egress illumination levels for the exit discharge shall be provided such that failure of a single lamp in a lumi- naire shall not reduce the illumination level on that landing to less than 1 footcandle (11 lux)."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1008_2_2_group_i2_exterior_landings",
+       "words": "A person checks this (Gordium doesn't decide it): In Group I-2 where two or more exits are required, the exterior landings 1010.1.5 requires are lit for the exit discharge so that one lamp failing in a luminaire leaves at least 1 footcandle on the landing: lighting isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1008_2_2_group_i2_exterior_landings",
+       "why": "A person checks this (Gordium doesn't decide it): In Group I-2 where two or more exits are required, the exterior landings 1010.1.5 requires are lit for the exit discharge so that one lamp failing in a luminaire leaves at least 1 footcandle on the landing: lighting isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Group I-2's exterior landings lit despite one lamp failing",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1008",
+      "section_title": "Means of Egress Illumination",
+      "piece": "1008.2.2",
+      "piece_title": "Group I-2"
+     }
+    },
+    {
+     "id": "egress.general.bc_1008_2_3_exit_discharge_illumination",
+     "rule": "general.bc_1008_2_3_exit_discharge_illumination",
+     "name": "Egress · Exit discharge lit to the public way (BCNYS 1008.2.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The path of the exit discharge is lit from each exit to the public way, or from the exit to a safe dispersal area complying with 1028.5 that is itself lit to at least 1 footcandle at the walking surface: site lighting isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The path of the exit discharge is lit from each exit to the public way, or from the exit to a safe dispersal area complying with 1028.5 that is itself lit to at least 1 footcandle at the walking surface: site lighting isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1008.2.3 Exit discharge. Illumination shall be provided along the path of travel for the exit discharge from each exit to the public way. Exception: Illumination shall not be required where the path of the exit discharge meets both of the following requirements: 1. The path of exit discharge is illuminated from the exit to a safe dispersal area complying with Section 1028.5. 2. A dispersal area shall be illuminated to a level not less than 1 footcandle (11 lux) at the walking surface.",
+        "where": "1008.2.3, 2025 Building Code of New York State (BCNYS), PDF p.318"
+       }
+      ],
+      "citation": "1008.2.3, 2025 Building Code of New York State (BCNYS), PDF p.318",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1008.2.3",
+      "quote": "1008.2.3 Exit discharge. Illumination shall be provided along the path of travel for the exit discharge from each exit to the public way. Exception: Illumination shall not be required where the path of the exit discharge meets both of the following requirements: 1. The path of exit discharge is illuminated from the exit to a safe dispersal area complying with Section 1028.5. 2. A dispersal area shall be illuminated to a level not less than 1 footcandle (11 lux) at the walking surface."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1008_2_3_exit_discharge_illumination",
+       "words": "A person checks this (Gordium doesn't decide it): The path of the exit discharge is lit from each exit to the public way, or from the exit to a safe dispersal area complying with 1028.5 that is itself lit to at least 1 footcandle at the walking surface: site lighting isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1008_2_3_exit_discharge_illumination",
+       "why": "A person checks this (Gordium doesn't decide it): The path of the exit discharge is lit from each exit to the public way, or from the exit to a safe dispersal area complying with 1028.5 that is itself lit to at least 1 footcandle at the walking surface: site lighting isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit discharge lit to the public way",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1008",
+      "section_title": "Means of Egress Illumination",
+      "piece": "1008.2.3",
+      "piece_title": "Exit discharge"
+     }
+    },
+    {
+     "id": "egress.general.bc_1008_2_4_power_for_illumination",
+     "rule": "general.bc_1008_2_4_power_for_illumination",
+     "name": "Egress · Means of egress lighting on the premises' supply (BCNYS 1008.2.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Means of egress lighting is normally powered by the premises' electrical supply: the electrical design isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Means of egress lighting is normally powered by the premises' electrical supply: the electrical design isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1008.2.4 Power for illumination. The power supply for means of egress illumination shall normally be provided by the premises’ electrical supply.",
+        "where": "1008.2.4, 2025 Building Code of New York State (BCNYS), PDF p.319"
+       }
+      ],
+      "citation": "1008.2.4, 2025 Building Code of New York State (BCNYS), PDF p.319",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1008.2.4",
+      "quote": "1008.2.4 Power for illumination. The power supply for means of egress illumination shall normally be provided by the premises’ electrical supply."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1008_2_4_power_for_illumination",
+       "words": "A person checks this (Gordium doesn't decide it): Means of egress lighting is normally powered by the premises' electrical supply: the electrical design isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1008_2_4_power_for_illumination",
+       "why": "A person checks this (Gordium doesn't decide it): Means of egress lighting is normally powered by the premises' electrical supply: the electrical design isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Means of egress lighting on the premises' supply",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1008",
+      "section_title": "Means of Egress Illumination",
+      "piece": "1008.2.4",
+      "piece_title": "Power for illumination"
+     }
+    },
+    {
+     "id": "egress.general.bc_1008_3_emergency_illumination",
+     "rule": "general.bc_1008_3_emergency_illumination",
+     "name": "Egress · Emergency lighting where required (BCNYS 1008.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An emergency electrical system lights, on a power failure: in rooms or spaces requiring two or more exits or access to exits, the aisles, corridors and exit access stairways and ramps; in buildings requiring two or more exits or access to exits, the interior exit access stairways and ramps, interior and exterior exit stairways and ramps, exit passageways, vestibules and discharge areas on the level of discharge (1028.2), and the exterior landings 1010.1.5 requires at exit doorways leading directly to the exit discharge; and electrical equipment rooms, fire command centers, fire pump rooms, generator rooms and public restrooms over 300 sq ft: the electrical design isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An emergency electrical system lights, on a power failure: in rooms or spaces requiring two or more exits or access to exits, the aisles, corridors and exit access stairways and ramps; in buildings requiring two or more exits or access to exits, the interior exit access stairways and ramps, interior and exterior exit stairways and ramps, exit passageways, vestibules and discharge areas on the level of discharge (1028.2), and the exterior landings 1010.1.5 requires at exit doorways leading directly to the exit discharge; and electrical equipment rooms, fire command centers, fire pump rooms, generator rooms and public restrooms over 300 sq ft: the electrical design isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1008.3 Illumination required by an emergency electrical system. An emergency electrical system shall be provided to automati- cally illuminate the following areas in the event of a power supply failure: 1. In rooms or spaces that require two or more exits or access to exits: 1.1. Aisles. 1.2. Corridors. 1.3. Exit access stairways and ramps. 2. In buildings that require two or more exits or access to exits: 2.1. Interior exit access stairways and ramps. 2.2. Interior and exterior exit stairways and ramps. 2.3. Exit passageways. 2.4. Vestibules and areas on the level of discharge used for exit discharge in accordance with Section 1028.2. 2.5. Exterior landings as required by Section 1010.1.5 for exit doorways that lead directly to the exit discharge. 3. In other rooms and spaces: 3.1. Electrical equipment rooms. 3.2. Fire command centers. 3.3. Fire pump rooms. 3.4. Generator rooms. 3.5. Public restrooms with an area greater than 300 square feet (27.87 m[fn2]).",
+        "where": "1008.3, 2025 Building Code of New York State (BCNYS), PDF p.319"
+       }
+      ],
+      "citation": "1008.3, 2025 Building Code of New York State (BCNYS), PDF p.319",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1008.3",
+      "quote": "1008.3 Illumination required by an emergency electrical system. An emergency electrical system shall be provided to automati- cally illuminate the following areas in the event of a power supply failure: 1. In rooms or spaces that require two or more exits or access to exits: 1.1. Aisles. 1.2. Corridors. 1.3. Exit access stairways and ramps. 2. In buildings that require two or more exits or access to exits: 2.1. Interior exit access stairways and ramps. 2.2. Interior and exterior exit stairways and ramps. 2.3. Exit passageways. 2.4. Vestibules and areas on the level of discharge used for exit discharge in accordance with Section 1028.2. 2.5. Exterior landings as required by Section 1010.1.5 for exit doorways that lead directly to the exit discharge. 3. In other rooms and spaces: 3.1. Electrical equipment rooms. 3.2. Fire command centers. 3.3. Fire pump rooms. 3.4. Generator rooms. 3.5. Public restrooms with an area greater than 300 square feet (27.87 m[fn2])."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1008_3_emergency_illumination",
+       "words": "A person checks this (Gordium doesn't decide it): An emergency electrical system lights, on a power failure: in rooms or spaces requiring two or more exits or access to exits, the aisles, corridors and exit access stairways and ramps; in buildings requiring two or more exits or access to exits, the interior exit access stairways and ramps, interior and exterior exit stairways and ramps, exit passageways, vestibules and discharge areas on the level of discharge (1028.2), and the exterior landings 1010.1.5 requires at exit doorways leading directly to the exit discharge; and electrical equipment rooms, fire command centers, fire pump rooms, generator rooms and public restrooms over 300 sq ft: the electrical design isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1008_3_emergency_illumination",
+       "why": "A person checks this (Gordium doesn't decide it): An emergency electrical system lights, on a power failure: in rooms or spaces requiring two or more exits or access to exits, the aisles, corridors and exit access stairways and ramps; in buildings requiring two or more exits or access to exits, the interior exit access stairways and ramps, interior and exterior exit stairways and ramps, exit passageways, vestibules and discharge areas on the level of discharge (1028.2), and the exterior landings 1010.1.5 requires at exit doorways leading directly to the exit discharge; and electrical equipment rooms, fire command centers, fire pump rooms, generator rooms and public restrooms over 300 sq ft: the electrical design isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Emergency lighting where required",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1008",
+      "section_title": "Means of Egress Illumination",
+      "piece": "1008.3",
+      "piece_title": "Illumination required by an emergency electrical system"
+     }
+    },
+    {
+     "id": "egress.general.bc_1008_3_1_emergency_power_duration",
+     "rule": "general.bc_1008_3_1_emergency_power_duration",
+     "name": "Egress · Emergency lighting for 90 minutes (BCNYS 1008.3.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The emergency power system powers the lighting for at least 90 minutes, from storage batteries, unit equipment or an on-site generator, installed per 2702: the electrical design isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The emergency power system powers the lighting for at least 90 minutes, from storage batteries, unit equipment or an on-site generator, installed per 2702: the electrical design isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1008.3.1 Duration. The emergency power system shall provide power for a duration of not less than 90 minutes and shall consist of storage batteries, unit equipment or an on-site generator. The installation of the emergency power system shall be in accor- dance with Section 2702.",
+        "where": "1008.3.1, 2025 Building Code of New York State (BCNYS), PDF p.319"
+       }
+      ],
+      "citation": "1008.3.1, 2025 Building Code of New York State (BCNYS), PDF p.319",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1008.3.1",
+      "quote": "1008.3.1 Duration. The emergency power system shall provide power for a duration of not less than 90 minutes and shall consist of storage batteries, unit equipment or an on-site generator. The installation of the emergency power system shall be in accor- dance with Section 2702."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1008_3_1_emergency_power_duration",
+       "words": "A person checks this (Gordium doesn't decide it): The emergency power system powers the lighting for at least 90 minutes, from storage batteries, unit equipment or an on-site generator, installed per 2702: the electrical design isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1008_3_1_emergency_power_duration",
+       "why": "A person checks this (Gordium doesn't decide it): The emergency power system powers the lighting for at least 90 minutes, from storage batteries, unit equipment or an on-site generator, installed per 2702: the electrical design isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Emergency lighting for 90 minutes",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1008",
+      "section_title": "Means of Egress Illumination",
+      "piece": "1008.3.1",
+      "piece_title": "Duration"
+     }
+    },
+    {
+     "id": "egress.general.bc_1008_3_2_emergency_illumination_level",
+     "rule": "general.bc_1008_3_2_emergency_illumination_level",
+     "name": "Egress · Emergency lighting level (BCNYS 1008.3.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Emergency lighting gives at first an average of at least 1 footcandle and at least 0.1 footcandle at any point along the path of egress at floor level, declining to no less than 0.6 average and 0.06 at any point by the end of its duration, with a maximum-to-minimum ratio no more than 40 to 1; in Group I-2 one lamp failing in a luminaire leaves at least 0.2 footcandle: lighting isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Emergency lighting gives at first an average of at least 1 footcandle and at least 0.1 footcandle at any point along the path of egress at floor level, declining to no less than 0.6 average and 0.06 at any point by the end of its duration, with a maximum-to-minimum ratio no more than 40 to 1; in Group I-2 one lamp failing in a luminaire leaves at least 0.2 footcandle: lighting isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1008.3.2 Illumination level under emergency power. Emergency lighting facilities shall be arranged to provide initial illumina- tion that is not less than an average of 1 footcandle (11 lux) and a minimum at any point of 0.1 footcandle (1 lux) measured along the path of egress at floor level. Illumination levels shall be permitted to decline to 0.6 footcandle (6 lux) average and a minimum at any point of 0.06 footcandle (0.6 lux) at the end of the emergency lighting time duration. A maximum-to-minimum illumination uniformity ratio of 40 to 1 shall not be exceeded. In Group I-2 occupancies, failure of a single lamp in a luminaire shall not reduce the illumination level to less than 0.2 footcandle (2.2 lux).",
+        "where": "1008.3.2, 2025 Building Code of New York State (BCNYS), PDF p.319"
+       }
+      ],
+      "citation": "1008.3.2, 2025 Building Code of New York State (BCNYS), PDF p.319",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1008.3.2",
+      "quote": "1008.3.2 Illumination level under emergency power. Emergency lighting facilities shall be arranged to provide initial illumina- tion that is not less than an average of 1 footcandle (11 lux) and a minimum at any point of 0.1 footcandle (1 lux) measured along the path of egress at floor level. Illumination levels shall be permitted to decline to 0.6 footcandle (6 lux) average and a minimum at any point of 0.06 footcandle (0.6 lux) at the end of the emergency lighting time duration. A maximum-to-minimum illumination uniformity ratio of 40 to 1 shall not be exceeded. In Group I-2 occupancies, failure of a single lamp in a luminaire shall not reduce the illumination level to less than 0.2 footcandle (2.2 lux)."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1008_3_2_emergency_illumination_level",
+       "words": "A person checks this (Gordium doesn't decide it): Emergency lighting gives at first an average of at least 1 footcandle and at least 0.1 footcandle at any point along the path of egress at floor level, declining to no less than 0.6 average and 0.06 at any point by the end of its duration, with a maximum-to-minimum ratio no more than 40 to 1; in Group I-2 one lamp failing in a luminaire leaves at least 0.2 footcandle: lighting isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1008_3_2_emergency_illumination_level",
+       "why": "A person checks this (Gordium doesn't decide it): Emergency lighting gives at first an average of at least 1 footcandle and at least 0.1 footcandle at any point along the path of egress at floor level, declining to no less than 0.6 average and 0.06 at any point by the end of its duration, with a maximum-to-minimum ratio no more than 40 to 1; in Group I-2 one lamp failing in a luminaire leaves at least 0.2 footcandle: lighting isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Emergency lighting level",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1008",
+      "section_title": "Means of Egress Illumination",
+      "piece": "1008.3.2",
+      "piece_title": "Illumination level under emergency power"
+     }
+    },
+    {
+     "id": "egress.general.bc_1013_1_exit_signs_where_required",
+     "rule": "general.bc_1013_1_exit_signs_where_required",
+     "name": "Egress · Exit signs where required (BCNYS 1013.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Exits and exit access doors are marked by an approved exit sign readily visible from any direction of egress travel; signs show the direction of travel where an exit or the path isn't immediately visible; intervening doors within exits are marked; and no point in an exit access corridor or exit passageway is farther than 100 feet, or the sign's listed viewing distance if less, from the nearest visible sign; not required in rooms or areas needing only one exit or exit access, at main exterior exit doors or gates obviously identifiable as exits where the building official approves, in Group U, within Group R-1, R-2 or R-3 sleeping or dwelling units, in Group I-3's dayrooms, sleeping rooms and dormitories, or on the seating side of Group A-4 and A-5 vomitories with signs in the concourse: exit signs aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Exits and exit access doors are marked by an approved exit sign readily visible from any direction of egress travel; signs show the direction of travel where an exit or the path isn't immediately visible; intervening doors within exits are marked; and no point in an exit access corridor or exit passageway is farther than 100 feet, or the sign's listed viewing distance if less, from the nearest visible sign; not required in rooms or areas needing only one exit or exit access, at main exterior exit doors or gates obviously identifiable as exits where the building official approves, in Group U, within Group R-1, R-2 or R-3 sleeping or dwelling units, in Group I-3's dayrooms, sleeping rooms and dormitories, or on the seating side of Group A-4 and A-5 vomitories with signs in the concourse: exit signs aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1013.1 Where required. Exits and exit access doors shall be marked by an approved exit sign readily visible from any direction of egress travel. The path of egress travel to exits and within exits shall be marked by readily visible exit signs to clearly indicate the direction of egress travel in cases where the exit or the path of egress travel is not immediately visible to the occupants. Intervening means of egress doors within exits shall be marked by exit signs. Exit sign placement shall be such that any point in an exit access corridor or exit passageway is within 100 feet (30 480 mm) or the listed viewing distance of the sign, whichever is less, from the near- est visible exit sign. Exceptions: 1. Exit signs are not required in rooms or areas that require only one exit or exit access. 2. Main exterior exit doors or gates that are obviously and clearly identifiable as exits need not have exit signs where approved by the building official. 3. Exit signs are not required in occupancies in Group U and individual sleeping units or dwelling units in Group R-1, R-2 or R-3. 4. Exit signs are not required in dayrooms, sleeping rooms or dormitories in occupancies in Group I-3. 5. In occupancies in Groups A-4 and A-5, exit signs are not required on the seating side of vomitories or openings into seat- ing areas where exit signs are provided in the concourse that are readily apparent from the vomitories. Egress lighting is provided to identify each vomitory or opening within the seating area in an emergency.",
+        "where": "1013.1, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1013.1, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1013.1",
+      "quote": "1013.1 Where required. Exits and exit access doors shall be marked by an approved exit sign readily visible from any direction of egress travel. The path of egress travel to exits and within exits shall be marked by readily visible exit signs to clearly indicate the direction of egress travel in cases where the exit or the path of egress travel is not immediately visible to the occupants. Intervening means of egress doors within exits shall be marked by exit signs. Exit sign placement shall be such that any point in an exit access corridor or exit passageway is within 100 feet (30 480 mm) or the listed viewing distance of the sign, whichever is less, from the near- est visible exit sign. Exceptions: 1. Exit signs are not required in rooms or areas that require only one exit or exit access. 2. Main exterior exit doors or gates that are obviously and clearly identifiable as exits need not have exit signs where approved by the building official. 3. Exit signs are not required in occupancies in Group U and individual sleeping units or dwelling units in Group R-1, R-2 or R-3. 4. Exit signs are not required in dayrooms, sleeping rooms or dormitories in occupancies in Group I-3. 5. In occupancies in Groups A-4 and A-5, exit signs are not required on the seating side of vomitories or openings into seat- ing areas where exit signs are provided in the concourse that are readily apparent from the vomitories. Egress lighting is provided to identify each vomitory or opening within the seating area in an emergency."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1013_1_exit_signs_where_required",
+       "words": "A person checks this (Gordium doesn't decide it): Exits and exit access doors are marked by an approved exit sign readily visible from any direction of egress travel; signs show the direction of travel where an exit or the path isn't immediately visible; intervening doors within exits are marked; and no point in an exit access corridor or exit passageway is farther than 100 feet, or the sign's listed viewing distance if less, from the nearest visible sign; not required in rooms or areas needing only one exit or exit access, at main exterior exit doors or gates obviously identifiable as exits where the building official approves, in Group U, within Group R-1, R-2 or R-3 sleeping or dwelling units, in Group I-3's dayrooms, sleeping rooms and dormitories, or on the seating side of Group A-4 and A-5 vomitories with signs in the concourse: exit signs aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1013_1_exit_signs_where_required",
+       "why": "A person checks this (Gordium doesn't decide it): Exits and exit access doors are marked by an approved exit sign readily visible from any direction of egress travel; signs show the direction of travel where an exit or the path isn't immediately visible; intervening doors within exits are marked; and no point in an exit access corridor or exit passageway is farther than 100 feet, or the sign's listed viewing distance if less, from the nearest visible sign; not required in rooms or areas needing only one exit or exit access, at main exterior exit doors or gates obviously identifiable as exits where the building official approves, in Group U, within Group R-1, R-2 or R-3 sleeping or dwelling units, in Group I-3's dayrooms, sleeping rooms and dormitories, or on the seating side of Group A-4 and A-5 vomitories with signs in the concourse: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit signs where required",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1013",
+      "section_title": "Exit Signs",
+      "piece": "1013.1",
+      "piece_title": "Where required"
+     }
+    },
+    {
+     "id": "egress.general.bc_1013_2_low_level_exit_signs_group_r1",
+     "rule": "general.bc_1013_2_low_level_exit_signs_group_r1",
+     "name": "Egress · Low-level exit signs in Group R-1 (BCNYS 1013.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every area serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall, a wall sign's edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: exit signs aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every area serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall, a wall sign's edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: exit signs aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1013.2 Low-level exit signs in Group R-1. Where exit signs are required in Group R-1 occupancies by Section 1013.1, additional low- level exit signs shall be provided in all areas serving guest rooms in Group R-1 occupancies and shall comply with Section 1013.5. The bottom of the sign shall be not less than 10 inches (254 mm) nor more than 18 inches (455 mm) above the floor level. The sign shall be flush mounted to the door or wall. Where mounted on the wall, the edge of the sign shall be within 4 inches (102 mm) of the door frame on the latch side. Exception: Low-level exit signs are not required in Group R-1 occupancies when the building is equipped throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1 or 903.3.1.2.",
+        "where": "1013.2, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1013.2, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1013.2",
+      "quote": "1013.2 Low-level exit signs in Group R-1. Where exit signs are required in Group R-1 occupancies by Section 1013.1, additional low- level exit signs shall be provided in all areas serving guest rooms in Group R-1 occupancies and shall comply with Section 1013.5. The bottom of the sign shall be not less than 10 inches (254 mm) nor more than 18 inches (455 mm) above the floor level. The sign shall be flush mounted to the door or wall. Where mounted on the wall, the edge of the sign shall be within 4 inches (102 mm) of the door frame on the latch side. Exception: Low-level exit signs are not required in Group R-1 occupancies when the building is equipped throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1 or 903.3.1.2."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1013_2_low_level_exit_signs_group_r1",
+       "words": "A person checks this (Gordium doesn't decide it): Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every area serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall, a wall sign's edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: exit signs aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1013_2_low_level_exit_signs_group_r1",
+       "why": "A person checks this (Gordium doesn't decide it): Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every area serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall, a wall sign's edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Low-level exit signs in Group R-1",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1013",
+      "section_title": "Exit Signs",
+      "piece": "1013.2",
+      "piece_title": "Low-level exit signs in Group R-1"
+     }
+    },
+    {
+     "id": "egress.general.bc_1013_3_exit_sign_illumination",
+     "rule": "general.bc_1013_3_exit_sign_illumination",
+     "name": "Egress · Exit signs lit (BCNYS 1013.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Exit signs are internally or externally lit (the tactile signs 1013.4 requires need not be): exit signs aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Exit signs are internally or externally lit (the tactile signs 1013.4 requires need not be): exit signs aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1013.3 Illumination. Exit signs shall be internally or externally illuminated. Exception: Tactile signs required by Section 1013.4 need not be provided with illumination.",
+        "where": "1013.3, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1013.3, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1013.3",
+      "quote": "1013.3 Illumination. Exit signs shall be internally or externally illuminated. Exception: Tactile signs required by Section 1013.4 need not be provided with illumination."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1013_3_exit_sign_illumination",
+       "words": "A person checks this (Gordium doesn't decide it): Exit signs are internally or externally lit (the tactile signs 1013.4 requires need not be): exit signs aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1013_3_exit_sign_illumination",
+       "why": "A person checks this (Gordium doesn't decide it): Exit signs are internally or externally lit (the tactile signs 1013.4 requires need not be): exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit signs lit",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1013",
+      "section_title": "Exit Signs",
+      "piece": "1013.3",
+      "piece_title": "Illumination"
+     }
+    },
+    {
+     "id": "egress.general.bc_1013_4_raised_character_braille_exit_signs",
+     "rule": "general.bc_1013_4_raised_character_braille_exit_signs",
+     "name": "Egress · Raised character and braille exit signs (BCNYS 1013.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading \"EXIT\" in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading \"EXIT\" in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1013.4 Raised character and braille exit signs. Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign stat- ing \"EXIT\" in visual characters, raised characters and braille and complying with ICC A117.1 shall be provided.",
+        "where": "1013.4, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1013.4, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1013.4",
+      "quote": "1013.4 Raised character and braille exit signs. Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign stat- ing \"EXIT\" in visual characters, raised characters and braille and complying with ICC A117.1 shall be provided."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1013_4_raised_character_braille_exit_signs",
+       "words": "A person checks this (Gordium doesn't decide it): Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading \"EXIT\" in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1013_4_raised_character_braille_exit_signs",
+       "why": "A person checks this (Gordium doesn't decide it): Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading \"EXIT\" in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Raised character and braille exit signs",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1013",
+      "section_title": "Exit Signs",
+      "piece": "1013.4",
+      "piece_title": "Raised character and braille exit signs"
+     }
+    },
+    {
+     "id": "egress.general.bc_1013_5_internally_illuminated_exit_signs",
+     "rule": "general.bc_1013_5_internally_illuminated_exit_signs",
+     "name": "Egress · Internally lit exit signs listed and always lit (BCNYS 1013.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Electrically powered, self-luminous and photoluminescent exit signs are listed and labeled to UL 924, installed to the maker's instructions and Chapter 27, and lit at all times: exit signs aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Electrically powered, self-luminous and photoluminescent exit signs are listed and labeled to UL 924, installed to the maker's instructions and Chapter 27, and lit at all times: exit signs aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1013.5 Internally illuminated exit signs. Electrically powered, self-luminous and photoluminescent exit signs shall be listed and labeled in accordance with UL 924 and shall be installed in accordance with the manufacturer’s instructions and Chapter 27. Exit signs shall be illuminated at all times.",
+        "where": "1013.5, 2025 Building Code of New York State (BCNYS), PDF p.337"
+       }
+      ],
+      "citation": "1013.5, 2025 Building Code of New York State (BCNYS), PDF p.337",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1013.5",
+      "quote": "1013.5 Internally illuminated exit signs. Electrically powered, self-luminous and photoluminescent exit signs shall be listed and labeled in accordance with UL 924 and shall be installed in accordance with the manufacturer’s instructions and Chapter 27. Exit signs shall be illuminated at all times."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1013_5_internally_illuminated_exit_signs",
+       "words": "A person checks this (Gordium doesn't decide it): Electrically powered, self-luminous and photoluminescent exit signs are listed and labeled to UL 924, installed to the maker's instructions and Chapter 27, and lit at all times: exit signs aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1013_5_internally_illuminated_exit_signs",
+       "why": "A person checks this (Gordium doesn't decide it): Electrically powered, self-luminous and photoluminescent exit signs are listed and labeled to UL 924, installed to the maker's instructions and Chapter 27, and lit at all times: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Internally lit exit signs listed and always lit",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1013",
+      "section_title": "Exit Signs",
+      "piece": "1013.5",
+      "piece_title": "Internally illuminated exit signs"
+     }
+    },
+    {
+     "id": "egress.general.bc_1013_5_1_photoluminescent_exit_signs",
+     "rule": "general.bc_1013_5_1_photoluminescent_exit_signs",
+     "name": "Egress · Photoluminescent exit signs charged (BCNYS 1013.5.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A photoluminescent exit sign has a light source to charge it as its maker instructs: exit signs aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A photoluminescent exit sign has a light source to charge it as its maker instructs: exit signs aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1013.5.1 Photoluminescent exit signs. Photoluminescent exit signs shall be provided with an illumination source to charge the exit sign in accordance with the manufacturer’s instructions.",
+        "where": "1013.5.1, 2025 Building Code of New York State (BCNYS), PDF p.337"
+       }
+      ],
+      "citation": "1013.5.1, 2025 Building Code of New York State (BCNYS), PDF p.337",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1013.5.1",
+      "quote": "1013.5.1 Photoluminescent exit signs. Photoluminescent exit signs shall be provided with an illumination source to charge the exit sign in accordance with the manufacturer’s instructions."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1013_5_1_photoluminescent_exit_signs",
+       "words": "A person checks this (Gordium doesn't decide it): A photoluminescent exit sign has a light source to charge it as its maker instructs: exit signs aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1013_5_1_photoluminescent_exit_signs",
+       "why": "A person checks this (Gordium doesn't decide it): A photoluminescent exit sign has a light source to charge it as its maker instructs: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Photoluminescent exit signs charged",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1013",
+      "section_title": "Exit Signs",
+      "piece": "1013.5.1",
+      "piece_title": "Photoluminescent exit signs"
+     }
+    },
+    {
+     "id": "egress.general.bc_1013_6_1_exit_sign_graphics",
+     "rule": "general.bc_1013_6_1_exit_sign_graphics",
+     "name": "Egress · Externally lit exit signs' lettering (BCNYS 1013.6.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An externally lit exit sign (1013.6) and every directional exit sign have plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An externally lit exit sign (1013.6) and every directional exit sign have plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1013.6 Externally illuminated exit signs. Externally illuminated exit signs shall comply with Sections 1013.6.1 through 1013.6.3.",
+        "where": "1013.6, 2025 Building Code of New York State (BCNYS), PDF p.337"
+       },
+       {
+        "text": "1013.6.1 Graphics. Every exit sign and directional exit sign shall have plainly legible letters not less than 6 inches (152 mm) high with the principal strokes of the letters not less than 3/4 inch (19.1 mm) wide. The word “EXIT” shall have letters having a width not less than 2 inches (51 mm) wide, except the letter “I,” and the minimum spacing between letters shall be not less than 3/8 inch (9.5 mm). Signs larger than the minimum established in this section shall have letter widths, strokes and spacing in proportion to their height. The word “EXIT” shall be in high contrast with the background and shall be clearly discernible when the means of exit sign illu- mination is or is not energized. If a chevron directional indicator is provided as part of the exit sign, the construction shall be such that the direction of the chevron directional indicator cannot be readily changed.",
+        "where": "1013.6.1, 2025 Building Code of New York State (BCNYS), PDF p.337"
+       }
+      ],
+      "citation": "1013.6, 2025 Building Code of New York State (BCNYS), PDF p.337",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1013.6",
+      "quote": "1013.6 Externally illuminated exit signs. Externally illuminated exit signs shall comply with Sections 1013.6.1 through 1013.6.3."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1013_6_1_exit_sign_graphics",
+       "words": "A person checks this (Gordium doesn't decide it): An externally lit exit sign (1013.6) and every directional exit sign have plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1013_6_1_exit_sign_graphics",
+       "why": "A person checks this (Gordium doesn't decide it): An externally lit exit sign (1013.6) and every directional exit sign have plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Externally lit exit signs' lettering",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1013",
+      "section_title": "Exit Signs",
+      "piece": "1013.6",
+      "piece_title": "Externally illuminated exit signs"
+     }
+    },
+    {
+     "id": "egress.general.bc_1013_6_2_exit_sign_illumination_intensity",
+     "rule": "general.bc_1013_6_2_exit_sign_illumination_intensity",
+     "name": "Egress · Externally lit exit signs' brightness (BCNYS 1013.6.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An exit sign lit from an external source has at least 5 footcandles on its face: exit signs aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An exit sign lit from an external source has at least 5 footcandles on its face: exit signs aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1013.6.2 Exit sign illumination. The face of an exit sign illuminated from an external source shall have an intensity of not less than 5 footcandles (54 lux).",
+        "where": "1013.6.2, 2025 Building Code of New York State (BCNYS), PDF p.337"
+       }
+      ],
+      "citation": "1013.6.2, 2025 Building Code of New York State (BCNYS), PDF p.337",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1013.6.2",
+      "quote": "1013.6.2 Exit sign illumination. The face of an exit sign illuminated from an external source shall have an intensity of not less than 5 footcandles (54 lux)."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1013_6_2_exit_sign_illumination_intensity",
+       "words": "A person checks this (Gordium doesn't decide it): An exit sign lit from an external source has at least 5 footcandles on its face: exit signs aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1013_6_2_exit_sign_illumination_intensity",
+       "why": "A person checks this (Gordium doesn't decide it): An exit sign lit from an external source has at least 5 footcandles on its face: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Externally lit exit signs' brightness",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1013",
+      "section_title": "Exit Signs",
+      "piece": "1013.6.2",
+      "piece_title": "Exit sign illumination"
+     }
+    },
+    {
+     "id": "egress.general.bc_1013_6_3_exit_sign_power_source",
+     "rule": "general.bc_1013_6_3_exit_sign_power_source",
+     "name": "Egress · Exit signs lit 90 minutes after a power loss (BCNYS 1013.6.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1013.6.3 Power source. Exit signs shall be illuminated at all times. To ensure continued illumination for a duration of not less than 90 minutes in case of primary power loss, the sign illumination means shall be connected to an emergency power system provided from storage batteries, unit equipment or an on-site generator. The installation of the emergency power system shall be in accordance with Chapter 27. Group I-2, Condition 2 exit sign illumination shall not be provided by unit equipment batteries only. Exception: Approved exit sign illumination types that provide continuous illumination independent of external power sources for a duration of not less than 90 minutes, in case of primary power loss, are not required to be connected to an emergency electrical system.",
+        "where": "1013.6.3, 2025 Building Code of New York State (BCNYS), PDF p.337"
+       }
+      ],
+      "citation": "1013.6.3, 2025 Building Code of New York State (BCNYS), PDF p.337",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1013.6.3",
+      "quote": "1013.6.3 Power source. Exit signs shall be illuminated at all times. To ensure continued illumination for a duration of not less than 90 minutes in case of primary power loss, the sign illumination means shall be connected to an emergency power system provided from storage batteries, unit equipment or an on-site generator. The installation of the emergency power system shall be in accordance with Chapter 27. Group I-2, Condition 2 exit sign illumination shall not be provided by unit equipment batteries only. Exception: Approved exit sign illumination types that provide continuous illumination independent of external power sources for a duration of not less than 90 minutes, in case of primary power loss, are not required to be connected to an emergency electrical system."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1013_6_3_exit_sign_power_source",
+       "words": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1013_6_3_exit_sign_power_source",
+       "why": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit signs lit 90 minutes after a power loss",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1013",
+      "section_title": "Exit Signs",
+      "piece": "1013.6.3",
+      "piece_title": "Power source"
+     }
+    },
+    {
      "id": "egress.interior#1",
      "rule": null,
      "name": "Interior drawing",
@@ -77171,7 +78386,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 133 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 150 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -77809,6 +79024,23 @@
       "egress.general.bc_1012_8_handrails",
       "egress.general.bc_1012_9_guards",
       "egress.general.bc_1012_10_edge_protection",
+      "egress.general.bc_1008_2_illumination_required",
+      "egress.general.bc_1008_2_1_illumination_level",
+      "egress.general.bc_1008_2_2_group_i2_exterior_landings",
+      "egress.general.bc_1008_2_3_exit_discharge_illumination",
+      "egress.general.bc_1008_2_4_power_for_illumination",
+      "egress.general.bc_1008_3_emergency_illumination",
+      "egress.general.bc_1008_3_1_emergency_power_duration",
+      "egress.general.bc_1008_3_2_emergency_illumination_level",
+      "egress.general.bc_1013_1_exit_signs_where_required",
+      "egress.general.bc_1013_2_low_level_exit_signs_group_r1",
+      "egress.general.bc_1013_3_exit_sign_illumination",
+      "egress.general.bc_1013_4_raised_character_braille_exit_signs",
+      "egress.general.bc_1013_5_internally_illuminated_exit_signs",
+      "egress.general.bc_1013_5_1_photoluminescent_exit_signs",
+      "egress.general.bc_1013_6_1_exit_sign_graphics",
+      "egress.general.bc_1013_6_2_exit_sign_illumination_intensity",
+      "egress.general.bc_1013_6_3_exit_sign_power_source",
       "egress.interior#1"
      ],
      "lines": [
@@ -79738,6 +80970,227 @@
        "name": "Egress · Ramp edge protection (BCNYS 1012.10)"
       },
       {
+       "key": "review#2ad467bfc7",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1008_2_illumination_required"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Means of egress lit while occupied (BCNYS 1008.2): A person checks this (Gordium doesn't decide it): The means of egress serving a room or space is lit at all times the room or space is occupied (1008.3's emergency lighting on a power failure); not required in Group U, in self-service storage units of 400 sq ft or less entered directly from outside, in Group A's aisle accessways, within dwelling and sleeping units in Groups R-1, R-2 and R-3, or in Group I sleeping units: lighting isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Means of egress lit while occupied (BCNYS 1008.2)"
+      },
+      {
+       "key": "review#c81a84f66d",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1008_2_1_illumination_level"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Means of egress lighting level (BCNYS 1008.2.1): A person checks this (Gordium doesn't decide it): The means of egress is lit to at least 1 footcandle at the walking surface, and exit access stairways, exit stairways and their required landings to at least 10 footcandles while the stairway is in use; auditoriums, theaters, concert or opera halls and similar assembly spaces may lower it during performances, restored automatically by the fire alarm system, to 0.2 footcandle on externally lit walking surfaces, or by marking steps, landings and ramp sides with self-luminous materials (1025.2.1, 1025.2.2 and 1025.2.4, systems listed to UL 1994): lighting isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Means of egress lighting level (BCNYS 1008.2.1)"
+      },
+      {
+       "key": "review#00c6f1184a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1008_2_2_group_i2_exterior_landings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Group I-2's exterior landings lit despite one lamp failing (BCNYS 1008.2.2): A person checks this (Gordium doesn't decide it): In Group I-2 where two or more exits are required, the exterior landings 1010.1.5 requires are lit for the exit discharge so that one lamp failing in a luminaire leaves at least 1 footcandle on the landing: lighting isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Group I-2's exterior landings lit despite one lamp failing (BCNYS 1008.2.2)"
+      },
+      {
+       "key": "review#9d5fbda64e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1008_2_3_exit_discharge_illumination"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit discharge lit to the public way (BCNYS 1008.2.3): A person checks this (Gordium doesn't decide it): The path of the exit discharge is lit from each exit to the public way, or from the exit to a safe dispersal area complying with 1028.5 that is itself lit to at least 1 footcandle at the walking surface: site lighting isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit discharge lit to the public way (BCNYS 1008.2.3)"
+      },
+      {
+       "key": "review#e173208b15",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1008_2_4_power_for_illumination"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Means of egress lighting on the premises' supply (BCNYS 1008.2.4): A person checks this (Gordium doesn't decide it): Means of egress lighting is normally powered by the premises' electrical supply: the electrical design isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Means of egress lighting on the premises' supply (BCNYS 1008.2.4)"
+      },
+      {
+       "key": "review#cceb516f6d",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1008_3_emergency_illumination"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Emergency lighting where required (BCNYS 1008.3): A person checks this (Gordium doesn't decide it): An emergency electrical system lights, on a power failure: in rooms or spaces requiring two or more exits or access to exits, the aisles, corridors and exit access stairways and ramps; in buildings requiring two or more exits or access to exits, the interior exit access stairways and ramps, interior and exterior exit stairways and ramps, exit passageways, vestibules and discharge areas on the level of discharge (1028.2), and the exterior landings 1010.1.5 requires at exit doorways leading directly to the exit discharge; and electrical equipment rooms, fire command centers, fire pump rooms, generator rooms and public restrooms over 300 sq ft: the electrical design isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Emergency lighting where required (BCNYS 1008.3)"
+      },
+      {
+       "key": "review#25bc752c8b",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1008_3_1_emergency_power_duration"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Emergency lighting for 90 minutes (BCNYS 1008.3.1): A person checks this (Gordium doesn't decide it): The emergency power system powers the lighting for at least 90 minutes, from storage batteries, unit equipment or an on-site generator, installed per 2702: the electrical design isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Emergency lighting for 90 minutes (BCNYS 1008.3.1)"
+      },
+      {
+       "key": "review#9d6310eb03",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1008_3_2_emergency_illumination_level"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Emergency lighting level (BCNYS 1008.3.2): A person checks this (Gordium doesn't decide it): Emergency lighting gives at first an average of at least 1 footcandle and at least 0.1 footcandle at any point along the path of egress at floor level, declining to no less than 0.6 average and 0.06 at any point by the end of its duration, with a maximum-to-minimum ratio no more than 40 to 1; in Group I-2 one lamp failing in a luminaire leaves at least 0.2 footcandle: lighting isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Emergency lighting level (BCNYS 1008.3.2)"
+      },
+      {
+       "key": "review#0b9d0aac8c",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1013_1_exit_signs_where_required"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit signs where required (BCNYS 1013.1): A person checks this (Gordium doesn't decide it): Exits and exit access doors are marked by an approved exit sign readily visible from any direction of egress travel; signs show the direction of travel where an exit or the path isn't immediately visible; intervening doors within exits are marked; and no point in an exit access corridor or exit passageway is farther than 100 feet, or the sign's listed viewing distance if less, from the nearest visible sign; not required in rooms or areas needing only one exit or exit access, at main exterior exit doors or gates obviously identifiable as exits where the building official approves, in Group U, within Group R-1, R-2 or R-3 sleeping or dwelling units, in Group I-3's dayrooms, sleeping rooms and dormitories, or on the seating side of Group A-4 and A-5 vomitories with signs in the concourse: exit signs aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit signs where required (BCNYS 1013.1)"
+      },
+      {
+       "key": "review#e420cc0f85",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1013_2_low_level_exit_signs_group_r1"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Low-level exit signs in Group R-1 (BCNYS 1013.2): A person checks this (Gordium doesn't decide it): Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every area serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall, a wall sign's edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: exit signs aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Low-level exit signs in Group R-1 (BCNYS 1013.2)"
+      },
+      {
+       "key": "review#01a89010bb",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1013_3_exit_sign_illumination"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit signs lit (BCNYS 1013.3): A person checks this (Gordium doesn't decide it): Exit signs are internally or externally lit (the tactile signs 1013.4 requires need not be): exit signs aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit signs lit (BCNYS 1013.3)"
+      },
+      {
+       "key": "review#282bd8b3af",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1013_4_raised_character_braille_exit_signs"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Raised character and braille exit signs (BCNYS 1013.4): A person checks this (Gordium doesn't decide it): Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading \"EXIT\" in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Raised character and braille exit signs (BCNYS 1013.4)"
+      },
+      {
+       "key": "review#23878f545e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1013_5_internally_illuminated_exit_signs"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Internally lit exit signs listed and always lit (BCNYS 1013.5): A person checks this (Gordium doesn't decide it): Electrically powered, self-luminous and photoluminescent exit signs are listed and labeled to UL 924, installed to the maker's instructions and Chapter 27, and lit at all times: exit signs aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Internally lit exit signs listed and always lit (BCNYS 1013.5)"
+      },
+      {
+       "key": "review#a2abae986e",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1013_5_1_photoluminescent_exit_signs"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Photoluminescent exit signs charged (BCNYS 1013.5.1): A person checks this (Gordium doesn't decide it): A photoluminescent exit sign has a light source to charge it as its maker instructs: exit signs aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Photoluminescent exit signs charged (BCNYS 1013.5.1)"
+      },
+      {
+       "key": "review#bf0a8456c0",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1013_6_1_exit_sign_graphics"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Externally lit exit signs' lettering (BCNYS 1013.6.1): A person checks this (Gordium doesn't decide it): An externally lit exit sign (1013.6) and every directional exit sign have plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Externally lit exit signs' lettering (BCNYS 1013.6.1)"
+      },
+      {
+       "key": "review#ce6cdfde6f",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1013_6_2_exit_sign_illumination_intensity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Externally lit exit signs' brightness (BCNYS 1013.6.2): A person checks this (Gordium doesn't decide it): An exit sign lit from an external source has at least 5 footcandles on its face: exit signs aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Externally lit exit signs' brightness (BCNYS 1013.6.2)"
+      },
+      {
+       "key": "review#c562f8ba0b",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1013_6_3_exit_sign_power_source"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit signs lit 90 minutes after a power loss (BCNYS 1013.6.3): A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit signs lit 90 minutes after a power loss (BCNYS 1013.6.3)"
+      },
+      {
        "key": "review#3b8d16e054",
        "tier": "review",
        "items": [
@@ -79751,7 +81204,7 @@
        "name": "Interior drawing"
       }
      ],
-     "count": 133,
+     "count": 150,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -81208,6 +82661,176 @@
         "egress.general.bc_1012_10_edge_protection"
        ],
        "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1008_2_illumination_required",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The means of egress serving a room or space is lit at all times the room or space is occupied (1008.3's emergency lighting on a power failure); not required in Group U, in self-service storage units of 400 sq ft or less entered directly from outside, in Group A's aisle accessways, within dwelling and sleeping units in Groups R-1, R-2 and R-3, or in Group I sleeping units: lighting isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1008_2_illumination_required"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1008_2_1_illumination_level",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The means of egress is lit to at least 1 footcandle at the walking surface, and exit access stairways, exit stairways and their required landings to at least 10 footcandles while the stairway is in use; auditoriums, theaters, concert or opera halls and similar assembly spaces may lower it during performances, restored automatically by the fire alarm system, to 0.2 footcandle on externally lit walking surfaces, or by marking steps, landings and ramp sides with self-luminous materials (1025.2.1, 1025.2.2 and 1025.2.4, systems listed to UL 1994): lighting isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1008_2_1_illumination_level"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1008_2_2_group_i2_exterior_landings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): In Group I-2 where two or more exits are required, the exterior landings 1010.1.5 requires are lit for the exit discharge so that one lamp failing in a luminaire leaves at least 1 footcandle on the landing: lighting isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1008_2_2_group_i2_exterior_landings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1008_2_3_exit_discharge_illumination",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The path of the exit discharge is lit from each exit to the public way, or from the exit to a safe dispersal area complying with 1028.5 that is itself lit to at least 1 footcandle at the walking surface: site lighting isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1008_2_3_exit_discharge_illumination"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1008_2_4_power_for_illumination",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Means of egress lighting is normally powered by the premises' electrical supply: the electrical design isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1008_2_4_power_for_illumination"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1008_3_emergency_illumination",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An emergency electrical system lights, on a power failure: in rooms or spaces requiring two or more exits or access to exits, the aisles, corridors and exit access stairways and ramps; in buildings requiring two or more exits or access to exits, the interior exit access stairways and ramps, interior and exterior exit stairways and ramps, exit passageways, vestibules and discharge areas on the level of discharge (1028.2), and the exterior landings 1010.1.5 requires at exit doorways leading directly to the exit discharge; and electrical equipment rooms, fire command centers, fire pump rooms, generator rooms and public restrooms over 300 sq ft: the electrical design isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1008_3_emergency_illumination"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1008_3_1_emergency_power_duration",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The emergency power system powers the lighting for at least 90 minutes, from storage batteries, unit equipment or an on-site generator, installed per 2702: the electrical design isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1008_3_1_emergency_power_duration"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1008_3_2_emergency_illumination_level",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Emergency lighting gives at first an average of at least 1 footcandle and at least 0.1 footcandle at any point along the path of egress at floor level, declining to no less than 0.6 average and 0.06 at any point by the end of its duration, with a maximum-to-minimum ratio no more than 40 to 1; in Group I-2 one lamp failing in a luminaire leaves at least 0.2 footcandle: lighting isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1008_3_2_emergency_illumination_level"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1013_1_exit_signs_where_required",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Exits and exit access doors are marked by an approved exit sign readily visible from any direction of egress travel; signs show the direction of travel where an exit or the path isn't immediately visible; intervening doors within exits are marked; and no point in an exit access corridor or exit passageway is farther than 100 feet, or the sign's listed viewing distance if less, from the nearest visible sign; not required in rooms or areas needing only one exit or exit access, at main exterior exit doors or gates obviously identifiable as exits where the building official approves, in Group U, within Group R-1, R-2 or R-3 sleeping or dwelling units, in Group I-3's dayrooms, sleeping rooms and dormitories, or on the seating side of Group A-4 and A-5 vomitories with signs in the concourse: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1013_1_exit_signs_where_required"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1013_2_low_level_exit_signs_group_r1",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every area serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall, a wall sign's edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1013_2_low_level_exit_signs_group_r1"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1013_3_exit_sign_illumination",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Exit signs are internally or externally lit (the tactile signs 1013.4 requires need not be): exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1013_3_exit_sign_illumination"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1013_4_raised_character_braille_exit_signs",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading \"EXIT\" in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1013_4_raised_character_braille_exit_signs"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1013_5_internally_illuminated_exit_signs",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Electrically powered, self-luminous and photoluminescent exit signs are listed and labeled to UL 924, installed to the maker's instructions and Chapter 27, and lit at all times: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1013_5_internally_illuminated_exit_signs"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1013_5_1_photoluminescent_exit_signs",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A photoluminescent exit sign has a light source to charge it as its maker instructs: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1013_5_1_photoluminescent_exit_signs"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1013_6_1_exit_sign_graphics",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An externally lit exit sign (1013.6) and every directional exit sign have plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1013_6_1_exit_sign_graphics"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1013_6_2_exit_sign_illumination_intensity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An exit sign lit from an external source has at least 5 footcandles on its face: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1013_6_2_exit_sign_illumination_intensity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1013_6_3_exit_sign_power_source",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1013_6_3_exit_sign_power_source"
+       ],
+       "rules": 1
       }
      ]
     },
@@ -81561,7 +83184,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "133 to review · 30 comply"
+     "summary": "150 to review · 30 comply"
     }
    ],
    "contents": [
@@ -93828,7 +95451,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 199
+          "not_for_checking": 209
          },
          "pieces": [
           {
@@ -93922,6 +95545,12 @@
            "rules": []
           },
           {
+           "id": "202:approved_agency",
+           "title": "APPROVED AGENCY",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:area_for_masonry",
            "title": "AREA (for masonry)",
            "coverage": "not_for_checking",
@@ -93930,6 +95559,12 @@
           {
            "id": "202:area_building",
            "title": "AREA, BUILDING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:area_of_refuge",
+           "title": "AREA OF REFUGE",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -94198,6 +95833,12 @@
            "rules": []
           },
           {
+           "id": "202:emergency_power_system",
+           "title": "EMERGENCY POWER SYSTEM",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:exit",
            "title": "EXIT",
            "coverage": "not_for_checking",
@@ -94420,6 +96061,12 @@
            "rules": []
           },
           {
+           "id": "202:guestroom",
+           "title": "GUESTROOM",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:habitable_space",
            "title": "HABITABLE SPACE",
            "coverage": "not_for_checking",
@@ -94504,6 +96151,18 @@
            "rules": []
           },
           {
+           "id": "202:label",
+           "title": "LABEL",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:labeled",
+           "title": "LABELED",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:level_of_exit_discharge",
            "title": "LEVEL OF EXIT DISCHARGE",
            "coverage": "not_for_checking",
@@ -94572,6 +96231,18 @@
           {
            "id": "202:manual_fire_alarm_box",
            "title": "MANUAL FIRE ALARM BOX",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:manufacturer_s_designation",
+           "title": "MANUFACTURER’S DESIGNATION",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:mark",
+           "title": "MARK",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -94708,6 +96379,12 @@
            "rules": []
           },
           {
+           "id": "202:photoluminescent",
+           "title": "PHOTOLUMINESCENT",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:place_of_religious_worship",
            "title": "PLACE OF RELIGIOUS WORSHIP",
            "coverage": "not_for_checking",
@@ -94806,6 +96483,12 @@
           {
            "id": "202:self_closing",
            "title": "SELF-CLOSING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:self_luminous",
+           "title": "SELF-LUMINOUS",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -96713,10 +98396,90 @@
          "number": "1008",
          "title": "Means of Egress Illumination",
          "book_page": 297,
-         "coverage": "not_brought_in",
-         "whole": false,
-         "counts": {},
-         "pieces": []
+         "coverage": "flag",
+         "whole": true,
+         "counts": {
+          "flag": 8,
+          "not_for_checking": 2
+         },
+         "pieces": [
+          {
+           "id": "1008.2",
+           "title": "Illumination required",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1008_2_illumination_required"
+           ]
+          },
+          {
+           "id": "1008.2.1",
+           "title": "Illumination level under normal power",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1008_2_1_illumination_level"
+           ]
+          },
+          {
+           "id": "1008.2.2",
+           "title": "Group I-2",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1008_2_2_group_i2_exterior_landings"
+           ]
+          },
+          {
+           "id": "1008.2.3",
+           "title": "Exit discharge",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1008_2_3_exit_discharge_illumination"
+           ]
+          },
+          {
+           "id": "1008.2.4",
+           "title": "Power for illumination",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1008_2_4_power_for_illumination"
+           ]
+          },
+          {
+           "id": "1008.3",
+           "title": "Illumination required by an emergency electrical system",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1008_3_emergency_illumination"
+           ]
+          },
+          {
+           "id": "1008.3.1",
+           "title": "Duration",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1008_3_1_emergency_power_duration"
+           ]
+          },
+          {
+           "id": "1008.3.2",
+           "title": "Illumination level under emergency power",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1008_3_2_emergency_illumination_level"
+           ]
+          },
+          {
+           "id": "1008",
+           "title": "MEANS OF EGRESS ILLUMINATION",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1008.1",
+           "title": "Means of egress illumination",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "1009",
@@ -97211,10 +98974,98 @@
          "number": "1013",
          "title": "Exit Signs",
          "book_page": 315,
-         "coverage": "not_brought_in",
-         "whole": false,
-         "counts": {},
-         "pieces": []
+         "coverage": "flag",
+         "whole": true,
+         "counts": {
+          "flag": 9,
+          "not_for_checking": 2
+         },
+         "pieces": [
+          {
+           "id": "1013.1",
+           "title": "Where required",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1013_1_exit_signs_where_required"
+           ]
+          },
+          {
+           "id": "1013.2",
+           "title": "Low-level exit signs in Group R-1",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1013_2_low_level_exit_signs_group_r1"
+           ]
+          },
+          {
+           "id": "1013.3",
+           "title": "Illumination",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1013_3_exit_sign_illumination"
+           ]
+          },
+          {
+           "id": "1013.4",
+           "title": "Raised character and braille exit signs",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1013_4_raised_character_braille_exit_signs"
+           ]
+          },
+          {
+           "id": "1013.5",
+           "title": "Internally illuminated exit signs",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1013_5_internally_illuminated_exit_signs"
+           ]
+          },
+          {
+           "id": "1013.5.1",
+           "title": "Photoluminescent exit signs",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1013_5_1_photoluminescent_exit_signs"
+           ]
+          },
+          {
+           "id": "1013.6.1",
+           "title": "Graphics",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1013_6_1_exit_sign_graphics"
+           ]
+          },
+          {
+           "id": "1013.6.2",
+           "title": "Exit sign illumination",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1013_6_2_exit_sign_illumination_intensity"
+           ]
+          },
+          {
+           "id": "1013.6.3",
+           "title": "Power source",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1013_6_3_exit_sign_power_source"
+           ]
+          },
+          {
+           "id": "1013",
+           "title": "EXIT SIGNS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1013.6",
+           "title": "Externally illuminated exit signs",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "1014",
@@ -97766,8 +99617,8 @@
        "coverage": "rules",
        "counts": {
         "rules": 8,
-        "flag": 5,
-        "not_brought_in": 18
+        "flag": 7,
+        "not_brought_in": 16
        }
       },
       {
@@ -101719,6 +103570,23 @@
    "egress.general.bc_1012_8_handrails": "needs_review",
    "egress.general.bc_1012_9_guards": "needs_review",
    "egress.general.bc_1012_10_edge_protection": "needs_review",
+   "egress.general.bc_1008_2_illumination_required": "needs_review",
+   "egress.general.bc_1008_2_1_illumination_level": "needs_review",
+   "egress.general.bc_1008_2_2_group_i2_exterior_landings": "needs_review",
+   "egress.general.bc_1008_2_3_exit_discharge_illumination": "needs_review",
+   "egress.general.bc_1008_2_4_power_for_illumination": "needs_review",
+   "egress.general.bc_1008_3_emergency_illumination": "needs_review",
+   "egress.general.bc_1008_3_1_emergency_power_duration": "needs_review",
+   "egress.general.bc_1008_3_2_emergency_illumination_level": "needs_review",
+   "egress.general.bc_1013_1_exit_signs_where_required": "needs_review",
+   "egress.general.bc_1013_2_low_level_exit_signs_group_r1": "needs_review",
+   "egress.general.bc_1013_3_exit_sign_illumination": "needs_review",
+   "egress.general.bc_1013_4_raised_character_braille_exit_signs": "needs_review",
+   "egress.general.bc_1013_5_internally_illuminated_exit_signs": "needs_review",
+   "egress.general.bc_1013_5_1_photoluminescent_exit_signs": "needs_review",
+   "egress.general.bc_1013_6_1_exit_sign_graphics": "needs_review",
+   "egress.general.bc_1013_6_2_exit_sign_illumination_intensity": "needs_review",
+   "egress.general.bc_1013_6_3_exit_sign_power_source": "needs_review",
    "egress.interior#1": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
@@ -101764,7 +103632,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "133 to review · 30 comply"
+    "summary": "150 to review · 30 comply"
    }
   ],
   "egress": {
@@ -107133,7 +109001,24 @@
     "general.bc_1012_7_2_outdoor_conditions": "needs_review",
     "general.bc_1012_8_handrails": "needs_review",
     "general.bc_1012_9_guards": "needs_review",
-    "general.bc_1012_10_edge_protection": "needs_review"
+    "general.bc_1012_10_edge_protection": "needs_review",
+    "general.bc_1008_2_illumination_required": "needs_review",
+    "general.bc_1008_2_1_illumination_level": "needs_review",
+    "general.bc_1008_2_2_group_i2_exterior_landings": "needs_review",
+    "general.bc_1008_2_3_exit_discharge_illumination": "needs_review",
+    "general.bc_1008_2_4_power_for_illumination": "needs_review",
+    "general.bc_1008_3_emergency_illumination": "needs_review",
+    "general.bc_1008_3_1_emergency_power_duration": "needs_review",
+    "general.bc_1008_3_2_emergency_illumination_level": "needs_review",
+    "general.bc_1013_1_exit_signs_where_required": "needs_review",
+    "general.bc_1013_2_low_level_exit_signs_group_r1": "needs_review",
+    "general.bc_1013_3_exit_sign_illumination": "needs_review",
+    "general.bc_1013_4_raised_character_braille_exit_signs": "needs_review",
+    "general.bc_1013_5_internally_illuminated_exit_signs": "needs_review",
+    "general.bc_1013_5_1_photoluminescent_exit_signs": "needs_review",
+    "general.bc_1013_6_1_exit_sign_graphics": "needs_review",
+    "general.bc_1013_6_2_exit_sign_illumination_intensity": "needs_review",
+    "general.bc_1013_6_3_exit_sign_power_source": "needs_review"
    },
    "interior": {
     "parts": {
@@ -111063,7 +112948,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "e94a47bcef2fab3606821a7a2072b51dfe08e6db84be39c53c7a0292b54d3cb7"
+   "new_york/ithaca_city": "e4abc5fa1c2223b952aa993b0627f1056475155d581534af8f8e78610fca1acd"
   }
  }
 }
