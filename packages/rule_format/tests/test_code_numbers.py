@@ -276,3 +276,29 @@ def test_an_ifs_test_measure_never_lends_its_unit(ctx):
         "the floor or grade below shall not permit the passage of a 4-inch-diameter (102 mm) sphere.")}
     got = problems(ctx, "stair_riser_height <= (30 if stair_handrail_sides > 0 else 30)", risers, "stair", "applies_when")
     assert got, "30 degrees backed a 30 in limit through an if's test measure"
+
+
+def _rule(folder, rule_id):
+    import yaml
+    path = REPO / "regulations/jurisdictions" / folder / "5_building_code_rules/drafted/general.yaml"
+    rules = yaml.safe_load(path.read_text(encoding="utf-8"))["rules"]
+    return next(r for r in rules if r["id"] == rule_id), Context.for_jurisdiction(path.parents[2])
+
+
+def test_a_list_items_number_never_backs_a_reading_with_limit_words():
+    # 1017.3 reads "more than one" (>); the quote "Exceptions: 1. In open parking garages" prints only the list
+    # item's 1. Once the reader stopped taking "In" for inches, that bare 1 backed "more than one": stories > 1 in an
+    # applies_when would have made one-storey buildings "not applicable" (review round 1, skeptic)
+    rule, ctx = _rule("new_york/new_york_state_building", "general.bc_table_1017_2_f2_s2_u")
+    assert code_numbers.problems(rule, rule["sources"], ctx) == []
+    got = code_numbers.problems({**rule, "applies_when": "stories > 1"}, rule["sources"], ctx)
+    assert any("number 1 in 'applies_when'" in p for p in got), got
+
+
+def test_a_sections_number_is_never_compared_with_even_in_an_ifs_test():
+    # NFPA 101 16.2.5.2: "... in accordance with Section 9.7, in which case dead-end corridors shall not exceed 50 ft"
+    rule, ctx = _rule("maine/maine_state", "general.nfpa_16_2_5_2_dead_end")
+    assert code_numbers.problems(rule, rule["sources"], ctx) == []
+    got = code_numbers.problems({**rule, "check": "corridor_dead_end_length <= (50 if stories > 9.7 else 20)"},
+                                rule["sources"], ctx)
+    assert any("9.7" in p and "section" in p for p in got), got

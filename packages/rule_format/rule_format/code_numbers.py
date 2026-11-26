@@ -30,7 +30,11 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
    upper <=. A number the walk can't place is reported, never let through. A number in an if's test, which picks which limit applies
    ("27 if stair_handrail_sides > 1 else 31.5": where handrails are on both sides), is checked by value only: a
    test written the wrong way round (">= 1") gives the looser limit to the wrong stairs and passes this check; the
-   worked examples and the answer key comparison are what catch it. review_when is checked by value only.
+   worked examples and the answer key comparison are what catch it. review_when is checked by value only. But a
+   section's number the law names ("Section 9.7, in which case": a decimal in digits, no unit, no limit words, read
+   "none") is never a quantity, so it backs no number anywhere, an if's test included (_named_part).
+   A reading with limit words of its own ("more than one") is backed only by a quote printing those words before
+   it, never by the bare value elsewhere in the quote (a list item's "1. In open parking garages": _has_words).
    A count, a degree or a percent backs only a number with no unit of its own (a count, or a coefficient such as
    the 0.5 of "one-half of the floor area"), never a length or an area.
 3. A number the verification file flags (a flag quoting it) counts only if the flag resolves it: it gives the
@@ -173,6 +177,21 @@ def _worded_statements(quote: str) -> set[tuple]:
             if value_of(s["value"]) is not None}
 
 
+def _has_words(length: dict) -> bool:
+    """A reading with limit words of its own ("more than one", "not less than 36"): a quote backs it only where it
+    prints the same words before it, never by the bare value (1017.3's "more than one" was backed by "Exceptions:
+    1. In open parking garages", a list item's number)."""
+    return bool(length.get("worded") and length["worded"][0])
+
+
+def _named_part(fits: list[dict]) -> bool:
+    """Every reading a number fits is a decimal printed in digits with no unit or limit words of its own, read
+    "none": the number of a section the law names ("Section 9.7, in which case", "Section 1004.1. In each story"),
+    never a quantity, so nothing may compare a measure with it, even where its direction isn't checked."""
+    return bool(fits) and all(c["comparison"] == "none" and not c.get("unit") and not (c.get("worded") or ("",))[0]
+                              and re.fullmatch(r"\d+\.\d+", c["shown"].strip()) for c in fits)
+
+
 def quote_statements(quote: str) -> set[tuple]:
     """(value, unit) of every number a quote states."""
     from document_extraction.numbers import statements
@@ -217,7 +236,8 @@ def candidates(sources: list[dict], ctx, flag: bool = False) -> list[dict]:
             for length in lengths:
                 if not all(st in stated for st in length["statements"]):
                     continue
-                if len(ways[tuple(length["statements"])]) > 1 and length["worded"] not in worded:
+                if (len(ways[tuple(length["statements"])]) > 1 or _has_words(length)) \
+                        and length["worded"] not in worded:
                     continue
                 out.append(length | {"piece": pid})
             if not book.get("not_verified"):
@@ -410,6 +430,11 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
                        "the flag doesn't resolve it: a person decides (make the rule a flag, which needs review)")
             continue
         fits = [c for c in fits if c["resolved"]]
+        if directions and op is None and not in_formula and _named_part(fits) \
+                and not all(c.get("unverified") for c in fits):    # (with a direction: refused below, as "none")
+            out.append(f"number {shown} in '{key}' is the number of a section the law names ({fits[0]['piece']}: "
+                       f"{fits[0]['shown']!r}), never a quantity: nothing may be compared with it, even in an if's test")
+            continue
         if not directions or op is None:
             continue
         if op in ("==", "!="):
