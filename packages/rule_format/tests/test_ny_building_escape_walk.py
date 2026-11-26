@@ -181,19 +181,37 @@ SIZE_RULES = {
 
 # ---- section group 8c (2026-11-26): area wells, their ladders and steps (1031.5 to 1031.5.2.2, p.360 lines 38-53) --------
 # Each case's within/past are written from the page: a well is asked of an opening whose bottom is below the adjacent
-# grade; 9 sq ft, 36 in out and wide (a ladder or steps may encroach up to 6 in: within when one may be there and the
-# shortfall is 6 in or less); fully openable; a ladder or steps past 44 in deep; the ladder 12 in, 3 in, 18 in, full
+# grade; 9 sq ft, 36 in out and wide to its walls (a ladder or steps in it may take up to 6 in of them, which isn't
+# measured: with one there or not known, never a pass; short of the size, past whatever stands in it: review round 1);
+# fully openable; a ladder or steps past 44 in deep; the ladder 12 in, 3 in, 18 in, full
 # height; the steps 12 in, treads over 5 in, risers 18 in, full height (a ladder or steps is asked only past 44 in deep
 # in the loosest reading).
 def _well(**m):
     return {k: v for k, v in m.items() if v is not U}
 
 
+ENCROACH = (U, 6, 7)          # section group 8d: how far a ladder or steps reach into the required dimensions
+
+
+def _room_left(ladder, enc):
+    """Within 1031.5.1's exception: no ladder or steps, or one known to take 6 in or less (8d)."""
+    return ladder is False or (enc is not U and enc <= 6)
+
+
+def _crowded(ladder, enc):
+    """Past it: a ladder or steps known to take more than 6 in."""
+    return ladder is True and enc is not U and enc > 6
+
+
 def _required_cases():
     for below in TRI:
         for area in (U, 8, 9):
-            yield _well(opening_below_grade=below, area_well_area=area), \
-                below is False or (area is not U and area >= 9), below is True and area is not U and area < 9
+            for ladder in TRI:
+                for enc in ENCROACH:
+                    ok = below is False or (area is not U and area >= 9 and _room_left(ladder, enc))
+                    past = below is True and ((area is not U and area < 9) or _crowded(ladder, enc))
+                    yield _well(opening_below_grade=below, area_well_area=area, area_well_ladder=ladder,
+                                area_well_ladder_encroachment=enc), ok, past
 
 
 def _side_cases(name):
@@ -201,10 +219,12 @@ def _side_cases(name):
         for below in TRI:
             for v in (U, 29, 30, 35, 36):
                 for ladder in TRI:
-                    m = _well(opening_below_grade=below, **{name: v}, area_well_ladder=ladder)
-                    ok = below is False or (v is not U and v >= 36)
-                    past = below is True and v is not U and v < 36 and (ladder is False or v < 30)
-                    yield m, ok, past
+                    for enc in ENCROACH:
+                        m = _well(opening_below_grade=below, **{name: v}, area_well_ladder=ladder,
+                                  area_well_ladder_encroachment=enc)
+                        ok = below is False or (v is not U and v >= 36 and _room_left(ladder, enc))
+                        past = below is True and ((v is not U and v < 36) or _crowded(ladder, enc))
+                        yield m, ok, past
     return cases
 
 
@@ -251,7 +271,9 @@ def _ladder_cases():
                 for dims, short in _one_off(GOOD_LADDER, BAD_LADDER):
                     m = _well(opening_below_grade=below, area_well_ladder=ladder, area_well_steps=steps,
                               area_well_depth=depth, **dims)
-                    ok = below is False or ladder is False or steps is True or short is False
+                    # 8d: only a ladder 1031.5.2 requires (over 44 in deep) is asked, the house code's reading
+                    ok = below is False or (depth is not U and depth <= 44) or ladder is False or steps is True \
+                        or short is False
                     past = below is True and ladder is True and steps is False and short is True and \
                         depth is not U and depth > 44
                     yield m, ok, past
@@ -263,7 +285,7 @@ def _steps_cases():
             for depth in (U, 44, 50):
                 for dims, short in _one_off(GOOD_STEPS, BAD_STEPS):
                     m = _well(opening_below_grade=below, area_well_steps=steps, area_well_depth=depth, **dims)
-                    ok = below is False or steps is False or short is False
+                    ok = below is False or (depth is not U and depth <= 44) or steps is False or short is False
                     past = below is True and steps is True and short is True and depth is not U and depth > 44
                     yield m, ok, past
 
