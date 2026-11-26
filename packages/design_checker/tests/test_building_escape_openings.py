@@ -256,3 +256,50 @@ def test_a_huge_whole_exit_count_is_two_or_more_never_a_crash():
 def test_a_storys_measures_that_arent_a_mapping_are_never_a_crash(measures):
     p = _linked(story={"id": "L1", "measures": measures})
     assert "sleeping_room_story_one_exit" not in p["measures"]
+
+
+def test_a_value_a_room_arrives_with_never_stands_beside_its_reason():
+    """Review (a false pass from a hand-built part): a sleeping room part that already says it is on the fourth story
+    or higher, linked where its level isn't given, keeps no value: only the link's own, here a reason."""
+    parts, desc = _parts()
+    parts["sleeping_room"][0]["measures"] = {"sleeping_room_fourth_or_higher": True, "sleeping_room_escape_openings": 9}
+    desc["rooms"][0]["level"] = None
+    escape_openings.link(parts, desc)
+    room = parts["sleeping_room"][0]
+    assert "sleeping_room_fourth_or_higher" not in room["measures"]
+    assert room["not_measured"]["sleeping_room_fourth_or_higher"]
+    assert room["measures"]["sleeping_room_escape_openings"] == 1
+    for bad in (["sleeping_room_fourth_or_higher"], "text"):
+        parts, desc = _parts()
+        parts["sleeping_room"][0]["measures"] = bad
+        escape_openings.link(parts, desc)                # never a crash
+
+
+@pytest.mark.parametrize("count", [1.5, -1, -3])
+def test_an_exit_count_that_isnt_a_whole_count_is_not_known(count):
+    """Review: 1.5 or -3 exits isn't a count of exits: the one-exit question is not known, never "one exit"."""
+    p = _linked(story={"id": "L1", "measures": {"story_exit_count": count}})
+    assert "sleeping_room_story_one_exit" not in p["measures"]
+
+
+@pytest.mark.parametrize("story, space", [
+    ({"id": "L1", "measures": ["x"], "not_measured": ["x"]}, None),
+    ({"id": ["L1"], "measures": {"story_exit_count": 2}}, None),
+    ({"id": "L1", "measures": {"story_exit_count": 2}}, {"id": "b", "within": "L1", "more": ["x"], "not_measured": ["x"]}),
+    ({"id": "L1", "measures": {"story_exit_count": 2}},
+     {"id": "b", "within": "L1", "more": {"exits_reached": {"two": True, "doors": {"d": [{"a": 1}, {"b": 2}]}}}}),
+    ({"id": "L1", "measures": {"story_exit_count": 2}},
+     {"id": "b", "within": "L1", "confirm": ["x"], "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}}}}),
+    ({"id": "L1", "measures": {"story_exit_count": 2}}, {"id": ["b"], "within": "L1"}),
+])
+def test_hand_built_story_and_space_facts_are_never_a_crash(story, space):
+    """Review: a story or space part built by hand with fields of the wrong shape leaves what it can't say not
+    measured, never a crash; a reach whose exits aren't named exits is never two."""
+    parts, desc = _parts(story=story)
+    if space is not None:
+        parts["space"] = [space]
+    escape_openings.link(parts, desc)
+    room = parts["sleeping_room"][0]                     # never a crash; a reach to exits not named isn't two
+    if space is not None and "doors" in str(space) and "confirm" not in space:
+        assert room["measures"].get("sleeping_room_story_one_exit") is not False
+
