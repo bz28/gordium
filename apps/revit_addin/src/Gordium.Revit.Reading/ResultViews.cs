@@ -97,6 +97,13 @@ public sealed record ResultViewsModel(string Summary, string Headline, IReadOnly
     /// sent, the code choice would otherwise be shown nowhere).</summary>
     public bool ShowsWhichCode => Code.Any(d => d.Note is not null);
 
+    /// <summary>What the headline is said of: each row's verdict and rule, and how many in review wait on the
+    /// questions card (<see cref="ResultViews.HeadlineOf"/> says it again as the card's questions change).</summary>
+    public IReadOnlyList<(Verdict Verdict, string Rule)> HeadlineRows { get; init; } = [];
+
+    /// <summary>How many results in review wait on a question of the questions card.</summary>
+    public int OnQuestions { get; init; }
+
     /// <summary>The ids of the rows the scope note is said of (<see cref="ResultViews.DraftedForOneGroup"/>).</summary>
     public IReadOnlySet<string> Scoped { get; init; } = new HashSet<string>(StringComparer.Ordinal);
 
@@ -126,14 +133,27 @@ public static class ResultViews
         // are the group's; only the questions shown are "the question(s) below"
         var onQuestions = answers.SelectMany(g => g.Rows)
                                  .Where(r => r.Verdict == Verdict.NeedsReview).Select(r => r.Id).Distinct(StringComparer.Ordinal).Count();
+        var said = rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id)).ToList();
         return new ResultViewsModel(Summary(rows.Select(r => r.Row.Verdict)),
-                                    Headline(rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id)), onQuestions,
-                                             answers.Sum(g => ProjectQuestions.Of(g, null).Count)),
+                                    Headline(said, onQuestions, answers.Sum(g => ProjectQuestions.Of(g, null).Count)),
                                     fix, CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
         {
             Scope = scoped.Count == 0 ? null : ScopeWords(scoped.Count),
             Scoped = scoped.Select(r => r.Row.Id).ToHashSet(StringComparer.Ordinal),
+            HeadlineRows = said,
+            OnQuestions = onQuestions,
         };
+    }
+
+    /// <summary>The headline as the questions card stands (<paramref name="fields"/>, <paramref name="draft"/>): "the
+    /// question below" or "the questions below" counts the questions the card shows now (review round 1: a follow-up
+    /// brought in by an answer chosen in the card made two, with the sentence still saying one). The results waiting
+    /// on the questions are counted as at the check: a choice saves nothing until Save and check again.</summary>
+    public static string HeadlineOf(ResultViewsModel model, IReadOnlyList<SetupField>? fields, SetupDraft? draft)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        return Headline(model.HeadlineRows, model.OnQuestions,
+                        model.Fix.Where(g => g.Kind == FixKind.Answer).Sum(g => ProjectQuestions.Of(g, fields, draft).Count));
     }
 
     // ---- the scope note (change 24) ---------------------------------------------------------------------------
@@ -333,11 +353,15 @@ public static class ResultViews
     }
 
     /// <summary>The cards of What to fix that list row <paramref name="rowId"/>, in their groups' order: the checker's
-    /// asks for it (a row in no card of asks, such as what fails, gives the group's own row card).</summary>
-    public static IReadOnlyList<FixCard> CardsOf(ResultViewsModel model, string rowId)
+    /// asks for it (a row in no card of asks, such as what fails, gives the group's own row card). The questions are
+    /// the ones the questions card shows (<see cref="ProjectQuestions.Of"/>, from <paramref name="fields"/> and
+    /// <paramref name="draft"/>): a follow-up held back or moot is not offered, its row on the question shown above it.</summary>
+    public static IReadOnlyList<FixCard> CardsOf(ResultViewsModel model, string rowId, IReadOnlyList<SetupField>? fields = null,
+                                                 SetupDraft? draft = null)
     {
         ArgumentNullException.ThrowIfNull(model);
-        return [.. model.Fix.SelectMany(g => g.Cards).Where(c => c.Rows.Any(r => r.Id == rowId))];
+        return [.. model.Fix.SelectMany(g => g.Kind == FixKind.Answer ? ProjectQuestions.Of(g, fields, draft).Select(q => q.Card) : g.Cards)
+                            .Where(c => c.Rows.Any(r => r.Id == rowId))];
     }
 
     /// <summary>One ask as the checker sent it (<c>asks[]</c>): its kind, key, headline, why, field and elements, and

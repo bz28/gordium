@@ -149,6 +149,27 @@ public sealed class FollowUpQuestionsTests
         Assert.StartsWith("276 need review", m.Views!.Summary, StringComparison.Ordinal);
     }
 
+    /// <summary>Review round 1: a result's page offered the follow-ups the card held back ("Answer 5 questions" with one
+    /// question in the card).</summary>
+    [Fact]
+    public void A_results_page_offers_the_questions_the_card_shows()
+    {
+        var m = Apartment();
+        var placed = ResultList.Place(m);
+        var at = placed.ToList().FindIndex(p => p.Row.Id.EndsWith("adu_attached_size", StringComparison.Ordinal));
+        var p = placed[at];
+        DetailPage Page(SetupDraft? draft) =>
+            DetailPages.Of(Details.Of(p, at, placed.Count, null, null), p, ResultViews.CardsOf(m.Views!, p.Row.Id, Fields(), draft));
+        var held = Page(null);
+        Assert.Equal("Answer 1 question", held.ActionWords);
+        Assert.Contains(held.Steps, s => s.StartsWith("Is there an ADU", StringComparison.Ordinal));
+        Assert.DoesNotContain(held.Steps, s => s.StartsWith("Is the ADU detached", StringComparison.Ordinal));
+        Assert.Equal("Answer 2 questions", Page(Draft((Marks.AccessoryDwellingUnit, "Yes"))).ActionWords);
+        Assert.Equal("Answer 1 question", Page(Draft((Marks.AccessoryDwellingUnit, "No"))).ActionWords);
+        // without the fields (not read), the follow-ups are held back the same way
+        Assert.Equal(1, ResultViews.CardsOf(m.Views!, p.Row.Id).Count(c => c.Kind == FixKind.Answer));
+    }
+
     [Fact]
     public void The_top_sentence_counts_the_held_back_results_as_waiting_on_the_questions_shown()
     {
@@ -166,6 +187,26 @@ public sealed class FollowUpQuestionsTests
         Assert.Equal("Nothing fails yet. 2 results can't be decided until the question below is answered.",
                      ResultViews.Headline([(Verdict.NeedsReview, "r1"), (Verdict.NeedsReview, "r2")], onQuestions: 2,
                                           questions: ProjectQuestions.Of(one, null).Count));
+        // review round 1: the sentence follows the card, as its title does: Yes brings the follow-up in, "the questions"
+        var model = new ResultViewsModel("", "", [one], [])
+        {
+            HeadlineRows = [(Verdict.NeedsReview, "r1"), (Verdict.NeedsReview, "r2")], OnQuestions = 2,
+        };
+        Assert.Equal("Nothing fails yet. 2 results can't be decided until the question below is answered.",
+                     ResultViews.HeadlineOf(model, Fields(), null));
+        Assert.Equal("Nothing fails yet. 2 results can't be decided until the questions below are answered.",
+                     ResultViews.HeadlineOf(model, Fields(), Draft((Marks.AccessoryDwellingUnit, "Yes"))));
+        Assert.Equal(ResultViews.HeadlineOf(model, Fields(), null), ResultViews.HeadlineOf(model, Fields(), Draft((Marks.AccessoryDwellingUnit, "No"))));
+        // the apartment's model says what Build said
+        Assert.Equal(m.Views.Headline, ResultViews.HeadlineOf(m.Views, null, null));
+        // the pane draws the sentence from it and says it again on each answer chosen; the page and list use the card's questions
+        var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
+        Assert.Contains("Text = model.Views is { } v ? ResultViews.HeadlineOf(v, _content?.Questions, _answers)", view, StringComparison.Ordinal);
+        Assert.Contains("_headline.Text = ResultViews.HeadlineOf(views, _content.Questions, _answers);", view, StringComparison.Ordinal);
+        Assert.Contains("if (ResultViewList.QuestionsDiffer(_entries, after))", view, StringComparison.Ordinal);
+        Assert.Contains("ResultViews.CardsOf(views, id, _content?.Questions, _answers)", view, StringComparison.Ordinal);
+        Assert.Contains("ResultViewList.PathTo(views, _view, id, _content?.Questions, _answers)", view, StringComparison.Ordinal);
+        Assert.Contains("ResultViewList.AnswerKeys(views, id, _content?.Questions, _answers)", view, StringComparison.Ordinal);
     }
 
     private static ResultRow Row(string id) => new(id, id, Verdict.NeedsReview, "NEEDS REVIEW", Tone.Review, null, null, null, null, [], []);

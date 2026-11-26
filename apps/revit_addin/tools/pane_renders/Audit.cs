@@ -60,7 +60,7 @@ internal static class Audit
             for (var i = 0; i < placed.Count; i++)
             {
                 var p = placed[i];
-                var cards = ResultViews.CardsOf(views, p.Row.Id);
+                var cards = ResultViews.CardsOf(views, p.Row.Id, fields);
                 var detail = Details.Of(p, i, placed.Count, elementLabels, null);
                 var page = DetailPages.Of(detail, p, cards);
                 text.AppendLine($"=== [{p.Section} / {p.Status}] {p.Row.Name}");
