@@ -213,6 +213,28 @@ def test_a_comparison_word_after_a_conversion_in_brackets_is_kept():
 
 
 @pytest.mark.parametrize("text,expect", [
+    # BCNYS 1010.2.12: the "In" starting item 3 is never the 50's inches (a count of occupants)
+    ("an occupant load of less than 50. 3. In courtrooms", ["less than 50", "3"]),
+    ("Section 1004.1. In each story of a mixed occupancy", ["1004.1"]),                     # BCNYS 1006.3.4.1
+    ("in accordance with Section 9.7, in which case", ["9.7"]),                              # NFPA 101 16.2.5.2
+    ("See Section 2102.1. Gross cross-sectional.", ["2102.1"]),                              # IBC 2009 Section 202
+    ("For 51: 1 square foot = 0.0929 m", ["51", "1 square foot", "0.0929 m"]),              # IBC 2009's OCR of "SI:"
+    ("Groups B, E, F, 1-1, M, R-1", ["1"]),                                                  # IBC 2009 1018.4's OCR
+    ("Exceptions: 1. In open parking garages", ["1"]),
+    ("shall not exceed 6; inches of", ["not exceed 6"]),
+    ("Within a dwelling unit 36 In Group E with", ["36"]),       # Table 1020.3: a row's capitalised first word
+    # still read: a unit straight after, joined by a hyphen, past digits, or a table's capitals
+    ("not less than 36 inches.", ["not less than 36 inch"]),
+    ("a 12-inch tread", ["12 inch"]),
+    ("75 feet (22 860 mm)", ["75 foot", "22 mm", "860 mm"]),
+    ("36 IN. MIN.", ["36 inch"]),
+    ("1 unit vertical in 12 units horizontal", ["1 unit vertical", "12 unit horizontal"]),
+    ("200 square feet. Where", ["200 square foot"])])
+def test_a_unit_is_never_taken_across_a_sentence_or_list_items_end(text, expect):
+    assert [shown(s) for s in statements(text)] == expect
+
+
+@pytest.mark.parametrize("text,expect", [
     ("shall not be less than 7 feet", ["not be less than 7 foot"]),          # R315.3, p.56
     ("nor more than 80 inches", ["nor more than 80 inch"]),                  # BO107.2.2, p.971
     ("no more than five", ["no more than five"]), ("not be greater than one-half", ["not be greater than one-half"]),
@@ -375,6 +397,7 @@ def test_an_italic_word_r202_doesnt_define_must_be_named_with_why():
 @pytest.mark.parametrize("lines,expect", [
     (["The landing shall be not less than 1.5. The tread"], ["not less than 1.5"]),     # a number ending a sentence
     (["shall be 36 inches.", "2. Where the stair is", "curved"], ["36 inch"]),           # a list item's own number
+    (["Group E classrooms with an occupant load of less than 50.", "3. In courtrooms"], ["less than 50"]),  # 1010.2.12
     (["area of 200 gross square feet"], ["200 gross square foot"])])
 def test_numbers_of_a_pieces_lines(lines, expect):
     from document_extraction.numbers import statements_of_lines
