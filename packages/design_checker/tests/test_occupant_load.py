@@ -578,7 +578,7 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     }
     fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "FUNCTION_ROOMS", "LOAD_STATED",
                  "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "OTHER_LEVELS_FIELD", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
-                 "CORRIDOR_READINGS"}     # the readings' own words: a load given, never asked
+                 "CORRIDOR_READINGS", "FUNCTIONS_ONLY"}     # the readings' own words: a load given, never asked
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
     corridor = {k: reasons[k] for k in ("CORRIDOR_NOT_RULED_OUT", "CORRIDOR_OTHER_LEVELS", "CORRIDOR_NO_STORY",
@@ -625,3 +625,32 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     closet = _space(parts, "s13")["not_measured"]["space_occupant_load"]
     assert "st egresses through it" in closet
     assert not any(h.startswith(("Fix the model", "Mark the")) for h in _asked(closet)), closet
+
+
+def _story_with_corridor(second_area=690.0):
+    parts = {"story": [{"id": "L1", "measures": {"story_gross_floor_area": 1800.0}, "not_measured": {}}],
+             "space": [{"id": "a", "name": "A", "within": "L1", "measures": {"space_floor_area": 690.0,
+                                                                            "space_is_exit": False}, "not_measured": {}},
+                       {"id": "b", "name": "B", "within": "L1", "measures": {"space_is_exit": False}, "not_measured": {}}],
+             "corridor": [{"id": "c", "name": "C", "within": "L1", "measures": {}, "not_measured": {}, "more": {}}]}
+    if second_area is not None:
+        parts["space"][1]["measures"]["space_floor_area"] = second_area
+    desc = {"rooms": [{"id": "a"}, {"id": "b"}, {"id": "c", "use": "corridor"}]}
+    return parts, desc
+
+
+def test_a_corridor_asks_the_rooms_functions_only_where_they_alone_wait():
+    """Review round 1 of the corridor asks (P3): a story whose load waits on more than functions (a room's floor area
+    not measured too) once had its corridor say the load 'isn't worked out until its rooms' functions are set' and
+    ask only for them, though setting them wouldn't give it. Now only a story waiting on functions alone asks them;
+    any other is by hand."""
+    parts, desc = _story_with_corridor()
+    occupant_load.apply(parts, desc, FACTORS, {occupant_load.OTHER_LEVELS: False})
+    c = parts["corridor"][0]
+    assert c["not_measured"]["corridor_occupant_load"] == occupant_load.CORRIDOR_NO_FUNCTION
+    assert c["more"]["corridor_occupant_load"][occupant_load.FUNCTION_ROOMS] == ["a", "b"]
+    parts, desc = _story_with_corridor(second_area=None)               # B's area not measured as well
+    occupant_load.apply(parts, desc, FACTORS, {occupant_load.OTHER_LEVELS: False})
+    c = parts["corridor"][0]
+    assert c["not_measured"]["corridor_occupant_load"] == occupant_load.CORRIDOR_NO_STORY
+    assert "corridor_occupant_load" not in c["more"]

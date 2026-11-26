@@ -43,6 +43,7 @@ LOWER, UPPER = "room_area", "grossed_up_or_increased"
 # PR #191), so the panel asks for that mark (ui_data: "Set the room's function"), never for an occupant load to mark
 FUNCTION_FIELD = "rooms[].function"
 FUNCTION_ROOMS = "room_ids_without_function"   # a story's `more`: the rooms its function ask is set on (never its level)
+FUNCTIONS_ONLY = "only_functions_wait"         # a story's `more`: true where its load waits on those functions alone
 FUNCTION_STATED = "set the room's Table 1004.5 function (the room mark Gordium: Function)"
 NOT_GIVEN = "the room's function (Table 1004.5) isn't stated, so its occupant load isn't worked out: " + FUNCTION_STATED
 # the same words for a load Gordium (or a person) must work out and no mark carries (round 6): a room others pass
@@ -184,6 +185,9 @@ def apply(parts: dict, description: dict, factors: dict, building: dict | None) 
         if open_ or odd:
             if lacking:                               # the story's ask for a function names these rooms, not the level
                 story.setdefault("more", {}).setdefault("story_occupant_load", {})[FUNCTION_ROOMS] = lacking
+            if lacking and not odd and all(w == NOT_GIVEN for _, w in open_):
+                # only functions wait: setting them works the story's load out (a corridor's ask is them alone)
+                story["more"]["story_occupant_load"][FUNCTIONS_ONLY] = True
             story["not_measured"]["story_occupant_load"] = "; ".join(
                 ([STORY_OPEN.format(names=", ".join(n for n, _ in open_))
                   + (STORY_FUNCTION if any(w == NOT_GIVEN for _, w in open_) else
@@ -227,7 +231,8 @@ def _corridor_loads(story: dict, mine: list, building: dict | None) -> None:
                                                            building.get(OTHER_LEVELS) is True else
                                                            CORRIDOR_NOT_RULED_OUT)
         elif load is None:
-            lacking = ((story.get("more") or {}).get("story_occupant_load") or {}).get(FUNCTION_ROOMS)
+            held = (story.get("more") or {}).get("story_occupant_load") or {}
+            lacking = held.get(FUNCTION_ROOMS) if held.get(FUNCTIONS_ONLY) is True else None
             c["not_measured"]["corridor_occupant_load"] = CORRIDOR_NO_FUNCTION if lacking else CORRIDOR_NO_STORY
             if lacking:                               # the rooms the function ask is set on (never the corridor)
                 c.setdefault("more", {}).setdefault("corridor_occupant_load", {})[FUNCTION_ROOMS] = list(lacking)

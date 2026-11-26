@@ -128,7 +128,7 @@ public sealed class MarksTests
             // a door type's leaves (BCNYS 1010.1.1: one leaf of a pair with no mullion gives the 32 in)
             ("Gordium: Leaves", "f23ad40b-e048-4b61-a92a-b7963e64d4cf", MarkValueKind.Integer, MarkBinding.Type, ["OST_Doors"]),
             // a corridor's walls (the egress UI audit's finding 5, 2026-11-26)
-            ("Gordium: Corridor fire rating", "3e9778e1-4f8d-40cc-a224-58933cb06a45", MarkValueKind.Integer, MarkBinding.Instance, ["OST_Rooms"]),
+            ("Gordium: Corridor rating minutes", "3e9778e1-4f8d-40cc-a224-58933cb06a45", MarkValueKind.Integer, MarkBinding.Instance, ["OST_Rooms"]),
             ("Gordium: Smoke partition walls", "6a953c28-38f7-49d7-8e3c-5f38cc3aa78c", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);

@@ -66,7 +66,7 @@ FIELD_HEADLINES = {
     "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
     "doors[].leaves": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)",
-    "rooms[].fire_rating_hours": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)",
+    "rooms[].fire_rating_hours": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)",
     "rooms[].walls_smoke_partitions": "Say whether the corridor's walls are smoke partitions",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",

@@ -94,7 +94,7 @@ public static class Marks
     /// <summary>A corridor's walls' fire-resistance rating, in minutes (<c>rooms[].fire_rating_hours</c>, sent in hours):
     /// the architect's statement of the assemblies (BCNYS Table 1020.2), never read from the walls' geometry.</summary>
     public static readonly MarkDefinition CorridorFireRating = new(
-        "Gordium: Corridor fire rating", new("3e9778e1-4f8d-40cc-a224-58933cb06a45"), MarkValueKind.Integer,
+        "Gordium: Corridor rating minutes", new("3e9778e1-4f8d-40cc-a224-58933cb06a45"), MarkValueKind.Integer,
         MarkBinding.Instance, [Rooms], "rooms[].fire_rating_hours",
         "On a room whose Gordium: Use is Corridor: the fire-resistance rating of its walls, in minutes (0 where they aren't rated; 30 for 1/2 hour, 60 for 1 hour; the least, where its walls differ), as the wall assemblies are rated. " +
         "BCNYS 1020.2: \"Corridors shall be fire-resistance rated in accordance with Table 1020.2.\" Blank: the corridor rating rules need review.");

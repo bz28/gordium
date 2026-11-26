@@ -53186,7 +53186,7 @@
        "measure": "corridor_fire_rating_hours",
        "kind": "mark",
        "field": "rooms[].fire_rating_hours",
-       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
+       "headline": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)"
       }
      ],
      "rule_name": "Corridor rating, H-1, H-2, H-3",
@@ -53412,7 +53412,7 @@
        "measure": "corridor_fire_rating_hours",
        "kind": "mark",
        "field": "rooms[].fire_rating_hours",
-       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
+       "headline": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)"
       }
      ],
      "rule_name": "Corridor rating, H-1, H-2, H-3",
@@ -55458,7 +55458,7 @@
        "measure": "corridor_fire_rating_hours",
        "kind": "mark",
        "field": "rooms[].fire_rating_hours",
-       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
+       "headline": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)"
       }
      ],
      "rule_name": "Corridor rating, I-1, I-3",
@@ -55728,7 +55728,7 @@
        "measure": "corridor_fire_rating_hours",
        "kind": "mark",
        "field": "rooms[].fire_rating_hours",
-       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
+       "headline": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)"
       }
      ],
      "rule_name": "Corridor rating, I-1, I-3",
@@ -55943,7 +55943,7 @@
        "measure": "corridor_fire_rating_hours",
        "kind": "mark",
        "field": "rooms[].fire_rating_hours",
-       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
+       "headline": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)"
       }
      ],
      "rule_name": "Corridor rating, I-4",
@@ -56158,7 +56158,7 @@
        "measure": "corridor_fire_rating_hours",
        "kind": "mark",
        "field": "rooms[].fire_rating_hours",
-       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
+       "headline": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)"
       }
      ],
      "rule_name": "Corridor rating, I-4",
@@ -56302,7 +56302,7 @@
        "measure": "corridor_fire_rating_hours",
        "kind": "mark",
        "field": "rooms[].fire_rating_hours",
-       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
+       "headline": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)"
       },
       {
        "key": "flag",
@@ -56455,7 +56455,7 @@
        "measure": "corridor_fire_rating_hours",
        "kind": "mark",
        "field": "rooms[].fire_rating_hours",
-       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
+       "headline": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)"
       },
       {
        "key": "flag",
@@ -57328,7 +57328,7 @@
        "measure": "corridor_fire_rating_hours",
        "kind": "mark",
        "field": "rooms[].fire_rating_hours",
-       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
+       "headline": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)"
       },
       {
        "key": "flag",
@@ -57481,7 +57481,7 @@
        "measure": "corridor_fire_rating_hours",
        "kind": "mark",
        "field": "rooms[].fire_rating_hours",
-       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
+       "headline": "Give the corridor walls' fire rating (0 if not rated; Revit takes minutes: 60 for 1 hour)"
       },
       {
        "key": "flag",
@@ -95506,7 +95506,8 @@
          "room_ids_without_function": [
           "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
           "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d5"
-         ]
+         ],
+         "only_functions_wait": true
         }
        },
        "readings": {
@@ -96868,7 +96869,8 @@
          "room_ids_without_function": [
           "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d7",
           "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7e0"
-         ]
+         ],
+         "only_functions_wait": true
         }
        },
        "readings": {
@@ -97895,7 +97897,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "3515d7a54d8f418a3df06d1e8884eafafd611e4a356a21e5903c0dd0e4e7d1cb",
+  "worker_fingerprint": "34cb63bef6039bd376eff2234354834c3d3f0133f785431913f97e35365650cb",
   "rulebook": {
    "new_york/ithaca_city": "6963c3b08879178c881c819f1454c207c51d83ff2484695de386d2f1d823fed5"
   }

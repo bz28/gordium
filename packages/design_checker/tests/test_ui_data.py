@@ -663,6 +663,18 @@ def test_the_plan_never_says_a_marked_facts_revit_mark_is_still_to_come():
             assert not named, (named, sentence[:200])
 
 
+def test_the_corridor_rating_card_names_the_unit_its_revit_mark_takes():
+    # corridor asks review round 1 (P2): the card said "in hours" while the Revit mark it opens takes minutes, so an
+    # architect typing 1 for one hour sent 1/60 hour; the card and the mark both say minutes
+    import re
+    text = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    m = re.search(r'new\(\s*"(Gordium: [^"]+)", new\("[^"]+"\), MarkValueKind\.(\w+),\s*MarkBinding\.\w+, \[Rooms\], '
+                  r'"rooms\[\]\.fire_rating_hours"', text)
+    assert m and m.group(2) == "Integer" and "minutes" in m.group(1), m
+    headline = ui_data.FIELD_HEADLINES["rooms[].fire_rating_hours"]
+    assert "minutes" in headline and "in hours" not in headline
+
+
 def test_a_door_whose_leaves_arent_given_is_asked_for_by_the_field_its_type_mark_answers():
     # the door-type mark (Revit's Gordium: Leaves, doors[].leaves): before it, "Mark the door leaves in the model", a
     # mark Revit didn't have; now the ask names the field, so the host's card opens its mark
