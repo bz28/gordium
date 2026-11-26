@@ -44,6 +44,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+from rule_format import published
 from rule_format.place import plugin_place
 from rule_format.rulebook import REPO, _jsonl_rows, utf8_console
 
@@ -355,6 +356,8 @@ def main(argv: list[str]) -> int:
         parser.error("give --check or --write")
     if args.write and args.only:
         parser.error("--write writes every case (no --only)")
+    for note in published.ensure(missing_only=True):   # a missing law certificate is published first (rule_format/published.py)
+        print(f"– {note}")
     texts = run(args.only)
     if args.write:
         write(texts)

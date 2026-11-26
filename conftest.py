@@ -129,3 +129,13 @@ def pytest_sessionfinish(session, exitstatus):
             session.exitstatus = pytest.ExitCode.TESTS_FAILED
         else:
             print(f"(named only: on {sys.platform} a slow test fails no part; the Linux parts decide)")
+
+
+# Compile, then freeze (rule_format/published.py; docs/decisions/2026-11-23_laws_validation_speed.md): every state
+# law's certificate is current before any test runs. CI publishes before the tests, so there this only checks (about
+# 50 ms); a local run publishes the missing or stale ones once, one publisher at a time across pytest-xdist's workers.
+@pytest.fixture(scope="session", autouse=True)
+def published_laws():
+    from rule_format import published
+    for note in published.ensure():     # a law that can't be published is said, never a crash (the check refuses it)
+        print(f"\nnot published: {note}", file=sys.stderr)
