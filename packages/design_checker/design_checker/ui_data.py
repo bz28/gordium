@@ -43,7 +43,7 @@ import re
 
 from rule_format import formula
 
-from design_checker import code_scope, occupant_load, present
+from design_checker import code_scope, occupant_load, panel_data, present
 
 MARK, FIX_MODEL, SURVEY, DECIDE, MEASURE, OPEN_QUESTION = ("mark", "fix_model", "survey", "decide", "measure",
                                                          "open_question")
@@ -65,6 +65,7 @@ FIELD_HEADLINES = {
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
+    "doors[].leaves": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",
     "facts.ground_is_flat": "Say whether the ground is flat",
@@ -167,6 +168,9 @@ def _from_cause(c: dict, rule_kind: str | None) -> dict:
             return {**base, "kind": MARK, "key": f"field:{field}", "field": field,
                     "headline": FIELD_HEADLINES.get(field) or f"Set the {name}"}
         stated = STOPS["stated_not_given"].split("{what}")[0]
+        if key.startswith("mark:") and measure in panel_data.MEASURE_FIELDS:   # a measure a host's mark states
+            f = panel_data.MEASURE_FIELDS[measure]
+            return {**base, "kind": MARK, "key": f"field:{f}", "field": f, "headline": FIELD_HEADLINES[f]}
         if key.startswith("mark:") and occupant_load.FUNCTION_STATED in words:   # a room's function: its own mark
             return {**base, "kind": MARK, "key": f"field:{occupant_load.FUNCTION_FIELD}",
                     "field": occupant_load.FUNCTION_FIELD, "headline": "Set the room's function"}

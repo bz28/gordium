@@ -22,7 +22,8 @@ public sealed record OpeningMarks(string Id, MarkedKind Kind, bool? Escape, stri
 
 /// <summary>A door's marks as a door. <see cref="ExitKind"/> is the description's word (null when not set, or for a
 /// word not in <see cref="ExitKinds"/>), <see cref="ExitWord"/> what the architect typed.</summary>
-public sealed record DoorMarks(string Id, bool? Exit, string? Operation, string? ExitKind = null, string? ExitWord = null);
+public sealed record DoorMarks(string Id, bool? Exit, string? Operation, string? ExitKind = null, string? ExitWord = null,
+                               int? Leaves = null);
 
 /// <summary>What the reader takes from the marks: the rooms, windows and doors in the design checked (the last phase,
 /// the main model and the option checked of each set: the outside reader's one rule), each mark read as stated or
@@ -84,7 +85,7 @@ public static class MarkReading
         InDesign(model).Where(e => KindOf(e) == MarkedKind.Door)
             .Select(e => new DoorMarks(e.UniqueId, Marks.YesNo(Get(e, Marks.ExitDoor)),
                                        Operations.ForDoor(Marks.Text(Get(e, Marks.Operation))),
-                                       ExitKinds.Table.Of(Marks.Text(Get(e, Marks.Exit))), Marks.Text(Get(e, Marks.Exit)))).ToList();
+                                       ExitKinds.Table.Of(Marks.Text(Get(e, Marks.Exit))), Marks.Text(Get(e, Marks.Exit)), Marks.Count(Get(e, Marks.DoorLeaves)))).ToList();
 
     internal static MarkValue? Value(MarkedElement e, MarkDefinition m) => Get(e, m);
 

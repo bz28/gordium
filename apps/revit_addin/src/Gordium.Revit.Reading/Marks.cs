@@ -81,6 +81,16 @@ public static class Marks
         [Windows, Doors], "openings[].stated_clear.source, doors[].stated_clear.source",
         "The maker's publication the clear opening came from (catalogue, product line, hardware option).");
 
+    /// <summary>How many leaves a door type's opening has (<c>doors[].leaves</c>, BCNYS 1010.1.1): 1, or 2 for a pair
+    /// with no mullion between them, set once on the type (Type Properties), like its clear opening. Blank, or another
+    /// number: not sent, so the door width rule needs review for every door of the type (never a pass).</summary>
+    public static readonly MarkDefinition DoorLeaves = new(
+        "Gordium: Leaves", new("f23ad40b-e048-4b61-a92a-b7963e64d4cf"), MarkValueKind.Integer, MarkBinding.Type,
+        [Doors], "doors[].leaves",
+        "A count: how many leaves this door type's opening has: 1 for a single leaf; 2 for a pair with no mullion between them. A pair with a mullion is two door openings, each needing the 32 in itself: give 1 only if this type's Gordium: Clear width is the narrower leaf's own opening, else 2. " +
+        "BCNYS 1010.1.1: \"Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm).\" " +
+        "1: the door's clear width is checked against 32 in. 2: one leaf of the pair must give the 32 in, which the maker's clear opening of the whole pair doesn't show, so a person checks. Blank or any other number: the door width needs review.");
+
     public static readonly MarkDefinition ClearConfirmed = new(
         "Gordium: Clear confirmed", new("66ced3f6-2dd7-4aa7-a0ce-89d086652103"), MarkValueKind.Text, MarkBinding.Type,
         [Windows, Doors], "openings[].stated_clear, doors[].stated_clear (the confirmation stamp)",
@@ -673,6 +683,7 @@ public static class Marks
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
         AbutsR1, Conversion, PrimaryBuildings, PrimaryBuildingsSameUse, HomeOccupationArea, HomeOccupationUnitArea,
         AduExistingBuilding, AduBedrooms, AduFloorArea, MainBuildingFloorArea,
+        DoorLeaves,
     ];
 
     /// <summary>What a number typed in a mark means, said before it is typed, true wherever it is read: "count" for a
