@@ -500,7 +500,6 @@ MEASURE_NAMES = {
     "stair_in_exit_enclosure": "exit stair enclosure (whether the flight stands wholly in one)",
     "stair_headroom_past_bottom": "headroom past the bottom riser (one tread depth onto the landing below)",
     "stair_handrail_each_side": "handrails (whether there is one on each side)",
-    "stair_riser_count": "risers in the flight",
 }
 # a key's leading word for its part kind, in words ("moe_door_latched": "door latched", never "moe latched")
 PREFIX_WORDS = (("moe_door_", "door "), ("atd_", "alternating tread device "), ("ladder_", "ship's ladder "),

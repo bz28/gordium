@@ -13836,8 +13836,8 @@ rules:
     note: 'Every flight: the rest of Section 1011 (1011.4 walkline, 1011.5.3 winders, 1011.5.5 nosings and riser profile,
       1011.7 construction, 1011.8 vertical rise, 1011.9 curved, 1011.10 spiral, 1011.12 stairway to roof, 1011.13 guards
       per 1015), alternating tread devices, ship''s ladders and ladders (1011.14 to 1011.16), a glass handrail''s Section
-      2407, and stepped aisles'' Section 1030 are a person''s check; dimensions are taken without carpets, rugs or runners
-      (1011.5.1).'
+      2407, each handrail''s Section 1014, and stepped aisles'' Section 1030 are a person''s check; dimensions are taken
+      without carpets, rugs or runners (1011.5.1).'
   - given: {}
     parts:
       stair: []
@@ -13849,7 +13849,9 @@ rules:
     stairway serving an occupied portion. The measured ones (width, headroom, risers and treads, their uniformity, handrails
     on each side) are rules of their own; landings (1011.6) a flag of its own. 1011.5.1: the measuring reads the model''s
     treads and nosings, which carry no carpet. A glass handrail follows Section 2407, which isn''t brought in: a material
-    the model doesn''t give.'
+    the model doesn''t give. A handrail''s own requirements (Section 1014: its height, grip, continuity, extensions, clearance,
+    projections and intermediate handrails) and guards (1011.13, Section 1015) are a person''s check here until their own
+    rules come (section group 7c''s next PRs).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1011_2_stair_width

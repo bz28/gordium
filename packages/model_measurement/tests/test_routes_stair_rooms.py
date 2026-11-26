@@ -119,8 +119,8 @@ def test_the_headroom_past_the_bottom_riser_follows_the_nosing_line_down_one_tre
     part = {"id": "s", "measures": {}, "not_measured": {}, "more": {}}
     apply([part], desc, _exit(enc=True))
     assert part["measures"]["stair_headroom_past_bottom"] == pytest.approx(85 - 2.8)
-    # the stretch only one tread back: a beam beyond it (x -5 to -1) is the landing's, not the flight's
-    desc = _desc([_room("enc", -20, 40)], [_overhead(stair, (-20, -1, 60), (-1, 40, 120))])
+    # the stretch one tread back from the riser face (x -1.25): a beam beyond it is the landing's, not the flight's
+    desc = _desc([_room("enc", -20, 40)], [_overhead(stair, (-20, -1.5, 60), (-1.5, 40, 120))])
     part = {"id": "s", "measures": {}, "not_measured": {}, "more": {}}
     apply([part], desc, _exit(enc=True))
     assert part["measures"]["stair_headroom_past_bottom"] > 80
@@ -143,3 +143,28 @@ def test_the_stair_test_buildings_flights_are_in_its_exit_enclosure(variant):
         if p["id"] == "L1S":
             p["measures"]["space_is_exit"] = False
     assert in_exit_enclosure(d, spaces) == {"f1": False, "f2": False}
+
+
+def test_a_taller_bottom_riser_carries_the_stretch_to_where_the_line_meets_the_floor():
+    """Review round 1 of group 7c (P0): a 6 7/8 in bottom riser under 6 1/2 in ones, on 11 in treads. The line through
+    the nosings, carried down at its slope (6.5 in per 11 in), meets the floor 11.635 in behind the first nosing, past
+    one tread: a beam at 80 in over the strip 11.05 to 11.6 in back stands 79.65 to 79.98 in over the line, under 80.
+    Measured back one tread alone it was missed (113 in)."""
+    stair = {"id": "s", "bottom_elevation": 0,
+             "nosings": [[[x, 0, z], [x, 36, z]] for x, z in ((10, 6.875), (21, 13.375), (32, 19.875))]}
+    desc = _desc([_room("enc", -20, 40)], [_overhead(stair, (-20, -1.6, 200), (-1.6, -1.05, 80), (-1.05, 40, 200))])
+    part = {"id": "s", "measures": {}, "not_measured": {}, "more": {}}
+    apply([part], desc, _exit(enc=True))
+    assert part["measures"]["stair_headroom_past_bottom"] < 80
+    assert part["measures"]["stair_headroom_past_bottom"] == pytest.approx(80 - (6.875 - 11.05 * 6.5 / 11), abs=1e-6)
+
+
+def test_one_tread_past_the_bottom_riser_is_taken_from_the_riser_face_not_the_nosing():
+    """Review round 1 (P3): "one tread depth beyond the bottom riser" (1011.3) is measured from the riser, which may
+    stand up to 1 1/4 in behind the nosing (1011.5.5.1): a beam 11 to 11.75 in behind the first nosing, over even 7 in
+    risers on 10 in treads, is within the stretch."""
+    stair = _stair()
+    desc = _desc([_room("enc", -20, 40)], [_overhead(stair, (-20, -1.75, 200), (-1.75, -1, 75), (-1, 40, 200))])
+    part = {"id": "s", "measures": {}, "not_measured": {}, "more": {}}
+    apply([part], desc, _exit(enc=True))
+    assert part["measures"]["stair_headroom_past_bottom"] < 80
