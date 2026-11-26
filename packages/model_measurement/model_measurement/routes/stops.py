@@ -143,8 +143,11 @@ STOPS = {
                                "known",
     # section group 6e (1010.2.8): what latches or locks each door
     "door_hardware_not_given": "the door {name} doesn't say what latches or locks it (panic or fire exit hardware, "
-                               "another latch or lock, or none), and Gordium has no mark for it in the model yet",
-    "door_hardware_not_read": "the door {name} gives its hardware as {got}, not panic, latch or none",
+                               "with or without an electric lock it releases, another latch or lock, or none), and "
+                               "Gordium has no mark for it in the model yet",
+    "door_hardware_not_read": "the door {name} gives its hardware as {got}, not panic, panic_electric, latch or none",
+    "door_electric_lock_not_asked": "the door {name} is latched by something other than panic hardware: whether it "
+                                    "is electrically locked isn't asked",
 }
 
 

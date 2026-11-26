@@ -14611,30 +14611,37 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Panic hardware on latched swinging doors, Groups A, E, H (BCNYS 1010.2.8)
-  check: not moe_door_swinging or not moe_door_latched or moe_door_panic_hardware or occupancy_group not in ["A-1", "A-2",
-    "A-3", "A-4", "A-5", "E", "H-1", "H-2", "H-3", "H-4", "H-5", "mixed"] or (moe_door_occupant_load < 50 and occupancy_group
-    not in ["H-1", "H-2", "H-3", "H-4", "H-5", "mixed"])
+  check: not moe_door_swinging or not moe_door_latched or (moe_door_panic_hardware and not moe_door_electric_lock) or
+    occupancy_group not in ["A-1", "A-2", "A-3", "A-4", "A-5", "E", "H-1", "H-2", "H-3", "H-4", "H-5", "mixed"] or (moe_door_occupant_load
+    < 50 and occupancy_group not in ["H-1", "H-2", "H-3", "H-4", "H-5", "mixed"])
   review_when:
-  - when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5"] and moe_door_swinging and moe_door_latched and not moe_door_panic_hardware
+  - when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5"] and moe_door_swinging and moe_door_latched and (not moe_door_panic_hardware or moe_door_electric_lock)
       and not moe_door_occupant_load < 50
-    reason: 'A latched swinging door in a Group A building, with no panic or fire exit hardware stated: 1010.2.8 asks for
-      it where the door serves a room or space of 50 or more, but exception 1 lets a Group A building''s main exit have a
-      key-operated lock under 1010.2.4 item 3 (and exception 4 a courtroom''s door under 1010.2.12 item 3), which the model
-      doesn''t show, and how many each door serves isn''t worked out: a person checks.'
-  - when: occupancy_group in ["E"] and moe_door_swinging and moe_door_latched and not moe_door_panic_hardware and not moe_door_occupant_load
-      >= 50 and not moe_door_occupant_load < 50
-    reason: 'A latched swinging door in a Group E building, with no panic or fire exit hardware stated: 1010.2.8 asks for
-      it where the door serves a room or space of 50 or more, and how many each door serves isn''t worked out (a door may
-      serve other stories, or outdoor areas, the model doesn''t hold): a person checks.'
+    reason: 'A latched swinging door in a Group A building without panic or fire exit hardware as its only latch or lock:
+      1010.2.8 asks for it where the door serves a room or space of 50 or more, but exception 1 lets a Group A building''s
+      main exit have a key-operated lock under 1010.2.4 item 3, exception 2 lets panic hardware release an electric lock
+      under 1010.2.10, and exception 4 lets a courtroom''s door lock under 1010.2.12 item 3, none of which the model shows,
+      and how many each door serves isn''t worked out: a person checks.'
+  - when: occupancy_group in ["E"] and moe_door_swinging and moe_door_latched and (not moe_door_panic_hardware or moe_door_electric_lock) and not
+      moe_door_occupant_load >= 50 and not moe_door_occupant_load < 50
+    reason: 'A latched swinging door in a Group E building without panic or fire exit hardware as its only latch or lock:
+      1010.2.8 asks for it where the door serves a room or space of 50 or more, and how many each door serves isn''t worked
+      out: a person checks.'
+  - when: occupancy_group in ["E"] and moe_door_swinging and moe_door_latched and moe_door_panic_hardware and moe_door_electric_lock
+      and not moe_door_occupant_load < 50
+    reason: 'Panic or fire exit hardware with an electric lock it releases, in a Group E building: exception 2 allows it
+      only where the lock is installed and operated in accordance with 1010.2.10 (its six conditions), which the model doesn''t
+      show: a person checks.'
   - when: (occupancy_group in ["H-1", "H-2", "H-3", "H-4", "H-5"] or (occupancy_group in ["E"] and not moe_door_occupant_load
       < 50)) and moe_door_swinging and moe_door_latched and not moe_door_panic_hardware and moe_door_exterior and occupied_outdoor_areas
     reason: 'A latched door to outside with no panic or fire exit hardware stated, in a building whose occupants use outdoor
       areas (stated, or not ruled out): exception 3 lets an exit access door serving an occupied exterior area be locked under
       1010.2.4 item 8 (a key-operated lock, a sign, a window, a telephone, at most 300 outside), which the model doesn''t
       show: a person checks.'
-  - when: occupancy_group in ["mixed"] and moe_door_swinging and moe_door_latched and not moe_door_panic_hardware
-    reason: 'A latched swinging door with no panic or fire exit hardware stated, in a building of two or more groups: whether
-      it serves a Group H occupancy, or a Group A or E room or space of 50 or more, isn''t shown: a person checks.'
+  - when: occupancy_group in ["mixed"] and moe_door_swinging and moe_door_latched and (not moe_door_panic_hardware or moe_door_electric_lock)
+    reason: 'A latched swinging door without panic or fire exit hardware as its only latch or lock, in a building of two
+      or more groups: whether it serves a Group H occupancy, or a Group A or E room or space of 50 or more, isn''t shown:
+      a person checks.'
   for_each: means_of_egress_door
   when_none: needs_review
   sources:
@@ -14662,6 +14669,7 @@ rules:
           moe_door_swinging: true
           moe_door_latched: true
           moe_door_panic_hardware: true
+          moe_door_electric_lock: false
           moe_door_exterior: false
     rows:
     - part: p1
@@ -14686,6 +14694,25 @@ rules:
       outcome: fail
     expect: fail
     note: 'Group H: a latched swinging door has panic or fire exit hardware whatever the load.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: H-2
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Group H door with panic hardware and an electric lock it releases
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: true
+          moe_door_electric_lock: true
+          moe_door_exterior: false
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'The electric lock is a lock other than panic hardware: exception 2 allows it only in Groups A and E, and 1010.2.10
+      excludes Group H.'
   - given:
       occupied_outdoor_areas: true
       occupancy_group: H-2
@@ -14751,7 +14778,7 @@ rules:
     - part: p1
       outcome: fail
     expect: fail
-    note: 'Group E, serving 50 or more: panic or fire exit hardware.'
+    note: 'Group E, serving 50 or more (the spaces whose egress passes through it combined, 1004.2.1): panic or fire exit hardware.'
   - given:
       occupied_outdoor_areas: false
       occupancy_group: E
@@ -14787,6 +14814,25 @@ rules:
       outcome: needs_review
     expect: needs_review
     note: 'How many it serves isn''t worked out: a person checks.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: E
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Corridor door with panic hardware and an electric lock, serving 60
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: true
+          moe_door_electric_lock: true
+          moe_door_exterior: false
+          moe_door_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: allowed only in accordance with 1010.2.10, which the model doesn''t show.'
   - given:
       occupied_outdoor_areas: false
       occupancy_group: A-3
@@ -14842,6 +14888,24 @@ rules:
     note: 'Two or more groups: whether it serves a Group H occupancy isn''t shown.'
   - given:
       occupied_outdoor_areas: false
+      occupancy_group: mixed
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door with panic hardware and an electric lock, in a building of two groups
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: true
+          moe_door_electric_lock: true
+          moe_door_occupant_load: 5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: a Group H occupancy, where the electric lock isn''t allowed, isn''t ruled out.'
+  - given:
+      occupied_outdoor_areas: false
       occupancy_group: H-2
     parts:
       means_of_egress_door:
@@ -14864,16 +14928,18 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No door read: a person checks.'
-  notes: 'Section group 6e: every door the model gives. What latches or locks it is the description''s `hardware` (panic,
-    latch or none; no Revit mark yet). It complies not swinging, with no latch or lock, with panic or fire exit hardware as
-    its only latch or lock, or in a building of one stated group other than A, E and H; under 50 in Group A or E only where
-    that load is stated by hand (how many people each door serves isn''t worked out, as for 1010.1.2.1). It fails a latched
-    swinging door with neither in a building stated Group H, or Group E serving 50 or more as stated (open question 3, Gordium''s reading:
-    a door stated to serve 50 or more serves a room or space of 50 or more, the spaces whose egress passes through it counted
-    together), unless it is a door to outside in a building whose outdoor areas may be occupied (exception 3, 1010.2.4 item
-    8). Group A never fails: exception 1''s main exit (1010.2.4 item 3) isn''t shown. Exceptions 2 (electric locks on doors
-    with panic hardware, 1010.2.10) and 4 (courtrooms, Group A-3 or B) loosen nothing a fail rests on. Hand-drafted in a Claude
-    Code session (2026-11-26).'
+  notes: 'Section group 6e: every door the model gives. What latches or locks it is the description''s door hardware (panic hardware, panic hardware with an electric lock it releases, another
+    latch, or none; no Revit mark yet). It complies not swinging, with no latch or lock, with panic or fire exit
+    hardware as its only latch or lock, or in a building of one stated group other than A, E and H; under 50 in Group A or E
+    only where that load is stated by hand (how many people each door serves isn''t worked out, as for 1010.1.2.1). The load
+    is counted as 1004.2 counts it: the rooms, areas or spaces whose egress passes through the door combined (1004.2.1: a corridor
+    door behind two classrooms of 30 serves 60), separate stories not added (1004.2.3). It fails a latched swinging door without
+    panic or fire exit hardware as its only latch or lock in a building stated Group H (an electric lock the panic hardware
+    releases included: exception 2 is for Groups A and E only, and 1010.2.10 excludes Group H; review round 1), or Group E serving
+    50 or more as stated, unless it is a door to outside in a building whose outdoor areas may be occupied (exception 3, 1010.2.4
+    item 8). Group A never fails: exception 1''s main exit (1010.2.4 item 3) isn''t shown. Group E''s electric lock on panic
+    hardware (exception 2) needs review: 1010.2.10''s conditions aren''t shown. Exception 4 (courtrooms, Group A-3 or B) loosens
+    nothing a fail rests on. Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1010_2_8_1_refrigeration_machinery_rooms
