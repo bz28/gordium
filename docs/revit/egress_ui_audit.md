@@ -19,6 +19,8 @@ too. The counts are in [what_moves.json](../evidence/egress-ui-audit/what_moves.
 | Building questions answered | 166 | 120 | 94 | 41 | 23 | 20 |
 | Everything answered | 155 | 120 | 80 | 44 | 23 | 1 |
 
+These counts are main's before #203 (door swing). Since #203, each door adds a swing row that needs review until its swing side is stated: as saved, 326 results, 286 needing review, 26 questions.
+
 Setting the occupancy group alone decides 20 results and takes away 148 that are for other groups, so the questions
 card's order (most results first, the occupancy group at the top) leads to the most decided results. No egress result
 shows green when it shouldn't: each one that complies was measured, or meets the stricter of two limits whatever the
