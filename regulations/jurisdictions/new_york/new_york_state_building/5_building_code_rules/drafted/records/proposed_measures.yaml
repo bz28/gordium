@@ -26,6 +26,7 @@ sprinklered_903_3_1_1:
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1007_1_2_space_three_or_more
+  - general.bc_1013_2_low_level_exit_signs_group_r1
   - general.bc_1017_2_travel_distance
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
@@ -84,6 +85,7 @@ sprinklered_903_3_1_2:
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1007_1_2_space_three_or_more
+  - general.bc_1013_2_low_level_exit_signs_group_r1
   - general.bc_1020_3_corridor_capacity
   - general.bc_1031_2_escape_opening_where_required
   - general.bc_1031_3_1_escape_opening_min_area
@@ -193,11 +195,15 @@ occupancy_group:
   - general.bc_1006_3_4_1_mixed_occupancies
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
+  - general.bc_1008_2_2_group_i2_exterior_landings
+  - general.bc_1008_2_illumination_required
   - general.bc_1010_1_1_door_width
   - general.bc_1010_1_2_1_direction_of_swing
   - general.bc_1010_2_13_controlled_egress
   - general.bc_1010_2_7_educational_locking
   - general.bc_1010_2_8_panic_hardware
+  - general.bc_1013_1_exit_signs_where_required
+  - general.bc_1013_2_low_level_exit_signs_group_r1
   - general.bc_1016_2_intervening_spaces_other_groups
   - general.bc_1016_2_other_occupancies
   - general.bc_1017_2_2_f1_s1_increase

@@ -20689,3 +20689,503 @@ rules:
     group 7''s).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1008_2_illumination_required
+  kind: flag
+  topic: means_of_egress
+  title: Means of egress lit while occupied (BCNYS 1008.2)
+  applies_when: not occupancy_group == "U"
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 31
+    - 32
+    quote: 1008.1 Means of egress illumination. Illumination shall be provided in the means of egress in accordance with Section
+      1008.2. In the event of power supply failure, means of egress illumination shall comply with Section 1008.3.
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 33
+    - 40
+    quote: '1008.2 Illumination required. The means of egress serving a room or space shall be illuminated at all times that
+      the room or space is occupied. Exceptions: 1. Occupancies in Group U. 2. Self-service storage units 400 square feet
+      (37.2 m[fn2]) or less in area and accessed directly from the exterior of the building. 3. Aisle accessways in Group
+      A. 4. Dwelling units and sleeping units in Groups R-1, R-2 and R-3. 5. Sleeping units of Group I occupancies.'
+  examples:
+  - given:
+      occupancy_group: R-2
+    expect: needs_review
+    note: 'The means of egress serving a room or space is lit at all times the room or space is occupied (1008.3''s emergency
+      lighting on a power failure); not required in Group U, in self-service storage units of 400 sq ft or less entered directly
+      from outside, in Group A''s aisle accessways, within dwelling and sleeping units in Groups R-1, R-2 and R-3, or in Group
+      I sleeping units: lighting isn''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: U
+    expect: not_applicable
+    note: 'Group U: exception 1, no means of egress lighting required.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. Not shown for a building stated Group U alone
+    (exception 1 spares the whole building); its other exceptions spare parts of a building only. 1008.1 (the pointer to 1008.2
+    and 1008.3) is quoted here.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1008_2_1_illumination_level
+  kind: flag
+  topic: means_of_egress
+  title: Means of egress lighting level (BCNYS 1008.2.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 41
+    - 49
+    quote: '1008.2.1 Illumination level under normal power. The means of egress illumination level shall be not less than
+      1 footcandle (11 lux) at the walking surface. Along exit access stairways, exit stairways and at their required landings,
+      the illumination level shall not be less than 10 footcandles (108 lux) at the walking surface when the stairway is in
+      use. Exception: For auditoriums, theaters, concert or opera halls and similar assembly occupancies, the illumination
+      at the walking surface is permitted to be reduced during performances by one of the following methods provided that
+      the required illumina- tion is automatically restored upon activation of a premises’ fire alarm system: 1. Externally
+      illuminated walking surfaces shall be permitted to be illuminated to not less than 0.2 footcandle (2.15 lux). 2. Steps,
+      landings and the sides of ramps shall be permitted to be marked with self-luminous materials in accordance with Sections
+      1025.2.1, 1025.2.2 and 1025.2.4 by systems listed in accordance with UL 1994.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The means of egress is lit to at least 1 footcandle at the walking surface, and exit access stairways, exit stairways
+      and their required landings to at least 10 footcandles while the stairway is in use; auditoriums, theaters, concert
+      or opera halls and similar assembly spaces may lower it during performances, restored automatically by the fire alarm
+      system, to 0.2 footcandle on externally lit walking surfaces, or by marking steps, landings and ramp sides with self-luminous
+      materials (1025.2.1, 1025.2.2 and 1025.2.4, systems listed to UL 1994): lighting isn''t in the model, so a person''s
+      check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9b. 1025 (luminous egress path markings) isn''t
+    brought in: the exception only loosens, and the flag never passes.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1008_2_2_group_i2_exterior_landings
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2's exterior landings lit despite one lamp failing (BCNYS 1008.2.2)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 50
+    - 52
+    quote: 1008.2.2 Group I-2. In Group I-2 occupancies where two or more exits are required, on the exterior landings required
+      by Section 1010.1.5, means of egress illumination levels for the exit discharge shall be provided such that failure
+      of a single lamp in a lumi- naire shall not reduce the illumination level on that landing to less than 1 footcandle
+      (11 lux).
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'In Group I-2 where two or more exits are required, the exterior landings 1010.1.5 requires are lit for the exit
+      discharge so that one lamp failing in a luminaire leaves at least 1 footcandle on the landing: lighting isn''t in the
+      model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: Not Group I-2.
+  - given:
+      occupancy_group: mixed
+    expect: needs_review
+    note: 'Two or more groups: one may be Group I-2, a person checks.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1008_2_3_exit_discharge_illumination
+  kind: flag
+  topic: means_of_egress
+  title: Exit discharge lit to the public way (BCNYS 1008.2.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 53
+    - 57
+    quote: '1008.2.3 Exit discharge. Illumination shall be provided along the path of travel for the exit discharge from each
+      exit to the public way. Exception: Illumination shall not be required where the path of the exit discharge meets both
+      of the following requirements: 1. The path of exit discharge is illuminated from the exit to a safe dispersal area complying
+      with Section 1028.5. 2. A dispersal area shall be illuminated to a level not less than 1 footcandle (11 lux) at the
+      walking surface.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The path of the exit discharge is lit from each exit to the public way, or from the exit to a safe dispersal area
+      complying with 1028.5 that is itself lit to at least 1 footcandle at the walking surface: site lighting isn''t in the
+      model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1008_2_4_power_for_illumination
+  kind: flag
+  topic: means_of_egress
+  title: Means of egress lighting on the premises' supply (BCNYS 1008.2.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 319
+    lines:
+    - 3
+    - 4
+    quote: 1008.2.4 Power for illumination. The power supply for means of egress illumination shall normally be provided by
+      the premises’ electrical supply.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Means of egress lighting is normally powered by the premises'' electrical supply: the electrical design isn''t
+      in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1008_3_emergency_illumination
+  kind: flag
+  topic: means_of_egress
+  title: Emergency lighting where required (BCNYS 1008.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 319
+    lines:
+    - 5
+    - 22
+    quote: '1008.3 Illumination required by an emergency electrical system. An emergency electrical system shall be provided
+      to automati- cally illuminate the following areas in the event of a power supply failure: 1. In rooms or spaces that
+      require two or more exits or access to exits: 1.1. Aisles. 1.2. Corridors. 1.3. Exit access stairways and ramps. 2.
+      In buildings that require two or more exits or access to exits: 2.1. Interior exit access stairways and ramps. 2.2.
+      Interior and exterior exit stairways and ramps. 2.3. Exit passageways. 2.4. Vestibules and areas on the level of discharge
+      used for exit discharge in accordance with Section 1028.2. 2.5. Exterior landings as required by Section 1010.1.5 for
+      exit doorways that lead directly to the exit discharge. 3. In other rooms and spaces: 3.1. Electrical equipment rooms.
+      3.2. Fire command centers. 3.3. Fire pump rooms. 3.4. Generator rooms. 3.5. Public restrooms with an area greater than
+      300 square feet (27.87 m[fn2]).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An emergency electrical system lights, on a power failure: in rooms or spaces requiring two or more exits or access
+      to exits, the aisles, corridors and exit access stairways and ramps; in buildings requiring two or more exits or access
+      to exits, the interior exit access stairways and ramps, interior and exterior exit stairways and ramps, exit passageways,
+      vestibules and discharge areas on the level of discharge (1028.2), and the exterior landings 1010.1.5 requires at exit
+      doorways leading directly to the exit discharge; and electrical equipment rooms, fire command centers, fire pump rooms,
+      generator rooms and public restrooms over 300 sq ft: the electrical design isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1008_3_1_emergency_power_duration
+  kind: flag
+  topic: means_of_egress
+  title: Emergency lighting for 90 minutes (BCNYS 1008.3.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 319
+    lines:
+    - 23
+    - 25
+    quote: 1008.3.1 Duration. The emergency power system shall provide power for a duration of not less than 90 minutes and
+      shall consist of storage batteries, unit equipment or an on-site generator. The installation of the emergency power
+      system shall be in accor- dance with Section 2702.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The emergency power system powers the lighting for at least 90 minutes, from storage batteries, unit equipment
+      or an on-site generator, installed per 2702: the electrical design isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1008_3_2_emergency_illumination_level
+  kind: flag
+  topic: means_of_egress
+  title: Emergency lighting level (BCNYS 1008.3.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 319
+    lines:
+    - 26
+    - 31
+    quote: 1008.3.2 Illumination level under emergency power. Emergency lighting facilities shall be arranged to provide initial
+      illumina- tion that is not less than an average of 1 footcandle (11 lux) and a minimum at any point of 0.1 footcandle
+      (1 lux) measured along the path of egress at floor level. Illumination levels shall be permitted to decline to 0.6 footcandle
+      (6 lux) average and a minimum at any point of 0.06 footcandle (0.6 lux) at the end of the emergency lighting time duration.
+      A maximum-to-minimum illumination uniformity ratio of 40 to 1 shall not be exceeded. In Group I-2 occupancies, failure
+      of a single lamp in a luminaire shall not reduce the illumination level to less than 0.2 footcandle (2.2 lux).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Emergency lighting gives at first an average of at least 1 footcandle and at least 0.1 footcandle at any point
+      along the path of egress at floor level, declining to no less than 0.6 average and 0.06 at any point by the end of its
+      duration, with a maximum-to-minimum ratio no more than 40 to 1; in Group I-2 one lamp failing in a luminaire leaves
+      at least 0.2 footcandle: lighting isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1013_1_exit_signs_where_required
+  kind: flag
+  topic: means_of_egress
+  title: Exit signs where required (BCNYS 1013.1)
+  applies_when: not occupancy_group == "U"
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 31
+    - 45
+    quote: '1013.1 Where required. Exits and exit access doors shall be marked by an approved exit sign readily visible from
+      any direction of egress travel. The path of egress travel to exits and within exits shall be marked by readily visible
+      exit signs to clearly indicate the direction of egress travel in cases where the exit or the path of egress travel is
+      not immediately visible to the occupants. Intervening means of egress doors within exits shall be marked by exit signs.
+      Exit sign placement shall be such that any point in an exit access corridor or exit passageway is within 100 feet (30
+      480 mm) or the listed viewing distance of the sign, whichever is less, from the near- est visible exit sign. Exceptions:
+      1. Exit signs are not required in rooms or areas that require only one exit or exit access. 2. Main exterior exit doors
+      or gates that are obviously and clearly identifiable as exits need not have exit signs where approved by the building
+      official. 3. Exit signs are not required in occupancies in Group U and individual sleeping units or dwelling units in
+      Group R-1, R-2 or R-3. 4. Exit signs are not required in dayrooms, sleeping rooms or dormitories in occupancies in Group
+      I-3. 5. In occupancies in Groups A-4 and A-5, exit signs are not required on the seating side of vomitories or openings
+      into seat- ing areas where exit signs are provided in the concourse that are readily apparent from the vomitories. Egress
+      lighting is provided to identify each vomitory or opening within the seating area in an emergency.'
+  examples:
+  - given:
+      occupancy_group: R-2
+    expect: needs_review
+    note: 'Exits and exit access doors are marked by an approved exit sign readily visible from any direction of egress travel;
+      signs show the direction of travel where an exit or the path isn''t immediately visible; intervening doors within exits
+      are marked; and no point in an exit access corridor or exit passageway is farther than 100 feet, or the sign''s listed
+      viewing distance if less, from the nearest visible sign; not required in rooms or areas needing only one exit or exit
+      access, at main exterior exit doors or gates obviously identifiable as exits where the building official approves, in
+      Group U, within Group R-1, R-2 or R-3 sleeping or dwelling units, in Group I-3''s dayrooms, sleeping rooms and dormitories,
+      or on the seating side of Group A-4 and A-5 vomitories with signs in the concourse: exit signs aren''t in the model,
+      so a person''s check.'
+  - given:
+      occupancy_group: U
+    expect: not_applicable
+    note: 'Group U: exception 3, no exit signs required.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. Not shown for a building stated Group U alone
+    (exception 3 spares it); its other exceptions spare parts of a building only.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1013_2_low_level_exit_signs_group_r1
+  kind: flag
+  topic: means_of_egress
+  title: Low-level exit signs in Group R-1 (BCNYS 1013.2)
+  applies_when: occupancy_group in ["R-1", "mixed"] and not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 46
+    - 52
+    quote: '1013.2 Low-level exit signs in Group R-1. Where exit signs are required in Group R-1 occupancies by Section 1013.1,
+      additional low- level exit signs shall be provided in all areas serving guest rooms in Group R-1 occupancies and shall
+      comply with Section 1013.5. The bottom of the sign shall be not less than 10 inches (254 mm) nor more than 18 inches
+      (455 mm) above the floor level. The sign shall be flush mounted to the door or wall. Where mounted on the wall, the
+      edge of the sign shall be within 4 inches (102 mm) of the door frame on the latch side. Exception: Low-level exit signs
+      are not required in Group R-1 occupancies when the building is equipped throughout with an automatic sprinkler system
+      installed in accordance with Section 903.3.1.1 or 903.3.1.2.'
+  examples:
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    expect: needs_review
+    note: 'Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every area
+      serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall, a wall
+      sign''s edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout
+      per 903.3.1.1 or 903.3.1.2: exit signs aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    expect: not_applicable
+    note: 'Sprinklered throughout per 903.3.1.1: the exception, no low-level signs required.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    expect: not_applicable
+    note: Not Group R-1.
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    expect: needs_review
+    note: 'Two or more groups: one may be Group R-1, a person checks.'
+  - given:
+      occupancy_group: R-1
+    expect: needs_review
+    note: 'The sprinkler system isn''t stated: a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1013_3_exit_sign_illumination
+  kind: flag
+  topic: means_of_egress
+  title: Exit signs lit (BCNYS 1013.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 53
+    - 54
+    quote: '1013.3 Illumination. Exit signs shall be internally or externally illuminated. Exception: Tactile signs required
+      by Section 1013.4 need not be provided with illumination.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Exit signs are internally or externally lit (the tactile signs 1013.4 requires need not be): exit signs aren''t
+      in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1013_4_raised_character_braille_exit_signs
+  kind: flag
+  topic: means_of_egress
+  title: Raised character and braille exit signs (BCNYS 1013.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 55
+    - 57
+    quote: 1013.4 Raised character and braille exit signs. Where exit signs are provided at an area of refuge with direct
+      access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal
+      exit and the exit discharge, a sign stat- ing "EXIT" in visual characters, raised characters and braille and complying
+      with ICC A117.1 shall be provided.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted
+      rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading "EXIT"
+      in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren''t in the model,
+      so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1013_5_internally_illuminated_exit_signs
+  kind: flag
+  topic: means_of_egress
+  title: Internally lit exit signs listed and always lit (BCNYS 1013.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 337
+    lines:
+    - 3
+    - 5
+    quote: 1013.5 Internally illuminated exit signs. Electrically powered, self-luminous and photoluminescent exit signs shall
+      be listed and labeled in accordance with UL 924 and shall be installed in accordance with the manufacturer’s instructions
+      and Chapter 27. Exit signs shall be illuminated at all times.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Electrically powered, self-luminous and photoluminescent exit signs are listed and labeled to UL 924, installed
+      to the maker''s instructions and Chapter 27, and lit at all times: exit signs aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1013_5_1_photoluminescent_exit_signs
+  kind: flag
+  topic: means_of_egress
+  title: Photoluminescent exit signs charged (BCNYS 1013.5.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 337
+    lines:
+    - 6
+    - 7
+    quote: 1013.5.1 Photoluminescent exit signs. Photoluminescent exit signs shall be provided with an illumination source
+      to charge the exit sign in accordance with the manufacturer’s instructions.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A photoluminescent exit sign has a light source to charge it as its maker instructs: exit signs aren''t in the
+      model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1013_6_1_exit_sign_graphics
+  kind: flag
+  topic: means_of_egress
+  title: Externally lit exit signs' lettering (BCNYS 1013.6.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 337
+    lines:
+    - 8
+    - 8
+    quote: 1013.6 Externally illuminated exit signs. Externally illuminated exit signs shall comply with Sections 1013.6.1
+      through 1013.6.3.
+  - file: gov.ny.building.2025.pdf
+    page: 337
+    lines:
+    - 9
+    - 16
+    quote: 1013.6.1 Graphics. Every exit sign and directional exit sign shall have plainly legible letters not less than 6
+      inches (152 mm) high with the principal strokes of the letters not less than 3/4 inch (19.1 mm) wide. The word “EXIT”
+      shall have letters having a width not less than 2 inches (51 mm) wide, except the letter “I,” and the minimum spacing
+      between letters shall be not less than 3/8 inch (9.5 mm). Signs larger than the minimum established in this section
+      shall have letter widths, strokes and spacing in proportion to their height. The word “EXIT” shall be in high contrast
+      with the background and shall be clearly discernible when the means of exit sign illu- mination is or is not energized.
+      If a chevron directional indicator is provided as part of the exit sign, the construction shall be such that the direction
+      of the chevron directional indicator cannot be readily changed.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An externally lit exit sign (1013.6) and every directional exit sign have plainly legible letters at least 6 inches
+      high with principal strokes at least 3/4 inch wide; the letters of "EXIT", but the I, at least 2 inches wide and spaced
+      at least 3/8 inch apart, larger signs in proportion; "EXIT" in high contrast with the background and clearly discernible
+      whether or not the sign''s lighting is on, and a chevron, if any, not readily turned: exit signs aren''t in the model,
+      so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1013_6_2_exit_sign_illumination_intensity
+  kind: flag
+  topic: means_of_egress
+  title: Externally lit exit signs' brightness (BCNYS 1013.6.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 337
+    lines:
+    - 17
+    - 18
+    quote: 1013.6.2 Exit sign illumination. The face of an exit sign illuminated from an external source shall have an intensity
+      of not less than 5 footcandles (54 lux).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An exit sign lit from an external source has at least 5 footcandles on its face: exit signs aren''t in the model,
+      so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1013_6_3_exit_sign_power_source
+  kind: flag
+  topic: means_of_egress
+  title: Exit signs lit 90 minutes after a power loss (BCNYS 1013.6.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 337
+    lines:
+    - 19
+    - 26
+    quote: '1013.6.3 Power source. Exit signs shall be illuminated at all times. To ensure continued illumination for a duration
+      of not less than 90 minutes in case of primary power loss, the sign illumination means shall be connected to an emergency
+      power system provided from storage batteries, unit equipment or an on-site generator. The installation of the emergency
+      power system shall be in accordance with Chapter 27. Group I-2, Condition 2 exit sign illumination shall not be provided
+      by unit equipment batteries only. Exception: Approved exit sign illumination types that provide continuous illumination
+      independent of external power sources for a duration of not less than 90 minutes, in case of primary power loss, are
+      not required to be connected to an emergency electrical system.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an
+      on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not
+      by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently
+      of external power need no connection: exit signs aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
