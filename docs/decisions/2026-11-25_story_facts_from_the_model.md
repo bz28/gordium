@@ -132,3 +132,7 @@ Two more (never a pass): an opening whose id isn't text crashed round 13's check
 ## Review round 15 of step 2 (2026-11-26)
 
 One low finding (never a pass): a unit marked fixed but stating a maker's clear opening contradicts itself, and was skipped as never a way out. Now only a fixed unit stating no clear opening is skipped; one stating one may be a door, so the story isn't measured. One test.
+
+## Review round 16 of step 2 (2026-11-26)
+
+No wrong answer found; two safeguards had no pin (a has_none claim resting on a reading of the law never rules out a ramp; a nosing within an inch of the space counts as in it). Both pinned; each pin fails when its safeguard is removed.

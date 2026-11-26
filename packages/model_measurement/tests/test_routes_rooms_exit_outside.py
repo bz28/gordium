@@ -341,7 +341,8 @@ def test_stairs_not_read_or_a_ramp_not_ruled_out_is_never_a_no():
         assert {"points": []} in _stair_points({**desc, "stairs": bad})
 
 
-@pytest.mark.parametrize("change", ["contradicted", "extra_key", "reading_not_bool", "twice", "unhashable"])
+@pytest.mark.parametrize("change", ["contradicted", "extra_key", "reading_not_bool", "twice", "unhashable",
+                                    "reading_true"])
 def test_a_has_none_claim_the_format_refuses_never_rules_out_a_ramp(change):
     """Review round 7 (PR 2): the routes read has_none loosely, taking claims the format refuses (contradicted by a
     ramp list, a mistyped key, a reading not true or false, a kind said twice) as "no ramps", giving a wrong "no"; an
@@ -355,6 +356,8 @@ def test_a_has_none_claim_the_format_refuses_never_rules_out_a_ramp(change):
         desc["has_none"][0] = {"kind": "ramp", "source": "s", "reading": "yes"}
     elif change == "twice":
         desc["has_none"].append({"kind": "ramp", "source": "t", "reading": True})
+    elif change == "reading_true":                       # a reading of the law, not what the drawing shows (round 16)
+        desc["has_none"][0] = {"kind": "ramp", "source": "s", "reading": True}
     else:
         desc["has_none"].append({"kind": {"x": 1}, "source": "s"})
         desc["has_none"].append({"kind": ["ramp"], "source": "s"})
@@ -557,3 +560,22 @@ def test_a_fixed_unit_stating_a_clear_opening_may_be_a_door():
     assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_link_elsewhere"].format(name="r0")
     del desc["openings"][0]["stated_clear"]
     assert _story(desc)["measures"][OUTSIDE_FACT] is False
+
+
+@pytest.mark.parametrize("y, expect_no", [(10.02, False), (12, True)])
+def test_a_stair_within_an_inch_of_the_space_may_be_its_own(y, expect_no):
+    """Review round 16 (PR 2): a nosing up to an inch inside a shared corridor that opens straight into the space (a
+    passage, no wall) may be the space's own stair: not a "no". One well inside the corridor is the corridor's."""
+    rooms = [room("r0", rect(0, 0, 10, 10), use="other", lockable=False, pass_through=False, function="residential"),
+             room("r1", rect(10.5, 0, 20.5, 9.5), use="other", lockable=False, pass_through=False,
+                  function="residential"),
+             room("c", rect(0, 10, 20.5, 16), use="corridor", lockable=False, pass_through=True)]
+    doors = [door("o1", (15, -0.25), (1, 0), ("r1", "outside"), exit_id="o1", kind="exterior_at_discharge"),
+             door("e1", (15, 9.75), (1, 0), ("r1", "c")),
+             door("oc", (-0.25, 13), (0, 1), ("c", "outside"), exit_id="oc")]
+    desc = description(rooms, doors, [(("r0", "c"), [(0, 10), (10, 10)])])
+    desc["stairs"] = [{"id": "st", "nosings": [[[2, y, 0], [4, y, 0]], [[2, y, 0.6], [4, y, 0.6]]]}]
+    desc["has_none"] = [{"kind": k, "source": "s"} for k in ("ramp", "alternating_tread_device", "ships_ladder")]
+    desc["building"] = {"corridors_within_dwelling_units": False}
+    got = _story(desc)["measures"].get(OUTSIDE_FACT)
+    assert (got is False) is expect_no, (y, got)
