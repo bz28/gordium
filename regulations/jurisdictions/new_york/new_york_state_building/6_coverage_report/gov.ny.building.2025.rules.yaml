@@ -865,6 +865,136 @@ pieces:
     heading: Corridor continuity
     rules:
     - general.bc_1020_7_continuity
+  '1021.1':
+    label: flag
+    heading: Egress balconies › General
+    rules:
+    - general.bc_1021_1_egress_balconies_as_corridors
+  '1021.2':
+    label: flag
+    heading: Egress balconies › Wall separation
+    rules:
+    - general.bc_1021_2_egress_balcony_separation
+  '1021.3':
+    label: flag
+    heading: Egress balconies › Openness
+    rules:
+    - general.bc_1021_3_egress_balcony_openness
+  '1021.4':
+    label: flag
+    heading: Egress balconies › Location
+    rules:
+    - general.bc_1021_4_egress_balcony_location
+  '1022.1':
+    label: flag
+    heading: Exits › General
+    rules:
+    - general.bc_1022_1_exits_general
+  '1022.2':
+    label: flag
+    heading: Exits › Exterior exit doors
+    rules:
+    - general.bc_1022_2_exterior_exit_door
+  1022.2.2:
+    label: flag
+    heading: Exterior exit doors › Arrangement
+    rules:
+    - general.bc_1022_2_2_exterior_exit_door_arrangement
+  '1023.1':
+    label: flag
+    heading: Interior exit stairways and ramps › General
+    rules:
+    - general.bc_1023_1_interior_exit_stairways_general
+  '1023.2':
+    label: flag
+    heading: Interior exit stairways and ramps › Construction
+    rules:
+    - general.bc_1023_2_enclosure_construction
+  '1023.3':
+    label: flag
+    heading: Interior exit stairways and ramps › Termination
+    rules:
+    - general.bc_1023_3_termination
+  1023.3.1:
+    label: flag
+    heading: Termination › Extension
+    rules:
+    - general.bc_1023_3_1_extension
+  '1023.4':
+    label: flag
+    heading: Interior exit stairways and ramps › Openings
+    rules:
+    - general.bc_1023_4_openings
+  '1023.5':
+    label: flag
+    heading: Interior exit stairways and ramps › Penetrations
+    rules:
+    - general.bc_1023_5_penetrations
+  '1023.6':
+    label: flag
+    heading: Interior exit stairways and ramps › Ventilation
+    rules:
+    - general.bc_1023_6_ventilation
+  '1023.7':
+    label: flag
+    heading: Interior exit stairways and ramps › Interior exit stairway and ramp exterior walls
+    rules:
+    - general.bc_1023_7_exterior_walls
+  1023.7.1:
+    label: flag
+    heading: Interior exit stairway and ramp exterior walls › Building exterior walls
+    rules:
+    - general.bc_1023_7_1_building_exterior_walls
+  1023.7.2:
+    label: flag
+    heading: Interior exit stairway and ramp exterior walls › Roof assemblies
+    rules:
+    - general.bc_1023_7_2_roof_assemblies
+  '1023.8':
+    label: flag
+    heading: Interior exit stairways and ramps › Barrier at level of exit discharge
+    rules:
+    - general.bc_1023_8_barrier_at_exit_discharge
+  '1023.9':
+    label: flag
+    heading: Interior exit stairways and ramps › Stairway identification signs
+    rules:
+    - general.bc_1023_9_stairway_identification_signs
+  1023.9.1:
+    label: flag
+    heading: Stairway identification signs › Signage requirements
+    rules:
+    - general.bc_1023_9_1_stairway_sign_requirements
+  '1023.10':
+    label: flag
+    heading: Interior exit stairways and ramps › Elevator lobby identification signs
+    rules:
+    - general.bc_1023_10_elevator_lobby_signs
+  '1023.11':
+    label: flag
+    heading: Interior exit stairways and ramps › Tactile floor-level signs
+    rules:
+    - general.bc_1023_11_tactile_floor_level_signs
+  '1023.12':
+    label: flag
+    heading: Interior exit stairways and ramps › Smokeproof enclosures
+    rules:
+    - general.bc_1023_12_smokeproof_enclosures
+  1023.12.1:
+    label: flag
+    heading: Smokeproof enclosures › Termination and extension
+    rules:
+    - general.bc_1023_12_1_smokeproof_termination
+  1023.12.2:
+    label: flag
+    heading: Smokeproof enclosures › Enclosure access
+    rules:
+    - general.bc_1023_12_2_smokeproof_access
+  '1023.13':
+    label: flag
+    heading: Interior exit stairways and ramps › Standpipes
+    rules:
+    - general.bc_1023_13_standpipes
   '1030.8':
     label: flag
     heading: Common path of egress travel

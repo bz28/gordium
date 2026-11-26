@@ -276,6 +276,33 @@ results:
   general.bc_1018_5_aisles_other_occupancies: needs_review
   general.bc_1019_3_exit_access_stairway_enclosure: needs_review
   general.bc_1019_4_exit_access_stairways_groups_i2_i3: not_applicable   # Group R-2
+  # section group 9e: 1021's egress balconies, 1022's exits and 1023's interior exit stairways and ramps, each a person's check for every building (balconies, exit stairways, their enclosures and signs aren't in the model)
+  general.bc_1021_1_egress_balconies_as_corridors: needs_review
+  general.bc_1021_2_egress_balcony_separation: needs_review
+  general.bc_1021_3_egress_balcony_openness: needs_review
+  general.bc_1021_4_egress_balcony_location: needs_review
+  general.bc_1022_1_exits_general: needs_review
+  general.bc_1022_2_exterior_exit_door: needs_review
+  general.bc_1022_2_2_exterior_exit_door_arrangement: needs_review
+  general.bc_1023_1_interior_exit_stairways_general: needs_review
+  general.bc_1023_2_enclosure_construction: needs_review
+  general.bc_1023_3_termination: needs_review
+  general.bc_1023_3_1_extension: needs_review
+  general.bc_1023_4_openings: needs_review
+  general.bc_1023_5_penetrations: needs_review
+  general.bc_1023_6_ventilation: needs_review
+  general.bc_1023_7_exterior_walls: needs_review
+  general.bc_1023_7_1_building_exterior_walls: needs_review
+  general.bc_1023_7_2_roof_assemblies: needs_review
+  general.bc_1023_8_barrier_at_exit_discharge: needs_review
+  general.bc_1023_9_stairway_identification_signs: needs_review
+  general.bc_1023_9_1_stairway_sign_requirements: needs_review
+  general.bc_1023_10_elevator_lobby_signs: needs_review
+  general.bc_1023_11_tactile_floor_level_signs: needs_review
+  general.bc_1023_12_smokeproof_enclosures: needs_review
+  general.bc_1023_12_1_smokeproof_termination: needs_review
+  general.bc_1023_12_2_smokeproof_access: needs_review
+  general.bc_1023_13_standpipes: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

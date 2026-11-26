@@ -319,7 +319,16 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          "1009.10": (322, 15, 19), "1009.11": (322, 20, 26),
          # section group 9d
          "1018.1": (342, 40, 44), "1018.2": (342, 45, 46), "1018.3": (342, 47, 50), "1018.5": (343, 3, 7),
-         "1019.1": (343, 9, 11), "1019.2": (343, 12, 12), "1019.3": (343, 13, 32), "1019.4": (343, 33, 36)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
+         "1019.1": (343, 9, 11), "1019.2": (343, 12, 12), "1019.3": (343, 13, 32), "1019.4": (343, 33, 36),
+         # section group 9e: 1021 (egress balconies), 1022 (exits), 1023 (interior exit stairways and ramps)
+         "1021.1": (345, 25, 26), "1021.2": (345, 27, 30), "1021.3": (345, 31, 32), "1021.4": (345, 33, 39),
+         "1022.1": (345, 41, 44), "1022.2": (345, 45, 46), "1022.2.1": (345, 47, 47), "1022.2.2": (345, 48, 48),
+         "1023.1": (345, 50, 54), "1023.2": (345, 55, 56), "1023.2 (part 2)": (346, 3, 10), "1023.3": (346, 11, 14),
+         "1023.3.1": (346, 15, 26), "1023.4": (346, 27, 30), "1023.5": (346, 31, 44), "1023.6": (346, 45, 56),
+         "1023.7": (346, 57, 58), "1023.7 (part 2)": (347, 3, 5), "1023.7.1": (347, 6, 10),
+         "1023.7.2": (347, 11, 22), "1023.8": (347, 23, 25), "1023.9": (347, 26, 30), "1023.9.1": (347, 31, 41),
+         "1023.10": (347, 42, 44), "1023.11": (347, 45, 47), "1023.12": (347, 48, 49), "1023.12.1": (347, 50, 60),
+         "1023.12.1 (part 2)": (348, 3, 4), "1023.12.2": (348, 5, 8), "1023.13": (348, 9, 9)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -404,6 +413,24 @@ HANDLERS = {
     "712.1.9": ("general.bc_1019_3_exit_access_stairway_enclosure", "712.1.9"),
     "713": ("general.bc_1019_3_exit_access_stairway_enclosure", "713"),
     "408": ("general.bc_1019_4_exit_access_stairways_groups_i2_i3", "408"),
+    # section group 9e (716 and 1028.2 handled above, by 6d's and 9b's flags; 1023.4's, 1023.6's and 1023.1's
+    # flags name them too)
+    "705": ("general.bc_1021_4_egress_balcony_location", "705"),
+    "707": ("general.bc_1023_2_enclosure_construction", "707"),
+    "711": ("general.bc_1023_2_enclosure_construction", "711"),
+    "408.3.8": ("general.bc_1023_2_enclosure_construction", "408.3.8"),
+    "404.6": ("general.bc_1023_2_enclosure_construction", "404.6"),
+    "510.2": ("general.bc_1023_2_enclosure_construction", "510.2"),
+    "909.20.4": ("general.bc_1023_3_1_extension", "909.20.4"),
+    "714": ("general.bc_1023_5_penetrations", "714"),
+    "714.4.2": ("general.bc_1023_5_penetrations", "714.4.2"),
+    "1025.4": ("general.bc_1023_9_1_stairway_sign_requirements", "1025.4"),
+    "403.5.4": ("general.bc_1023_12_smokeproof_enclosures", "403.5.4"),
+    "405.7.2": ("general.bc_1023_12_smokeproof_enclosures", "405.7.2"),
+    "412.2.2.1": ("general.bc_1023_12_smokeproof_enclosures", "412.2.2.1"),
+    "909.20": ("general.bc_1023_12_smokeproof_enclosures", "909.20"),
+    "905.3": ("general.bc_1023_13_standpipes", "905.3"),
+    "905.4": ("general.bc_1023_13_standpipes", "905.4"),
 }
 NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
             "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1", "1010.1.2",
@@ -416,7 +443,8 @@ NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.
             "1008.1", "1008.2", "1008.2.1", "1008.2.2", "1008.2.3", "1008.2.4", "1008.3", "1008.3.1", "1008.3.2",
             "1013.1", "1013.2", "1013.3", "1013.4", "1013.5", "1013.5.1", "1013.6", "1013.6.1", "1013.6.2", "1013.6.3",
             "1009.1", "1009.10", "1009.11", "1009.2", "1009.2.1", "1009.2.2", "1009.3", "1009.3.1", "1009.3.2", "1009.3.3", "1009.4", "1009.4.1", "1009.4.2", "1009.5", "1009.6", "1009.6.1", "1009.6.2", "1009.6.3", "1009.6.4", "1009.6.5", "1009.7", "1009.7.1", "1009.7.2", "1009.7.3", "1009.7.4", "1009.8", "1009.8.1", "1009.8.2", "1009.9",
-            "1018.1", "1018.2", "1018.3", "1018.5", "1019.1", "1019.2", "1019.3", "1019.4"}          # the piece naming itself
+            "1018.1", "1018.2", "1018.3", "1018.5", "1019.1", "1019.2", "1019.3", "1019.4",
+            "1021.1", "1021.2", "1021.3", "1021.4", "1022.1", "1022.2", "1022.2.1", "1022.2.2", "1023.1", "1023.2", "1023.3", "1023.3.1", "1023.4", "1023.5", "1023.6", "1023.7", "1023.7.1", "1023.7.2", "1023.8", "1023.9", "1023.9.1", "1023.10", "1023.11", "1023.12", "1023.12.1", "1023.12.2", "1023.13"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
@@ -1265,7 +1293,8 @@ def test_no_rule_text_carries_yaml_quoting_into_what_people_read():
     assert not bad, bad
 
 
-GROUP_9_SECTIONS = ("1003", "1012", "1008", "1013", "1009", "1018", "1019")        # section groups 9a to 9d
+GROUP_9_SECTIONS = ("1003", "1012", "1008", "1013", "1009", "1018", "1019",        # section groups 9a to 9d
+                    "1021", "1022", "1023")                                       # section group 9e
 
 
 def test_every_section_group_9_reference_with_words_to_follow_is_quoted_by_a_rule():
@@ -1374,6 +1403,23 @@ def test_each_section_group_9_flag_with_a_condition_hides_only_where_the_law_spa
                 values = facts | ({"occupancy_group": g} if g else {})
                 want = "not_applicable" if hidden(g, s) else "needs_review"
                 assert outcome(rules[rid], values, ctx.allowed()) == want, (rid, g, s)
+
+
+def test_each_section_group_9_flag_without_a_condition_shows_for_every_building(ctx, rules):
+    """Section group 9e: the walk above tries only the flags with a condition; a flag given none must show (a person's
+    check) for every group, two or more and none stated, and every sprinkler setting, so a condition added to one
+    later fails here unless HIDDEN_WHERE gives it an oracle from the law. Section group 9e's 26 flags have none: whether
+    a building has an egress balcony, an interior exit stairway, a smokeproof enclosure or standpipes isn't a fact
+    Gordium is given, and no exception of 1021 to 1023 spares a whole building."""
+    from rule_format.rulebook import outcome
+    plain = sorted(rid for rid, r in rules.items() if r.get("kind") == "flag" and not r.get("applies_when")
+                   and rid.removeprefix("general.bc_").split("_")[0] in GROUP_9_SECTIONS)
+    assert sum(rid.startswith(("general.bc_1021_", "general.bc_1022_", "general.bc_1023_")) for rid in plain) == 26
+    for rid in plain:
+        for g in GROUPS_9:
+            for s, facts in SPRINKLERS_9.items():
+                values = facts | ({"occupancy_group": g} if g else {})
+                assert outcome(rules[rid], values, ctx.allowed()) == "needs_review", (rid, g, s)
 
 
 def test_1019_3s_congregate_residence_exception_is_for_stairways_only(rules):
