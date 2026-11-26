@@ -125,11 +125,13 @@ def link(parts: dict, description) -> None:
             story = stories.get(level) if reason is None else None
             given = story.get("measures") if story is not None else None
             raw = given.get(theirs) if isinstance(given, dict) else None
-            if story is not None and theirs in (story.get("measures") or {}) and mine == "sleeping_room_story_one_exit"                     and (isinstance(raw, bool) or not isinstance(raw, (int, float))
-                         or (isinstance(raw, float) and not math.isfinite(raw))):
+            known = isinstance(given, dict) and theirs in given
+            if known and mine == "sleeping_room_story_one_exit" and (
+                    isinstance(raw, bool) or not isinstance(raw, (int, float))
+                    or (isinstance(raw, float) and not math.isfinite(raw))):
                 # a count that isn't a number (null, text, NaN): not known, never a crash and never two exits
                 why[mine] = WHY["story_not_measured"].format(name=name, reason=f"its {theirs} is not a number")
-            elif story is not None and theirs in (story.get("measures") or {}):
+            elif known:
                 value = worked(raw)
                 if value is None and mine == "sleeping_room_story_one_exit":    # two or more exits: the room's reach
                     value, said = _reach(spaces.get((rid, level)) or [], name)
