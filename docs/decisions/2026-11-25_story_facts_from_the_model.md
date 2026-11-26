@@ -129,6 +129,10 @@ One more wrong "no": a patio door listed among the `openings` (every window and 
 
 Two more (never a pass): an opening whose id isn't text crashed round 13's check (now it is never a door read on the story, so the story isn't measured), and an opening reusing a door's id for another room was taken as that door (now only one naming the door's own room, or none, is). A fixed unit doesn't open, so, like a window, it is never a way out (it no longer stops the fact). Pins for each.
 
+## Review round 15 of step 2 (2026-11-26)
+
+One low finding (never a pass): a unit marked fixed but stating a maker's clear opening contradicts itself, and was skipped as never a way out. Now only a fixed unit stating no clear opening is skipped; one stating one may be a door, so the story isn't measured. One test.
+
 ## Review round 1 of step 3 (2026-11-25)
 
 Three ways the count came out too low (each a possible false pass on Table 1006.3.4(1)): an opening with no door to the corridor wasn't counted as a way out (a lock-off pair read one unit); a function not on Table 1004.5's list (a typo, dormitory) ruled a group out; and a shared vestibule marked an ordinary room joined two units into one, which 1016.2.1 doesn't catch, so the words said beside the count were wrong. Fixed: openings count as ways out; only a listed other use rules a group out (the list tied to the frozen Table 1004.5 record by test); a lived-in room with no function stops the count; the words now name the real assumption (every room shared between units marked a corridor or lobby) beside 1016.2.1; they're said with a count of 0 too. One test each.

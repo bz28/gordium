@@ -626,8 +626,8 @@ def _links_listed(description) -> list:
     """Every way between rooms, or out, the description gives: (kind, id, room ids) for each door, passage, and opening
     that may be a door (`openings` lists windows and doors: one whose operation names a door, or doesn't say, may be a
     door to the outside the `doors` list left out: one with a listed door's id, naming one of its rooms or none, is
-    that door, as Revit sends each; a fixed unit doesn't open, so is never a way out); one whose rooms can't be read (or
-    a list that isn't one) as ("unread", None, []): it may be any room's."""
+    that door, as Revit sends each; a fixed unit stating no clear opening doesn't open, so is never a way out); one
+    whose rooms can't be read (or a list that isn't one) as ("unread", None, []): it may be any room's."""
     out = []
     given_doors = description.get("doors")
     door_sides = {d["id"]: d.get("sides") for d in given_doors if isinstance(d, dict) and isinstance(d.get("id"), str)} \
@@ -644,8 +644,10 @@ def _links_listed(description) -> list:
             sides = d.get(sides_key) if isinstance(d, dict) else None
             if kind == "opening":
                 operation = d.get("operation") if isinstance(d, dict) else None
-                if isinstance(operation, str) and (IS_DOOR.get(operation) is False or operation == "fixed"):
-                    continue                             # a window, or a unit that doesn't open
+                if isinstance(operation, str) and (IS_DOOR.get(operation) is False or
+                                                   (operation == "fixed" and d.get("stated_clear") is None)):
+                    continue                             # a window, or a unit that doesn't open (one stating a clear
+                #                                          opening contradicts its "fixed": it may be a door)
                 oid = d.get("id") if isinstance(d, dict) else None
                 if isinstance(oid, str) and oid in door_sides and \
                         (sides is None or (isinstance(door_sides[oid], list) and sides in door_sides[oid])):
