@@ -1,0 +1,146 @@
+{
+ "s0_base": {
+  "results": 316,
+  "status": {
+   "complies": 31,
+   "needs_review": 276,
+   "not_checked": 8,
+   "not_applicable": 1
+  },
+  "egress": 268,
+  "egress_status": {
+   "needs_review": 238,
+   "complies": 30
+  },
+  "questions": 25,
+  "asks": {
+   "building.occupancy_groups": 188,
+   "building.assembly_fixed_seating": 84,
+   "building.special_egress_spaces": 82,
+   "building.sprinkler_system": 60,
+   "facts.corner_lot": 10,
+   "building.egress_balcony_increase_taken": 8,
+   "facts.accessory_dwelling_unit": 6,
+   "building.other_level_egress_into_corridors": 6,
+   "facts.adu_detached": 4,
+   "facts.adu_existing_building": 4,
+   "facts.primary_buildings": 2,
+   "facts.home_occupation": 2,
+   "facts.home_occupation_area": 2,
+   "facts.home_occupation_unit_area": 2,
+   "facts.dwelling_units": 1,
+   "facts.rooms_let_for_profit": 1,
+   "facts.conversion": 1,
+   "facts.primary_buildings_same_use": 1,
+   "facts.stream_near_lot": 1,
+   "facts.stream_distance": 1,
+   "facts.abuts_r1_district": 1,
+   "facts.adus_on_parcel": 1,
+   "facts.adu_bedrooms": 1,
+   "facts.adu_floor_area": 1,
+   "facts.primary_floor_area": 1
+  }
+ },
+ "one_at_a_time": {
+  "building.occupancy_groups": {
+   "moved": {
+    "needs_review->complies": 6,
+    "needs_review->not_applicable": 14
+   },
+   "results": 168
+  },
+  "building.sprinkler_system": {
+   "moved": {
+    "needs_review->complies": 2
+   },
+   "results": 314
+  },
+  "building.special_egress_spaces": {
+   "moved": {
+    "needs_review->not_applicable": 6
+   },
+   "results": 316
+  },
+  "building.assembly_fixed_seating": {
+   "moved": {
+    "needs_review->not_applicable": 1
+   },
+   "results": 316
+  },
+  "building.egress_balcony_increase_taken": {
+   "moved": {
+    "needs_review->not_applicable": 1
+   },
+   "results": 316
+  },
+  "building.other_level_egress_into_corridors": {
+   "moved": {},
+   "results": 316
+  },
+  "building.r2_sleeping_units": {
+   "moved": {},
+   "results": 316
+  }
+ },
+ "s1_building": {
+  "results": 166,
+  "status": {
+   "complies": 41,
+   "needs_review": 94,
+   "not_checked": 8,
+   "not_applicable": 23
+  },
+  "egress": 120,
+  "egress_status": {
+   "needs_review": 58,
+   "complies": 40,
+   "not_applicable": 22
+  },
+  "questions": 20,
+  "asks": {
+   "facts.corner_lot": 10,
+   "facts.accessory_dwelling_unit": 6,
+   "facts.adu_detached": 4,
+   "facts.adu_existing_building": 4,
+   "facts.primary_buildings": 2,
+   "facts.home_occupation": 2,
+   "facts.home_occupation_area": 2,
+   "facts.home_occupation_unit_area": 2,
+   "building.emergency_voice_alarm_system": 2,
+   "facts.dwelling_units": 1,
+   "facts.rooms_let_for_profit": 1,
+   "facts.conversion": 1,
+   "facts.primary_buildings_same_use": 1,
+   "facts.stream_near_lot": 1,
+   "facts.stream_distance": 1,
+   "facts.abuts_r1_district": 1,
+   "facts.adus_on_parcel": 1,
+   "facts.adu_bedrooms": 1,
+   "facts.adu_floor_area": 1,
+   "facts.primary_floor_area": 1
+  }
+ },
+ "s2_all": {
+  "results": 155,
+  "status": {
+   "complies": 44,
+   "needs_review": 80,
+   "not_checked": 8,
+   "not_applicable": 23
+  },
+  "egress": 120,
+  "egress_status": {
+   "needs_review": 58,
+   "complies": 40,
+   "not_applicable": 22
+  },
+  "questions": 1,
+  "asks": {
+   "building.emergency_voice_alarm_system": 2
+  }
+ },
+ "s2_moved_from_base": {
+  "needs_review->complies": 13,
+  "needs_review->not_applicable": 22
+ }
+}
