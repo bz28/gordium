@@ -116,3 +116,7 @@ Round 9's "joined to something" was too weak: a stair in rooms joined only to ea
 ## Review round 11 of step 2 (2026-11-26)
 
 One more wrong "no": a door drawn on another level than its room vanished from the room's story (the routes stop only the door's own story), so the shared corridor looked like the space's one way out. Now a door or opening the description gives for a room of the story, but not read there, leaves the story not measured. One test.
+
+## Review round 12 of step 2 (2026-11-26)
+
+Three more (never a pass): a hall or exit was taken as shared circulation by its use alone, so a unit's own stairwell marked a corridor or lobby still placed its stair elsewhere (now only halls two or more spaces open into, the exits entered from them, and those spaces' rooms are shared); a doors or passages value that isn't a list crashed round 11's check (now it, or a door whose rooms can't be read, leaves the story not measured). Pins for each, and for round 11's opening half.

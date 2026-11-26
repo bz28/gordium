@@ -87,8 +87,9 @@ def _story(desc):
     story = read(desc).stories["L1"]
     try:
         from model_measurement.routes import _stair_points
+        from model_measurement.routes import _links_listed
         got = rooms_exit_outside(story, {r["id"]: r for r in desc["rooms"]}, desc.get("building"),
-                                 _stair_points(desc))
+                                 _stair_points(desc), _links_listed(desc))
         return {"measures": {OUTSIDE_FACT: got}, "not_measured": {}}
     except Stop as s:
         return {"measures": {}, "not_measured": {OUTSIDE_FACT: s.reason}}
@@ -431,3 +432,61 @@ def test_a_door_drawn_on_another_level_is_never_a_no():
     next(d for d in desc["doors"] if d["id"] == "o0")["level"] = "L2"
     got = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
     assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_link_elsewhere"].format(name="r0")
+
+
+@pytest.mark.parametrize("case", ["hall_alone", "hall_to_outside", "own_foyer", "exit_from_outside"])
+@pytest.mark.parametrize("use", ["corridor", "lobby"])
+def test_a_stair_in_a_hall_or_exit_no_other_space_shares_may_be_the_spaces_own(case, use):
+    """Review round 12 (PR 2): a hall or exit counted as shared circulation by its use alone, so the unit's own
+    stairwell marked a corridor or lobby (alone, with its front door, beside its own foyer) or an exit entered only
+    from outside placed a stair elsewhere: "no". Only halls two or more spaces open into, the exits entered from them,
+    and those spaces' rooms are shared."""
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    nosings = [[[1, -5, 0], [3, -5, 0]], [[1, -4, 0.6], [3, -4, 0.6]], [[1, -1.5, 1.2], [3, -1.5, 1.2]]]
+    if case == "hall_alone":
+        desc["rooms"].append(room("H", rect(0, -6.5, 10, -0.5), use=use, lockable=False, pass_through=True))
+    elif case == "hall_to_outside":
+        desc["rooms"].append(room("H", rect(0, -12.5, 10, -0.5), use=use, lockable=False, pass_through=True))
+        desc["doors"].append(door("ho", (-0.25, -8), (0, 1), ("H", "outside"), exit_id="ho"))
+        nosings = [[[1, -11, 0], [3, -11, 0]], [[1, -10, 0.6], [3, -10, 0.6]]]
+    elif case == "own_foyer":
+        desc["rooms"] += [room("S", rect(0, -6.5, 5, -0.5), use="other", lockable=False, pass_through=False),
+                          room("F", rect(5.5, -6.5, 10, -0.5), use=use, lockable=False, pass_through=True)]
+        desc["doors"] += [door("sf", (5.25, -3.5), (0, 1), ("S", "F")),
+                          door("fo", (10.25, -3.5), (0, 1), ("F", "outside"), exit_id="fo")]
+    else:
+        desc["rooms"].append(room("S", rect(0, -6.5, 10, -0.5), use="other", lockable=False, pass_through=False))
+        desc["doors"].append(door("se", (-0.25, -3.5), (0, 1), ("S", "outside"), exit_id="S", kind="exit_enclosure"))
+    desc["stairs"] = [{"id": "st", "nosings": nosings}]
+    assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False, (case, use)
+
+
+@pytest.mark.parametrize("bad", [("doors", 5), ("passages", 5), ("doors", True), ("passages", 1.5),
+                                 ("door_sides", "r0"), ("door_sides", None)])
+def test_unreadable_doors_or_openings_never_crash_or_give_a_no(bad):
+    """Review round 12 (PR 2): a doors or passages value that isn't a list crashed the measuring; a door whose sides
+    can't be read (it may be any room's) was dropped, giving "no"."""
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    key, value = bad
+    if key == "door_sides":
+        extra = dict(desc["doors"][0], id="x")
+        if value is None:
+            extra.pop("sides")
+        else:
+            extra["sides"] = value
+        desc["doors"].append(extra)
+    else:
+        desc[key] = value
+    got = {s["id"]: s for s in measure(desc)["parts"]["story"]}
+    assert got["L1"]["measures"].get(OUTSIDE_FACT) is not False, bad
+
+
+def test_an_opening_drawn_on_another_level_is_never_a_no():
+    """The passage half of round 11: an opening joining a room of this story to one on another level leaves it not
+    measured."""
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    desc["levels"].insert(0, {"id": "L2", "name": "Level 2", "elevation": 0})
+    desc["rooms"].append(room("u", rect(-10, 0, 0, 10), use="other", lockable=False, pass_through=False, level="L2"))
+    desc["passages"].append({"rooms": ["u", "r0"], "line": [[0, 0], [0, 10]]})
+    got = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
+    assert got["measures"].get(OUTSIDE_FACT) is not False
