@@ -183,3 +183,17 @@ def test_a_value_a_room_arrives_with_never_stands_beside_its_reason():
         parts["sleeping_room"][0]["measures"] = bad
         escape_openings.link(parts, desc)                # never a crash
 
+
+def test_a_room_whose_reasons_cant_be_read_keeps_no_value_it_arrives_with():
+    """Confirming round on 4f56db51: a room arriving with a value and reasons that aren't a mapping (null, text)
+    keeps none of the value; a room's or door's `more` that isn't a mapping is never a crash."""
+    for why in (None, "x"):
+        parts, desc = _parts()
+        parts["sleeping_room"][0].update(measures={"sleeping_room_fourth_or_higher": True}, not_measured=why)
+        escape_openings.link(parts, desc)
+        assert parts["sleeping_room"][0]["measures"].get("sleeping_room_fourth_or_higher") is not True, why
+    parts, desc = _parts(doors=[{"id": "d", "more": ["x"]}])
+    parts["sleeping_room"][0]["more"] = ["x"]
+    escape_openings.link(parts, desc)                   # never a crash
+    assert "sleeping_room_door_to_outside" not in parts["sleeping_room"][0]["measures"]
+

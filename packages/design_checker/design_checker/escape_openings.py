@@ -84,16 +84,19 @@ def link(parts: dict, description) -> None:
     for part in rooms:
         if not isinstance(part, dict) or part.get("maybe"):
             continue                 # an enclosed space that may not be a room at all: every row of it needs review
-        if not isinstance(part.setdefault("measures", {}), dict) \
-                or not isinstance(part.setdefault("not_measured", {}), dict):
+        if not isinstance(part.get("not_measured", {}), dict):
+            part["not_measured"] = {}    # reasons that can't be read: the link's own (its values are popped below)
+        if not isinstance(part.setdefault("measures", {}), dict):
             continue                 # a room that can't be read: its rows say so (rule_format.parts)
+        part.setdefault("not_measured", {})
         m, why = part["measures"], part["not_measured"]
         for k in NEW_MEASURES:           # the house measuring's "not measured yet" for these, and any value a part
             why.pop(k, None)             # arrives with: this link decides them, never a stale one beside its reason
             m.pop(k, None)
         name = part.get("name") or part.get("id")
         pid = part.get("id")
-        rid = (part.get("more") or {}).get("described_id", pid)       # the description's id (egress._escape_openings)
+        more = part.get("more") if isinstance(part.get("more"), dict) else {}
+        rid = more.get("described_id", pid)       # the description's id (egress._escape_openings)
         same = by_id.get(rid, [])
         # the openings marked in it (none counted where the id is more than one room's: review round 1)
         if len(same) > 1:
@@ -134,7 +137,8 @@ def link(parts: dict, description) -> None:
         if not isinstance(doors, list):
             why["sleeping_room_door_to_outside"] = WHY["doors_not_read"].format(name=name)
             continue
-        sides = [((d.get("more") or {}).get("sides")) for d in doors if isinstance(d, dict)]
+        sides = [(d["more"].get("sides") if isinstance(d.get("more"), dict) else None)
+                 for d in doors if isinstance(d, dict)]
         if any(not isinstance(s, list) for s in sides) or len(sides) != len(doors):
             if any(isinstance(s, list) and rid in s and OUTSIDE in s for s in sides):
                 m["sleeping_room_door_to_outside"] = True
