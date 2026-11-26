@@ -84,10 +84,13 @@ def link(parts: dict, description) -> None:
     for part in rooms:
         if not isinstance(part, dict) or part.get("maybe"):
             continue                 # an enclosed space that may not be a room at all: every row of it needs review
-        m = part.setdefault("measures", {})
-        why = part.setdefault("not_measured", {})
-        for k in NEW_MEASURES:           # the house measuring's "not measured yet" for these: this link decides them
-            why.pop(k, None)
+        if not isinstance(part.setdefault("measures", {}), dict) \
+                or not isinstance(part.setdefault("not_measured", {}), dict):
+            continue                 # a room that can't be read: its rows say so (rule_format.parts)
+        m, why = part["measures"], part["not_measured"]
+        for k in NEW_MEASURES:           # the house measuring's "not measured yet" for these, and any value a part
+            why.pop(k, None)             # arrives with: this link decides them, never a stale one beside its reason
+            m.pop(k, None)
         name = part.get("name") or part.get("id")
         pid = part.get("id")
         rid = (part.get("more") or {}).get("described_id", pid)       # the description's id (egress._escape_openings)

@@ -166,3 +166,20 @@ def test_an_opening_within_no_sleeping_room_read_leaves_every_rooms_count_unknow
         assert "may be this room's" in p["not_measured"]["sleeping_room_escape_openings"]
     assert _linked()["measures"]["sleeping_room_escape_openings"] == 1
 
+
+def test_a_value_a_room_arrives_with_never_stands_beside_its_reason():
+    """Review (a false pass from a hand-built part): a sleeping room part that already says it is on the fourth story
+    or higher, linked where its level isn't given, keeps no value: only the link's own, here a reason."""
+    parts, desc = _parts()
+    parts["sleeping_room"][0]["measures"] = {"sleeping_room_fourth_or_higher": True, "sleeping_room_escape_openings": 9}
+    desc["rooms"][0]["level"] = None
+    escape_openings.link(parts, desc)
+    room = parts["sleeping_room"][0]
+    assert "sleeping_room_fourth_or_higher" not in room["measures"]
+    assert room["not_measured"]["sleeping_room_fourth_or_higher"]
+    assert room["measures"]["sleeping_room_escape_openings"] == 1
+    for bad in (["sleeping_room_fourth_or_higher"], "text"):
+        parts, desc = _parts()
+        parts["sleeping_room"][0]["measures"] = bad
+        escape_openings.link(parts, desc)                # never a crash
+
