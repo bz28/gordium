@@ -167,9 +167,15 @@ def test_each_escape_opening_carries_its_rooms_four_facts():
     parts["emergency_escape_opening"].append({"id": "x", "within": "nowhere", "measures": {}})
     escape_openings.link(parts, desc)
     w, x = parts["emergency_escape_opening"]
+    # x may be w's room's too (it is within no sleeping room read: 8a's stray opening), so whether w's room has
+    # another isn't known; the other three facts are its room's
     assert w["measures"] == {"opening_room_fourth_or_higher": False, "opening_room_one_exit": True,
-                             "opening_room_door_to_outside": False, "opening_room_has_other_openings": False}
+                             "opening_room_door_to_outside": False}
+    assert "may be this room's" in w["not_measured"]["opening_room_has_other_openings"]
     assert not set(w["measures"]) & set(w["not_measured"])
+    parts, desc = _parts(story=one)
+    escape_openings.link(parts, desc)
+    assert parts["emergency_escape_opening"][0]["measures"]["opening_room_has_other_openings"] is False
     assert not set(escape_openings.FROM_ROOM) & set(x["measures"])
     assert set(escape_openings.FROM_ROOM) <= set(x["not_measured"])
     parts, desc = _parts()                                   # two exits: not measured on the room, nor on its opening
@@ -183,4 +189,17 @@ def test_an_opening_knows_its_room_has_another_marked_one():
     parts, desc = _parts(openings=[{"id": "w", "within": "b", "measures": {}}, {"id": "v", "within": "b", "measures": {}}])
     escape_openings.link(parts, desc)
     assert [o["measures"]["opening_room_has_other_openings"] for o in parts["emergency_escape_opening"]] == [True, True]
+
+
+def test_an_opening_within_no_sleeping_room_read_leaves_every_rooms_count_unknown():
+    """An escape opening whose room isn't a sleeping room read (none named, a mistyped room), or that can't be read,
+    may be this room's: its count isn't known, never 0 (a wrong fail on 1031.2 once the room's story is placed, as
+    main's stated ground now does); one in the room itself still counts."""
+    for other in ({"id": "v"}, {"id": "v", "within": "typo"}, {"id": "w", "within": "b"}, "not a part",
+                  {"id": "v", "within": ["b"]}, {"id": "v", "within": {"id": "b"}},      # never a crash (review)
+                  {"id": "v", "within": "L1"}, {"id": "v", "within": "b", "measures": "big"}):  # a story isn't a room
+        p = _linked(openings=[{"id": "w", "within": "b", "measures": {}}, other])
+        assert "sleeping_room_escape_openings" not in p["measures"], other
+        assert "may be this room's" in p["not_measured"]["sleeping_room_escape_openings"]
+    assert _linked()["measures"]["sleeping_room_escape_openings"] == 1
 

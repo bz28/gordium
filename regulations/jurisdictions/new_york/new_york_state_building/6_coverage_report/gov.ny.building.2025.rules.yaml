@@ -292,7 +292,7 @@ pieces:
     - general.bc_1010_2_4_locks_and_latches
   Table 1010.2.4:
     label: flag
-    heading: Manual bolts, automatic flush bolts and
+    heading: Manual bolts, automatic flush bolts and constant latching bolts on the inactive leaf of a pair of doors
     rules:
     - general.bc_table_1010_2_4_inactive_leaf_bolts
   1010.2.5:

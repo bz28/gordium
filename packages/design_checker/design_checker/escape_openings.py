@@ -39,6 +39,8 @@ WHY = {
                            "isn't known",
     "two_exits": "the sleeping room {name}'s story has two or more exits, but whether its occupants have access to "
                  "more than one (not only one, as Table 1006.3.4(1) permits) isn't worked out",
+    "opening_stray": "an emergency escape and rescue opening of the description is within no sleeping room read (none "
+                     "named, a room not read, or one that can't be read), so it may be this room's",
     "room_id_shared": "the sleeping room {name}'s id is more than one room's, so which openings and doors are its "
                       "isn't known",
 }
@@ -51,6 +53,25 @@ FROM_ROOM = {"opening_room_fourth_or_higher": "sleeping_room_fourth_or_higher",
              # review round 1 of 8b: 1031.2 asks one opening per room; another marked one may be the one relied on
              "opening_room_has_other_openings": "sleeping_room_escape_openings"}
 WORKED = {"opening_room_has_other_openings": lambda count: count > 1}
+
+
+def _stray(parts, openings) -> bool:
+    """An opening that may be any room's, as rule_format.parts.rows reads it: one that can't be read (not a mapping,
+    no id, an id two parts share), or one within no part of a kind it may sit in (no `within`, a mistyped room, an id
+    two parts share); one within a part of another such kind (a basement) is that part's."""
+    from rule_format import parts as part_rules
+    ids = part_rules._ids(parts)
+    kind_of = {p["id"]: k for k, given in parts.items() if isinstance(given, list)
+               for p in given if isinstance(p, dict) and isinstance(p.get("id"), str)}
+    may = part_rules.registry()[OPENINGS].get("within", [])
+    for o in openings:
+        if not (isinstance(o, dict) and isinstance(o.get("id"), str) and o["id"].strip() and ids.get(o["id"]) == 1
+                and isinstance(o.get("measures", {}), dict)):
+            return True
+        where = o.get("within")
+        if not isinstance(where, str) or ids.get(where) != 1 or kind_of.get(where) not in may:
+            return True
+    return False
 
 
 def link(parts: dict, description) -> None:
@@ -67,6 +88,7 @@ def link(parts: dict, description) -> None:
     stories = {s.get("id"): s for s in parts.get("story") or [] if isinstance(s, dict)}
     openings = parts.get(OPENINGS)
     doors = parts.get("means_of_egress_door")
+    stray = isinstance(openings, list) and _stray(parts, openings)
     for part in rooms:
         if not isinstance(part, dict) or part.get("maybe"):
             continue                 # an enclosed space that may not be a room at all: every row of it needs review
@@ -81,6 +103,8 @@ def link(parts: dict, description) -> None:
         # the openings marked in it (none counted where the id is more than one room's: review round 1)
         if len(same) > 1:
             why["sleeping_room_escape_openings"] = WHY["room_id_shared"].format(name=name)
+        elif stray:
+            why["sleeping_room_escape_openings"] = WHY["opening_stray"]
         elif isinstance(openings, list):
             m["sleeping_room_escape_openings"] = sum(1 for o in openings if isinstance(o, dict) and o.get("within") == pid)
         else:
@@ -136,11 +160,11 @@ def _to_openings(rooms: list, openings) -> None:
         if isinstance(r, dict) and isinstance(r.get("id"), str):
             by_id.setdefault(r["id"], []).append(r)
     for o in openings:
-        if not isinstance(o, dict):
-            continue
-        m = o.setdefault("measures", {})
-        why = o.setdefault("not_measured", {})
-        same = by_id.get(o.get("within"), [])
+        if not isinstance(o, dict) or not isinstance(o.setdefault("measures", {}), dict)                 or not isinstance(o.setdefault("not_measured", {}), dict):
+            continue                              # an unreadable opening: its rows say so (rule_format.parts)
+        m, why = o["measures"], o["not_measured"]
+        where = o.get("within")
+        same = by_id.get(where, []) if isinstance(where, str) else []
         room = same[0] if len(same) == 1 and not same[0].get("maybe") else None
         for mine, theirs in FROM_ROOM.items():
             why.pop(mine, None)

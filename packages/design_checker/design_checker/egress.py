@@ -226,10 +226,12 @@ def _no_rooms(interior) -> bool:
     return isinstance(interior, dict) and interior.get("format") == INTERIOR_FORMAT and interior.get("rooms") == []
 
 
-def check(found: dict, interior, values: dict, allowed: dict) -> dict:
+def check(found: dict, interior, values: dict, allowed: dict, ground: dict | None = None) -> dict:
     """Every inherited law's rows and items for one design. `interior`: the interior description
     (gordium.interior/1, docs/interior/interior_description_format.md), or None when none is drawn. `values`: the
-    building's measures (dwelling units…), `allowed`: the place's allowed values (its uses).
+    building's measures (dwelling units…), `allowed`: the place's allowed values (its uses), `ground`: the ground the
+    architect stated (model_measurement.routes.story_place.ground_of; None: none), for where each story sits against
+    the grade plane.
 
     Where the place inherits laws that each cover some buildings (state.yaml `scope`: New York's Residential Code and
     Building Code), code_scope.decide picks the one that covers this building from `values` and the description's
@@ -246,7 +248,7 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
     undecided = scope is not None and scope["code"] is None
     sections, items, rows, results, ids, readings = [], [], [], {}, set(), {}
     for law in run:
-        measured = None if waiting else _measured(law, interior, readings)
+        measured = None if waiting else _measured(law, interior, readings, ground)
         law_values, law_allowed = _law_values(law, values, allowed, building)
         # rules that can't be used are said whether or not rooms are drawn: never hidden behind "waiting"
         mine = _law_items(law, measured, law_values, law_allowed, rows, results) if not waiting or law["problems"]             else [_waiting_item(law)]
@@ -361,7 +363,7 @@ def _escape_openings(interior) -> dict:
     return {"parts": parts, "problems": got["problems"]}
 
 
-def _measured(law: dict, interior, readings: dict) -> dict:
+def _measured(law: dict, interior, readings: dict, ground: dict | None = None) -> dict:
     """The parts a law's rules read, measured once per kind of reading: the house code's from the interior measuring
     (model_measurement.interior), the Building Code's from the routes (model_measurement.routes: story, space,
     corridor and every door) and, for its stairs and guards, the interior measuring's (_stairs_and_guards), in the
@@ -375,7 +377,7 @@ def _measured(law: dict, interior, readings: dict) -> dict:
         kind = f"{kind} and the interior's {ESCAPE}"          # its own readings key (section group 8a)
     if kind not in readings:
         if kind.startswith(ROUTES):
-            got = measure_routes(interior)
+            got = measure_routes(interior, ground=ground)
             factors = Path(law["folder"]) / OCCUPANT_LOAD_FACTORS
             if factors.exists() and isinstance(interior, dict):      # 1004.5: each room's function's load
                 occupant_load.apply(got["parts"], interior, occupant_load.factors_of(factors),
