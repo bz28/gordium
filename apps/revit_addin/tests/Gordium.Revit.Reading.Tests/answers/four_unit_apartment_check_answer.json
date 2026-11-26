@@ -1335,16 +1335,16 @@
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
-    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): door occupant load not measured: Gordium doesn't measure this yet; door swings with egress not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say which side it swings into, and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable)",
     "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): door occupant load not measured: Gordium doesn't measure this yet; door swings with egress not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say which side it swings into, and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable)",
     "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): door occupant load not measured: Gordium doesn't measure this yet; door swings with egress not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say which side it swings into, and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable)",
@@ -57511,7 +57511,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "means_of_egress_door",
@@ -57520,7 +57520,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).",
@@ -57628,7 +57628,7 @@
       "worked": [],
       "inputs": [
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
-       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -57637,11 +57637,12 @@
       {
        "kind": "mark",
        "key": "mark:means_of_egress_door:moe_door_leaves",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b777"
        ],
-       "measure": "moe_door_leaves"
+       "measure": "moe_door_leaves",
+       "field": "doors[].leaves"
       },
       {
        "kind": "mark",
@@ -57662,14 +57663,15 @@
      },
      "asks": [
       {
-       "key": "mark:means_of_egress_door:moe_door_leaves",
-       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "key": "field:doors[].leaves",
+       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b777"
        ],
        "measure": "moe_door_leaves",
        "kind": "mark",
-       "headline": "Mark the door leaves in the model"
+       "field": "doors[].leaves",
+       "headline": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
       },
       {
        "key": "field:building.occupancy_groups",
@@ -57709,7 +57711,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "means_of_egress_door",
@@ -57718,7 +57720,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).",
@@ -57826,7 +57828,7 @@
       "worked": [],
       "inputs": [
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
-       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -57835,11 +57837,12 @@
       {
        "kind": "mark",
        "key": "mark:means_of_egress_door:moe_door_leaves",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b779"
        ],
-       "measure": "moe_door_leaves"
+       "measure": "moe_door_leaves",
+       "field": "doors[].leaves"
       },
       {
        "kind": "mark",
@@ -57860,14 +57863,15 @@
      },
      "asks": [
       {
-       "key": "mark:means_of_egress_door:moe_door_leaves",
-       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "key": "field:doors[].leaves",
+       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b779"
        ],
        "measure": "moe_door_leaves",
        "kind": "mark",
-       "headline": "Mark the door leaves in the model"
+       "field": "doors[].leaves",
+       "headline": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
       },
       {
        "key": "field:building.occupancy_groups",
@@ -57907,7 +57911,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "means_of_egress_door",
@@ -57916,7 +57920,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).",
@@ -58024,7 +58028,7 @@
       "worked": [],
       "inputs": [
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
-       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -58033,11 +58037,12 @@
       {
        "kind": "mark",
        "key": "mark:means_of_egress_door:moe_door_leaves",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77a"
        ],
-       "measure": "moe_door_leaves"
+       "measure": "moe_door_leaves",
+       "field": "doors[].leaves"
       },
       {
        "kind": "mark",
@@ -58058,14 +58063,15 @@
      },
      "asks": [
       {
-       "key": "mark:means_of_egress_door:moe_door_leaves",
-       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "key": "field:doors[].leaves",
+       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77a"
        ],
        "measure": "moe_door_leaves",
        "kind": "mark",
-       "headline": "Mark the door leaves in the model"
+       "field": "doors[].leaves",
+       "headline": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
       },
       {
        "key": "field:building.occupancy_groups",
@@ -58105,7 +58111,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "means_of_egress_door",
@@ -58114,7 +58120,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).",
@@ -58222,7 +58228,7 @@
       "worked": [],
       "inputs": [
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
-       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -58231,11 +58237,12 @@
       {
        "kind": "mark",
        "key": "mark:means_of_egress_door:moe_door_leaves",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77b"
        ],
-       "measure": "moe_door_leaves"
+       "measure": "moe_door_leaves",
+       "field": "doors[].leaves"
       },
       {
        "kind": "mark",
@@ -58256,14 +58263,15 @@
      },
      "asks": [
       {
-       "key": "mark:means_of_egress_door:moe_door_leaves",
-       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "key": "field:doors[].leaves",
+       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77b"
        ],
        "measure": "moe_door_leaves",
        "kind": "mark",
-       "headline": "Mark the door leaves in the model"
+       "field": "doors[].leaves",
+       "headline": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
       },
       {
        "key": "field:building.occupancy_groups",
@@ -58303,7 +58311,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "means_of_egress_door",
@@ -58312,7 +58320,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).",
@@ -58420,7 +58428,7 @@
       "worked": [],
       "inputs": [
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
-       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -58429,11 +58437,12 @@
       {
        "kind": "mark",
        "key": "mark:means_of_egress_door:moe_door_leaves",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77c"
        ],
-       "measure": "moe_door_leaves"
+       "measure": "moe_door_leaves",
+       "field": "doors[].leaves"
       },
       {
        "kind": "mark",
@@ -58454,14 +58463,15 @@
      },
      "asks": [
       {
-       "key": "mark:means_of_egress_door:moe_door_leaves",
-       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "key": "field:doors[].leaves",
+       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77c"
        ],
        "measure": "moe_door_leaves",
        "kind": "mark",
-       "headline": "Mark the door leaves in the model"
+       "field": "doors[].leaves",
+       "headline": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
       },
       {
        "key": "field:building.occupancy_groups",
@@ -58501,7 +58511,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "means_of_egress_door",
@@ -58510,7 +58520,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).",
@@ -58618,7 +58628,7 @@
       "worked": [],
       "inputs": [
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
-       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -58627,11 +58637,12 @@
       {
        "kind": "mark",
        "key": "mark:means_of_egress_door:moe_door_leaves",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77d"
        ],
-       "measure": "moe_door_leaves"
+       "measure": "moe_door_leaves",
+       "field": "doors[].leaves"
       },
       {
        "kind": "mark",
@@ -58652,14 +58663,15 @@
      },
      "asks": [
       {
-       "key": "mark:means_of_egress_door:moe_door_leaves",
-       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "key": "field:doors[].leaves",
+       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77d"
        ],
        "measure": "moe_door_leaves",
        "kind": "mark",
-       "headline": "Mark the door leaves in the model"
+       "field": "doors[].leaves",
+       "headline": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
       },
       {
        "key": "field:building.occupancy_groups",
@@ -58699,7 +58711,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "means_of_egress_door",
@@ -58708,7 +58720,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).",
@@ -58816,7 +58828,7 @@
       "worked": [],
       "inputs": [
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
-       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -58825,11 +58837,12 @@
       {
        "kind": "mark",
        "key": "mark:means_of_egress_door:moe_door_leaves",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77e"
        ],
-       "measure": "moe_door_leaves"
+       "measure": "moe_door_leaves",
+       "field": "doors[].leaves"
       },
       {
        "kind": "mark",
@@ -58850,14 +58863,15 @@
      },
      "asks": [
       {
-       "key": "mark:means_of_egress_door:moe_door_leaves",
-       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "key": "field:doors[].leaves",
+       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77e"
        ],
        "measure": "moe_door_leaves",
        "kind": "mark",
-       "headline": "Mark the door leaves in the model"
+       "field": "doors[].leaves",
+       "headline": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
       },
       {
        "key": "field:building.occupancy_groups",
@@ -58897,7 +58911,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "means_of_egress_door",
@@ -58906,7 +58920,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).",
@@ -59014,7 +59028,7 @@
       "worked": [],
       "inputs": [
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
-       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -59023,11 +59037,12 @@
       {
        "kind": "mark",
        "key": "mark:means_of_egress_door:moe_door_leaves",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77f"
        ],
-       "measure": "moe_door_leaves"
+       "measure": "moe_door_leaves",
+       "field": "doors[].leaves"
       },
       {
        "kind": "mark",
@@ -59048,14 +59063,15 @@
      },
      "asks": [
       {
-       "key": "mark:means_of_egress_door:moe_door_leaves",
-       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "key": "field:doors[].leaves",
+       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77f"
        ],
        "measure": "moe_door_leaves",
        "kind": "mark",
-       "headline": "Mark the door leaves in the model"
+       "field": "doors[].leaves",
+       "headline": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
       },
       {
        "key": "field:building.occupancy_groups",
@@ -59095,7 +59111,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "means_of_egress_door",
@@ -59104,7 +59120,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).",
@@ -59212,7 +59228,7 @@
       "worked": [],
       "inputs": [
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
-       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -59221,11 +59237,12 @@
       {
        "kind": "mark",
        "key": "mark:means_of_egress_door:moe_door_leaves",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b780"
        ],
-       "measure": "moe_door_leaves"
+       "measure": "moe_door_leaves",
+       "field": "doors[].leaves"
       },
       {
        "kind": "mark",
@@ -59246,14 +59263,15 @@
      },
      "asks": [
       {
-       "key": "mark:means_of_egress_door:moe_door_leaves",
-       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "key": "field:doors[].leaves",
+       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b780"
        ],
        "measure": "moe_door_leaves",
        "kind": "mark",
-       "headline": "Mark the door leaves in the model"
+       "field": "doors[].leaves",
+       "headline": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
       },
       {
        "key": "field:building.occupancy_groups",
@@ -59293,7 +59311,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+     "reason": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "means_of_egress_door",
@@ -59302,7 +59320,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)",
+      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
       "quotes": [
        {
         "text": "1010.1.1 Size of doors. The required capacity of each door opening shall be sufficient for the occupant load thereof and shall provide a minimum clear opening width of 32 inches (813 mm). The clear opening width of doorways with swinging doors shall be measured between the face of the door and the frame stop, with the door open 90 degrees (1.57 rad). Where this section requires a minimum clear opening width of 32 inches (813 mm) and a door opening includes two door leaves without a mullion, one leaf shall provide a minimum clear opening width of 32 inches (813 mm). In Group I-2, doors serving as means of egress doors where used for the movement of beds shall provide a minimum clear opening width of 41 1/2 inches (1054 mm). The minimum clear open- ing height of doors shall be not less than 80 inches (2032 mm).",
@@ -59410,7 +59428,7 @@
       "worked": [],
       "inputs": [
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
-       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)"
       ],
       "decide": false
@@ -59419,11 +59437,12 @@
       {
        "kind": "mark",
        "key": "mark:means_of_egress_door:moe_door_leaves",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781"
        ],
-       "measure": "moe_door_leaves"
+       "measure": "moe_door_leaves",
+       "field": "doors[].leaves"
       },
       {
        "kind": "mark",
@@ -59444,14 +59463,15 @@
      },
      "asks": [
       {
-       "key": "mark:means_of_egress_door:moe_door_leaves",
-       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "key": "field:doors[].leaves",
+       "why": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781"
        ],
        "measure": "moe_door_leaves",
        "kind": "mark",
-       "headline": "Mark the door leaves in the model"
+       "field": "doors[].leaves",
+       "headline": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
       },
       {
        "key": "field:building.occupancy_groups",
@@ -69975,7 +69995,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 2,
-       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet, occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
+       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01)"
       },
@@ -69989,7 +70009,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 2,
-       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet, occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
+       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02)"
       },
@@ -70003,7 +70023,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 2,
-       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet, occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
+       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03)"
       },
@@ -70017,7 +70037,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 2,
-       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet, occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
+       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04)"
       },
@@ -70031,7 +70051,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 2,
-       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet, occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
+       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05)"
       },
@@ -70045,7 +70065,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 2,
-       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet, occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
+       "title": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06)"
       },
@@ -70059,7 +70079,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 2,
-       "title": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet, occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
+       "title": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07)"
       },
@@ -70073,7 +70093,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 2,
-       "title": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet, occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
+       "title": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08)"
       },
@@ -70087,7 +70107,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 2,
-       "title": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet, occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
+       "title": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09)"
       },
@@ -70101,7 +70121,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 2,
-       "title": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet, occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
+       "title": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): 2 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable) · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10)"
       },
@@ -70975,7 +70995,7 @@
       {
        "key": "mark:means_of_egress_door:moe_door_leaves",
        "kind": "mark",
-       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+       "words": "door leaves: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b777",
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b779",
@@ -71000,7 +71020,8 @@
         "general.bc_1010_1_1_door_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b780",
         "general.bc_1010_1_1_door_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781"
        ],
-       "rules": 1
+       "rules": 1,
+       "field": "doors[].leaves"
       },
       {
        "key": "mark:means_of_egress_door:moe_door_swings_with_egress",
@@ -95167,7 +95188,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1010_1_1_door_width",
@@ -95188,7 +95209,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1010_1_1_door_width",
@@ -95209,7 +95230,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1010_1_1_door_width",
@@ -95230,7 +95251,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1010_1_1_door_width",
@@ -95251,7 +95272,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1010_1_1_door_width",
@@ -95272,7 +95293,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1010_1_1_door_width",
@@ -95293,7 +95314,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1010_1_1_door_width",
@@ -95314,7 +95335,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1010_1_1_door_width",
@@ -95335,7 +95356,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1010_1_1_door_width",
@@ -95356,7 +95377,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable)"
+     "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1010_1_1_door_height",
@@ -99566,7 +99587,7 @@
         "moe_door_swinging": true
        },
        "not_measured": {
-        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
         "moe_door_swings_with_egress": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say which side it swings into, and Gordium has no mark for it in the model yet",
         "moe_door_occupant_load": "Gordium doesn't measure this yet",
         "moe_door_area_occupant_load": "Gordium doesn't measure this yet",
@@ -99601,7 +99622,7 @@
         "moe_door_swinging": true
        },
        "not_measured": {
-        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
         "moe_door_swings_with_egress": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say which side it swings into, and Gordium has no mark for it in the model yet",
         "moe_door_occupant_load": "Gordium doesn't measure this yet",
         "moe_door_area_occupant_load": "Gordium doesn't measure this yet",
@@ -99636,7 +99657,7 @@
         "moe_door_swinging": true
        },
        "not_measured": {
-        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
         "moe_door_swings_with_egress": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say which side it swings into, and Gordium has no mark for it in the model yet",
         "moe_door_occupant_load": "Gordium doesn't measure this yet",
         "moe_door_area_occupant_load": "Gordium doesn't measure this yet",
@@ -99670,7 +99691,7 @@
         "moe_door_swinging": true
        },
        "not_measured": {
-        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
         "moe_door_swings_with_egress": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D04) doesn't say which side it swings into, and Gordium has no mark for it in the model yet",
         "moe_door_occupant_load": "Gordium doesn't measure this yet",
         "moe_door_area_occupant_load": "Gordium doesn't measure this yet",
@@ -99704,7 +99725,7 @@
         "moe_door_swinging": true
        },
        "not_measured": {
-        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
         "moe_door_swings_with_egress": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D05) doesn't say which side it swings into, and Gordium has no mark for it in the model yet",
         "moe_door_occupant_load": "Gordium doesn't measure this yet",
         "moe_door_area_occupant_load": "Gordium doesn't measure this yet",
@@ -99738,7 +99759,7 @@
         "moe_door_swinging": true
        },
        "not_measured": {
-        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
         "moe_door_swings_with_egress": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D06) doesn't say which side it swings into, and Gordium has no mark for it in the model yet",
         "moe_door_occupant_load": "Gordium doesn't measure this yet",
         "moe_door_area_occupant_load": "Gordium doesn't measure this yet",
@@ -99772,7 +99793,7 @@
         "moe_door_swinging": true
        },
        "not_measured": {
-        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
         "moe_door_swings_with_egress": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D07) doesn't say which side it swings into, and Gordium has no mark for it in the model yet",
         "moe_door_occupant_load": "Gordium doesn't measure this yet",
         "moe_door_area_occupant_load": "Gordium doesn't measure this yet",
@@ -99807,7 +99828,7 @@
         "moe_door_swinging": true
        },
        "not_measured": {
-        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
         "moe_door_swings_with_egress": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say which side it swings into, and Gordium has no mark for it in the model yet",
         "moe_door_occupant_load": "Gordium doesn't measure this yet",
         "moe_door_area_occupant_load": "Gordium doesn't measure this yet",
@@ -99842,7 +99863,7 @@
         "moe_door_swinging": true
        },
        "not_measured": {
-        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
         "moe_door_swings_with_egress": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say which side it swings into, and Gordium has no mark for it in the model yet",
         "moe_door_occupant_load": "Gordium doesn't measure this yet",
         "moe_door_area_occupant_load": "Gordium doesn't measure this yet",
@@ -99876,7 +99897,7 @@
         "moe_door_swinging": true
        },
        "not_measured": {
-        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one, or a pair with no mullion), and Gordium has no mark for it in the model yet",
+        "moe_door_leaves": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark)",
         "moe_door_swings_with_egress": "the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say which side it swings into, and Gordium has no mark for it in the model yet",
         "moe_door_occupant_load": "Gordium doesn't measure this yet",
         "moe_door_area_occupant_load": "Gordium doesn't measure this yet",
@@ -99929,7 +99950,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "91cb018b1dcc054b88b255dde1100684fe26e6aca3187254229fb124a2ce00f4",
+  "worker_fingerprint": "684749359ac24f73173cdb29b96f0c8376b5adb656527dc772470af138b4cc7b",
   "rulebook": {
    "new_york/ithaca_city": "03b988e2448f52163c93e8d6c12d54e6251a1300649719b39d8cbf181882711c"
   }
