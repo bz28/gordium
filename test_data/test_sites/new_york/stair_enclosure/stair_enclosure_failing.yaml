@@ -1,0 +1,157 @@
+# The stair test building, failing: the compliant one (stair_enclosure_compliant.yaml) with known failures
+# (section group 7; written by apps/revit_addin/tools/evals/make_stair_building.py, never edited by hand). Inches.
+# Risers 7.5 in (1011.5.2: at most 7 in); a beam over flight 2 leaving 76 in of headroom above its nosings
+# (1011.3: 80 in); no handrail on flight 2's north wall side (its right, looking up; 1011.11, 1014.1: on both sides); Level 2's landing guard
+# 36 in high (1015.3: 42 in). Everything else as the compliant variant. Gordium's own test building, not a real project.
+
+format: gordium.interior/1
+units: in
+levels:
+- {id: L1, name: Level 1, elevation: 0}
+- {id: L2, name: Level 2, elevation: 135.0}
+rooms:
+- id: L1S
+  name: Stair L1
+  sleeping: false
+  level: L1
+  use: other
+  lockable: false
+  pass_through: false
+  floor_elevation: 0
+  floor:
+  - [0, 0]
+  - [176, 0]
+  - [176, 92]
+  - [0, 92]
+  holes: []
+  obstructions: []
+- id: L2S
+  name: Stair L2
+  sleeping: false
+  level: L2
+  use: other
+  lockable: false
+  pass_through: false
+  floor_elevation: 135.0
+  floor:
+  - [0, 0]
+  - [176, 0]
+  - [176, 92]
+  - [0, 92]
+  holes: []
+  obstructions: []
+openings: []
+doors: []
+stairs:
+- id: f1
+  name: Flight 1 (Level 1 to the turn landing)
+  bottom_elevation: 0
+  spiral: false
+  nosings:
+  - - [44, 0, 7.5]
+    - [44, 44, 7.5]
+  - - [55, 0, 15.0]
+    - [55, 44, 15.0]
+  - - [66, 0, 22.5]
+    - [66, 44, 22.5]
+  - - [77, 0, 30.0]
+    - [77, 44, 30.0]
+  - - [88, 0, 37.5]
+    - [88, 44, 37.5]
+  - - [99, 0, 45.0]
+    - [99, 44, 45.0]
+  - - [110, 0, 52.5]
+    - [110, 44, 52.5]
+  - - [121, 0, 60.0]
+    - [121, 44, 60.0]
+  - - [132, 0, 67.5]
+    - [132, 44, 67.5]
+  sides:
+    left:
+    - [32, 44]
+    - [144, 44]
+    right:
+    - [32, 0]
+    - [144, 0]
+  handrails:
+  - side: left
+    inner_edge:
+    - [44, 40.5]
+    - [132, 40.5]
+  - side: right
+    inner_edge:
+    - [44, 3.5]
+    - [132, 3.5]
+  overhead:
+  - - [0, 0, 123.0]
+    - [44, 0, 123.0]
+    - [44, 92, 123.0]
+    - [0, 92, 123.0]
+  - - [44, 0, 243.0]
+    - [176, 0, 243.0]
+    - [176, 92, 243.0]
+    - [44, 92, 243.0]
+- id: f2
+  name: Flight 2 (the turn landing to Level 2)
+  bottom_elevation: 67.5
+  spiral: false
+  nosings:
+  - - [132, 92, 75.0]
+    - [132, 48, 75.0]
+  - - [121, 92, 82.5]
+    - [121, 48, 82.5]
+  - - [110, 92, 90.0]
+    - [110, 48, 90.0]
+  - - [99, 92, 97.5]
+    - [99, 48, 97.5]
+  - - [88, 92, 105.0]
+    - [88, 48, 105.0]
+  - - [77, 92, 112.5]
+    - [77, 48, 112.5]
+  - - [66, 92, 120.0]
+    - [66, 48, 120.0]
+  - - [55, 92, 127.5]
+    - [55, 48, 127.5]
+  - - [44, 92, 135.0]
+    - [44, 48, 135.0]
+  sides:
+    left:
+    - [144, 48]
+    - [32, 48]
+    right:
+    - [144, 92]
+    - [32, 92]
+  handrails:
+  - side: left
+    inner_edge:
+    - [132, 51.5]
+    - [44, 51.5]
+  overhead:
+  - - [0, 0, 243.0]
+    - [176, 0, 243.0]
+    - [176, 92, 243.0]
+    - [0, 92, 243.0]
+  - - [84, 48, 183.72727272727272]
+    - [96, 48, 183.72727272727272]
+    - [96, 92, 183.72727272727272]
+    - [84, 92, 183.72727272727272]
+guards:
+- id: g1
+  name: Level 2 landing guard
+  walking_surface: 135.0
+  top: 171.0
+  extent: {left: 0, right: 44}
+  members:
+  - {left: 0, right: 44, bottom: 169.5, top: 171.0}
+  - {left: 0, right: 44, bottom: 135.0, top: 138.5}
+  - {left: 4, right: 5.5, bottom: 138.5, top: 169.5}
+  - {left: 9, right: 10.5, bottom: 138.5, top: 169.5}
+  - {left: 14, right: 15.5, bottom: 138.5, top: 169.5}
+  - {left: 19, right: 20.5, bottom: 138.5, top: 169.5}
+  - {left: 24, right: 25.5, bottom: 138.5, top: 169.5}
+  - {left: 29, right: 30.5, bottom: 138.5, top: 169.5}
+  - {left: 34, right: 35.5, bottom: 138.5, top: 169.5}
+  - {left: 39, right: 40.5, bottom: 138.5, top: 169.5}
+building:
+  occupancy_groups: [R-2]
+  sprinkler_system: none
