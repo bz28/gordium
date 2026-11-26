@@ -100,3 +100,7 @@ Round 5's stair check read a description with no stairs list (stairs not read: t
 ## Review round 7 of step 2 (2026-11-26)
 
 The routes read `has_none` loosely, taking claims the format refuses (contradicted by a ramp list, a mistyped key, a reading not true or false, a kind said twice) as "no ramps", a wrong "no"; an unhashable kind stopped the measuring. Now only the format's own claims (`interior.has_none.read`, not a reading) rule a ramp, alternating tread device or ship's ladder out, and a stair in no room of the story may be anywhere (only a stair placed in another room is outside the space). One test for the claims.
+
+## Review round 8 of step 2 (2026-11-26)
+
+One more wrong "no": a stair with its top nosings in no room (a stairwell left out of the room's outline) and its lower ones under the corridor counted as outside the space. Now a stair is outside only when every nosing stands in another room. A malformed openings list beside a basement claim no longer stops the measuring. One test.
