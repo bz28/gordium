@@ -50,6 +50,10 @@ STEP = 0.01                      # the step a how-far is shown in, in its unit
 # a reason that asks for a mark says so in the word itself ("mark", "marks", "marked", "unmarked"), never inside a
 # room's name or a value a reason quotes ("Supermarket", "Landmark hall", a function "market": group 3 review round 8)
 MARK_WORD = re.compile(r"\b(un)?mark(s|ed)?\b")
+# a part's measure the description's own field states, as a host's mark gives it (never one measured): its cause is
+# a mark, naming that field, so the host's card opens its mark (the door-type mark Gordium: Leaves; before it the
+# reason said "no mark for it in the model yet", a dead end in Revit)
+MEASURE_FIELDS = {"moe_door_leaves": "doors[].leaves"}
 
 
 # ---- how far off ------------------------------------------------------------------------------------------------
@@ -302,14 +306,14 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
         elif m not in own:                            # the building's: a fact the architect states for the project
             add({"kind": MARK, "key": f"fact:{m}", "words": f"{_words(rule, m)}: not stated for the project",
                  "elements": [], "measure": m, "field": f"facts.{m}"})
-        elif why and (MARK_WORD.search(why) or "stated by the architect" in why):
+        elif why and (MARK_WORD.search(why) or "stated by the architect" in why or m in MEASURE_FIELDS):
             # a mark set on other elements than this row's (a story's occupant load waits on its rooms' function marks:
             # occupant_load.FUNCTION_ROOMS) names those elements, never the row's own (a level can't hold a room mark)
             held = (more or {}).get(m)
             on = held.get("room_ids_without_function") if isinstance(held, dict) else None
             add({"kind": MARK, "key": f"mark:{kind}:{m}", "words": f"{_words(rule, m)}: {why}",
                  "elements": list(on) if on else own_id,
-                 "measure": m})
+                 "measure": m, **({"field": MEASURE_FIELDS[m]} if m in MEASURE_FIELDS else {})})
         else:
             add({"kind": FIX_MODEL, "key": f"model:{kind}:{m}:{why or ''}",
                  "words": f"{_words(rule, m)} not measured" + (f": {why}" if why else " (or not usable)"),
