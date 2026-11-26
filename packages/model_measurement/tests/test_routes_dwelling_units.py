@@ -512,7 +512,7 @@ def test_a_marked_unit_room_marked_a_hall_or_exit_still_counts(how):
                                        ("apt  1", "units_mark_alike"), ("APT 1", "units_mark_alike"),
                                        ("Apt1", "units_mark_alike")])    # (review round 4: spaces, not only case)
 def test_a_mark_naming_two_units_or_none_or_alike_names_is_not_measured(mark, key):
-    """A room marked with two units, a mark that isn't a name, or two names differing only in capitals or spacing:
+    """A room marked with two units, a mark that isn't a name, or two names differing only in capitals or in where spaces stand (spaces at the ends and repeated spaces are no new name):
     the marks don't settle the count. A whole number is a name, and spacing at the ends is no new name (s1 and s2
     joined by a door: one unit's two rooms)."""
     desc = layout([("residential", 1, 1)] * 3, (False, True))
