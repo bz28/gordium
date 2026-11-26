@@ -80,6 +80,10 @@ SPOTS_READING = ("Gordium's reading: the ground between two spot grades lies bet
                  "surveying reading), so the grade plane is at most the highest finished spot grade ({high}); the "
                  "slope-away rule (BCNYS 202 GRADE PLANE) can only lower it")
 UNPLACED = "not placed (under the grade plane above a story that is above it)"
+MEZZANINE = "not placed (it may be a mezzanine, or the story one is part of: BCNYS 505.2)"
+LEVELS_READING = ("Gordium's reading: a story stands where the model has a level for it (every level tried as a story "
+                  "or not), or under the lowest level where that is more than 6 ft over the lowest ground stated (then "
+                  "nothing is placed); a story with no level of its own below that isn't looked for")
 
 
 # --- the ground the architect stated --------------------------------------------------------------------------------
@@ -180,8 +184,8 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
         return none(Stop("place_under_lowest", gap=f"{(lowest - plane['lowest']) / FT:g} ft").reason)   # (an undercroft)
     seen = {lid: [] for lid in order}                    # every reading's facts (or UNPLACED) for each story placed
     for lid in mezzanines:                               # a possible mezzanine, and the story it would be part of (its
-        seen[lid].append(UNPLACED)                       # occupants then that story's, 505.2): never placed
-        seen[order[order.index(lid) - 1]].append(UNPLACED)
+        seen[lid].append(MEZZANINE)                      # occupants then that story's, 505.2): never placed
+        seen[order[order.index(lid) - 1]].append(MEZZANINE)
     for chosen in itertools.product((False, True), repeat=len(roomless)):
         for kept in itertools.product((True, False), repeat=len(mezzanines)):
             dropped = {m for m, k in zip(mezzanines, kept) if not k}
@@ -195,6 +199,7 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
              "floors_ft": {lid: [round(floors[lid][0] / FT, 4), round(floors[lid][1] / FT, 4)] for lid in order},
              "levels_maybe_stories": [names[lid] for _, lid in roomless],
              "levels_maybe_mezzanines": [names[lid] for lid in mezzanines]}
+    shown["levels_reading"] = LEVELS_READING
     if plane.get("reading"):
         shown["reading"] = plane["reading"]
     maybe = ", ".join([names[lid] for _, lid in roomless] + [names[lid] for lid in mezzanines])
@@ -202,11 +207,11 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
         got = out[lid]
         got["more"]["story_place"] = shown
         for f in FACTS:
-            values = {UNPLACED if e == UNPLACED else e[f] for e in seen[lid]}
-            if len(values) == 1 and UNPLACED not in values:
+            values = {e if isinstance(e, str) else e[f] for e in seen[lid]}
+            if len(values) == 1 and not any(isinstance(v, str) for v in values):
                 got["measures"][f] = values.pop()
                 continue
-            could = " or ".join(dict.fromkeys(e if e == UNPLACED else e["said"] for e in seen[lid]))
+            could = " or ".join(dict.fromkeys(e if isinstance(e, str) else e["said"] for e in seen[lid]))
             got["not_measured"][f] = (Stop("place_either_levels", name=stories[lid].name, could=could, levels=maybe)
                                       if maybe else Stop("place_either", name=stories[lid].name, could=could)).reason
     return out
@@ -214,11 +219,13 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
 
 def _maybe_mezzanine(story, below) -> bool:
     """Whether a level with rooms may be a mezzanine of the story below (BCNYS 505.2: "considered a portion of the
-    story below"; 505.2.1: at most 1/3, or 2/3 in some buildings, of the room or space it is in): its outline at most
-    2/3 of the one below's, or either outline not given."""
-    if story.outer is None or below.outer is None:
+    story below"; 505.2.1: at most 1/3, or 2/3 in some buildings, of the room or space it is in): its rooms' floor
+    area at most 2/3 of the story below's (its outline, the larger reading), or either not known (a room not read, no
+    outline). Its own outline is no guide: a mezzanine stands within the story's exterior walls."""
+    rooms = list(story.rooms.values())
+    if not rooms or any(r is None for r in rooms) or below.outer is None:
         return True
-    return story.outer.area <= below.outer.area * 2 / 3 + 1
+    return unary_union([r.outline for r in rooms]).area <= below.outer.area * 2 / 3 + 1
 
 
 def _readings(stack, plane):
@@ -325,7 +332,7 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
             return None, Stop("ground_disagrees", flat=f"{ground['flat']:g} ft", high=f"{max(given) / FT:g} ft").reason
         # the grade plane at most the flat ground (an areaway, a well, a walk-out door may be lower: never a basement
         # proven); the flat ground itself a known point of finished ground (item 2)
-        return {"high": z, "point": z, "lowest": z}, None
+        return {"high": z, "point": z, "lowest": min([z] + given)}, None     # lower ground stated at an opening too
     spots = [p for p in ground.get("spots") or []
              if isinstance(p, (list, tuple)) and len(p) == 3 and all(_number(v) for v in p)]
     if not spots or len(spots) != len(ground.get("spots") or []):
@@ -362,6 +369,8 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
         return None, Stop("ground_disagrees_spots", high=f"{high / FT:g} ft", stated=f"{max(stated) / FT:g} ft").reason
     # item 2's "finished ground level at any point": never a spot (it may stand in an areaway or a window well,
     # whose floor as "ground" is an open question: docs/questions_for_architects.md 4.6), only flat ground
-    beside = [z for p, z in at if not any(o.buffer(-SAME).contains(p) for o in outlines)] or used
-    return {"high": high, "point": None, "lowest": min(beside),     # the lowest ground beside it (a spot under it isn't)
+    # the lowest ground beside the building: every spot outside some story's outline (the ground floor's walls under
+    # an overhang included); one under every story is under the building, not beside it
+    beside = [z for p, z in at if not all(o.buffer(-SAME).contains(p) for o in outlines)] or [z for _, z in at]
+    return {"high": high, "point": None, "lowest": min(beside + stated),
             "reading": SPOTS_READING.format(high=f"{high / FT:g} ft")}, None

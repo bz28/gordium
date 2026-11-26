@@ -46,9 +46,16 @@ def building(floors, extra_levels=(), outline=BOX):
     for lv in levels:
         s = Story(lv["id"], lv["name"])
         s.outer = outline
-        s.rooms = {r["id"]: None for r in rooms if r["level"] == lv["id"]}
+        s.rooms = {r["id"]: _Room(outline) for r in rooms if r["level"] == lv["id"]}
         stories[lv["id"]] = s
     return {"units": "ft", "levels": levels, "all_levels": [dict(lv) for lv in levels], "rooms": rooms}, stories
+
+
+class _Room:
+    """A room read, as the routes' floor gives it: its outline (here the story's whole floor)."""
+
+    def __init__(self, outline):
+        self.outline = outline if outline is not None else BOX
 
 
 def placed(floors, ground, **kw):
@@ -573,7 +580,8 @@ def test_a_mezzanine_drawn_on_its_own_level_never_proves_the_story_below_above()
     mezzanine (505.2: part of the story below) it isn't, and the -1 ft story's own floor leaves it open. Tried both
     ways; a possible mezzanine is never placed itself."""
     desc, stories = building([[-10], [-1], [7]])
-    stories["L2"].outer = Polygon([(0, 0), (10 * FT, 0), (10 * FT, 10 * FT), (0, 10 * FT)])
+    stories["L2"].rooms = {k: _Room(Polygon([(0, 0), (10 * FT, 0), (10 * FT, 10 * FT), (0, 10 * FT)]))
+                           for k in stories["L2"].rooms}             # its own outline the building's: within the walls
     got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
     assert FIRST not in got["L0"]["measures"]
     assert not set(FACTS) & set(got["L2"]["measures"])
@@ -586,7 +594,8 @@ def test_the_story_under_a_possible_mezzanine_is_never_placed():
     """A level at 10 ft half the size of the one at 0: possibly its mezzanine, whose occupants would then be the lower
     story's (505.2), so the lower story's one-exit row could pass on too few occupants. Neither is placed."""
     desc, stories = building([[0], [10]])
-    stories["L1"].outer = Polygon([(0, 0), (20 * FT, 0), (20 * FT, 30 * FT), (0, 30 * FT)])
+    stories["L1"].rooms = {k: _Room(Polygon([(0, 0), (20 * FT, 0), (20 * FT, 30 * FT), (0, 30 * FT)]))
+                           for k in stories["L1"].rooms}
     got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
     assert not set(FACTS) & set(got["L0"]["measures"]) and not set(FACTS) & set(got["L1"]["measures"])
 
@@ -597,3 +606,60 @@ def test_a_story_may_stand_under_the_lowest_level(ground):
     would be the first story above grade plane and Level 1 the third. Nothing is placed."""
     got = placed([[0], [10], [20]], ground)
     assert not set(FACTS) & set(got["L0"]["measures"]) and not set(FACTS) & set(got["L1"]["measures"])
+
+
+# --- review round 9 (2026-11-26) ----------------------------------------------------------------------------------
+
+def test_ground_under_an_overhang_counts_toward_the_lowest_ground():
+    """The ground floor's walls at 0 under the overhang, 2 ft beyond its edges, the ground floor at 7 ft: more than 6 ft
+    over the ground at its own walls (a story may stand under it). Before, the spots under the overhang were left out
+    of the lowest ground (2 ft) and the ground floor measured the first story above."""
+    small, big = BOX, Polygon([(-10 * FT, 0), (50 * FT, 0), (50 * FT, 40 * FT), (-10 * FT, 40 * FT)])
+    desc, stories = building([[7], [17]])
+    stories["L1"].outer = big
+    spots = [[20, -1, 2], [41, 15, 0], [20, 31, 0], [-1, 15, 0], [20, 41, 2], [51, 20, 2], [-11, 20, 2], [45, -1, 2],
+             [-5, -1, 2]]
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"spots": spots})
+    assert not set(FACTS) & set(got["L0"]["measures"])
+    assert got["L0"]["not_measured"][FIRST] == STOPS["place_under_lowest"].format(gap="7 ft")
+
+
+def test_a_possible_mezzanine_is_said_so():
+    """The reason a story under a possible mezzanine isn't placed names the mezzanine, never "levels with no rooms"."""
+    desc, stories = building([[20], [30]])
+    stories["L1"].rooms = {k: _Room(Polygon([(0, 0), (20 * FT, 0), (20 * FT, 30 * FT), (0, 30 * FT)]))
+                           for k in stories["L1"].rooms}
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 18})
+    assert "mezzanine" in got["L0"]["not_measured"][FIRST]
+    assert "levels with no rooms" not in got["L0"]["not_measured"][FIRST]
+    assert "Gordium's reading: a story stands where the model has a level" in \
+        got["L0"]["more"]["story_place"]["levels_reading"]
+
+
+# --- review round 10 (2026-11-26) ---------------------------------------------------------------------------------
+
+def test_a_mezzanine_within_the_buildings_walls_is_judged_by_its_rooms():
+    """A mezzanine's level outline is the building's own (it stands within the exterior walls), so the outline test
+    never flagged it: judged by its rooms' area now, and a level whose rooms aren't read may be one."""
+    desc, stories = building([[-10], [-1], [7]])
+    stories["L2"].rooms = {k: _Room(Polygon([(0, 0), (10 * FT, 0), (10 * FT, 10 * FT), (0, 10 * FT)]))
+                           for k in stories["L2"].rooms}
+    assert stories["L2"].outer == stories["L1"].outer
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert FIRST not in got["L0"]["measures"] and got["L0"]["more"]["story_place"]["levels_maybe_mezzanines"] == \
+        ["Level 2"]
+    stories["L2"].rooms = {k: None for k in stories["L2"].rooms}
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert got["L0"]["more"]["story_place"]["levels_maybe_mezzanines"] == ["Level 2"]
+
+
+@pytest.mark.parametrize("ground", [{"flat": 0}, {"spots": [[x, y, 0] for x, y in WALL_SPOTS]}])
+@pytest.mark.parametrize("opening", [{"id": "w1", "ground_outside": -3},
+                                     {"id": "w1", "ground_outside": 0, "area_well": {"floor_elevation": -3}}])
+def test_lower_ground_stated_at_an_opening_is_the_lowest_ground(ground, opening):
+    """The lowest level 8 ft over ground stated at a window (or a well's floor): a story may stand under it."""
+    desc, stories = building([[5], [15]])
+    desc["openings"] = [opening]
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, ground)
+    assert not set(FACTS) & set(got["L0"]["measures"]) and not set(FACTS) & set(got["L1"]["measures"])
+    assert got["L0"]["not_measured"][FIRST] == STOPS["place_under_lowest"].format(gap="8 ft")
