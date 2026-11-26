@@ -29,7 +29,7 @@ UNITS_KEYS = {"units_use_unknown", "units_function_unknown", "units_no_entrance"
               "units_shared_room", "units_link_elsewhere", "units_link_unread", "units_exit_function",
               "units_hall_residential"}
 MARK_KEYS = {"units_mark_unreadable", "units_mark_several", "units_mark_alike", "units_mark_apart",
-             "units_mark_not_dwelling", "units_mark_on_exit", "units_mark_left_out"}     # the unit marks' tests below
+             "units_mark_not_dwelling", "units_mark_on_exit", "units_mark_left_out", "units_mark_hall_function"}     # the unit marks' tests below
 UNITS_KEYS |= MARK_KEYS
 FUNCTIONS = ("residential", "business", None)
 
@@ -465,7 +465,8 @@ def test_the_marks_walk_every_count_measured_is_the_oracles(joins):
 
 def test_a_shared_vestibule_marked_residential_no_longer_joins_two_units():
     """The grouping's first disclosed limit: a vestibule marked residential, two units off it, counted one unit. With
-    the units marked, the vestibule with no mark stops the count (mark it a lobby, or a unit); marked a lobby, 2."""
+    the units marked, the vestibule with no mark stops the count (mark it a lobby, or a unit); a lobby with no
+    function, 2."""
     desc = layout([("residential", 1, 0), ("residential", 1, 0), ("business", 1, 1)], (False, False))
     desc["rooms"].append(room("v", rect(0, 10.5, 23.5, 15), use="other", lockable=False, pass_through=True,
                               function="residential"))
@@ -475,7 +476,10 @@ def test_a_shared_vestibule_marked_residential_no_longer_joins_two_units():
     _room(desc, "s0")["unit"], _room(desc, "s1")["unit"] = "1", "2"
     got = count(desc)
     assert isinstance(got, Stop) and got.key == "units_mark_left_out", got
-    _room(desc, "v")["use"] = "lobby"
+    _room(desc, "v")["use"] = "lobby"                     # a lobby still stating residential: a unit's room?
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_mark_hall_function", got
+    _room(desc, "v").pop("function")                     # a shared lobby states no function: 2
     assert count(desc) == 2
     story = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
     assert story["measures"][UNITS_FACT] == 2
@@ -543,3 +547,24 @@ def test_with_no_mark_the_grouping_and_its_words_stay():
         for r in desc["rooms"]:
             r["unit"] = blank
         assert count(desc) == 3 and not marked(read(desc).stories["L1"], {r["id"]: r for r in desc["rooms"]})
+
+
+@pytest.mark.parametrize("hall", ["lobby", "corridor"])
+@pytest.mark.parametrize("function", ["residential", "R-2", None, "business"])
+def test_an_unmarked_hall_stating_a_units_function_stops_the_marks_count_whatever_it_opens_into(hall, function):
+    """Review round 1 (PR 1, a hardening): a one-room unit marked a lobby or corridor, stating residential, no unit
+    mark, joined by a door to a marked unit: the grouping's hall check lets a hall opening into a unit's room through,
+    so the marks counted 2 of 3. Under the marks a shared hall states no function: one stating a function a unit may
+    have stops the count; one stating none, or a listed other use, is a hall (2 counted: the limit said beside it)."""
+    desc = layout([("residential", 1, 1)] * 3, (False, True))
+    _room(desc, "s0")["unit"], _room(desc, "s1")["unit"] = "A", "B"
+    s2 = _room(desc, "s2")
+    s2["use"] = hall
+    s2.pop("function")
+    if function is not None:
+        s2["function"] = function
+    got = count(desc)
+    if function in ("residential", "R-2"):
+        assert isinstance(got, Stop) and got.key == "units_mark_hall_function", (hall, function, got)
+    else:
+        assert got == 2, (hall, function, got)

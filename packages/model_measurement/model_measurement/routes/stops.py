@@ -216,6 +216,9 @@ STOPS = {
                                "(a listed other use): whether it is a dwelling unit isn't known",
     "units_mark_on_exit": "the room {name} is taken as an exit (a stair enclosure or exit passageway, shared) yet is "
                           "marked unit {unit!r}: which is right isn't known",
+    "units_mark_hall_function": "the room {name}, marked a corridor or lobby with no unit mark, states a function a "
+                                "dwelling unit may have (a hall shared between units states none): it may be a "
+                                "unit's room left unmarked; mark its unit, or clear its function",
     "units_mark_left_out": "the room {name} has no unit mark while other rooms of this story have one, and may be a "
                            "dwelling unit's room (it states a function a dwelling unit may have, or none): mark its "
                            "unit, or, if it is shared between units, mark its use Corridor or Lobby",

@@ -48,8 +48,10 @@ and the drawing disagree or don't settle it:
   one name?), or whose lived-in rooms all state a listed other use (no dwelling unit), or a room the drawing takes as
   an exit (a stair enclosure) given a unit;
 - a lived-in room with no mark that may be a dwelling unit's (any function but a listed other use, or none): a unit
-  left unmarked, or a room shared between units not marked a corridor or lobby; the room-of-a-unit-marked-a-hall
-  checks above still run for the halls and exits with no mark.
+  left unmarked, or a room shared between units not marked a corridor or lobby; a corridor or lobby with no mark
+  stating such a function (a shared hall states none), or an exit with no mark stating any.
+What is left is said with the count: a unit none of whose rooms is marked, all of them marked corridors, lobbies or
+exits stating no function, can't be told from shared halls.
 """
 
 import re
@@ -151,17 +153,17 @@ def _marked(story, items: dict, is_exit) -> int:
                 (isinstance(function, str) and function in NOT_DWELLING):
             continue
         raise Stop("units_mark_left_out", name=room.name)
-    links = [set(s) for s in links]
     for rid in sorted(exits | hall_rooms):               # a unit's room marked a hall or exit, with no unit mark
         if rid in names:
             continue
         room, function = story.rooms[rid], (items.get(rid) or {}).get("function")
         if rid in exits and function is not None:
             raise Stop("units_exit_function", name=room.name)
-        if rid in hall_rooms and function is not None and \
-                not (isinstance(function, str) and function in NOT_DWELLING) and \
-                not any(rid in sides and sides & set(names) for sides in links):
-            raise Stop("units_hall_residential", name=room.name)
+        # a shared hall states no function (Gordium: Function: blank on a corridor), and a unit's own carries its
+        # name: one stating a function a unit may have, with no name, is a unit's room left unmarked or a hall marked
+        # wrong, whatever it opens into
+        if rid in hall_rooms and function is not None and not (isinstance(function, str) and function in NOT_DWELLING):
+            raise Stop("units_mark_hall_function", name=room.name)
     return len(by_unit)
 
 
