@@ -57,6 +57,10 @@ internal sealed class CheckRun
 
     internal ProjectPrepared? Prepared { get; private set; }
     internal int MarksAdded { get; private set; }
+
+    /// <summary>Whether this check wrote to the project before it failed (marks added, drafts filled, a street edge
+    /// picked): its failure card then never says the model wasn't changed.</summary>
+    internal bool Wrote { get; set; }
     internal StreetAsk Ask { get; private set; }
     internal string Clear { get; private set; } = "";
 
@@ -92,11 +96,26 @@ internal sealed class CheckRun
     {
         try
         {
-            return Trial.WorkerAsync();
+            return Started(Trial.WorkerAsync());
         }
         catch (Exception e)                                    // no clone: said when the worker is needed
         {
-            return Task.FromException<WorkerClient>(e);
+            return Task.FromException<WorkerClient>(new WorkerUnavailableException($"The Gordium checker couldn't be started: {e.Message}", e));
+        }
+    }
+
+    /// <summary>The worker's start, its failures that aren't the worker's own words (no Gordium folder, Revit closing)
+    /// said as the worker that couldn't be started, wherever it is first waited for: the read's question or the check
+    /// (UI polish PR 5 review round 8: the same cause, one card). A cancel stays a cancel.</summary>
+    internal static async Task<WorkerClient> Started(Task<WorkerClient> start)
+    {
+        try
+        {
+            return await start.ConfigureAwait(false);
+        }
+        catch (Exception e) when (e is not WorkerException and not OperationCanceledException)
+        {
+            throw new WorkerUnavailableException($"The Gordium checker couldn't be started: {e.Message}", e);
         }
     }
 
@@ -134,13 +153,29 @@ internal sealed class CheckRun
             return;
         }
         // off Revit's thread (CheckFlow.Send); the outcome back on it through the panel's ExternalEvent
+        // the checker is stopped only when it says nothing for Silence (UI polish change 15); each of its progress lines
+        // is shown under the check's step
+        Log["silence_s"] = Silence.TotalSeconds;
         _ = Flow.Send(Ticket, Worker, request, (sent, seconds) =>
             ResultsPane.Post("Show the check's answer", app =>
             {
                 Log["check_s"] = seconds;
                 Clock.OffThread("check", seconds);
                 CheckProjectCommand.Answered(app, Doc, this, sent);
-            }, refused: () => Refused("the checker's answer")));
+            }, refused: () => Refused("the checker's answer")), Silence, new Said(step => ResultsPane.Ui(() => ResultsPane.Step(step))));
+    }
+
+    /// <summary>How long the checker may say nothing before it is stopped: 60 s, doubled by each "Try again with more
+    /// time" this session (CheckFailures.More).</summary>
+    internal static TimeSpan Silence { get; private set; } = CheckFailures.FirstSilence;
+
+    /// <summary>"Try again with more time": the next check's silence doubled.</summary>
+    internal static void MoreTime() => Silence = CheckFailures.More(Silence);
+
+    /// <summary>A progress line, handed on as it comes (never through a captured context: the pane's Ui does that).</summary>
+    private sealed class Said(Action<string> said) : IProgress<string>
+    {
+        public void Report(string value) => said(value);
     }
 
     /// <summary>Revit refused the ExternalEvent for <paramref name="what"/>: the error state (never a check left
@@ -154,7 +189,8 @@ internal sealed class CheckRun
             return;
         }
         End("failed");
-        ResultsPane.Failed($"Revit didn't take {what}: nothing was checked. Click Check again.");
+        ResultsPane.Failed(CheckFailures.NotStarted($"Revit didn't take {what}: nothing was checked.", afterRead: Prepared is not null)
+                                         .After(ClearPrefills.StatusLine(MarksAdded, Clear), Wrote));   // after a read: what it wrote
     });
 
     /// <summary>Cancels the running check (the panel's Cancel, or the project read closing; on Revit's thread, no API
