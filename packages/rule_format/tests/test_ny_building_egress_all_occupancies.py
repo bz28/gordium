@@ -295,11 +295,12 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          # section group 9a: 1003 (general means of egress) and 1012 (ramps), each a flag quoting its piece whole
          "1003.2": (310, 35, 46), "1003.3": (310, 47, 48), "1003.3.1": (310, 49, 53), "1003.3.1 (part 2)": (311, 3, 4),
          "1003.3.2": (311, 5, 11), "1003.3.3": (311, 12, 14), "1003.3.4": (311, 15, 15), "1003.4": (311, 16, 16),
-         "1003.5": (311, 17, 31), "1003.6": (311, 32, 35), "1003.7": (311, 36, 38), "1012.2": (335, 30, 32),
+         "1003.5": (311, 17, 31), "1003.6": (311, 32, 35), "1003.7": (311, 36, 38), "1012.1": (335, 23, 29),
+         "1012.2": (335, 30, 32),
          "1012.3": (335, 33, 34), "1012.4": (335, 35, 35), "1012.5": (335, 36, 37), "1012.5.1": (335, 38, 40),
          "1012.5.2": (335, 41, 43), "1012.5.3": (335, 44, 46), "1012.6": (335, 47, 48), "1012.6.1": (335, 49, 50),
          "1012.6.2": (335, 51, 51), "1012.6.3": (335, 52, 57), "1012.6.4": (336, 3, 6), "1012.6.5": (336, 7, 8),
-         "1012.7": (336, 9, 10), "1012.7.1": (336, 11, 11), "1012.7.2": (336, 12, 13), "1012.8": (336, 14, 15),
+         "1012.7": (336, 9, 10), "1012.7.1": (336, 11, 11), "1012.7.2": (336, 12, 13), "1012.8": (336, 14, 15), "1012.9": (336, 16, 16),
          "1012.10": (336, 17, 24), "1012.10.1": (336, 25, 27), "1012.10.2": (336, 28, 29)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
@@ -372,8 +373,8 @@ NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.
             "1010.1.2.1", "1010.1.3", "1010.1.3.1", "1010.1.3.2", "1010.1.4", "1010.1.5", "1010.1.6",
             "1010.1.7", "1010.2", "1010.2.1", "1010.2.2", "1010.2.3", "1010.2.4", "1010.2.5", "1010.2.6", "1010.2.7",
             "1003.2", "1003.3", "1003.3.1", "1003.3.2", "1003.3.3", "1003.3.4", "1003.4", "1003.5", "1003.6", "1003.7",
-            "1012.2", "1012.3", "1012.4", "1012.5", "1012.5.1", "1012.5.2", "1012.5.3", "1012.6", "1012.6.1",
-            "1012.6.2", "1012.6.3", "1012.6.4", "1012.6.5", "1012.7", "1012.7.1", "1012.7.2", "1012.8", "1012.10",
+            "1012.1", "1012.2", "1012.3", "1012.4", "1012.5", "1012.5.1", "1012.5.2", "1012.5.3", "1012.6", "1012.6.1",
+            "1012.6.2", "1012.6.3", "1012.6.4", "1012.6.5", "1012.7", "1012.7.1", "1012.7.2", "1012.8", "1012.9", "1012.10",
             "1012.10.1", "1012.10.2"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
@@ -1212,3 +1213,19 @@ def test_no_rule_text_carries_yaml_quoting_into_what_people_read():
                 [e.get("note") for e in r.get("examples") or []]
         bad += [(r["id"], t[:60]) for t in texts if isinstance(t, str) and ("''" in t or t.startswith("'"))]
     assert not bad, bad
+
+
+def test_every_section_group_9_reference_with_words_to_follow_is_quoted_by_a_flag():
+    """Review round 1 of section group 9a (P1): 1012.9 ('Guards shall be provided where required by Section 1015') was
+    labeled a reference that no flag quoted, so nothing showed a ramp's guards while 1015 isn't brought in; 1012.1's
+    'shall comply' sentences (ramped aisles, curb ramps) the same. Every piece of section group 9's sections labeled
+    reference is quoted whole by some rule, but a scope that only says where the chapter's sections apply."""
+    labels = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]
+    book = load(RULEBOOK)
+    scope_only = {"1003.1"}                          # 'The general requirements ... shall apply to all three elements'
+    for pid, lab in labels.items():
+        if pid.split(".")[0] not in ("1003", "1012") or lab["label"] != "reference" or pid in scope_only:
+            continue
+        for s in lab["sources"]:
+            lines, _ = _quoted(book, s["page"], *s["lines"])
+            assert set(range(s["lines"][0], s["lines"][1] + 1)) <= lines, (pid, s["page"], s["lines"])

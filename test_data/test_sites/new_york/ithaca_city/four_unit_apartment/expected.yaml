@@ -222,6 +222,7 @@ results:
   general.bc_1012_7_1_ramp_surface: needs_review
   general.bc_1012_7_2_outdoor_conditions: needs_review
   general.bc_1012_8_handrails: needs_review
+  general.bc_1012_9_guards: needs_review
   general.bc_1012_10_edge_protection: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)

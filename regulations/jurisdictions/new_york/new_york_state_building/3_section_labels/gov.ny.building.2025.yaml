@@ -4206,7 +4206,7 @@ labels:
   1005.7.3:
     label: flag
     topic: means_of_egress
-    reason: 'Protruding objects meet 1003.3 (not brought in): a person''s check.'
+    reason: 'Protruding objects meet 1003.3 (brought in by section group 9a, each of 1003.3.1 to 1003.3.4 its own flag): a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 314
@@ -5852,10 +5852,9 @@ labels:
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1012.9':
-    label: reference
+    label: flag
     topic: means_of_egress
-    reason: 'A pointer: a ramp''s guards are where 1015 requires them and built to 1015, whose own pieces are section group
-      7''s.'
+    reason: 'Guards where 1015 requires them on a ramp, built to 1015 (not brought in yet: section group 7''s): ramps aren''t measured for the Building Code, a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 336

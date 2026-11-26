@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 132 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 133 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1469,7 +1469,7 @@
     "Egress · Changes in floor elevation: A person checks this (Gordium doesn't decide it): A change in elevation of less than 12 inches in the means of egress is made by a sloped surface, a ramp complying with 1012 where steeper than 1 in 20 (5 percent), with handrails or a contrasting floor finish where 6 inches or less; the exceptions are steps at exterior doors per 1010.1.4, a stair of one riser or of two risers and a tread where Chapter 11 doesn't require access (risers and treads per 1011.5, treads at least 13 inches deep, a handrail per 1014 within 30 inches of the centerline of the path), and a step under 12 inches in aisles serving seating where Chapter 11 doesn't require access (risers and treads per 1030.14, a handrail per 1030.16); throughout a story in Group I-2, any change in elevation in the means of egress serving nonambulatory persons is a ramp or sloped walkway: the routes read each story as one level, so changes in floor level within it aren't in the model, a person's check.",
     "Egress · Means of egress continuity: A person checks this (Gordium doesn't decide it): The path of egress travel isn't interrupted by any building element other than a means of egress component; nothing but the projections this chapter permits obstructs a component's minimum width or required capacity; and the minimum width or required capacity of the means of egress system isn't diminished along the path of egress travel: the routes measure the corridors' clear width between the walls and what is drawn (Table 1020.3's rule), not every component's width or capacity along the path, so a person's check.",
     "Egress · Elevators and escalators not a required means of egress: A person checks this (Gordium doesn't decide it): Elevators, escalators and moving walks are not used as a component of a required means of egress from any other part of the building, except elevators used as an accessible means of egress per 1009.4: which ways out the architect counts on beyond the doors and stairs the routes read isn't in the model, so a person's check.",
-    "Egress · Ramp slope: A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp slope: A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent); ramped aisles in assembly spaces comply with 1030 and curb ramps with ICC A117.1 instead (1012.1): ramps aren't measured for the Building Code yet, so a person's check.",
     "Egress · Ramp cross slope: A person checks this (Gordium doesn't decide it): A ramp's slope measured perpendicular to the direction of travel is no steeper than 1 in 48 (2 percent): ramps aren't measured for the Building Code yet, so a person's check.",
     "Egress · Ramp run's rise: A person checks this (Gordium doesn't decide it): The rise of any ramp run is 30 inches at most: ramps aren't measured for the Building Code yet, so a person's check.",
     "Egress · Ramp width and capacity: A person checks this (Gordium doesn't decide it): A means of egress ramp is at least as wide, and of at least the capacity, as 1020.3 requires of corridors, and at least 36 inches clear between handrails, if provided, or other permitted projections: ramps aren't measured for the Building Code yet, so a person's check.",
@@ -1485,6 +1485,7 @@
     "Egress · Outdoor ramps shed water: A person checks this (Gordium doesn't decide it): Outdoor ramps and their outdoor approaches are designed so water doesn't accumulate on walking surfaces: ramps aren't measured for the Building Code yet, so a person's check.",
     "Egress · Ramp handrails: A person checks this (Gordium doesn't decide it): A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren't measured for the Building Code yet, so a person's check.",
     "Egress · Ramp edge protection: A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp guards: A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
@@ -71539,18 +71540,22 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent); ramped aisles in assembly spaces comply with 1030 and curb ramps with ICC A117.1 instead (1012.1): ramps aren't measured for the Building Code yet, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent); ramped aisles in assembly spaces comply with 1030 and curb ramps with ICC A117.1 instead (1012.1): ramps aren't measured for the Building Code yet, so a person's check.",
       "quotes": [
+       {
+        "text": "1012.1 Scope. The provisions of this section shall apply to ramps used as a component of a means of egress. Exceptions: 1. Ramped aisles within assembly rooms or spaces shall comply with the provisions in Section 1030. 2. Curb ramps shall comply with ICC A117.1. 3. Vehicle ramps in parking garages for pedestrian exit access shall not be required to comply with Sections 1012.3 through 1012.10 where they are not an accessible route serving accessible parking spaces, other required accessible elements or part of an accessible means of egress.",
+        "where": "1012.1, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       },
        {
         "text": "1012.2 Slope. Ramps used as part of a means of egress shall have a running slope not steeper than 1 unit vertical in 12 units horizon- tal (8.3-percent slope). The slope of other pedestrian ramps shall not be steeper than 1 unit vertical in 8 units horizontal (12.5- percent slope).",
         "where": "1012.2, 2025 Building Code of New York State (BCNYS), PDF p.335"
        }
       ],
-      "citation": "1012.2, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "citation": "1012.1, 2025 Building Code of New York State (BCNYS), PDF p.335",
       "links": [],
       "calc": null,
       "scope": "",
@@ -71561,27 +71566,27 @@
      "law_short": "Egress",
      "law_key": "new_york/new_york_state_building",
      "code": {
-      "section": "1012.2",
-      "quote": "1012.2 Slope. Ramps used as part of a means of egress shall have a running slope not steeper than 1 unit vertical in 12 units horizon- tal (8.3-percent slope). The slope of other pedestrian ramps shall not be steeper than 1 unit vertical in 8 units horizontal (12.5- percent slope)."
+      "section": "1012.1",
+      "quote": "1012.1 Scope. The provisions of this section shall apply to ramps used as a component of a means of egress. Exceptions: 1. Ramped aisles within assembly rooms or spaces shall comply with the provisions in Section 1030. 2. Curb ramps shall comply with ICC A117.1. 3. Vehicle ramps in parking garages for pedestrian exit access shall not be required to comply with Sections 1012.3 through 1012.10 where they are not an accessible route serving accessible parking spaces, other required accessible elements or part of an accessible means of egress."
      },
      "causes": [
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1012_2_slope",
-       "words": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent); ramped aisles in assembly spaces comply with 1030 and curb ramps with ICC A117.1 instead (1012.1): ramps aren't measured for the Building Code yet, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1012_2_slope",
-       "why": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent); ramped aisles in assembly spaces comply with 1030 and curb ramps with ICC A117.1 instead (1012.1): ramps aren't measured for the Building Code yet, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
       }
      ],
-     "rule_name": "Ramp slope",
+     "rule_name": "Ramp slope (BCNYS 1012.2)",
      "in_code": {
       "document": "2025 Building Code of New York State (BCNYS)",
       "file": "gov.ny.building.2025.pdf",
@@ -71589,8 +71594,8 @@
       "chapter_title": "MEANS OF EGRESS",
       "section": "1012",
       "section_title": "Ramps",
-      "piece": "1012.2",
-      "piece_title": "Slope"
+      "piece": "1012.1",
+      "piece_title": "Scope"
      }
     },
     {
@@ -72657,6 +72662,76 @@
       "section_title": "Ramps",
       "piece": "1012.10",
       "piece_title": "Edge protection"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_9_guards",
+     "rule": "general.bc_1012_9_guards",
+     "name": "Egress · Ramp guards (BCNYS 1012.9)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.9 Guards. Guards shall be provided where required by Section 1015 and shall be constructed in accordance with Section 1015.",
+        "where": "1012.9, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1012.9, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.9",
+      "quote": "1012.9 Guards. Guards shall be provided where required by Section 1015 and shall be constructed in accordance with Section 1015."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_9_guards",
+       "words": "A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_9_guards",
+       "why": "A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp guards",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.9",
+      "piece_title": "Guards"
      }
     },
     {
@@ -77096,7 +77171,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 132 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 133 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -77733,6 +77808,7 @@
       "egress.general.bc_1012_7_2_outdoor_conditions",
       "egress.general.bc_1012_8_handrails",
       "egress.general.bc_1012_10_edge_protection",
+      "egress.general.bc_1012_9_guards",
       "egress.interior#1"
      ],
      "lines": [
@@ -79449,7 +79525,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Ramp slope (BCNYS 1012.2): A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "title": "Egress · Ramp slope (BCNYS 1012.2): A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent); ramped aisles in assembly spaces comply with 1030 and curb ramps with ICC A117.1 instead (1012.1): ramps aren't measured for the Building Code yet, so a person's check.",
        "mark": "?",
        "name": "Egress · Ramp slope (BCNYS 1012.2)"
       },
@@ -79649,6 +79725,19 @@
        "name": "Egress · Ramp edge protection (BCNYS 1012.10)"
       },
       {
+       "key": "review#97dc17c4ca",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_9_guards"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp guards (BCNYS 1012.9): A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp guards (BCNYS 1012.9)"
+      },
+      {
        "key": "review#3b8d16e054",
        "tier": "review",
        "items": [
@@ -79662,7 +79751,7 @@
        "name": "Interior drawing"
       }
      ],
-     "count": 132,
+     "count": 133,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -80953,7 +81042,7 @@
       {
        "key": "reason:egress.general.bc_1012_2_slope",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent); ramped aisles in assembly spaces comply with 1030 and curb ramps with ICC A117.1 instead (1012.1): ramps aren't measured for the Building Code yet, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1012_2_slope"
@@ -81107,6 +81196,16 @@
        "elements": [],
        "items": [
         "egress.general.bc_1012_10_edge_protection"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_9_guards",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_9_guards"
        ],
        "rules": 1
       }
@@ -81462,7 +81561,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "132 to review · 30 comply"
+     "summary": "133 to review · 30 comply"
     }
    ],
    "contents": [
@@ -96930,8 +97029,8 @@
          "coverage": "flag",
          "whole": true,
          "counts": {
-          "flag": 16,
-          "not_for_checking": 7
+          "flag": 17,
+          "not_for_checking": 6
          },
          "pieces": [
           {
@@ -97055,6 +97154,14 @@
            ]
           },
           {
+           "id": "1012.9",
+           "title": "Guards",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_9_guards"
+           ]
+          },
+          {
            "id": "1012.10",
            "title": "Edge protection",
            "coverage": "flag",
@@ -97083,12 +97190,6 @@
           {
            "id": "1012.6.5",
            "title": "Doorways",
-           "coverage": "not_for_checking",
-           "rules": []
-          },
-          {
-           "id": "1012.9",
-           "title": "Guards",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -101617,6 +101718,7 @@
    "egress.general.bc_1012_7_2_outdoor_conditions": "needs_review",
    "egress.general.bc_1012_8_handrails": "needs_review",
    "egress.general.bc_1012_10_edge_protection": "needs_review",
+   "egress.general.bc_1012_9_guards": "needs_review",
    "egress.interior#1": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
@@ -101662,7 +101764,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "132 to review · 30 comply"
+    "summary": "133 to review · 30 comply"
    }
   ],
   "egress": {
@@ -107030,7 +107132,8 @@
     "general.bc_1012_7_1_ramp_surface": "needs_review",
     "general.bc_1012_7_2_outdoor_conditions": "needs_review",
     "general.bc_1012_8_handrails": "needs_review",
-    "general.bc_1012_10_edge_protection": "needs_review"
+    "general.bc_1012_10_edge_protection": "needs_review",
+    "general.bc_1012_9_guards": "needs_review"
    },
    "interior": {
     "parts": {
@@ -110960,7 +111063,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "666c35ec00979f95408f12a527723a5bc641aa69b2ac89cb24bb276003563835"
+   "new_york/ithaca_city": "fa9be43d60ba433d0be9435620d58aba79df0097f908d5ef696040b80976b615"
   }
  }
 }
