@@ -133,6 +133,10 @@ Two more (never a pass): an opening whose id isn't text crashed round 13's check
 
 One low finding (never a pass): a unit marked fixed but stating a maker's clear opening contradicts itself, and was skipped as never a way out. Now only a fixed unit stating no clear opening is skipped; one stating one may be a door, so the story isn't measured. One test.
 
+## Review round 16 of step 2 (2026-11-26)
+
+No wrong answer found; two safeguards had no pin (a has_none claim resting on a reading of the law never rules out a ramp; a nosing within an inch of the space counts as in it). Both pinned; each pin fails when its safeguard is removed.
+
 ## Review round 1 of step 3 (2026-11-25)
 
 Three ways the count came out too low (each a possible false pass on Table 1006.3.4(1)): an opening with no door to the corridor wasn't counted as a way out (a lock-off pair read one unit); a function not on Table 1004.5's list (a typo, dormitory) ruled a group out; and a shared vestibule marked an ordinary room joined two units into one, which 1016.2.1 doesn't catch, so the words said beside the count were wrong. Fixed: openings count as ways out; only a listed other use rules a group out (the list tied to the frozen Table 1004.5 record by test); a lived-in room with no function stops the count; the words now name the real assumption (every room shared between units marked a corridor or lobby) beside 1016.2.1; they're said with a count of 0 too. One test each.
