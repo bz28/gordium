@@ -5854,7 +5854,7 @@ labels:
   '1012.9':
     label: flag
     topic: means_of_egress
-    reason: 'Guards where 1015 requires them on a ramp, built to 1015 (not brought in yet: section group 7''s): ramps aren''t measured for the Building Code, a person''s check.'
+    reason: 'Guards where 1015 requires them on a ramp, built to 1015 (not brought in yet: section group 7''s): ramps aren''t measured for the Building Code yet, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 336
@@ -5870,8 +5870,7 @@ labels:
   '1012.10':
     label: flag
     topic: means_of_egress
-    reason: 'Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail,
-      wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the
+    reason: 'Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier (a barrier stopping a 4-inch sphere anywhere within 4 inches of the floor or ground) (1012.10.1), or the
       floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not
       required on a ramp that needs no handrails and has flared sides per ICC A117.1''s curb ramp provisions, on a landing''s
       sides serving an adjoining ramp run or stairway, or on a landing''s sides with a dropoff of at most 1/2 inch within
@@ -5895,8 +5894,7 @@ labels:
   1012.10.1:
     label: reference
     topic: means_of_egress
-    reason: 'One of 1012.10''s two ways to give edge protection (a curb at least 4 inches high, or a rail, wall or barrier
-      stopping a 4-inch sphere): read with 1012.10''s flag, which quotes it.'
+    reason: 'One of 1012.10''s two ways to give edge protection (a curb at least 4 inches high, or a rail, wall or barrier, a barrier stopping a 4-inch sphere): read with 1012.10''s flag, which quotes it.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 336

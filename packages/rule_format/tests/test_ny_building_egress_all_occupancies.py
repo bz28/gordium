@@ -1215,16 +1215,20 @@ def test_no_rule_text_carries_yaml_quoting_into_what_people_read():
     assert not bad, bad
 
 
-def test_every_section_group_9_reference_with_words_to_follow_is_quoted_by_a_flag():
+GROUP_9_SECTIONS = ("1003", "1012")        # section group 9a
+
+
+def test_every_section_group_9_reference_with_words_to_follow_is_quoted_by_a_rule():
     """Review round 1 of section group 9a (P1): 1012.9 ('Guards shall be provided where required by Section 1015') was
     labeled a reference that no flag quoted, so nothing showed a ramp's guards while 1015 isn't brought in; 1012.1's
     'shall comply' sentences (ramped aisles, curb ramps) the same. Every piece of section group 9's sections labeled
-    reference is quoted whole by some rule, but a scope that only says where the chapter's sections apply."""
+    reference (GROUP_9_SECTIONS, each later PR of group 9 adding its own) is quoted whole by some rule or flag, but a
+    scope that only says where the chapter's sections apply."""
     labels = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]
     book = load(RULEBOOK)
     scope_only = {"1003.1"}                          # 'The general requirements ... shall apply to all three elements'
     for pid, lab in labels.items():
-        if pid.split(".")[0] not in ("1003", "1012") or lab["label"] != "reference" or pid in scope_only:
+        if pid.split(".")[0] not in GROUP_9_SECTIONS or lab["label"] != "reference" or pid in scope_only:
             continue
         for s in lab["sources"]:
             lines, _ = _quoted(book, s["page"], *s["lines"])

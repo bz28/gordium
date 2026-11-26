@@ -1484,8 +1484,8 @@
     "Egress · Ramp surface: A person checks this (Gordium doesn't decide it): A ramp's surface is of slip-resistant materials, securely attached: finishes aren't in the model, so a person's check.",
     "Egress · Outdoor ramps shed water: A person checks this (Gordium doesn't decide it): Outdoor ramps and their outdoor approaches are designed so water doesn't accumulate on walking surfaces: ramps aren't measured for the Building Code yet, so a person's check.",
     "Egress · Ramp handrails: A person checks this (Gordium doesn't decide it): A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren't measured for the Building Code yet, so a person's check.",
-    "Egress · Ramp edge protection: A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
     "Egress · Ramp guards: A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
+    "Egress · Ramp edge protection: A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier (a barrier stopping a 4-inch sphere anywhere within 4 inches of the floor or ground) (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
@@ -72587,84 +72587,6 @@
      }
     },
     {
-     "id": "egress.general.bc_1012_10_edge_protection",
-     "rule": "general.bc_1012_10_edge_protection",
-     "name": "Egress · Ramp edge protection (BCNYS 1012.10)",
-     "group": "law",
-     "status": "needs_review",
-     "mark": "?",
-     "proposed": "",
-     "required": "",
-     "margin": "",
-     "sign": "",
-     "zoom": null,
-     "measure": null,
-     "objects": [],
-     "points": null,
-     "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
-     "use_detail": false,
-     "part": null,
-     "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
-      "quotes": [
-       {
-        "text": "1012.10 Edge protection. Edge protection complying with Section 1012.10.1 or 1012.10.2 shall be provided on each side of ramp runs and at each side of ramp landings. Exceptions: 1. Edge protection is not required on ramps that are not required to have handrails, provided they have flared sides that comply with the ICC A117.1 curb ramp provisions. 2. Edge protection is not required on the sides of ramp landings serving an adjoining ramp run or stairway. 3. Edge protection is not required on the sides of ramp landings having a vertical dropoff of not more than 1/2 inch (12.7 mm) within 10 inches (254 mm) horizontally of the required landing area.",
-        "where": "1012.10, 2025 Building Code of New York State (BCNYS), PDF p.336"
-       },
-       {
-        "text": "1012.10.1 Curb, rail, wall or barrier. A curb, rail, wall or barrier shall be provided to serve as edge protection. A curb shall be not less than 4 inches (102 mm) in height. Barriers shall be constructed so that the barrier prevents the passage of a 4-inch-diameter (102 mm) sphere, where any portion of the sphere is within 4 inches (102 mm) of the floor or ground surface.",
-        "where": "1012.10.1, 2025 Building Code of New York State (BCNYS), PDF p.336"
-       },
-       {
-        "text": "1012.10.2 Extended floor or ground surface. The floor or ground surface of the ramp run or landing shall extend 12 inches (305 mm) minimum beyond the inside face of a handrail complying with Section 1014.",
-        "where": "1012.10.2, 2025 Building Code of New York State (BCNYS), PDF p.336"
-       }
-      ],
-      "citation": "1012.10, 2025 Building Code of New York State (BCNYS), PDF p.336",
-      "links": [],
-      "calc": null,
-      "scope": "",
-      "precision": "",
-      "at_limit": null
-     },
-     "law": "Egress (NY State Building Code 2025)",
-     "law_short": "Egress",
-     "law_key": "new_york/new_york_state_building",
-     "code": {
-      "section": "1012.10",
-      "quote": "1012.10 Edge protection. Edge protection complying with Section 1012.10.1 or 1012.10.2 shall be provided on each side of ramp runs and at each side of ramp landings. Exceptions: 1. Edge protection is not required on ramps that are not required to have handrails, provided they have flared sides that comply with the ICC A117.1 curb ramp provisions. 2. Edge protection is not required on the sides of ramp landings serving an adjoining ramp run or stairway. 3. Edge protection is not required on the sides of ramp landings having a vertical dropoff of not more than 1/2 inch (12.7 mm) within 10 inches (254 mm) horizontally of the required landing area."
-     },
-     "causes": [
-      {
-       "kind": "decide",
-       "key": "reason:egress.general.bc_1012_10_edge_protection",
-       "words": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
-       "elements": []
-      }
-     ],
-     "asks": [
-      {
-       "key": "reason:egress.general.bc_1012_10_edge_protection",
-       "why": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
-       "elements": [],
-       "kind": "decide",
-       "headline": "Check this by hand: a person decides it"
-      }
-     ],
-     "rule_name": "Ramp edge protection",
-     "in_code": {
-      "document": "2025 Building Code of New York State (BCNYS)",
-      "file": "gov.ny.building.2025.pdf",
-      "chapter": "10",
-      "chapter_title": "MEANS OF EGRESS",
-      "section": "1012",
-      "section_title": "Ramps",
-      "piece": "1012.10",
-      "piece_title": "Edge protection"
-     }
-    },
-    {
      "id": "egress.general.bc_1012_9_guards",
      "rule": "general.bc_1012_9_guards",
      "name": "Egress · Ramp guards (BCNYS 1012.9)",
@@ -72732,6 +72654,84 @@
       "section_title": "Ramps",
       "piece": "1012.9",
       "piece_title": "Guards"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_10_edge_protection",
+     "rule": "general.bc_1012_10_edge_protection",
+     "name": "Egress · Ramp edge protection (BCNYS 1012.10)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier (a barrier stopping a 4-inch sphere anywhere within 4 inches of the floor or ground) (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier (a barrier stopping a 4-inch sphere anywhere within 4 inches of the floor or ground) (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.10 Edge protection. Edge protection complying with Section 1012.10.1 or 1012.10.2 shall be provided on each side of ramp runs and at each side of ramp landings. Exceptions: 1. Edge protection is not required on ramps that are not required to have handrails, provided they have flared sides that comply with the ICC A117.1 curb ramp provisions. 2. Edge protection is not required on the sides of ramp landings serving an adjoining ramp run or stairway. 3. Edge protection is not required on the sides of ramp landings having a vertical dropoff of not more than 1/2 inch (12.7 mm) within 10 inches (254 mm) horizontally of the required landing area.",
+        "where": "1012.10, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       },
+       {
+        "text": "1012.10.1 Curb, rail, wall or barrier. A curb, rail, wall or barrier shall be provided to serve as edge protection. A curb shall be not less than 4 inches (102 mm) in height. Barriers shall be constructed so that the barrier prevents the passage of a 4-inch-diameter (102 mm) sphere, where any portion of the sphere is within 4 inches (102 mm) of the floor or ground surface.",
+        "where": "1012.10.1, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       },
+       {
+        "text": "1012.10.2 Extended floor or ground surface. The floor or ground surface of the ramp run or landing shall extend 12 inches (305 mm) minimum beyond the inside face of a handrail complying with Section 1014.",
+        "where": "1012.10.2, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1012.10, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.10",
+      "quote": "1012.10 Edge protection. Edge protection complying with Section 1012.10.1 or 1012.10.2 shall be provided on each side of ramp runs and at each side of ramp landings. Exceptions: 1. Edge protection is not required on ramps that are not required to have handrails, provided they have flared sides that comply with the ICC A117.1 curb ramp provisions. 2. Edge protection is not required on the sides of ramp landings serving an adjoining ramp run or stairway. 3. Edge protection is not required on the sides of ramp landings having a vertical dropoff of not more than 1/2 inch (12.7 mm) within 10 inches (254 mm) horizontally of the required landing area."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_10_edge_protection",
+       "words": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier (a barrier stopping a 4-inch sphere anywhere within 4 inches of the floor or ground) (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_10_edge_protection",
+       "why": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier (a barrier stopping a 4-inch sphere anywhere within 4 inches of the floor or ground) (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp edge protection",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.10",
+      "piece_title": "Edge protection"
      }
     },
     {
@@ -77807,8 +77807,8 @@
       "egress.general.bc_1012_7_1_ramp_surface",
       "egress.general.bc_1012_7_2_outdoor_conditions",
       "egress.general.bc_1012_8_handrails",
-      "egress.general.bc_1012_10_edge_protection",
       "egress.general.bc_1012_9_guards",
+      "egress.general.bc_1012_10_edge_protection",
       "egress.interior#1"
      ],
      "lines": [
@@ -79712,19 +79712,6 @@
        "name": "Egress · Ramp handrails (BCNYS 1012.8)"
       },
       {
-       "key": "review#4d0e9fee05",
-       "tier": "review",
-       "items": [
-        "egress.general.bc_1012_10_edge_protection"
-       ],
-       "folded": true,
-       "status": "needs_review",
-       "rules": 1,
-       "title": "Egress · Ramp edge protection (BCNYS 1012.10): A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
-       "mark": "?",
-       "name": "Egress · Ramp edge protection (BCNYS 1012.10)"
-      },
-      {
        "key": "review#97dc17c4ca",
        "tier": "review",
        "items": [
@@ -79736,6 +79723,19 @@
        "title": "Egress · Ramp guards (BCNYS 1012.9): A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
        "mark": "?",
        "name": "Egress · Ramp guards (BCNYS 1012.9)"
+      },
+      {
+       "key": "review#4d0e9fee05",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_10_edge_protection"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp edge protection (BCNYS 1012.10): A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier (a barrier stopping a 4-inch sphere anywhere within 4 inches of the floor or ground) (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp edge protection (BCNYS 1012.10)"
       },
       {
        "key": "review#3b8d16e054",
@@ -81190,22 +81190,22 @@
        "rules": 1
       },
       {
-       "key": "reason:egress.general.bc_1012_10_edge_protection",
-       "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
-       "elements": [],
-       "items": [
-        "egress.general.bc_1012_10_edge_protection"
-       ],
-       "rules": 1
-      },
-      {
        "key": "reason:egress.general.bc_1012_9_guards",
        "kind": "decide",
        "words": "A person checks this (Gordium doesn't decide it): Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren't measured for the Building Code yet, and 1015 isn't brought in (section group 7), so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1012_9_guards"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_10_edge_protection",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier (a barrier stopping a 4-inch sphere anywhere within 4 inches of the floor or ground) (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_10_edge_protection"
        ],
        "rules": 1
       }
@@ -101717,8 +101717,8 @@
    "egress.general.bc_1012_7_1_ramp_surface": "needs_review",
    "egress.general.bc_1012_7_2_outdoor_conditions": "needs_review",
    "egress.general.bc_1012_8_handrails": "needs_review",
-   "egress.general.bc_1012_10_edge_protection": "needs_review",
    "egress.general.bc_1012_9_guards": "needs_review",
+   "egress.general.bc_1012_10_edge_protection": "needs_review",
    "egress.interior#1": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
@@ -107132,8 +107132,8 @@
     "general.bc_1012_7_1_ramp_surface": "needs_review",
     "general.bc_1012_7_2_outdoor_conditions": "needs_review",
     "general.bc_1012_8_handrails": "needs_review",
-    "general.bc_1012_10_edge_protection": "needs_review",
-    "general.bc_1012_9_guards": "needs_review"
+    "general.bc_1012_9_guards": "needs_review",
+    "general.bc_1012_10_edge_protection": "needs_review"
    },
    "interior": {
     "parts": {
@@ -111063,7 +111063,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "fa9be43d60ba433d0be9435620d58aba79df0097f908d5ef696040b80976b615"
+   "new_york/ithaca_city": "8461c16a1500ff2462c57f8324e63313cb60673bc7f4a0dfdcb5f961bf4173ed"
   }
  }
 }

@@ -20612,6 +20612,29 @@ rules:
     the flags never pass.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1012_9_guards
+  kind: flag
+  topic: means_of_egress
+  title: Ramp guards (BCNYS 1012.9)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 16
+    - 16
+    quote: 1012.9 Guards. Guards shall be provided where required by Section 1015 and shall be constructed in accordance with
+      Section 1015.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren''t measured for the Building
+      Code yet, and 1015 isn''t brought in (section group 7), so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Review round 1 of section group 9a: 1012.9
+    was a reference at first, so nothing showed a ramp''s guards while 1015 isn''t brought in. Ramps are read by the house
+    measuring only; whether a building has one isn''t a fact the Building Code check is given, so the flag shows for every
+    building.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_1012_10_edge_protection
   kind: flag
   topic: means_of_egress
@@ -20647,8 +20670,7 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall
-      or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor
+    note: 'Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier (a barrier stopping a 4-inch sphere anywhere within 4 inches of the floor or ground) (1012.10.1), or the floor
       or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required
       on a ramp that needs no handrails and has flared sides per ICC A117.1''s curb ramp provisions, on a landing''s sides
       serving an adjoining ramp run or stairway, or on a landing''s sides with a dropoff of at most 1/2 inch within 10 inches
@@ -20659,28 +20681,5 @@ rules:
     spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
     1012.3 to 1012.10 where they are not an accessible route serving accessible parking spaces, other required accessible elements or part of an accessible means of egress: each only loosens, and
     the flags never pass.'
-  drafted_by: claude_code/claude-opus-5-5
-  status: draft
-- id: general.bc_1012_9_guards
-  kind: flag
-  topic: means_of_egress
-  title: Ramp guards (BCNYS 1012.9)
-  sources:
-  - file: gov.ny.building.2025.pdf
-    page: 336
-    lines:
-    - 16
-    - 16
-    quote: 1012.9 Guards. Guards shall be provided where required by Section 1015 and shall be constructed in accordance with
-      Section 1015.
-  examples:
-  - given: {}
-    expect: needs_review
-    note: 'Guards are provided on a ramp where 1015 requires them and built to 1015: ramps aren''t measured for the Building
-      Code yet, and 1015 isn''t brought in (section group 7), so a person''s check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Review round 1 of section group 9a: 1012.9
-    was a reference at first, so nothing showed a ramp''s guards while 1015 isn''t brought in. Ramps are read by the house
-    measuring only; whether a building has one isn''t a fact the Building Code check is given, so the flag shows for every
-    building.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
