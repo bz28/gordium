@@ -21,13 +21,16 @@ from rule_format import published
 from rule_format.rulebook import REPO, building_code_rulebook
 
 MAINE = "regulations/jurisdictions/maine/maine_state"
+NY = "regulations/jurisdictions/new_york/new_york_state"
+LAWS = (MAINE, NY, "regulations/jurisdictions/new_york/new_york_state_building")
 CERT = f"{MAINE}/7_published_rulebooks/general.published.json"
 
 
 def _copy_repo(dest: Path) -> Path:
     """A copy of the repo at dest that the compile can't tell from it: every name of the repo (an empty file for each,
     as the compile walks the repo's names: rulebook._in_repo), then the real bytes of the code the compile imports,
-    the shared files and Maine's law folder (its certificate left out)."""
+    the shared files and every state law's folder. No 7_published_rulebooks folder anywhere, as on a fresh clone
+    (they hold only what publish writes, gitignored while rules are draft)."""
     for top, dirs, files in os.walk(REPO):
         dirs[:] = [d for d in dirs if not published._left_out(d)]          # never into .git or a cache
         here = dest / Path(top).relative_to(REPO)
@@ -37,7 +40,7 @@ def _copy_repo(dest: Path) -> Path:
                 (here / name).write_bytes(b"")
     real = [f for package in ("rule_format", "document_extraction")
             for f in (REPO / "packages" / package / package).rglob("*")]
-    real += published.shared_files(REPO) + list((REPO / MAINE).rglob("*"))
+    real += published.shared_files(REPO) + [f for law in LAWS for f in (REPO / law).rglob("*")]
     for f in real:
         if f.is_file() and not published._generated(f.relative_to(REPO)):
             shutil.copyfile(f, dest / f.relative_to(REPO))
@@ -54,8 +57,9 @@ def _run(repo: Path, *args: str) -> tuple[int, str]:
 @pytest.fixture(scope="module")
 def copy(tmp_path_factory):
     repo = _copy_repo(tmp_path_factory.mktemp("published") / "repo")
-    code, said = _run(repo, MAINE)
-    assert code == 0 and "written" in said, said
+    assert not list(repo.rglob(published.PUBLISHED))
+    code, said = _run(repo)                    # every state law, in order: one's publishing never stales another
+    assert code == 0 and said.count("written") == len(LAWS), said
     return repo
 
 
@@ -143,8 +147,12 @@ def test_publish_check_fails_on_a_changed_input_of_each_kind_and_names_it(copy, 
 
 
 def test_publish_check_passes_when_clean_and_fails_on_a_missing_or_hand_edited_certificate(copy):
-    code, out = _run(copy, "--check", MAINE)
-    assert code == 0 and "matches a fresh compile" in out, out
+    """Review round 1 (F1): on a fresh clone (no 7_published_rulebooks folders) Maine's compile walked the repo
+    before New York's folders were made, so publishing New York made Maine's certificate stale at once. Clean, every
+    law matches a fresh compile and none is stale."""
+    code, out = _run(copy, "--check")
+    assert code == 0 and out.count("matches a fresh compile") == len(LAWS), out
+    assert [published.stale(copy / law, repo=copy) for law in LAWS] == [[]] * len(LAWS)
     cert = copy / CERT
     kept = cert.read_bytes()
     try:
@@ -190,6 +198,38 @@ def test_publish_refuses_a_law_with_problems_and_writes_nothing(copy):
         rulebook.write_bytes(kept)
 
 
+def test_a_name_that_appears_anywhere_in_the_law_folder_makes_its_certificate_stale(copy):
+    """Review round 1 (F2, confirmed by two sceptics): the compile also asks whether a file exists (a stat, which no
+    audit event shows): a copy of a book kept outside the repo in 1_source_documents is a problem. New York's compile
+    never listed that folder, so a copy appearing there left the certificate current while a live compile refused the
+    law. Every folder of the law folder is listed now, whatever the compile lists."""
+    cert = json.loads((copy / NY / "7_published_rulebooks/general.published.json").read_bytes())
+    folders = {d.relative_to(copy).as_posix() for d in [copy / NY, *(copy / NY).rglob("*")] if d.is_dir()
+               and not published._generated(d.relative_to(copy))}
+    assert folders <= set(cert["listed"]) and f"{NY}/1_source_documents" in cert["listed"]
+    (entry,) = [d for d in published.load(copy / NY / published.SOURCES)["documents"] if d.get("kept_outside_repo")]
+    copied = copy / NY / "1_source_documents" / entry["file"]
+    copied.write_bytes(b"%PDF a copy")
+    try:
+        assert any(f"folder {NY}/1_source_documents" in w for w in published.stale(copy / NY, repo=copy))
+        code, out = _run(copy, "--check", NY)
+        assert code == 1 and f"folder listing changed: {NY}/1_source_documents" in out, out
+    finally:
+        copied.unlink()
+    assert published.stale(copy / NY, repo=copy) == []
+
+
+def test_publishing_and_the_repo_walk_leave_out_the_same_names():
+    """Review round 1 (F3): the listings a certificate keeps leave out the names tools make and what publish writes;
+    the compile's one walk of the repo (rulebook._in_repo) must leave out exactly the same, or a certificate could miss
+    a name the compile sees. One rule for both."""
+    from rule_format import rulebook
+    assert published._left_out is rulebook.generated_name
+    assert published.PUBLISHED in rulebook.GENERATED_NAMES and published.SUFFIX == rulebook.PUBLISHED_SUFFIX
+    for name in ("__pycache__", ".git", "bin", "obj", "x.egg-info", "general.published.json", published.PUBLISHED):
+        assert rulebook.generated_name(name), name
+
+
 # ---- in-process -----------------------------------------------------------------------------------------------------
 
 def test_the_typed_json_keeps_dates_and_sets_and_refuses_what_it_cant_keep():
@@ -231,3 +271,13 @@ def test_ensure_publishes_only_what_is_missing_or_stale(monkeypatch, tmp_path):
     (tmp_path / "b").unlink()                                    # missing: published
     assert published.ensure(missing_only=True) == ["stale (input changed: x)"] and calls == ["b"]
     assert not (tmp_path / ".lock").exists()
+
+
+def test_a_report_a_rule_cites_must_be_under_docs_research_where_certificates_list_it():
+    """Review round 1 (F2's class, a sceptic's sweep): a rule's `report` was checked only to exist (a stat, which no
+    audit event shows), wherever it was: one outside docs/research/ (a folder every certificate lists) could appear or
+    go without the certificate going stale. A report must be under docs/research/."""
+    from rule_format import rulebook
+    assert rulebook._report_problems({"report": "docs/research/2026-10-20_architect_questions.md"}, "r") == []
+    for elsewhere in ("packages/rule_format/README.md", "docs/research/../../packages/rule_format/README.md"):
+        assert (REPO / elsewhere).is_file() and rulebook._report_problems({"report": elsewhere}, "r"), elsewhere
