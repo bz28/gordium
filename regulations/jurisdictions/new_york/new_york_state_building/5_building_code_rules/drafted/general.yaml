@@ -20197,8 +20197,8 @@ rules:
     note: 'Elevators, escalators and moving walks are not used as a component of a required means of egress from any other
       part of the building, except elevators used as an accessible means of egress per 1009.4: which ways out the architect
       counts on beyond the doors and stairs the routes read isn''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9a. 1009.4 is section group 9b's (accessible means
-    of egress).
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. 1009.4 isn''t brought in (accessible means of
+    egress: a later PR of section group 9).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1012_2_slope
@@ -20229,12 +20229,13 @@ rules:
     expect: needs_review
     note: 'A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian
       ramp no steeper than 1 in 8 (12.5 percent); ramped aisles in assembly spaces comply with 1030 and curb ramps with ICC A117.1 instead (1012.1): ramps aren''t measured for the Building Code yet, so a person''s check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
-    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
-    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference, quoted by the slope flag: review round 1) sends ramped aisles in assembly
-    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
-    1012.3 to 1012.10 where they are not an accessible route serving accessible parking spaces, other required accessible elements or part of an accessible means of egress: each only loosens, and
-    the flags never pass.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only (the
+    ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact it is
+    given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference, quoted by the slope flag: review round
+    1) sends ramped aisles in assembly spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps
+    used for pedestrian exit access from 1012.3 to 1012.10 where they are not an accessible route serving accessible parking
+    spaces, other required accessible elements or part of an accessible means of egress: each only loosens, and the flags never
+    pass. 1030 (ramped aisles in assembly spaces) and ICC A117.1 (curb ramps) aren''t brought in.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1012_3_cross_slope

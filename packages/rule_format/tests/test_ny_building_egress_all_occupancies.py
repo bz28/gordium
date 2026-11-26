@@ -906,7 +906,9 @@ def test_more_than_one_reads_the_same_comparison_in_every_piece():
     1020.5's same words read '>': the second reading says what the printed sentence says of each number, so 'more
     than <n>' is '>' everywhere in this book (a condition, but a comparison all the same). Section group 9a: where the
     sentence denies the verb before it ('shall not overhang that post or pylon more than 4 inches', 1003.3.2), the
-    number is a maximum, '<=': the one such sentence is named here, its words checked, so no other may slip through."""
+    number is a maximum, '<=': the one such sentence is named here, its words checked. A number recorded with its
+    'not' ('not more than 6 inch', 'not project horizontally more than 4 inch') is '<=', but 1012.6.3's 'not be
+    required to be more than 48 inch', the least a landing needs, '>=' with its verification flag (review round 4)."""
     pieces = load(NY / "text_verification.yaml")["pieces"]
     denied = {("1003.3.2", "more than 4 inch"): "shall not overhang that post or pylon more than 4 inches"}
     seen = []
@@ -915,6 +917,13 @@ def test_more_than_one_reads_the_same_comparison_in_every_piece():
             if str(n).startswith("more than ") and (pid, n) not in denied:
                 seen.append((pid, n, comp))
     assert seen and all(comp == ">" for _, _, comp in seen), [x for x in seen if x[2] != ">"]
+    capped = {("1012.6.3", "not be required to be more than 48 inch"): ">="}
+    for pid, e in pieces.items():
+        for n, comp in zip(e["second_reading_numbers"], e["second_reading_comparisons"]):
+            if re.search(r"not.*more than", str(n)):
+                assert comp == capped.get((pid, n), "<="), (pid, n, comp)
+                if (pid, n) in capped:
+                    assert any(f"'{n}' ({comp})" in f for f in e.get("flags") or []), (pid, n)
     for (pid, n), words in denied.items():
         e = pieces[pid]
         assert e["second_reading_comparisons"][e["second_reading_numbers"].index(n)] == "<=", (pid, n)
@@ -1248,8 +1257,10 @@ def test_each_section_group_9_flag_names_what_it_points_to_that_isnt_brought_in(
         quotes = " ".join(s["quote"] for s in r["sources"])
         named = set(re.findall(r"(?:Sections?|through|or|and|,) (\d{3,4}(?:\.\d+)*)", quotes))
         named |= {"ICC A117.1"} if "ICC A117.1" in quotes else set()
-        said = r.get("notes") or ""                  # the notes, where the flag says what isn't brought in
+        # review round 4: in a sentence of the notes saying it isn't brought in, the reference whole; a section is
+        # brought in only where its own id is a piece (1030 isn't, though 1030.7 and 1030.8 are)
+        said = [s for s in re.split(r"(?<=\.) ", r.get("notes") or "") if "brought in" in s]
         for ref in sorted(named):
-            if ref in brought or any(p.startswith(ref + ".") for p in brought):
+            if ref in brought:
                 continue
-            assert ref in said, (r["id"], ref)
+            assert any(re.search(rf"(?<![\d.]){re.escape(ref)}(?![\d]|\.\d)", s) for s in said), (r["id"], ref)
