@@ -424,7 +424,7 @@ public sealed class ResultListTests
         // the add-in (Revit-only, not built here): a row selected sends Select, which never calls ShowElements; Show
         // (the button, or Space) sends Zoom, which does
         var pane = Addin("ResultsPane.cs");
-        Assert.Contains("new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, SetUp, _theme, SaveAnswers)", pane, StringComparison.Ordinal);
+        Assert.Contains("new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, SetUp, _theme, SaveAnswers, MoreTime)", pane, StringComparison.Ordinal);
         Assert.Contains("private static void Select(ResultRow row) => Post(\"Select in model\", ui => ShowElements(ui, row, zoom: false));", pane, StringComparison.Ordinal);
         Assert.Contains("private static void Zoom(ResultRow row) => Post(\"Show in model\", ui => ShowElements(ui, row, zoom: true));", pane, StringComparison.Ordinal);
         Assert.Contains("        if (zoom)\n            uidoc.ShowElements(found);", pane, StringComparison.Ordinal);
