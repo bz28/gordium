@@ -395,7 +395,12 @@ def test_a_room_stopped_by_a_tie_is_not_measured_with_its_own_reason_never_calle
 
 
 @pytest.mark.parametrize("key, bad", [("rooms", 5), ("rooms", True), ("unknown_spaces", 5), ("unknown_spaces", True),
-                                      ("unknown_spaces", "x")])
+                                      ("unknown_spaces", "x"),
+                                      ("unknown_spaces", [{"id": ["u"], "name": "u", "level": "L1"}]),
+                                      ("unknown_spaces", [{"id": "u", "name": "u", "level": ["X"]}]),
+                                      ("unknown_spaces", [{"id": "u", "name": "u", "level": {"id": "X"}}]),
+                                      ("story_outlines", [{"level": ["X"]}]),
+                                      ("story_outlines", [{"level": {"id": "X"}}])])
 def test_a_description_list_that_isnt_a_list_is_never_a_crash(key, bad):
     """A hand-written description may give its rooms or unknown spaces as a number or text: the routes say what
     they can't read (or measure without it), never a crash."""

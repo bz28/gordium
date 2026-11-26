@@ -102,7 +102,7 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     parts["means_of_egress_door"] = door_parts(description, floor, toward)   # every door given (section group 6a)
     if floor.stops:                                      # a part that can't be placed on a story: none is "none"
         for u in unknown:
-            if u.get("level") not in floor.stories:
+            if not isinstance(u.get("level"), str) or u.get("level") not in floor.stories:
                 _maybe_parts(u, None, parts)
     _not_measured_yet(parts)
     out["parts"] = parts

@@ -282,9 +282,12 @@ def _stated_ground(description, reader) -> list | None:
     """Every finished ground level the description states at an opening (`ground_outside`: one value or a list) and
     every area well's floor, in inches; None where one is given but can't be read."""
     out = []
-    for o in (description or {}).get("openings") or []:
+    openings = (description or {}).get("openings") if isinstance(description, dict) else None
+    if openings is not None and not isinstance(openings, list):
+        return None                                      # openings that aren't a list: their ground isn't read
+    for o in openings or []:
         if not isinstance(o, dict):
-            continue
+            return None                                  # an opening that isn't one: its ground isn't read
         given = o.get("ground_outside")
         well = o.get("area_well")
         try:

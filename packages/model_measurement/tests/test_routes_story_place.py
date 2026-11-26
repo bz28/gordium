@@ -663,3 +663,16 @@ def test_lower_ground_stated_at_an_opening_is_the_lowest_ground(ground, opening)
     got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, ground)
     assert not set(FACTS) & set(got["L0"]["measures"]) and not set(FACTS) & set(got["L1"]["measures"])
     assert got["L0"]["not_measured"][FIRST] == STOPS["place_under_lowest"].format(gap="8 ft")
+
+
+@pytest.mark.parametrize("openings", [5, True, {"w": {"id": "w", "ground_outside": 2}}, [[{"id": "w", "ground_outside": 2}]],
+                                      [{"id": "w", "ground_outside": 2}, "x"]])
+def test_openings_that_arent_a_list_of_openings_leave_the_place_not_known(openings):
+    """Cold review of the room-id fix: openings given as a number, a mapping, or with an entry that isn't an opening
+    can't be read for the ground beside them: the stories' places are not measured, never measured past a ground
+    stated higher at an opening, and never a crash."""
+    desc, stories = building([[0], [10]])
+    desc["openings"] = openings
+    got = places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})
+    assert FIRST not in got["L0"]["measures"]
+    assert _reason(got).startswith(STOPS["ground_openings_not_read"].split("{")[0])
