@@ -62,7 +62,10 @@ def _one_exit_building(interior, sprinkler):
                      "assembly_fixed_seating": False, "special_egress_spaces": False, "occupant_load_increased": False,
                      "r2_sleeping_units": False, "emergency_escape_openings_1031": True,
                      "corridors_within_dwelling_units": False}
-    return {k: i[k] for k in ("doors", "rooms", "building")}
+    i["stairs"] = [{"id": "flight west", "nosings": [[[4.5, 13, 0], [4.5, 17, 0]]]}]    # within the west enclosure
+    i["has_none"] = [{"kind": k, "source": "the eval building: none drawn"}
+                     for k in ("ramp", "alternating_tread_device", "ships_ladder")]
+    return {k: i[k] for k in ("doors", "rooms", "building", "stairs", "has_none")}
 
 
 @pytest.mark.parametrize("sprinkler,residential", list(itertools.product(("none", "nfpa_13r", "nfpa_13"), (0, 1, 2))))

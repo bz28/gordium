@@ -173,11 +173,15 @@ STOPS = {
     # the dwelling units on a story (Table 1006.3.4(1): dwelling_units.py)
     "units_use_unknown": "the room {name} has no use given: whether it is a corridor (shared) or part of a dwelling "
                          "unit isn't known",
-    "units_function_unknown": "a room of the space of {name} states no function, or one not on Table 1004.5's list "
-                              "(Revit's room mark for it): whether it is a dwelling unit, or a room shared between "
-                              "units, isn't known",
-    "units_no_entrance": "the space of {name} has no door to a corridor, an exit or the outside: it may be part of a "
-                         "dwelling unit on two stories, which story counts it isn't known",
+    "units_function_unknown": "a room of the space of {name} states no function, or one that doesn't settle it (not "
+                              "on Table 1004.5's list, or a sleeping use; Revit's room mark for it): whether it is a "
+                              "dwelling unit, or a room shared between units, isn't known",
+    "units_stair": "the space of {name} may have a stair, ramp or ladder within it (one not read, or not said to be "
+                   "none, may be anywhere): it may hold the upper part of a dwelling unit whose door is downstairs",
+    "units_shared_room": "the room {room} opens onto two or more rooms of the space of {name}: it may be shared by two "
+                         "dwelling units",
+    "units_no_entrance": "the space of {name} has no door or opening to a corridor, an exit or the outside: it may be "
+                         "part of a dwelling unit on two stories, which story counts it isn't known",
     "units_entrances": "the space of {name} has {count} ways out to the corridors, exits or outside ({doors}): it "
                        "may be two dwelling units joined by a door",
     # each door's own part (doors.py, section group 6a): its sizes only from the maker's stated clear opening

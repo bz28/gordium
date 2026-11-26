@@ -25,7 +25,8 @@ from model_measurement.routes.floor import read  # noqa: E402
 from model_measurement.routes.stops import STOPS, Stop  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[3]
-UNITS_KEYS = {"units_use_unknown", "units_function_unknown", "units_no_entrance", "units_entrances"}
+UNITS_KEYS = {"units_use_unknown", "units_function_unknown", "units_no_entrance", "units_entrances", "units_stair",
+              "units_shared_room"}
 FUNCTIONS = ("residential", "business", None)
 
 
@@ -52,13 +53,21 @@ def layout(suites, joins):
     for i, joined in enumerate(joins):
         if joined:
             doors.append(door(f"j{i}", (12 * i + 11.75, 5), (0, 1), (f"s{i}", f"s{i + 1}")))
-    return description(rooms, doors)
+    desc = description(rooms, doors)
+    desc["stairs"] = []                                  # no stair, ramp or ladder: said, as a host says it
+    desc["has_none"] = [{"kind": k, "source": "the test's corridor: none drawn"}
+                        for k in ("ramp", "alternating_tread_device", "ships_ladder")]
+    return desc
 
 
 def count(desc):
+    """The story's count as measure() works it out (the stairs read as it reads them), or its Stop."""
+    from model_measurement.routes import _stair_in, _stair_points
     story = read(desc).stories["L1"]
+    stairs = _stair_points(desc)
     try:
-        return units_on(story, {r["id"]: r for r in desc["rooms"]}, _is_exit)
+        return units_on(story, {r["id"]: r for r in desc["rooms"]}, _is_exit,
+                        lambda g: any(_stair_in(st, g, story) for st in stairs))
     except Stop as s:
         return s
 
@@ -118,7 +127,11 @@ def test_the_four_unit_apartment_two_units_a_story_with_the_reading_beside_them(
     As Revit sent it (no function marked): not measured."""
     sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
     import make_ny_build_data as build
-    for s in measure(build.interior_of())["parts"]["story"]:
+    interior = build.interior_of()
+    interior["stairs"] = [{"id": f"flight {x}", "nosings": [[[x, 13, 0], [x, 17, 0]]]} for x in (4.5, 55.5)]
+    interior["has_none"] = [{"kind": k, "source": "the eval building: none drawn"}
+                            for k in ("ramp", "alternating_tread_device", "ships_ladder")]
+    for s in measure(interior)["parts"]["story"]:
         assert s["measures"][UNITS_FACT] == 2, s["name"]
         assert s["rests_on"][UNITS_FACT] == RESTS_ON
     assert "1016.2.1 (p.341)" in RESTS_ON and QUOTE_1016_2_1 in RESTS_ON
@@ -135,6 +148,7 @@ def test_each_reason_has_a_case():
         assert isinstance(got, Stop) and got.key == key, (suites, got)
         seen.add(key)
     seen.add("units_use_unknown")                        # test_a_room_with_no_use_given_may_be_a_corridor...
+    seen |= {"units_stair", "units_shared_room"}         # the round 2 tests below
     assert seen == UNITS_KEYS
 
 
@@ -186,3 +200,32 @@ def test_the_listed_other_uses_are_table_1004_5_but_residential_and_sleeping():
                      "records/occupant_load_factors.yaml")
     table = set(yaml.safe_load(record.read_text(encoding="utf-8"))["functions"])
     assert NOT_DWELLING == table - {"residential", "dormitory", "institutional_sleeping"}
+
+
+# --- review round 2 (PR 3) -----------------------------------------------------------------------------------------
+
+def test_a_stair_in_a_group_or_not_read_never_counts_it_as_one_unit():
+    """Suite 0 the upper floor of a two-story unit (its own stair down to its door, no door to the corridor), joined by
+    a door to suite 1, a unit with its own door: one way out, but two units. A stair within the group, or stairs not
+    read at all, leave the count not measured."""
+    desc = layout([("residential", 1, 0), ("residential", 1, 1), ("business", 1, 1)], (True, False))
+    assert count(desc) == 1                              # as drawn with no stair: the reading counts one
+    desc["stairs"] = [{"id": "st", "nosings": [[[2, 2, 0], [2, 8, 0]], [[3, 2, 0.6], [3, 8, 0.6]]]}]
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_stair", got
+    del desc["stairs"]
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_stair", got
+
+
+def test_a_closet_between_two_rooms_of_a_group_may_be_shared():
+    """Two residential rooms (one with a door to the corridor) each opening into a closet that sits between them:
+    the closet may be shared by two units; not measured. A closet opening into one room only changes nothing."""
+    desc = layout([("residential", 1, 1), ("residential", 1, 0), ("business", 1, 1)], (False, False))
+    desc["rooms"].append(room("k", rect(0, 10.5, 23.5, 15), use="closet", lockable=False, pass_through=False))
+    desc["doors"] += [door("k0", (5, 10.25), (1, 0), ("s0", "k")), door("k1", (17, 10.25), (1, 0), ("s1", "k"))]
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_shared_room", got
+    desc["doors"] = [d for d in desc["doors"] if d["id"] != "k1"]
+    desc["doors"].append(door("e10", (15, -0.25), (1, 0), ("s1", "c")))
+    assert count(desc) == 2

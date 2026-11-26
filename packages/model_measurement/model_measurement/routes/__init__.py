@@ -182,7 +182,8 @@ def _story_parts(story, uses, items, unknown, parts, r, building=None, stairs=()
     except Stop as s:
         sp["not_measured"][OUTSIDE_FACT] = s.reason
     try:
-        sp["measures"][UNITS_FACT] = dwelling_units.units_on(story, items, _is_exit)
+        sp["measures"][UNITS_FACT] = dwelling_units.units_on(
+            story, items, _is_exit, lambda group: any(_stair_in(st, group, story) for st in stairs))
         sp.setdefault("rests_on", {})[UNITS_FACT] = dwelling_units.RESTS_ON   # beside every row reading it (0 too)
     except Stop as s:
         sp["not_measured"][UNITS_FACT] = s.reason

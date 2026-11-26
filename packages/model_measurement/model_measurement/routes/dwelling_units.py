@@ -16,8 +16,11 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md, step 3):
 - A group is a dwelling unit where one of its rooms states the function residential (Table 1004.5, the room mark
   Gordium: Function). A group whose rooms that could be lived in (not a toilet, closet or storeroom) all state
   another function is no dwelling unit; one where such a room states none may be one: not measured.
-- A dwelling unit reaches the exits without passing through another (1016.2.1), so a group with one door to a shared
-  space is one unit: Gordium's reading, to confirm, said with every row reading the count (`rests_on`, RESTS_ON),
+- A group with a stair, ramp or ladder within it (or one not read, or not said to be none: it may be anywhere), or
+  with a closet, toilet or storeroom opening onto two or more of its rooms, may hold the upper part of a unit whose
+  door is downstairs, or two units sharing that room: not measured.
+- A dwelling unit reaches the exits without passing through another (1016.2.1), so a group with one way out to a
+  shared space is one unit: Gordium's reading, to confirm, said with every row reading the count (`rests_on`, RESTS_ON),
   which also says the count holds only if 1016.2.1 is met (a flag, a person's check, in every Group R-2 answer). It
   never holds a pass: a second unit drawn with no door of its own would break 1016.2.1 itself. A group with
   two or more such doors may be two units joined by a door (a lock-off): not measured. One with none reaches the
@@ -55,9 +58,10 @@ RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with a residenti
             "two units into one) and BCNYS 1016.2.1 (p.341) is met: \"" + QUOTE_1016_2_1 + "\"")
 
 
-def units_on(story, items: dict, is_exit) -> int:
+def units_on(story, items: dict, is_exit, stair_in=lambda group: False) -> int:
     """The dwelling units on the story (see the module's words). `items`: the description's rooms by id (their
-    `function`); `is_exit(story, room id)`: whether the room is itself an exit (routes._is_exit, Stop where unclear)."""
+    `function`); `is_exit(story, room id)`: whether the room is itself an exit (routes._is_exit, Stop where unclear);
+    `stair_in(group)`: whether a stair, ramp or ladder may stand in the group (one not read may be anywhere)."""
     if story.stops:
         raise Stop("story_not_measured", reasons="; ".join(story.stops))
     for rid, room in sorted(story.rooms.items()):
@@ -85,5 +89,12 @@ def units_on(story, items: dict, is_exit) -> int:
             raise Stop("units_no_entrance", name=names)
         if len(entrances) > 1:
             raise Stop("units_entrances", name=names, count=len(entrances), doors=", ".join(entrances))
+        if stair_in(g):                                  # a way to another story: the upper part of a unit whose door
+            raise Stop("units_stair", name=names)        # is downstairs may share this group's one way out
+        for r in g:                                      # a closet, toilet or storeroom between two parts of it may
+            if story.rooms[r].use in NOT_LIVED_IN:       # be shared by two units
+                others = {x for _, sides in links if r in sides for x in sides} - {r}
+                if len(others & g) >= 2:
+                    raise Stop("units_shared_room", name=names, room=story.rooms[r].name)
         count += 1
     return count
