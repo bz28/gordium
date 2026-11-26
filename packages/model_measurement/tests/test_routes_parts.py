@@ -193,6 +193,49 @@ E2E = ["general.nfpa_16_2_6_2_point_in_room_to_exit", "general.nfpa_16_2_6_2_roo
        "general.nfpa_16_2_5_2_dead_end"]
 
 
+def _corridor_with(**stated):
+    d = day_care()
+    next(r for r in d["rooms"] if r["id"] == "c").update(stated)
+    c, = measure(d)["parts"]["corridor"]
+    return c
+
+
+@pytest.mark.parametrize("stated, rating, smoke", [
+    ({"fire_rating_hours": 1, "walls_smoke_partitions": True}, 1, True),
+    ({"fire_rating_hours": 0.5, "walls_smoke_partitions": False}, 0.5, False),
+    ({"fire_rating_hours": 0}, 0, None),                         # 0: not rated (a statement, never "not given")
+])
+def test_a_corridors_stated_rating_and_smoke_partitions_are_its_measures(stated, rating, smoke):
+    """The egress UI audit's finding 5 (2026-11-26): the corridor walls' fire-resistance rating and whether they are
+    smoke partitions are the architect's to state (a rating is the assembly's, which the model's geometry can't
+    show for certain), on the corridor's room (fire_rating_hours, walls_smoke_partitions); before, nothing could give
+    them, so every rule reading them needed review for good."""
+    c = _corridor_with(**stated)
+    assert c["measures"]["corridor_fire_rating_hours"] == rating
+    assert "corridor_fire_rating_hours" not in c["not_measured"]
+    if smoke is None:
+        assert "walls_smoke_partitions" in c["not_measured"]["corridor_walls_smoke_partitions"]
+    else:
+        assert c["measures"]["corridor_walls_smoke_partitions"] is smoke
+
+
+@pytest.mark.parametrize("stated", [{"fire_rating_hours": True}, {"fire_rating_hours": "1 HR"},
+                                    {"fire_rating_hours": -1}, {"fire_rating_hours": float("nan")},
+                                    {"walls_smoke_partitions": "yes"}, {"walls_smoke_partitions": 1}])
+def test_a_corridor_fact_not_of_its_kind_is_said_never_read(stated):
+    c = _corridor_with(**stated)
+    m = {"fire_rating_hours": "corridor_fire_rating_hours", "walls_smoke_partitions": "corridor_walls_smoke_partitions"}[
+        next(iter(stated))]
+    assert m not in c["measures"] and " is given as " in c["not_measured"][m], c["not_measured"][m]
+
+
+def test_a_corridor_fact_left_out_is_said_by_its_key(plain):
+    c, = plain["parts"]["corridor"]
+    assert c["not_measured"]["corridor_fire_rating_hours"].startswith("not stated for this corridor:")
+    assert "fire_rating_hours" in c["not_measured"]["corridor_fire_rating_hours"]
+    assert "no mark for it" not in c["not_measured"]["corridor_fire_rating_hours"]
+
+
 def test_end_to_end_a_small_day_care_story_complies_with_the_nfpa_route_rules(plain, maine):
     assert {rid: result(maine, rid, plain) for rid in E2E} == {rid: "pass" for rid in E2E}
 

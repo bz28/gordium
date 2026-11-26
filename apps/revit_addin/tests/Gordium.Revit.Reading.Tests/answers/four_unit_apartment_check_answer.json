@@ -1313,28 +1313,28 @@
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): occupancy group (whether Group I-4) not measured (or not usable)",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): occupancy group (the building's one group, or mixed), sprinkler system (NFPA 13) not measured (or not usable)",
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): occupancy group (the building's one group, or mixed), sprinkler system (NFPA 13) not measured (or not usable)",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): occupancy group (the building's one group, or mixed), sprinkler system (NFPA 13), sprinkler system (NFPA 13R), sprinkler system (NFPA 13D) not measured (or not usable)",
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): occupancy group (the building's one group, or mixed), sprinkler system (NFPA 13), sprinkler system (NFPA 13R), sprinkler system (NFPA 13D) not measured (or not usable)",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): fixed assembly seating (whether any room has it) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; emergency voice/alarm system (whether the whole building has one per 907.5.2.2) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): fixed assembly seating (whether any room has it) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; emergency voice/alarm system (whether the whole building has one per 907.5.2.2) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
     "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable)",
-    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
-    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+    "Level 1 › CORRIDOR L1: Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
+    "Level 2 › CORRIDOR L2: Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
     "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D02) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Level 1 › Single-Flush: Door 36\" x 84\": Level 1 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D03) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
@@ -52991,7 +52991,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -53000,7 +53000,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -53108,7 +53108,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
        "sprinkler system (NFPA 13R) not measured (or not usable)"
@@ -53143,11 +53143,12 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_fire_rating_hours",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
-       "measure": "corridor_fire_rating_hours"
+       "measure": "corridor_fire_rating_hours",
+       "field": "rooms[].fire_rating_hours"
       }
      ],
      "law": "Egress (NY State Building Code 2025)",
@@ -53177,14 +53178,15 @@
        "headline": "Set the sprinkler system"
       },
       {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "key": "field:rooms[].fire_rating_hours",
+       "why": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
        "measure": "corridor_fire_rating_hours",
-       "kind": "measure",
-       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+       "kind": "mark",
+       "field": "rooms[].fire_rating_hours",
+       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
       }
      ],
      "rule_name": "Corridor rating, H-1, H-2, H-3",
@@ -53215,7 +53217,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -53224,7 +53226,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -53332,7 +53334,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
        "sprinkler system (NFPA 13R) not measured (or not usable)"
@@ -53367,11 +53369,12 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_fire_rating_hours",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
-       "measure": "corridor_fire_rating_hours"
+       "measure": "corridor_fire_rating_hours",
+       "field": "rooms[].fire_rating_hours"
       }
      ],
      "law": "Egress (NY State Building Code 2025)",
@@ -53401,14 +53404,15 @@
        "headline": "Set the sprinkler system"
       },
       {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "key": "field:rooms[].fire_rating_hours",
+       "why": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
        "measure": "corridor_fire_rating_hours",
-       "kind": "measure",
-       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+       "kind": "mark",
+       "field": "rooms[].fire_rating_hours",
+       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
       }
      ],
      "rule_name": "Corridor rating, H-1, H-2, H-3",
@@ -53439,7 +53443,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -53448,7 +53452,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -53557,7 +53561,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
@@ -53641,7 +53645,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -53650,7 +53654,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -53759,7 +53763,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
@@ -53843,7 +53847,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -53852,7 +53856,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -54004,7 +54008,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
@@ -54089,7 +54093,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -54098,7 +54102,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -54250,7 +54254,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
@@ -54335,7 +54339,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -54344,7 +54348,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -54497,7 +54501,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
@@ -54583,7 +54587,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -54592,7 +54596,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -54745,7 +54749,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
@@ -55215,7 +55219,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -55224,7 +55228,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -55375,7 +55379,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
@@ -55411,11 +55415,12 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_fire_rating_hours",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
-       "measure": "corridor_fire_rating_hours"
+       "measure": "corridor_fire_rating_hours",
+       "field": "rooms[].fire_rating_hours"
       }
      ],
      "law": "Egress (NY State Building Code 2025)",
@@ -55445,14 +55450,15 @@
        "headline": "Set the sprinkler system"
       },
       {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "key": "field:rooms[].fire_rating_hours",
+       "why": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
        "measure": "corridor_fire_rating_hours",
-       "kind": "measure",
-       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+       "kind": "mark",
+       "field": "rooms[].fire_rating_hours",
+       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
       }
      ],
      "rule_name": "Corridor rating, I-1, I-3",
@@ -55483,7 +55489,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -55492,7 +55498,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
+      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -55643,7 +55649,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
@@ -55679,11 +55685,12 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_fire_rating_hours",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
-       "measure": "corridor_fire_rating_hours"
+       "measure": "corridor_fire_rating_hours",
+       "field": "rooms[].fire_rating_hours"
       }
      ],
      "law": "Egress (NY State Building Code 2025)",
@@ -55713,14 +55720,15 @@
        "headline": "Set the sprinkler system"
       },
       {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "key": "field:rooms[].fire_rating_hours",
+       "why": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
        "measure": "corridor_fire_rating_hours",
-       "kind": "measure",
-       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+       "kind": "mark",
+       "field": "rooms[].fire_rating_hours",
+       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
       }
      ],
      "rule_name": "Corridor rating, I-1, I-3",
@@ -55751,7 +55759,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -55760,7 +55768,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -55848,7 +55856,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
        "sprinkler system (NFPA 13R) not measured (or not usable)",
@@ -55876,11 +55884,12 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_fire_rating_hours",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
-       "measure": "corridor_fire_rating_hours"
+       "measure": "corridor_fire_rating_hours",
+       "field": "rooms[].fire_rating_hours"
       },
       {
        "kind": "mark",
@@ -55926,14 +55935,15 @@
        "headline": "Set the sprinkler system"
       },
       {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "key": "field:rooms[].fire_rating_hours",
+       "why": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
        "measure": "corridor_fire_rating_hours",
-       "kind": "measure",
-       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+       "kind": "mark",
+       "field": "rooms[].fire_rating_hours",
+       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
       }
      ],
      "rule_name": "Corridor rating, I-4",
@@ -55964,7 +55974,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -55973,7 +55983,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
+      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -56061,7 +56071,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "sprinkler system (NFPA 13) not measured (or not usable)",
        "sprinkler system (NFPA 13R) not measured (or not usable)",
@@ -56089,11 +56099,12 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_fire_rating_hours",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
-       "measure": "corridor_fire_rating_hours"
+       "measure": "corridor_fire_rating_hours",
+       "field": "rooms[].fire_rating_hours"
       },
       {
        "kind": "mark",
@@ -56139,14 +56150,15 @@
        "headline": "Set the sprinkler system"
       },
       {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "key": "field:rooms[].fire_rating_hours",
+       "why": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
        "measure": "corridor_fire_rating_hours",
-       "kind": "measure",
-       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+       "kind": "mark",
+       "field": "rooms[].fire_rating_hours",
+       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
       }
      ],
      "rule_name": "Corridor rating, I-4",
@@ -56177,7 +56189,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -56186,7 +56198,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -56249,7 +56261,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)"
       ],
       "decide": false
      },
@@ -56257,11 +56269,12 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_fire_rating_hours",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
-       "measure": "corridor_fire_rating_hours"
+       "measure": "corridor_fire_rating_hours",
+       "field": "rooms[].fire_rating_hours"
       },
       {
        "kind": "decide",
@@ -56281,14 +56294,15 @@
      },
      "asks": [
       {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "key": "field:rooms[].fire_rating_hours",
+       "why": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
        "measure": "corridor_fire_rating_hours",
-       "kind": "measure",
-       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+       "kind": "mark",
+       "field": "rooms[].fire_rating_hours",
+       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
       },
       {
        "key": "flag",
@@ -56328,7 +56342,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -56337,7 +56351,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
       "quotes": [
        {
         "text": "1020.2 Construction. Corridors shall be fire-resistance rated in accordance with Table 1020.2. The corridor walls required to be fire- resistance rated shall comply with Section 708 for fire partitions.",
@@ -56400,7 +56414,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)"
       ],
       "decide": false
      },
@@ -56408,11 +56422,12 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_fire_rating_hours",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
-       "measure": "corridor_fire_rating_hours"
+       "measure": "corridor_fire_rating_hours",
+       "field": "rooms[].fire_rating_hours"
       },
       {
        "kind": "decide",
@@ -56432,14 +56447,15 @@
      },
      "asks": [
       {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "key": "field:rooms[].fire_rating_hours",
+       "why": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
        "measure": "corridor_fire_rating_hours",
-       "kind": "measure",
-       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+       "kind": "mark",
+       "field": "rooms[].fire_rating_hours",
+       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
       },
       {
        "key": "flag",
@@ -57199,7 +57215,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+     "reason": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -57208,7 +57224,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+      "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
       "quotes": [
        {
         "text": "1020.7 Corridor continuity. Fire-resistance-rated corridors shall be continuous from the point of entry to an exit, and shall not be interrupted by intervening rooms. Where the path of egress travel within a fire-resistance-rated corridor to the exit includes travel along unenclosed exit access stairways or ramps, the fire-resistance rating shall be continuous for the length of the stairway or ramp and for the length of the connecting corridor on the adjacent floor leading to the exit.",
@@ -57271,7 +57287,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)"
       ],
       "decide": false
      },
@@ -57279,11 +57295,12 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_fire_rating_hours",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
-       "measure": "corridor_fire_rating_hours"
+       "measure": "corridor_fire_rating_hours",
+       "field": "rooms[].fire_rating_hours"
       },
       {
        "kind": "decide",
@@ -57303,14 +57320,15 @@
      },
      "asks": [
       {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "key": "field:rooms[].fire_rating_hours",
+       "why": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1"
        ],
        "measure": "corridor_fire_rating_hours",
-       "kind": "measure",
-       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+       "kind": "mark",
+       "field": "rooms[].fire_rating_hours",
+       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
       },
       {
        "key": "flag",
@@ -57350,7 +57368,7 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+     "reason": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
      "use_detail": false,
      "part": {
       "part": "corridor",
@@ -57359,7 +57377,7 @@
       "within": null
      },
      "detail": {
-      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+      "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
       "quotes": [
        {
         "text": "1020.7 Corridor continuity. Fire-resistance-rated corridors shall be continuous from the point of entry to an exit, and shall not be interrupted by intervening rooms. Where the path of egress travel within a fire-resistance-rated corridor to the exit includes travel along unenclosed exit access stairways or ramps, the fire-resistance rating shall be continuous for the length of the stairway or ramp and for the length of the connecting corridor on the adjacent floor leading to the exit.",
@@ -57422,7 +57440,7 @@
       "gaps": [],
       "worked": [],
       "inputs": [
-       "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+       "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)"
       ],
       "decide": false
      },
@@ -57430,11 +57448,12 @@
       {
        "kind": "mark",
        "key": "mark:corridor:corridor_fire_rating_hours",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
-       "measure": "corridor_fire_rating_hours"
+       "measure": "corridor_fire_rating_hours",
+       "field": "rooms[].fire_rating_hours"
       },
       {
        "kind": "decide",
@@ -57454,14 +57473,15 @@
      },
      "asks": [
       {
-       "key": "mark:corridor:corridor_fire_rating_hours",
-       "why": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "key": "field:rooms[].fire_rating_hours",
+       "why": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
        "measure": "corridor_fire_rating_hours",
-       "kind": "measure",
-       "headline": "Work out the corridor fire rating hours by hand: Gordium has no field for it yet"
+       "kind": "mark",
+       "field": "rooms[].fire_rating_hours",
+       "headline": "Give the corridor walls' fire-resistance rating, in hours (0 if not rated)"
       },
       {
        "key": "flag",
@@ -68362,7 +68382,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 13,
-       "title": "Level 1 › CORRIDOR L1 (3): 13 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), fixed assembly seating (whether any room has it) not measured (or not usable), emergency voice/alarm system (whether the whole building has one per 907.5.2.2) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
+       "title": "Level 1 › CORRIDOR L1 (3): 13 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours), sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), fixed assembly seating (whether any room has it) not measured (or not usable), emergency voice/alarm system (whether the whole building has one per 907.5.2.2) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
        "mark": "?",
        "name": "Level 1 › CORRIDOR L1 (3)"
       },
@@ -68387,7 +68407,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 13,
-       "title": "Level 2 › CORRIDOR L2 (8): 13 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), fixed assembly seating (whether any room has it) not measured (or not usable), emergency voice/alarm system (whether the whole building has one per 907.5.2.2) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
+       "title": "Level 2 › CORRIDOR L2 (8): 13 need review: to give: occupancy group (whether Group I-4) not measured (or not usable), occupancy group (the building's one group, or mixed) not measured (or not usable), sprinkler system (NFPA 13) not measured (or not usable), not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours), sprinkler system (NFPA 13R) not measured (or not usable), the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet, sprinkler system (NFPA 13D) not measured (or not usable), corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), fixed assembly seating (whether any room has it) not measured (or not usable), emergency voice/alarm system (whether the whole building has one per 907.5.2.2) not measured (or not usable), ambulatory care facility (whether the building is or holds one, per Table 1020.3) not measured (or not usable)",
        "mark": "?",
        "name": "Level 2 › CORRIDOR L2 (8)"
       },
@@ -69440,7 +69460,7 @@
       {
        "key": "mark:corridor:corridor_fire_rating_hours",
        "kind": "mark",
-       "words": "corridor fire rating hours: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
+       "words": "corridor fire rating hours: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
        "elements": [
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d1",
         "462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
@@ -69451,7 +69471,8 @@
         "general.bc_1020_2_fire_partitions@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_1020_7_continuity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
        ],
-       "rules": 2
+       "rules": 2,
+       "field": "rooms[].fire_rating_hours"
       },
       {
        "key": "fact:sprinklered_903_3_1_1",
@@ -93111,7 +93132,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
+     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_h1_h2_h3",
@@ -93127,7 +93148,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
+     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_h4_h5",
@@ -93144,7 +93165,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
+     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_h4_h5",
@@ -93161,7 +93182,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
+     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_a_b_e_f_m_s_u",
@@ -93178,7 +93199,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
+     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_a_b_e_f_m_s_u",
@@ -93195,7 +93216,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
+     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_r",
@@ -93212,7 +93233,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
+     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_r",
@@ -93229,7 +93250,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
+     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridor occupant load not measured: the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_i2",
@@ -93273,7 +93294,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
+     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_i1_i3",
@@ -93289,7 +93310,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
+     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_i4",
@@ -93305,7 +93326,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
+     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
     },
     {
      "rule": "general.bc_table_1020_2_i4",
@@ -93321,7 +93342,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
+     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours); occupancy group (the building's one group, or mixed) not measured (or not usable); sprinkler system (NFPA 13) not measured (or not usable); sprinkler system (NFPA 13R) not measured (or not usable); sprinkler system (NFPA 13D) not measured (or not usable)"
     },
     {
      "rule": "general.bc_1020_2_fire_partitions",
@@ -93337,7 +93358,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)"
     },
     {
      "rule": "general.bc_1020_2_fire_partitions",
@@ -93353,7 +93374,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)"
     },
     {
      "rule": "general.bc_1020_3_corridor_capacity",
@@ -93437,7 +93458,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 1",
-     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+     "line": "Level 1 › CORRIDOR L1 (3): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)"
     },
     {
      "rule": "general.bc_1020_7_continuity",
@@ -93453,7 +93474,7 @@
      "none": false,
      "unknown": [],
      "home": "Level 2",
-     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet"
+     "line": "Level 2 › CORRIDOR L2 (8): corridor fire rating hours not measured: not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)"
     },
     {
      "rule": "general.bc_1010_1_1_door_width",
@@ -97448,8 +97469,8 @@
        },
        "not_measured": {
         "corridor_occupant_load": "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
-        "corridor_fire_rating_hours": "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
-        "corridor_walls_smoke_partitions": "stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet"
+        "corridor_fire_rating_hours": "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
+        "corridor_walls_smoke_partitions": "not stated for this corridor: whether the corridor's walls are smoke partitions (the corridor room's walls_smoke_partitions)"
        },
        "more": {
         "centre_lines": [
@@ -97477,8 +97498,8 @@
        },
        "not_measured": {
         "corridor_occupant_load": "the building doesn't say whether another level's occupants reach its corridors (an unenclosed stairway or ramp, a mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's occupant load doesn't bound the corridor's: say on the building that none do (other_level_egress_into_corridors in the interior description; Revit: Gordium: Other levels reach corridors), or stated by the architect (the occupant load the corridor serves, worked out by hand), and Gordium has no mark for it in the model yet",
-        "corridor_fire_rating_hours": "stated by the architect (the corridor walls' fire-resistance rating), and Gordium has no mark for it in the model yet",
-        "corridor_walls_smoke_partitions": "stated by the architect (whether the corridor's walls are smoke partitions), and Gordium has no mark for it in the model yet"
+        "corridor_fire_rating_hours": "not stated for this corridor: the corridor walls' fire-resistance rating (the corridor room's fire_rating_hours)",
+        "corridor_walls_smoke_partitions": "not stated for this corridor: whether the corridor's walls are smoke partitions (the corridor room's walls_smoke_partitions)"
        },
        "more": {
         "centre_lines": [
@@ -97874,7 +97895,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "aec6a4c74905cfdc997635b8b8bd94f025be14212fddbd59903affa54415cf71",
+  "worker_fingerprint": "3515d7a54d8f418a3df06d1e8884eafafd611e4a356a21e5903c0dd0e4e7d1cb",
   "rulebook": {
    "new_york/ithaca_city": "6963c3b08879178c881c819f1454c207c51d83ff2484695de386d2f1d823fed5"
   }

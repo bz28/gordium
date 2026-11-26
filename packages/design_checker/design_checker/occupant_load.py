@@ -89,6 +89,10 @@ CORRIDOR_OTHER_LEVELS = ("another level's occupants reach the building's corrido
                          "mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the "
                          "story's occupant load doesn't bound the corridor's: " + CORRIDOR_BY_HAND)
 CORRIDOR_NO_STORY = "the story's occupant load isn't worked out, so the corridor's isn't either: " + CORRIDOR_BY_HAND
+# the story's load waits on its rooms' functions (the model gives the rest): the corridor's ask is those functions, the
+# room mark Gordium: Function on the rooms that lack one (its `more`: FUNCTION_ROOMS), never a load worked out by hand
+CORRIDOR_NO_FUNCTION = ("the story's occupant load isn't worked out until its rooms' functions are set, so the "
+                        "corridor's isn't either" + STORY_FUNCTION)
 CORRIDOR_READINGS = ("given as two readings (none, the least it can serve; {load:.1f}, the whole story's, the most it "
                      "can serve): the routes don't split a story's occupants between its corridors, so a rule "
                      "reading it complies only if it complies at the whole story's load, fails only if it fails at "
@@ -223,7 +227,10 @@ def _corridor_loads(story: dict, mine: list, building: dict | None) -> None:
                                                            building.get(OTHER_LEVELS) is True else
                                                            CORRIDOR_NOT_RULED_OUT)
         elif load is None:
-            c["not_measured"]["corridor_occupant_load"] = CORRIDOR_NO_STORY
+            lacking = ((story.get("more") or {}).get("story_occupant_load") or {}).get(FUNCTION_ROOMS)
+            c["not_measured"]["corridor_occupant_load"] = CORRIDOR_NO_FUNCTION if lacking else CORRIDOR_NO_STORY
+            if lacking:                               # the rooms the function ask is set on (never the corridor)
+                c.setdefault("more", {}).setdefault("corridor_occupant_load", {})[FUNCTION_ROOMS] = list(lacking)
         else:
             c.setdefault("readings", {})["corridor_occupant_load"] = [
                 {"value": 0, "named": {CORRIDOR_QUESTION: CORRIDOR_NONE}},

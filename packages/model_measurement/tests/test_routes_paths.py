@@ -395,7 +395,8 @@ LATER_KEYS = {"corridor_not_legs", "corridor_end_only", "door_off_legs", "dead_e
               "corridor_width_stepped",
               "too_few_exits", "outline_needed", "area_room_not_read", "area_no_use", "area_unknown_space",
               "area_rooms_overlap",                                                  # test_routes_straight_areas.py
-              "stated_not_given", "not_measured_yet", "readings", "room_not_measured", "maybe_kind",
+              "stated_not_given", "corridor_fact_not_stated", "corridor_fact_not_read", "not_measured_yet", "readings",
+              "room_not_measured", "maybe_kind",
               "exit_access_unclear", "passage_in_ring", "no_room_doors", "no_exit_access",   # test_routes_parts.py
               "no_route_host_blocked", "no_route_via_host",                          # test_routes_served.py
               "not_occupied_refused", "none_occupied",                               # test_routes_not_occupied.py

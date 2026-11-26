@@ -147,7 +147,7 @@ def test_a_row_not_in_review_has_no_asks():
     ({"kind": "mark", "key": "mark:space:space_occupant_load", "measure": "space_occupant_load",
       "words": "occupant load: stated by the architect (the space's occupant load), and Gordium has no mark for it "
                "in the model yet"}, ui_data.MEASURE,
-     "Work out the occupant load by hand: Gordium has no field for it yet"),
+     "Work out the occupant load by hand (a person's check)"),
     ({"kind": "measure_by_hand", "key": "gap:space:space_egress_through_locked_room",
       "words": "egress through locked room: Gordium doesn't measure this yet: measure it by hand"}, ui_data.MEASURE,
      "Check by hand: does the path pass through a room that can be locked?"),
