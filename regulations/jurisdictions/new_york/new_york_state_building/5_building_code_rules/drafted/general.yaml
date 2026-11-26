@@ -15730,6 +15730,12 @@ rules:
     reason: 'The opening is smaller than 1031.3.1 allows, in a Group R-2 or R-3 building sprinklered throughout (stated, or
       not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or one
       and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_net_clear_area >= 5.7 or (opening_at_grade and opening_net_clear_area
+      >= 5)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_has_other_openings
+    reason: 'The opening is smaller than 1031.3.1 allows, but its room has another escape opening marked: 1031.2 asks each
+      sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
+      a person checks.'
   - when: occupancy_group in ["mixed"] and not (opening_net_clear_area >= 5.7 or (opening_at_grade and opening_net_clear_area
       >= 5))
     reason: 'The opening is smaller than 1031.3.1 allows, in a building of two or more groups: whether its room is in a Group
@@ -15762,6 +15768,7 @@ rules:
           opening_at_grade: false
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -15787,6 +15794,7 @@ rules:
           opening_at_grade: false
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -15836,6 +15844,7 @@ rules:
           opening_at_grade: false
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
           opening_room_one_exit: false
       sleeping_room:
       - id: r1
@@ -15896,6 +15905,32 @@ rules:
     expect: needs_review
     note: Whether the room is below the fourth story isn't known.
   - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_net_clear_area: 4.9
+          opening_at_grade: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
       occupancy_group: mixed
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -15910,6 +15945,7 @@ rules:
           opening_at_grade: false
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -15933,6 +15969,7 @@ rules:
         measures:
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -15966,8 +16003,8 @@ rules:
     where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade
     plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review where
     the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building
-    of two or more groups, or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session
-    (2026-11-26).'
+    of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review round 1), or
+    where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_3_2_escape_opening_min_height
@@ -15988,6 +16025,11 @@ rules:
     reason: 'The opening is lower than 24 inches clear, in a Group R-2 or R-3 building sprinklered throughout (stated, or
       not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or one
       and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_net_clear_height >= 24) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening is lower than 24 inches clear, but its room has another escape opening marked: 1031.2 asks each sleeping
+      room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3): a person
+      checks.'
   - when: occupancy_group in ["mixed"] and not (opening_net_clear_height >= 24)
     reason: 'The opening is lower than 24 inches clear, in a building of two or more groups: whether its room is in a Group
       R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
@@ -16018,6 +16060,7 @@ rules:
           opening_net_clear_height: 24
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16042,6 +16085,7 @@ rules:
           opening_net_clear_height: 23.5
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16089,6 +16133,7 @@ rules:
           opening_net_clear_height: 23.5
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
           opening_room_one_exit: false
       sleeping_room:
       - id: r1
@@ -16147,6 +16192,31 @@ rules:
     expect: needs_review
     note: Whether the room is below the fourth story isn't known.
   - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_net_clear_height: 23.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
       occupancy_group: mixed
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -16160,6 +16230,7 @@ rules:
           opening_net_clear_height: 23.5
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16183,6 +16254,7 @@ rules:
         measures:
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16214,8 +16286,8 @@ rules:
     or more. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the
     fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits;
     it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
-    5), in a building of two or more groups, or where the room''s story isn''t known (not measured yet). Hand-drafted in a
-    Claude Code session (2026-11-26).'
+    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
+    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_3_2_escape_opening_min_width
@@ -16236,6 +16308,11 @@ rules:
     reason: 'The opening is narrower than 20 inches clear, in a Group R-2 or R-3 building sprinklered throughout (stated,
       or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or
       one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_net_clear_width >= 20) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening is narrower than 20 inches clear, but its room has another escape opening marked: 1031.2 asks each
+      sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet 1031.3):
+      a person checks.'
   - when: occupancy_group in ["mixed"] and not (opening_net_clear_width >= 20)
     reason: 'The opening is narrower than 20 inches clear, in a building of two or more groups: whether its room is in a Group
       R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
@@ -16266,6 +16343,7 @@ rules:
           opening_net_clear_width: 20
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16290,6 +16368,7 @@ rules:
           opening_net_clear_width: 19.5
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16338,6 +16417,7 @@ rules:
           opening_net_clear_width: 19.5
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
           opening_room_one_exit: false
       sleeping_room:
       - id: r1
@@ -16396,6 +16476,31 @@ rules:
     expect: needs_review
     note: Whether the room is below the fourth story isn't known.
   - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_net_clear_width: 19.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
       occupancy_group: mixed
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -16409,6 +16514,7 @@ rules:
           opening_net_clear_width: 19.5
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16432,6 +16538,7 @@ rules:
         measures:
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16463,8 +16570,8 @@ rules:
     or more. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the
     fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits;
     it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
-    5), in a building of two or more groups, or where the room''s story isn''t known (not measured yet). Hand-drafted in a
-    Claude Code session (2026-11-26).'
+    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
+    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_3_3_escape_opening_max_sill_height
@@ -16485,6 +16592,11 @@ rules:
     reason: 'The opening has its sill higher than 44 inches above the floor, in a Group R-2 or R-3 building sprinklered throughout
       (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress,
       or one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_sill_height <= 44) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening has its sill higher than 44 inches above the floor, but its room has another escape opening marked:
+      1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t
+      meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (opening_sill_height <= 44)
     reason: 'The opening has its sill higher than 44 inches above the floor, in a building of two or more groups: whether
       its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
@@ -16514,6 +16626,7 @@ rules:
           opening_sill_height: 44
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16538,6 +16651,7 @@ rules:
           opening_sill_height: 44.5
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16586,6 +16700,7 @@ rules:
           opening_sill_height: 44.5
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
           opening_room_one_exit: false
       sleeping_room:
       - id: r1
@@ -16644,6 +16759,31 @@ rules:
     expect: needs_review
     note: Whether the room is below the fourth story isn't known.
   - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_sill_height: 44.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
       occupancy_group: mixed
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -16657,6 +16797,7 @@ rules:
           opening_sill_height: 44.5
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16680,6 +16821,7 @@ rules:
         measures:
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16711,7 +16853,8 @@ rules:
     the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher, or
     in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review where the room has a door
     to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups,
-    or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    where the room has another escape opening marked (1031.2 asks one per room: review round 1), or where the room''s story
+    isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_4_escape_door_swinging_or_sliding
@@ -16733,6 +16876,11 @@ rules:
     reason: 'The opening is a door that isn''t swinging or sliding, in a Group R-2 or R-3 building sprinklered throughout
       (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress,
       or one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_is_door or opening_door_hinged_or_sliding) and not
+      opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+    reason: 'The opening is a door that isn''t swinging or sliding, but its room has another escape opening marked: 1031.2
+      asks each sleeping room for not fewer than one, so this one may not be the one relied on (an extra window needn''t meet
+      1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_is_door or opening_door_hinged_or_sliding)
     reason: 'The opening is a door that isn''t swinging or sliding, in a building of two or more groups: whether its room
       is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
@@ -16763,6 +16911,7 @@ rules:
           opening_door_hinged_or_sliding: true
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16788,6 +16937,7 @@ rules:
           opening_door_hinged_or_sliding: false
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16838,6 +16988,7 @@ rules:
           opening_door_hinged_or_sliding: false
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
           opening_room_one_exit: false
       sleeping_room:
       - id: r1
@@ -16898,6 +17049,32 @@ rules:
     expect: needs_review
     note: Whether the room is below the fourth story isn't known.
   - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Second escape window
+        within: r1
+        measures:
+          opening_is_door: true
+          opening_door_hinged_or_sliding: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Its room has another escape opening marked: 1031.2 asks for one, which may be the other.'
+  - given:
       occupancy_group: mixed
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -16912,6 +17089,7 @@ rules:
           opening_door_hinged_or_sliding: false
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16935,6 +17113,7 @@ rules:
         measures:
           opening_room_fourth_or_higher: false
           opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
       sleeping_room:
       - id: r1
         name: Bedroom
@@ -16966,7 +17145,7 @@ rules:
     It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth
     story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it
     needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
-    5), in a building of two or more groups, or where the room''s story isn''t known (not measured yet). Hand-drafted in a
-    Claude Code session (2026-11-26).'
+    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
+    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

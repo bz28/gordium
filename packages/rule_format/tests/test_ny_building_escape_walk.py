@@ -10,8 +10,8 @@ from the page here, never from the rule:
 - **Strict** (a pass allowed only here): the room is on the fourth story above grade plane or higher, or the building
   is stated Group R-2 and the room's occupants are shown to have access to two or more exits (item 1 asks Group R-2
   only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit; a story's two exits
-  don't show it: review round 1). A marked opening alone isn't a pass until its size and sill are checked (1031.3 to
-  1031.6, section group 8b: review round 2).
+  don't show it: review round 1). A marked opening alone isn't a pass while its area well and bars aren't checked
+  (1031.5, 1031.6, section group 8c: review round 2; its size, sill and door kind are its own rows since 8b).
 - **Loosest** (a fail allowed only here): a building stated Group R-3 or R-4, or Group R-2 with the room's story at
   one exit; no opening marked; below the fourth story; no door of the room to outside (exception 2: an exit door to a
   public way, yard, court or exterior egress balcony); and in Group R-2 or R-3 no sprinkler system stated (exception 5:
@@ -120,9 +120,10 @@ def test_no_sleeping_room_read_never_passes(rules, ctx):
             == "needs_review", group
 
 
-def test_a_marked_opening_alone_needs_review_until_its_size_is_checked(rules, ctx):
-    """Review round 2 of group 8a: 1031.2 asks for an opening "in accordance with this section"; until 1031.3 to 1031.6
-    (size, sill, area wells) are checked, a sleeping room that 1031.2 may ask passes on a marked opening never."""
+def test_a_marked_opening_alone_needs_review_until_its_area_well_and_bars_are_checked(rules, ctx):
+    """Review round 2 of group 8a: 1031.2 asks for an opening "in accordance with this section"; until 1031.5 and 1031.6
+    (area wells, bars: section group 8c) are checked, a sleeping room that 1031.2 may ask passes on a marked opening
+    never (its size, sill and door kind are the opening's own rows, section group 8b)."""
     rule = {r["id"]: r for r in rules}[RULE]
     for group in ("R-2", "R-3", "R-4", "mixed", U):
         out = parts.rows(rule, {"sleeping_room": [_part(1, False, True, False)]}, _given(group, "none"),
@@ -176,33 +177,37 @@ def test_the_size_walk_finds_every_rule_over_escape_openings(rules):
 @pytest.mark.parametrize("rid", sorted(SIZE_RULES))
 def test_no_escape_opening_passes_short_of_its_limit_or_fails_where_1031_2_may_not_ask_it(rules, ctx, rid, sprinkler):
     rule = {r["id"]: r for r in rules}[rid]
+    # the rule reads the group only in lists of R-2, R-3, R-4 and mixed, so one group outside them walks every such one
+    import re
+    named = set(re.findall(r'"([A-Z]-\d|mixed)"', " ".join([rule["applies_when"], rule["check"]] + [w["when"] for w in rule["review_when"]])))
+    assert named <= {"R-2", "R-3", "R-4", "mixed"}, named
     bad_rows, seen = [], set()
-    for group in GROUPS + [U]:
-        if True:
-            given = _given(group, sprinkler)
-            for m, ok, past in SIZE_RULES[rid]():
-                for fourth, one_exit, door in itertools.product(TRI, TRI, TRI):
-                    room = {k: v for k, v in (("opening_room_fourth_or_higher", fourth), ("opening_room_one_exit", one_exit),
-                                              ("opening_room_door_to_outside", door)) if v is not U}
-                    got = parts.rows(rule, {"emergency_escape_opening": [{"id": "o", "within": "r", "measures": {**m, **room}}],
-                                            "sleeping_room": [{"id": "r", "measures": {}}]}, given, ctx.allowed())
-                    out = got[0]["outcome"]
-                    seen.add(out)
-                    single_other = group is not U and group not in ("R-2", "R-3", "R-4", "mixed")
-                    if out == "not_applicable":
-                        why = None if single_other else "set aside where 1031.2 may ask it"
-                    elif single_other:
-                        why = "not set aside where 1031.2 asks nothing"
-                    elif out == "pass":
-                        why = None if ok or fourth is True or (group == "R-2" and one_exit is False) else "passes short"
-                    elif out == "fail":
-                        required = group in ("R-3", "R-4") or (group == "R-2" and one_exit is True)
-                        exc5 = group in ("R-2", "R-3") and sprinkler != "none"
-                        why = None if past and required and fourth is False and door is False and not exc5 \
-                            else "fails within the loosest reading"
-                    else:
-                        why = None
-                    if why:
-                        bad_rows.append(("unstated" if group is U else group, sprinkler, m, fourth, one_exit, door, out, why))
+    for group in ("B", "I-1", "R-1", "R-2", "R-3", "R-4", "mixed", U):
+        given = _given(group, sprinkler)
+        for m, ok, past in SIZE_RULES[rid]():
+            for fourth, one_exit, door, other in itertools.product(TRI, TRI, TRI, TRI):
+                room = {k: v for k, v in (("opening_room_fourth_or_higher", fourth), ("opening_room_one_exit", one_exit),
+                                          ("opening_room_door_to_outside", door),
+                                          ("opening_room_has_other_openings", other)) if v is not U}
+                got = parts.rows(rule, {"emergency_escape_opening": [{"id": "o", "within": "r", "measures": {**m, **room}}],
+                                        "sleeping_room": [{"id": "r", "measures": {}}]}, given, ctx.allowed())
+                out = got[0]["outcome"]
+                seen.add(out)
+                single_other = group is not U and group not in ("R-2", "R-3", "R-4", "mixed")
+                if out == "not_applicable":
+                    why = None if single_other else "set aside where 1031.2 may ask it"
+                elif single_other:
+                    why = "not set aside where 1031.2 asks nothing"
+                elif out == "pass":
+                    why = None if ok or fourth is True or (group == "R-2" and one_exit is False) else "passes short"
+                elif out == "fail":
+                    required = group in ("R-3", "R-4") or (group == "R-2" and one_exit is True)
+                    exc5 = group in ("R-2", "R-3") and sprinkler != "none"
+                    why = None if past and required and fourth is False and door is False and not exc5 and other is False \
+                        else "fails within the loosest reading"
+                else:
+                    why = None
+                if why:
+                    bad_rows.append(("unstated" if group is U else group, sprinkler, m, fourth, one_exit, door, out, why))
     assert not bad_rows, (len(bad_rows), bad_rows[:4])
     assert {"pass", "needs_review", "not_applicable"} <= seen and ("fail" in seen or sprinkler == "nfpa_13")

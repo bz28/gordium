@@ -47,7 +47,10 @@ NEW_MEASURES = ("sleeping_room_escape_openings", *LINKED, "sleeping_room_door_to
 # rules (1031.3, 1031.4) fail only an opening the law asks for (a rule reads only its own part's measures)
 FROM_ROOM = {"opening_room_fourth_or_higher": "sleeping_room_fourth_or_higher",
              "opening_room_one_exit": "sleeping_room_story_one_exit",
-             "opening_room_door_to_outside": "sleeping_room_door_to_outside"}
+             "opening_room_door_to_outside": "sleeping_room_door_to_outside",
+             # review round 1 of 8b: 1031.2 asks one opening per room; another marked one may be the one relied on
+             "opening_room_has_other_openings": "sleeping_room_escape_openings"}
+WORKED = {"opening_room_has_other_openings": lambda count: count > 1}
 
 
 def link(parts: dict, description) -> None:
@@ -142,7 +145,7 @@ def _to_openings(rooms: list, openings) -> None:
         for mine, theirs in FROM_ROOM.items():
             why.pop(mine, None)
             if room is not None and theirs in (room.get("measures") or {}):
-                m[mine] = room["measures"][theirs]
+                m[mine] = WORKED.get(mine, lambda v: v)(room["measures"][theirs])
             elif room is not None:
                 why[mine] = (room.get("not_measured") or {}).get(theirs, "its room's isn't known")
             else:

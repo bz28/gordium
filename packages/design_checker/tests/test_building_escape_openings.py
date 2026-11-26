@@ -42,7 +42,8 @@ def test_a_building_code_law_reading_sleeping_rooms_gets_them_and_their_openings
     assert {p["id"] for p in got["parts"]["sleeping_room"]} == {f"{i} (sleeping room)" for i in
                                                                _rid(house["parts"]["sleeping_room"])}
     for mine, theirs in zip(got["parts"]["emergency_escape_opening"], house["parts"]["emergency_escape_opening"]):
-        assert mine["measures"] == theirs["measures"] and mine["within"] == f"{theirs['within']} (sleeping room)"
+        own = {k: v for k, v in mine["measures"].items() if k not in escape_openings.FROM_ROOM}   # 8b: its room's facts
+        assert own == theirs["measures"] and mine["within"] == f"{theirs['within']} (sleeping room)"
         assert mine["more"]["described_id"] == theirs["id"]
     assert got["has_none"] == {}
     # a law with no rule over them measures none of them
@@ -167,10 +168,19 @@ def test_each_escape_opening_carries_its_rooms_three_facts():
     escape_openings.link(parts, desc)
     w, x = parts["emergency_escape_opening"]
     assert w["measures"] == {"opening_room_fourth_or_higher": False, "opening_room_one_exit": True,
-                             "opening_room_door_to_outside": False}
+                             "opening_room_door_to_outside": False, "opening_room_has_other_openings": False}
     assert not set(w["measures"]) & set(w["not_measured"])
     assert not set(escape_openings.FROM_ROOM) & set(x["measures"])
     assert set(escape_openings.FROM_ROOM) <= set(x["not_measured"])
     parts, desc = _parts()                                   # two exits: not measured on the room, nor on its opening
     escape_openings.link(parts, desc)
     assert parts["emergency_escape_opening"][0]["not_measured"]["opening_room_one_exit"].endswith("isn't worked out")
+
+
+def test_an_opening_knows_its_room_has_another_marked_one():
+    """Review round 1 of group 8b: 1031.2 asks each sleeping room for not fewer than one opening, so a room with two
+    marked tells each that another may be the one relied on (its size rules then need review, never fail)."""
+    parts, desc = _parts(openings=[{"id": "w", "within": "b", "measures": {}}, {"id": "v", "within": "b", "measures": {}}])
+    escape_openings.link(parts, desc)
+    assert [o["measures"]["opening_room_has_other_openings"] for o in parts["emergency_escape_opening"]] == [True, True]
+
