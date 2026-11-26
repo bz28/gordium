@@ -282,7 +282,8 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          "1005.7": (314, 37, 38), "1005.7.1": (314, 39, 49), "1005.7.2": (314, 50, 53),
          "1005.7.3": (314, 54, 54),
          "1010.1": (322, 28, 36), "1010.1.1": (322, 37, 58), "1010.1.1 (part 2)": (323, 3, 5),
-         "1010.1.1.1": (323, 6, 10)}                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
+         "1010.1.1.1": (323, 6, 10),
+         "1010.1.2": (323, 11, 23), "1010.1.2.1": (323, 24, 25)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -327,9 +328,13 @@ HANDLERS = {
     "1010.4": ("general.bc_1010_1_doors_general", "1010.4"), "1010.4.1": ("general.bc_1010_1_doors_general", "1010.4.1"),
     "1010.5": ("general.bc_1010_1_doors_general", "1010.5"), "1010.5.4": ("general.bc_1010_1_doors_general", "1010.5.4"),
     "421.4.2": ("general.bc_1010_1_1_door_width", "421.4.2"), "421": ("general.bc_1010_1_1_door_width", "421.4.2"),
+    # section group 6b: 1010.1.2's exceptions 5 to 7 (revolving, power-operated, special-purpose sliding doors)
+    "1010.3.1": ("general.bc_1010_1_2_door_types", "1010.3.1"), "1010.3.2": ("general.bc_1010_1_2_door_types", "1010.3.2"),
+    "1010.3.3": ("general.bc_1010_1_2_door_types", "1010.3.3"),
 }
 NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
-            "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1"}          # the piece naming itself
+            "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1", "1010.1.2",
+            "1010.1.2.1"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
@@ -968,4 +973,47 @@ def test_1010_1_1_takes_no_size_from_anything_but_the_stated_clear_opening(ctx, 
     for rid in ("general.bc_1010_1_1_door_width", "general.bc_1010_1_1_door_height"):
         for g in ("B", "R-2", "I-2"):
             assert _one(rules[rid], "means_of_egress_door", _door(), {"occupancy_group": g} | NO_UNITS, ctx) ==                 "needs_review", (rid, g)
+
+
+# ---- section group 6b (2026-11-25): door kind and swing, 1010.1.2 and 1010.1.2.1 (p.323) -----------------------------
+
+H = ["H-1", "H-2", "H-3", "H-4", "H-5"]
+
+
+def test_1010_1_2_1_swing_at_its_limit_and_just_past(ctx, rules):
+    """1010.1.2.1 (p.323 lines 24-25): a swinging door swings with egress travel where it serves 50 or more, or a
+    Group H occupancy, typed from the page; a door that isn't swinging is asked nothing."""
+    r = rules["general.bc_1010_1_2_1_direction_of_swing"]
+    assert _cites(r, 323, 24) and _cites(r, 323, 25)
+    one = lambda m, g: _one(r, "means_of_egress_door", m, {"occupancy_group": g}, ctx)
+    against = {"moe_door_swinging": True, "moe_door_swings_with_egress": False, "moe_door_exterior": False, "moe_door_exit": False}
+    for g in ("B", "A-2", "R-2"):
+        assert one(against | {"moe_door_occupant_load": 49.99}, g) == "pass", g
+        assert one(against | {"moe_door_occupant_load": 50}, g) == "fail", g
+    for g in H:
+        assert one(against | {"moe_door_occupant_load": 1}, g) == "fail", g
+    # two or more groups: under 50, whether a Group H occupancy is among them isn't shown (found by the walk)
+    assert one(against | {"moe_door_occupant_load": 1}, "mixed") == "needs_review"
+    assert one(against | {"moe_door_occupant_load": 50}, "mixed") == "fail"
+    assert one({"moe_door_swinging": True, "moe_door_occupant_load": 1}, "H-3") == "needs_review"  # swing not stated
+    assert one({"moe_door_swinging": False, "moe_door_occupant_load": 500}, "H-1") == "pass"       # not swinging
+    inside = {"moe_door_exterior": False, "moe_door_exit": False}
+    assert one({"moe_door_swinging": True, "moe_door_swings_with_egress": True, "moe_door_occupant_load": 900} | inside,
+               "B") == "pass"
+    # review round 2: a door to outside that isn't an exit, outdoor areas not ruled out: either way, never decided
+    patio = {"moe_door_swinging": True, "moe_door_exterior": True, "moe_door_exit": False, "moe_door_occupant_load": 900}
+    for swings in (True, False):
+        assert one(patio | {"moe_door_swings_with_egress": swings}, "B") == "needs_review", swings
+        assert _one(r, "means_of_egress_door", patio | {"moe_door_swings_with_egress": swings},
+                    {"occupancy_group": "B", "occupied_outdoor_areas": False}, ctx) == ("pass" if swings else "fail")
+
+
+def test_1010_1_2_door_kind_is_never_a_fail(ctx, rules):
+    """1010.1.2 (p.323 lines 11-23): exception 7's power-operated doors are allowed in every group, and the model
+    doesn't say whether a door is power-operated, so a door of another kind is a person's check, never a fail."""
+    r = rules["general.bc_1010_1_2_door_types"]
+    assert _cites(r, 323, 11) and _cites(r, 323, 20)
+    for g in ("B", "H-1", "R-2", "I-3"):
+        assert _one(r, "means_of_egress_door", {"moe_door_swinging": False}, {"occupancy_group": g}, ctx) ==             "needs_review", g
+        assert _one(r, "means_of_egress_door", {"moe_door_swinging": True}, {"occupancy_group": g}, ctx) ==             "not_applicable", g
 
