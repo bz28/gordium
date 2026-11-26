@@ -357,9 +357,14 @@ def main(argv: list[str]) -> int:
     if args.write and args.only:
         parser.error("--write writes every case (no --only)")
     # a missing law certificate is published first (rule_format/published.py); before writing goldens a stale one too,
-    # since a check reads no stale law (every row of it needs review) and those rows would be written as the goldens
-    for note in published.ensure(missing_only=not args.write):
+    # since a check reads no stale law (every row of it needs review) and those rows would be written as the goldens.
+    # A law that can't be published stops a write: its rows would be written as needs review
+    notes = published.ensure(missing_only=not args.write)
+    for note in notes:
         print(f"– {note}")
+    if args.write and notes:
+        print("✗ not written: a law can't be published (above), so its rows would be written as needs review")
+        return 1
     texts = run(args.only)
     if args.write:
         write(texts)

@@ -117,11 +117,20 @@ def test_a_checks_rules_are_parsed_from_the_very_bytes_the_certificate_was_check
     certificate's check, so a rulebook saved in between could be checked against rules no one validated. Any later
     read of the rulebook here gives no rules: the check's rules still come from the bytes frozen() hashed."""
     from pathlib import Path
+    from rule_format.rulebook import load_bytes
     folder, book = place(REPO / ITHACA).inherited_rulebooks()[0]
     real = egress.load
     monkeypatch.setattr(egress, "load", lambda p: {"rules": []} if Path(p) == Path(book) else real(p))
     law = egress.laws(ITHACA)["laws"][0]
     assert law["rules"] and law["rules"] == load(book)["rules"]
+    # round 2: a second read from disk of any kind is caught too: the bytes checked here lack a rule the file has
+    whole = book.read_bytes()
+    fewer = yaml.safe_dump({**yaml.safe_load(whole), "rules": yaml.safe_load(whole)["rules"][1:]}).encode("utf-8")
+    real_frozen = published.frozen
+    monkeypatch.setattr(egress, "frozen", lambda f, b: {**real_frozen(f, b), "book": fewer} if Path(b) == Path(book)
+                        else real_frozen(f, b))
+    law = egress.laws(ITHACA)["laws"][0]
+    assert law["rules"] == load_bytes(fewer)["rules"] != load(book)["rules"]
 
 
 def test_writing_goldens_publishes_stale_certificates_first_and_checking_only_missing_ones(monkeypatch):
@@ -144,3 +153,10 @@ def test_writing_goldens_publishes_stale_certificates_first_and_checking_only_mi
             with pytest.raises(Stop):
                 main(args)
             assert asked == [missing_only], (main.__module__, args)
+    # round 2: a law that can't be published stops a write before anything is written
+    wrote = []
+    monkeypatch.setattr(published, "ensure", lambda missing_only=False: ["x: refused"])
+    monkeypatch.setattr(goldens, "run", lambda only: wrote.append("goldens") or {})
+    monkeypatch.setattr(goldens, "write", lambda texts: wrote.append("goldens written"))
+    monkeypatch.setattr(sheets_main.goldens, "write", lambda name: wrote.append("sheets written"))
+    assert goldens.main(["--write"]) == 1 and sheets_main.main(["--write"]) == 1 and wrote == []

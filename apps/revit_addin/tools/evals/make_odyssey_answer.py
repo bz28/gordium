@@ -75,6 +75,9 @@ def answer(interior: dict) -> dict:
 
 
 def main(src: Path, out: Path) -> dict:
+    from rule_format import published
+    if notes := published.ensure():        # Maine's certificate current, or no answer written (its rows would be
+        raise SystemExit("not written: " + "; ".join(notes))   # needs review: the frozen law refused)
     got = answer(json.loads(src.read_text(encoding="utf-8")))
     out.write_text(json.dumps(got, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
     return got
