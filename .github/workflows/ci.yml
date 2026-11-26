@@ -4,6 +4,14 @@ on:
   push:
     branches: [main]
   pull_request:   # every PR, including PRs stacked on other PRs
+    types: [opened, synchronize, reopened, labeled]
+
+# Windows runs only where a merge is near (Ben, 2026-11-26: GitHub runs about one CI run at a time, and Windows is
+# half of each run's jobs). A push to a PR runs Linux, plus the Revit client on Ubuntu. When the merge script
+# (gordium_handoff_tools/merge_when_green.py) takes a PR, it labels it `merge-ready`: that labelled run is Windows
+# only (Linux already passed on the same commit), and every later push to a labelled PR runs everything. A push to
+# main runs everything. The merge script merges only when the Windows checks ran on the head and passed: a skipped
+# Windows job never counts as passing.
 
 # A newer push to the same PR replaces the older run, so the queue only holds
 # each branch's latest commit. Pushes to main are never cancelled.
@@ -25,6 +33,7 @@ env:
 jobs:
   linux_tests:
     name: linux tests (part ${{ matrix.part }} of 4)
+    if: github.event.action != 'labeled'   # the merge label adds Windows; Linux already ran on this commit
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -41,6 +50,7 @@ jobs:
         run: pytest -n auto --dist worksteal --shard ${{ matrix.part }}/${{ env.SHARDS }}
 
   linux_checks:
+    if: github.event.action != 'labeled'   # the merge label adds Windows; Linux already ran on this commit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -73,7 +83,7 @@ jobs:
   # The old single Linux job's name: passes only when every Linux test part and the Linux checks passed (a
   # skipped or cancelled part fails it too)
   check:
-    if: always()
+    if: always() && github.event.action != 'labeled'
     needs: [linux_tests, linux_checks]
     runs-on: ubuntu-latest
     steps:
@@ -86,6 +96,7 @@ jobs:
   # not set: the job proves the code names its encodings, as an architect's Windows PC runs it.
   windows_tests:
     name: windows tests (${{ matrix.python-version }}, part ${{ matrix.part }} of 4)
+    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'merge-ready')
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -104,6 +115,7 @@ jobs:
         run: pytest -n auto --dist worksteal --shard ${{ matrix.part }}/${{ env.SHARDS }}
 
   windows_checks:
+    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'merge-ready')
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -138,7 +150,7 @@ jobs:
   # The old Windows job's names (`windows (3.14)`; on main also `windows (3.12)`): each passes only when every
   # Windows test part and Windows check passed
   windows:
-    if: always()
+    if: always() && (github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'merge-ready'))
     needs: [windows_tests, windows_checks]
     runs-on: ubuntu-latest
     strategy:
@@ -157,7 +169,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        # Windows only when a merge is near (above); on the merge label's own run, only Windows (Ubuntu already ran)
+        os: ${{ fromJSON(github.event.action == 'labeled' && '["windows-latest"]' || ((github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'merge-ready')) && '["windows-latest", "ubuntu-latest"]' || '["ubuntu-latest"]')) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
