@@ -158,8 +158,8 @@ def test_a_room_id_two_rooms_share_counts_no_openings_and_no_doors():
 
 def test_each_escape_opening_carries_its_rooms_four_facts():
     """Section group 8b: an opening's size rules fail only where 1031.2 requires it, which is its room's to say (its
-    story's place, one exit, a door to outside): each is copied from the room, or its reason why not; an opening in no
-    one sleeping room read gets none of them, so its rows need review."""
+    story's place, one exit, a door to outside, another marked opening): each is copied from the room, or its reason
+    why not; an opening in no one sleeping room read gets none of them, so its rows need review."""
     one = {"id": "L1", "measures": {"story_exit_count": 1, "story_fourth_or_higher_above_grade_plane": False}}
     parts, desc = _parts(story=one)
     parts["emergency_escape_opening"][0]["not_measured"] = {k: "Gordium doesn't measure this yet"
