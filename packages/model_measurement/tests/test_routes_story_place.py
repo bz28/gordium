@@ -63,9 +63,10 @@ def _worlds(floors, ground):
     zs = sorted({z for f in floors for z in f})
     marks = {z + d for z in zs for d in (0, -6, -12)} | {0.0}
     near = sorted({m + e for m in marks for e in (-0.01, 0, 0.01)} | {-1000.0})
-    if "flat" in ground:
-        g = ground["flat"]
-        return [(g, g, g)]
+    if "flat" in ground:                                 # the grade plane at most the flat ground (lower ground beside
+        g = ground["flat"]                               # the building, an areaway or a well, may lower it), the flat
+        return [(x, m, p) for x in [v for v in near if v <= g] + [g]          # ground a known point of it
+                for m in [v for v in near if v <= min(x, g)] + [min(x, g)] for p in (m, None)]
     if "spots" in ground:
         high, low = max(p[2] for p in ground["spots"]), min(p[2] for p in ground["spots"])
         planes = [g for g in near if g <= high] + [high]
@@ -148,8 +149,8 @@ GROUNDS = ([{"flat": z} for z in (-8, -6, -4, -2, -0.5, 0, 0.5, 2, 3.5, 4, 6, 7,
 def test_every_place_measured_is_the_same_in_every_world_the_ground_stated_allows(floors):
     """The property: a fact measured is the oracle's one value; a fact the oracle can't settle is never measured,
     with or without levels that have no rooms. And flat ground with no such level settles every story whose floors
-    are clear of the thresholds, where the top one is above the ground (the measuring is no lazier than it must be
-    there)."""
+    are clear of the thresholds, where the lowest one is above the ground (the measuring is no lazier than it must
+    be there; a basement is never proven)."""
     for extra in EXTRAS:
         for ground in GROUNDS + [None]:
             got = placed(floors, ground or {"none": "none stated"}, extra_levels=extra)
@@ -166,7 +167,8 @@ def test_every_place_measured_is_the_same_in_every_world_the_ground_stated_allow
                         assert fact in got[lid]["not_measured"], (floors, extra, ground, lid, fact)
             clear = all(len(set(f)) == 1 and all(abs(f[0] - ground["flat"] - d) > 0.1 for d in (0, 6))
                         for f in floors) if ground and "flat" in ground else False
-            if clear and not extra and floors[-1][0] > ground["flat"]:      # a top story at or below grade has no
+            # a story is never proven a basement: flat ground settles a stack whose lowest story is above it
+            if clear and not extra and floors[0][0] > ground["flat"]:       # a top story at or below grade has no
                 assert all(f in got[f"L{i}"]["measures"]                    # floor above to test
                            for i in range(len(floors) - 1) for f in FACTS), (floors, ground)
 
@@ -216,19 +218,13 @@ def test_the_four_unit_apartment_on_its_flat_ground_is_first_and_second_above_gr
 
 
 def test_the_four_unit_apartment_on_ground_5_ft_up():
-    """Ground stated flat at 5 ft: the stair enclosures' doors to the outside are at 0, under it (an areaway: the
-    ground there may be as low, question 4.6), so Level 1 may be above grade plane by item 2: it is the first story
-    above or below either way, and Level 2 the first or the second (not placed). Without those doors Level 1 is a
-    basement and Level 2 the first story above."""
+    """Ground stated flat at 5 ft: Level 1's floor at 0 is under it and its floor next above (10 ft) only 5 ft over
+    it; whether ground beside it is lower somewhere (its stair doors out are at 0: an areaway) the model can't rule
+    out, and a basement is never proven. Level 1 is the first story above or below either way; Level 2 the first or
+    the second: not placed."""
     s = _apartment_places({"flat": 5.0})
     assert s["Level 1"]["measures"][FIRST] is True
     assert FIRST not in s["Level 2"]["measures"] and SECOND not in s["Level 2"]["measures"]
-    interior = json.loads(APARTMENT.read_text(encoding="utf-8"))["interior"]
-    interior["all_levels"] = [dict(lv) for lv in interior["levels"]]
-    interior["doors"] = [d for d in interior["doors"] if "outside" not in d["sides"]]
-    s = {p["name"]: p for p in measure(interior, ground={"flat": 5.0})["parts"]["story"]}
-    assert s["Level 1"]["measures"][FIRST] is True and s["Level 2"]["measures"][FIRST] is True
-    assert s["Level 2"]["measures"][SECOND] is False
 
 
 def test_106_ithaca_rd_its_levels_and_spot_grades():
@@ -326,7 +322,7 @@ def test_each_reason_a_place_isnt_measured():
 
 
 def test_a_level_beyond_the_stories_with_rooms_is_no_gap():
-    got = placed([[0], [10]], {"flat": 0}, extra_levels=(-5, 30))
+    got = placed([[0], [10]], {"flat": 0}, extra_levels=(30, 45))
     assert got["L0"]["measures"][FIRST] is True and got["L1"]["measures"][SECOND] is True
 
 
@@ -359,11 +355,13 @@ def test_a_level_with_no_rooms_under_the_lowest_story_may_be_a_story():
     assert "Datum 0" in got["L0"]["not_measured"][FIRST]
 
 
-def test_a_datum_under_the_slab_changes_nothing():
-    """A foundation level 4 ft under a slab on flat ground: a story there would be a basement, so the slab is the
-    first story above grade plane either way."""
+def test_a_datum_under_the_slab_may_be_a_story():
+    """A level with no rooms 4 ft under a slab on flat ground: if it is a story, a basement is never proven, so it
+    may be the first story above grade plane, and the slab's story the second: neither the slab's place nor the
+    one above it is placed. (A level the architect marks as no story would settle it: a follow-up.)"""
     got = placed([[0], [10]], {"flat": 0}, extra_levels=(-4,))
-    assert got["L0"]["measures"][FIRST] is True and got["L1"]["measures"][SECOND] is True
+    assert FIRST not in got["L0"]["measures"] and SECOND not in got["L1"]["measures"]
+    assert placed([[0], [10]], {"flat": 0})["L1"]["measures"][SECOND] is True       # with no such level
 
 
 def test_the_top_story_under_the_grade_plane_is_never_placed_above_it():
@@ -438,7 +436,7 @@ def test_spots_at_the_ground_floors_walls_under_an_overhang_count():
              [20, 41, 0], [51, 20, 0], [-11, 20, 0], [45, -1, 0], [-5, -1, 0]]    # outside the overhang's edges
     got, _ = _overhang(spots)
     assert FIRST not in got["L0"]["measures"]
-    assert got["L0"]["more"]["story_place"]["grade_plane_ft"][1] == 8
+    assert got["L0"]["more"]["story_place"]["grade_plane_top_ft"] == 8
 
 
 def test_a_low_spot_is_never_item_2s_ground_at_any_point():
@@ -472,9 +470,6 @@ def test_lower_ground_at_an_opening_never_proves_a_basement_on_flat_ground(openi
     desc["openings"] = [opening]
     got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
     assert FIRST not in got["L1"]["measures"] and SECOND not in got["L2"]["measures"]
-    del desc["openings"]
-    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
-    assert got["L2"]["measures"][SECOND] is True                    # with no such opening, as before
 
 
 def test_revits_plain_spot_grades_are_existing_ground():
@@ -519,7 +514,7 @@ def test_a_higher_spot_farther_from_the_walls_raises_the_grade_planes_top_end():
              [50, -10, 120], [50, 30, 120]]
     got = placed([[86], [96], [107]], {"spots": spots}, outline=outline)
     assert FIRST not in got["L0"]["measures"]
-    assert got["L0"]["more"]["story_place"]["grade_plane_ft"][1] == 120
+    assert got["L0"]["more"]["story_place"]["grade_plane_top_ft"] == 120
 
 
 @pytest.mark.parametrize("what", ["door", "stair"])
@@ -534,3 +529,50 @@ def test_a_walk_out_door_or_a_stairs_foot_under_flat_ground_proves_no_basement(w
         desc["stairs"] = [{"id": "s", "bottom_elevation": -9}]
     got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
     assert FIRST not in got["L1"]["measures"] and SECOND not in got["L1"]["measures"]
+
+
+# --- review round 6 (2026-11-25): a basement is never proven ------------------------------------------------------
+
+@pytest.mark.parametrize("case", ["sill", "space_door", "double_height"])
+def test_no_basement_is_proven_on_flat_ground(case):
+    """Round 6's three ways the model can hold ground below the stated flat ground or a floor next above higher than
+    the next story's: a window sill under the ground with no well given, a door to the outside from an enclosed space
+    with no room, a double-height room over the story. Each "proved" a basement and measured a real fourth story not
+    the fourth. Now no basement is proven at all."""
+    desc, stories = building([[-11], [1.5], [11.5], [21.5], [31.5]])
+    if case == "sill":
+        desc["openings"] = [{"id": "w", "room": "L0r0", "frame": {"left": 0, "right": 3, "bottom": -10, "top": -7}}]
+    elif case == "space_door":
+        desc["unknown_spaces"] = [{"id": "u1", "level": "L0"}]
+        desc["doors"] = [{"id": "d1", "level": "L0", "sides": ["u1", "outside"]}]
+    else:
+        desc["rooms"][0]["ceiling_height"] = 25
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert FOURTH not in got["L3"]["measures"] and FIRST not in got["L1"]["measures"]
+
+
+# --- review round 7 (2026-11-25) ----------------------------------------------------------------------------------
+
+def test_a_spot_under_an_overhang_far_from_the_walls_raises_the_top_end():
+    """Spots at 4 ft under the overhang, 5 ft from the ground floor's walls: outside the building at ground level, but
+    dropped from the grade plane's top end (left at 0), so Level 0 measured the first story below. Every finished spot
+    counts now."""
+    spots = [[20, -1, 0], [41, 1, 0], [1, 31, 0], [-1, 1, 0], [39, 31, 0],
+             [20, 41, 0], [51, 20, 0], [-11, 20, 0], [45, -1, 0], [-5, -1, 0],
+             [45, 15, 4], [20, 35, 4], [-5, 15, 4]]
+    got, _ = _overhang(spots)
+    assert FIRST not in got["L0"]["measures"]
+    assert got["L0"]["more"]["story_place"]["grade_plane_top_ft"] == 4
+
+
+def test_a_mezzanine_drawn_on_its_own_level_never_proves_the_story_below_above():
+    """A small level at 7 ft over a story at -1 ft and a basement at -10 ft, flat ground at 0: as a story, its floor
+    is the floor next above (more than 6 ft over the grade plane, item 1) and proved the -1 ft story above; as a
+    mezzanine (505.2: part of the story below) it isn't, and the -1 ft story's own floor leaves it open. Tried both
+    ways; a possible mezzanine is never placed itself."""
+    desc, stories = building([[-10], [-1], [7]])
+    stories["L2"].outer = Polygon([(0, 0), (10 * FT, 0), (10 * FT, 10 * FT), (0, 10 * FT)])
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert FIRST not in got["L0"]["measures"]
+    assert not set(FACTS) & set(got["L2"]["measures"])
+    assert got["L0"]["more"]["story_place"]["levels_maybe_mezzanines"] == ["Level 2"]

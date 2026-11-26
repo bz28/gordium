@@ -42,7 +42,10 @@ corridor's rating and smoke partitions) are marks the description doesn't carry 
 import copy
 import math
 
+from shapely.geometry import Point
+
 from model_measurement.interior.read import Reader, name_of
+from model_measurement.interior.stops import Stop as InteriorStop
 from model_measurement.routes import areas, dead_ends, dwelling_units, spaces, story_place, straight
 from model_measurement.routes.common_path import _TravelOnly, at_point, story_figure
 from model_measurement.routes.doors import door_parts
@@ -79,6 +82,7 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     out["problems"] = list(floor.stops)
     if not floor.stories:
         return out
+    stairs = _stair_points(description)
     placed = story_place.places(description, Reader(description["units"]),
                                 {lid: s.name for lid, s in floor.stories.items()}, floor.stories, ground,
                                 floor.stops)
@@ -88,7 +92,7 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     for level, story in floor.stories.items():
         uses = {rid: (items.get(rid) or {}).get("use") for rid in story.rooms}
         here = [u for u in unknown if u.get("level") == level]
-        _story_parts(story, uses, items, here, parts, clearance, description.get("building"))
+        _story_parts(story, uses, items, here, parts, clearance, description.get("building"), stairs)
     for sp in parts["story"]:                            # where each story sits against the grade plane
         got = placed[sp["id"]]
         sp["measures"].update(got["measures"])
@@ -101,6 +105,21 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
                 _maybe_parts(u, None, parts)
     _not_measured_yet(parts)
     out["parts"] = parts
+    return out
+
+
+def _stair_points(description) -> list:
+    """Every stair the description gives ({"points": plan points of its nosings' ends, in inches}, or no points where
+    they can't be read: such a stair may be anywhere). The interior reading's own stairs (`stairs`, house egress)."""
+    reader = Reader(description["units"])
+    out = []
+    for st in description.get("stairs") or []:
+        try:
+            pts = [(reader.length(e[0], "a nosing"), reader.length(e[1], "a nosing"))
+                   for n in st.get("nosings") or [] for e in n]
+        except (InteriorStop, TypeError, IndexError, AttributeError):    # unreadable: may be anywhere
+            pts = []
+        out.append({"points": pts})
     return out
 
 
@@ -122,7 +141,7 @@ def _readings(part, name, readings, words) -> None:
     part["not_measured"][name] = Stop("readings", question=question, words=words).reason
 
 
-def _story_parts(story, uses, items, unknown, parts, r, building=None) -> None:
+def _story_parts(story, uses, items, unknown, parts, r, building=None, stairs=()) -> None:
     sp = _part(story.level, story.name)
     parts["story"].append(sp)
     routes = None
@@ -141,7 +160,7 @@ def _story_parts(story, uses, items, unknown, parts, r, building=None) -> None:
             sp["confirm"] = {m: words for m in READ_THROUGH}
     _story_areas(sp, story, uses, [name_of(u) for u in unknown])
     try:
-        sp["measures"][OUTSIDE_FACT] = rooms_exit_outside(story, items, building)
+        sp["measures"][OUTSIDE_FACT] = rooms_exit_outside(story, items, building, stairs)
     except Stop as s:
         sp["not_measured"][OUTSIDE_FACT] = s.reason
     try:
@@ -493,7 +512,7 @@ OUTSIDE_FACT = "story_rooms_exit_directly_outside"
 UNITS_FACT = "story_dwelling_units"
 
 
-def rooms_exit_outside(story, items: dict | None = None, building: dict | None = None) -> bool:
+def rooms_exit_outside(story, items: dict | None = None, building: dict | None = None, stairs=()) -> bool:
     """Whether the story relies on BCNYS 1006.3.4 item 2 ("Rooms, areas and spaces complying with Section 1006.2.1 with
     exits that discharge directly to the exterior at the level of exit discharge, are permitted to have one exit or
     access to a single exit", p.317): every space on it has an exit of its own straight outside.
@@ -505,8 +524,8 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
     marked, never guessed). False only where a space reaches the outside through a corridor or lobby shared with
     another tenant, which the model shows only for dwelling units: the corridor (every room of it marked a corridor:
     a lobby may be a dwelling's own foyer) reaches an exit itself (a door outside, or into an exit), two or more of the
-    spaces opening into it hold a room whose function is residential, this one among them and with no door of its own
-    into an exit, and the building states no corridor is within a dwelling unit (`corridors_within_dwelling_
+    spaces opening into it hold a room whose function is residential, this one among them, the corridor is this
+    space's one way out of itself (no other door, opening or stair within it), and the building states no corridor is within a dwelling unit (`corridors_within_dwelling_
     units` no, BCNYS 1020.2 exception 2's fact); a corridor otherwise may be a hallway within one dwelling or tenant
     space (a house's hall, a shop's back corridor to its toilets). Every other case is not measured (Stop): a door to
     the outside not marked so, or onto an exterior stair or ramp; a space whose way out is through such a corridor,
@@ -518,6 +537,7 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
     groups = [set(g) for g in found]
     residential = {i for i, g in enumerate(found) if any((items.get(r) or {}).get("function") == "residential" for r in g)}
     within_units = (building or {}).get("corridors_within_dwelling_units") if isinstance(building, dict) else None
+    shared_rooms = {}                                    # each common space: the rooms of the shared corridor it opens into
     common, private = set(), set()                       # spaces opening into a corridor shared between dwelling units
     for rooms, touched in halls:                         # (common), or into one that may be a space's own (private)
         if len(touched) == 1:                            # a vestibule: part of the one space it opens into
@@ -528,6 +548,8 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
                 len(touched & residential) >= 2 and any(
                 OUTSIDE in d.sides or any(s != r and _is_exit(story, s) for s in d.sides if s in story.rooms)
                 for d in story.doors.values() for r in rooms if r in d.sides):
+            for k in touched & residential:
+                shared_rooms[k] = shared_rooms.get(k, set()) | set(rooms)
             common |= touched & residential
             private |= touched - residential
         else:
@@ -544,12 +566,19 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
         if outside:
             unclear = unclear or Stop("outside_door_not_marked", name=names, door=outside[0].name)
         elif i in common:
-            into = sorted((d for d in story.doors.values() if group & set(d.sides)
-                           and any(s not in group and s in story.rooms and _is_exit(story, s) for s in d.sides)),
-                          key=lambda d: d.id)
-            if into:                                     # its own door into an exit too: whether that is "directly
-                unclear = unclear or Stop("outside_into_exit", name=names, door=into[0].name)    # outside" isn't
-                continue                                                                           # settled here
+            # "no" only where the shared corridor is the space's one way out of itself: any other door or opening
+            # (into an exit, or into another hall, a vestibule shared with a closet) may be its own direct way out
+            links = [(d.name, set(d.sides)) for d in story.doors.values()] + \
+                [(f"the opening between {_room_name(story, a)} and {_room_name(story, b)}", {a, b})
+                 for a, b, _ in story.passages]
+            other = sorted(name for name, sides in links if sides & group and sides - group
+                           and not (sides - group) <= shared_rooms[i])
+            if other:
+                unclear = unclear or Stop("outside_into_exit", name=names, door=other[0])
+                continue
+            if any(_stair_in(st, group, story) for st in stairs):   # a stair within it: a way out to another story
+                unclear = unclear or Stop("outside_stair", name=names)
+                continue
             return False
         elif i in private:
             unclear = unclear or Stop("outside_hall_unclear", name=names)
@@ -558,6 +587,21 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
     if unclear:
         raise unclear
     return True
+
+
+def _room_name(story, rid) -> str:
+    room = story.rooms.get(rid)
+    return room.name if room is not None else rid
+
+
+def _stair_in(stair, group, story) -> bool:
+    """Whether any nosing end of a stair (plan points, inches) stands in a room of `group`, or can't be placed: a
+    stair whose points can't be read may be anywhere."""
+    points = stair.get("points")
+    if not points:
+        return True
+    return any(story.rooms[r] is not None and story.rooms[r].outline.buffer(1).contains(Point(p)) for p in points
+               for r in group)
 
 
 def _is_exit(story, rid) -> bool:

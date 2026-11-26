@@ -5655,9 +5655,9 @@ rules:
     review while fixed seating (1030.7) or a space the code gives its own exits or travel limit is stated or not ruled
     out. The story''s place against the grade plane is worked out from the model (2026-11-25): the floor elevations of
     each level''s rooms and the ground the architect states (202 GRADE PLANE, STORY ABOVE GRADE PLANE, BASEMENT),
-    measured only where every grade plane that ground allows gives the same place, else needs review. Flat ground stated
-    is exact. With spot grades, Gordium''s reading, shown to confirm: the ground between spots lies between their
-    values, so the grade plane is at most the highest spot within 2 ft of the walls; the slope-away rule can only lower
+    measured only where every grade plane that ground allows gives the same place, else needs review. A basement is never
+    proven (review round 6). With spot grades, Gordium''s reading, shown to confirm: the ground between spots lies between their
+    values, so the grade plane is at most the highest finished spot grade outside the building itself; the slope-away rule can only lower
     it, so a basement is never proven from spot grades. No ground stated, or existing ground: needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6061,9 +6061,9 @@ rules:
     sprinklered or not (note b is printed on the first story''s rows only). The story''s place against the grade plane
     is worked out from the model (2026-11-25): the floor elevations of each level''s rooms and the ground the architect
     states (202 GRADE PLANE, STORY ABOVE GRADE PLANE, BASEMENT), measured only where every grade plane that ground
-    allows gives the same place, else needs review. Flat ground stated is exact. With spot grades, Gordium''s reading,
-    shown to confirm: the ground between spots lies between their values, so the grade plane is at most the highest spot
-    within 2 ft of the walls; the slope-away rule can only lower it, so a basement is never proven from spot grades. No
+    allows gives the same place, else needs review. A basement is never proven (review round 6). With spot grades, Gordium''s reading,
+    shown to confirm: the ground between spots lies between their values, so the grade plane is at most the highest finished
+    spot grade outside the building itself; the slope-away rule can only lower it, so a basement is never proven from spot grades. No
     ground stated, or existing ground: needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6290,9 +6290,9 @@ rules:
     (408.6.1''s smoke-barrier distances aren''t drawn). The story''s place against the grade plane is worked out from
     the model (2026-11-25): the floor elevations of each level''s rooms and the ground the architect states (202 GRADE
     PLANE, STORY ABOVE GRADE PLANE, BASEMENT), measured only where every grade plane that ground allows gives the same
-    place, else needs review. Flat ground stated is exact. With spot grades, Gordium''s reading, shown to confirm: the
-    ground between spots lies between their values, so the grade plane is at most the highest spot within 2 ft of the
-    walls; the slope-away rule can only lower it, so a basement is never proven from spot grades. No ground stated, or
+    place, else needs review. A basement is never proven (review round 6). With spot grades, Gordium''s reading, shown to confirm: the
+    ground between spots lies between their values, so the grade plane is at most the highest finished spot grade outside the building
+    itself; the slope-away rule can only lower it, so a basement is never proven from spot grades. No ground stated, or
     existing ground: needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6530,9 +6530,9 @@ rules:
     not (note b is printed on the first story''s S row only). The story''s place against the grade plane is worked out
     from the model (2026-11-25): the floor elevations of each level''s rooms and the ground the architect states (202
     GRADE PLANE, STORY ABOVE GRADE PLANE, BASEMENT), measured only where every grade plane that ground allows gives the
-    same place, else needs review. Flat ground stated is exact. With spot grades, Gordium''s reading, shown to confirm:
-    the ground between spots lies between their values, so the grade plane is at most the highest spot within 2 ft of
-    the walls; the slope-away rule can only lower it, so a basement is never proven from spot grades. No ground stated,
+    same place, else needs review. A basement is never proven (review round 6). With spot grades, Gordium''s reading, shown to confirm:
+    the ground between spots lies between their values, so the grade plane is at most the highest finished spot grade outside the
+    building itself; the slope-away rule can only lower it, so a basement is never proven from spot grades. No ground stated,
     or existing ground: needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6803,9 +6803,9 @@ rules:
     review while fixed seating (1030.7) or a space the code gives its own exits or travel limit is stated or not ruled
     out. The story''s place against the grade plane is worked out from the model (2026-11-25): the floor elevations of
     each level''s rooms and the ground the architect states (202 GRADE PLANE, STORY ABOVE GRADE PLANE, BASEMENT),
-    measured only where every grade plane that ground allows gives the same place, else needs review. Flat ground stated
-    is exact. With spot grades, Gordium''s reading, shown to confirm: the ground between spots lies between their
-    values, so the grade plane is at most the highest spot within 2 ft of the walls; the slope-away rule can only lower
+    measured only where every grade plane that ground allows gives the same place, else needs review. A basement is never
+    proven (review round 6). With spot grades, Gordium''s reading, shown to confirm: the ground between spots lies between their
+    values, so the grade plane is at most the highest finished spot grade outside the building itself; the slope-away rule can only lower
     it, so a basement is never proven from spot grades. No ground stated, or existing ground: needs review.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
