@@ -202,6 +202,23 @@ STOPS = {
                          "part of a dwelling unit on two stories, which story counts it isn't known",
     "units_entrances": "the space of {name} has {count} ways out to the corridors, exits or outside ({doors}): it "
                        "may be two dwelling units joined by a door",
+    # the count from the architect's unit marks (Gordium: Unit, rooms[].unit: dwelling_units._marked)
+    "units_mark_unreadable": "the room {name}'s unit mark is {got}, not a unit's name: which dwelling unit it belongs "
+                             "to isn't known",
+    "units_mark_several": "the room {name}'s unit mark names more than one unit ({got!r}): a room belongs to one "
+                          "dwelling unit, so the units aren't counted",
+    "units_mark_alike": "the unit marks {names} differ only in capitals or spacing: one dwelling unit or two isn't "
+                        "known",
+    "units_mark_apart": "the rooms marked unit {unit!r} come apart on this story ({rooms} not joined to the rest "
+                        "through its own rooms): two dwelling units given one name, or a room of it left unmarked "
+                        "(mark the rooms between them too)",
+    "units_mark_not_dwelling": "every lived-in room marked unit {unit!r} states a function no dwelling unit is made of "
+                               "(a listed other use): whether it is a dwelling unit isn't known",
+    "units_mark_on_exit": "the room {name} is taken as an exit (a stair enclosure or exit passageway, shared) yet is "
+                          "marked unit {unit!r}: which is right isn't known",
+    "units_mark_left_out": "the room {name} has no unit mark while other rooms of this story have one, and may be a "
+                           "dwelling unit's room (it states a function a dwelling unit may have, or none): mark its "
+                           "unit, or, if it is shared between units, mark its use Corridor or Lobby",
     # each door's own part (doors.py, section group 6a): its sizes only from the maker's stated clear opening
     "door_no_stated_clear": "the door {name} has no maker's stated clear opening (its type's clear width and height, "
                             "confirmed): its size is never taken from the door's own size or its leaf",

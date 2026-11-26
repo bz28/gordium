@@ -194,6 +194,32 @@ public sealed class RouteTests
         Assert.False(json[U("C")]!.GetValue<bool>());
     }
 
+    /// <summary>The dwelling unit a room belongs to (Gordium: Unit): sent as typed, trimmed, as <c>rooms[].unit</c>,
+    /// which the route code counts a story's dwelling units from (one per name); blank or never set is left out (no
+    /// mark), and a mark naming two units is sent as typed, so the route code says so and the count needs review.</summary>
+    [Fact]
+    public void A_rooms_unit_mark_is_sent_as_typed_and_blank_is_left_out()
+    {
+        var floor = new FakeFloor();
+        floor.SetMark("A", Marks.RoomUnit, new(true, Text: " Apt 1 "));
+        floor.SetMark("B", Marks.RoomUnit, new(true, Text: "1A, 1B"));
+        floor.SetMark("C", Marks.RoomUnit, new(true, Text: "   "));
+        floor.SetMark("L", Marks.RoomUnit, new(false, Text: ""));              // never set
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Equal("Apt 1", Room(read, "A")["unit"]!.GetValue<string>());
+        Assert.Equal("1A, 1B", Room(read, "B")["unit"]!.GetValue<string>());
+        Assert.Null(Room(read, "C")["unit"]);
+        Assert.Null(Room(read, "L")["unit"]);
+        Assert.Contains(Marks.RoomUnit, Marks.All);
+        Assert.Equal((MarkValueKind.Text, MarkBinding.Instance, "rooms[].unit"), (Marks.RoomUnit.Kind, Marks.RoomUnit.Binding, Marks.RoomUnit.Feeds));
+        Assert.Equal([Marks.Rooms], Marks.RoomUnit.Categories);
+        // the route code reads the same key, and the words it says beside a count from the marks name the mark
+        var json = JsonNode.Parse(Env.RunCode(
+            "import json; from model_measurement.routes import dwelling_units as d; print(json.dumps({'key': d.UNIT, 'words': d.MARKED}))"))!;
+        Assert.Equal("unit", json["key"]!.GetValue<string>());
+        Assert.Contains(Marks.RoomUnit.Name, json["words"]!.GetValue<string>(), StringComparison.Ordinal);
+    }
+
     [Fact]
     public void The_use_words_and_exit_words_reach_exactly_the_route_codes_words()
     {

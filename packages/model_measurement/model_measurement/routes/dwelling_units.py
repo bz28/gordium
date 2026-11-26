@@ -34,7 +34,25 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md, step 3):
   leaves it not measured. One so marked stating no function
   can't be told from a real corridor or exit: the words beside the count name it.
 Never a guess: a count too low could pass a one-exit story Table 1006.3.4(1) allows only up to 4 units.
+
+Where any room of the story carries the architect's unit mark (`rooms[].unit`, Revit's room mark Gordium: Unit: the
+name of the dwelling unit the room belongs to), the marks replace the grouping above (`_marked`): each name is one
+dwelling unit, said with the count as the architect's statement (`architect_stated`, MARKED). The marks need no
+function, no single way out and no 1016.2.1 for the count, so the two limits above close: a shared room marked
+residential no longer joins two units (with no unit mark, it stops the count until it is marked a unit or a corridor
+or lobby), and a unit's room marked a corridor, lobby or exit still counts by its mark. Not measured where the marks
+and the drawing disagree or don't settle it:
+- a room whose mark isn't a name (not text), or names two or more units ("1A, 1B"), or two names differing only in
+  case or spacing ("Apt 1", "apt 1": one unit or two?);
+- a unit whose rooms on the story come apart (not joined by doors or passages through its own rooms: two units given
+  one name?), or whose lived-in rooms all state a listed other use (no dwelling unit), or a room the drawing takes as
+  an exit (a stair enclosure) given a unit;
+- a lived-in room with no mark that may be a dwelling unit's (any function but a listed other use, or none): a unit
+  left unmarked, or a room shared between units not marked a corridor or lobby; the room-of-a-unit-marked-a-hall
+  checks above still run for the halls and exits with no mark.
 """
+
+import re
 
 from model_measurement.routes.floor import OUTSIDE
 from model_measurement.routes.spaces import spaces
@@ -63,6 +81,88 @@ RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with a residenti
             "dwelling units is marked a corridor or lobby (a shared vestibule or landing marked residential would join "
             "two units into one), no room of a dwelling unit is marked a corridor, lobby or exit (a unit so marked "
             "would be left out of the count), and BCNYS 1016.2.1 (p.341) is met: \"" + QUOTE_1016_2_1 + "\"")
+UNIT = "unit"                                            # rooms[].unit: the architect's unit mark (Gordium: Unit)
+# said with every row reading a count from the marks (parts.yaml `architect_stated`): the statement it stands on
+MARKED = ("counted from the rooms' unit marks (Gordium: Unit), the architect's statement: each name given is one "
+          "dwelling unit, and every room of a dwelling unit on the story carries its unit's name")
+# two or more units named in one mark ("1A, 1B", "1A and 1B", "1A/1B"): a room can't be in two units
+_SEVERAL = re.compile(r"[,;&+/|]|\band\b", re.IGNORECASE)
+
+
+def marked(story, items: dict) -> bool:
+    """Whether any room of the story carries a unit mark (any value but none or blank text): then the marks count."""
+    return any(_given((items.get(rid) or {}).get(UNIT)) for rid in story.rooms)
+
+
+def _given(value) -> bool:
+    return value is not None and not (isinstance(value, str) and not value.strip())
+
+
+def _name(value, room_name):
+    """The unit a mark names (spacing made single), None for no mark; Stop where it isn't one name."""
+    if not _given(value):
+        return None
+    if isinstance(value, bool) or not isinstance(value, (str, int)):
+        raise Stop("units_mark_unreadable", name=room_name, got=repr(value))
+    text = " ".join(str(value).split())
+    if _SEVERAL.search(text):
+        raise Stop("units_mark_several", name=room_name, got=text)
+    return text
+
+
+def _marked(story, items: dict, is_exit) -> int:
+    """The count from the unit marks (see the module's words)."""
+    exits = {rid for rid in story.rooms if is_exit(story, rid)}
+    names, by_unit = {}, {}
+    for rid, room in sorted(story.rooms.items()):
+        name = _name((items.get(rid) or {}).get(UNIT), room.name)
+        if name is None:
+            continue
+        if rid in exits:                                 # a stair enclosure or exit passageway is shared, never a unit's
+            raise Stop("units_mark_on_exit", name=room.name, unit=name)
+        names[rid] = name
+        by_unit.setdefault(name, set()).add(rid)
+    alike = {}
+    for name in by_unit:
+        alike.setdefault(name.casefold(), []).append(name)
+    for same in alike.values():
+        if len(same) > 1:
+            raise Stop("units_mark_alike", names=", ".join(sorted(same)))
+    links = [tuple(d.sides) for d in story.doors.values()] + [(a, b) for a, b, _ in story.passages]
+    for name, rooms in sorted(by_unit.items()):
+        reached, todo = set(), [min(rooms)]              # its rooms joined through its own rooms only
+        while todo:
+            r = todo.pop()
+            if r not in reached:
+                reached.add(r)
+                todo += [y if x == r else x for x, y in links if r in (x, y) and {x, y} <= rooms]
+        if reached != rooms:
+            raise Stop("units_mark_apart", unit=name,
+                       rooms=", ".join(sorted(story.rooms[r].name for r in rooms - reached)))
+        lived = [r for r in rooms if story.rooms[r].use not in NOT_LIVED_IN]
+        if lived and all(isinstance(f, str) and f in NOT_DWELLING
+                         for f in ((items.get(r) or {}).get("function") for r in lived)):
+            raise Stop("units_mark_not_dwelling", unit=name)
+    found, halls = spaces(story, lambda _s, rid: rid in exits)
+    hall_rooms = set().union(*[h for h, _ in halls]) if halls else set()
+    for rid, room in sorted(story.rooms.items()):        # a room with no mark that may be a dwelling unit's
+        function = (items.get(rid) or {}).get("function")
+        if rid in names or rid in exits or rid in hall_rooms or room.use in NOT_LIVED_IN or \
+                (isinstance(function, str) and function in NOT_DWELLING):
+            continue
+        raise Stop("units_mark_left_out", name=room.name)
+    links = [set(s) for s in links]
+    for rid in sorted(exits | hall_rooms):               # a unit's room marked a hall or exit, with no unit mark
+        if rid in names:
+            continue
+        room, function = story.rooms[rid], (items.get(rid) or {}).get("function")
+        if rid in exits and function is not None:
+            raise Stop("units_exit_function", name=room.name)
+        if rid in hall_rooms and function is not None and \
+                not (isinstance(function, str) and function in NOT_DWELLING) and \
+                not any(rid in sides and sides & set(names) for sides in links):
+            raise Stop("units_hall_residential", name=room.name)
+    return len(by_unit)
 
 
 def units_on(story, items: dict, is_exit, stair_in, links_read) -> int:
@@ -73,6 +173,8 @@ def units_on(story, items: dict, is_exit, stair_in, links_read) -> int:
     it (routes.links_read_here: one drawn on another level would hide a unit's own door, two units counted one)."""
     if story.stops:
         raise Stop("story_not_measured", reasons="; ".join(story.stops))
+    if marked(story, items):                             # the architect's unit marks replace the grouping (doors
+        return _marked(story, items, is_exit)            # change no count by marks: one hidden only stops it)
     links_read()
     for rid, room in sorted(story.rooms.items()):
         if room.use is None:                             # it may be a corridor joining two units into one group

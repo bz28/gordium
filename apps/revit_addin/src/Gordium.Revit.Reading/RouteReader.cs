@@ -98,6 +98,10 @@ public static class RouteReader
             room["function"] = typed;
             notes.Add(new(r.Id, "function", $"{Marks.RoomFunction.Name} is \"{typed}\", not one of Table 1004.5's functions Gordium lists: sent as typed, so its occupant load and its story's need review"));
         }
+        // the dwelling unit it belongs to (Gordium: Unit): sent as typed, trimmed, so the route code counts a story's
+        // units from the names (one naming two units, or names the drawing disagrees with, it says); blank is left out
+        if (r.Unit is { } unit)
+            room["unit"] = unit;
     }
 
     // ---- everything else, once the rooms and doors are read ----------------------------------------------------

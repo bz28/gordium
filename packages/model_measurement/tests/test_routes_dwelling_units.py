@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from routes_layouts import description, door, rect, room  # noqa: E402
 
 from model_measurement.routes import UNITS_FACT, _is_exit, measure  # noqa: E402
-from model_measurement.routes.dwelling_units import QUOTE_1016_2_1, RESTS_ON, units_on  # noqa: E402
+from model_measurement.routes.dwelling_units import MARKED, QUOTE_1016_2_1, RESTS_ON, marked, units_on  # noqa: E402
 from model_measurement.routes.floor import read  # noqa: E402
 from model_measurement.routes.stops import STOPS, Stop  # noqa: E402
 
@@ -28,6 +28,9 @@ REPO = Path(__file__).resolve().parents[3]
 UNITS_KEYS = {"units_use_unknown", "units_function_unknown", "units_no_entrance", "units_entrances", "units_stair",
               "units_shared_room", "units_link_elsewhere", "units_link_unread", "units_exit_function",
               "units_hall_residential"}
+MARK_KEYS = {"units_mark_unreadable", "units_mark_several", "units_mark_alike", "units_mark_apart",
+             "units_mark_not_dwelling", "units_mark_on_exit", "units_mark_left_out"}     # the unit marks' tests below
+UNITS_KEYS |= MARK_KEYS
 FUNCTIONS = ("residential", "business", None)
 
 
@@ -142,6 +145,12 @@ def test_the_four_unit_apartment_two_units_a_story_with_the_reading_beside_them(
         assert s["measures"][UNITS_FACT] == 2, s["name"]
         assert s["rests_on"][UNITS_FACT] == RESTS_ON
     assert "1016.2.1 (p.341)" in RESTS_ON and QUOTE_1016_2_1 in RESTS_ON
+    for r in interior["rooms"]:                          # each apartment marked with its unit (Gordium: Unit)
+        if r.get("function") == "residential":
+            r["unit"] = r["name"]
+    for s in measure(interior)["parts"]["story"]:
+        assert s["measures"][UNITS_FACT] == 2, s["name"]
+        assert s["architect_stated"][UNITS_FACT] == MARKED and UNITS_FACT not in s.get("rests_on", {})
     for s in measure(json.loads(APARTMENT.read_text(encoding="utf-8"))["interior"])["parts"]["story"]:
         assert UNITS_FACT not in s["measures"]
         assert s["not_measured"][UNITS_FACT].startswith(STOPS["units_function_unknown"].split("{")[0])
@@ -158,6 +167,7 @@ def test_each_reason_has_a_case():
     seen |= {"units_stair", "units_shared_room"}         # the round 2 tests below
     seen |= {"units_link_elsewhere", "units_link_unread"}    # test_a_units_own_door_drawn_on_another_level...
     seen |= {"units_exit_function", "units_hall_residential"}   # test_a_unit_marked_an_exit_or_a_hall...
+    seen |= MARK_KEYS                                    # the unit marks' tests at the end of this file
     assert seen == UNITS_KEYS
 
 
@@ -369,3 +379,167 @@ def test_a_residential_corridor_beside_units_stating_no_function_says_to_mark_th
     next(r for r in desc["rooms"] if r["id"] == "c")["function"] = "residential"
     got = count(desc)
     assert isinstance(got, Stop) and got.key == "units_function_unknown", got
+
+
+# --- the unit marks (Gordium: Unit, rooms[].unit): they replace the grouping where any room of the story has one ---
+
+MARKS = (None, "A", "B")
+WALK_ROOMS = ("s0", "s1", "b1", "s2")                    # the middle suite two rooms (s1, and b1 behind it)
+
+
+def mark_oracle(marks, functions, joins):
+    """The count from the marks, written apart from dwelling_units._marked: None where it may be another number,
+    "inferred" where no room is marked. `marks`: each room's unit (WALK_ROOMS' order); `functions`: each suite's (b1
+    takes s1's)."""
+    if not any(marks):
+        return "inferred"
+    unit = dict(zip(WALK_ROOMS, marks))
+    function = {"s0": functions[0], "s1": functions[1], "b1": functions[1], "s2": functions[2]}
+    links = [("s1", "b1")] + [(f"s{i}", f"s{i + 1}") for i in range(2) if joins[i]]
+    for rid in WALK_ROOMS:                               # a room with no mark that may be a unit's
+        if unit[rid] is None and function[rid] != "business":
+            return None
+    names = {n for n in unit.values() if n}
+    for n in names:
+        rooms = {r for r in WALK_ROOMS if unit[r] == n}
+        reached = {min(rooms)}
+        for _ in range(4):
+            reached |= {b for a, b in links if a in reached and b in rooms} | \
+                {a for a, b in links if b in reached and a in rooms}
+        if reached != rooms:
+            return None                                  # one name on rooms apart: two units?
+        if all(function[r] == "business" for r in rooms):
+            return None                                  # a unit of no dwelling use
+    return len(names)
+
+
+def _items(desc, marks, functions):
+    items = {r["id"]: dict(r) for r in desc["rooms"]}
+    function = {"s0": functions[0], "s1": functions[1], "b1": functions[1], "s2": functions[2]}
+    for rid, m in zip(WALK_ROOMS, marks):
+        items[rid].pop("function", None)
+        if function[rid]:
+            items[rid]["function"] = function[rid]
+        if m is not None:
+            items[rid]["unit"] = m
+    return items
+
+
+def _count(story, desc, items):
+    from model_measurement.routes import _links_listed, _stair_in, _stair_points, links_read_here
+    stairs = _stair_points(desc)
+    try:
+        return units_on(story, items, _is_exit, lambda g: any(_stair_in(st, g, story) for st in stairs),
+                        lambda: links_read_here(story, _links_listed(desc), "units"))
+    except Stop as s:
+        return s
+
+
+def _room(desc, rid):
+    return next(r for r in desc["rooms"] if r["id"] == rid)
+
+
+@pytest.mark.parametrize("joins", list(itertools.product((False, True), repeat=2)), ids=str)
+def test_the_marks_walk_every_count_measured_is_the_oracles(joins):
+    """Every unit mark (none, A, B) on each of four rooms, every function per suite (residential, business, none), the
+    suites joined or not: the count is the oracle's (the names given), or not measured where it may be another
+    number; with no mark, the grouping counts (the walk above)."""
+    desc = layout([("residential", 1, 1), ("residential", 2, 1), ("residential", 1, 1)], joins)
+    story = read(desc).stories["L1"]
+    seen = set()
+    for marks in itertools.product(MARKS, repeat=4):
+        for functions in itertools.product(FUNCTIONS, repeat=3):
+            items = _items(desc, marks, functions)
+            got, want = _count(story, desc, items), mark_oracle(marks, functions, joins)
+            if want == "inferred":
+                assert not marked(story, items)
+                continue
+            assert marked(story, items)
+            if want is None:
+                assert isinstance(got, Stop) and got.key in MARK_KEYS, (marks, functions, joins, got)
+            else:
+                assert got == want, (marks, functions, joins, got)
+            seen.add(got if not isinstance(got, Stop) else got.key)
+    assert {1, 2, "units_mark_left_out", "units_mark_not_dwelling", "units_mark_apart"} <= seen, seen
+
+
+def test_a_shared_vestibule_marked_residential_no_longer_joins_two_units():
+    """The grouping's first disclosed limit: a vestibule marked residential, two units off it, counted one unit. With
+    the units marked, the vestibule with no mark stops the count (mark it a lobby, or a unit); marked a lobby, 2."""
+    desc = layout([("residential", 1, 0), ("residential", 1, 0), ("business", 1, 1)], (False, False))
+    desc["rooms"].append(room("v", rect(0, 10.5, 23.5, 15), use="other", lockable=False, pass_through=True,
+                              function="residential"))
+    desc["doors"] += [door("va", (5, 10.25), (1, 0), ("s0", "v")), door("vb", (17, 10.25), (1, 0), ("s1", "v")),
+                      door("vc", (23.75, 12.75), (0, 1), ("v", "outside"))]
+    assert count(desc) == 1                              # the grouping: one group, one way out (the limit)
+    _room(desc, "s0")["unit"], _room(desc, "s1")["unit"] = "1", "2"
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_mark_left_out", got
+    _room(desc, "v")["use"] = "lobby"
+    assert count(desc) == 2
+    story = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
+    assert story["measures"][UNITS_FACT] == 2
+    assert story["architect_stated"][UNITS_FACT] == MARKED and UNITS_FACT not in story.get("rests_on", {})
+
+
+@pytest.mark.parametrize("how", ["exit", "lobby", "corridor"])
+def test_a_marked_unit_room_marked_a_hall_or_exit_still_counts(how):
+    """The second disclosed limit: a unit's room marked a corridor or lobby with no function dropped out (3 counted 2).
+    Marked with its unit it counts; marked an exit (a stair enclosure) and a unit, the two disagree: not measured."""
+    desc = layout([("residential", 1, 1)] * 3, (False, False))
+    for i in range(3):
+        _room(desc, f"s{i}")["unit"] = f"Apt {i + 1}"
+    s2 = _room(desc, "s2")
+    s2.pop("function")
+    if how == "exit":
+        d = next(d for d in desc["doors"] if d["id"] == "e20")
+        d["exit_kind"], d["exit_id"] = "exit_passageway", "s2"
+        got = count(desc)
+        assert isinstance(got, Stop) and got.key == "units_mark_on_exit", got
+    else:
+        s2["use"] = how
+        assert count(desc) == 3
+        s2.pop("unit")                                   # unmarked, it is a hall: the marks count the two named
+        assert count(desc) == 2
+
+
+@pytest.mark.parametrize("mark, key", [("1A, 1B", "units_mark_several"), ("1A and 1B", "units_mark_several"),
+                                       ("1A/1B", "units_mark_several"), (["1A"], "units_mark_unreadable"),
+                                       (True, "units_mark_unreadable"), (1.5, "units_mark_unreadable"),
+                                       ("apt  1", "units_mark_alike"), ("APT 1", "units_mark_alike")])
+def test_a_mark_naming_two_units_or_none_or_alike_names_is_not_measured(mark, key):
+    """A room marked with two units, a mark that isn't a name, or two names differing only in capitals or spacing:
+    the marks don't settle the count. A whole number is a name, and spacing at the ends is no new name (s1 and s2
+    joined by a door: one unit's two rooms)."""
+    desc = layout([("residential", 1, 1)] * 3, (False, True))
+    for i, m in enumerate(("Apt 1", "Apt 2", mark)):
+        _room(desc, f"s{i}")["unit"] = m
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == key, (mark, got)
+    for m, want in ((3, 3), (" Apt 2 ", 2), ("Apt 3", 3), ("", "units_mark_left_out")):
+        _room(desc, "s2")["unit"] = m
+        got = count(desc)
+        assert (got.key if isinstance(got, Stop) else got) == want, (m, got)
+
+
+def test_a_two_story_units_own_stair_doesnt_stop_the_marks_count():
+    """The grouping stops where a stair may stand in a group (the upper floor of a unit whose door is downstairs);
+    the marks name the unit, so a stair within it changes no count: the story counts the units with a room on it."""
+    desc = layout([("residential", 2, 1), ("residential", 1, 1), ("business", 1, 1)], (False, False))
+    desc["stairs"] = [{"id": "own", "nosings": [[[3, 12, 0], [3, 14, 0]]]}]          # in b0, the unit's own stair
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_stair", got
+    for rid, name in (("s0", "1"), ("b0", "1"), ("s1", "2")):
+        _room(desc, rid)["unit"] = name
+    assert count(desc) == 2
+
+
+def test_with_no_mark_the_grouping_and_its_words_stay():
+    desc = layout([("residential", 1, 1)] * 3, (False, False))
+    story = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
+    assert story["measures"][UNITS_FACT] == 3 and story["rests_on"][UNITS_FACT] == RESTS_ON
+    assert UNITS_FACT not in story.get("architect_stated", {})
+    for blank in ("", "   ", None):                      # a blank mark is no mark
+        for r in desc["rooms"]:
+            r["unit"] = blank
+        assert count(desc) == 3 and not marked(read(desc).stories["L1"], {r["id"]: r for r in desc["rooms"]})

@@ -97,3 +97,26 @@ def test_the_1016_2_1_flag_is_never_set_aside_in_group_r2():
     under every setting (so no building fact can drop the question while the count passes the row)."""
     rule = next(r for r in load(RULES)["rules"] if r["id"] == FLAG)
     assert rule["kind"] == "flag" and not rule.get("applies_when"), rule.get("applies_when")
+
+
+def test_counted_from_the_unit_marks_the_row_says_the_marks_not_the_reading():
+    """Each apartment marked with its unit (Revit's room mark Gordium: Unit): the count is the marks' (2 a story), the
+    row's line says it stands on them (the architect's statement), and no longer Gordium's grouping reading; a marked
+    room the drawing takes as an exit stops it (needs review, never a pass)."""
+    from model_measurement.routes.dwelling_units import MARKED
+    interior = build.interior_of()
+    interior.update(_one_exit_building(interior, "nfpa_13r"))
+    for r in interior["rooms"]:
+        if "APARTMENT" in r["name"].upper():
+            r["unit"] = r["name"]
+    got = _check(interior)
+    rows = [r for r in got["rows"] if r["rule"] == ROW]
+    assert [r["outcome"] for r in rows] == ["pass", "pass"] and all(r["values"][UNITS] == 2 for r in rows)
+    assert all(MARKED in r["architect_stated"] and not r.get("rests_on") for r in rows)
+    assert all(MARKED in str(i) for i in got["items"] if i.get("rule") == ROW)
+    stair = next(r for r in interior["rooms"] if "STAIR WEST" in r["name"].upper() and r["level"].endswith("1"))
+    stair["unit"] = "Apartment 1"
+    got = _check(interior)
+    assert got["results"][ROW] == "needs_review"
+    why = {s["id"]: s["not_measured"].get(UNITS, "") for s in got["interior"]["parts"]["story"]}
+    assert "is taken as an exit" in why[stair["level"]] and "marked unit 'Apartment 1'" in why[stair["level"]], why

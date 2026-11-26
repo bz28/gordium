@@ -181,6 +181,19 @@ public static class Marks
         RoomFunctions.Listed + ". Leave it blank on an exit stair enclosure or exit passageway and on a room whose Gordium: Use is Corridor, Closet or Toilet. " +
         "Blank on any other room, or a word not in the list (sent as typed, and said): the room's occupant load and its story's need review.");
 
+    /// <summary>The dwelling unit a room belongs to (<c>rooms[].unit</c>), the architect's name for it ("1A", "Apt 2"):
+    /// where any room of a story has one, the story's dwelling units (BCNYS Table 1006.3.4(1)) are counted from the
+    /// marks, one unit per name, instead of grouped from the drawing (model_measurement/routes/dwelling_units.py). Sent
+    /// as typed, trimmed; blank is not stated. A mark naming two units, or a name the drawing disagrees with, leaves the
+    /// count at needs review (the checker says which).</summary>
+    public static readonly MarkDefinition RoomUnit = new(
+        "Gordium: Unit", new("631bdd26-d64d-4d89-b192-04321c4bc82e"), MarkValueKind.Text, MarkBinding.Instance,
+        [Rooms], "rooms[].unit",
+        "The name of the dwelling unit this room belongs to (1A, Apt 2), the same on every room of that unit, its halls, baths and closets included. " +
+        "Where any room on a level has one, Gordium counts that story's dwelling units (BCNYS Table 1006.3.4(1)) from these names, one unit per name, instead of working them out from the drawing. " +
+        "Leave it blank on a room shared between units (mark that room's Gordium: Use Corridor or Lobby) and on a room of no unit. One name per room: a room with two names, " +
+        "a unit's rooms not joined to each other, or a room left blank that may be a unit's, and the count needs review.");
+
     public static readonly MarkDefinition LotSurveyed = new(
         "Gordium: Lot surveyed", new("133d30e3-832f-4956-88c3-6b48989ac3f7"), MarkValueKind.YesNo, MarkBinding.Instance,
         [ProjectInformation], "facts.lot_surveyed",
@@ -673,7 +686,7 @@ public static class Marks
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
-        CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction,
+        CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction, RoomUnit,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
         EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased, OtherLevelsReachCorridors,
