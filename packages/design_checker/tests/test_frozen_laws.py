@@ -122,3 +122,25 @@ def test_a_checks_rules_are_parsed_from_the_very_bytes_the_certificate_was_check
     monkeypatch.setattr(egress, "load", lambda p: {"rules": []} if Path(p) == Path(book) else real(p))
     law = egress.laws(ITHACA)["laws"][0]
     assert law["rules"] and law["rules"] == load(book)["rules"]
+
+
+def test_writing_goldens_publishes_stale_certificates_first_and_checking_only_missing_ones(monkeypatch):
+    """Review round 1 of PR 3 (noted on PR 2's entry points): with a stale certificate a check uses none of that law,
+    so `--write` would record every one of its rows as needs review as the goldens. Writing publishes stale ones
+    first; checking publishes only missing ones (a stale one then shows as the goldens differing)."""
+    import pytest
+    from design_checker import goldens
+    from permit_sheets import __main__ as sheets_main
+
+    class Stop(Exception):
+        pass
+    for main in (goldens.main, sheets_main.main):
+        for args, missing_only in ((["--write"], False), (["--check"], True)):
+            asked = []
+            monkeypatch.setattr(published, "ensure", lambda missing_only=False: asked.append(missing_only) or _stop())
+
+            def _stop():
+                raise Stop
+            with pytest.raises(Stop):
+                main(args)
+            assert asked == [missing_only], (main.__module__, args)

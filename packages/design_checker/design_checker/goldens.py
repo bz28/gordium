@@ -356,7 +356,9 @@ def main(argv: list[str]) -> int:
         parser.error("give --check or --write")
     if args.write and args.only:
         parser.error("--write writes every case (no --only)")
-    for note in published.ensure(missing_only=True):   # a missing law certificate is published first (rule_format/published.py)
+    # a missing law certificate is published first (rule_format/published.py); before writing goldens a stale one too,
+    # since a check reads no stale law (every row of it needs review) and those rows would be written as the goldens
+    for note in published.ensure(missing_only=not args.write):
         print(f"– {note}")
     texts = run(args.only)
     if args.write:

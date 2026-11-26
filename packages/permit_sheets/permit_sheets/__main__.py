@@ -73,7 +73,9 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--check", action="store_true", help="compare the golden sheets with fresh builds")
     parser.add_argument("--write", action="store_true", help="record the golden sheets again")
     args = parser.parse_args(argv)
-    for note in published.ensure(missing_only=True):   # a missing law certificate is published first (rule_format/published.py)
+    # a missing law certificate is published first (rule_format/published.py); before writing goldens a stale one too,
+    # since a check reads no stale law (every row of it needs review) and those rows would be written as the goldens
+    for note in published.ensure(missing_only=not args.write):
         print(f"– {note}")
     if args.check or args.write:
         if args.house or args.check == args.write:
