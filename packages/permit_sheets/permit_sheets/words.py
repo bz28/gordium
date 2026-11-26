@@ -138,7 +138,11 @@ def _aside_value(m: str, v, unit: str) -> str:
     (more than 44 in decides) down, said "over" where it is past 44 in but rounds to it."""
     if m == "area_well_depth":
         shown = value(v, unit, toward(ast.Gt, True))
-        return f"over {shown}" if isinstance(v, (int, float)) and v > 44 and shown == value(44, unit) else shown
+        # the checker's own comparison (formula: two numbers within its tolerance are equal), never a raw v > 44
+        over = isinstance(v, (int, float)) and formula.evaluate(
+            "area_well_depth > 44", {"area_well_depth": v},
+            _kinds({}, parts.measure_kinds("emergency_escape_opening"))) is True
+        return f"over {shown}" if over and shown == value(44, unit) else shown
     return value(v, unit, toward(ast.LtE, True))
 
 

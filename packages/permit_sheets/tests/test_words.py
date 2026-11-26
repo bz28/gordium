@@ -19,6 +19,10 @@ def test_an_area_well_size_rows_reach_is_said_in_words_and_its_values_never_roun
     _, have = required_and_proposed(rule, {"area_well_width": 40, "area_well_ladder": False, "area_well_depth": 30,
                                            "area_well_ladder_encroachment": 0, "area_well_other_encroachment": 0})
     assert "clear of the open window" not in have and "depth" not in have, have
+    # a depth the checker reads as 44 in (float noise within its tolerance) is never said "over" (review round 5)
+    _, have = required_and_proposed(rule, {"area_well_width": 40, "area_well_ladder": True, "area_well_depth": 44 + 1e-7,
+                                           "area_well_ladder_encroachment": 3, "area_well_other_encroachment": 0})
+    assert "area well depth 3'-8\"" in have and "over" not in have, have
     # R319.4.2's check reads the ladder alone: never set aside
     ladder = next(r for r in book["rules"] if r["id"] == "general.r319_4_2_area_well_ladder_over_44")
     assert required_and_proposed(ladder, {"area_well_ladder": False})[0] == "yes"

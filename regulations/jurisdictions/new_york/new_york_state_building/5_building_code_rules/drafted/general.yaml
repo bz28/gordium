@@ -17774,17 +17774,20 @@ rules:
   - field: notes
     by: Claude for Ben (R319.4.1 area well reaches, review round 3)
     date: 2026-11-26
-    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
-      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
-      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
-      none found on the point).'
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
   - field: research
     by: Claude for Ben (R319.4.1 area well reaches, review round 3)
     date: 2026-11-26
-    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
-      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
-      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
-      none found on the point).'
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 4)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 4: the research''s citation names the handout''s passage (the IRC''s
+      ladder sentence, R310.2.3.1) and records the search for New York State''s code interpretations (none found on the point).'
 - id: general.bc_1031_5_1_area_well_min_projection
   kind: rule
   topic: means_of_egress
@@ -18401,17 +18404,20 @@ rules:
   - field: notes
     by: Claude for Ben (R319.4.1 area well reaches, review round 3)
     date: 2026-11-26
-    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
-      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
-      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
-      none found on the point).'
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
   - field: research
     by: Claude for Ben (R319.4.1 area well reaches, review round 3)
     date: 2026-11-26
-    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
-      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
-      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
-      none found on the point).'
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 4)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 4: the research''s citation names the handout''s passage (the IRC''s
+      ladder sentence, R310.2.3.1) and records the search for New York State''s code interpretations (none found on the point).'
 - id: general.bc_1031_5_1_area_well_min_width
   kind: rule
   topic: means_of_egress
@@ -19028,17 +19034,20 @@ rules:
   - field: notes
     by: Claude for Ben (R319.4.1 area well reaches, review round 3)
     date: 2026-11-26
-    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
-      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
-      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
-      none found on the point).'
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
   - field: research
     by: Claude for Ben (R319.4.1 area well reaches, review round 3)
     date: 2026-11-26
-    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
-      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
-      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
-      none found on the point).'
+    why: 'PR feat/r319-well-encroachment''s review round 3: the notes say the 6 in is allowed only a required ladder or steps
+      not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the City of
+      Boise handout (its own words) and records the search for ICC commentary (none found).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 4)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 4: the research''s citation names the handout''s passage (the IRC''s
+      ladder sentence, R310.2.3.1) and records the search for New York State''s code interpretations (none found on the point).'
 - id: general.bc_1031_5_1_area_well_allows_full_opening
   kind: rule
   topic: means_of_egress

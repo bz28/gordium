@@ -3124,6 +3124,11 @@ rules:
       stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose
       reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps
       needs review, as before.'
+  - field: research
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'The pending question whether the exception applies only where the ladder is required by R319.4.2 is answered by
+      the law (the finding ladder_encroaches_only_where_required): its research entry moves to findings.'
   - field: check
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
@@ -3605,6 +3610,11 @@ rules:
       stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose
       reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps
       needs review, as before.'
+  - field: research
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'The pending question whether the exception applies only where the ladder is required by R319.4.2 is answered by
+      the law (the finding ladder_encroaches_only_where_required): its research entry moves to findings.'
   - field: check
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
@@ -4153,6 +4163,11 @@ rules:
       stated with no ladder, passed (a false pass found in PR #247''s review round 1). A crowded well now fails; one whose
       reaches aren''t stated needs review. The answer key''s band is kept: a well 30 in to under 36 in with a ladder or steps
       needs review, as before.'
+  - field: research
+    by: Claude for Ben (Revit marks for area wells, PR feat/r319-well-encroachment)
+    date: 2026-11-26
+    why: 'The pending question whether the exception applies only where the ladder is required by R319.4.2 is answered by
+      the law (the finding ladder_encroaches_only_where_required): its research entry moves to findings.'
   - field: check
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
