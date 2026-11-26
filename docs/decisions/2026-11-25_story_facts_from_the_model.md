@@ -96,3 +96,7 @@ Three ways the count came out too low (each a possible false pass on Table 1006.
 ## Review round 2 of step 3 (2026-11-26)
 
 Two more undercounts: a stair within a group (the upper floor of a two-story unit, joined by a door to a unit with its own door, counted as one with it: the same gap step 2 closed in its round 5), and a closet, toilet or storeroom opening onto two rooms of a group (shared by two units). Now a stair, ramp or ladder within the group or not ruled out (as step 2 reads them), and such a shared room, leave the count not measured. A shared vestibule marked residential still joins two units: the words beside the count name that assumption; a room mark for the unit (Gordium: Unit) is the way to settle it. One test each.
+
+## Review round 3 of step 3 (2026-11-26)
+
+No undercount found. Hardening: the stair check is required of every caller (left out, it would have counted none); the module's words name the listed other uses; a ramp not said to be none is pinned too. Two common layouts will come out not measured, and are the first cases for the room mark Gordium: Unit if they prove common: an apartment with a balcony door to the outside besides its entry (two ways out), and a bath opening onto two rooms of one unit (a room shared between rooms of the group).

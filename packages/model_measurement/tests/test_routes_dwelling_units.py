@@ -216,6 +216,12 @@ def test_a_stair_in_a_group_or_not_read_never_counts_it_as_one_unit():
     del desc["stairs"]
     got = count(desc)
     assert isinstance(got, Stop) and got.key == "units_stair", got
+    desc["stairs"] = []                                  # no stair, but a ramp not said to be none: may be anywhere
+    desc["has_none"] = [c for c in desc["has_none"] if c["kind"] != "ramp"]
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_stair", got
+    with pytest.raises(TypeError):                       # no caller can leave the stair check out
+        units_on(read(desc).stories["L1"], {}, _is_exit)
 
 
 def test_a_closet_between_two_rooms_of_a_group_may_be_shared():

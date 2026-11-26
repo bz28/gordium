@@ -14,8 +14,9 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md, step 3):
   an exit passageway), and the outside. Every other room belongs to a group: rooms joined by doors or passages
   without crossing a shared space.
 - A group is a dwelling unit where one of its rooms states the function residential (Table 1004.5, the room mark
-  Gordium: Function). A group whose rooms that could be lived in (not a toilet, closet or storeroom) all state
-  another function is no dwelling unit; one where such a room states none may be one: not measured.
+  Gordium: Function) and every lived-in room (not a toilet, closet or storeroom) states one. A group whose lived-in
+  rooms all state a listed other function (NOT_DWELLING) is no dwelling unit; one with a room stating none, or one not
+  on the list (a typo, dormitory, institutional sleeping), may be one: not measured.
 - A group with a stair, ramp or ladder within it (or one not read, or not said to be none: it may be anywhere), or
   with a closet, toilet or storeroom opening onto two or more of its rooms, may hold the upper part of a unit whose
   door is downstairs, or two units sharing that room: not measured.
@@ -58,7 +59,7 @@ RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with a residenti
             "two units into one) and BCNYS 1016.2.1 (p.341) is met: \"" + QUOTE_1016_2_1 + "\"")
 
 
-def units_on(story, items: dict, is_exit, stair_in=lambda group: False) -> int:
+def units_on(story, items: dict, is_exit, stair_in) -> int:
     """The dwelling units on the story (see the module's words). `items`: the description's rooms by id (their
     `function`); `is_exit(story, room id)`: whether the room is itself an exit (routes._is_exit, Stop where unclear);
     `stair_in(group)`: whether a stair, ramp or ladder may stand in the group (one not read may be anywhere)."""
