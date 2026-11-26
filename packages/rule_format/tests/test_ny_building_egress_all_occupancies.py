@@ -1171,3 +1171,15 @@ def test_the_6d_labels_say_their_section_group():
                 "202:initiating_device", "202:life_safety_systems"):
         assert labels[pid]["notes"].endswith("Section group 6d."), pid
     assert labels["1010.1.7"]["notes"].endswith("Section group 6c.")
+
+
+def test_no_rule_text_carries_yaml_quoting_into_what_people_read():
+    """Review round 3 of group 6e: a rewrite once wrapped a rule's notes in its YAML quotes twice, so the workbook
+    showed "'Section group 6e ... description''s ...". Every title, note, reason and example note, as loaded, has no
+    doubled apostrophe and doesn't start with a quote."""
+    bad = []
+    for r in load(RULEBOOK)["rules"]:
+        texts = [r.get("title"), r.get("notes")] + [w.get("reason") for w in r.get("review_when") or []] + \
+                [e.get("note") for e in r.get("examples") or []]
+        bad += [(r["id"], t[:60]) for t in texts if isinstance(t, str) and ("''" in t or t.startswith("'"))]
+    assert not bad, bad

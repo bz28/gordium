@@ -189,7 +189,6 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Until you answer:** Today, escape windows are not checked yet: check them by hand. From a model, Gordium measures both readings; where they disagree the window gets no grade-floor answer, so a rule that turns on it gets NEEDS REVIEW (the test house `test_data/interior_houses/5_basement_window_well/`).
 - **Options:** (a) the ground around the well (the stricter reading: a window deep in a well needs the full 5.7 sq ft); (b) the well's own floor.
 
-
 ---
 
 ## 5. Accessory buildings, accessory dwelling units, and the R-3a, R-2c, R-3aa, R-3b, RU and B districts
