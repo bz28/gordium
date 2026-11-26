@@ -43,6 +43,11 @@ WHY = {
                       "isn't known",
 }
 NEW_MEASURES = ("sleeping_room_escape_openings", *LINKED, "sleeping_room_door_to_outside")
+# section group 8b: each escape opening carries its room's facts that decide whether 1031.2 requires it, so the size
+# rules (1031.3, 1031.4) fail only an opening the law asks for (a rule reads only its own part's measures)
+FROM_ROOM = {"opening_room_fourth_or_higher": "sleeping_room_fourth_or_higher",
+             "opening_room_one_exit": "sleeping_room_story_one_exit",
+             "opening_room_door_to_outside": "sleeping_room_door_to_outside"}
 
 
 def link(parts: dict, description) -> None:
@@ -115,6 +120,33 @@ def link(parts: dict, description) -> None:
                 why["sleeping_room_door_to_outside"] = WHY["door_sides_not_read"].format(name=name)
             continue
         m["sleeping_room_door_to_outside"] = any(rid in s and OUTSIDE in s for s in sides)
+    _to_openings(rooms, openings)
+
+
+def _to_openings(rooms: list, openings) -> None:
+    """Copy each sleeping room's three facts onto the escape openings within it (FROM_ROOM): its value, or its reason
+    for having none; an opening within no sleeping room read (or a `maybe` one) gets neither, so its rows need review."""
+    if not isinstance(openings, list):
+        return
+    by_id = {}
+    for r in rooms:
+        if isinstance(r, dict) and isinstance(r.get("id"), str):
+            by_id.setdefault(r["id"], []).append(r)
+    for o in openings:
+        if not isinstance(o, dict):
+            continue
+        m = o.setdefault("measures", {})
+        why = o.setdefault("not_measured", {})
+        same = by_id.get(o.get("within"), [])
+        room = same[0] if len(same) == 1 and not same[0].get("maybe") else None
+        for mine, theirs in FROM_ROOM.items():
+            why.pop(mine, None)
+            if room is not None and theirs in (room.get("measures") or {}):
+                m[mine] = room["measures"][theirs]
+            elif room is not None:
+                why[mine] = (room.get("not_measured") or {}).get(theirs, "its room's isn't known")
+            else:
+                why[mine] = "the room it is in isn't one sleeping room read"
 
 
 __all__ = ["link", "NEW_MEASURES"]

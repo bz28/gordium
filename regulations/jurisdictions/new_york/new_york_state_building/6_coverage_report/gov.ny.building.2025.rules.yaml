@@ -507,4 +507,25 @@ pieces:
     heading: Where required › Operational constraints and opening control devices
     rules:
     - general.bc_1031_2_1_operational_constraints
+  1031.3.1:
+    label: rule
+    heading: Emergency escape and rescue openings › Minimum size
+    rules:
+    - general.bc_1031_3_1_escape_opening_min_area
+  1031.3.2:
+    label: rule
+    heading: Emergency escape and rescue openings › Minimum dimensions
+    rules:
+    - general.bc_1031_3_2_escape_opening_min_height
+    - general.bc_1031_3_2_escape_opening_min_width
+  1031.3.3:
+    label: rule
+    heading: Emergency escape and rescue openings › Maximum height from floor
+    rules:
+    - general.bc_1031_3_3_escape_opening_max_sill_height
+  '1031.4':
+    label: rule
+    heading: Emergency escape and rescue doors
+    rules:
+    - general.bc_1031_4_escape_door_swinging_or_sliding
 not_checked_yet: []

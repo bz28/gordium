@@ -30,6 +30,11 @@ sprinklered_903_3_1_1:
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_1031_2_escape_opening_where_required
+  - general.bc_1031_3_1_escape_opening_min_area
+  - general.bc_1031_3_2_escape_opening_min_height
+  - general.bc_1031_3_2_escape_opening_min_width
+  - general.bc_1031_3_3_escape_opening_max_sill_height
+  - general.bc_1031_4_escape_door_swinging_or_sliding
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -74,6 +79,11 @@ sprinklered_903_3_1_2:
   - general.bc_1007_1_2_space_three_or_more
   - general.bc_1020_3_corridor_capacity
   - general.bc_1031_2_escape_opening_where_required
+  - general.bc_1031_3_1_escape_opening_min_area
+  - general.bc_1031_3_2_escape_opening_min_height
+  - general.bc_1031_3_2_escape_opening_min_width
+  - general.bc_1031_3_3_escape_opening_max_sill_height
+  - general.bc_1031_4_escape_door_swinging_or_sliding
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -103,6 +113,11 @@ sprinklered_903_3_1_3:
   needed_by:
   - general.bc_1006_2_2_6_r3_r4_nfpa_13d
   - general.bc_1031_2_escape_opening_where_required
+  - general.bc_1031_3_1_escape_opening_min_area
+  - general.bc_1031_3_2_escape_opening_min_height
+  - general.bc_1031_3_2_escape_opening_min_width
+  - general.bc_1031_3_3_escape_opening_max_sill_height
+  - general.bc_1031_4_escape_door_swinging_or_sliding
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1020_2_a_b_e_f_m_s_u
   - general.bc_table_1020_2_i2
@@ -174,6 +189,11 @@ occupancy_group:
   - general.bc_1031_2_basements
   - general.bc_1031_2_escape_opening_where_required
   - general.bc_1031_2_openings_to_public_way
+  - general.bc_1031_3_1_escape_opening_min_area
+  - general.bc_1031_3_2_escape_opening_min_height
+  - general.bc_1031_3_2_escape_opening_min_width
+  - general.bc_1031_3_3_escape_opening_max_sill_height
+  - general.bc_1031_4_escape_door_swinging_or_sliding
   - general.bc_407_4_2_sleeping_room_travel
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b

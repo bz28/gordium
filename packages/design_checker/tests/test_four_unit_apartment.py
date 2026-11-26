@@ -475,3 +475,20 @@ def test_escape_openings_as_sent_and_with_one_room_stated_a_sleeping_room(got):
     assert [(r["id"], r["outcome"]) for r in rows] == [(desc["rooms"][0]["id"] + " (sleeping room)", present.REVIEW)]
     assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == set()
 
+
+SIZES = ("general.bc_1031_3_1_escape_opening_min_area", "general.bc_1031_3_2_escape_opening_min_height",
+         "general.bc_1031_3_2_escape_opening_min_width", "general.bc_1031_3_3_escape_opening_max_sill_height",
+         "general.bc_1031_4_escape_door_swinging_or_sliding")
+
+
+def test_escape_opening_sizes_as_sent_and_with_the_openings_stated_none(got):
+    """Section group 8b. Before: the description gives no openings, so they aren't read and each of the five rules
+    needs review, never a pass. After, the openings stated none: no opening to size, each not applicable (1031.2's own
+    rule asks for one), and only these five change."""
+    assert {got["results"][k] for k in SIZES} == {present.REVIEW}
+    desc = build.interior_of()
+    desc["openings"] = []
+    stated = _check(desc, egress.measure_routes(desc))
+    assert {stated["results"][k] for k in SIZES} == {"not_applicable"}
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == set(SIZES)
+

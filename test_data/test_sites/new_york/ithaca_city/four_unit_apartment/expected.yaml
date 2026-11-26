@@ -180,6 +180,13 @@ results:
   general.bc_1031_2_basements: needs_review
   general.bc_1031_2_openings_to_public_way: needs_review
   general.bc_1031_2_1_operational_constraints: needs_review
+  # section group 8b: the description gives no openings, so the escape openings aren't read: each opening's size, sill
+  # and door rule needs review (stated none, they would not apply)
+  general.bc_1031_3_1_escape_opening_min_area: needs_review
+  general.bc_1031_3_2_escape_opening_min_height: needs_review
+  general.bc_1031_3_2_escape_opening_min_width: needs_review
+  general.bc_1031_3_3_escape_opening_max_sill_height: needs_review
+  general.bc_1031_4_escape_door_swinging_or_sliding: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

@@ -15380,8 +15380,9 @@ rules:
       the room is in a basement, and the basement''s egress, aren''t shown: a person checks.'
   - when: sleeping_room_escape_openings >= 1 and not sleeping_room_fourth_or_higher and not (occupancy_group in ["R-2"] and
       not sleeping_room_story_one_exit)
-    reason: 'An escape opening is marked, but 1031.2 asks for one in accordance with this section: its size, sill height
-      and any area well (1031.3 to 1031.6) aren''t checked yet: a person checks.'
+    reason: 'An escape opening is marked, but 1031.2 asks for one in accordance with this section: its size, sill and
+      door kind are the opening''s own rows (1031.3, 1031.4), but its area well and any bars or grilles (1031.5, 1031.6)
+      aren''t checked yet: a person checks.'
   - when: occupancy_group in ["mixed"] and not sleeping_room_escape_openings >= 1
     reason: 'No escape opening marked, in a building of two or more groups: whether the room is in a Group R-2, R-3 or R-4
       occupancy that 1031.2 asks it of isn''t shown: a person checks.'
@@ -15434,8 +15435,8 @@ rules:
     - part: r1
       outcome: needs_review
     expect: needs_review
-    note: 'One escape opening marked: its size and sill (1031.3 to 1031.6, section group 8b) aren''t checked yet, so a
-      person checks (review round 2).'
+    note: 'One escape opening marked: its area well and bars (1031.5, 1031.6, section group 8c) aren''t checked yet,
+      so a person checks (review round 2 of section group 8a).'
   - given:
       occupancy_group: R-3
       sprinklered_903_3_1_1: false
@@ -15707,5 +15708,1265 @@ rules:
     expect: not_applicable
     note: Not Group R-2, R-3 or R-4.
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 8a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_3_1_escape_opening_min_area
+  kind: rule
+  topic: means_of_egress
+  title: Escape opening at least 5.7 sq ft, 5 sq ft at grade floor (BCNYS 1031.3.1)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (opening_net_clear_area >= 5.7 or (opening_at_grade and opening_net_clear_area >= 5)) or opening_room_fourth_or_higher
+    or (occupancy_group in ["R-2"] and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_net_clear_area >= 5.7 or (opening_at_grade and opening_net_clear_area
+      >= 5)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_door_to_outside
+    reason: 'The opening is smaller than 1031.3.1 allows, but its room has a door to outside: exception 2 sets the opening
+      aside where that door is an exit or exit access door opening directly into a public way, or a yard, court or exterior
+      egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (opening_net_clear_area >= 5.7 or (opening_at_grade and opening_net_clear_area
+      >= 5)) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+    reason: 'The opening is smaller than 1031.3.1 allows, in a Group R-2 or R-3 building sprinklered throughout (stated, or
+      not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or one
+      and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["mixed"] and not (opening_net_clear_area >= 5.7 or (opening_at_grade and opening_net_clear_area
+      >= 5))
+    reason: 'The opening is smaller than 1031.3.1 allows, in a building of two or more groups: whether its room is in a Group
+      R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 29
+    - 30
+    quote: '1031.3.1 Minimum size. Emergency escape and rescue openings shall have a minimum net clear opening of 5.7 square
+      feet (0.53 m[fn2]). Exception: The minimum net clear opening for grade-floor emergency escape and rescue openings shall
+      be 5 square feet (0.46 m[fn2]).'
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_net_clear_area: 5.8
+          opening_at_grade: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_net_clear_area: 4.9
+          opening_at_grade: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening is smaller than 1031.3.1 allows.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_net_clear_area: 4.9
+          opening_at_grade: false
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_net_clear_area: 4.9
+          opening_at_grade: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_net_clear_area: 4.9
+          opening_at_grade: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_net_clear_area: 4.9
+          opening_at_grade: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_net_clear_area: 4.9
+          opening_at_grade: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8b: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). Its net clear opening is 5.7 sq ft or more, or 5 sq ft or more for a grade-floor opening (202 GRADE FLOOR
+    EMERGENCY ESCAPE AND RESCUE OPENING: its bottom within 44 inches of the finished ground level adjacent to it, as the house
+    measuring reads it; in an area well the two readings of ''adjacent'' must agree, questions page 4.6). It applies only
+    where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade
+    plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review where
+    the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building
+    of two or more groups, or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session
+    (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_3_2_escape_opening_min_height
+  kind: rule
+  topic: means_of_egress
+  title: Escape opening at least 24 in high (BCNYS 1031.3.2)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (opening_net_clear_height >= 24) or opening_room_fourth_or_higher or (occupancy_group in ["R-2"] and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_net_clear_height >= 24) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening is lower than 24 inches clear, but its room has a door to outside: exception 2 sets the opening aside
+      where that door is an exit or exit access door opening directly into a public way, or a yard, court or exterior egress
+      balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (opening_net_clear_height >= 24) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      or sprinklered_903_3_1_3)
+    reason: 'The opening is lower than 24 inches clear, in a Group R-2 or R-3 building sprinklered throughout (stated, or
+      not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or one
+      and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["mixed"] and not (opening_net_clear_height >= 24)
+    reason: 'The opening is lower than 24 inches clear, in a building of two or more groups: whether its room is in a Group
+      R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 31
+    - 33
+    quote: 1031.3.2 Minimum dimensions. The minimum net clear opening height dimension shall be 24 inches (610 mm). The minimum
+      net clear opening width dimension shall be 20 inches (508 mm). The net clear opening dimensions shall be the result
+      of normal operation of the opening.
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_net_clear_height: 24
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_net_clear_height: 23.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening is lower than 24 inches clear.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_net_clear_height: 23.5
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_net_clear_height: 23.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_net_clear_height: 23.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_net_clear_height: 23.5
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_net_clear_height: 23.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8b: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). Its net clear opening height, with the window or door in its normal operation fully open, is 24 inches
+    or more. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the
+    fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits;
+    it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
+    5), in a building of two or more groups, or where the room''s story isn''t known (not measured yet). Hand-drafted in a
+    Claude Code session (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_3_2_escape_opening_min_width
+  kind: rule
+  topic: means_of_egress
+  title: Escape opening at least 20 in wide (BCNYS 1031.3.2)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (opening_net_clear_width >= 20) or opening_room_fourth_or_higher or (occupancy_group in ["R-2"] and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_net_clear_width >= 20) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening is narrower than 20 inches clear, but its room has a door to outside: exception 2 sets the opening
+      aside where that door is an exit or exit access door opening directly into a public way, or a yard, court or exterior
+      egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (opening_net_clear_width >= 20) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      or sprinklered_903_3_1_3)
+    reason: 'The opening is narrower than 20 inches clear, in a Group R-2 or R-3 building sprinklered throughout (stated,
+      or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress, or
+      one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["mixed"] and not (opening_net_clear_width >= 20)
+    reason: 'The opening is narrower than 20 inches clear, in a building of two or more groups: whether its room is in a Group
+      R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 31
+    - 33
+    quote: 1031.3.2 Minimum dimensions. The minimum net clear opening height dimension shall be 24 inches (610 mm). The minimum
+      net clear opening width dimension shall be 20 inches (508 mm). The net clear opening dimensions shall be the result
+      of normal operation of the opening.
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_net_clear_width: 20
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_net_clear_width: 19.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening is narrower than 20 inches
+      clear.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_net_clear_width: 19.5
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_net_clear_width: 19.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_net_clear_width: 19.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_net_clear_width: 19.5
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_net_clear_width: 19.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8b: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). Its net clear opening width, with the window or door in its normal operation fully open, is 20 inches
+    or more. It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the
+    fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits;
+    it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
+    5), in a building of two or more groups, or where the room''s story isn''t known (not measured yet). Hand-drafted in a
+    Claude Code session (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_3_3_escape_opening_max_sill_height
+  kind: rule
+  topic: means_of_egress
+  title: Escape opening's sill at most 44 in above the floor (BCNYS 1031.3.3)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (opening_sill_height <= 44) or opening_room_fourth_or_higher or (occupancy_group in ["R-2"] and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (opening_sill_height <= 44) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening has its sill higher than 44 inches above the floor, but its room has a door to outside: exception
+      2 sets the opening aside where that door is an exit or exit access door opening directly into a public way, or a yard,
+      court or exterior egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (opening_sill_height <= 44) and not opening_room_fourth_or_higher and
+      not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or
+      sprinklered_903_3_1_3)
+    reason: 'The opening has its sill higher than 44 inches above the floor, in a Group R-2 or R-3 building sprinklered throughout
+      (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress,
+      or one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["mixed"] and not (opening_sill_height <= 44)
+    reason: 'The opening has its sill higher than 44 inches above the floor, in a building of two or more groups: whether
+      its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 34
+    - 35
+    quote: 1031.3.3 Maximum height from floor. Emergency escape and rescue openings shall have the bottom of the clear opening
+      not greater than 44 inches (1118 mm) measured from the floor.
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_sill_height: 44
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_sill_height: 44.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening has its sill higher than 44
+      inches above the floor.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_sill_height: 44.5
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_sill_height: 44.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_sill_height: 44.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_sill_height: 44.5
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_sill_height: 44.5
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8b: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). The bottom of its clear opening is 44 inches or less above the floor. It applies only where 1031.2 requires
+    the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher, or
+    in Group R-2 where the room''s occupants are shown to reach two or more exits; it needs review where the room has a door
+    to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception 5), in a building of two or more groups,
+    or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_4_escape_door_swinging_or_sliding
+  kind: rule
+  topic: means_of_egress
+  title: An escape door is a swinging or sliding door (BCNYS 1031.4)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: (not opening_is_door or opening_door_hinged_or_sliding) or opening_room_fourth_or_higher or (occupancy_group in ["R-2"]
+    and not opening_room_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_is_door or opening_door_hinged_or_sliding) and not
+      opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+    reason: 'The opening is a door that isn''t swinging or sliding, but its room has a door to outside: exception 2 sets the
+      opening aside where that door is an exit or exit access door opening directly into a public way, or a yard, court or
+      exterior egress balcony leading to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not (not opening_is_door or opening_door_hinged_or_sliding) and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      or sprinklered_903_3_1_3)
+    reason: 'The opening is a door that isn''t swinging or sliding, in a Group R-2 or R-3 building sprinklered throughout
+      (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room in a basement with two means of egress,
+      or one and an escape opening, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["mixed"] and not (not opening_is_door or opening_door_hinged_or_sliding)
+    reason: 'The opening is a door that isn''t swinging or sliding, in a building of two or more groups: whether its room
+      is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 36
+    - 37
+    quote: 1031.4 Emergency escape and rescue doors. Where a door is provided as the required emergency escape and rescue
+      opening, it shall be a swinging door or a sliding door.
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_is_door: true
+          opening_door_hinged_or_sliding: true
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: Within the limit.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_is_door: true
+          opening_door_hinged_or_sliding: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story, no door to outside, not sprinklered: the opening is a door that isn''t swinging
+      or sliding.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window on the fifth story
+        within: r1
+        measures:
+          opening_is_door: true
+          opening_door_hinged_or_sliding: false
+          opening_room_fourth_or_higher: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: On the fourth story or higher, 1031.2 doesn't require it.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Apartment escape window
+        within: r1
+        measures:
+          opening_is_door: true
+          opening_door_hinged_or_sliding: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_one_exit: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'Group R-2, its room''s occupants shown to reach two exits: 1031.2 doesn''t require it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, room with a door to the yard
+        within: r1
+        measures:
+          opening_is_door: true
+          opening_door_hinged_or_sliding: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the room''s door to outside may set the opening aside.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window, story not known
+        within: r1
+        measures:
+          opening_is_door: true
+          opening_door_hinged_or_sliding: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: Whether the room is below the fourth story isn't known.
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_is_door: true
+          opening_door_hinged_or_sliding: false
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether 1031.2 asks it isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window not measured
+        within: r1
+        measures:
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Not measured: a person checks.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - within: r1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'No escape opening marked in the room: 1031.2''s own rule asks for one.'
+  notes: 'Section group 8b: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
+    house code''s). A door provided as the escape opening is a swinging door or a sliding door (a window is asked nothing).
+    It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth
+    story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it
+    needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
+    5), in a building of two or more groups, or where the room''s story isn''t known (not measured yet). Hand-drafted in a
+    Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

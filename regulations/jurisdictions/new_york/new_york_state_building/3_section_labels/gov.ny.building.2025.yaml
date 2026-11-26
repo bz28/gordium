@@ -1481,6 +1481,24 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:grade_floor_emergency_escape_and_rescue_opening:
+    label: reference
+    topic: definitions
+    reason: 'Defines GRADE FLOOR EMERGENCY ESCAPE AND RESCUE OPENING, the opening 1031.3.1''s exception allows at 5 sq ft:
+      a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 33
+      - 34
+      quote: '[BE] GRADE FLOOR EMERGENCY ESCAPE AND RESCUE OPENING. An emergency escape and rescue opening located such that
+        the bottom of the clear opening is not more than 44 inches (1118 mm) above or below the finished ground level adjacent
+        to the opening.'
+    piece_sha256: ecac10b31c65285dfe64e3518db829476ec2911f00385d13bd97428d891f5d36
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:grade_plane:
     label: reference
     topic: definitions
@@ -5811,5 +5829,91 @@ labels:
         be permitted for use on windows serving as a required emergency escape and rescue opening.
     piece_sha256: 3f297335b1b526856741d17864bf872258b3b7bedebd495328118712b7a59f57
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1031.3':
+    label: reference
+    topic: means_of_egress
+    reason: 'Says escape openings comply with 1031.3.1 to 1031.3.3: no requirement of its own, the three after it are checked.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 27
+      - 28
+      quote: 1031.3 Emergency escape and rescue openings. Emergency escape and rescue openings shall comply with Sections
+        1031.3.1 through 1031.3.3.
+    piece_sha256: 19cccd6ae869c96b9f243b14d673b629fda1304ec1b5e4589b0d50a7a10d0c73
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1031.3.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Net clear opening at least 5.7 sq ft, 5 sq ft for a grade-floor opening: checkable per marked escape opening
+      from its measured clear opening, where 1031.2 requires it.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 29
+      - 30
+      quote: '1031.3.1 Minimum size. Emergency escape and rescue openings shall have a minimum net clear opening of 5.7 square
+        feet (0.53 m[fn2]). Exception: The minimum net clear opening for grade-floor emergency escape and rescue openings
+        shall be 5 square feet (0.46 m[fn2]).'
+    piece_sha256: 8c7eac647e184bb5f78aeda046c51edee783701abd97ab6de7318f280224285b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1031.3.2:
+    label: rule
+    topic: means_of_egress
+    reason: 'Net clear opening at least 24 inches high and 20 inches wide, in normal operation: checkable per marked escape
+      opening, where 1031.2 requires it.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 31
+      - 33
+      quote: 1031.3.2 Minimum dimensions. The minimum net clear opening height dimension shall be 24 inches (610 mm). The
+        minimum net clear opening width dimension shall be 20 inches (508 mm). The net clear opening dimensions shall be the
+        result of normal operation of the opening.
+    piece_sha256: f1c03b52b2642242239751dc00c464e7cd4486947761b821e1b446cfc758c04c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1031.3.3:
+    label: rule
+    topic: means_of_egress
+    reason: 'Bottom of the clear opening at most 44 inches above the floor: checkable per marked escape opening, where 1031.2
+      requires it.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 34
+      - 35
+      quote: 1031.3.3 Maximum height from floor. Emergency escape and rescue openings shall have the bottom of the clear opening
+        not greater than 44 inches (1118 mm) measured from the floor.
+    piece_sha256: a85334706b102ce51f29186ecf644df9a8137a950f6f879948631c729ee7419d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1031.4':
+    label: rule
+    topic: means_of_egress
+    reason: 'A door provided as the escape opening is a swinging or sliding door: checkable per marked escape door, where
+      1031.2 requires it.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 36
+      - 37
+      quote: 1031.4 Emergency escape and rescue doors. Where a door is provided as the required emergency escape and rescue
+        opening, it shall be a swinging door or a sliding door.
+    piece_sha256: 74255b8b7b2ef9bbef62dbba81d5557c6f29d79d2192576dc61f4ef67219d7b8
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft

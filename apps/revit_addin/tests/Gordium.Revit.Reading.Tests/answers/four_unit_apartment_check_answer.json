@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 104 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 105 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1366,6 +1366,11 @@
     "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): door electric lock not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door latched not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door occupant load not measured: Gordium doesn't measure this yet; door panic hardware not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable)",
     "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): door electric lock not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door latched not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door occupant load not measured: Gordium doesn't measure this yet; door panic hardware not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable)",
     "Sleeping rooms · An escape opening in each sleeping room where 1031.2 requires one: Sleeping rooms: no sleeping rooms",
+    "Emergency escape openings · Escape opening at least 5.7 sq ft: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · Escape opening at least 24 in high: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · Escape opening at least 20 in wide: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · Escape opening's sill at most 44 in above the floor: Emergency escape openings: the emergency escape openings aren't read yet",
+    "Emergency escape openings · An escape door is a swinging or sliding door: Emergency escape openings: the emergency escape openings aren't read yet",
     "Egress · Group I-4: A person checks this (Gordium doesn't decide it): Which group the building is in decides every limit below; the architect states it, a person confirms.",
     "Egress · Child day care classified Group E: A person checks this (Gordium doesn't decide it): More than five but not more than 100 children 2 1/2 or younger, in rooms on a level of exit discharge each with an exit door directly outside: Group E, not I-4; the architect states it.",
     "Egress · Care during religious functions: A person checks this (Gordium doesn't decide it): Part of the primary occupancy: the architect states it.",
@@ -63046,6 +63051,721 @@
      }
     },
     {
+     "id": "general.bc_1031_3_1_escape_opening_min_area@-/-",
+     "rule": "general.bc_1031_3_1_escape_opening_min_area",
+     "name": "Emergency escape openings · Escape opening at least 5.7 sq ft, 5 sq ft at grade floor (BCNYS 1031.3.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.3.1 Minimum size. Emergency escape and rescue openings shall have a minimum net clear opening of 5.7 square feet (0.53 m[fn2]). Exception: The minimum net clear opening for grade-floor emergency escape and rescue openings shall be 5 square feet (0.46 m[fn2]).",
+        "where": "1031.3.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         29,
+         30
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.3.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         29,
+         30
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_net_clear_area:",
+       "words": "net clear area not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_net_clear_area"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.3.1",
+      "quote": "1031.3.1 Minimum size. Emergency escape and rescue openings shall have a minimum net clear opening of 5.7 square feet (0.53 m[fn2]). Exception: The minimum net clear opening for grade-floor emergency escape and rescue openings shall be 5 square feet (0.46 m[fn2])."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_net_clear_area:",
+       "why": "net clear area not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_net_clear_area",
+       "kind": "fix_model",
+       "headline": "Fix the model so the net clear area can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "Escape opening at least 5.7 sq ft, 5 sq ft at grade floor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.3.1",
+      "piece_title": "Minimum size"
+     }
+    },
+    {
+     "id": "general.bc_1031_3_2_escape_opening_min_height@-/-",
+     "rule": "general.bc_1031_3_2_escape_opening_min_height",
+     "name": "Emergency escape openings · Escape opening at least 24 in high (BCNYS 1031.3.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.3.2 Minimum dimensions. The minimum net clear opening height dimension shall be 24 inches (610 mm). The minimum net clear opening width dimension shall be 20 inches (508 mm). The net clear opening dimensions shall be the result of normal operation of the opening.",
+        "where": "1031.3.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         31,
+         33
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.3.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         31,
+         33
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_net_clear_height:",
+       "words": "net clear height not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_net_clear_height"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.3.2",
+      "quote": "1031.3.2 Minimum dimensions. The minimum net clear opening height dimension shall be 24 inches (610 mm). The minimum net clear opening width dimension shall be 20 inches (508 mm). The net clear opening dimensions shall be the result of normal operation of the opening."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_net_clear_height:",
+       "why": "net clear height not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_net_clear_height",
+       "kind": "fix_model",
+       "headline": "Fix the model so the net clear height can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "Escape opening at least 24 in high",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.3.2",
+      "piece_title": "Minimum dimensions"
+     }
+    },
+    {
+     "id": "general.bc_1031_3_2_escape_opening_min_width@-/-",
+     "rule": "general.bc_1031_3_2_escape_opening_min_width",
+     "name": "Emergency escape openings · Escape opening at least 20 in wide (BCNYS 1031.3.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.3.2 Minimum dimensions. The minimum net clear opening height dimension shall be 24 inches (610 mm). The minimum net clear opening width dimension shall be 20 inches (508 mm). The net clear opening dimensions shall be the result of normal operation of the opening.",
+        "where": "1031.3.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         31,
+         33
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.3.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         31,
+         33
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_net_clear_width:",
+       "words": "net clear width not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_net_clear_width"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.3.2",
+      "quote": "1031.3.2 Minimum dimensions. The minimum net clear opening height dimension shall be 24 inches (610 mm). The minimum net clear opening width dimension shall be 20 inches (508 mm). The net clear opening dimensions shall be the result of normal operation of the opening."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_net_clear_width:",
+       "why": "net clear width not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_net_clear_width",
+       "kind": "fix_model",
+       "headline": "Fix the model so the net clear width can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "Escape opening at least 20 in wide",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.3.2",
+      "piece_title": "Minimum dimensions"
+     }
+    },
+    {
+     "id": "general.bc_1031_3_3_escape_opening_max_sill_height@-/-",
+     "rule": "general.bc_1031_3_3_escape_opening_max_sill_height",
+     "name": "Emergency escape openings · Escape opening's sill at most 44 in above the floor (BCNYS 1031.3.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.3.3 Maximum height from floor. Emergency escape and rescue openings shall have the bottom of the clear opening not greater than 44 inches (1118 mm) measured from the floor.",
+        "where": "1031.3.3, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         34,
+         35
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.3.3, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         34,
+         35
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_sill_height:",
+       "words": "sill height not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_sill_height"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.3.3",
+      "quote": "1031.3.3 Maximum height from floor. Emergency escape and rescue openings shall have the bottom of the clear opening not greater than 44 inches (1118 mm) measured from the floor."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_sill_height:",
+       "why": "sill height not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_sill_height",
+       "kind": "fix_model",
+       "headline": "Fix the model so the sill height can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "Escape opening's sill at most 44 in above the floor",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.3.3",
+      "piece_title": "Maximum height from floor"
+     }
+    },
+    {
+     "id": "general.bc_1031_4_escape_door_swinging_or_sliding@-/-",
+     "rule": "general.bc_1031_4_escape_door_swinging_or_sliding",
+     "name": "Emergency escape openings · An escape door is a swinging or sliding door (BCNYS 1031.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Emergency escape openings: the emergency escape openings aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "emergency_escape_opening",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Emergency escape openings: the emergency escape openings aren't read yet",
+      "quotes": [
+       {
+        "text": "1031.4 Emergency escape and rescue doors. Where a door is provided as the required emergency escape and rescue opening, it shall be a swinging door or a sliding door.",
+        "where": "1031.4, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         36,
+         37
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.4, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         36,
+         37
+        ]
+       }
+      ]
+     },
+     "element": "Emergency escape openings",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the emergency escape openings weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_is_door:",
+       "words": "is door not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_is_door"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_door_hinged_or_sliding:",
+       "words": "hinged or sliding not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_door_hinged_or_sliding"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:emergency_escape_opening:opening_room_fourth_or_higher:",
+       "words": "room fourth or higher not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_room_fourth_or_higher"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "words": "the emergency escape openings weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.4",
+      "quote": "1031.4 Emergency escape and rescue doors. Where a door is provided as the required emergency escape and rescue opening, it shall be a swinging door or a sliding door."
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_is_door:",
+       "why": "is door not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_is_door",
+       "kind": "fix_model",
+       "headline": "Fix the model so the is door can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_door_hinged_or_sliding:",
+       "why": "hinged or sliding not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_door_hinged_or_sliding",
+       "kind": "fix_model",
+       "headline": "Fix the model so the hinged or sliding can be measured"
+      },
+      {
+       "key": "model:emergency_escape_opening:opening_room_fourth_or_higher:",
+       "why": "room fourth or higher not measured (or not usable)",
+       "elements": [],
+       "measure": "opening_room_fourth_or_higher",
+       "kind": "fix_model",
+       "headline": "Fix the model so the room fourth or higher can be measured"
+      },
+      {
+       "key": "drawing:the emergency escape openings weren't sent from the model",
+       "why": "the emergency escape openings weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The emergency escape openings weren't sent from the model"
+      }
+     ],
+     "rule_name": "An escape door is a swinging or sliding door",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.4",
+      "piece_title": "Emergency escape and rescue doors"
+     }
+    },
+    {
      "id": "egress.general.bc_308_5_classification",
      "rule": "general.bc_308_5_classification",
      "name": "Egress · Group I-4, day care facilities (BCNYS 308.5)",
@@ -73174,7 +73894,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 104 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 105 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -73692,6 +74412,11 @@
       "general.bc_1010_1_2_1_direction_of_swing@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781",
       "general.bc_1010_2_8_panic_hardware@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781",
       "general.bc_1031_2_escape_opening_where_required@-/-",
+      "general.bc_1031_3_1_escape_opening_min_area@-/-",
+      "general.bc_1031_3_2_escape_opening_min_height@-/-",
+      "general.bc_1031_3_2_escape_opening_min_width@-/-",
+      "general.bc_1031_3_3_escape_opening_max_sill_height@-/-",
+      "general.bc_1031_4_escape_door_swinging_or_sliding@-/-",
       "egress.general.bc_308_5_classification",
       "egress.general.bc_308_5_1_group_e",
       "egress.general.bc_308_5_2_religious_worship",
@@ -74271,6 +74996,23 @@
        "title": "Sleeping rooms: 1 needs review: no sleeping rooms",
        "mark": "?",
        "name": "Sleeping rooms"
+      },
+      {
+       "key": "review#0abb4ddcee",
+       "tier": "review",
+       "items": [
+        "general.bc_1031_3_1_escape_opening_min_area@-/-",
+        "general.bc_1031_3_2_escape_opening_min_height@-/-",
+        "general.bc_1031_3_2_escape_opening_min_width@-/-",
+        "general.bc_1031_3_3_escape_opening_max_sill_height@-/-",
+        "general.bc_1031_4_escape_door_swinging_or_sliding@-/-"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 5,
+       "title": "Emergency escape openings: 5 need review: to give: the emergency escape openings weren't sent from the model",
+       "mark": "?",
+       "name": "Emergency escape openings"
       },
       {
        "key": "review#e2688efa33",
@@ -75326,7 +76068,7 @@
        "name": "Interior drawing"
       }
      ],
-     "count": 104,
+     "count": 105,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -75493,9 +76235,14 @@
         "general.bc_table_1020_2_i4@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
-        "general.bc_1031_2_escape_opening_where_required@-/-"
+        "general.bc_1031_2_escape_opening_where_required@-/-",
+        "general.bc_1031_3_1_escape_opening_min_area@-/-",
+        "general.bc_1031_3_2_escape_opening_min_height@-/-",
+        "general.bc_1031_3_2_escape_opening_min_width@-/-",
+        "general.bc_1031_3_3_escape_opening_max_sill_height@-/-",
+        "general.bc_1031_4_escape_door_swinging_or_sliding@-/-"
        ],
-       "rules": 40,
+       "rules": 45,
        "field": "facts.occupancy_group"
       },
       {
@@ -76844,7 +77591,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "104 to review · 30 comply"
+     "summary": "105 to review · 30 comply"
     }
    ],
    "contents": [
@@ -89111,7 +89858,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 195
+          "not_for_checking": 196
          },
          "pieces": [
           {
@@ -89663,6 +90410,12 @@
           {
            "id": "202:grade_lumber",
            "title": "GRADE (LUMBER)",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:grade_floor_emergency_escape_and_rescue_opening",
+           "title": "GRADE FLOOR EMERGENCY ESCAPE AND RESCUE OPENING",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -92623,9 +93376,9 @@
          "coverage": "rules",
          "whole": false,
          "counts": {
-          "rules": 1,
+          "rules": 5,
           "flag": 1,
-          "not_for_checking": 1
+          "not_for_checking": 2
          },
          "pieces": [
           {
@@ -92647,8 +93400,47 @@
            ]
           },
           {
+           "id": "1031.3.1",
+           "title": "Minimum size",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1031_3_1_escape_opening_min_area"
+           ]
+          },
+          {
+           "id": "1031.3.2",
+           "title": "Minimum dimensions",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1031_3_2_escape_opening_min_height",
+            "general.bc_1031_3_2_escape_opening_min_width"
+           ]
+          },
+          {
+           "id": "1031.3.3",
+           "title": "Maximum height from floor",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1031_3_3_escape_opening_max_sill_height"
+           ]
+          },
+          {
+           "id": "1031.4",
+           "title": "Emergency escape and rescue doors",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1031_4_escape_door_swinging_or_sliding"
+           ]
+          },
+          {
            "id": "1031.1",
            "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1031.3",
+           "title": "Emergency escape and rescue openings",
            "coverage": "not_for_checking",
            "rules": []
           }
@@ -96491,6 +97283,11 @@
    "general.bc_1010_2_8_panic_hardware@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b780": "needs_review",
    "general.bc_1010_2_8_panic_hardware@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781": "needs_review",
    "general.bc_1031_2_escape_opening_where_required@-/-": "needs_review",
+   "general.bc_1031_3_1_escape_opening_min_area@-/-": "needs_review",
+   "general.bc_1031_3_2_escape_opening_min_height@-/-": "needs_review",
+   "general.bc_1031_3_2_escape_opening_min_width@-/-": "needs_review",
+   "general.bc_1031_3_3_escape_opening_max_sill_height@-/-": "needs_review",
+   "general.bc_1031_4_escape_door_swinging_or_sliding@-/-": "needs_review",
    "egress.general.bc_308_5_classification": "needs_review",
    "egress.general.bc_308_5_1_group_e": "needs_review",
    "egress.general.bc_308_5_2_religious_worship": "needs_review",
@@ -96616,7 +97413,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "104 to review · 30 comply"
+    "summary": "105 to review · 30 comply"
    }
   ],
   "egress": {
@@ -101649,6 +102446,71 @@
      "none": true,
      "unknown": [],
      "line": "Sleeping rooms: no sleeping rooms"
+    },
+    {
+     "rule": "general.bc_1031_3_1_escape_opening_min_area",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_3_2_escape_opening_min_height",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_3_2_escape_opening_min_width",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_3_3_escape_opening_max_sill_height",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
+    },
+    {
+     "rule": "general.bc_1031_4_escape_door_swinging_or_sliding",
+     "part": "emergency_escape_opening",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the emergency escape openings aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Emergency escape openings: the emergency escape openings aren't read yet"
     }
    ],
    "results": {
@@ -101710,6 +102572,11 @@
     "general.bc_1010_1_3_2_sliding_door_latch": "not_applicable",
     "general.bc_1010_2_8_panic_hardware": "needs_review",
     "general.bc_1031_2_escape_opening_where_required": "needs_review",
+    "general.bc_1031_3_1_escape_opening_min_area": "needs_review",
+    "general.bc_1031_3_2_escape_opening_min_height": "needs_review",
+    "general.bc_1031_3_2_escape_opening_min_width": "needs_review",
+    "general.bc_1031_3_3_escape_opening_max_sill_height": "needs_review",
+    "general.bc_1031_4_escape_door_swinging_or_sliding": "needs_review",
     "general.bc_308_5_classification": "needs_review",
     "general.bc_308_5_1_group_e": "needs_review",
     "general.bc_308_5_2_religious_worship": "needs_review",
@@ -105717,9 +106584,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "f63a22cec0c0a10799c5e21aa2b992881035eb04e0ff373f512ed6206a78962b",
+  "worker_fingerprint": "90254ae6c90e4cb2869bd6a09b3272270cb0e6c8495d609d7c37979bc6203977",
   "rulebook": {
-   "new_york/ithaca_city": "b42d6b55ae0b6f4422968f4233ac817f30603811369da6200a0700f233a90f46"
+   "new_york/ithaca_city": "8225d3b7245c185c2cdcdc2c57693a11c9aa7989b48b62f12135a0004a891f9b"
   }
  }
 }

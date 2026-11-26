@@ -153,3 +153,24 @@ def test_a_room_id_two_rooms_share_counts_no_openings_and_no_doors():
     for k in ("sleeping_room_escape_openings", "sleeping_room_door_to_outside", "sleeping_room_fourth_or_higher"):
         assert k not in p["measures"] and p["not_measured"][k], k
 
+
+
+def test_each_escape_opening_carries_its_rooms_three_facts():
+    """Section group 8b: an opening's size rules fail only where 1031.2 requires it, which is its room's to say (its
+    story's place, one exit, a door to outside): each is copied from the room, or its reason why not; an opening in no
+    one sleeping room read gets none of them, so its rows need review."""
+    one = {"id": "L1", "measures": {"story_exit_count": 1, "story_fourth_or_higher_above_grade_plane": False}}
+    parts, desc = _parts(story=one)
+    parts["emergency_escape_opening"][0]["not_measured"] = {k: "Gordium doesn't measure this yet"
+                                                           for k in escape_openings.FROM_ROOM}
+    parts["emergency_escape_opening"].append({"id": "x", "within": "nowhere", "measures": {}})
+    escape_openings.link(parts, desc)
+    w, x = parts["emergency_escape_opening"]
+    assert w["measures"] == {"opening_room_fourth_or_higher": False, "opening_room_one_exit": True,
+                             "opening_room_door_to_outside": False}
+    assert not set(w["measures"]) & set(w["not_measured"])
+    assert not set(escape_openings.FROM_ROOM) & set(x["measures"])
+    assert set(escape_openings.FROM_ROOM) <= set(x["not_measured"])
+    parts, desc = _parts()                                   # two exits: not measured on the room, nor on its opening
+    escape_openings.link(parts, desc)
+    assert parts["emergency_escape_opening"][0]["not_measured"]["opening_room_one_exit"].endswith("isn't worked out")
