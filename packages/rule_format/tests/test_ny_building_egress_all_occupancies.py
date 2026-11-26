@@ -1570,3 +1570,31 @@ def test_the_readme_names_each_section_group_9e_flag_that_reads_icc_a117_1():
         if r.get("kind") == "flag" and sid in GROUP_9E_ON and "ICC A117.1 isn't brought in" in (r.get("notes") or ""):
             piece = ".".join(p for p in r["id"].removeprefix("general.bc_").split("_") if p.isdigit())
             assert f"{piece}'s flag" in entry, r["id"]
+
+
+def test_the_readme_names_each_flag_reading_a_reference_outside_chapter_10_not_brought_in(rules):
+    """Review round 1 of section group 9f (P3), fixed here for 9e's flags: the README's list names, for each reference
+    not brought in, the flags that read it; 1023.3.1's, 1023.4's, 1023.6's (716) and 1023.12.2's (909.20.4) weren't named. From section
+    group 9e on, each reference outside Chapter 10 a flag's notes say isn't brought in is in the README's list, with
+    that flag ('1024.3's flag') or its section ('1024's flags') in the bracket after it."""
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    part = readme.split("## References in the brought-in sections that are not brought in", 1)[1].split("\n## ", 1)[0]
+    ref = r"(?:UL|NFPA|ASTM) [A-Z]?\d+|ICC A117\.1|(?<![\d.])\d{3,4}(?:\.\d+)*(?![\d])"
+    missing = []
+    for rid, r in rules.items():
+        sid = rid.removeprefix("general.bc_").split("_")[0]
+        if r.get("kind") != "flag" or sid not in GROUP_9E_ON:
+            continue
+        piece = ".".join(p for p in rid.removeprefix("general.bc_").split("_") if p.isdigit())
+        for sentence in re.split(r"(?<=\.) ", r.get("notes") or ""):
+            m = re.search(r"\b(?:is|are)n't(?: yet)? brought in", sentence)
+            if not m:
+                continue
+            for x in re.findall(ref, re.sub(r"\([^()]*\)", "", sentence[:m.start()])):
+                if re.fullmatch(r"10\d\d(?:\.\d+)*", x) or x == "ICC A117.1":   # Chapter 10's own; A117.1 tested above
+                    continue
+                spots = [part[k.end():part.find(")", k.end())] for k in
+                         re.finditer(rf"(?<![\w.]){re.escape(x)}(?![\d]|\.\d)", part)]
+                if not any(f"{piece}'s" in s or f"{sid}'s" in s for s in spots):
+                    missing.append((rid, x))
+    assert not missing, missing
