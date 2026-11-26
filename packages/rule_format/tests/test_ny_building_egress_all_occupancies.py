@@ -727,15 +727,31 @@ def test_no_text_calls_a_brought_in_section_not_brought_in():
     alone = [str(x) for x in brought["alone"]]     # brought in without the parts under them (1010.2 without 1010.2.14)
     pat = re.compile(r"(?:Section )?(\d{3,4}(?:\.\d+)*)(?:'s)?[^.;]{0,40}?(?:\(|, )[^()]{0,40}?not brought in")
 
+    def brought_in(n):
+        return n in alone or any(n == s or n.startswith(s + ".") for s in secs)
+
+    # review round 1 of section group 9e: a list before a bracket that names no section of its own ("meet 1022.2,
+    # gates 1010.4 and turnstiles 1010.5 (not brought in)") calls every section in it not brought in
+    listed = re.compile(r"([^;:()]{0,160})\(([^()]*?)\b(?:not|none|neither) brought in\)")
+
     def stale(t):
-        return [m.group(0) for m in pat.finditer(t) if m.group(1) in alone or any(
-            m.group(1) == s or m.group(1).startswith(s + ".") for s in secs)]
+        out = [m.group(0) for m in pat.finditer(t) if brought_in(m.group(1))]
+        for m in listed.finditer(t):
+            if re.search(r"\d{3}", m.group(2)):
+                continue
+            out += [m.group(0) for n in re.findall(r"(?<![\d.])(?<!Table )(\d{3,4}(?:\.\d+)*)(?!\d)", m.group(1))
+                    if brought_in(n)]
+        return out
     bad = []
     for r in load(RULEBOOK)["rules"]:
         texts = [r.get("title"), r.get("notes")] + [w["reason"] for w in r.get("review_when") or []] + \
                 [e.get("note") for e in r.get("examples") or []]
         bad += [(r["id"], x) for t in texts if isinstance(t, str) for x in stale(t)]
     bad += [("sources.yaml", x) for x in stale((NY / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))]
+    # review round 1 of section group 9e (P2): the label reasons too, which the label review page shows (1017.2.1's
+    # and 1010.1's still called 1021 and 1022.2 not brought in)
+    for pid, lab in load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"].items():
+        bad += [(pid, x) for x in stale(lab.get("reason") or "")]
     assert not bad, bad
 
 
@@ -1432,3 +1448,78 @@ def test_1019_3s_congregate_residence_exception_is_for_stairways_only(rules):
     note = " ".join(r["examples"][0]["note"].split())
     assert "exit access stairways (not ramps) within a Group R-3 congregate residence" in note
 
+
+
+# Review round 1 of section group 9e (P1, P2): a shown reason that names an exception wider than the book prints it
+# (a ramp given a stairways-only exception, a condition of two dropped, "not less than" said as "up to") lets a person
+# accept what the law forbids. Each phrase below is the book's limit in the reason's words; each banned phrase was one.
+SHOWN_MUST_SAY = {
+    "general.bc_1023_1_interior_exit_stairways_general": (["except as 1028.2 permits"], ["but as 1028.2 allows"]),
+    "general.bc_1023_2_enclosure_construction": (["exit stairways (not ramps) within an atrium enclosed per 404.6 or per 510.2",
+                                                  "exit stairways and ramps in Group I-3 per 408.3.8"], []),
+    "general.bc_1023_7_2_roof_assemblies": (["unless the code otherwise requires it", "extending at least 10 feet above the roof"],
+                                            ["up to 10 feet"]),
+    "general.bc_1023_12_1_smokeproof_termination": (["and the openings are protected as for access from other floors"], []),
+}
+
+
+def test_section_group_9e_reasons_name_each_exception_as_printed(rules):
+    for rid, (must, never) in SHOWN_MUST_SAY.items():
+        note = " ".join(rules[rid]["examples"][0]["note"].split())
+        assert all(m in note for m in must), (rid, [m for m in must if m not in note])
+        assert not any(n in note for n in never), rid
+
+
+GROUP_9E_ON = ("1021", "1022", "1023")          # section group 9e on: each flag's own piece's label gives its reason
+
+
+def test_a_flags_label_reason_is_its_shown_reason(rules):
+    """Review round 1 of section group 9e: the four reasons above were wrong in the flag and in its piece's label alike;
+    fixing one and not the other would show the reader two different laws. From section group 9e on, the label of a
+    flag's first piece (the one its id names) gives the flag's shown reason word for word."""
+    labels = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]
+    n = 0
+    for rid, r in rules.items():
+        sid = rid.removeprefix("general.bc_").split("_")[0]
+        if r.get("kind") != "flag" or sid not in GROUP_9E_ON:
+            continue
+        piece = re.sub(r"^(\d{4})_((?:\d+_)*)[a-z].*$", lambda m: m[1] + "." + m[2].rstrip("_").replace("_", "."),
+                       rid.removeprefix("general.bc_")).rstrip(".")
+        assert labels[piece]["label"] == "flag", (rid, piece)
+        assert " ".join(labels[piece]["reason"].split()) == " ".join(r["examples"][0]["note"].split()), rid
+        n += 1
+    assert n == 26
+
+
+def test_every_up_to_limit_in_a_section_group_9e_reason_is_a_maximum_in_the_book(rules):
+    """Review round 1 of section group 9e (P2): 1023.7.2's reason said 'up to 10 feet above the roof' for the book's 'not
+    less than 10 feet'. Each 'up to N' in a group 9e flag's reason is a figure its quote caps ('need not exceed',
+    'not exceeding', 'not more than', 'maximum', 'up to', 'or less')."""
+    caps = r"(?:need not exceed|not exceeding|not more than|maximum(?: of)?|up to|not greater than)"
+    for rid, r in rules.items():
+        if r.get("kind") != "flag" or rid.removeprefix("general.bc_").split("_")[0] not in GROUP_9E_ON:
+            continue
+        note = " ".join(r["examples"][0]["note"].split())
+        quote = " ".join(" ".join(s["quote"] for s in r["sources"]).split())
+        for n in re.findall(r"\bup to (\d+(?: \d/\d)?)", note):
+            assert re.search(rf"{caps}[^.;]{{0,20}}?\b{re.escape(n)}\b|\b{re.escape(n)}\b[^.;]{{0,25}}or less", quote), (rid, n)
+
+
+def test_1022_1s_notes_name_what_of_1003_to_1015_isnt_brought_in(rules):
+    """Review round 1 of section group 9e (P3): 1022.1 sends exits to 'the applicable requirements of Sections 1003
+    through 1015'; its notes named only 1011, 1014 and 1015 as not brought in, but 1006's general parts and 1010.3 to
+    1010.5.4 aren't either."""
+    notes = rules["general.bc_1022_1_exits_general"]["notes"]
+    assert all(s in notes for s in ("1006.1 to 1006.3.2", "1010.3 to 1010.5.4", "1011", "1014", "1015"))
+
+
+def test_the_readme_names_each_section_group_9e_flag_that_reads_icc_a117_1():
+    """Review round 1 of section group 9e (P3): the README's 'Chapter 11 and ICC A117.1' entry names the flag reading
+    it in each place; 1023.11's (tactile floor-level signs) was missing."""
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    entry = readme.split("Chapter 11 and ICC A117.1 (", 1)[1].split("), ", 1)[0]
+    for r in load(RULEBOOK)["rules"]:
+        sid = r["id"].removeprefix("general.bc_").split("_")[0]
+        if r.get("kind") == "flag" and sid in GROUP_9E_ON and "ICC A117.1 isn't brought in" in (r.get("notes") or ""):
+            piece = ".".join(p for p in r["id"].removeprefix("general.bc_").split("_") if p.isdigit())
+            assert f"{piece}'s flag" in entry, r["id"]
