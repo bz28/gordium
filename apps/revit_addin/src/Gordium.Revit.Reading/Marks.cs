@@ -595,7 +595,7 @@ public static class Marks
         [Levels], "all_levels[].not_a_story",
         "Yes for a level that is no story of the building: a reference or datum level (top of foundation, a sill height), or a roof level. " +
         "Gordium then never counts it as a story nobody drew rooms on when it works out which story is the first, second or fourth above grade plane (BCNYS Tables 1006.3.4(1) and (2)). " +
-        "Blank or No: such a level with no rooms is tried both as a story and not, and the stories' places it could change need review. Rooms drawn on a level ticked Yes disagree with it: no story's place is measured.");
+        "Blank or No: such a level with no rooms is tried both as a story and not, and the stories' places it could change need review. Rooms, or an enclosed area with no Room, on a level ticked Yes disagree with it: no story's place is measured (for a roof whose walls close off an area, tick Gordium: No rooms on this level too).");
 
     // ---- step 6: what the house has none of (design note, sections 2 and 4; HasNone) ------------------------------
     // One Yes/No on Project Information per kind: the three kinds the description lists itself (an empty list says

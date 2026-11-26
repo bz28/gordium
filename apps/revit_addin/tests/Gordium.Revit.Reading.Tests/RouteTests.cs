@@ -161,6 +161,26 @@ public sealed class RouteTests
             "import json; from model_measurement.routes import story_place as s; print(json.dumps(s.NOT_A_STORY))"))!.GetValue<string>());
     }
 
+    /// <summary>Review round 1 (PR 2): a level ticked Not a story with Rooms on it disagrees with the mark, so no story is
+    /// placed; the reader lists it first among the level conflicts (as for No rooms on this level), and the tooltip names
+    /// an enclosed area with no Room too.</summary>
+    [Fact]
+    public void A_level_marked_not_a_story_with_rooms_on_it_is_a_conflict_said_first()
+    {
+        var floor = new FakeFloor();
+        floor.Marked.Add(new MarkedElement
+        {
+            UniqueId = FakeFloor.Level, BuiltInCategory = Marks.Levels, Name = "Level 1",
+            Instance = new Dictionary<Guid, MarkValue> { [Marks.NotAStory.Guid] = new(true, 1) },
+        });
+        var read = InteriorReader.Read(floor.Model());
+        var conflict = Assert.Single(read.LevelConflicts);
+        Assert.StartsWith($"Level \"Level 1\" is marked {Marks.NotAStory.Name} Yes, but Room \"", conflict, StringComparison.Ordinal);
+        Assert.Contains("no story's place above or below grade plane is measured", conflict, StringComparison.Ordinal);
+        Assert.Contains("an enclosed area with no Room", Marks.NotAStory.Description, StringComparison.Ordinal);
+        Assert.Contains(Marks.NoRoomsOnLevel.Name, Marks.NotAStory.Description, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void The_story_under_turned_and_moved_shared_coordinates_reads_the_same()
     {

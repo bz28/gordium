@@ -398,11 +398,16 @@ public static class InteriorReader
         if (model.Interior is null)
             return [];
         var withRooms = RoomLevels(model);
+        string Rooms(MarkedElement l) => string.Join(", ", withRooms[l.UniqueId].Select(r => $"Room \"{RoomName(r)}\"")) +
+                                         (withRooms[l.UniqueId].Count == 1 ? " is" : " are");
         return MarkReading.LevelsMarkedNoRooms(model).Where(l => withRooms.ContainsKey(l.UniqueId))
-            .Select(l => $"Level \"{l.Name ?? l.UniqueId}\" is marked {Marks.NoRoomsOnLevel.Name} Yes, but " +
-                         string.Join(", ", withRooms[l.UniqueId].Select(r => $"Room \"{RoomName(r)}\"")) +
-                         (withRooms[l.UniqueId].Count == 1 ? " is" : " are") + " drawn on it: delete the Room or mark the level No " +
+            .Select(l => $"Level \"{l.Name ?? l.UniqueId}\" is marked {Marks.NoRoomsOnLevel.Name} Yes, but " + Rooms(l) +
+                         " drawn on it: delete the Room or mark the level No " +
                          "(until then the mark doesn't count, and its enclosed areas with no Room each keep the sleeping-room rules needing review)")
+            // a level said to be no story with Rooms on it: the two disagree, and no story's place is measured
+            .Concat(MarkReading.LevelsMarkedNotAStory(model).Where(l => withRooms.ContainsKey(l.UniqueId))
+                .Select(l => $"Level \"{l.Name ?? l.UniqueId}\" is marked {Marks.NotAStory.Name} Yes, but " + Rooms(l) +
+                             " drawn on it: delete the Room or mark the level No (until then no story's place above or below grade plane is measured)"))
             .ToList();
     }
 
