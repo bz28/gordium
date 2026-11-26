@@ -113,6 +113,10 @@ One more wrong "no": a stair wholly in a room drawn with no door or opening (the
 
 Round 9's "joined to something" was too weak: a stair in rooms joined only to each other, or only to the outside, still counted as elsewhere. As a class: a stair is placed outside a space only when every nosing stands in the shared circulation (a corridor, lobby or exit, or a room of a space opening into one). One test, three cases.
 
+## Review round 11 of step 2 (2026-11-26)
+
+One more wrong "no": a door drawn on another level than its room vanished from the room's story (the routes stop only the door's own story), so the shared corridor looked like the space's one way out. Now a door or opening the description gives for a room of the story, but not read there, leaves the story not measured. One test.
+
 ## Review round 1 of step 3 (2026-11-25)
 
 Three ways the count came out too low (each a possible false pass on Table 1006.3.4(1)): an opening with no door to the corridor wasn't counted as a way out (a lock-off pair read one unit); a function not on Table 1004.5's list (a typo, dormitory) ruled a group out; and a shared vestibule marked an ordinary room joined two units into one, which 1016.2.1 doesn't catch, so the words said beside the count were wrong. Fixed: openings count as ways out; only a listed other use rules a group out (the list tied to the frozen Table 1004.5 record by test); a lived-in room with no function stops the count; the words now name the real assumption (every room shared between units marked a corridor or lobby) beside 1016.2.1; they're said with a count of 0 too. One test each.
