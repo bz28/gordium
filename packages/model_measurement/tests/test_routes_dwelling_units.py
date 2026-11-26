@@ -26,7 +26,8 @@ from model_measurement.routes.stops import STOPS, Stop  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[3]
 UNITS_KEYS = {"units_use_unknown", "units_function_unknown", "units_no_entrance", "units_entrances", "units_stair",
-              "units_shared_room", "units_link_elsewhere", "units_link_unread"}
+              "units_shared_room", "units_link_elsewhere", "units_link_unread", "units_exit_function",
+              "units_hall_residential"}
 FUNCTIONS = ("residential", "business", None)
 
 
@@ -156,6 +157,7 @@ def test_each_reason_has_a_case():
     seen.add("units_use_unknown")                        # test_a_room_with_no_use_given_may_be_a_corridor...
     seen |= {"units_stair", "units_shared_room"}         # the round 2 tests below
     seen |= {"units_link_elsewhere", "units_link_unread"}    # test_a_units_own_door_drawn_on_another_level...
+    seen |= {"units_exit_function", "units_hall_residential"}   # test_a_unit_marked_an_exit_or_a_hall...
     assert seen == UNITS_KEYS
 
 
@@ -300,3 +302,22 @@ def test_a_units_own_door_drawn_on_another_level_never_undercounts(how):
     assert isinstance(got, Stop) and got.key == key, (how, got)
     story = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
     assert UNITS_FACT not in story["measures"] and UNITS_FACT not in story.get("rests_on", {}), how
+
+
+@pytest.mark.parametrize("how", ["exit", "lobby", "corridor"])
+def test_a_unit_marked_an_exit_or_a_hall_never_drops_out_of_the_count(how):
+    """Review round 8 (PR 3): a one-room unit whose door was marked an exit passageway into it (Revit takes the room
+    every door of which is so marked as the exit), or the unit itself marked a lobby or corridor, became shared space
+    and dropped out of the count: 3 units counted 2. A room taken as an exit that states a function, or a residential
+    hall opening only into halls, exits or the outside, leaves the count not measured; a corridor stating no function
+    still counts 3."""
+    desc = layout([("residential", 1, 1)] * 3, (False, False))
+    assert count(desc) == 3
+    if how == "exit":
+        d = next(d for d in desc["doors"] if d["id"] == "e20")
+        d["exit_kind"], d["exit_id"] = "exit_passageway", "s2"
+    else:
+        next(r for r in desc["rooms"] if r["id"] == "s2")["use"] = how
+    got = count(desc)
+    key = "units_exit_function" if how == "exit" else "units_hall_residential"
+    assert isinstance(got, Stop) and got.key == key, (how, got)

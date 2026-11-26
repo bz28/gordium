@@ -74,6 +74,15 @@ def units_on(story, items: dict, is_exit, stair_in, links_read) -> int:
     found, halls = spaces(story, is_exit)
     grouped = set().union(*found) if found else set()
     shared = (set(story.rooms) - grouped) | {OUTSIDE}    # the corridors, lobbies and exits, and the outside
+    hall_rooms = set().union(*[h for h, _ in halls]) if halls else set()
+    links = [set(d.sides) for d in story.doors.values()] + [{a, b} for a, b, _ in story.passages]
+    for rid in sorted(set(story.rooms) - grouped):       # a shared room that may be a unit marked wrong would drop it
+        room, function = story.rooms[rid], (items.get(rid) or {}).get("function")
+        if rid not in hall_rooms and function is not None:   # an exit stating a function (a unit's door marked an exit)
+            raise Stop("units_exit_function", name=room.name)
+        if rid in hall_rooms and function == RESIDENTIAL and \
+                not any(rid in sides and sides & grouped for sides in links):   # a "hall" opening into no space
+            raise Stop("units_hall_residential", name=room.name)
     count = 0
     for g in found:
         names = ", ".join(sorted(story.rooms[r].name for r in g))

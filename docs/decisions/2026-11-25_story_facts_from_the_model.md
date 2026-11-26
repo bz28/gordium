@@ -160,3 +160,7 @@ No undercount found. The closet, toilet or storeroom clause is pinned again (one
 ## Review round 7 of step 3 (2026-11-26)
 
 One more undercount (a possible false pass): a unit's own door drawn on another level vanished from its story, so two units joined by a door looked like one with a single way out, and 1016.2.1 doesn't catch it (each has its own door). The count now runs step 2's check first (`links_read_here`, a required argument so no caller can leave it out): every door, opening, and listed opening that may be a door for the story's rooms must be read on it, and one whose rooms can't be read stops the count. One test, three cases.
+
+## Review round 8 of step 3 (2026-11-26)
+
+One more undercount, on a model marked wrong (a possible false pass): a one-room unit whose door was marked an exit into it, or the unit itself marked a lobby or corridor, became shared space and dropped out of the count. Now a room taken as an exit that states a function (an exit has none), or a residential corridor or lobby opening only into halls, exits or the outside, leaves the count not measured. One test, three cases.
