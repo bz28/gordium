@@ -219,3 +219,17 @@ def test_the_rooms_reach_decides_the_one_exit_question_only():
     p = parts["sleeping_room"][0]
     assert p["measures"]["sleeping_room_story_one_exit"] is False
     assert "sleeping_room_fourth_or_higher" not in p["measures"] and p["not_measured"]["sleeping_room_fourth_or_higher"]
+
+
+def test_an_opening_within_no_sleeping_room_read_leaves_every_rooms_count_unknown():
+    """An escape opening whose room isn't a sleeping room read (none named, a mistyped room), or that can't be read,
+    may be this room's: its count isn't known, never 0 (a wrong fail on 1031.2 once the room's story is placed, as
+    main's stated ground now does); one in the room itself still counts."""
+    for other in ({"id": "v"}, {"id": "v", "within": "typo"}, {"id": "w", "within": "b"}, "not a part",
+                  {"id": "v", "within": ["b"]}, {"id": "v", "within": {"id": "b"}},      # never a crash (review)
+                  {"id": "v", "within": "L1"}, {"id": "v", "within": "b", "measures": "big"}):  # a story isn't a room
+        p = _linked(openings=[{"id": "w", "within": "b", "measures": {}}, other])
+        assert "sleeping_room_escape_openings" not in p["measures"], other
+        assert "may be this room's" in p["not_measured"]["sleeping_room_escape_openings"]
+    assert _linked()["measures"]["sleeping_room_escape_openings"] == 1
+
