@@ -1016,7 +1016,9 @@ labels:
   202:emergency_power_system:
     label: reference
     topic: definitions
-    reason: 'Defines EMERGENCY POWER SYSTEM, a term 1008.3.1 and 1013.6.3 print in italics: a definition, no requirement.'
+    reason: 'Defines EMERGENCY POWER SYSTEM, a term 1008.3.1 and 1013.6.3 print in italics; its sentence that such
+      systems are required where losing primary power could cost lives restates Chapter 27''s requirement (not brought in),
+      which the 1008.3, 1008.3.1 and 1013.6.3 flags carry.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 42
@@ -7042,7 +7044,7 @@ labels:
       listed viewing distance if less, from the nearest visible sign; not required in rooms or areas needing only one exit
       or exit access, at main exterior exit doors or gates obviously identifiable as exits where the building official approves,
       in Group U, within Group R-1, R-2 or R-3 sleeping or dwelling units, in Group I-3''s dayrooms, sleeping rooms and dormitories,
-      or on the seating side of Group A-4 and A-5 vomitories with signs in the concourse: exit signs aren''t in the model,
+      or on the seating side of Group A-4 and A-5 vomitories where signs in the concourse are readily apparent from the vomitories and egress lighting identifies each vomitory or opening in an emergency: exit signs aren''t in the model,
       so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -7228,7 +7230,7 @@ labels:
   1013.6.3:
     label: flag
     topic: means_of_egress
-    reason: 'Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or
+    reason: 'Externally lit exit signs (1013.6) are lit at all times, connected to an emergency power system (storage batteries, unit equipment or
       an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost,
       not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently
       of external power need no connection: exit signs aren''t in the model, so a person''s check.'

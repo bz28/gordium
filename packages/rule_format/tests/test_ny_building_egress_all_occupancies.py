@@ -1270,7 +1270,8 @@ def test_each_section_group_9_flag_names_what_it_points_to_that_isnt_brought_in(
             continue
         quotes = " ".join(s["quote"] for s in r["sources"])
         named = set(re.findall(r"(?:Sections?|through|or|and|,) (\d{3,4}(?:\.\d+)*)", quotes))
-        named |= {"ICC A117.1"} if "ICC A117.1" in quotes else set()
+        # review round 1 of section group 9b: chapters and standards too (Chapter 27, UL 924, NFPA 72, ASME A17.1)
+        named |= set(re.findall(r"\b((?:Chapter|UL|NFPA) \d+|ICC A117\.1|ASME A17\.1)\b", quotes))
         # review round 4: in a sentence of the notes saying it isn't brought in, the reference whole; a section is
         # brought in only where its own id is a piece (1030 isn't, though 1030.7 and 1030.8 are)
         said = [s for s in re.split(r"(?<=\.) ", r.get("notes") or "") if re.search(r"(?:n't|not) brought in", s)]
