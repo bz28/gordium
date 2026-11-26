@@ -7551,6 +7551,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '1018':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 39
+      - 39
+      quote: SECTION 1018—AISLES
+    piece_sha256: 5671c608778b168e7c91dbad15b9a54df794ccabf9bb7938f6c83ba84b470acd
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   '1018.1':
     label: flag
     topic: means_of_egress

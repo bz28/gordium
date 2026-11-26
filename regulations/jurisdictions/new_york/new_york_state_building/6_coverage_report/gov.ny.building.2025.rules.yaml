@@ -781,22 +781,22 @@ pieces:
     - general.bc_1017_3_2_3_atrium
   '1018.1':
     label: flag
-    heading: General
+    heading: Aisles › General
     rules:
     - general.bc_1018_1_aisles_general
   '1018.3':
     label: flag
-    heading: Aisles in Groups B and M
+    heading: Aisles › Aisles in Groups B and M
     rules:
     - general.bc_1018_3_aisles_groups_b_m
   '1018.4':
     label: flag
-    heading: Aisle accessways in Group M
+    heading: Aisles › Aisle accessways in Group M
     rules:
     - general.bc_1018_4_merchandise_pads
   '1018.5':
     label: flag
-    heading: Aisles in other than assembly spaces and Groups B and M
+    heading: Aisles › Aisles in other than assembly spaces and Groups B and M
     rules:
     - general.bc_1018_5_aisles_other_occupancies
   '1019.3':

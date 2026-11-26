@@ -29,15 +29,16 @@ second_reading:
     the 38 of section group 9a (Sections 1003 and 1012 and 3 definitions, 2026-11-26), a twenty-fifth for the
     31 of section group 9b (Sections 1008 and 1013 and 10 definitions, 2026-11-26), a twenty-sixth for the
     34 of section group 9c (Section 1009 and 4 definitions, 2026-11-26), a twenty-seventh for the 11 of section
-    group 9d (1018.1 to 1018.3, 1018.5 and Section 1019 and 2 definitions, 2026-11-26), and a helper for the comparison words)
+    group 9d (1018.1 to 1018.3, 1018.5 and Section 1019 and 2 definitions, 2026-11-26, and Section 1018's heading,
+    review round 1), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d), and 1 page, 1 box as step_g9d2 (1018''s heading); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 450 pieces, 1282 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 451 pieces, 1283 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -6092,6 +6093,15 @@ pieces:
     second_reading_comparisons:
     - <=
     - none
+    - none
+  '1018':
+    piece_sha256: 5671c608778b168e7c91dbad15b9a54df794ccabf9bb7938f6c83ba84b470acd
+    numbers:
+    - '1018'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1018'
+    second_reading_comparisons:
     - none
   '1018.1':
     piece_sha256: 79beb0674c0a466d6005b948f03ee6010b4e74bba7962a52ba0c7a1cbcdeb941
