@@ -121,6 +121,10 @@ One more wrong "no": a door drawn on another level than its room vanished from t
 
 Three more (never a pass): a hall or exit was taken as shared circulation by its use alone, so a unit's own stairwell marked a corridor or lobby still placed its stair elsewhere (now only halls two or more spaces open into, the exits entered from them, and those spaces' rooms are shared); a doors or passages value that isn't a list crashed round 11's check (now it, or a door whose rooms can't be read, leaves the story not measured). Pins for each, and for round 11's opening half.
 
+## Review round 13 of step 2 (2026-11-26)
+
+One more wrong "no": a patio door listed among the `openings` (every window and door that could be an escape opening) but not in `doors` was never read as a way out. As a class, one check (`links_read_here`, used again by step 3's count): every door, opening, and listed opening that is or may be a door touching a room of the story must be read on it, and any whose rooms can't be read stops the measuring. Round 12's pins for unreadable doors moved onto another level so they fail on revert.
+
 ## Review round 1 of step 3 (2026-11-25)
 
 Three ways the count came out too low (each a possible false pass on Table 1006.3.4(1)): an opening with no door to the corridor wasn't counted as a way out (a lock-off pair read one unit); a function not on Table 1004.5's list (a typo, dormitory) ruled a group out; and a shared vestibule marked an ordinary room joined two units into one, which 1016.2.1 doesn't catch, so the words said beside the count were wrong. Fixed: openings count as ways out; only a listed other use rules a group out (the list tied to the frozen Table 1004.5 record by test); a lived-in room with no function stops the count; the words now name the real assumption (every room shared between units marked a corridor or lobby) beside 1016.2.1; they're said with a count of 0 too. One test each.

@@ -170,7 +170,10 @@ STOPS = {
                      "another story, maybe to its own door out; one not read, or not said to be none, may be anywhere): "
                      "whether it exits directly outside isn't known",
     "outside_link_elsewhere": "a door or opening of the room {name} isn't read on this story (drawn on another "
-                              "level?): whether it exits directly outside isn't known",
+                              "level, or listed only among the openings?): whether it exits directly outside isn't "
+                              "known",
+    "outside_link_unread": "a door or opening the model gives can't be read (which rooms it joins): whether each space "
+                           "exits directly outside isn't known",
     "outside_door_not_marked": "the space of {name} has a door to the outside ({door}) not marked as an exit door at "
                                "the level of exit discharge: whether it is one isn't known (exits are marked, never "
                                "guessed)",

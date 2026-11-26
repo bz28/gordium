@@ -46,6 +46,7 @@ import math
 
 from shapely.geometry import Point
 
+from model_measurement.interior.openings import IS_DOOR
 from model_measurement.interior.read import Reader, name_of
 from model_measurement.interior.stops import Stop as InteriorStop
 from model_measurement.routes import areas, dead_ends, dwelling_units, spaces, story_place, straight
@@ -554,26 +555,15 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
     another tenant, which the model shows only for dwelling units: the corridor (every room of it marked a corridor:
     a lobby may be a dwelling's own foyer) reaches an exit itself (a door outside, or into an exit), two or more of the
     spaces opening into it hold a room whose function is residential, this one among them, the corridor is this
-    space's one way out of itself (no other door, opening or stair within it), and the building states no corridor is within a dwelling unit (`corridors_within_dwelling_
-    units` no, BCNYS 1020.2 exception 2's fact); a corridor otherwise may be a hallway within one dwelling or tenant
-    space (a house's hall, a shop's back corridor to its toilets). Every other case is not measured (Stop): a door to
+    space's one way out of itself (no other door, opening or stair within it), and the building states no corridor is
+    within a dwelling unit (`corridors_within_dwelling_units` no, BCNYS 1020.2 exception 2's fact); a corridor
+    otherwise may be a hallway within one dwelling or tenant space (a house's hall, a shop's back corridor to its
+    toilets). Every other case is not measured (Stop): a door to
     the outside not marked so, or onto an exterior stair or ramp; a space whose way out is through such a corridor,
     or only through an exit, or none. A story whose routes aren't read isn't measured either."""
     if story.stops:
         raise Stop("story_not_measured", reasons="; ".join(story.stops))
-    # every door and opening the description gives touching a room of this story must be this story's: one drawn on
-    # another level (and so not read here) may be a space's own way out
-    here = {r for r in story.rooms}
-    read_doors = set(story.doors)
-    read_pairs = {frozenset((a, b)) for a, b, _ in story.passages}
-    for kind, key, sides in listed:
-        if kind == "unread":                             # a door or opening whose rooms can't be read: any room's
-            raise Stop("outside_link_elsewhere", name="of this story")
-        if not set(sides) & here:
-            continue
-        if (kind == "door" and key not in read_doors) or (kind == "passage" and frozenset(sides) not in read_pairs):
-            raise Stop("outside_link_elsewhere", name=", ".join(sorted(story.rooms[r].name for r in set(sides) & here
-                                                                         if story.rooms.get(r) is not None)) or "?")
+    links_read_here(story, listed, "outside")
     items = items or {}
     found, halls = spaces.spaces(story, _is_exit)
     groups = [set(g) for g in found]
@@ -632,10 +622,16 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
 
 
 def _links_listed(description) -> list:
-    """Every door and passage the description gives: (kind, id, sides as room ids); one whose sides can't be read
-    (or a list that isn't one) as ("unread", None, []): it may be any room's."""
+    """Every way between rooms, or out, the description gives: (kind, id, room ids) for each door, passage, and opening
+    that may be a door (`openings` lists windows and doors: one whose operation names a door, or doesn't say, may be a
+    door to the outside the `doors` list left out: one with a listed door's id is that door, as Revit sends each); one
+    whose rooms can't be read (or a list that isn't one) as ("unread", None, []): it may be any room's."""
     out = []
-    for key, kind, sides_key in (("doors", "door", "sides"), ("passages", "passage", "rooms")):
+    given_doors = description.get("doors")
+    door_ids = {d.get("id") for d in given_doors if isinstance(d, dict) and isinstance(d.get("id"), str)} \
+        if isinstance(given_doors, list) else set()
+    for key, kind, sides_key in (("doors", "door", "sides"), ("passages", "passage", "rooms"),
+                                 ("openings", "opening", "room")):
         given = description.get(key)
         if given is None:
             continue
@@ -644,11 +640,37 @@ def _links_listed(description) -> list:
             continue
         for d in given:
             sides = d.get(sides_key) if isinstance(d, dict) else None
+            if kind == "opening":
+                operation = d.get("operation") if isinstance(d, dict) else None
+                if isinstance(operation, str) and IS_DOOR.get(operation) is False:
+                    continue                             # a window
+                if isinstance(d, dict) and d.get("id") in door_ids:
+                    continue                             # a listed door, judged as one
+                sides = [sides] if isinstance(sides, str) else None
             if not isinstance(sides, list) or not all(isinstance(x, str) for x in sides):
                 out.append(("unread", None, []))
                 continue
-            out.append((kind, d.get("id") if kind == "door" else None, list(sides)))
+            out.append((kind, d.get("id") if kind != "passage" else None, list(sides)))
     return out
+
+
+def links_read_here(story, listed, prefix: str) -> None:
+    """Raises Stop (`<prefix>_link_unread` or `<prefix>_link_elsewhere`) unless every door, passage and opening that
+    may be a door the description gives (`_links_listed`) touching a room of the story was read on it: one drawn on
+    another level (and so stopped only there), a door listed only among the openings, or one whose rooms can't be read,
+    may be a space's own way out, which the story would then not show."""
+    here = set(story.rooms)
+    read_doors = set(story.doors)
+    read_pairs = {frozenset((a, b)) for a, b, _ in story.passages}
+    for kind, key, sides in listed:
+        if kind == "unread":
+            raise Stop(f"{prefix}_link_unread")
+        mine = set(sides) & here
+        if not mine:
+            continue
+        if (kind in ("door", "opening") and key not in read_doors) or \
+                (kind == "passage" and frozenset(sides) not in read_pairs):
+            raise Stop(f"{prefix}_link_elsewhere", name=", ".join(sorted(story.rooms[r].name for r in mine)))
 
 
 def _room_name(story, rid) -> str:

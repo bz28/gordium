@@ -29,7 +29,8 @@ from model_measurement.routes.stops import STOPS, Stop  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[3]
 OUTSIDE_KEYS = {"outside_no_rooms", "outside_door_not_marked", "outside_way_unclear", "outside_hall_unclear",
-                "outside_into_exit", "outside_stair", "outside_link_elsewhere"}
+                "outside_into_exit", "outside_stair", "outside_link_elsewhere",
+                "outside_link_unread"}
 KINDS = ("marked", "unmarked", "stair", "none")
 SIDES = ("door", "passage", "wall")
 
@@ -252,6 +253,7 @@ def test_each_reason_has_a_case():
     seen.add("outside_into_exit")
     seen.add("outside_stair")                            # test_a_stair_within_a_space_on_the_shared_corridor...
     seen.add("outside_link_elsewhere")                   # test_a_door_drawn_on_another_level_is_never_a_no
+    seen.add("outside_link_unread")                      # test_unreadable_doors_or_openings_never_crash_or_give_a_no
     assert seen == OUTSIDE_KEYS
 
 
@@ -462,23 +464,33 @@ def test_a_stair_in_a_hall_or_exit_no_other_space_shares_may_be_the_spaces_own(c
 
 
 @pytest.mark.parametrize("bad", [("doors", 5), ("passages", 5), ("doors", True), ("passages", 1.5),
-                                 ("door_sides", "r0"), ("door_sides", None)])
+                                 ("openings", 5), ("door_sides", "r0"), ("door_sides", None),
+                                 ("passage_rooms", ["r0", 5]), ("opening_room", None)])
 def test_unreadable_doors_or_openings_never_crash_or_give_a_no(bad):
-    """Review round 12 (PR 2): a doors or passages value that isn't a list crashed the measuring; a door whose sides
-    can't be read (it may be any room's) was dropped, giving "no"."""
+    """Review rounds 12-13 (PR 2): a doors or passages value that isn't a list crashed the measuring; a door, opening
+    or listed opening whose rooms can't be read (it may be any room's), filed on another level so the story itself
+    reads whole, was dropped, giving "no"."""
     desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    desc["levels"].insert(0, {"id": "L2", "name": "Level 2", "elevation": 0})
+    desc["rooms"].append(room("u", rect(-10, 0, 0, 10), use="other", lockable=False, pass_through=False, level="L2"))
     key, value = bad
     if key == "door_sides":
-        extra = dict(desc["doors"][0], id="x")
+        extra = dict(desc["doors"][0], id="x", level="L2")
         if value is None:
             extra.pop("sides")
         else:
             extra["sides"] = value
         desc["doors"].append(extra)
+    elif key == "passage_rooms":
+        desc["passages"].append({"rooms": value, "line": [[0, 0], [0, 10]], "level": "L2"})
+    elif key == "opening_room":
+        desc["openings"] = [{"id": "p", "room": value, "operation": "sliding_door", "escape": False}]
     else:
         desc[key] = value
     got = {s["id"]: s for s in measure(desc)["parts"]["story"]}
     assert got["L1"]["measures"].get(OUTSIDE_FACT) is not False, bad
+    if key not in ("doors", "passages", "passage_rooms"):    # those also stop the story's own read
+        assert got["L1"]["not_measured"][OUTSIDE_FACT] == STOPS["outside_link_unread"], bad
 
 
 def test_an_opening_drawn_on_another_level_is_never_a_no():
@@ -490,3 +502,22 @@ def test_an_opening_drawn_on_another_level_is_never_a_no():
     desc["passages"].append({"rooms": ["u", "r0"], "line": [[0, 0], [0, 10]]})
     got = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
     assert got["measures"].get(OUTSIDE_FACT) is not False
+
+
+@pytest.mark.parametrize("operation", ["sliding_door", "side_hinged_door", "fixed", "other", None])
+def test_a_door_listed_only_among_the_openings_is_never_a_no(operation):
+    """Review round 13 (PR 2): a patio door listed in `openings` (every window and door that could be an escape
+    opening) but not in `doors` was never read: the shared corridor looked like the space's one way out, "no". An
+    opening that is or may be a door, not read as a door on its story, leaves it not measured; a window doesn't."""
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    o = {"id": "p1", "room": "r0", "escape": False}
+    if operation:
+        o["operation"] = operation
+    desc["openings"] = [o]
+    got = _story(desc)
+    assert got["measures"].get(OUTSIDE_FACT) is not False, operation
+    assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_link_elsewhere"].format(name="r0")
+    o["operation"] = "casement"                          # a window: still "no"
+    assert _story(desc)["measures"][OUTSIDE_FACT] is False
+    o.update(id="o1", operation="side_hinged_door", room=None)  # a listed door, sent among the openings as Revit does
+    assert _story(desc)["measures"][OUTSIDE_FACT] is False
