@@ -26,7 +26,7 @@ The extra 0.30 s a check is the Building Code book's validation. A possible non-
 
 ## The planned fix: compile, then freeze (design agreed 2026-11-26)
 
-Principle 1: documents are turned into rules once per code version, and approved rules are frozen as data. A check should read laws that were validated once, not validate them again each time. Measured 2026-11-26 (this machine, the Ithaca box check): `egress.laws` takes 2.8 s of a 2.2-3 s check, nearly all of it validation (building each book's sources 0.43 s, validating the Residential Code's rules 0.38 s and the Building Code's 1.47 s); reading a rulebook is 4 ms.
+Principle 1: documents are turned into rules once per code version, and approved rules are frozen as data. A check should read laws that were validated once, not validate them again each time. Measured 2026-11-26 (this machine, quiet, the Ithaca box check): `egress.laws` takes about 2.0 s on a process's first call and about 0.84 s on each call after (a long-running worker's case), of a check of about 1.27 s: about two thirds of every check. Nearly all of it is validation (each book's sources read and checked, then its rules); reading a rulebook is 4 ms.
 
 **What is frozen.** For each state book a place inherits, a certificate: the result of `egress.compile_law` (the book's problems, which must be none; its sources; the measures its rules may name), with the sha256 of every input the validation read and of the code that validated it. The rules themselves stay in `5_` (one home), pinned by the rulebook's sha256 in the certificate.
 
