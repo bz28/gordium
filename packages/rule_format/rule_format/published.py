@@ -39,6 +39,7 @@ import site
 import subprocess
 import sys
 import sysconfig
+import tempfile
 import time
 from pathlib import Path
 
@@ -107,6 +108,11 @@ def _folder_inputs(folder: Path, repo: Path) -> set[str]:
     return {_rel(f, repo) for f in own + shared_files(repo)}
 
 
+def _import_path(repo: Path) -> list[Path]:
+    """The folders the fresh compile imports from, in order: every package folder of packages/."""
+    return [p for p in sorted((Path(repo) / "packages").iterdir()) if p.is_dir() and not _left_out(p.name)]
+
+
 def certificate_path(folder: Path, book: Path) -> Path:
     return Path(folder) / PUBLISHED / f"{Path(book).stem}{SUFFIX}"
 
@@ -138,7 +144,11 @@ def _always_listed(folder: Path, repo: Path) -> set[str]:
     must make the certificate stale."""
     tops = [Path(folder), Path(repo) / "docs/research"]
     regulations = Path(repo) / "regulations"
-    out = {_rel(regulations, repo)}
+    # and where the fresh process imports from (fresh(): every folder of packages/ on its path, before Python's own):
+    # a package folder that appears could hold a module the compile imports in place of Python's (review round 4)
+    packages = Path(repo) / "packages"
+    out = {_rel(regulations, repo), _rel(packages, repo)}
+    out |= {_rel(d, repo) for d in _import_path(repo)}
     tops += [d for d in regulations.iterdir() if d.is_dir() and d.name != "jurisdictions" and not _left_out(d.name)]
     for top in tops:
         for here, dirs, _ in os.walk(top):
@@ -260,6 +270,8 @@ def _python_roots() -> list[Path]:
     never law. A root that holds the repo itself is left out, so nothing of the repo is ever taken for Python's."""
     paths = {sys.prefix, sys.base_prefix, sys.exec_prefix, sys.base_exec_prefix, *site.getsitepackages(),
              site.getusersitepackages(), *(sysconfig.get_paths().values())}
+    if sys.pycache_prefix:                      # fresh()'s own empty cache folder: compiled from source, this run
+        paths.add(sys.pycache_prefix)
     roots = []
     for p in sorted(paths):
         r = Path(p).resolve()
@@ -316,10 +328,15 @@ def fresh(folder: Path) -> bytes:
     """A law folder's certificate, compiled now in a fresh Python process running this repo's code."""
     # this repo's packages alone: another entry (an empty one is the folder it runs in) would change what the import
     # lists, so the certificate would differ by machine; everything else comes from Python's own installation
-    ours = [str(p) for p in sorted((REPO / "packages").iterdir()) if p.is_dir() and not _left_out(p.name)]
-    env = dict(os.environ, PYTHONPATH=os.pathsep.join(ours))
-    done = subprocess.run([sys.executable, "-P", "-c", _CHILD, str(Path(folder).resolve()), str(REPO)],
-                          capture_output=True, env=env, cwd=str(REPO))
+    ours = [str(p) for p in _import_path(REPO)]
+    # and never the repo's compiled caches (__pycache__): Python trusts one by its source's size and time to the
+    # second, so a same-size edit could run the old code beside the new source's sha256 (review round 5). The child
+    # compiles every module from its source, into an empty folder of its own, written nowhere
+    with tempfile.TemporaryDirectory(prefix="gordium_publish_") as cache:
+        env = dict(os.environ, PYTHONPATH=os.pathsep.join(ours), PYTHONPYCACHEPREFIX=cache,
+                   PYTHONDONTWRITEBYTECODE="1")
+        done = subprocess.run([sys.executable, "-P", "-c", _CHILD, str(Path(folder).resolve()), str(REPO)],
+                              capture_output=True, env=env, cwd=str(REPO))
     if done.returncode != 0:
         why = done.stderr.decode("utf-8", "replace").strip().splitlines()
         raise PublishError(f"the fresh compile of {_shown(folder)} failed: {why[-1] if why else done.returncode}")
