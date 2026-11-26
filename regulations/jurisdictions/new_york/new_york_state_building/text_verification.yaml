@@ -29,7 +29,7 @@ second_reading:
     the 38 of section group 9a (Sections 1003 and 1012 and 3 definitions, 2026-11-26), a twenty-fifth for the
     31 of section group 9b (Sections 1008 and 1013 and 10 definitions, 2026-11-26), a twenty-sixth for the
     34 of section group 9c (Section 1009 and 4 definitions, 2026-11-26), a twenty-seventh for the 11 of section
-    group 9d (1018.1 to 1018.5 and Section 1019 and 2 definitions, 2026-11-26), and a helper for the comparison words)
+    group 9d (1018.1 to 1018.3, 1018.5 and Section 1019 and 2 definitions, 2026-11-26), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
@@ -6276,6 +6276,9 @@ pieces:
     - none
     - none
     flags:
+    - 'Exception 4''s "does not exceed twice the horizontal projected area" (p.343, line 22) is a limit in a word the
+      number reader doesn''t know (twice), so neither reading records it; checked on the page image. Read by 1019.3''s flag
+      (no more than twice).'
     - '''four'' (<=): exception 2''s ''connecting four stories or less'', the ''or less'' after the word ''stories''; the
       recorded words miss it (numbers.py reads comparison words only directly before a number or after its unit). The second
       reading is right.'

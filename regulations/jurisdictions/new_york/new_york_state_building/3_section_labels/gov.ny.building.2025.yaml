@@ -7674,7 +7674,7 @@ labels:
     label: reference
     topic: means_of_egress
     reason: 'Scope: exit access stairways and ramps comply with 1019, the stories they connect counting basements but not
-      mezzanines; quoted by 1019.3''s flag.'
+      mezzanines; quoted by 1019.3''s and 1019.4''s flags.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 343
@@ -7691,8 +7691,7 @@ labels:
   '1019.2':
     label: reference
     topic: means_of_egress
-    reason: 'A permission: an exit access stairway or ramp serving floor levels within one story needs no enclosure; quoted
-      by 1019.3''s flag.'
+    reason: 'A permission: an exit access stairway or ramp serving floor levels within one story needs no enclosure; quoted by 1019.3''s and 1019.4''s flags.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 343
@@ -7709,10 +7708,8 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Outside Groups I-2 and I-3, a floor opening holding an exit access stairway or ramp is enclosed in a shaft built
-      to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs
-      no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within
-      one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; within a Group R-3 congregate residence or a Group R-4
-      facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway''s
+      to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within
+      one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; exit access stairways (not ramps) within a Group R-3 congregate residence or a Group R-4 facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway''s
       or ramp''s projected area, with a draft curtain and closely spaced sprinklers per NFPA 13 (outside Groups B and M, connecting
       no more than four stories); within an atrium complying with 404; in an open parking garage it alone serves; serving
       smoke-protected or open-air assembly seating within 1030.7''s travel; between a balcony, gallery or press box and the
@@ -7747,8 +7744,7 @@ labels:
   '1019.4':
     label: flag
     topic: means_of_egress
-    reason: 'In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in
-      a shaft built to 713, but Group I-3''s built to 408 need none: enclosures aren''t in the model, so a person''s check.'
+    reason: 'In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in a shaft built to 713 (the stories counting basements, not mezzanines, 1019.1; one serving floor levels within a single story needs no enclosure, 1019.2), but Group I-3''s built to 408 need none: enclosures aren''t in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 343

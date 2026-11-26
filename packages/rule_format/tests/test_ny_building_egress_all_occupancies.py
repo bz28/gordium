@@ -1330,3 +1330,56 @@ def test_no_title_puts_a_bare_apostrophe_after_a_word_not_ending_in_s():
     bad = [r["id"] for r in load(RULEBOOK)["rules"] if re.search(r"[a-rt-z]' ", r.get("title") or "")]
     assert not bad, bad
 
+
+# Review round 1 of section group 9d (P2): a flag hidden where the law may still apply is a silent pass, and the flags'
+# own examples didn't catch a wrong condition (hiding 1018.5 for two or more groups passed them all). Written from the
+# law, never from the rules: where each section group 9 flag with a condition is NOT applicable (its exception spares the
+# whole building, or its own words exclude the group); everywhere else, the unstated cases included, it shows.
+SPRINKLED = ("nfpa_13", "nfpa_13r")              # 903.3.1.1 and 903.3.1.2, "equipped throughout"
+HIDDEN_WHERE = {
+    "general.bc_1008_2_illumination_required": lambda g, s: g == "U",                       # exception 1
+    "general.bc_1013_1_exit_signs_where_required": lambda g, s: g == "U",                   # exception 3
+    "general.bc_1008_2_2_group_i2_exterior_landings": lambda g, s: g not in ("I-2", "mixed", None),
+    "general.bc_1013_2_low_level_exit_signs_group_r1": lambda g, s: g not in ("R-1", "mixed", None) or s in SPRINKLED,
+    "general.bc_1009_3_2_stairway_width": lambda g, s: s in SPRINKLED,                      # exception 1
+    "general.bc_1009_3_3_area_of_refuge_at_stairways": lambda g, s: s in SPRINKLED or g == "R-2",   # exceptions 2, 5
+    "general.bc_1009_4_2_elevator_area_of_refuge": lambda g, s: s in SPRINKLED,             # exception 2
+    "general.bc_1009_7_2_assisted_rescue_separation": lambda g, s: s in SPRINKLED,
+    "general.bc_1009_7_4_assisted_rescue_stairways": lambda g, s: s in SPRINKLED,
+    "general.bc_1009_8_two_way_communication": lambda g, s: g in ("I-2", "I-3"),            # exception 6
+    "general.bc_1018_3_aisles_groups_b_m": lambda g, s: g not in ("B", "M", "mixed", None),
+    "general.bc_1018_5_aisles_other_occupancies": lambda g, s: g in ("B", "M"),             # "other than ... B and M"
+    "general.bc_1019_3_exit_access_stairway_enclosure": lambda g, s: g in ("I-2", "I-3"),   # "other than I-2 and I-3"
+    "general.bc_1019_4_exit_access_stairways_groups_i2_i3": lambda g, s: g not in ("I-2", "I-3", "mixed", None),
+}
+GROUPS_9 = ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2", "H-3", "H-4", "H-5", "I-1", "I-2",
+            "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U", "mixed", None]
+SPRINKLERS_9 = {"none": {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False},
+                "nfpa_13": {"sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False},
+                "nfpa_13r": {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True}, None: {}}
+
+
+def test_each_section_group_9_flag_with_a_condition_hides_only_where_the_law_spares_the_building(ctx, rules):
+    from rule_format.rulebook import outcome
+    conditioned = {rid for rid, r in rules.items() if r.get("kind") == "flag" and r.get("applies_when")
+                   and rid.removeprefix("general.bc_").split("_")[0] in GROUP_9_SECTIONS
+                   and "section group 9" in (r.get("notes") or "")}            # 1018.4's is round 1's (2026-11-23)
+    assert conditioned == set(HIDDEN_WHERE), conditioned ^ set(HIDDEN_WHERE)      # a new condition needs its oracle
+    for rid, hidden in HIDDEN_WHERE.items():
+        for g in GROUPS_9:
+            for s, facts in SPRINKLERS_9.items():
+                values = facts | ({"occupancy_group": g} if g else {})
+                want = "not_applicable" if hidden(g, s) else "needs_review"
+                assert outcome(rules[rid], values, ctx.allowed()) == want, (rid, g, s)
+
+
+def test_1019_3s_congregate_residence_exception_is_for_stairways_only(rules):
+    """Review round 1 of section group 9d (P1): 1019.3's exception 3 reads 'Exit access stairways serving and contained
+    within a Group R-3 congregate residence or a Group R-4 facility' (p.343, lines 19-20), naming no ramps where its
+    other exceptions do; the shown reason said 'stairway or ramp' for it, so a person could accept an open ramp there."""
+    r = rules["general.bc_1019_3_exit_access_stairway_enclosure"]
+    assert any("Exit access stairways serving and contained within a Group R-3" in " ".join(s["quote"].split())
+               for s in r["sources"])
+    note = " ".join(r["examples"][0]["note"].split())
+    assert "exit access stairways (not ramps) within a Group R-3 congregate residence" in note
+

@@ -22155,10 +22155,10 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The occupancy isn''t stated: a person checks.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9d. Not shown for a building stated Group B or
-    M alone (1018.3 covers it). Shown for every other group, two or more groups or none stated: a room used for assembly may
-    be in a building of any group, and its aisles are 1030''s, not this one''s, which is part of the check. Chapter 11 isn''t
-    brought in.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9d. Not shown for a building stated Group B or M
+    alone (1018.3 covers it). Shown for every other group, two or more groups or none stated: a Group A building may hold spaces
+    not used for assembly (a kitchen, offices), whose aisles are this section''s, and which rooms are used for assembly (their
+    aisles 1030''s) is part of the check. Chapter 11 isn''t brought in.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1019_3_exit_access_stairway_enclosure
@@ -22208,10 +22208,8 @@ rules:
       occupancy_group: B
     expect: needs_review
     note: 'Outside Groups I-2 and I-3, a floor opening holding an exit access stairway or ramp is enclosed in a shaft built
-      to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs
-      no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within
-      one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; within a Group R-3 congregate residence or a Group R-4
-      facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway''s
+      to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within
+      one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; exit access stairways (not ramps) within a Group R-3 congregate residence or a Group R-4 facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway''s
       or ramp''s projected area, with a draft curtain and closely spaced sprinklers per NFPA 13 (outside Groups B and M, connecting
       no more than four stories); within an atrium complying with 404; in an open parking garage it alone serves; serving
       smoke-protected or open-air assembly seating within 1030.7''s travel; between a balcony, gallery or press box and the
@@ -22238,6 +22236,21 @@ rules:
   - file: gov.ny.building.2025.pdf
     page: 343
     lines:
+    - 9
+    - 11
+    quote: 1019.1 General. Exit access stairways and ramps serving as an exit access component in a means of egress system shall
+      comply with the requirements of this section. The number of stories connected by exit access stairways and ramps shall
+      include basements, but not mezzanines.
+  - file: gov.ny.building.2025.pdf
+    page: 343
+    lines:
+    - 12
+    - 12
+    quote: 1019.2 All occupancies. Exit access stairways and ramps that serve floor levels within a single story are not required
+      to be enclosed.
+  - file: gov.ny.building.2025.pdf
+    page: 343
+    lines:
     - 33
     - 36
     quote: '1019.4 Group I-2 and I-3 occupancies. In Group I-2 and I-3 occupancies, floor openings between stories containing
@@ -22248,8 +22261,7 @@ rules:
   - given:
       occupancy_group: I-3
     expect: needs_review
-    note: 'In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in a
-      shaft built to 713, but Group I-3''s built to 408 need none: enclosures aren''t in the model, so a person''s check.'
+    note: 'In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in a shaft built to 713 (the stories counting basements, not mezzanines, 1019.1; one serving floor levels within a single story needs no enclosure, 1019.2), but Group I-3''s built to 408 need none: enclosures aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
