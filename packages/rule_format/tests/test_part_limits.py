@@ -77,3 +77,26 @@ def test_the_room_facts_copied_onto_an_opening_are_marked_from_its_room():
     room = {k for k in m if k.startswith("opening_room_")}
     assert room and all(m[k].get("from") == "sleeping_room" for k in room)
     assert not [k for k, d in m.items() if "from" in d and k not in room]
+
+
+def test_a_limit_reading_a_copied_room_fact_is_refused_on_its_own():
+    """Review round 2 of 8d: a limit reading a fact copied from the room (marked `from`) is refused even where the
+    rule reads it nowhere else (a compliance that leans on another opening's would be circular)."""
+    r = next(x for x in _escape_rules() if x["id"] == "general.bc_1031_3_2_escape_opening_min_height")
+    L = "opening_net_clear_height >= 24 or opening_room_other_compliant"
+    bad = {**copy.deepcopy(r), "limit": L, "check": f"({L}) or opening_room_fourth_or_higher", "review_when": []}
+    assert any("own figures" in p for p in limit_problems(bad))
+
+
+def test_a_limit_rule_whose_applies_when_reads_the_part_is_refused():
+    r = next(x for x in _escape_rules() if x["id"] == "general.bc_1031_3_2_escape_opening_min_height")
+    assert not limit_problems(r)
+    assert any("applies_when" in p for p in limit_problems({**copy.deepcopy(r), "applies_when": "opening_below_grade"}))
+
+
+def test_from_must_name_another_part_kind():
+    from rule_format.parts import load_registry, registry_problems
+    kinds = copy.deepcopy(load_registry())
+    kinds["emergency_escape_opening"]["measures"]["opening_room_one_exit"]["from"] = "attic"
+    problems = registry_problems(kinds, set())
+    assert any("'from' must name another part kind" in p for p in problems)

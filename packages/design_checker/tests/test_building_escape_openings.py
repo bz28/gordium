@@ -281,3 +281,40 @@ def _ny_rules():
     return load(REPO / "regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/"
                        "general.yaml")["rules"]
 
+
+
+def test_a_rule_that_doesnt_apply_where_1031_2_does_leaves_compliance_unknown():
+    """Review round 2 of 8d: a limit is held to every opening only because its rule applies wherever 1031.2 does. A
+    rule applying more narrowly (another occupancy list, or one reading the opening) would hold an opening to a
+    requirement the law doesn't place on it: no opening counts, never a wrong fail."""
+    rules = _ny_rules()
+    narrow = [dict(r, applies_when='occupancy_group in ["R-2"]') if r["id"].endswith("min_height") else r for r in rules]
+    assert escape_openings.limits(rules) and escape_openings.limits(narrow) == []
+
+
+def test_openings_the_rows_refuse_never_decide_a_rooms_count():
+    """Review round 2 of 8d: two openings sharing an id (one described twice, its sizes in conflict), an opening that
+    can't be read, or one whose figure stands on a reading to confirm, is never counted, either way: the room's count
+    isn't known, so 1031.2 needs review, never a pass on the compliant twin or a fail beside an unreadable one."""
+    def room(openings):
+        parts, desc = _parts(openings=openings)
+        escape_openings.link(parts, desc, _ny_rules())
+        return parts["sleeping_room"][0]
+    twins = room([{"id": "w", "within": "b", "measures": dict(GOOD)}, {"id": "w", "within": "b", "measures": dict(SMALL)}])
+    assert "sleeping_room_compliant_openings" not in twins["measures"]
+    bad = room([{"id": "w", "within": "b", "measures": dict(SMALL)}, {"id": "v", "within": "b", "measures": "big"}])
+    assert "sleeping_room_compliant_openings" not in bad["measures"]
+    told = room([{"id": "w", "within": "b", "measures": dict(GOOD),
+                  "confirm": {"opening_net_clear_area": "Gordium's reading"}}])
+    assert "sleeping_room_compliant_openings" not in told["measures"]
+    plain = room([{"id": "w", "within": "b", "measures": dict(GOOD)}])
+    assert plain["measures"]["sleeping_room_compliant_openings"] == 1
+
+
+def test_an_unknown_count_names_the_opening_and_the_figures_missing():
+    """Review round 2 of 8d: the reason a person sees names what to give, never only "a figure not measured"."""
+    parts, desc = _parts(openings=[{"id": "w", "name": "North window", "within": "b",
+                                    "measures": {k: v for k, v in GOOD.items() if k != "opening_net_clear_area"}}])
+    escape_openings.link(parts, desc, _ny_rules())
+    why = parts["sleeping_room"][0]["not_measured"]["sleeping_room_compliant_openings"]
+    assert "North window" in why and "opening_net_clear_area" in why

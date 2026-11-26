@@ -20,9 +20,10 @@ from .formula import EvaluationError, FormulaError, MissingMeasure
 PARTS_FILE = Path(__file__).with_name("parts.yaml")
 PART_FIELDS = ("for_each", "within", "when_none", "limit")   # a rule's fields for repeating over parts
 # `limit` (section group 8d): the part's own requirement, apart from whether the law asks it of this part, so code can
-# tell which parts comply (design_checker/escape_openings.py counts a sleeping room's compliant escape openings). The
-# check must be exactly "(<limit>) or <the condition setting the requirement aside>", and every review_when that reads
-# a measure the limit reads must say "not (<limit>)": the two can't drift apart (limit_problems).
+# tell which parts comply (design_checker/escape_openings.py counts a sleeping room's compliant escape openings). On
+# the parsed formulas: the check a top-level "(<limit>) or <set-aside>", every review_when a top-level "... and not
+# (<limit>) and ...", no "if ... else", the limit's measures the part's own (never one marked `from`) and read nowhere
+# else in the rule, and an applies_when reading no part measure: the two can't drift apart (limit_problems).
 EXAMPLE_FIELDS = ("parts", "rows")                     # a per-part rule's worked example: the parts, the rows expected
 PART_ENTRY_FIELDS = {"id", "name", "within", "measures"}
 ROW_FIELDS = {"part", "within", "outcome"}             # an expected row: the part's id, the id of the part it sits in
@@ -67,9 +68,10 @@ def registry_problems(kinds, building_measures) -> list[str]:
                 p.append(f"{name}: measure {m!r}: a name is lowercase letters, digits and _")
                 continue
             if not isinstance(d, dict) or d.keys() - MEASURE_FIELDS or d.get("unit") not in UNITS \
-                    or not (isinstance(d.get("meaning"), str) and d["meaning"].strip()) \
-                    or ("from" in d and d["from"] not in kinds):
+                    or not (isinstance(d.get("meaning"), str) and d["meaning"].strip()):
                 p.append(f"{name}: measure {m!r} needs a unit from {sorted(UNITS)} and a meaning")
+            if isinstance(d, dict) and "from" in d and (d["from"] not in kinds or d["from"] == name):
+                p.append(f"{name}: measure {m!r}: 'from' must name another part kind, the one it is copied from")
             if m in building_measures:
                 p.append(f"{name}: measure {m!r} is also a building measure (measures.yaml)")
             if m in seen:
@@ -223,6 +225,10 @@ def limit_problems(rule: dict) -> list[str]:
                     elsewhere |= {x.id for x in ast.walk(v) if isinstance(x, ast.Name)}
         if isinstance(rule.get("applies_when"), str):
             elsewhere |= formula.names(rule["applies_when"])
+            if formula.names(rule["applies_when"]) & own:
+                p.append("applies_when reads the part's measures: with a limit, whether the rule applies must be "
+                         "the building's alone, so a part is held to its limit only where the rule applies (review "
+                         "round 2 of 8d)")
     except ValueError as e:
         return [str(e)]
     if reads & elsewhere:
