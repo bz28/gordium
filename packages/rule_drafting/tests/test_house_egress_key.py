@@ -238,7 +238,10 @@ def test_an_area_well_with_a_ladder_never_passes_on_its_unmeasured_reach(ctx, dr
     sides = {"general.r319_4_1_area_well_min_projection", "general.r319_4_1_area_well_min_width"}
     rid = f"general.r319_4_1_area_well_min_{measure.removeprefix('area_well_')}"
     full = "general.r319_4_1_area_well_allows_full_opening"
-    ai = [r for r in reverted(drafts, as_drafted, sides | {full}) if r["kind"] == "rule"]   # its flag set aside
+    # the AI's area rule too (the fixed one reads how far anything reaches into the well, which this design leaves
+    # unmeasured, PR feat/r319-well-encroachment), so the AI's rules pass the design its sides' rules pass
+    area = "general.r319_4_1_area_well_min_area"
+    ai = [r for r in reverted(drafts, as_drafted, sides | {full, area}) if r["kind"] == "rule"]   # its flag set aside
     assert piece_result(ai, "R319.4.1", design(36), {}, ctx) == "pass"
     assert piece_result(drafts, "R319.4.1", design(36), {}, ctx) == "needs_review"
     this_side = reverted(drafts, as_drafted, {rid})               # only this side's rule as the AI drafted it

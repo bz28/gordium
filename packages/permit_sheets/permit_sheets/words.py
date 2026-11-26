@@ -121,9 +121,26 @@ def measure_words(m: str) -> str:
 
 # ---- a rule's limit and a part's values, for the code-analysis table ------------------------------------------------
 
-def _comparisons(check: str):
+# the parts of a check a sheet's columns aren't about, by the measures they read, each set aside with its own short
+# words: an area well's size rules also read what reaches into the well (RCNYS R319.4.1's exception: only the ladder or
+# steps a well over 44 in deep requires, 6 in at most), which the "Required" column says in words, never as a formula
+ASIDE = (({"area_well_other_encroachment", "area_well_ladder_encroachment", "area_well_depth", "area_well_ladder"},
+          "nothing else in its required dimensions but the required ladder or steps (6 in at most)"),)
+
+
+def _aside(node) -> str | None:
+    """The words a part of a check is set aside with, or None."""
+    try:
+        names = {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
+    except Exception:
+        return None
+    return next((words for measures, words in ASIDE if names and names <= measures), None)
+
+
+def _comparisons(check: str, aside: list | None = None):
     """The check's parts every one of which must hold (an `and` chain), each (measure, op, limit node) when it is
-    `measure <op> limit` (or mirrored), else None for that part; None when the check can't be read."""
+    `measure <op> limit` (or mirrored), else None for that part; None when the check can't be read. A part ASIDE
+    names goes into `aside` (its words, once) instead, where a list is given."""
     try:
         body = formula.parse(check).body
     except Exception:
@@ -133,8 +150,16 @@ def _comparisons(check: str):
         if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.And):
             return [n for v in node.values for n in every(v)]
         return [node]
-    out = []
-    for node in every(body):
+    out, parts = [], every(body)
+    # set aside only beside what the column is about: a check all of whose parts ASIDE names (R319.4.2's
+    # area_well_ladder) is read as it is
+    if aside is not None and all(_aside(node) for node in parts):
+        aside = None
+    for node in parts:
+        if aside is not None and (words := _aside(node)):
+            if words not in aside:
+                aside.append(words)
+            continue
         if isinstance(node, ast.Compare) and len(node.ops) == 1 and type(node.ops[0]) in SIGN:
             left, op, right = node.left, type(node.ops[0]), node.comparators[0]
             if not isinstance(left, ast.Name) and isinstance(right, ast.Name):
@@ -162,7 +187,7 @@ def in_words(text: str) -> str:
 
 def compared(check) -> set[str]:
     """The measures the check compares with a limit (or needs yes/no): what a schedule column is about."""
-    got = _comparisons(check) if isinstance(check, str) else None
+    got = _comparisons(check, []) if isinstance(check, str) else None
     return {c[0] for c in got or [] if c}
 
 
@@ -173,7 +198,8 @@ def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None)
     check, kind = rule.get("check"), rule.get("for_each")
     if not isinstance(check, str):
         return "see the code's words (no formula: a person decides)", ""
-    got = _comparisons(check)
+    aside = []
+    got = _comparisons(check, aside)
     if not got or any(c is None for c in got):
         return f"per formula: {in_words(check)}", "; ".join(
             f"{measure_words(m)} {value(values.get(m), unit_of(kind, m))}" for m in sorted(values)) or ""
@@ -199,4 +225,4 @@ def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None)
             need.append(f"{label}{SIGN[op]} {text}" + (f" {'sq ft' if unit == 'sf' else unit}" if unit in ("in", "sf")
                                                       else ""))
         have.append(f"{label}{value(values.get(m), unit, toward(op, True))}")
-    return "; ".join(need), "; ".join(have)
+    return "; ".join(need + aside), "; ".join(have)
