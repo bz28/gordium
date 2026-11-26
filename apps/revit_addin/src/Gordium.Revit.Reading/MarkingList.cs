@@ -156,7 +156,8 @@ public sealed record MarkingListResult(IReadOnlyList<string> SetupProblems, IRea
     /// <summary>Every "this house has none of" tick that disagrees with what is drawn (step 6): listed first of all.</summary>
     public IReadOnlyList<string> HasNoneConflicts { get; init; } = [];
 
-    /// <summary>Every level marked "no rooms on this level" with a Room drawn on it: listed first, with the ticks'.</summary>
+    /// <summary>Every level marked "no rooms on this level" or "not a story" with a Room drawn on it: listed first, with
+    /// the ticks'.</summary>
     public IReadOnlyList<string> LevelConflicts { get; init; } = [];
 
     /// <summary>Every Revit stair or railing marked <c>Gordium: Not a stair</c> Yes (the mark can't clear one): listed
