@@ -134,6 +134,33 @@ public sealed class RouteTests
         Assert.Equal(-10.0, all[1]!["elevation"]!.GetValue<double>(), 9);
     }
 
+    /// <summary>A level ticked Gordium: Not a story (a datum, a roof) is sent with <c>not_a_story</c> true, so the story
+    /// places never try it as a story; No or blank is left out (tried both ways), and the route code reads that key.</summary>
+    [Theory]
+    [InlineData(1, true)]
+    [InlineData(0, false)]
+    [InlineData(null, false)]
+    public void A_level_marked_not_a_story_is_sent_so_and_only_yes(int? tick, bool sent)
+    {
+        var floor = new FakeFloor();
+        floor.Levels!.Add(new LevelRecord("level-datum", "T.O. Footing", floor.Fake.Place(0, 0, -4).Z));
+        floor.Marked.Add(new MarkedElement
+        {
+            UniqueId = "level-datum", BuiltInCategory = Marks.Levels, Name = "T.O. Footing",
+            Instance = tick is { } v ? new Dictionary<Guid, MarkValue> { [Marks.NotAStory.Guid] = new(true, v) } : [],
+        });
+        var all = InteriorReader.Read(floor.Model()).Interior["all_levels"]!.AsArray();
+        var datum = all.Single(l => l!["id"]!.GetValue<string>() == "level-datum")!;
+        Assert.Equal(sent, datum["not_a_story"] is not null);
+        if (sent)
+            Assert.True(datum["not_a_story"]!.GetValue<bool>());
+        Assert.Null(all.Single(l => l!["id"]!.GetValue<string>() == FakeFloor.Level)!["not_a_story"]);
+        Assert.Equal((MarkValueKind.YesNo, "all_levels[].not_a_story"), (Marks.NotAStory.Kind, Marks.NotAStory.Feeds));
+        Assert.Equal([Marks.Levels], Marks.NotAStory.Categories);
+        Assert.Equal("not_a_story", JsonNode.Parse(Env.RunCode(
+            "import json; from model_measurement.routes import story_place as s; print(json.dumps(s.NOT_A_STORY))"))!.GetValue<string>());
+    }
+
     [Fact]
     public void The_story_under_turned_and_moved_shared_coordinates_reads_the_same()
     {

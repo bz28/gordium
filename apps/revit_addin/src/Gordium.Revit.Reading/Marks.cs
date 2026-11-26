@@ -585,6 +585,18 @@ public static class Marks
         [Levels], "unknown_spaces (an enclosed area with no Room on a level ticked Yes isn't one)",
         "Yes for a level with no rooms at all (a roof, the top of a turret). Its enclosed areas with no Room are then not treated as rooms nobody drew; a Room drawn on it is listed as a conflict. Blank or No: each enclosed area with no Room on it keeps every sleeping-room rule needing review.");
 
+    /// <summary>A level the architect says is no story (<c>all_levels[].not_a_story</c>): a reference or datum level, a
+    /// roof level. The Building Code's story places (model_measurement/routes/story_place.py) then never try it as a
+    /// story nobody drew rooms on, so a datum under a slab no longer unsettles which story is the first above grade
+    /// plane. Yes only: blank or No, the level is tried both ways as before. Rooms, or an enclosed area with no Room,
+    /// on a level ticked Yes disagree with it, and no story is placed.</summary>
+    public static readonly MarkDefinition NotAStory = new(
+        "Gordium: Not a story", new("0938c91d-d646-49f7-b072-465fecbb9325"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [Levels], "all_levels[].not_a_story",
+        "Yes for a level that is no story of the building: a reference or datum level (top of foundation, a sill height), or a roof level. " +
+        "Gordium then never counts it as a story nobody drew rooms on when it works out which story is the first, second or fourth above grade plane (BCNYS Tables 1006.3.4(1) and (2)). " +
+        "Blank or No: such a level with no rooms is tried both as a story and not, and the stories' places it could change need review. Rooms drawn on a level ticked Yes disagree with it: no story's place is measured.");
+
     // ---- step 6: what the house has none of (design note, sections 2 and 4; HasNone) ------------------------------
     // One Yes/No on Project Information per kind: the three kinds the description lists itself (an empty list says
     // none) and every kind of the format's has_none (model_measurement.interior.has_none.KINDS). Yes is sent only when
@@ -685,7 +697,7 @@ public static class Marks
         SleepingRoom, EscapeOpening, ExitDoor, Operation, ClearWidth, ClearHeight, ClearOffset, ClearSource,
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
-        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
+        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStory, NotAStair, SiteSlab, SiteObject,
         CanBeLocked, PassThrough, Exit, Stories, NotOccupied, RoomFunction, RoomUnit,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,

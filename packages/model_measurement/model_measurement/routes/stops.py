@@ -153,6 +153,10 @@ STOPS = {
     "place_either_levels": "{name} could be {could}, depending on where the grade plane lies within what the ground "
                            "stated allows and on whether the levels {levels} are stories (a level with no rooms drawn, "
                            "or a small one that may be a mezzanine)",
+    "place_not_a_story_not_read": "the level {name}'s not-a-story mark is {got}, not yes or no: whether it is a "
+                                  "story isn't known",
+    "place_not_a_story_has_rooms": "the level {name} is marked not a story, yet rooms, or an enclosed space with no "
+                                   "room drawn in it, are on it: which is right isn't known",
     "place_too_many_levels": "{count} levels have no rooms: whether each is a story nobody drew rooms on is tried both "
                              "ways only up to 8",
     "ground_buildings_apart": "the stories' outlines come apart in {count} pieces (separate buildings?): which spot "

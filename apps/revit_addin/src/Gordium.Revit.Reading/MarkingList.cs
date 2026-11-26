@@ -60,6 +60,10 @@ public static class MarkReading
     public static IReadOnlyList<MarkedElement> LevelsMarkedNoRooms(RevitModel model) =>
         InDesign(model).Where(e => KindOf(e) == MarkedKind.Level && Marks.YesNo(Get(e, Marks.NoRoomsOnLevel)) is true).ToList();
 
+    /// <summary>The levels in the model the architect marked "not a story" Yes (unset or No: not stated).</summary>
+    public static IReadOnlyList<MarkedElement> LevelsMarkedNotAStory(RevitModel model) =>
+        InDesign(model).Where(e => KindOf(e) == MarkedKind.Level && Marks.YesNo(Get(e, Marks.NotAStory)) is true).ToList();
+
     private static MarkValue? Get(MarkedElement e, MarkDefinition m) =>
         (m.Binding == MarkBinding.Instance ? e.Instance : e.Type).TryGetValue(m.Guid, out var v) ? v : null;
 
