@@ -128,6 +128,10 @@ ASIDE = (({"area_well_other_encroachment", "area_well_ladder_encroachment", "are
           "nothing else in its required dimensions but the required ladder or steps (6 in at most)"),)
 
 
+# the set-aside measures' own words on a sheet (area_well_ladder is a ladder or steps the open window doesn't obstruct)
+ASIDE_WORDS = {"area_well_ladder": "ladder or steps clear of the open window"}
+
+
 def _aside(node) -> str | None:
     """The words a part of a check is set aside with, or None."""
     try:
@@ -208,7 +212,7 @@ def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None)
     need, have = [], []
     shown_aside = sorted({n.id for c in got if c[1] == "aside" for n in ast.walk(c[2]) if isinstance(n, ast.Name)})
     got = [c for c in got if c[1] != "aside"]
-    named = len(got) > 1
+    named = len(got) > 1 or bool(shown_aside)          # the main value keeps its name beside the set-aside ones
     for m, op, right in got:
         unit = unit_of(kind, m)
         label = f"{measure_words(m)} " if named else ""
@@ -229,5 +233,8 @@ def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None)
                                                       else ""))
         have.append(f"{label}{value(values.get(m), unit, toward(op, True))}")
     # the measures set aside, as the part has them (the value that may decide a fail is never hidden)
-    have += [f"{measure_words(m)} {value(values.get(m), unit_of(kind, m))}" for m in shown_aside]
+    # rounded the way that never favours compliance: a reach (at most) up, the depth (more than 44 in) down
+    have += [f"{ASIDE_WORDS.get(m, measure_words(m))} "
+             f"{value(values.get(m), unit_of(kind, m), toward(ast.Gt if m == 'area_well_depth' else ast.LtE, True))}"
+             for m in shown_aside]
     return "; ".join(need + aside), "; ".join(have)

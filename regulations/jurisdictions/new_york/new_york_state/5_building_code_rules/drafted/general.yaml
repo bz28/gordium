@@ -2962,9 +2962,29 @@ rules:
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   - question: How much the ladder or steps encroachment (exception) may reduce the horizontal area is not stated.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+    searched:
+    - R319.4.1
+    - R319.4.2
+    sources:
+    - rank: 4
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s window well sections (R310.2.3)'
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Exception: The ladder or steps required by Section R310.2.3.1 shall permitted to encroach not more than 6 inches
+        (152 mm) into the required dimensions of the window well.'
+    - rank: 4
+      cite: the same handout, the IRC's ladder sentence of that edition
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
+    why_open: 'The exception lets the ladder or steps encroach into the required dimensions of the area well, but neither
+      R319.4.1 nor its twin BCNYS 1031.5.1 says how that changes the 9 sq ft the well must hold: a well under 9 sq ft with
+      the ladder or steps a well over 44 in deep requires, reaching in 6 in or less, needs review. Searched (2026-11-26):
+      R319.4.1 and R319.4.2 whole, BCNYS 1031.5.1 and 1031.5.2 (the same words), a web search for ICC commentary on the IRC''s
+      same exception (none found; New York State''s code interpretations not searched), and building departments'' handouts
+      on it: the City of Boise''s quotes the IRC''s earlier wording, where the required ladder or steps are those "usable
+      with the window in the fully open position" (which leans toward the plain reading), but none says how an obstructed
+      ladder''s reach, or the well''s own size beside a ladder, is read.'
   - question: Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section R319.4.2" whose
       reach into the well the exception allows?
     searched:
@@ -2972,22 +2992,27 @@ rules:
     - R319.4.2
     sources:
     - rank: 4
-      cite: City of Boise, Egress windows code handout (2022), on the IRC's same exception
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s window well sections (R310.2.3)'
       url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
-      quote: Permanent ladder or steps cannot encroach the required window well dimensions by more than 6 inches.
+      quote: 'Exception: The ladder or steps required by Section R310.2.3.1 shall permitted to encroach not more than 6 inches
+        (152 mm) into the required dimensions of the window well.'
     - rank: 4
-      cite: City of Boulder, Guide to emergency escape and rescue openings (2021), on the IRC's same sections
-      url: https://bouldercolorado.gov/sites/default/files/2021-03/guide-emergency-openings.pdf
+      cite: the same handout, the IRC's ladder sentence of that edition
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
     why_open: 'R319.4.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
       the emergency escape and rescue opening where the window or door is in the open position'', so the plain reading is
       that an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
       words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
       ladder needs review here, never a fail stricter than every reading. R319.4.2''s own rule fails the obstructed ladder
-      either way. For the architects to confirm (BCNYS 1031.5.1, the same words, reads it the same way). Searched: R319.4.1
-      and R319.4.2 whole, BCNYS 1031.5.1 and 1031.5.2 (the same words), and building departments'' handouts on the IRC''s
-      same sections (2026-11-26; they repeat the 6 in limit and that the ladder must not obstruct the open window, but none
-      says whether an obstructed ladder''s reach is allowed); no New York State code interpretation or ICC commentary on the
-      point was found.'
+      either way. For the architects to confirm (BCNYS 1031.5.1, the same words, reads it the same way). Searched (2026-11-26):
+      R319.4.1 and R319.4.2 whole, BCNYS 1031.5.1 and 1031.5.2 (the same words), a web search for ICC commentary on the IRC''s
+      same exception (none found; New York State''s code interpretations not searched), and building departments'' handouts
+      on it: the City of Boise''s quotes the IRC''s earlier wording, where the required ladder or steps are those "usable
+      with the window in the fully open position" (which leans toward the plain reading), but none says how an obstructed
+      ladder''s reach, or the well''s own size beside a ladder, is read.'
   findings:
   - id: ladder_encroaches_only_where_required
     question: Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?
@@ -3103,60 +3128,107 @@ rules:
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: review_when
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: examples
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: open_questions
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: research
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: findings
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
+  - field: check
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: review_when
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: examples
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: findings
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 3 (two skeptics): the research quotes the City of Boise handout''s
+      own words (round 2 had a sentence the handout doesn''t hold, and a dead link), records the search for New York interpretations
+      and ICC commentary, and the area band question is researched too; the band''s record says it follows the answer key
+      for an unobstructed ladder, a choice that leaves the obstructed-ladder question open.'
 - id: general.r319_4_1_area_well_min_projection
   kind: rule
   topic: means_of_egress
@@ -3525,60 +3597,107 @@ rules:
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: review_when
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: examples
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: open_questions
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: research
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: findings
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
+  - field: check
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: review_when
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: examples
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: findings
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 3 (two skeptics): the research quotes the City of Boise handout''s
+      own words (round 2 had a sentence the handout doesn''t hold, and a dead link), records the search for New York interpretations
+      and ICC commentary, and the area band question is researched too; the band''s record says it follows the answer key
+      for an unobstructed ladder, a choice that leaves the obstructed-ladder question open.'
   open_questions:
   - Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section R319.4.2" whose reach
     into the well the exception allows?
@@ -3592,22 +3711,27 @@ rules:
     - R319.4.2
     sources:
     - rank: 4
-      cite: City of Boise, Egress windows code handout (2022), on the IRC's same exception
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s window well sections (R310.2.3)'
       url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
-      quote: Permanent ladder or steps cannot encroach the required window well dimensions by more than 6 inches.
+      quote: 'Exception: The ladder or steps required by Section R310.2.3.1 shall permitted to encroach not more than 6 inches
+        (152 mm) into the required dimensions of the window well.'
     - rank: 4
-      cite: City of Boulder, Guide to emergency escape and rescue openings (2021), on the IRC's same sections
-      url: https://bouldercolorado.gov/sites/default/files/2021-03/guide-emergency-openings.pdf
+      cite: the same handout, the IRC's ladder sentence of that edition
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
     why_open: 'R319.4.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
       the emergency escape and rescue opening where the window or door is in the open position'', so the plain reading is
       that an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
       words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
       ladder needs review here, never a fail stricter than every reading. R319.4.2''s own rule fails the obstructed ladder
-      either way. For the architects to confirm (BCNYS 1031.5.1, the same words, reads it the same way). Searched: R319.4.1
-      and R319.4.2 whole, BCNYS 1031.5.1 and 1031.5.2 (the same words), and building departments'' handouts on the IRC''s
-      same sections (2026-11-26; they repeat the 6 in limit and that the ladder must not obstruct the open window, but none
-      says whether an obstructed ladder''s reach is allowed); no New York State code interpretation or ICC commentary on the
-      point was found.'
+      either way. For the architects to confirm (BCNYS 1031.5.1, the same words, reads it the same way). Searched (2026-11-26):
+      R319.4.1 and R319.4.2 whole, BCNYS 1031.5.1 and 1031.5.2 (the same words), a web search for ICC commentary on the IRC''s
+      same exception (none found; New York State''s code interpretations not searched), and building departments'' handouts
+      on it: the City of Boise''s quotes the IRC''s earlier wording, where the required ladder or steps are those "usable
+      with the window in the fully open position" (which leans toward the plain reading), but none says how an obstructed
+      ladder''s reach, or the well''s own size beside a ladder, is read.'
   - question: Does R319.4.1's exception let the 6 in a required ladder or steps may take come off the well's own 36 in, so
       that a well 30 to under 36 in with one complies?
     searched:
@@ -3615,23 +3739,29 @@ rules:
     - R319.4.2
     sources:
     - rank: 4
-      cite: City of Boise, Egress windows code handout (2022), on the IRC's same exception
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s window well sections (R310.2.3)'
       url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
-      quote: Permanent ladder or steps cannot encroach the required window well dimensions by more than 6 inches.
+      quote: 'Exception: The ladder or steps required by Section R310.2.3.1 shall permitted to encroach not more than 6 inches
+        (152 mm) into the required dimensions of the window well.'
     - rank: 4
-      cite: City of Boulder, Guide to emergency escape and rescue openings (2021), on the IRC's same sections
-      url: https://bouldercolorado.gov/sites/default/files/2021-03/guide-emergency-openings.pdf
+      cite: the same handout, the IRC's ladder sentence of that edition
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
     why_open: 'Gordium''s reading is no: the exception lets the ladder or steps encroach into the required dimensions of the
       area well, so the well''s own projection and width are still 36 in (the BCNYS 1031.5.1 rule, the same words, fails such
       a well). But the architects'' answer key needs review for a well 30 to under 36 in with a ladder (test_data/answer_keys/new_york/new_york_state/general.yaml,
       general.r319_4_1_area_well_size), so the band stays a review, never a fail, until the architects answer (docs/discrepancies_with_architects.md).
       Only a well over 44 in deep has a required ladder, and only one that reaches in could take any of the 36 in: a shallower
-      well, or one whose ladder reaches 0, short of 36 in fails; the band is for a ladder or steps not obstructed by the open
-      window (as the key''s own review reads area_well_ladder), an obstructed one being no required ladder (R319.4.2''s rule
-      fails it). Searched: R319.4.1 and R319.4.2 whole, BCNYS 1031.5.1 (the same words), and building departments'' handouts
-      on the IRC''s same exception (2026-11-26: "Permanent ladder or steps cannot encroach the required window well dimensions
-      by more than 6 inches.", City of Boise; none says whether the well itself may be smaller); no New York State code interpretation
-      or ICC commentary on it was found.'
+      well, or one whose ladder reaches 0, short of 36 in fails. The band follows the key, whose review reads area_well_ladder
+      (a ladder or steps not obstructed by the open window): a band well with an obstructed ladder fails, a deliberate choice
+      that doesn''t settle this rule''s question on obstructed ladders (R319.4.2''s own rule fails the obstruction anyway).
+      Searched (2026-11-26): R319.4.1 and R319.4.2 whole, BCNYS 1031.5.1 and 1031.5.2 (the same words), a web search for ICC
+      commentary on the IRC''s same exception (none found; New York State''s code interpretations not searched), and building
+      departments'' handouts on it: the City of Boise''s quotes the IRC''s earlier wording, where the required ladder or steps
+      are those "usable with the window in the fully open position" (which leans toward the plain reading), but none says
+      how an obstructed ladder''s reach, or the well''s own size beside a ladder, is read.'
 - id: general.r319_4_1_area_well_min_width
   kind: rule
   topic: means_of_egress
@@ -4000,60 +4130,107 @@ rules:
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: review_when
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: examples
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: open_questions
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: research
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
   - field: findings
     by: Claude for Ben (R319.4.1 area well reaches, review round 1)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 1 (two skeptics): (1) the exception names "The ladder or steps required
       by Section R319.4.2", which R319.4.2 says "shall not be obstructed by the emergency escape and rescue opening where
       the window or door is in the open position", so a reach is allowed only an unobstructed one (area_well_ladder): an obstructed
-      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or under
-      9 sq ft, with a ladder reaching in) applies only where a ladder is required (a well over 44 in deep) and is recorded
-      as an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions
-      stay open.'
+      one within 6 in needs review (an open question), never a pass; (2) the answer key''s band (30 to under 36 in, or 6.25
+      to under 9 sq ft, with a ladder) applies only where a ladder is required (a well over 44 in deep) and is recorded as
+      an open question with what was searched; (3) the answered question''s finding says which of the entry''s questions stay
+      open.'
+  - field: check
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: review_when
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: examples
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: findings
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2 (two skeptics): the band needs a ladder or steps that reach in
+      (one reaching 0 takes nothing off, so a band well beside it fails) and has no lower limit for the area (the round 1
+      words said 6.25 sq ft); the reach reads as a comparison of its own (the same logic: area_well_ladder_encroachment <=
+      6, then 0 or a required ladder); the finding names every rule''s obstructed-ladder question in still_open, quoted in
+      double quotes so the guard sees the words; the research records what was searched.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 1)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 3 (two skeptics): the research quotes the City of Boise handout''s
+      own words (round 2 had a sentence the handout doesn''t hold, and a dead link), records the search for New York interpretations
+      and ICC commentary, and the area band question is researched too; the band''s record says it follows the answer key
+      for an unobstructed ladder, a choice that leaves the obstructed-ladder question open.'
   open_questions:
   - Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section R319.4.2" whose reach
     into the well the exception allows?
@@ -4067,22 +4244,27 @@ rules:
     - R319.4.2
     sources:
     - rank: 4
-      cite: City of Boise, Egress windows code handout (2022), on the IRC's same exception
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s window well sections (R310.2.3)'
       url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
-      quote: Permanent ladder or steps cannot encroach the required window well dimensions by more than 6 inches.
+      quote: 'Exception: The ladder or steps required by Section R310.2.3.1 shall permitted to encroach not more than 6 inches
+        (152 mm) into the required dimensions of the window well.'
     - rank: 4
-      cite: City of Boulder, Guide to emergency escape and rescue openings (2021), on the IRC's same sections
-      url: https://bouldercolorado.gov/sites/default/files/2021-03/guide-emergency-openings.pdf
+      cite: the same handout, the IRC's ladder sentence of that edition
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
     why_open: 'R319.4.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
       the emergency escape and rescue opening where the window or door is in the open position'', so the plain reading is
       that an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
       words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
       ladder needs review here, never a fail stricter than every reading. R319.4.2''s own rule fails the obstructed ladder
-      either way. For the architects to confirm (BCNYS 1031.5.1, the same words, reads it the same way). Searched: R319.4.1
-      and R319.4.2 whole, BCNYS 1031.5.1 and 1031.5.2 (the same words), and building departments'' handouts on the IRC''s
-      same sections (2026-11-26; they repeat the 6 in limit and that the ladder must not obstruct the open window, but none
-      says whether an obstructed ladder''s reach is allowed); no New York State code interpretation or ICC commentary on the
-      point was found.'
+      either way. For the architects to confirm (BCNYS 1031.5.1, the same words, reads it the same way). Searched (2026-11-26):
+      R319.4.1 and R319.4.2 whole, BCNYS 1031.5.1 and 1031.5.2 (the same words), a web search for ICC commentary on the IRC''s
+      same exception (none found; New York State''s code interpretations not searched), and building departments'' handouts
+      on it: the City of Boise''s quotes the IRC''s earlier wording, where the required ladder or steps are those "usable
+      with the window in the fully open position" (which leans toward the plain reading), but none says how an obstructed
+      ladder''s reach, or the well''s own size beside a ladder, is read.'
   - question: Does R319.4.1's exception let the 6 in a required ladder or steps may take come off the well's own 36 in, so
       that a well 30 to under 36 in with one complies?
     searched:
@@ -4090,23 +4272,29 @@ rules:
     - R319.4.2
     sources:
     - rank: 4
-      cite: City of Boise, Egress windows code handout (2022), on the IRC's same exception
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s window well sections (R310.2.3)'
       url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
-      quote: Permanent ladder or steps cannot encroach the required window well dimensions by more than 6 inches.
+      quote: 'Exception: The ladder or steps required by Section R310.2.3.1 shall permitted to encroach not more than 6 inches
+        (152 mm) into the required dimensions of the window well.'
     - rank: 4
-      cite: City of Boulder, Guide to emergency escape and rescue openings (2021), on the IRC's same sections
-      url: https://bouldercolorado.gov/sites/default/files/2021-03/guide-emergency-openings.pdf
+      cite: the same handout, the IRC's ladder sentence of that edition
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
     why_open: 'Gordium''s reading is no: the exception lets the ladder or steps encroach into the required dimensions of the
       area well, so the well''s own projection and width are still 36 in (the BCNYS 1031.5.1 rule, the same words, fails such
       a well). But the architects'' answer key needs review for a well 30 to under 36 in with a ladder (test_data/answer_keys/new_york/new_york_state/general.yaml,
       general.r319_4_1_area_well_size), so the band stays a review, never a fail, until the architects answer (docs/discrepancies_with_architects.md).
       Only a well over 44 in deep has a required ladder, and only one that reaches in could take any of the 36 in: a shallower
-      well, or one whose ladder reaches 0, short of 36 in fails; the band is for a ladder or steps not obstructed by the open
-      window (as the key''s own review reads area_well_ladder), an obstructed one being no required ladder (R319.4.2''s rule
-      fails it). Searched: R319.4.1 and R319.4.2 whole, BCNYS 1031.5.1 (the same words), and building departments'' handouts
-      on the IRC''s same exception (2026-11-26: "Permanent ladder or steps cannot encroach the required window well dimensions
-      by more than 6 inches.", City of Boise; none says whether the well itself may be smaller); no New York State code interpretation
-      or ICC commentary on it was found.'
+      well, or one whose ladder reaches 0, short of 36 in fails. The band follows the key, whose review reads area_well_ladder
+      (a ladder or steps not obstructed by the open window): a band well with an obstructed ladder fails, a deliberate choice
+      that doesn''t settle this rule''s question on obstructed ladders (R319.4.2''s own rule fails the obstruction anyway).
+      Searched (2026-11-26): R319.4.1 and R319.4.2 whole, BCNYS 1031.5.1 and 1031.5.2 (the same words), a web search for ICC
+      commentary on the IRC''s same exception (none found; New York State''s code interpretations not searched), and building
+      departments'' handouts on it: the City of Boise''s quotes the IRC''s earlier wording, where the required ladder or steps
+      are those "usable with the window in the fully open position" (which leans toward the plain reading), but none says
+      how an obstructed ladder''s reach, or the well''s own size beside a ladder, is read.'
 - id: general.r319_4_1_area_well_allows_full_opening
   kind: rule
   topic: means_of_egress

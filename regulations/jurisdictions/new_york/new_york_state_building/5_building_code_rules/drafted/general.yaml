@@ -17692,7 +17692,8 @@ rules:
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). An opening whose bottom is below the adjacent grade has an area well (1031.5) of at least 9 sq ft horizontal
     area (1031.5.1), to its walls, with nothing standing in it reaching into its required dimensions but the ladder or steps
-    1031.5.2 requires (a well over 44 inches deep), and those no more than 6 inches (the exception; not measured yet, a review);
+    1031.5.2 requires (a well over 44 inches deep), not obstructed by the open window, and those no more than 6 inches (the
+    exception; stated, or a review: an obstructed or unstated ladder reaching 6 inches or less is a review, an open question);
     no well read is no area. Past those limits (something else in the required dimensions, the ladder or steps more than 6
     inches into them, or any in a well no deeper than 44 inches) it fails too (review round 4). It applies only where 1031.2
     requires the opening: its room''s facts are copied onto it, so it complies on the fourth story above grade plane or higher,
@@ -17711,14 +17712,23 @@ rules:
     searched:
     - 1031.5.1
     - 1031.5.2
-    sources: []
+    sources:
+    - rank: 4
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s window well sections (R310.2.3), the same exception'
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
     why_open: '1031.5.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
       the emergency escape and rescue opening when the window or door is in the open position'', so the plain reading is that
       an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
       words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
       (or unstated) ladder needs review, never a pass. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
-      (the same words) reads it the same way. Searched: 1031.5.1 and 1031.5.2 whole; not yet searched: New York State''s code
-      interpretations and IBC commentary on 1031.5.1.'
+      (the same words) reads it the same way. Searched (2026-11-26): 1031.5.1 and 1031.5.2 whole, RCNYS R319.4.1 and R319.4.2
+      (the same words), a web search for ICC commentary (none found; New York State''s code interpretations not searched),
+      and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the required ladder or steps
+      "usable with the window in the fully open position" (leaning toward the plain reading) but says nothing of an obstructed
+      ladder''s reach.'
   revised:
   - field: check
     by: Claude for Ben (R319.4.1 area well reaches, review round 2)
@@ -17753,6 +17763,14 @@ rules:
       one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
       this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
   - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: notes
     by: Claude for Ben (R319.4.1 area well reaches, review round 2)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
@@ -18293,14 +18311,16 @@ rules:
     note: 'A ladder the open window obstructs reaching 3 in: whether the exception allows its reach is an open question.'
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). Its area well''s horizontal projection is 36 inches or more to its walls, and nothing standing in it reaches
-    into it but the ladder or steps 1031.5.2 requires, those no more than 6 inches (not measured yet, a review); short of
-    36 inches it fails whatever stands in it (review rounds 1 to 3). Past those limits (something else in the required dimensions,
-    the ladder or steps more than 6 inches into them, or any in a well no deeper than 44 inches) it fails too (review round
-    4). It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth
-    story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it
-    needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
-    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
-    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    into it but the ladder or steps 1031.5.2 requires, not obstructed by the open window, those no more than 6 inches (stated,
+    or a review: an obstructed or unstated ladder reaching 6 inches or less, in a well over 44 inches deep, is a review, an
+    open question); short of 36 inches it fails whatever stands in it (review rounds 1 to 3). Past those limits (something
+    else in the required dimensions, the ladder or steps more than 6 inches into them, or any in a well no deeper than 44
+    inches) it fails too (review round 4). It applies only where 1031.2 requires the opening: its room''s facts are copied
+    onto it, so it complies on the fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are
+    shown to reach two or more exits; it needs review where the room has a door to outside (exception 2), in a sprinklered
+    Group R-2 or R-3 building (exception 5), in a building of two or more groups, where the room has another escape opening
+    marked (1031.2 asks one per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted
+    in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   open_questions:
@@ -18312,14 +18332,23 @@ rules:
     searched:
     - 1031.5.1
     - 1031.5.2
-    sources: []
+    sources:
+    - rank: 4
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s window well sections (R310.2.3), the same exception'
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
     why_open: '1031.5.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
       the emergency escape and rescue opening when the window or door is in the open position'', so the plain reading is that
       an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
       words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
       (or unstated) ladder needs review, never a pass. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
-      (the same words) reads it the same way. Searched: 1031.5.1 and 1031.5.2 whole; not yet searched: New York State''s code
-      interpretations and IBC commentary on 1031.5.1.'
+      (the same words) reads it the same way. Searched (2026-11-26): 1031.5.1 and 1031.5.2 whole, RCNYS R319.4.1 and R319.4.2
+      (the same words), a web search for ICC commentary (none found; New York State''s code interpretations not searched),
+      and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the required ladder or steps
+      "usable with the window in the fully open position" (leaning toward the plain reading) but says nothing of an obstructed
+      ladder''s reach.'
   revised:
   - field: check
     by: Claude for Ben (R319.4.1 area well reaches, review round 2)
@@ -18354,6 +18383,14 @@ rules:
       one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
       this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
   - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: notes
     by: Claude for Ben (R319.4.1 area well reaches, review round 2)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
@@ -18894,14 +18931,16 @@ rules:
     note: 'A ladder the open window obstructs reaching 3 in: whether the exception allows its reach is an open question.'
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). Its area well''s width is 36 inches or more to its walls, and nothing standing in it reaches into it but
-    the ladder or steps 1031.5.2 requires, those no more than 6 inches (not measured yet, a review); short of 36 inches it
-    fails whatever stands in it (review rounds 1 to 3). Past those limits (something else in the required dimensions, the
-    ladder or steps more than 6 inches into them, or any in a well no deeper than 44 inches) it fails too (review round 4).
-    It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies on the fourth
-    story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or more exits; it
-    needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building (exception
-    5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one per room: review
-    round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
+    the ladder or steps 1031.5.2 requires, not obstructed by the open window, those no more than 6 inches (stated, or a review:
+    an obstructed or unstated ladder reaching 6 inches or less, in a well over 44 inches deep, is a review, an open question);
+    short of 36 inches it fails whatever stands in it (review rounds 1 to 3). Past those limits (something else in the required
+    dimensions, the ladder or steps more than 6 inches into them, or any in a well no deeper than 44 inches) it fails too
+    (review round 4). It applies only where 1031.2 requires the opening: its room''s facts are copied onto it, so it complies
+    on the fourth story above grade plane or higher, or in Group R-2 where the room''s occupants are shown to reach two or
+    more exits; it needs review where the room has a door to outside (exception 2), in a sprinklered Group R-2 or R-3 building
+    (exception 5), in a building of two or more groups, where the room has another escape opening marked (1031.2 asks one
+    per room: review round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session
+    (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   open_questions:
@@ -18913,14 +18952,23 @@ rules:
     searched:
     - 1031.5.1
     - 1031.5.2
-    sources: []
+    sources:
+    - rank: 4
+      cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
+        quoting the IRC''s window well sections (R310.2.3), the same exception'
+      url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
+      quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
+        a permanently affixed ladder or steps usable with the window in the fully open position.'
     why_open: '1031.5.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
       the emergency escape and rescue opening when the window or door is in the open position'', so the plain reading is that
       an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
       words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
       (or unstated) ladder needs review, never a pass. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
-      (the same words) reads it the same way. Searched: 1031.5.1 and 1031.5.2 whole; not yet searched: New York State''s code
-      interpretations and IBC commentary on 1031.5.1.'
+      (the same words) reads it the same way. Searched (2026-11-26): 1031.5.1 and 1031.5.2 whole, RCNYS R319.4.1 and R319.4.2
+      (the same words), a web search for ICC commentary (none found; New York State''s code interpretations not searched),
+      and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the required ladder or steps
+      "usable with the window in the fully open position" (leaning toward the plain reading) but says nothing of an obstructed
+      ladder''s reach.'
   revised:
   - field: check
     by: Claude for Ben (R319.4.1 area well reaches, review round 2)
@@ -18955,6 +19003,14 @@ rules:
       one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
       this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
   - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: notes
     by: Claude for Ben (R319.4.1 area well reaches, review round 2)
     date: 2026-11-26
     why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
