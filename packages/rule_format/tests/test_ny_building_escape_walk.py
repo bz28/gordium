@@ -180,8 +180,8 @@ SIZE_RULES = {
 
 # ---- section group 8c (2026-11-26): area wells, their ladders and steps (1031.5 to 1031.5.2.2, p.360 lines 38-53) --------
 # Each case's within/past are written from the page: a well is asked of an opening whose bottom is below the adjacent
-# grade; 9 sq ft, 36 in out and wide to its walls (a ladder or steps in it may take up to 6 in of them, which isn't
-# measured: with one there or not known, never a pass; short of the size, past whatever stands in it: review round 1);
+# grade; 9 sq ft, 36 in out and wide to its walls, nothing in them but the ladder or steps 1031.5.2 requires (a well
+# over 44 in deep), and those no more than 6 in (1031.5.1's exception; review rounds 1 to 3); short, past;
 # fully openable; a ladder or steps past 44 in deep; the ladder 12 in, 3 in, 18 in, full
 # height; the steps 12 in, treads over 5 in, risers 18 in, full height (a ladder or steps is asked only past 44 in deep
 # in the loosest reading).
@@ -189,28 +189,51 @@ def _well(**m):
     return {k: v for k, v in m.items() if v is not U}
 
 
-# review round 2 of 8c: how far anything standing in the well reaches into its required dimensions is its own fact
-# (area_well_encroachment), never read from area_well_ladder (no for an obstructed ladder too): within 6 in, or past
-ENCROACH = (U, 0, 6, 7)
+# review rounds 2 and 3 of 8c: how far the ladder or steps, and anything else, reach into the required dimensions are
+# their own facts (never read from area_well_ladder, which says no for an obstructed ladder too); only a required
+# ladder or steps (a well over 44 in deep) may take up to 6 in
+LADDER_IN = (U, 0, 6, 7)
+OTHER_IN = (U, 0, 1)
+DEPTHS = (U, 44, 45)
+
+
+def _clear(other, ladder, depth):
+    """Within the law: nothing else in the required dimensions, and the ladder none, or a required one 6 in at most."""
+    return other is not U and other <= 0 and ladder is not U and (
+        ladder <= 0 or (depth is not U and depth > 44 and ladder <= 6))
+
+
+def _crowded(other, ladder, depth):
+    """Past it whatever else is known: something else in them, a ladder past 6 in, or one in a shallow well."""
+    return (other is not U and other > 0) or (ladder is not U and ladder > 6) or (
+        ladder is not U and ladder > 0 and depth is not U and depth <= 44)
+
+
+def _clear_cases():
+    for other in OTHER_IN:
+        for ladder in LADDER_IN:
+            for depth in DEPTHS:
+                yield _well(area_well_other_encroachment=other, area_well_ladder_encroachment=ladder,
+                            area_well_depth=depth), _clear(other, ladder, depth), _crowded(other, ladder, depth)
 
 
 def _required_cases():
     for below in TRI:
         for area in (U, 8, 9):
-            for enc in ENCROACH:
-                ok = below is False or (area is not U and area >= 9 and enc is not U and enc <= 6)
-                past = below is True and ((area is not U and area < 9) or (enc is not U and enc > 6))
-                yield _well(opening_below_grade=below, area_well_area=area, area_well_encroachment=enc), ok, past
+            for clear, within, crowded in _clear_cases():
+                ok = below is False or (area is not U and area >= 9 and within)
+                past = below is True and ((area is not U and area < 9) or crowded)
+                yield {**_well(opening_below_grade=below, area_well_area=area), **clear}, ok, past
 
 
 def _side_cases(name):
     def cases():
         for below in TRI:
-            for v in (U, 29, 30, 35, 36):
-                for enc in ENCROACH:
-                    m = _well(opening_below_grade=below, **{name: v}, area_well_encroachment=enc)
-                    ok = below is False or (v is not U and v >= 36 and enc is not U and enc <= 6)
-                    past = below is True and ((v is not U and v < 36) or (enc is not U and enc > 6))
+            for v in (U, 35, 36):
+                for clear, within, crowded in _clear_cases():
+                    m = {**_well(opening_below_grade=below, **{name: v}), **clear}
+                    ok = below is False or (v is not U and v >= 36 and within)
+                    past = below is True and ((v is not U and v < 36) or crowded)
                     yield m, ok, past
     return cases
 
