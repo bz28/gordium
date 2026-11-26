@@ -1500,9 +1500,9 @@
     "Egress · Raised character and braille exit signs: A person checks this (Gordium doesn't decide it): Where exit signs are provided at an area of refuge with direct access to a stairway, an exterior area for assisted rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading \"EXIT\" in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren't in the model, so a person's check.",
     "Egress · Internally lit exit signs listed and always lit: A person checks this (Gordium doesn't decide it): Electrically powered, self-luminous and photoluminescent exit signs are listed and labeled to UL 924, installed to the maker's instructions and Chapter 27, and lit at all times: exit signs aren't in the model, so a person's check.",
     "Egress · Photoluminescent exit signs charged: A person checks this (Gordium doesn't decide it): A photoluminescent exit sign has a light source to charge it as its maker instructs: exit signs aren't in the model, so a person's check.",
-    "Egress · Externally lit exit signs' lettering: A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+    "Egress · Externally lit exit signs' lettering: A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned (Gordium reads this section's \"every exit sign\" as the externally lit ones, 1013.6, a reading to confirm): exit signs aren't in the model, so a person's check.",
     "Egress · Externally lit exit signs' brightness: A person checks this (Gordium doesn't decide it): An exit sign lit from an external source has at least 5 footcandles on its face: exit signs aren't in the model, so a person's check.",
-    "Egress · Exit signs lit 90 minutes after a power loss: A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+    "Egress · Exit signs lit 90 minutes after a power loss: A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection (Gordium reads this for every exit sign, internally lit ones too, since 2702.2.6 sends every exit sign's emergency power here, a reading to confirm): exit signs aren't in the model, so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
@@ -73751,11 +73751,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned (Gordium reads this section's \"every exit sign\" as the externally lit ones, 1013.6, a reading to confirm): exit signs aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned (Gordium reads this section's \"every exit sign\" as the externally lit ones, 1013.6, a reading to confirm): exit signs aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1013.6 Externally illuminated exit signs. Externally illuminated exit signs shall comply with Sections 1013.6.1 through 1013.6.3.",
@@ -73784,14 +73784,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1013_6_1_exit_sign_graphics",
-       "words": "A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned (Gordium reads this section's \"every exit sign\" as the externally lit ones, 1013.6, a reading to confirm): exit signs aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1013_6_1_exit_sign_graphics",
-       "why": "A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned (Gordium reads this section's \"every exit sign\" as the externally lit ones, 1013.6, a reading to confirm): exit signs aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -73895,11 +73895,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection (Gordium reads this for every exit sign, internally lit ones too, since 2702.2.6 sends every exit sign's emergency power here, a reading to confirm): exit signs aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection (Gordium reads this for every exit sign, internally lit ones too, since 2702.2.6 sends every exit sign's emergency power here, a reading to confirm): exit signs aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1013.6.3 Power source. Exit signs shall be illuminated at all times. To ensure continued illumination for a duration of not less than 90 minutes in case of primary power loss, the sign illumination means shall be connected to an emergency power system provided from storage batteries, unit equipment or an on-site generator. The installation of the emergency power system shall be in accordance with Chapter 27. Group I-2, Condition 2 exit sign illumination shall not be provided by unit equipment batteries only. Exception: Approved exit sign illumination types that provide continuous illumination independent of external power sources for a duration of not less than 90 minutes, in case of primary power loss, are not required to be connected to an emergency electrical system.",
@@ -73924,14 +73924,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1013_6_3_exit_sign_power_source",
-       "words": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection (Gordium reads this for every exit sign, internally lit ones too, since 2702.2.6 sends every exit sign's emergency power here, a reading to confirm): exit signs aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1013_6_3_exit_sign_power_source",
-       "why": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection (Gordium reads this for every exit sign, internally lit ones too, since 2702.2.6 sends every exit sign's emergency power here, a reading to confirm): exit signs aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -81160,7 +81160,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Externally lit exit signs' lettering (BCNYS 1013.6.1): A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+       "title": "Egress · Externally lit exit signs' lettering (BCNYS 1013.6.1): A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned (Gordium reads this section's \"every exit sign\" as the externally lit ones, 1013.6, a reading to confirm): exit signs aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Externally lit exit signs' lettering (BCNYS 1013.6.1)"
       },
@@ -81186,7 +81186,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Exit signs lit 90 minutes after a power loss (BCNYS 1013.6.3): A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+       "title": "Egress · Exit signs lit 90 minutes after a power loss (BCNYS 1013.6.3): A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection (Gordium reads this for every exit sign, internally lit ones too, since 2702.2.6 sends every exit sign's emergency power here, a reading to confirm): exit signs aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Exit signs lit 90 minutes after a power loss (BCNYS 1013.6.3)"
       },
@@ -82805,7 +82805,7 @@
       {
        "key": "reason:egress.general.bc_1013_6_1_exit_sign_graphics",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned: exit signs aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches high with principal strokes at least 3/4 inch wide; the letters of \"EXIT\", but the I, at least 2 inches wide and spaced at least 3/8 inch apart, larger signs in proportion; \"EXIT\" in high contrast with the background and clearly discernible whether or not the sign's lighting is on, and a chevron, if any, not readily turned (Gordium reads this section's \"every exit sign\" as the externally lit ones, 1013.6, a reading to confirm): exit signs aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1013_6_1_exit_sign_graphics"
@@ -82825,7 +82825,7 @@
       {
        "key": "reason:egress.general.bc_1013_6_3_exit_sign_power_source",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection: exit signs aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently of external power need no connection (Gordium reads this for every exit sign, internally lit ones too, since 2702.2.6 sends every exit sign's emergency power here, a reading to confirm): exit signs aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1013_6_3_exit_sign_power_source"
@@ -112948,7 +112948,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "c4d91ac19a96e0475df27a396d34076f6595563783d611e66640346dfca9175e"
+   "new_york/ithaca_city": "82984adc50ff4a1093c4e4e3730e2b8cd0c442a6979efc69750990653809adfd"
   }
  }
 }

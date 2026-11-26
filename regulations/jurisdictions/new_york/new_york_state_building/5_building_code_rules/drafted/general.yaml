@@ -20970,7 +20970,9 @@ rules:
     expect: needs_review
     note: 'The occupancy isn''t stated: a person checks.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. Not shown for a building stated Group U alone
-    (exception 3 spares it); its other exceptions turn on facts Gordium isn't given (which rooms need one exit, which units are what), so the flag shows.
+    (exception 3 spares it); its other exceptions turn on facts Gordium isn't given (which rooms or areas need only one exit, which
+    main exterior doors the building official approves, which spaces are dwelling or sleeping units, Group I-3 dayrooms,
+    sleeping rooms or dormitories, or Group A-4 and A-5 vomitories), so the flag shows.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1013_2_low_level_exit_signs_group_r1
@@ -21076,8 +21078,7 @@ rules:
       rescue, an exit stairway or ramp, an exit passageway, a horizontal exit and the exit discharge, a sign reading "EXIT"
       in visual characters, raised characters and braille complying with ICC A117.1 is provided: signs aren''t in the model,
       so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. ICC A117.1 isn't brought in; how Gordium reads
-    it is an open decision.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.  ICC A117.1 isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1013_5_internally_illuminated_exit_signs
@@ -21153,9 +21154,12 @@ rules:
     note: 'Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6 inches
       high with principal strokes at least 3/4 inch wide; the letters of "EXIT", but the I, at least 2 inches wide and spaced
       at least 3/8 inch apart, larger signs in proportion; "EXIT" in high contrast with the background and clearly discernible
-      whether or not the sign''s lighting is on, and a chevron, if any, not readily turned: exit signs aren''t in the model,
-      so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+      whether or not the sign''s lighting is on, and a chevron, if any, not readily turned (Gordium reads this section''s "every exit sign" as the externally lit
+      ones, 1013.6, a reading to confirm): exit signs aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. Its words say every exit sign, but it sits under
+    1013.6, whose pointer sends externally illuminated exit signs to 1013.6.1 to 1013.6.3, and internally lit signs are listed
+    to UL 924 under 1013.5, so Gordium reads it for externally lit signs (review round 3 of section group 9b), a reading for
+    the person to confirm. UL 924 isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1013_6_2_exit_sign_illumination_intensity
@@ -21201,7 +21205,8 @@ rules:
     note: 'Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an
       on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not
       by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently
-      of external power need no connection: exit signs aren''t in the model, so a person''s check.'
+      of external power need no connection (Gordium reads this for every exit sign, internally lit ones too, since 2702.2.6
+      sends every exit sign''s emergency power here, a reading to confirm): exit signs aren''t in the model, so a person''s check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9b. Chapter 27 (electrical) isn''t brought in. 1013.6.3
     sits under 1013.6 (externally illuminated exit signs), but its words name exit signs, and 2702.2.6 (p.653, not brought in)
     sends every exit sign''s emergency power to it: ''Emergency power shall be provided for exit signs as required in Section
