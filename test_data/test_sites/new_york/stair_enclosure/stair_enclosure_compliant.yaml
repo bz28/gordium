@@ -3,7 +3,7 @@
 # hand). Inches. Worked by hand: risers 6.5 in (1011.5.2: 4 to 7 in), 18 of them, 117 in floor to floor; treads 11 in
 # (at least 11 in); each flight 44 in wide between its walls (1011.2: 44 in) with a handrail on both sides projecting
 # 3.5 in (1014.9: at most 4 1/2 in), so 37 in clear between them; headroom over flight 1 at its first nosing 105 - 6.5
-# = 98.5 in and the ceiling 225 in beyond (1011.3: 80 in); landings 44 in deep (1011.6: the stair's width); Level 2's
+# = 98.5 in, and over flight 2 108 in to the ceiling (1011.3: 80 in); landings 44 in deep (1011.6: the stair's width); Level 2's
 # open landing edge guarded 42 in high (1015.3: 42 in), no opening in it over 3.5 in (1015.4: a 4 in sphere doesn't
 # pass). Each story's door from its corridor is marked an exit stair enclosure: the stair is in no dwelling unit.
 # Gordium's own test building, not a real project.
@@ -82,7 +82,7 @@ doors:
   sides: [L1C, L1S]
   exit: false
   exit_kind: exit_enclosure
-  exit_id: stair
+  exit_id: L1S
   operation: side_hinged
   plan:
     centre: [-2.0, 22]
@@ -95,7 +95,7 @@ doors:
   sides: [L2C, L2S]
   exit: false
   exit_kind: exit_enclosure
-  exit_id: stair
+  exit_id: L2S
   operation: side_hinged
   plan:
     centre: [-2.0, 22]

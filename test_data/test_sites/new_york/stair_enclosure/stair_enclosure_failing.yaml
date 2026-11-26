@@ -81,7 +81,7 @@ doors:
   sides: [L1C, L1S]
   exit: false
   exit_kind: exit_enclosure
-  exit_id: stair
+  exit_id: L1S
   operation: side_hinged
   plan:
     centre: [-2.0, 22]
@@ -94,7 +94,7 @@ doors:
   sides: [L2C, L2S]
   exit: false
   exit_kind: exit_enclosure
-  exit_id: stair
+  exit_id: L2S
   operation: side_hinged
   plan:
     centre: [-2.0, 22]

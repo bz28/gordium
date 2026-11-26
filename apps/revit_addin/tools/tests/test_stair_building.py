@@ -70,3 +70,9 @@ def test_the_stair_is_marked_outside_every_dwelling_unit_and_level_2_is_open_ove
         assert all(x["exit_kind"] == "exit_enclosure" and x["sides"][1].endswith("S") for x in doors.values())
         l2 = next(r for r in d["rooms"] if r["id"] == "L2S")
         assert max(x for x, _ in l2["floor"]) <= 44
+        # review round 2: each door's exit is the enclosure it enters, so the routes read both stair rooms as the exit
+        from model_measurement.routes import measure
+        routes = measure(d)
+        assert routes["problems"] == [], routes["problems"]
+        spaces = {p["id"]: p for p in routes["parts"]["space"]}
+        assert spaces["L1S"]["measures"]["space_is_exit"] is True and spaces["L2S"]["measures"]["space_is_exit"] is True
