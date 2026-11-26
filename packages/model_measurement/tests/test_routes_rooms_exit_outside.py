@@ -504,7 +504,7 @@ def test_an_opening_drawn_on_another_level_is_never_a_no():
     assert got["measures"].get(OUTSIDE_FACT) is not False
 
 
-@pytest.mark.parametrize("operation", ["sliding_door", "side_hinged_door", "fixed", "other", None])
+@pytest.mark.parametrize("operation", ["sliding_door", "side_hinged_door", "pivot", "other", None])
 def test_a_door_listed_only_among_the_openings_is_never_a_no(operation):
     """Review round 13 (PR 2): a patio door listed in `openings` (every window and door that could be an escape
     opening) but not in `doors` was never read: the shared corridor looked like the space's one way out, "no". An
@@ -517,7 +517,28 @@ def test_a_door_listed_only_among_the_openings_is_never_a_no(operation):
     got = _story(desc)
     assert got["measures"].get(OUTSIDE_FACT) is not False, operation
     assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_link_elsewhere"].format(name="r0")
-    o["operation"] = "casement"                          # a window: still "no"
-    assert _story(desc)["measures"][OUTSIDE_FACT] is False
+    for window in ("casement", "fixed"):                 # a window, or a unit that doesn't open: still "no"
+        o["operation"] = window
+        assert _story(desc)["measures"][OUTSIDE_FACT] is False, window
     o.update(id="o1", operation="side_hinged_door", room=None)  # a listed door, sent among the openings as Revit does
+    assert _story(desc)["measures"][OUTSIDE_FACT] is False
+
+
+@pytest.mark.parametrize("oid", [["p"], {"a": 1}, 7])
+def test_an_opening_whose_id_isnt_text_never_crashes_or_gives_a_no(oid):
+    """Review round 14 (PR 2): an opening (that may be a door) whose id is a list or dict crashed the measuring (an
+    unhashable id looked up among the doors); one with no text id is never a door read on the story."""
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    desc["openings"] = [{"id": oid, "room": "r0", "operation": "sliding_door", "escape": False}]
+    got = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
+    assert got["measures"].get(OUTSIDE_FACT) is not False, oid
+
+
+def test_an_opening_reusing_a_doors_id_for_another_room_is_never_a_no():
+    """Review round 14 (PR 2): an opening with a listed door's id was skipped whatever room it named; one naming a room
+    the door doesn't join contradicts it, and may be that room's own way out."""
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    desc["openings"] = [{"id": "o1", "room": "r0", "operation": "sliding_door", "escape": False}]
+    assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False
+    desc["openings"][0]["room"] = "r1"                   # the door's own room: that door, still "no"
     assert _story(desc)["measures"][OUTSIDE_FACT] is False
