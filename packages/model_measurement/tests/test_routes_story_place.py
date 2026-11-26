@@ -597,3 +597,30 @@ def test_a_story_may_stand_under_the_lowest_level(ground):
     would be the first story above grade plane and Level 1 the third. Nothing is placed."""
     got = placed([[0], [10], [20]], ground)
     assert not set(FACTS) & set(got["L0"]["measures"]) and not set(FACTS) & set(got["L1"]["measures"])
+
+
+# --- review round 9 (2026-11-26) ----------------------------------------------------------------------------------
+
+def test_ground_under_an_overhang_counts_toward_the_lowest_ground():
+    """The ground floor's walls at 0 under the overhang, 2 ft beyond its edges, the ground floor at 7 ft: more than 6 ft
+    over the ground at its own walls (a story may stand under it). Before, the spots under the overhang were left out
+    of the lowest ground (2 ft) and the ground floor measured the first story above."""
+    small, big = BOX, Polygon([(-10 * FT, 0), (50 * FT, 0), (50 * FT, 40 * FT), (-10 * FT, 40 * FT)])
+    desc, stories = building([[7], [17]])
+    stories["L1"].outer = big
+    spots = [[20, -1, 2], [41, 15, 0], [20, 31, 0], [-1, 15, 0], [20, 41, 2], [51, 20, 2], [-11, 20, 2], [45, -1, 2],
+             [-5, -1, 2]]
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"spots": spots})
+    assert not set(FACTS) & set(got["L0"]["measures"])
+    assert got["L0"]["not_measured"][FIRST] == STOPS["place_under_lowest"].format(gap="7 ft")
+
+
+def test_a_possible_mezzanine_is_said_so():
+    """The reason a story under a possible mezzanine isn't placed names the mezzanine, never "levels with no rooms"."""
+    desc, stories = building([[20], [30]])
+    stories["L1"].outer = Polygon([(0, 0), (20 * FT, 0), (20 * FT, 30 * FT), (0, 30 * FT)])
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 18})
+    assert "mezzanine" in got["L0"]["not_measured"][FIRST]
+    assert "levels with no rooms" not in got["L0"]["not_measured"][FIRST]
+    assert "Gordium's reading: a story stands where the model has a level" in \
+        got["L0"]["more"]["story_place"]["levels_reading"]

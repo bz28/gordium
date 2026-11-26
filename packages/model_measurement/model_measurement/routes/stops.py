@@ -151,8 +151,8 @@ STOPS = {
     "place_either": "{name} could be {could}, depending on where the grade plane lies within what the ground stated "
                     "allows",
     "place_either_levels": "{name} could be {could}, depending on where the grade plane lies within what the ground "
-                           "stated allows and on whether the levels with no rooms ({levels}) are stories nobody drew "
-                           "rooms on",
+                           "stated allows and on whether the levels {levels} are stories (a level with no rooms drawn, "
+                           "or a small one that may be a mezzanine)",
     "place_too_many_levels": "{count} levels have no rooms: whether each is a story nobody drew rooms on is tried both "
                              "ways only up to 8",
     "ground_buildings_apart": "the stories' outlines come apart in {count} pieces (separate buildings?): which spot "
