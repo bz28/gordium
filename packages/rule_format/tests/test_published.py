@@ -406,12 +406,12 @@ def test_a_certificate_keeps_the_repo_names_its_rules_mention_not_the_whole_repo
 def test_one_compile_works_out_what_its_certificates_share_once(monkeypatch):
     """Review round 1 of PR 4 (F1): a place has a certificate per district (21 for Ithaca), and each worked out the
     same inputs, listings and validator again (about 22 s of a 37 s publish). They are worked out once per folder."""
-    from rule_format.rulebook import building_code_rulebook
+    ithaca = REPO / "regulations/jurisdictions/new_york/ithaca_city"
     calls = []
     real = published._shared
     monkeypatch.setattr(published, "_shared", lambda *a: calls.append(1) or real(*a))
-    books = [building_code_rulebook(REPO / MAINE)] * 3
+    books = published.books_of(ithaca)[:3]                     # three districts, so three certificates
     monkeypatch.setattr(published, "books_of", lambda folder: books)
     monkeypatch.setattr(published, "compiled", lambda f, b: {"problems": [], "kinds": {}, "documents": {}})
-    out = json.loads(published._child(str(REPO / MAINE), str(REPO), [], [True]))
-    assert calls == [1] and len(out) == 1
+    out = json.loads(published._child(str(ithaca), str(REPO), [], [True]))
+    assert calls == [1] and len(out) == 3
