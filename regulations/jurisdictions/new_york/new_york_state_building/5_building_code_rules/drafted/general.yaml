@@ -14928,18 +14928,21 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No door read: a person checks.'
-  notes: 'Section group 6e: every door the model gives. What latches or locks it is the description''s door hardware (panic hardware, panic hardware with an electric lock it releases, another
-    latch, or none; no Revit mark yet). It complies not swinging, with no latch or lock, with panic or fire exit
-    hardware as its only latch or lock, or in a building of one stated group other than A, E and H; under 50 in Group A or E
-    only where that load is stated by hand (how many people each door serves isn''t worked out, as for 1010.1.2.1). The load
-    is counted as 1004.2 counts it: the rooms, areas or spaces whose egress passes through the door combined (1004.2.1: a corridor
-    door behind two classrooms of 30 serves 60), separate stories not added (1004.2.3). It fails a latched swinging door without
-    panic or fire exit hardware as its only latch or lock in a building stated Group H (an electric lock the panic hardware
-    releases included: exception 2 is for Groups A and E only, and 1010.2.10 excludes Group H; review round 1), or Group E serving
-    50 or more as stated, unless it is a door to outside in a building whose outdoor areas may be occupied (exception 3, 1010.2.4
-    item 8). Group A never fails: exception 1''s main exit (1010.2.4 item 3) isn''t shown. Group E''s electric lock on panic
-    hardware (exception 2) needs review: 1010.2.10''s conditions aren''t shown. Exception 4 (courtrooms, Group A-3 or B) loosens
-    nothing a fail rests on. Hand-drafted in a Claude Code session (2026-11-26).'
+  notes: '''Section group 6e: every door the model gives. What latches or locks it is the description''''s door hardware (panic
+    hardware, panic hardware with an electric lock it releases, another latch, or none; no Revit mark yet). It complies not
+    swinging, with no latch or lock, with panic or fire exit hardware as its only latch or lock, or in a building of one stated
+    group other than A, E and H; under 50 in Group A or E only where that load is stated by hand (how many people each door
+    serves isn''''t worked out, as for 1010.1.2.1). The load is counted as 1004.2 counts it: the rooms, areas or spaces whose
+    egress passes through the door combined (1004.2.1: a corridor door behind two classrooms of 30 serves 60), and where more
+    than one story''s occupants pass through it, at least the largest of those stories'' loads, no story left out (1005.4),
+    the stories added only where egress from above and below converges at it (1004.2.3, 1005.6). It fails a latched swinging
+    door without panic or fire exit hardware as its only latch or lock in a building stated Group H (an electric lock the panic
+    hardware releases included: exception 2 is for Groups A and E only, and 1010.2.10 excludes Group H; review round 1), or
+    Group E serving 50 or more as stated; a door without panic hardware to outside in a building whose outdoor areas may be
+    occupied needs review instead (exception 3: 1010.2.4 item 8''s key-operated lock, which an electric lock on panic hardware
+    never is). Group A never fails: exception 1''''s main exit (1010.2.4 item 3) isn''''t shown. Group E''''s electric lock
+    on panic hardware (exception 2) needs review: 1010.2.10''''s conditions aren''''t shown. Exception 4 (courtrooms, Group
+    A-3 or B) loosens nothing a fail rests on. Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1010_2_8_1_refrigeration_machinery_rooms

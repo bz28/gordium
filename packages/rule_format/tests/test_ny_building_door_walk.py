@@ -448,3 +448,16 @@ def test_an_electric_lock_on_panic_hardware_never_passes_where_group_h_may_be_se
                                                        ("E", "needs_review"), ("A-3", "needs_review"), ("B", "pass")]:
         assert _row(rule, part, _given(g, U) | {"occupied_outdoor_areas": False}, ctx) == want, g
     assert _row(rule, _panic_part(True, True, True, False, 30, electric=True), _given("E", U), ctx) == "pass"
+
+
+def test_a_doors_load_counts_every_story_it_serves_and_exception_3_spares_no_electric_lock(rules):
+    """Review round 2 of group 6e: a door's load is stated by hand, so its meaning must not let a stair's discharge door
+    be typed with its own story only (it serves every story above: 1005.4, p.314; stories not added, 1004.2.3, p.311
+    lines 50-51, except where egress from above and below converges, 1005.6); and the rule's notes say exception 3's
+    review spares only a door without panic hardware (1010.2.4 item 8.3's lock is key-operated, p.325 line 24)."""
+    meaning = " ".join(parts.load_registry()["means_of_egress_door"]["measures"]["moe_door_occupant_load"]["meaning"].split())
+    assert "at least the largest of those stories' loads, no story left out (1005.4" in meaning
+    assert "converges at it, where the two adjacent stories' loads are added (1005.6)" in meaning
+    notes = " ".join({r["id"]: r for r in rules}[PANIC_RULE]["notes"].split())
+    assert "a door without panic hardware to outside" in notes and "unless it is a door to outside" not in notes
+    assert "no story left out (1005.4)" in notes and "separate stories not added" not in notes
