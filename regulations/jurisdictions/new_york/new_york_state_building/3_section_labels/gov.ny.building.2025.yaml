@@ -8351,9 +8351,10 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'An interior exit stairway or ramp is enclosed and leads directly to the exterior, or is extended to it by an
-      exit passageway meeting 1024, except as 1028.2 permits (through areas on the level of exit discharge or a vestibule),
-      and is used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and
-      their use aren''t in the model, so a person''s check.'
+      exit passageway meeting 1024, except as 1028.2 permits (no more than half of the exit stairways and ramps, by number
+      and by width or capacity, through areas on the level of exit discharge or a vestibule, under its conditions), and is
+      used only as a means of egress and a circulation path: which stairways are exit stairways, their enclosures and their
+      use aren''t in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 345
@@ -8375,8 +8376,9 @@ labels:
     reason: 'An interior exit stairway or ramp enclosure is built as fire barriers per 707 or horizontal assemblies per 711,
       rated at least 2 hours where it connects four stories or more and at least 1 hour where fewer (counting basements, not
       mezzanines), and at least the rating of the floor assembly it passes through, up to 2 hours; except, as those sections
-      allow, exit stairways and ramps in Group I-3 per 408.3.8, and exit stairways (not ramps) within an atrium enclosed per
-      404.6 or per 510.2: the enclosure''s rating isn''t in the model, so a person''s check.'
+      allow, exit stairways and ramps in Group I-3 per 408.3.8, exit stairways (not ramps) within an atrium enclosed per 404.6,
+      and exit stairways (not ramps) per 510.2 (a horizontal building separation): the enclosure''s rating isn''t in the model,
+      so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 345
@@ -8405,9 +8407,9 @@ labels:
   '1023.3':
     label: flag
     topic: means_of_egress
-    reason: 'An interior exit stairway or ramp ends at an exit discharge or a public way, or continues there through a protected
-      enclosure of exit stairways, exit ramps and exit passageways built per 1023.2, 1023.3.1 and 1024: where a stairway ends
-      isn''t in the model, so a person''s check.'
+    reason: 'An interior exit stairway or ramp ends at an exit discharge or a public way, or continues there through exit
+      stairways, exit ramps and exit passageways built per 1023.2, 1023.3.1 and 1024 that form one continuous protected enclosure:
+      where a stairway ends isn''t in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 346
@@ -8740,8 +8742,8 @@ labels:
       707 or horizontal assemblies per 711; but openings into the passageway are allowed where it is protected and pressurized
       as the enclosure is and the openings are protected as for access from other floors, the barrier between the enclosure
       and the passageway isn''t needed where the passageway is protected and pressurized as the enclosure is, and the enclosure
-      may egress through areas on the level of exit discharge or vestibules as 1028 allows: smokeproof enclosures aren''t
-      in the model, so a person''s check.'
+      may egress through areas on the level of exit discharge or vestibules as 1028 allows (1028.2: no more than half of the
+      exit stairways and ramps, under its conditions): smokeproof enclosures aren''t in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 347

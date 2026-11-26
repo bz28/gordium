@@ -328,7 +328,16 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          "1023.7": (346, 57, 58), "1023.7 (part 2)": (347, 3, 5), "1023.7.1": (347, 6, 10),
          "1023.7.2": (347, 11, 22), "1023.8": (347, 23, 25), "1023.9": (347, 26, 30), "1023.9.1": (347, 31, 41),
          "1023.10": (347, 42, 44), "1023.11": (347, 45, 47), "1023.12": (347, 48, 49), "1023.12.1": (347, 50, 60),
-         "1023.12.1 (part 2)": (348, 3, 4), "1023.12.2": (348, 5, 8), "1023.13": (348, 9, 9)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
+         "1023.12.1 (part 2)": (348, 3, 4), "1023.12.2": (348, 5, 8), "1023.13": (348, 9, 9),
+         # section group 9f: 1024 (exit passageways), 1025 (luminous egress path markings)
+         "1024.1": (348, 11, 12), "1024.2": (348, 13, 17), "1024.3": (348, 18, 20), "1024.4": (348, 21, 22),
+         "1024.5": (348, 23, 28), "1024.6": (348, 29, 40), "1024.7": (348, 41, 52), "1024.8": (348, 53, 56),
+         "1024.8 (part 2)": (349, 3, 4), "1024.9": (349, 5, 5), "1025.1": (349, 7, 10), "1025.2": (349, 11, 12),
+         "1025.2.1": (349, 13, 17), "1025.2.2": (349, 18, 19), "1025.2.3": (349, 20, 24), "1025.2.4": (349, 25, 29),
+         "1025.2.4.1": (349, 30, 34), "1025.2.4.2": (349, 35, 42), "1025.2.4.3": (349, 43, 45),
+         "1025.2.5": (349, 46, 52), "1025.2.6": (349, 53, 54), "1025.2.6.1": (349, 55, 57),
+         "1025.2.6.2": (350, 3, 6), "1025.2.6.3": (350, 7, 9), "1025.3": (350, 10, 10), "1025.4": (350, 11, 18),
+         "1025.5": (350, 19, 21)}                       # section group 6b                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -431,6 +440,8 @@ HANDLERS = {
     "909.20": ("general.bc_1023_12_smokeproof_enclosures", "909.20"),
     "905.3": ("general.bc_1023_13_standpipes", "905.3"),
     "905.4": ("general.bc_1023_13_standpipes", "905.4"),
+    # section group 9f (705, 707, 711, 714, 714.4.2, 716, 905.3, 905.4, 1005.1, 1005.7 and 1028.2 handled above)
+    "402.8.7": ("general.bc_1024_5_exit_passageway_openings", "402.8.7"),
 }
 NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
             "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1", "1010.1.2",
@@ -444,7 +455,8 @@ NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.
             "1013.1", "1013.2", "1013.3", "1013.4", "1013.5", "1013.5.1", "1013.6", "1013.6.1", "1013.6.2", "1013.6.3",
             "1009.1", "1009.10", "1009.11", "1009.2", "1009.2.1", "1009.2.2", "1009.3", "1009.3.1", "1009.3.2", "1009.3.3", "1009.4", "1009.4.1", "1009.4.2", "1009.5", "1009.6", "1009.6.1", "1009.6.2", "1009.6.3", "1009.6.4", "1009.6.5", "1009.7", "1009.7.1", "1009.7.2", "1009.7.3", "1009.7.4", "1009.8", "1009.8.1", "1009.8.2", "1009.9",
             "1018.1", "1018.2", "1018.3", "1018.5", "1019.1", "1019.2", "1019.3", "1019.4",
-            "1021.1", "1021.2", "1021.3", "1021.4", "1022.1", "1022.2", "1022.2.1", "1022.2.2", "1023.1", "1023.2", "1023.3", "1023.3.1", "1023.4", "1023.5", "1023.6", "1023.7", "1023.7.1", "1023.7.2", "1023.8", "1023.9", "1023.9.1", "1023.10", "1023.11", "1023.12", "1023.12.1", "1023.12.2", "1023.13"}          # the piece naming itself
+            "1021.1", "1021.2", "1021.3", "1021.4", "1022.1", "1022.2", "1022.2.1", "1022.2.2", "1023.1", "1023.2", "1023.3", "1023.3.1", "1023.4", "1023.5", "1023.6", "1023.7", "1023.7.1", "1023.7.2", "1023.8", "1023.9", "1023.9.1", "1023.10", "1023.11", "1023.12", "1023.12.1", "1023.12.2", "1023.13",
+            "1024.1", "1024.2", "1024.3", "1024.4", "1024.5", "1024.6", "1024.7", "1024.8", "1024.9", "1025.1", "1025.2", "1025.2.1", "1025.2.2", "1025.2.3", "1025.2.4", "1025.2.4.1", "1025.2.4.2", "1025.2.4.3", "1025.2.5", "1025.2.6", "1025.2.6.1", "1025.2.6.2", "1025.2.6.3", "1025.3", "1025.4", "1025.5"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
@@ -734,8 +746,47 @@ def test_no_text_calls_a_brought_in_section_not_brought_in():
     # gates 1010.4 and turnstiles 1010.5 (not brought in)") calls every section in it not brought in
     listed = re.compile(r"([^;:()]{0,160})\(([^()]*?)\b(?:not|none|neither) brought in\)")
 
+    # review round 2 of section group 9e (P3): a clause saying its sections "isn't" or "aren't" brought in
+    # ("1023 isn't brought in yet", "1006.1 to 1006.3.2, 1011 ... aren't brought in"), a range holding every section
+    # from its first to its last; what a bracket says is left to the bracket checks
+    said = re.compile(r"\b(?:is|are)(?:n'?'?t| not)(?: yet)? brought in")
+    num = r"(?<![\d.])(?<!Table )(\d{3,4}(?:\.\d+)*)(?![\d])"
+
+    def key(n):
+        return tuple(int(x) for x in n.split("."))
+
+    def in_range(a, b):
+        return any(key(a) <= key(s) <= key(b) + (999,) for s in secs + alone)
+
+    def said_stale(t):
+        out = []
+        for clause in re.split(r"(?<=[;:])\s|(?<=[a-z)'\"])\.\s", t):
+            m = said.search(clause)
+            if not m:
+                continue
+            head = clause[:m.start()]
+            if head.count("(") > head.count(")"):          # said inside a bracket: the bracket's own list
+                head = head[head.rindex("(") + 1:]
+            while re.search(r"\([^()]*\)", head):
+                head = re.sub(r"\([^()]*\)", "", head)
+            # only the list the verb is said of ("..., while 1015 isn't": 1015, not the sentence's subject)
+            head = " ".join(head.split()) + " "
+            head = re.search(r"((?:(?:Sections? )?\d{3,4}(?:\.\d+)*(?:''?s own words)?(?:,? (?:and|or|to|with) |, | ))*)$",
+                             head).group(1)
+            for a, b in re.findall(num + r" to " + num, head):
+                if in_range(a, b):
+                    out.append(clause)
+            head = re.sub(num + r" to " + num, "", head)
+            out += [clause for n in re.findall(num, head) if brought_in(n)]
+        return out
+
+    assert said_stale("1023 isn't brought in yet.") and said_stale("1006.1 to 1006.3.2 and 1011 aren't brought in.")
+    assert not said_stale("1104 and 3006 aren't brought in (1023 is its own).")
+    assert not said_stale("Exits meet 1003 to 1015 (1011 and 1014 aren't brought in yet).")
+    assert not said_stale("1012.9 was a reference, so nothing showed while 1015 isn't brought in.")
+
     def stale(t):
-        out = [m.group(0) for m in pat.finditer(t) if brought_in(m.group(1))]
+        out = [m.group(0) for m in pat.finditer(t) if brought_in(m.group(1))] + said_stale(t)
         for m in listed.finditer(t):
             if re.search(r"\d{3}", m.group(2)):
                 continue
@@ -1310,7 +1361,8 @@ def test_no_rule_text_carries_yaml_quoting_into_what_people_read():
 
 
 GROUP_9_SECTIONS = ("1003", "1012", "1008", "1013", "1009", "1018", "1019",        # section groups 9a to 9d
-                    "1021", "1022", "1023")                                       # section group 9e
+                    "1021", "1022", "1023",                                       # section group 9e
+                    "1024", "1025")                                               # section group 9f
 
 
 def test_every_section_group_9_reference_with_words_to_follow_is_quoted_by_a_rule():
@@ -1380,7 +1432,8 @@ def test_no_title_puts_a_bare_apostrophe_after_a_word_not_ending_in_s():
 # own examples didn't catch a wrong condition (hiding 1018.5 for two or more groups passed them all). Written from the
 # law, never from the rules: where each section group 9 flag with a condition is NOT applicable (its exception spares the
 # whole building, or its own words exclude the group); everywhere else, the unstated cases included, it shows.
-SPRINKLED = ("nfpa_13", "nfpa_13r", "nfpa_13 alone", "nfpa_13r alone")   # 903.3.1.1 or 903.3.1.2 stated, "equipped throughout"
+SPRINKLED = ("nfpa_13", "nfpa_13r", "nfpa_13 alone", "nfpa_13r alone")
+LUMINOUS_HIDDEN = lambda g, s: g not in ("A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "I-1", "M", "R-1", "mixed", None)       # 1025.1   # 903.3.1.1 or 903.3.1.2 stated, "equipped throughout"
 HIDDEN_WHERE = {
     "general.bc_1008_2_illumination_required": lambda g, s: g == "U",                       # exception 1
     "general.bc_1013_1_exit_signs_where_required": lambda g, s: g == "U",                   # exception 3
@@ -1396,6 +1449,22 @@ HIDDEN_WHERE = {
     "general.bc_1018_5_aisles_other_occupancies": lambda g, s: g in ("B", "M"),             # "other than ... B and M"
     "general.bc_1019_3_exit_access_stairway_enclosure": lambda g, s: g in ("I-2", "I-3"),   # "other than I-2 and I-3"
     "general.bc_1019_4_exit_access_stairways_groups_i2_i3": lambda g, s: g not in ("I-2", "I-3", "mixed", None),
+    # section group 9f: 1025.1 names high-rise buildings of Groups A, B, E, I-1, M and R-1 only
+    "general.bc_1025_1_luminous_markings_where_required": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_1_steps": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_2_landings": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_3_handrails": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_4_perimeter_demarcation_lines": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_4_1_floor_mounted_lines": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_4_2_wall_mounted_lines": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_4_3_transition": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_5_obstacles": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_6_1_emergency_exit_symbol": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_6_2_door_hardware_markings": LUMINOUS_HIDDEN,
+    "general.bc_1025_2_6_3_door_frame_markings": LUMINOUS_HIDDEN,
+    "general.bc_1025_3_uniformity": LUMINOUS_HIDDEN,
+    "general.bc_1025_4_self_luminous_photoluminescent": LUMINOUS_HIDDEN,
+    "general.bc_1025_5_illumination": LUMINOUS_HIDDEN,
 }
 GROUPS_9 = ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2", "H-3", "H-4", "H-5", "I-1", "I-2",
             "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U", "mixed", None]
@@ -1454,9 +1523,13 @@ def test_1019_3s_congregate_residence_exception_is_for_stairways_only(rules):
 # (a ramp given a stairways-only exception, a condition of two dropped, "not less than" said as "up to") lets a person
 # accept what the law forbids. Each phrase below is the book's limit in the reason's words; each banned phrase was one.
 SHOWN_MUST_SAY = {
-    "general.bc_1023_1_interior_exit_stairways_general": (["except as 1028.2 permits"], ["but as 1028.2 allows"]),
-    "general.bc_1023_2_enclosure_construction": (["exit stairways (not ramps) within an atrium enclosed per 404.6 or per 510.2",
-                                                  "exit stairways and ramps in Group I-3 per 408.3.8"], []),
+    "general.bc_1023_1_interior_exit_stairways_general": (["except as 1028.2 permits (no more than half"], ["but as 1028.2 allows"]),
+    # review round 2: 510.2's exception isn't an atrium's
+    "general.bc_1023_2_enclosure_construction": (["exit stairways (not ramps) within an atrium enclosed per 404.6,",
+                                                  "exit stairways (not ramps) per 510.2",
+                                                  "exit stairways and ramps in Group I-3 per 408.3.8"],
+                                                 ["atrium enclosed per 404.6 or per 510.2"]),
+    "general.bc_1023_3_termination": (["that form one continuous protected enclosure"], []),
     "general.bc_1023_7_2_roof_assemblies": (["unless the code otherwise requires it", "extending at least 10 feet above the roof"],
                                             ["up to 10 feet"]),
     "general.bc_1023_12_1_smokeproof_termination": (["and the openings are protected as for access from other floors"], []),
@@ -1470,7 +1543,7 @@ def test_section_group_9e_reasons_name_each_exception_as_printed(rules):
         assert not any(n in note for n in never), rid
 
 
-GROUP_9E_ON = ("1021", "1022", "1023")          # section group 9e on: each flag's own piece's label gives its reason
+GROUP_9E_ON = ("1021", "1022", "1023", "1024", "1025")   # section group 9e on: each flag's own piece's label gives its reason
 
 
 def test_a_flags_label_reason_is_its_shown_reason(rules):
@@ -1488,7 +1561,7 @@ def test_a_flags_label_reason_is_its_shown_reason(rules):
         assert labels[piece]["label"] == "flag", (rid, piece)
         assert " ".join(labels[piece]["reason"].split()) == " ".join(r["examples"][0]["note"].split()), rid
         n += 1
-    assert n == 26
+    assert n == 26 + 24                    # section groups 9e and 9f
 
 
 def test_every_up_to_limit_in_a_section_group_9e_reason_is_a_maximum_in_the_book(rules):
@@ -1510,7 +1583,9 @@ def test_1022_1s_notes_name_what_of_1003_to_1015_isnt_brought_in(rules):
     through 1015'; its notes named only 1011, 1014 and 1015 as not brought in, but 1006's general parts and 1010.3 to
     1010.5.4 aren't either."""
     notes = rules["general.bc_1022_1_exits_general"]["notes"]
-    assert all(s in notes for s in ("1006.1 to 1006.3.2", "1010.3 to 1010.5.4", "1011", "1014", "1015"))
+    assert all(s in notes for s in ("1006.1, 1006.2's own words and 1006.3 to 1006.3.2", "1010.3 to 1010.5.4", "1011",
+                                    "1014", "1015"))
+    assert "1006.1 to 1006.3.2" not in notes         # review round 2: that range holds 1006.2.1 and 1006.2.2, brought in
 
 
 def test_the_readme_names_each_section_group_9e_flag_that_reads_icc_a117_1():
