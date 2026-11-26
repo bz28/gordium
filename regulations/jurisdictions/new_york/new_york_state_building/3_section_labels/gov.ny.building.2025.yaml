@@ -697,6 +697,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:corridor_open_ended:
+    label: reference
+    topic: definitions
+    reason: 'A pointer entry for 1027.6''s italic "open-ended corridor" (CORRIDOR, OPEN-ENDED. See "Open-ended corridor."):
+      a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 18
+      - 18
+      quote: CORRIDOR, OPEN-ENDED. See “Open-ended corridor.”
+    piece_sha256: 10df5e75248f1d8d636eef565d3ee3d1930b9853efe46ee3d3093f15ae5fecaf
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:court:
     label: reference
     topic: definitions
@@ -1171,6 +1187,22 @@ labels:
         by fire-resistance-'
     piece_sha256: 13b0cd4d9827097c4115d8238eceae2fc825593c0ce675d3afc536203df6b5f1
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exterior_exit_ramp:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXTERIOR EXIT RAMP, a term 1027.6 prints in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 43
+      lines:
+      - 58
+      - 59
+      quote: '[BE] EXTERIOR EXIT RAMP. An exit component that serves to meet one or more means of egress design requirements,
+        such as required number of exits or exit access travel distance, and is open to yards, courts or public ways.'
+    piece_sha256: 1df4a1658ebad35b7cd13f1aff41249151d10d37012621aa22c8505b31ebde07
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:exterior_exit_stairway:
@@ -2510,6 +2542,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:open_ended_corridor:
+    label: reference
+    topic: definitions
+    reason: 'Defines OPEN-ENDED CORRIDOR, a term 1027.6 prints in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 36
+      - 37
+      quote: '[BE] OPEN-ENDED CORRIDOR. An interior corridor that is open on each end and connects to an exterior stairway
+        or ramp at each end with no intervening doors or separation from the corridor.'
+    piece_sha256: 26ba2bd65aa79a15019f63c2891a97fad1f692d5cedbb655c446b8a430bb96b3
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:opening_protective:
     label: reference
     topic: definitions
@@ -2830,6 +2878,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:ramp_exterior_exit:
+    label: reference
+    topic: definitions
+    reason: 'A pointer entry for 1027.6''s italic "exterior exit ramp" (RAMP, EXTERIOR EXIT. See "Exterior exit ramp."): a
+      definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 33
+      - 33
+      quote: RAMP, EXTERIOR EXIT. See “Exterior exit ramp.”
+    piece_sha256: 7449ae68d555f09971646fe5ad6755822dc98a77200737ce5e53a34c088d48ff
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:ramp_interior_exit:
     label: reference
     topic: definitions
@@ -3102,6 +3166,22 @@ labels:
         that is designed and constructed to restrict the movement of smoke.'
     piece_sha256: 2362bf8f9765ea07a0781a2aa97a6e85dcd42105b1868731ffc1abb41c737ea4
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:smoke_compartment:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKE COMPARTMENT, a term 1026.4.1 prints in italics: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 5
+      - 6
+      quote: '[BG] SMOKE COMPARTMENT. A space within a building separated from other interior areas of the building by smoke
+        barriers, includ- ing interior walls and horizontal assemblies.'
+    piece_sha256: 71488f773b63d6a1a6d3cdae1a2e9bec7ee5c95184c97ff80ff91ba534d91e75
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:smoke_detector:
@@ -9374,6 +9454,571 @@ labels:
         is occupied and continuously during occupancy.
     piece_sha256: 75aced510c2e424f3f67977f1499be380b8b57234223bdc95eeef4e2d1b407bd
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1026':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 22
+      - 22
+      quote: SECTION 1026—HORIZONTAL EXITS
+    piece_sha256: b99369ee5f7c224b0eddfd756dc9e35358d1ae10427d6df2c13e9b3c955a19d2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1026.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'A horizontal exit is never the only exit from a portion of a building, and where two or more exits are required,
+      horizontal exits are at most half of their number and of their total width or capacity; but two-thirds in Group I-2,
+      and all of them in Group I-3 with at least 6 square feet of accessible space per occupant on each side for everyone
+      in the adjoining compartments: which exits are horizontal exits, and their share, aren''t worked out, so a person''s
+      check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 23
+      - 31
+      quote: '1026.1 General. Horizontal exits serving as an exit in a means of egress system shall comply with the requirements
+        of this section. A horizontal exit shall not serve as the only exit from a portion of a building, and where two or
+        more exits are required, not more than one-half of the total number of exits or total exit minimum width or required
+        capacity shall be horizontal exits. Exceptions: 1. Horizontal exits are permitted to comprise two-thirds of the required
+        exits from any building or floor area for occupancies in Group I-2. 2. Horizontal exits are permitted to comprise
+        100 percent of the exits required for occupancies in Group I-3. Not less than 6 square feet (0.6 m2) of accessible
+        space per occupant shall be provided on each side of the horizontal exit for the total number of people in adjoining
+        compartments.'
+    piece_sha256: 09447ca21c06424979c7a5252b120c3e3acae1c30d39d078cb8d01508a153888
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1026.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'The separation between buildings or refuge areas a horizontal exit connects is a fire wall per 706, or fire barriers
+      per 707 or horizontal assemblies per 711, rated at least 2 hours, with opening protectives per 716 and duct and air
+      transfer openings per 717, running through every level unless the floors are rated 2 hours with no unprotected openings,
+      and a fire barrier continuous from exterior wall to exterior wall; but no rating is needed to an above-grade pedestrian
+      walkway per 3104 where the buildings are more than 20 feet apart: horizontal exits aren''t in the model, so a person''s
+      check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 32
+      - 42
+      quote: '1026.2 Separation. The separation between buildings or refuge areas connected by a horizontal exit shall be
+        provided by a fire wall complying with Section 706; or by a fire barrier complying with Section 707 or a horizontal
+        assembly complying with Section 711, or both. The minimum fire-resistance rating of the separation shall be 2 hours.
+        Opening protectives in horizontal exits shall also comply with Section 716. Duct and air transfer openings in a fire
+        wall or fire barrier that serves as a horizontal exit shall also comply with Section 717. The horizontal exit separation
+        shall extend vertically through all levels of the building unless floor assemblies have a fire- resistance rating
+        of not less than 2 hours and do not have unprotected openings. Exception: A fire-resistance rating is not required
+        at horizontal exits between a building area and an above-grade pedestrian walk- way constructed in accordance with
+        Section 3104, provided that the distance between connected buildings is more than 20 feet (6096 mm). Horizontal exits
+        constructed as fire barriers shall be continuous from exterior wall to exterior wall so as to divide completely the
+        floor served by the horizontal exit.'
+    piece_sha256: d7013ac8cab66cfd3a527d8b5cfbe4f778ad44daa8182a22d245349cdadd8154
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1026.3':
+    label: flag
+    topic: means_of_egress
+    reason: 'Fire doors in a horizontal exit are self-closing or close automatically on a smoke detector per 716.2.6.6, and
+      doors in a cross-corridor close automatically on a smoke detector so installed: door closers aren''t in the model, so
+      a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 43
+      - 45
+      quote: 1026.3 Opening protectives. Fire doors in horizontal exits shall be self-closing or automatic-closing when activated
+        by a smoke detector in accordance with Section 716.2.6.6. Doors, where located in a cross-corridor condition, shall
+        be automatic-closing by acti- vation of a smoke detector installed in accordance with Section 716.2.6.6.
+    piece_sha256: 340285dc987378faa9aa6ed258d7a0cc24f542377bd57d9270df3b067aa1a9d2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1026.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'A horizontal exit''s refuge area is occupied by the same tenant or is a public area, large enough for its own
+      occupant load plus the load expected from the adjoining compartment (the lesser of what the horizontal exit doors into
+      it can carry and that compartment''s whole load): horizontal exits aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 46
+      - 49
+      quote: 1026.4 Refuge area. The refuge area of a horizontal exit shall be a space occupied by the same tenant or a public
+        area and each such refuge area shall be adequate to accommodate the original occupant load of the refuge area plus
+        the occupant load anticipated from the adjoining compartment. The anticipated occupant load from the adjoining compartment
+        shall be based on the capacity of the horizontal exit doors entering the refuge area or the total occupant load of
+        the adjoining compartment, whichever is less.
+    piece_sha256: 5258cc33f9fdc2c8ede4c9252e128f4b7d5e117f8b868f438e7e0b9192d2e462
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1026.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A refuge area''s capacity is worked out at 3 square feet of net floor area per occupant it must hold; where the
+      horizontal exit also forms a smoke compartment, Groups I-1, I-2 and I-3 and ambulatory care facilities meet 407.5.3,
+      408.6.2, 420.6.1 and 422.3.2 as they apply: refuge areas aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 50
+      - 53
+      quote: 1026.4.1 Capacity. The capacity of the refuge area shall be computed based on a net floor area allowance of 3
+        square feet (0.2787 m[fn2]) for each occupant to be accommodated therein. Where the horizontal exit also forms a smoke
+        compartment, the capacity of the refuge area for Group I-1, I-2 and I-3 occupancies and ambulatory care facilities
+        shall comply with Sections 407.5.3, 408.6.2, 420.6.1 and 422.3.2 as applicable.
+    piece_sha256: f7e84272a9b12addac504c0effe8a7da242f243bea5606c3a9354ad43493f068
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1026.4.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'The refuge area a horizontal exit leads into has exits enough for its own occupants (not counting those entering
+      through horizontal exits), at least one leading directly outside or to an interior exit stairway or ramp; but the adjoining
+      compartment needs no stairway or door directly outside where the refuge area has them and no one must go back through
+      the compartment they left: horizontal exits aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 350
+      lines:
+      - 54
+      - 57
+      quote: 1026.4.2 Number of exits. The refuge area into which a horizontal exit leads shall be provided with exits adequate
+        to meet the occupant requirements of this chapter, but not including the added occupant load imposed by persons entering
+        the refuge area through horizontal exits from other areas. Not less than one refuge area exit shall lead directly
+        to the exterior or to an interior exit stairway or ramp.
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 3
+      - 5
+      quote: 'Exception: The adjoining compartment shall not be required to have a stairway or door leading directly outside,
+        provided that the refuge area into which a horizontal exit leads has stairways or doors leading directly outside and
+        are so arranged that egress shall not require the occupants to return through the compartment from which egress originates.'
+    piece_sha256: 122b201fe6b63a9a0302722958894e4add8c49d04a586a3485797d7abbd77888
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1026.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren''t
+      in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 6
+      - 6
+      quote: 1026.5 Standpipes. Standpipes and standpipe hose connections shall be provided where required by Sections 905.3
+        and 905.4.
+    piece_sha256: ab6f3a09e59dd1de0824d298b4edda84837a81886e0ea4c82ad09962ffa4a18e
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1027':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 7
+      - 7
+      quote: SECTION 1027—EXTERIOR EXIT STAIRWAYS AND RAMPS
+    piece_sha256: 64e55e4bff348b58f4005239e7814e2d7c162196ed22e94e7edec7e99b6e75f4
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1027.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Scope: exterior exit stairways and ramps serving as an exit component comply with 1027; quoted by 1027.2''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 8
+      - 9
+      quote: 1027.1 General. Exterior exit stairways and ramps serving as an exit component in a means of egress system shall
+        comply with the requirements of this section.
+    piece_sha256: 153ffbc7f5157331197f030916f081b800af0f039b9dd7d900f37431fc14d18e
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1027.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'Exterior exit stairways and ramps serving as an exit component meet 1027 (1027.1); an exterior exit stairway
+      is not an element of a required means of egress in Group I-2, and outside Group I-2 no exterior exit stairway or ramp
+      is one in a building more than six stories above grade plane or a high-rise building: which stairways are exterior exit
+      stairways, and whether the building is a high-rise, aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 10
+      - 12
+      quote: 1027.2 Use in a means of egress. Exterior exit stairways shall not be used as an element of a required means
+        of egress for Group I-2 occupancies. For occupancies in other than Group I-2, exterior exit stairways and ramps shall
+        not be used as an element of a required means of egress for buildings exceeding six stories above grade plane or that
+        are high-rise buildings.
+    piece_sha256: d0f14ef25d6b5c7c58b40b08a1c4f19cc90694462a1f376ad4724e116bf49d86
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1027.3':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exterior exit stairway or ramp serving as an element of a required means of egress is open on at least one
+      side but for required structural columns, beams, handrails and guards, the open side having at least 35 square feet
+      of open area at each floor level and intermediate landing, at least 42 inches above that floor or landing: exterior
+      stairways aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 13
+      - 16
+      quote: 1027.3 Open side. Exterior exit stairways and ramps serving as an element of a required means of egress shall
+        be open on not less than one side, except for required structural columns, beams, handrails and guards. An open side
+        shall have not less than 35 square feet (3.3 m[fn2]) of aggregate open area adjacent to each floor level and the level
+        of each intermediate landing. The required open area shall be located not less than 42 inches (1067 mm) above the
+        adjacent floor or landing level.
+    piece_sha256: 119d8c7b3ac5f8da70dd17fac1c2c2631821ce6d2fd54b4bfd6575519ac5ba03
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1027.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'The open areas beside an exterior exit stairway or ramp are yards, courts or public ways; its other sides may
+      be enclosed by the building''s exterior walls: exterior stairways and what they open onto aren''t in the model, so a
+      person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 17
+      - 18
+      quote: 1027.4 Side yards. The open areas adjoining exterior exit stairways or ramps shall be either yards, courts or
+        public ways; the remain- ing sides are permitted to be enclosed by the exterior walls of the building.
+    piece_sha256: 80959ad541ccc6215f0425dcc1464a5cedd57dffb4090b2ef109de6ec0c45978
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1027.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exterior exit stairway or ramp, landings included, has a fire separation distance of at least 10 feet, measured
+      at right angles from its exterior edge, to adjacent lot lines, to other portions of the building (treated as separate
+      buildings) and to other buildings on the same lot unless their exterior walls and openings are protected per 705; but
+      at least 5 feet for one serving individual dwelling units of Group R-3: exterior stairways and their distances aren''t
+      in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 19
+      - 27
+      quote: '1027.5 Location. Exterior exit stairways and ramps shall have a minimum fire separation distance of 10 feet
+        (3048 mm) measured at right angles from the exterior edge of the stairway or ramps, including landings, to: 1. Adjacent
+        lot lines. 2. Other portions of the building. 3. Other buildings on the same lot unless the adjacent building exterior
+        walls and openings are protected in accordance with Section 705 based on fire separation distance. For the purposes
+        of this section, other portions of the building shall be treated as separate buildings. Exception: Exterior exit stairways
+        and ramps serving individual dwelling units of Group R-3 shall have a minimum fire separation distance of 5 feet (1525
+        mm).'
+    piece_sha256: 33d23c90ad50fdaf488bc7a61319324fa67cd5b7c261f04861ca0fb41321dc77
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1027.6':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exterior exit stairway or ramp is separated from the interior as 1023.2 requires, with openings only those
+      needed for egress from normally occupied spaces, and the exterior wall rated per 1023.7 where other parts of the building
+      expose the plane of its edge at an angle under 180 degrees; but no separation is needed for occupancies other than Group
+      R-1 or R-2 in a building of at most two stories above grade plane whose level of exit discharge is the first story above
+      grade plane; nor where it is served by an exterior ramp or balcony connecting two remote exterior exit stairways or
+      other approved exits, its perimeter at least 50 percent open (openings at least half the enclosing wall''s height, their
+      tops at least 7 feet above the balcony); nor from an open-ended corridor where the building is sprinklered throughout
+      per 903.3.1.1 or 903.3.1.2, the corridors meet 1020 and connect at each end to an exterior exit stairway or ramp meeting
+      1027, the walls and openings beside it meet 1023.7, and each change of direction over 45 degrees has a clear opening
+      of at least 35 square feet or an exterior stairway or ramp; nor in Group R-3 of at most four stories where it serves
+      individual dwelling units and discharges directly to grade: exterior stairways, their separation and walls aren''t in
+      the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 28
+      - 53
+      quote: '1027.6 Exterior exit stairway and ramp protection. Exterior exit stairways and ramps shall be separated from
+        the interior of the building as required in Section 1023.2. Openings shall be limited to those necessary for egress
+        from normally occupied spaces. Where a vertical plane projecting from the edge of an exterior exit stairway or ramp
+        and landings is exposed by other parts of the building at an angle of less than 180 degrees (3.14 rad), the exterior
+        wall shall be rated in accordance with Section 1023.7. Exceptions: 1. Separation from the interior of the building
+        is not required for occupancies, other than those in Group R-1 or R-2, in build- ings that are not more than two stories
+        above grade plane where a level of exit discharge serving such occupancies is the first story above grade plane. 2.
+        Separation from the interior of the building is not required where the exterior exit stairway or ramp is served by
+        an exte- rior exit ramp or balcony that connects two remote exterior exit stairways or other approved exits with a
+        perimeter that is not less than 50 percent open. To be considered open, the opening shall be not less than 50 percent
+        of the height of the enclosing wall, with the top of the openings not less than 7 feet (2134 mm) above the top of
+        the balcony. 3. Separation from the open-ended corridor of the building is not required for exterior exit stairways
+        or ramps, provided that Items 3.1 through 3.5 are met: 3.1. The building, including open-ended corridors, and stairways
+        and ramps, shall be equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or
+        903.3.1.2. 3.2. The open-ended corridors comply with Section 1020. 3.3. The open-ended corridors are connected on
+        each end to an exterior exit stairway or ramp complying with Section 1027. 3.4. The exterior walls and openings adjacent
+        to the exterior exit stairway or ramp comply with Section 1023.7. 3.5. At any location in an open-ended corridor where
+        a change of direction exceeding 45 degrees (0.79 rad) occurs, a clear opening of not less than 35 square feet (3.3
+        m[fn2]) or an exterior stairway or ramp shall be provided. Where clear openings are provided, they shall be located
+        so as to minimize the accumulation of smoke or toxic gases. 4. In Group R-3 occupancies not more than four stories
+        in height, exterior exit stairways and ramps serving individual dwell- ing units are not required to be separated
+        from the interior of the building where the exterior exit stairway or ramp discharges directly to grade.'
+    piece_sha256: c840cd469b44342fc66b4338331e9242fa0c7b56885b2aae2aa1a3293fa3246f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1028':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 54
+      - 54
+      quote: SECTION 1028—EXIT DISCHARGE
+    piece_sha256: d1da08766861cf8abeeb8abc71f26a666b4162f4d9ede71485e6fc641a32c2c7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1028.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Scope: the exit discharge complies with 1028 and 1029 and 1003 to 1015 as they apply; quoted by 1028.2''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 351
+      lines:
+      - 55
+      - 56
+      quote: 1028.1 General. The exit discharge shall comply with Sections 1028 and 1029 and the applicable requirements of
+        Sections 1003 through 1015.
+    piece_sha256: 94cc8b92e1ffd2766ad8885fa2c5019513702e911f52fb004e0578d76174fa08
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1028.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'The exit discharge meets 1028 and 1029 and 1003 to 1015 as they apply (1028.1). Exits discharge directly to the
+      exterior, at grade or with a direct path of egress travel to grade, never reentering a building; but at most 50 percent
+      of the number and the minimum width or required capacity of interior exit stairways and ramps may egress through areas
+      on the level of exit discharge (a free and unobstructed path to a readily visible exterior exit door, the whole level
+      separated from areas below as the enclosure is, the egress path sprinklered and the portions with access to it sprinklered
+      per 903.3.1.1 or 903.3.1.2 or separated from it, and an exit access stairway or ramp ending at least 30 feet, or a quarter
+      of the building''s greatest diagonal if less, from the exit stairway''s discharge door), or through a vestibule (separated
+      from areas below as the enclosure is, at most 10 feet deep and 30 feet long, separated from the rest of the level by
+      a fire partition per 708, used only for egress and exiting directly outside), the two together at most 50 percent of
+      the required exits; and horizontal exits per 1026 need not discharge directly outside: where each exit discharges isn''t
+      worked out, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 352
+      lines:
+      - 3
+      - 37
+      quote: '1028.2 Exit discharge. Exits shall discharge directly to the exterior of the building. The exit discharge shall
+        be at grade or shall provide a direct path of egress travel to grade. The exit discharge shall not reenter a building.
+        The combined use of Exceptions 1 and 2 shall not exceed 50 percent of the number and minimum width or required capacity
+        of the required exits. Exceptions: 1. Not more than 50 percent of the number and minimum width or required capacity
+        of interior exit stairways and ramps is permitted to egress through areas, including atriums, on the level of discharge
+        provided that all of the following condi- tions are met: 1.1. Discharge of interior exit stairways and ramps shall
+        be provided with a free and unobstructed path of travel to an exterior exit door and such exit is readily visible
+        and identifiable from the point of termination of the enclosure. 1.2. The entire area of the level of exit discharge
+        is separated from areas below by construction conforming to the fire-resistance rating for the enclosure. 1.3. The
+        egress path from the interior exit stairway and ramp on the level of exit discharge is protected throughout by an
+        approved automatic sprinkler system. Portions of the level of exit discharge with access to the egress path shall
+        be either equipped throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1 or
+        903.3.1.2, or separated from the egress path in accordance with the requirements for the enclosure of interior exit
+        stairways or ramps. 1.4. Where a required interior exit stairway or ramp and an exit access stairway or ramp serve
+        the same floor level and terminate at the same level of exit discharge, the termination of the exit access stairway
+        or ramp and the exit discharge door of the interior exit stairway or ramp shall be separated by a distance of not
+        less than 30 feet (9144 mm) or not less than one-fourth the length of the maximum overall diagonal dimension of the
+        building, which- ever is less. The distance shall be measured in a straight line between the exit discharge door from
+        the interior exit stairway or ramp and the last tread of the exit access stairway or termination of slope of the exit
+        access ramp. 2. Not more than 50 percent of the number and minimum width or required capacity of the interior exit
+        stairways and ramps is permitted to egress through a vestibule provided that all of the following conditions are met:
+        2.1. The entire area of the vestibule is separated from areas below by construction conforming to the fire-resistance
+        rating of the interior exit stairway or ramp enclosure. 2.2. The depth from the exterior of the building is not greater
+        than 10 feet (3048 mm) and the length is not greater than 30 feet (9144 mm). 2.3. The area is separated from the remainder
+        of the level of exit discharge by a fire partition constructed in accor- dance with Section 708. Exception: The maximum
+        transmitted temperature rise is not required. 2.4. The area is used only for means of egress and exits directly to
+        the outside. 3. Horizontal exits complying with Section 1026 shall not be required to discharge directly to the exterior
+        of the building.'
+    piece_sha256: 738170b2f3137ea8eee5733036dba6af7af58e64185708156888a6acdfb34e5b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1028.3':
+    label: flag
+    topic: means_of_egress
+    reason: 'The exit discharge''s minimum width or required capacity is at least that of the exits it serves: the exit discharge
+      outside the building isn''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 352
+      lines:
+      - 38
+      - 39
+      quote: 1028.3 Exit discharge width or capacity. The minimum width or required capacity of the exit discharge shall be
+        not less than the minimum width or required capacity of the exits being served.
+    piece_sha256: 2a5a2d6c45ed97a5d3c44072f517df282c796d7ac9dc0a5dc85aabd1352175c1
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1028.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'Exit discharge components are open enough to the exterior to keep smoke and toxic gases from building up: the
+      exit discharge isn''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 352
+      lines:
+      - 40
+      - 41
+      quote: 1028.4 Exit discharge components. Exit discharge components shall be sufficiently open to the exterior so as
+        to minimize the accu- mulation of smoke and toxic gases.
+    piece_sha256: 4062a29eb092ae3ebce9ed304fa7e2f37881de33708eae8f3a6b018ae561cbc2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1028.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'The exit discharge gives direct and unobstructed access to a public way; where that can''t be provided, a safe
+      dispersal area of at least 5 square feet per person, on the same lot at least 50 feet from the building, permanently
+      kept and identified as one, with a safe and unobstructed path from the building: the site outside the building isn''t
+      in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 352
+      lines:
+      - 42
+      - 48
+      quote: '1028.5 Access to a public way. The exit discharge shall provide a direct and unobstructed access to a public
+        way. Exception: Where access to a public way cannot be provided, a safe dispersal area shall be provided where all
+        of the following are met: 1. The area shall be of a size to accommodate not less than 5 square feet (0.46 m[fn2])
+        for each person. 2. The area shall be located on the same lot not less than 50 feet (15 240 mm) away from the building
+        requiring egress. 3. The area shall be permanently maintained and identified as a safe dispersal area. 4. The area
+        shall be provided with a safe and unobstructed path of travel from the building.'
+    piece_sha256: cf127ab6ef9b9b2771b27c901f2cfe63e06edecca28023a623b9a8d3ad15acba
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1029':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 352
+      lines:
+      - 49
+      - 49
+      quote: SECTION 1029—EGRESS COURTS
+    piece_sha256: b14b860f75f4f6af2fb552c7bc3a7e5622a1175083bdb27999d9050b9cc0d905
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1029.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Scope: egress courts serving as an exit discharge component comply with 1029; quoted by 1029.2''s flag.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 352
+      lines:
+      - 50
+      - 51
+      quote: 1029.1 General. Egress courts serving as an exit discharge component in the means of egress system shall comply
+        with the require- ments in this section.
+    piece_sha256: 8460fc94aa2babafb198c427df1a0895e594839f831285b7b4c326abe22d0983
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1029.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'An egress court serving as an exit discharge component meets 1029 (1029.1): its capacity is as 1005.1 requires
+      and its width at least 44 inches, or 36 inches serving Groups R-3 and U, and never less than the required capacity,
+      the width and capacity unobstructed to a height of 7 feet but for encroachments complying with 1005.7: egress courts
+      aren''t in the model, so a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 352
+      lines:
+      - 52
+      - 56
+      quote: '1029.2 Width or capacity. The required capacity of egress courts shall be determined as specified in Section
+        1005.1, but the mini- mum width shall be not less than 44 inches (1118 mm), except as specified herein. Egress courts
+        serving Group R-3 and U occupancies shall be not less than 36 inches (914 mm) in width. The required capacity and
+        width of egress courts shall be unobstructed to a height of 7 feet (2134 mm). The width of the egress court shall
+        be not less than the required capacity. Exception: Encroachments complying with Section 1005.7.'
+    piece_sha256: 83988db5fb6f8bafc72d1721f80df39a93e6ea8c21d2e65684f1db0160e8402f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1029.3':
+    label: flag
+    topic: means_of_egress
+    reason: 'Where an egress court is less than 10 feet wide, its walls are rated at least 1 hour for 10 feet above its floor,
+      openings in them protected at least 3/4 hour; but not for an egress court serving fewer than 10 occupants, one serving
+      Group R-3, or one at grade giving direct and unobstructed access to a public way by two or more independent paths, each
+      keeping the required width or capacity, whichever is greater: egress courts and their walls aren''t in the model, so
+      a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 352
+      lines:
+      - 57
+      - 58
+      quote: 1029.3 Construction and openings. Where an egress court serving a building or portion thereof is less than 10
+        feet (3048 mm) in width, the egress court walls shall have not less than 1-hour fire-resistance-rated construction
+        for a distance of 10 feet (3048 mm)
+    - file: gov.ny.building.2025.pdf
+      page: 353
+      lines:
+      - 3
+      - 10
+      quote: 'above the floor of the egress court. Openings within such walls shall be protected by opening protectives having
+        a fire protection rating of not less than 3/4 hour. Exceptions: 1. Egress courts serving an occupant load of less
+        than 10. 2. Egress courts serving Group R-3. 3. Egress courts, located at grade, that provide direct and unobstructed
+        access to a public way through two or more inde- pendent paths. The minimum width provided along each path shall be
+        based on the required width or the required capacity, whichever is greater, and shall be maintained along each path.'
+    piece_sha256: 53c02df6f13de1b16af50aeb72d0289cbee6e17a9541304b29a7666c4ef16382
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 9g.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1030.7':
