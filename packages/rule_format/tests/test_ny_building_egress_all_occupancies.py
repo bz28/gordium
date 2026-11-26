@@ -934,7 +934,7 @@ def test_more_than_one_reads_the_same_comparison_in_every_piece():
     capped = {("1012.6.3", "not be required to be more than 48 inch"): ">="}
     for pid, e in pieces.items():
         for n, comp in zip(e["second_reading_numbers"], e["second_reading_comparisons"]):
-            if re.search(r"not.*more than", str(n)):
+            if re.search(r"\bnot\b.*\bmore than\b", str(n)):
                 assert comp == capped.get((pid, n), "<="), (pid, n, comp)
                 if (pid, n) in capped:
                     assert any(f"'{n}' ({comp})" in f for f in e.get("flags") or []), (pid, n)
@@ -1273,8 +1273,25 @@ def test_each_section_group_9_flag_names_what_it_points_to_that_isnt_brought_in(
         named |= {"ICC A117.1"} if "ICC A117.1" in quotes else set()
         # review round 4: in a sentence of the notes saying it isn't brought in, the reference whole; a section is
         # brought in only where its own id is a piece (1030 isn't, though 1030.7 and 1030.8 are)
-        said = [s for s in re.split(r"(?<=\.) ", r.get("notes") or "") if "brought in" in s]
+        said = [s for s in re.split(r"(?<=\.) ", r.get("notes") or "") if re.search(r"(?:n't|not) brought in", s)]
         for ref in sorted(named):
             if ref in brought:
                 continue
             assert any(re.search(rf"(?<![\d.]){re.escape(ref)}(?![\d]|\.\d)", s) for s in said), (r["id"], ref)
+
+
+def test_no_source_or_law_file_holds_a_control_character():
+    """Review round 5 of section group 9a (P2): a fix script wrote a regex's word boundaries through an ordinary
+    string, so this file held four backspace characters where they belonged and the check they guarded never ran. No
+    Python file under packages, apps or tests, and no law file under regulations, holds a control character but tab,
+    newline and carriage return."""
+    control = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+    bad = []
+    for top, globs in (("packages", ("*.py",)), ("apps", ("*.py",)), ("tests", ("*.py",)),
+                       ("regulations", ("*.yaml", "*.md"))):
+        for g in globs:
+            for f in (REPO / top).rglob(g):
+                if control.search(f.read_text(encoding="utf-8", errors="replace")):
+                    bad.append(str(f.relative_to(REPO)))
+    assert not bad, bad
+
