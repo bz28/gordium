@@ -206,7 +206,7 @@ public static class MarkingList
         // (objects.left_out, with the lot the check is given), never guessed here (review round 2), so the list asks for
         // each and says that one off the lot changes nothing
         var slabs = SiteSlabs.Find(model).Values.ToList();
-        // a level is listed when it has an enclosed area with no Room (whatever its mark), or its mark is set
+        // a level is listed when it has an enclosed area with no Room (whatever its marks), or either of its marks is set
         var unmarkedAreas = InteriorReader.UnknownAreas(model, levelMarks: false);
         var rows = MarkReading.InDesign(model)
             .Select(e => MarkReading.KindOf(e) == MarkedKind.Level ? LevelRow(e, unmarkedAreas) : Row(e)).OfType<MarkingRow>()
