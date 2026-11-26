@@ -28,6 +28,10 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md, step 3):
   exits only through another story (a unit on two stories) or not at all: not measured.
 - Not measured either where the story's routes aren't read (a room or door not read, an enclosed space with no room
   drawn in it: it may be a unit), or a room has no `use` (it may be a corridor).
+- A unit marked shared space would drop out of the count: a room taken as an exit that states a function (an exit has
+  none), or a corridor or lobby stating residential that opens into no room of a dwelling unit (only into halls,
+  exits, the outside, or a toilet or closet of its own), leaves it not measured. One so marked stating no function
+  can't be told from a real corridor or exit: the words beside the count name it.
 Never a guess: a count too low could pass a one-exit story Table 1006.3.4(1) allows only up to 4 units.
 """
 
@@ -56,7 +60,8 @@ QUOTE_1016_2_1 = ("each tenant space, dwelling unit and sleeping unit shall be p
 RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with a residential room and one way out to the "
             "corridors, lobbies, exits or outside is one dwelling unit. It holds only if every room shared between "
             "dwelling units is marked a corridor or lobby (a shared vestibule or landing marked residential would join "
-            "two units into one) and BCNYS 1016.2.1 (p.341) is met: \"" + QUOTE_1016_2_1 + "\"")
+            "two units into one), no room of a dwelling unit is marked a corridor, lobby or exit (a unit so marked "
+            "would be left out of the count), and BCNYS 1016.2.1 (p.341) is met: \"" + QUOTE_1016_2_1 + "\"")
 
 
 def units_on(story, items: dict, is_exit, stair_in, links_read) -> int:
@@ -75,13 +80,16 @@ def units_on(story, items: dict, is_exit, stair_in, links_read) -> int:
     grouped = set().union(*found) if found else set()
     shared = (set(story.rooms) - grouped) | {OUTSIDE}    # the corridors, lobbies and exits, and the outside
     hall_rooms = set().union(*[h for h, _ in halls]) if halls else set()
+    unit_rooms = {r for g in found for r in g          # the rooms of groups holding a lived-in residential room
+                  if any(story.rooms[x].use not in NOT_LIVED_IN and (items.get(x) or {}).get("function") == RESIDENTIAL
+                         for x in g)}
     links = [set(d.sides) for d in story.doors.values()] + [{a, b} for a, b, _ in story.passages]
     for rid in sorted(set(story.rooms) - grouped):       # a shared room that may be a unit marked wrong would drop it
         room, function = story.rooms[rid], (items.get(rid) or {}).get("function")
         if rid not in hall_rooms and function is not None:   # an exit stating a function (a unit's door marked an exit)
             raise Stop("units_exit_function", name=room.name)
         if rid in hall_rooms and function == RESIDENTIAL and \
-                not any(rid in sides and sides & grouped for sides in links):   # a "hall" opening into no space
+                not any(rid in sides and sides & unit_rooms for sides in links):   # a "hall" opening into no unit
             raise Stop("units_hall_residential", name=room.name)
     count = 0
     for g in found:

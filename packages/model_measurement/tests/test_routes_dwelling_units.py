@@ -198,6 +198,7 @@ def test_a_shared_vestibule_not_marked_a_corridor_is_never_counted_as_one_unit()
     got = count(desc)
     assert isinstance(got, Stop) and got.key == "units_function_unknown", got
     assert "shared between dwelling units is marked a corridor or lobby" in RESTS_ON
+    assert "no room of a dwelling unit is marked a corridor, lobby or exit" in RESTS_ON   # review round 9
 
 
 def test_the_listed_other_uses_are_table_1004_5_but_residential_and_sleeping():
@@ -321,3 +322,23 @@ def test_a_unit_marked_an_exit_or_a_hall_never_drops_out_of_the_count(how):
     got = count(desc)
     key = "units_exit_function" if how == "exit" else "units_hall_residential"
     assert isinstance(got, Stop) and got.key == key, (how, got)
+
+
+@pytest.mark.parametrize("hall, back", [("corridor", "toilet"), ("lobby", "closet"), ("corridor", "toilet_res")])
+def test_a_unit_marked_a_hall_with_its_own_toilet_never_drops_out_of_the_count(hall, back):
+    """Review round 9 (PR 3): a two-room unit marked a hall whose back room is a toilet or closet: the toilet is a group
+    of its own (nothing lived in), so the "hall" opened into a space and passed round 8's check; the unit dropped out
+    (3 counted 2). A residential hall must open into a room of a dwelling unit; a residential corridor serving units
+    beside a public toilet still counts."""
+    desc = layout([("residential", 1, 1), ("residential", 1, 1), ("residential", 2, 1)], (False, False))
+    s2 = next(r for r in desc["rooms"] if r["id"] == "s2")
+    b2 = next(r for r in desc["rooms"] if r["id"] == "b2")
+    s2["use"] = hall
+    b2["use"] = back.split("_")[0]
+    if not back.endswith("_res"):
+        b2.pop("function")
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_hall_residential", (hall, back, got)
+    control = layout([("residential", 1, 1), ("residential", 1, 1), ("business", 1, 1)], (False, False))
+    next(r for r in control["rooms"] if r["id"] == "c")["function"] = "residential"
+    assert count(control) == 2
