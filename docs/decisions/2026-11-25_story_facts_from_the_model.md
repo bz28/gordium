@@ -108,3 +108,7 @@ One more wrong "no": a stair with its top nosings in no room (a stairwell left o
 ## Review round 9 of step 2 (2026-11-26)
 
 One more wrong "no": a stair wholly in a room drawn with no door or opening (the unit's own stairwell with its opening left out) counted as elsewhere. Now only rooms joined to something place a stair outside a space, and a nosing that isn't two ends makes its stair one that may be anywhere. One test.
+
+## Review round 10 of step 2 (2026-11-26)
+
+Round 9's "joined to something" was too weak: a stair in rooms joined only to each other, or only to the outside, still counted as elsewhere. As a class: a stair is placed outside a space only when every nosing stands in the shared circulation (a corridor, lobby or exit, or a room of a space opening into one). One test, three cases.
