@@ -155,6 +155,7 @@ occupancy_group:
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1010_1_1_door_width
+  - general.bc_1010_1_2_1_direction_of_swing
   - general.bc_1016_2_intervening_spaces_other_groups
   - general.bc_1016_2_other_occupancies
   - general.bc_1017_2_2_f1_s1_increase
@@ -342,6 +343,7 @@ occupied_outdoor_areas:
   unit: yes_no
   needed_by:
   - general.bc_1004_7_outdoor_areas
+  - general.bc_1010_1_2_1_direction_of_swing
 ambulatory_care_facility:
   meaning: 'The building is or holds an ambulatory care facility (2025 BCNYS 202, Section 422; Group B, 304.1), as the architect
     states it: Table 1020.3 asks 72 inches of its corridors serving stretcher traffic'

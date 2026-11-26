@@ -282,6 +282,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:balanced_door:
+    label: reference
+    topic: definitions
+    reason: 'Defines BALANCED DOOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 34
+      - 35
+      quote: '[BE] BALANCED DOOR. A door equipped with double-pivoted hardware so designed as to cause a semicounterbalanced
+        swing action when opening.'
+    piece_sha256: 68fe944b9c26a78653d6c8aa069f6404dccb0592462e13a0f4aeca6934e8565a
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:basement:
     label: reference
     topic: definitions
@@ -611,6 +627,66 @@ labels:
         common wall'
     piece_sha256: 02dac78ea38bd502c7ab3345cd9a66aae210c77018a7754d3b77e1303816f038
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:door_balanced:
+    label: reference
+    topic: definitions
+    reason: 'Defines DOOR, BALANCED, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 29
+      - 29
+      quote: DOOR, BALANCED. See “Balanced door.”
+    piece_sha256: 4108a506e3d397df95d44ff45929bdfab9463f4ac9d9ade452ff7e9e8b9412db
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:door_low_energy_power_operated:
+    label: reference
+    topic: definitions
+    reason: 'Defines DOOR, LOW-ENERGY POWER-OPERATED, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 30
+      - 30
+      quote: DOOR, LOW-ENERGY POWER-OPERATED. See “Low-energy power-operated door.”
+    piece_sha256: 0f70db8bcf022e00c88ae955c9b09a6b8933d0cb565865b76b7f1a1222410445
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:door_power_assisted:
+    label: reference
+    topic: definitions
+    reason: 'Defines DOOR, POWER-ASSISTED, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 31
+      - 31
+      quote: DOOR, POWER-ASSISTED. See “Power-assisted door.”
+    piece_sha256: ebf5a73be8ce4d74b470a5a9b3fb3eb80396c224c3097dc3d3b9d684b467f0e0
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:door_power_operated:
+    label: reference
+    topic: definitions
+    reason: 'Defines DOOR, POWER-OPERATED, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 32
+      - 32
+      quote: DOOR, POWER-OPERATED. See “Power-operated door.”
+    piece_sha256: be74908d3fa79d439730f9fceca4e1deb49d0153e11559c3538ff7add5471d7b
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:doorway_exit_access:
@@ -1466,6 +1542,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:low_energy_power_operated_door:
+    label: reference
+    topic: definitions
+    reason: 'Defines LOW-ENERGY POWER-OPERATED DOOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 53
+      - 55
+      quote: '[BE] LOW-ENERGY POWER-OPERATED DOOR. A swinging, sliding or folding door that opens automatically upon an action
+        by a pedestrian such as pressing a push plate or waving a hand in front of a sensor. The door closes automatically,
+        and operates with decreased forces and decreased speeds (see “Power-assisted door” and “Power-operated door”).'
+    piece_sha256: 3b0151e86c26e482f1942593116a7541d772a1d9dabff9e58dc64da00d16fab1
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:masonry:
     label: reference
     topic: definitions
@@ -1829,6 +1922,59 @@ labels:
         State”, published by the International Code Council, Inc. (publication date July 2025).'
     piece_sha256: 1d1e666b5250e6f76b3e98251099e4533448cbce3ff3152a850f71c500a95a3e
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:power_assisted_door:
+    label: reference
+    topic: definitions
+    reason: 'Defines POWER-ASSISTED DOOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 57
+      lines:
+      - 44
+      - 46
+      quote: '[BE] POWER-ASSISTED DOOR. Swinging door which opens by reduced pushing or pulling force on the door-operating
+        hardware. The door closes automatically after the pushing or pulling force is released and functions with decreased
+        forces. See “Low-energy power- operated door” and “Power-operated door.”'
+    piece_sha256: 5cb92c6cee4dcf43d2605d62bc190eb2a2d33f0059a2ee754a88090000f59c98
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:power_operated_door:
+    label: reference
+    topic: definitions
+    reason: 'Defines POWER-OPERATED DOOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 57
+      lines:
+      - 47
+      - 49
+      quote: '[BE] POWER-OPERATED DOOR. Swinging, sliding, or folding door which opens automatically when approached by a pedestrian
+        or opens automatically upon an action by a pedestrian. The door closes automatically and includes provisions such as
+        presence sensors to prevent entrapment. See “Low-energy power-operated door” and “Power-assisted door.”'
+    piece_sha256: 63fb51b248fb75d3b544e9cd0969d0ef0f33adf3244323ef543f560b8f9de705
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:private_garage:
+    label: reference
+    topic: definitions
+    reason: 'Defines PRIVATE GARAGE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 8
+      - 11
+      quote: '[BG] PRIVATE GARAGE. A building or portion of a building in which motor vehicles used by the owner or tenants
+        of the building or buildings on the premises are stored or kept, without provisions for repairing or servicing such
+        vehicles for profit. [NY] PROPERTY MAINTENANCE CODE OF NEW YORK STATE. The 2025 edition of the publication entitled
+        “Property Maintenance Code of New York State,” published by the International Code Council, Inc. (publication date July
+        2025).'
+    piece_sha256: e66fa2394dfd7630998f331014f20a8c06eaac52637121b02e6614914e32becf
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:public_way:
@@ -3808,6 +3954,49 @@ labels:
         opening height not lower than 78 inches (1980 mm) above the floor.'
     piece_sha256: 510625f8fefc1d31569155bbb4d0b0fa8b26eedd717388b481591941632e1231
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Egress doors are side-hinged swinging, pivoted or balanced, with exceptions the model doesn''t tell apart (a power-operated
+      door in any group among them): a door of another kind, or whose kind isn''t stated, is a person''s check per door.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 323
+      lines:
+      - 11
+      - 23
+      quote: '1010.1.2 Egress door types. Egress doors shall be of the side-hinged swinging door, pivoted door, or balanced
+        door types. Exceptions: 1. Private garages, office areas, factory and storage areas with an occupant load of 10 or less.
+        2. Group I-3 occupancies used as a place of detention. 3. Critical or intensive care patient rooms within suites of
+        health care facilities. 4. Doors within or serving a single dwelling unit in Groups R-2 and R-3. 5. In other than Group
+        H occupancies, revolving doors complying with Section 1010.3.1. 6. In other than Group H occupancies, special purpose
+        horizontal sliding, accordion or folding door assemblies comply- ing with Section 1010.3.3. 7. Power-operated doors
+        in accordance with Section 1010.3.2. 8. Doors serving a bathroom within an individual dwelling unit or sleeping unit
+        in Group R-1. 9. In other than Group H occupancies, manually operated horizontal sliding doors are permitted in a means
+        of egress from spaces with an occupant load of 10 or less.'
+    piece_sha256: 9a0a566b14081a715d62a10d4761e167d0e53e9acf067b5017a4cf197ad635b3
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1010.1.2.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'A swinging door swings in the direction of egress travel where it serves a room or area of 50 or more occupants
+      or a Group H occupancy: checkable per door from the side it swings into, the direction the routes find and the occupant
+      loads.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 323
+      lines:
+      - 24
+      - 25
+      quote: 1010.1.2.1 Direction of swing. Side-hinged swinging doors, pivoted doors and balanced doors shall swing in the
+        direction of egress travel where serving a room or area containing an occupant load of 50 or more persons or a Group
+        H occupancy.
+    piece_sha256: a65bc3fae01ea8bd6d08c7d6f9bf8d8d33730adcf8232db5848f6f97772fc809
+    notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1016.2':
