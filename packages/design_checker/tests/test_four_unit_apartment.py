@@ -304,6 +304,27 @@ def test_group_3s_marks_stated_move_only_their_own_rows_and_never_to_a_pass(got,
         moved[("occupant_load_increased", True)] == {}
 
 
+def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
+    """The four Revit marks for groups 4 and 5's building facts on the apartment: Gordium: Other levels reach corridors
+    No (its stairs are enclosed exits discharging outside) bounds each corridor's load by its story's, so the corridor
+    width and capacity rows pass at the whole story's load (two readings, none and the story's: a pass only if the
+    story's passes); Yes leaves them by hand; the other three, either way, move nothing here (Group R-2, no sprinkler
+    system, no ambulatory care, the corridors already within Table 1020.3's widths)."""
+    moved = {}
+    for fact, value in (("other_level_egress_into_corridors", False), ("other_level_egress_into_corridors", True),
+                        ("ambulatory_care_facility", False), ("corridors_within_dwelling_units", False),
+                        ("corridors_within_dwelling_units", True), ("emergency_voice_alarm_system", False),
+                        ("emergency_voice_alarm_system", True)):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], fact: value}
+        now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
+        moved[(fact, value)] = {k: (got["results"][k], now[k]) for k in got["results"] if got["results"][k] != now[k]}
+    assert moved.pop(("other_level_egress_into_corridors", False)) == {
+        "general.bc_1020_3_corridor_capacity": ("needs_review", "pass"),
+        "general.bc_table_1020_3_corridor_width": ("needs_review", "pass")}
+    assert all(m == {} for m in moved.values()), moved
+
+
 # ---- section group 6a (2026-11-25): door size, 1010.1.1, from each door's maker's stated clear opening ----------------
 
 WIDTH, HEIGHT = "general.bc_1010_1_1_door_width", "general.bc_1010_1_1_door_height"

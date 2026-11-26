@@ -577,8 +577,11 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # Revit-fields work. Groups 2 and 3's facts have theirs (PR #194).
     # and this branch's own: corridors_within_dwelling_units (their marks follow in the Revit-fields work)
     # and this branch's own: emergency_voice_alarm_system (their marks follow in the Revit-fields work)
-    assert keys - set(revit) == {"ambulatory_care_facility", "corridors_within_dwelling_units", "emergency_voice_alarm_system", "other_level_egress_into_corridors"}
-    for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased"):
+    # (groups 4 and 5's four have theirs too, the Revit-fields PR for them: the set is empty)
+    assert keys - set(revit) == set()
+    for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",
+              "other_level_egress_into_corridors", "ambulatory_care_facility", "corridors_within_dwelling_units",
+              "emergency_voice_alarm_system"):
         # a fact a rule reads as a measure is answered by its field (field_of); occupant_load_increased is read by the
         # occupant loads themselves, not as a measure
         assert code_scope.field_of(k) == (f"building.{k}" if k in code_scope.DERIVED else None), k
@@ -637,6 +640,11 @@ def test_every_story_fact_a_story_exit_rule_reads_and_nothing_measures_is_a_ques
         assert "story above grade plane" in each_part.MEASURE_NAMES[m] and "(whether it is the" in each_part.MEASURE_NAMES[m]
 
 
+def test_the_voice_alarm_ask_is_the_whole_buildings():
+    # groups 4 and 5's Revit fields, review round 1: the lower capacity factors are for buildings equipped throughout
+    assert "whole building" in ui_data.FIELD_HEADLINES["building.emergency_voice_alarm_system"]
+
+
 def test_the_r2_sleeping_units_ask_never_reads_as_either_or_for_a_mixed_building():
     # group 2 facts' review rounds 1 and 2: one building-wide fact, so a building with both kinds leaves it blank (both
     # tables' rows need review); the words the architect reads say so, never "sleeping units (not dwelling units)"
@@ -653,3 +661,25 @@ def test_the_plan_never_says_a_marked_facts_revit_mark_is_still_to_come():
         if re.search(r"Revit mark\S* (is|are) a follow-up|marks? join group", sentence):
             named = [k for k in code_scope.MARK if k in sentence]
             assert not named, (named, sentence[:200])
+
+
+def test_a_door_whose_leaves_arent_given_is_asked_for_by_the_field_its_type_mark_answers():
+    # the door-type mark (Revit's Gordium: Leaves, doors[].leaves): before it, "Mark the door leaves in the model", a
+    # mark Revit didn't have; now the ask names the field, so the host's card opens its mark
+    from model_measurement.routes.stops import STOPS
+    why = "door leaves: " + STOPS["door_leaves_not_given"].format(name="D01")
+    got = ui_data._from_cause({"kind": "mark", "key": "mark:means_of_egress_door:moe_door_leaves", "words": why,
+                               "measure": "moe_door_leaves"}, "means_of_egress_door")
+    assert (got["kind"], got["field"], got["key"]) == ("mark", "doors[].leaves", "field:doors[].leaves")
+    assert got["headline"] == "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)"
+    assert "no mark for it" not in STOPS["door_leaves_not_given"]
+
+
+def test_every_restatement_of_the_leaves_rule_carries_the_mullioned_pair():
+    # door leaves review round 3: the card headline and the check's reason restated the rule as "1, or 2 for a pair
+    # with no mullion", which read as 1 for a mullioned pair whose clear width is the wider leaf's (a false pass)
+    from model_measurement.routes.stops import STOPS
+    assert "narrower leaf" in ui_data.FIELD_HEADLINES["doors[].leaves"]
+    assert "narrower leaf" in STOPS["door_leaves_not_given"]
+    fmt = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
+    assert "narrower leaf" in next(line for line in fmt.splitlines() if line.startswith("| `leaves`"))

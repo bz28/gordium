@@ -161,8 +161,9 @@ STOPS = {
     "door_clear_not_read": "the door {name}'s clear opening isn't read: {reason}",
     "door_clear_disagree": "the door {name}'s {where} gives a clear {size} of {other} in and its maker's stated "
                            "clear opening {stated} in: which is the door's isn't clear",
-    "door_leaves_not_given": "the door {name} doesn't say how many leaves it has (one, or a pair with no mullion), and "
-                             "Gordium has no mark for it in the model yet",
+    "door_leaves_not_given": "the door {name} doesn't say how many leaves it has (one; or a pair with no mullion, or a "
+                             "mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door "
+                             "type's leaves mark)",
     "door_leaves_not_read": "the door {name} gives its leaves as {got}, not 1 or 2",
     "door_exit_kind_not_read": "the door {name} gives its kind of exit as {got}, not one Gordium reads",
     "door_sides_not_read": "the door {name}'s sides (the two rooms, or a room and outside, it joins) aren't read",
