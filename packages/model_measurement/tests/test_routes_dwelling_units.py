@@ -476,10 +476,9 @@ def test_a_shared_vestibule_marked_residential_no_longer_joins_two_units():
     _room(desc, "s0")["unit"], _room(desc, "s1")["unit"] = "1", "2"
     got = count(desc)
     assert isinstance(got, Stop) and got.key == "units_mark_left_out", got
-    _room(desc, "v")["use"] = "lobby"                     # a lobby still stating residential: a unit's room?
-    got = count(desc)
-    assert isinstance(got, Stop) and got.key == "units_mark_hall_function", got
-    _room(desc, "v").pop("function")                     # a shared lobby states no function: 2
+    _room(desc, "v")["use"] = "lobby"                     # a lobby stating residential, opening into both units
+    assert count(desc) == 2                              # (its occupant load needs that function): shared, 2
+    _room(desc, "v").pop("function")                     # stating none: a hall, 2
     assert count(desc) == 2
     story = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
     assert story["measures"][UNITS_FACT] == 2
@@ -510,7 +509,8 @@ def test_a_marked_unit_room_marked_a_hall_or_exit_still_counts(how):
 @pytest.mark.parametrize("mark, key", [("1A, 1B", "units_mark_several"), ("1A and 1B", "units_mark_several"),
                                        ("1A/1B", "units_mark_several"), (["1A"], "units_mark_unreadable"),
                                        (True, "units_mark_unreadable"), (1.5, "units_mark_unreadable"),
-                                       ("apt  1", "units_mark_alike"), ("APT 1", "units_mark_alike")])
+                                       ("apt  1", "units_mark_alike"), ("APT 1", "units_mark_alike"),
+                                       ("Apt1", "units_mark_alike")])    # (review round 4: spaces, not only case)
 def test_a_mark_naming_two_units_or_none_or_alike_names_is_not_measured(mark, key):
     """A room marked with two units, a mark that isn't a name, or two names differing only in capitals or spacing:
     the marks don't settle the count. A whole number is a name, and spacing at the ends is no new name (s1 and s2
@@ -551,11 +551,12 @@ def test_with_no_mark_the_grouping_and_its_words_stay():
 
 @pytest.mark.parametrize("hall", ["lobby", "corridor"])
 @pytest.mark.parametrize("function", ["residential", "R-2", None, "business"])
-def test_an_unmarked_hall_stating_a_units_function_stops_the_marks_count_whatever_it_opens_into(hall, function):
-    """Review round 1 (PR 1, a hardening): a one-room unit marked a lobby or corridor, stating residential, no unit
-    mark, joined by a door to a marked unit: the grouping's hall check lets a hall opening into a unit's room through,
-    so the marks counted 2 of 3. Under the marks a shared hall states no function: one stating a function a unit may
-    have stops the count; one stating none, or a listed other use, is a hall (2 counted: the limit said beside it)."""
+def test_an_unmarked_hall_stating_a_units_function_must_open_into_two_named_units(hall, function):
+    """Review rounds 1 and 2 (PR 1): a one-room unit marked a lobby or corridor, stating residential, no unit mark,
+    joined by a door to one marked unit: the grouping's hall check lets a hall opening into a unit's room through, so
+    the marks counted 2 of 3. Under the marks a hall stating a function a unit may have is shared only where it opens
+    into rooms of two or more named units (a building's residential lobby: its occupant load needs that function);
+    into one, it stops the count. One stating none, or a listed other use, is a hall (2 counted: the limit said)."""
     desc = layout([("residential", 1, 1)] * 3, (False, True))
     _room(desc, "s0")["unit"], _room(desc, "s1")["unit"] = "A", "B"
     s2 = _room(desc, "s2")
@@ -568,3 +569,29 @@ def test_an_unmarked_hall_stating_a_units_function_stops_the_marks_count_whateve
         assert isinstance(got, Stop) and got.key == "units_mark_hall_function", (hall, function, got)
     else:
         assert got == 2, (hall, function, got)
+    if function in ("residential", "R-2"):               # into two named units (A's and B's rooms): shared
+        desc = layout([("residential", 1, 1)] * 3, (True, True))
+        _room(desc, "s0")["unit"], _room(desc, "s2")["unit"] = "A", "B"
+        _room(desc, "s1").update(use=hall, function=function)
+        assert count(desc) == 2, (hall, function)        # (a studio so marked can't be told apart: the words say so)
+        assert "marked a corridor, lobby or exit can't be told from a room shared between units" in MARKED
+
+
+def test_an_entry_lobby_stating_residential_into_no_unit_stops_with_words_that_dont_ask_a_mark_check():
+    """Review round 3 (PR 1): an entry lobby between the corridor and the outside, stating residential (its occupant
+    load needs a function), opens into no unit's room: it stops the marks' count (it may be a unit marked a lobby), and
+    the reason no longer tells the architect to check marks that can't clear it."""
+    desc = layout([("residential", 1, 1)] * 3, (False, False))
+    for i in range(3):
+        _room(desc, f"s{i}")["unit"] = f"U{i}"
+    desc["rooms"].append(room("L", rect(-6.5, -6.5, -0.5, -0.5), use="lobby", lockable=False, pass_through=True,
+                              function="residential"))
+    x = next(d for d in desc["doors"] if d["id"] == "x")
+    x["sides"] = ["L", "outside"]
+    x["plan"]["centre"] = [-6.75, -3.5]
+    desc["doors"].append(door("cl", (-0.25, -3.5), (0, 1), ("c", "L")))
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_mark_hall_function", got
+    assert "check the units' marks" not in got.reason and "mark its unit if it is one" in got.reason
+    _room(desc, "L").pop("function")                     # stating none: a hall, the three units counted
+    assert count(desc) == 3

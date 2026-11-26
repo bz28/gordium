@@ -211,8 +211,8 @@ STOPS = {
                              "to isn't known",
     "units_mark_several": "the room {name}'s unit mark names more than one unit ({got!r}): a room belongs to one "
                           "dwelling unit, so the units aren't counted",
-    "units_mark_alike": "the unit marks {names} differ only in capitals or spacing: one dwelling unit or two isn't "
-                        "known",
+    "units_mark_alike": "the unit marks {names} differ only in capitals or in where spaces stand: one dwelling unit or "
+                        "two isn't known",
     "units_mark_apart": "the rooms marked unit {unit!r} come apart on this story ({rooms} not joined to the rest "
                         "through its own rooms): two dwelling units given one name, or a room of it left unmarked "
                         "(mark the rooms between them too)",
@@ -221,8 +221,10 @@ STOPS = {
     "units_mark_on_exit": "the room {name} is taken as an exit (a stair enclosure or exit passageway, shared) yet is "
                           "marked unit {unit!r}: which is right isn't known",
     "units_mark_hall_function": "the room {name}, marked a corridor or lobby with no unit mark, states a function a "
-                                "dwelling unit may have (a hall shared between units states none): it may be a "
-                                "unit's room left unmarked; mark its unit, or clear its function",
+                                "dwelling unit may have and opens into rooms of fewer than two named units: it may be "
+                                "a unit's room left unmarked (mark its unit if it is one); a lobby shared by units "
+                                "reached only through other halls can't be told from one, so the units aren't "
+                                "counted",
     "units_mark_left_out": "the room {name} has no unit mark while other rooms of this story have one, and may be a "
                            "dwelling unit's room (it states a function a dwelling unit may have, or none): mark its "
                            "unit, or, if it is shared between units, mark its use Corridor or Lobby",

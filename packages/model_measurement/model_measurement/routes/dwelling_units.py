@@ -40,18 +40,22 @@ name of the dwelling unit the room belongs to), the marks replace the grouping a
 dwelling unit, said with the count as the architect's statement (`architect_stated`, MARKED). The marks need no
 function, no single way out and no 1016.2.1 for the count, so the two limits above close: a shared room marked
 residential no longer joins two units (with no unit mark, it stops the count until it is marked a unit or a corridor
-or lobby), and a unit's room marked a corridor, lobby or exit still counts by its mark. Not measured where the marks
+or lobby), and a unit's room marked a corridor or lobby still counts by its mark (one the drawing takes as an exit
+stops the count: the two disagree). Not measured where the marks
 and the drawing disagree or don't settle it:
-- a room whose mark isn't a name (not text), or names two or more units ("1A, 1B"), or two names differing only in
-  case or spacing ("Apt 1", "apt 1": one unit or two?);
+- a room whose mark isn't a name (not text or a whole number), or names two or more units ("1A, 1B"), or two names
+  differing only in capitals or in where spaces stand ("Apt 1", "apt1": one unit or two?; spaces at the ends and
+  repeated spaces are no new name);
 - a unit whose rooms on the story come apart (not joined by doors or passages through its own rooms: two units given
   one name?), or whose lived-in rooms all state a listed other use (no dwelling unit), or a room the drawing takes as
   an exit (a stair enclosure) given a unit;
 - a lived-in room with no mark that may be a dwelling unit's (any function but a listed other use, or none): a unit
   left unmarked, or a room shared between units not marked a corridor or lobby; a corridor or lobby with no mark
-  stating such a function (a shared hall states none), or an exit with no mark stating any.
-What is left is said with the count: a unit none of whose rooms is marked, all of them marked corridors, lobbies or
-exits stating no function, can't be told from shared halls.
+  stating such a function that opens into rooms of fewer than two named units (a shared residential lobby opens into
+  two or more), or an exit with no mark stating any.
+What is left is said with the count (MARKED: every room of a dwelling unit carries its unit's name): a unit none of
+whose rooms is marked, all of them marked corridors, lobbies or exits, can't be told from shared halls where they
+state no function, or a residential one and open into rooms of two or more named units (as a shared lobby does).
 """
 
 import re
@@ -86,7 +90,8 @@ RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with a residenti
 UNIT = "unit"                                            # rooms[].unit: the architect's unit mark (Gordium: Unit)
 # said with every row reading a count from the marks (parts.yaml `architect_stated`): the statement it stands on
 MARKED = ("counted from the rooms' unit marks (Gordium: Unit), the architect's statement: each name given is one "
-          "dwelling unit, and every room of a dwelling unit on the story carries its unit's name")
+          "dwelling unit, and every room of a dwelling unit on the story carries its unit's name (a unit's room left "
+          "unmarked and marked a corridor, lobby or exit can't be told from a room shared between units)")
 # two or more units named in one mark ("1A, 1B", "1A and 1B", "1A/1B"): a room can't be in two units
 _SEVERAL = re.compile(r"[,;&+/|]|\band\b", re.IGNORECASE)
 
@@ -126,7 +131,7 @@ def _marked(story, items: dict, is_exit) -> int:
         by_unit.setdefault(name, set()).add(rid)
     alike = {}
     for name in by_unit:
-        alike.setdefault(name.casefold(), []).append(name)
+        alike.setdefault("".join(name.casefold().split()), []).append(name)   # "Apt1", "apt 1": one or two?
     for same in alike.values():
         if len(same) > 1:
             raise Stop("units_mark_alike", names=", ".join(sorted(same)))
@@ -159,10 +164,12 @@ def _marked(story, items: dict, is_exit) -> int:
         room, function = story.rooms[rid], (items.get(rid) or {}).get("function")
         if rid in exits and function is not None:
             raise Stop("units_exit_function", name=room.name)
-        # a shared hall states no function (Gordium: Function: blank on a corridor), and a unit's own carries its
-        # name: one stating a function a unit may have, with no name, is a unit's room left unmarked or a hall marked
-        # wrong, whatever it opens into
-        if rid in hall_rooms and function is not None and not (isinstance(function, str) and function in NOT_DWELLING):
+        # a hall stating a function a unit may have (a lobby states one: its occupant load needs it) is shared only
+        # where it opens into rooms of two or more named units; opening into one or none, it may be a unit's room left
+        # unmarked (a studio marked a lobby beside one unit)
+        if rid in hall_rooms and function is not None and \
+                not (isinstance(function, str) and function in NOT_DWELLING) and \
+                len({names[x] for sides in links if rid in sides for x in sides if x in names}) < 2:
             raise Stop("units_mark_hall_function", name=room.name)
     return len(by_unit)
 
