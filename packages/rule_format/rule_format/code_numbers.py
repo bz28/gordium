@@ -188,9 +188,10 @@ def _has_words(length: dict) -> bool:
 def _named_part(fits: list[dict]) -> bool:
     """Every reading a number fits is a decimal printed in digits with no unit or limit words of its own, read
     "none": the number of a section the law names ("Section 9.7, in which case", "Section 1004.1. In each story"),
-    never a quantity, so nothing may compare a measure with it, even where its direction isn't checked."""
+    never a quantity, so no formula may use it anywhere. A section is never numbered 0.x, so a fraction such as the
+    0.5 of a coefficient is left to the checks below."""
     return bool(fits) and all(c["comparison"] == "none" and not c.get("unit") and not (c.get("worded") or ("",))[0]
-                              and re.fullmatch(r"\d+\.\d+", c["shown"].strip()) for c in fits)
+                              and re.fullmatch(r"[1-9]\d*\.\d+", c["shown"].strip()) for c in fits)
 
 
 def quote_statements(quote: str) -> set[tuple]:
