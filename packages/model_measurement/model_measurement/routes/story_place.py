@@ -219,11 +219,13 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
 
 def _maybe_mezzanine(story, below) -> bool:
     """Whether a level with rooms may be a mezzanine of the story below (BCNYS 505.2: "considered a portion of the
-    story below"; 505.2.1: at most 1/3, or 2/3 in some buildings, of the room or space it is in): its outline at most
-    2/3 of the one below's, or either outline not given."""
-    if story.outer is None or below.outer is None:
+    story below"; 505.2.1: at most 1/3, or 2/3 in some buildings, of the room or space it is in): its rooms' floor
+    area at most 2/3 of the story below's (its outline, the larger reading), or either not known (a room not read, no
+    outline). Its own outline is no guide: a mezzanine stands within the story's exterior walls."""
+    rooms = list(story.rooms.values())
+    if not rooms or any(r is None for r in rooms) or below.outer is None:
         return True
-    return story.outer.area <= below.outer.area * 2 / 3 + 1
+    return unary_union([r.outline for r in rooms]).area <= below.outer.area * 2 / 3 + 1
 
 
 def _readings(stack, plane):
@@ -330,7 +332,7 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
             return None, Stop("ground_disagrees", flat=f"{ground['flat']:g} ft", high=f"{max(given) / FT:g} ft").reason
         # the grade plane at most the flat ground (an areaway, a well, a walk-out door may be lower: never a basement
         # proven); the flat ground itself a known point of finished ground (item 2)
-        return {"high": z, "point": z, "lowest": z}, None
+        return {"high": z, "point": z, "lowest": min([z] + given)}, None     # lower ground stated at an opening too
     spots = [p for p in ground.get("spots") or []
              if isinstance(p, (list, tuple)) and len(p) == 3 and all(_number(v) for v in p)]
     if not spots or len(spots) != len(ground.get("spots") or []):
@@ -370,5 +372,5 @@ def _plane(ground, stories, description=None, reader=None) -> tuple:
     # the lowest ground beside the building: every spot outside some story's outline (the ground floor's walls under
     # an overhang included); one under every story is under the building, not beside it
     beside = [z for p, z in at if not all(o.buffer(-SAME).contains(p) for o in outlines)] or [z for _, z in at]
-    return {"high": high, "point": None, "lowest": min(beside),
+    return {"high": high, "point": None, "lowest": min(beside + stated),
             "reading": SPOTS_READING.format(high=f"{high / FT:g} ft")}, None
