@@ -546,9 +546,9 @@ def _exits_reached(story, routes, room, access, figure, building=None) -> dict:
     into an exit enclosure or passageway whose room has its own such door on this story, or on a story with no door to
     outside (an upper story); a stair entered on the level it discharges through a lobby or corridor (1028.1), or
     whose door out isn't marked, leads back through the same story (review round 1, `_egress_sides`' own test). Not
-    worked out: a space with two or more ways out to the halls, exits or outside (two units joined by a door, a lock-off, can't be told apart), a passage
-    out of the room, a room routes cross, a room it serves (decision 1a), a door of the room that is itself an exit, a
-    door reaching one exit only. Never a guess: two exits set aside the escape opening 1031.2 item 1 asks."""
+    worked out: a space with two or more ways out to the halls, exits or outside (two units joined by a door, a
+    lock-off, can't be told apart), a passage out of the room, a room routes cross, a room it serves (decision 1a), a
+    door of the room that is itself an exit, a door reaching one exit only. Never a guess: two exits set aside the escape opening 1031.2 item 1 asks."""
     if isinstance(access, Stop):
         return {"two": False, "why": access.reason}
     if isinstance(figure, Stop) or figure is None:
