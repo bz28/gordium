@@ -33,7 +33,7 @@ PLACE_KEYS = {"no_ground", "ground_existing", "ground_assumed", "ground_spots_no
               "place_level_not_read", "place_split_level", "place_either", "place_either_levels",
               "place_too_many_levels", "ground_buildings_apart", "place_levels_not_all", "place_description",
               "ground_spots_not_finished", "ground_disagrees", "ground_openings_not_read", "ground_disagrees_spots",
-              "place_story_spread", "place_level_inside_story"}
+              "place_story_spread", "place_level_inside_story", "place_under_lowest"}
 
 
 def building(floors, extra_levels=(), outline=BOX):
@@ -168,7 +168,8 @@ def test_every_place_measured_is_the_same_in_every_world_the_ground_stated_allow
             clear = all(len(set(f)) == 1 and all(abs(f[0] - ground["flat"] - d) > 0.1 for d in (0, 6))
                         for f in floors) if ground and "flat" in ground else False
             # a story is never proven a basement: flat ground settles a stack whose lowest story is above it
-            if clear and not extra and floors[0][0] > ground["flat"]:       # a top story at or below grade has no
+            if clear and not extra and ground["flat"] < floors[0][0] <= ground["flat"] + 6:   # (higher: a story may
+                # stand under the lowest level, with no level of its own)       # a top story at or below grade has no
                 assert all(f in got[f"L{i}"]["measures"]                    # floor above to test
                            for i in range(len(floors) - 1) for f in FACTS), (floors, ground)
 
@@ -307,6 +308,7 @@ def test_each_reason_a_place_isnt_measured():
     said("ground_buildings_apart", _reason(placed([[0]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS]}, outline=two)))
     said("place_split_level", _reason(placed([[0, 3], [2]], {"flat": 0})))
     said("place_story_spread", _reason(placed([[0, 12], [24]], {"flat": 0})))
+    said("place_under_lowest", _reason(placed([[0], [10], [20]], {"flat": -10})))
     said("place_level_inside_story", _reason(placed([[0, 3], [10]], {"flat": 0}, extra_levels=(1.5,))))
     said("place_either", placed([[-4], [6]], {"spots": [[x, y, 0] for x, y in WALL_SPOTS]})["L1"]["not_measured"][FIRST])
     desc, stories = building([[0]])
@@ -576,3 +578,22 @@ def test_a_mezzanine_drawn_on_its_own_level_never_proves_the_story_below_above()
     assert FIRST not in got["L0"]["measures"]
     assert not set(FACTS) & set(got["L2"]["measures"])
     assert got["L0"]["more"]["story_place"]["levels_maybe_mezzanines"] == ["Level 2"]
+
+
+# --- review round 8 (2026-11-26) ----------------------------------------------------------------------------------
+
+def test_the_story_under_a_possible_mezzanine_is_never_placed():
+    """A level at 10 ft half the size of the one at 0: possibly its mezzanine, whose occupants would then be the lower
+    story's (505.2), so the lower story's one-exit row could pass on too few occupants. Neither is placed."""
+    desc, stories = building([[0], [10]])
+    stories["L1"].outer = Polygon([(0, 0), (20 * FT, 0), (20 * FT, 30 * FT), (0, 30 * FT)])
+    got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
+    assert not set(FACTS) & set(got["L0"]["measures"]) and not set(FACTS) & set(got["L1"]["measures"])
+
+
+@pytest.mark.parametrize("ground", [{"flat": -10}, {"spots": [[x, y, -10] for x, y in WALL_SPOTS]}])
+def test_a_story_may_stand_under_the_lowest_level(ground):
+    """The lowest level 10 ft over the ground: an undercroft drawn from Level 0 with an offset (no level of its own)
+    would be the first story above grade plane and Level 1 the third. Nothing is placed."""
+    got = placed([[0], [10], [20]], ground)
+    assert not set(FACTS) & set(got["L0"]["measures"]) and not set(FACTS) & set(got["L1"]["measures"])
