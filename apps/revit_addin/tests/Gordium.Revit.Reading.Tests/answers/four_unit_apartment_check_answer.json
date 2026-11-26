@@ -65500,7 +65500,7 @@
       "section": "1010",
       "section_title": "Doors, Gates and Turnstiles",
       "piece": "Table 1010.2.4",
-      "piece_title": "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND"
+      "piece_title": "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND CONSTANT LATCHING BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS"
      }
     },
     {
@@ -88461,7 +88461,7 @@
           },
           {
            "id": "Table 1010.2.4",
-           "title": "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND",
+           "title": "MANUAL BOLTS, AUTOMATIC FLUSH BOLTS AND CONSTANT LATCHING BOLTS ON THE INACTIVE LEAF OF A PAIR OF DOORS",
            "coverage": "flag",
            "rules": [
             "general.bc_table_1010_2_4_inactive_leaf_bolts"
@@ -101730,7 +101730,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "8d2321657d8408ab261707daa58643ef65049c5193114ac2f8cc5f0b31bc1d3f",
   "rulebook": {
-   "new_york/ithaca_city": "d5048c1da701d8169b24c7ec8f9bce6aef7e51c9367254580d0ec7c8d904c39f"
+   "new_york/ithaca_city": "2f91a8ca5ca323da35abfd09f9f59c001fbbf6bc83ace1e2f67ed6850f3a8466"
   }
  }
 }
