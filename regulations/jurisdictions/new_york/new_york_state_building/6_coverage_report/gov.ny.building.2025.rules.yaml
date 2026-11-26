@@ -1115,6 +1115,96 @@ pieces:
     heading: Luminous egress path markings › Illumination
     rules:
     - general.bc_1025_5_illumination
+  '1026.1':
+    label: flag
+    heading: Horizontal exits › General
+    rules:
+    - general.bc_1026_1_horizontal_exits_general
+  '1026.2':
+    label: flag
+    heading: Horizontal exits › Separation
+    rules:
+    - general.bc_1026_2_horizontal_exit_separation
+  '1026.3':
+    label: flag
+    heading: Horizontal exits › Opening protectives
+    rules:
+    - general.bc_1026_3_horizontal_exit_opening_protectives
+  '1026.4':
+    label: flag
+    heading: Horizontal exits › Refuge area
+    rules:
+    - general.bc_1026_4_refuge_area
+  1026.4.1:
+    label: flag
+    heading: Refuge area › Capacity
+    rules:
+    - general.bc_1026_4_1_refuge_area_capacity
+  1026.4.2:
+    label: flag
+    heading: Refuge area › Number of exits
+    rules:
+    - general.bc_1026_4_2_refuge_area_exits
+  '1026.5':
+    label: flag
+    heading: Horizontal exits › Standpipes
+    rules:
+    - general.bc_1026_5_horizontal_exit_standpipes
+  '1027.2':
+    label: flag
+    heading: Exterior exit stairways and ramps › Use in a means of egress
+    rules:
+    - general.bc_1027_2_exterior_exit_stairways_use
+  '1027.3':
+    label: flag
+    heading: Exterior exit stairways and ramps › Open side
+    rules:
+    - general.bc_1027_3_open_side
+  '1027.4':
+    label: flag
+    heading: Exterior exit stairways and ramps › Side yards
+    rules:
+    - general.bc_1027_4_side_yards
+  '1027.5':
+    label: flag
+    heading: Exterior exit stairways and ramps › Location
+    rules:
+    - general.bc_1027_5_location
+  '1027.6':
+    label: flag
+    heading: Exterior exit stairways and ramps › Exterior exit stairway and ramp protection
+    rules:
+    - general.bc_1027_6_protection
+  '1028.2':
+    label: flag
+    heading: Exit discharge › Exit discharge
+    rules:
+    - general.bc_1028_2_exit_discharge
+  '1028.3':
+    label: flag
+    heading: Exit discharge › Exit discharge width or capacity
+    rules:
+    - general.bc_1028_3_exit_discharge_width
+  '1028.4':
+    label: flag
+    heading: Exit discharge › Exit discharge components
+    rules:
+    - general.bc_1028_4_exit_discharge_components
+  '1028.5':
+    label: flag
+    heading: Exit discharge › Access to a public way
+    rules:
+    - general.bc_1028_5_access_to_public_way
+  '1029.2':
+    label: flag
+    heading: Egress courts › Width or capacity
+    rules:
+    - general.bc_1029_2_egress_court_width
+  '1029.3':
+    label: flag
+    heading: Egress courts › Construction and openings
+    rules:
+    - general.bc_1029_3_egress_court_construction
   '1030.8':
     label: flag
     heading: Common path of egress travel

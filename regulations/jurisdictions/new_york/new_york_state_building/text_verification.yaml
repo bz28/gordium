@@ -31,15 +31,16 @@ second_reading:
     34 of section group 9c (Section 1009 and 4 definitions, 2026-11-26), a twenty-seventh for the 11 of section
     group 9d (1018.1 to 1018.3, 1018.5 and Section 1019 and 2 definitions, 2026-11-26, and Section 1018's heading,
     review round 1), a twenty-eighth for the 39 of section group 9e (Sections 1021, 1022 and 1023 and 9 definitions, 2026-11-26), a
-    twenty-ninth for the 29 of section group 9f (Sections 1024 and 1025 and 1 definition, 2026-11-26), and a helper for the comparison words)
+    twenty-ninth for the 29 of section group 9f (Sections 1024 and 1025 and 1 definition, 2026-11-26), a thirtieth for
+    the 30 of section group 9g (Sections 1026 to 1029 and 5 definitions, 2026-11-26), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
     as step_5, 3 pages, 3 boxes as step_7, 14 pages, 29 boxes as step_6 (section group 3), 8 pages, 9 boxes as
-    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d), and 1 page, 1 box as step_g9d2 (1018''s heading), and 10 pages, 42 boxes as step_g9e (section group 9e), and 4 pages, 30 boxes as step_g9f (section group 9f); p.47''s two and pp.42,
+    step_8 (section group 4a), 4 pages, 6 boxes as step_9 (section group 4b), 3 pages, 6 boxes as step_10 (section group 4c), 2 pages, 5 boxes as step_11 (section group 5a), 1 page, 3 boxes as step_12 (section group 5b), 3 pages, 6 boxes as step_13 (section group 5c), 7 pages, 10 boxes as step_14 (section group 6a), 6 pages, 11 boxes as step_15 (section group 6b), 5 pages, 13 boxes as step_16 (section group 6c), and 12 pages, 23 boxes as step_17 (section group 6d, Table 1010.2.4 also cell by cell, and its three raised note letters by position on p.325), and 2 pages, 2 boxes as step_18, and 10 pages, 22 boxes as step_19 (section group 6e), and 4 pages, 6 boxes as step_20 (section group 8a), and 2 pages, 6 boxes as step_21 (section group 8b), and 2 pages, 8 boxes as step_22 (section group 8c), and 7 pages, 39 boxes as step_g9a (section group 9a), and 11 pages, 31 boxes as step_g9b (section group 9b), and 8 pages, 35 boxes as step_g9c (section group 9c), and 4 pages, 11 boxes as step_g9d (section group 9d), and 1 page, 1 box as step_g9d2 (1018''s heading), and 10 pages, 42 boxes as step_g9e (section group 9e), and 4 pages, 30 boxes as step_g9f (section group 9f), and 9 pages, 32 boxes as step_g9g (section group 9g); p.47''s two and pp.42,
     55, 316-317''s seven on 2026-11-22); helpers that never saw the extracted text transcribed every line of every
     box from the images alone (tables row by row, raised characters written as sealed marks); the transcript went
-    through document_extraction/numbers.py: 519 pieces, 1518 numbers, every piece agrees. The tables were also read
+    through document_extraction/numbers.py: 549 pieces, 1633 numbers, every piece agrees. The tables were also read
     a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, pp.315-317 and
     p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into its
     cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so read.
@@ -469,6 +470,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:corridor_open_ended:
+    piece_sha256: 10df5e75248f1d8d636eef565d3ee3d1930b9853efe46ee3d3093f15ae5fecaf
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:court:
     piece_sha256: 630e2e8b75ef5ce1f7a85b29abe33c3ef3404133ba7277f7d4223b80b68f9b83
     numbers:
@@ -696,6 +703,15 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:exterior_exit_ramp:
+    piece_sha256: 1df4a1658ebad35b7cd13f1aff41249151d10d37012621aa22c8505b31ebde07
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
   202:exterior_exit_stairway:
     piece_sha256: e42b9a3defe05d681c1edc0c898fb09bd760a5b3d83d349b78d61cace419bd05
     numbers:
@@ -1332,6 +1348,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:open_ended_corridor:
+    piece_sha256: 26ba2bd65aa79a15019f63c2891a97fad1f692d5cedbb655c446b8a430bb96b3
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:opening_protective:
     piece_sha256: 2f5230d999192232a14fdd6b5fd86ff2543b669591c2a23f0e7e0a0a2746b25f
     numbers: []
@@ -1504,6 +1526,12 @@ pieces:
     second_reading: agrees
     second_reading_numbers: []
     second_reading_comparisons: []
+  202:ramp_exterior_exit:
+    piece_sha256: 7449ae68d555f09971646fe5ad6755822dc98a77200737ce5e53a34c088d48ff
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:ramp_interior_exit:
     piece_sha256: ec2140685bbf2ab888bb5fa3ce83565eba3b473b638e4b77cd5ed6bb2c00cb55
     numbers: []
@@ -1629,6 +1657,12 @@ pieces:
     - '>='
   202:smoke_barrier:
     piece_sha256: 2362bf8f9765ea07a0781a2aa97a6e85dcd42105b1868731ffc1abb41c737ea4
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:smoke_compartment:
+    piece_sha256: 71488f773b63d6a1a6d3cdae1a2e9bec7ee5c95184c97ff80ff91ba534d91e75
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -7806,6 +7840,520 @@ pieces:
     - '>='
     - none
     - '>='
+  '1026':
+    piece_sha256: b99369ee5f7c224b0eddfd756dc9e35358d1ae10427d6df2c13e9b3c955a19d2
+    numbers:
+    - '1026'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1026'
+    second_reading_comparisons:
+    - none
+  '1026.1':
+    piece_sha256: 09447ca21c06424979c7a5252b120c3e3acae1c30d39d078cb8d01508a153888
+    numbers:
+    - '1026.1'
+    - two or more
+    - not more than one-half
+    - two-thirds
+    - 100 percent
+    - not less than 6 square foot
+    - 0.6 m
+    second_reading: agrees
+    second_reading_numbers:
+    - '1026.1'
+    - two or more
+    - not more than one-half
+    - two-thirds
+    - 100 percent
+    - not less than 6 square foot
+    - 0.6 m
+    second_reading_comparisons:
+    - none
+    - '>='
+    - <=
+    - <=
+    - <=
+    - '>='
+    - none
+    flags:
+    - '''two-thirds'' and ''100 percent'' (<=): exceptions 1 and 2 let horizontal exits ''comprise two-thirds of the required
+      exits'' in Group I-2 and ''100 percent of the exits required'' in Group I-3, each the most the exits may be; the recorded
+      words give no comparison. The second reading is right.'
+  '1026.2':
+    piece_sha256: d7013ac8cab66cfd3a527d8b5cfbe4f778ad44daa8182a22d245349cdadd8154
+    numbers:
+    - '1026.2'
+    - '706'
+    - '707'
+    - '711'
+    - '2'
+    - '716'
+    - '717'
+    - not less than 2
+    - '3104'
+    - more than 20 foot
+    - 6096 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1026.2'
+    - '706'
+    - '707'
+    - '711'
+    - '2'
+    - '716'
+    - '717'
+    - not less than 2
+    - '3104'
+    - more than 20 foot
+    - 6096 mm
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - '>='
+    - none
+    - '>'
+    - none
+    flags:
+    - '''2'' (>=): ''The minimum fire-resistance rating of the separation shall be 2 hours'', the ''minimum ... shall be''
+      before the number; the recorded words miss it (numbers.py reads comparison words only directly before a number or after
+      its unit). The second reading is right.'
+  '1026.3':
+    piece_sha256: 340285dc987378faa9aa6ed258d7a0cc24f542377bd57d9270df3b067aa1a9d2
+    numbers:
+    - '1026.3'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1026.3'
+    second_reading_comparisons:
+    - none
+  '1026.4':
+    piece_sha256: 5258cc33f9fdc2c8ede4c9252e128f4b7d5e117f8b868f438e7e0b9192d2e462
+    numbers:
+    - '1026.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1026.4'
+    second_reading_comparisons:
+    - none
+  1026.4.1:
+    piece_sha256: f7e84272a9b12addac504c0effe8a7da242f243bea5606c3a9354ad43493f068
+    numbers:
+    - 3 square foot
+    - 0.2787 m
+    second_reading: agrees
+    second_reading_numbers:
+    - 3 square foot
+    - 0.2787 m
+    second_reading_comparisons:
+    - '>='
+    - none
+    flags:
+    - '''3 square foot'' (>=): the refuge area''s capacity is ''computed based on a net floor area allowance of 3 square feet
+      (0.2787 m[fn2]) for each occupant'', so it holds at least 3 square feet per occupant; the recorded words give no comparison.
+      The second reading is right.'
+  1026.4.2:
+    piece_sha256: 122b201fe6b63a9a0302722958894e4add8c49d04a586a3485797d7abbd77888
+    numbers:
+    - not less than one
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than one
+    second_reading_comparisons:
+    - '>='
+  '1026.5':
+    piece_sha256: ab6f3a09e59dd1de0824d298b4edda84837a81886e0ea4c82ad09962ffa4a18e
+    numbers:
+    - '1026.5'
+    - '905.3'
+    - and 905.4
+    second_reading: agrees
+    second_reading_numbers:
+    - '1026.5'
+    - '905.3'
+    - and 905.4
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  '1027':
+    piece_sha256: 64e55e4bff348b58f4005239e7814e2d7c162196ed22e94e7edec7e99b6e75f4
+    numbers:
+    - '1027'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1027'
+    second_reading_comparisons:
+    - none
+  '1027.1':
+    piece_sha256: 153ffbc7f5157331197f030916f081b800af0f039b9dd7d900f37431fc14d18e
+    numbers:
+    - '1027.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1027.1'
+    second_reading_comparisons:
+    - none
+  '1027.2':
+    piece_sha256: d0f14ef25d6b5c7c58b40b08a1c4f19cc90694462a1f376ad4724e116bf49d86
+    numbers:
+    - '1027.2'
+    - exceeding six
+    second_reading: agrees
+    second_reading_numbers:
+    - '1027.2'
+    - exceeding six
+    second_reading_comparisons:
+    - none
+    - '>'
+  '1027.3':
+    piece_sha256: 119d8c7b3ac5f8da70dd17fac1c2c2631821ce6d2fd54b4bfd6575519ac5ba03
+    numbers:
+    - '1027.3'
+    - not less than one
+    - not less than 35 square foot
+    - 3.3 m
+    - not less than 42 inch
+    - 1067 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1027.3'
+    - not less than one
+    - not less than 35 square foot
+    - 3.3 m
+    - not less than 42 inch
+    - 1067 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - '>='
+    - none
+    - '>='
+    - none
+  '1027.4':
+    piece_sha256: 80959ad541ccc6215f0425dcc1464a5cedd57dffb4090b2ef109de6ec0c45978
+    numbers:
+    - '1027.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1027.4'
+    second_reading_comparisons:
+    - none
+  '1027.5':
+    piece_sha256: 33d23c90ad50fdaf488bc7a61319324fa67cd5b7c261f04861ca0fb41321dc77
+    numbers:
+    - '1027.5'
+    - 10 foot
+    - 3048 mm
+    - '705'
+    - 5 foot
+    - 1525 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1027.5'
+    - 10 foot
+    - 3048 mm
+    - '705'
+    - 5 foot
+    - 1525 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - none
+    - '>='
+    - none
+    flags:
+    - '''10 foot'' and ''5 foot'' (>=): ''a minimum fire separation distance of 10 feet'' and the exception''s ''a minimum
+      fire separation distance of 5 feet'', the ''minimum ... of'' before each number; the recorded words miss it. The second
+      reading is right.'
+  '1027.6':
+    piece_sha256: c840cd469b44342fc66b4338331e9242fa0c7b56885b2aae2aa1a3293fa3246f
+    numbers:
+    - '1027.6'
+    - '1023.2'
+    - less than 180 degree
+    - 3.14 rad
+    - '1023.7'
+    - not more than two
+    - two
+    - not less than 50 percent
+    - not less than 50 percent
+    - not less than 7 foot
+    - 2134 mm
+    - '3.1'
+    - '3.5'
+    - '1020'
+    - '1027'
+    - '1023.7'
+    - exceeding 45 degree
+    - 0.79 rad
+    - not less than 35 square foot
+    - 3.3 m
+    - not more than four
+    second_reading: agrees
+    second_reading_numbers:
+    - '1027.6'
+    - '1023.2'
+    - less than 180 degree
+    - 3.14 rad
+    - '1023.7'
+    - not more than two
+    - two
+    - not less than 50 percent
+    - not less than 50 percent
+    - not less than 7 foot
+    - 2134 mm
+    - '3.1'
+    - '3.5'
+    - '1020'
+    - '1027'
+    - '1023.7'
+    - exceeding 45 degree
+    - 0.79 rad
+    - not less than 35 square foot
+    - 3.3 m
+    - not more than four
+    second_reading_comparisons:
+    - none
+    - none
+    - <
+    - none
+    - none
+    - <=
+    - none
+    - '>='
+    - '>='
+    - '>='
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - '>'
+    - none
+    - '>='
+    - none
+    - <=
+  '1028':
+    piece_sha256: d1da08766861cf8abeeb8abc71f26a666b4162f4d9ede71485e6fc641a32c2c7
+    numbers:
+    - '1028'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1028'
+    second_reading_comparisons:
+    - none
+  '1028.1':
+    piece_sha256: 94cc8b92e1ffd2766ad8885fa2c5019513702e911f52fb004e0578d76174fa08
+    numbers:
+    - '1028.1'
+    - '1028'
+    - and 1029
+    - '1003'
+    - '1015'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1028.1'
+    - '1028'
+    - and 1029
+    - '1003'
+    - '1015'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+  '1028.2':
+    piece_sha256: 738170b2f3137ea8eee5733036dba6af7af58e64185708156888a6acdfb34e5b
+    numbers:
+    - '1028.2'
+    - '1'
+    - and 2
+    - not exceed 50 percent
+    - not more than 50 percent
+    - not less than 30 foot
+    - 9144 mm
+    - not less than one-fourth
+    - not more than 50 percent
+    - not greater than 10 foot
+    - 3048 mm
+    - not greater than 30 foot
+    - 9144 mm
+    - '708'
+    - '1026'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1028.2'
+    - '1'
+    - and 2
+    - not exceed 50 percent
+    - not more than 50 percent
+    - not less than 30 foot
+    - 9144 mm
+    - not less than one-fourth
+    - not more than 50 percent
+    - not greater than 10 foot
+    - 3048 mm
+    - not greater than 30 foot
+    - 9144 mm
+    - '708'
+    - '1026'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - <=
+    - <=
+    - '>='
+    - none
+    - '>='
+    - <=
+    - <=
+    - none
+    - <=
+    - none
+    - none
+    - none
+  '1028.3':
+    piece_sha256: 2a5a2d6c45ed97a5d3c44072f517df282c796d7ac9dc0a5dc85aabd1352175c1
+    numbers:
+    - '1028.3'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1028.3'
+    second_reading_comparisons:
+    - none
+  '1028.4':
+    piece_sha256: 4062a29eb092ae3ebce9ed304fa7e2f37881de33708eae8f3a6b018ae561cbc2
+    numbers:
+    - '1028.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1028.4'
+    second_reading_comparisons:
+    - none
+  '1028.5':
+    piece_sha256: cf127ab6ef9b9b2771b27c901f2cfe63e06edecca28023a623b9a8d3ad15acba
+    numbers:
+    - '1028.5'
+    - not less than 5 square foot
+    - 0.46 m
+    - not less than 50 foot
+    - 15 mm
+    - 240 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1028.5'
+    - not less than 5 square foot
+    - 0.46 m
+    - not less than 50 foot
+    - 15 mm
+    - 240 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - none
+  '1029':
+    piece_sha256: b14b860f75f4f6af2fb552c7bc3a7e5622a1175083bdb27999d9050b9cc0d905
+    numbers:
+    - '1029'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1029'
+    second_reading_comparisons:
+    - none
+  '1029.1':
+    piece_sha256: 8460fc94aa2babafb198c427df1a0895e594839f831285b7b4c326abe22d0983
+    numbers:
+    - '1029.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1029.1'
+    second_reading_comparisons:
+    - none
+  '1029.2':
+    piece_sha256: 83988db5fb6f8bafc72d1721f80df39a93e6ea8c21d2e65684f1db0160e8402f
+    numbers:
+    - '1029.2'
+    - '1005.1'
+    - not less than 44 inch
+    - 1118 mm
+    - not less than 36 inch
+    - 914 mm
+    - 7 foot
+    - 2134 mm
+    - '1005.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1029.2'
+    - '1005.1'
+    - not less than 44 inch
+    - 1118 mm
+    - not less than 36 inch
+    - 914 mm
+    - 7 foot
+    - 2134 mm
+    - '1005.7'
+    second_reading_comparisons:
+    - none
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - none
+    flags:
+    - '''7 foot'' (>=): ''The required capacity and width of egress courts shall be unobstructed to a height of 7 feet (2134
+      mm)'', clear for at least that height; the recorded words give no comparison. The second reading is right.'
+  '1029.3':
+    piece_sha256: 53c02df6f13de1b16af50aeb72d0289cbee6e17a9541304b29a7666c4ef16382
+    numbers:
+    - '1029.3'
+    - less than 10 foot
+    - 3048 mm
+    - not less than 1
+    - 10 foot
+    - 3048 mm
+    - not less than 3/4
+    - less than 10
+    - two or more
+    second_reading: agrees
+    second_reading_numbers:
+    - '1029.3'
+    - less than 10 foot
+    - 3048 mm
+    - not less than 1
+    - 10 foot
+    - 3048 mm
+    - not less than 3/4
+    - less than 10
+    - two or more
+    second_reading_comparisons:
+    - none
+    - <
+    - none
+    - '>='
+    - '>='
+    - none
+    - '>='
+    - <
+    - '>='
+    flags:
+    - '''10 foot'' (>=), the second: the walls are rated ''for a distance of 10 feet (3048 mm) above the floor of the egress
+      court'', at least that high; the recorded words give no comparison. The second reading is right.'
   '1030.7':
     piece_sha256: 0dedbb8deaa95cfacfefff8ad82fb14eb63468c3e6c595eb4bc7e45d398a2fc6
     numbers:

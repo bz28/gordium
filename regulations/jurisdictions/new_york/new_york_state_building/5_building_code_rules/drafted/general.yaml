@@ -20819,8 +20819,7 @@ rules:
     note: 'The path of the exit discharge is lit from each exit to the public way, or from the exit to a safe dispersal area
       complying with 1028.5 that is itself lit to at least 1 footcandle at the walking surface: site lighting isn''t in the
       model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. 1028.5 (safe dispersal areas) isn't brought in
-    (a later PR of section group 9).
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. 1028.5 (safe dispersal areas) is its own flag.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1008_2_4_power_for_illumination
@@ -20872,7 +20871,7 @@ rules:
       doorways leading directly to the exit discharge; and electrical equipment rooms, fire command centers, fire pump rooms,
       generator rooms and public restrooms over 300 sq ft: the electrical design isn''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. 1028.2 (exit discharge through the level of discharge)
-    isn't brought in (a later PR of section group 9); 1010.1.5 is section group 6c's.
+    is its own flag; 1010.1.5 is section group 6c's.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1008_3_1_emergency_power_duration
@@ -21272,7 +21271,7 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units must
     be accessible) and ICC A117.1 aren't brought in; how Gordium will read A117.1 isn't settled yet. Accessible means of egress,
     areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's check,
-    never a pass or a fail. 1104, 1026 and 1027 aren't brought in (1026 and 1027 are later PRs of section group 9); 1023 is section group 9e's flags; 1019.3
+    never a pass or a fail. 1104 isn't brought in; 1026 and 1027 are flags of their own; 1023 is section group 9e's flags; 1019.3
     and 1019.4 are section group 9d's flags.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -21689,9 +21688,9 @@ rules:
       and designed to keep smoke out; not required within an interior exit stairway enclosure (1023), or in outdoor facilities
       whose exit access is essentially open to the outside: areas of refuge aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units must
-    be accessible) and ICC A117.1 aren't brought in; how Gordium will read A117.1 isn't settled yet. Accessible means
-    of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's
-    check, never a pass or a fail. 709 (smoke barriers) and 1026 aren't brought in; 1023 is section group 9e's flags.
+    be accessible) and ICC A117.1 aren't brought in; how Gordium will read A117.1 isn't settled yet. Accessible means of egress,
+    areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's check,
+    never a pass or a fail. 709 (smoke barriers) isn't brought in; 1026 is flags of its own; 1023 is section group 9e's flags.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_6_5_area_of_refuge_two_way_communication
@@ -22384,8 +22383,9 @@ rules:
     note: 'An exit is used for nothing that interferes with its use as a means of egress, its level of protection once reached
       isn''t reduced before the exit discharge, and it is continuous from where it is entered to the exit discharge: what
       an exit is used for and its protection aren''t in the model, so a person''s check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9e. Exits comply with 1022 to 1027 and with 1003
-    to 1015 as they apply, each a rule or flag of its own (1006.1, 1006.2''s own words and 1006.3 to 1006.3.2, 1010.3 to 1010.5.4, 1011, 1014 and 1015 aren''t brought in yet, 1024 and 1025 are flags of their own, and 1026 and 1027 follow in their own section groups).'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. Exits comply with 1022 to 1027 and with 1003
+    to 1015 as they apply, each a rule or flag of its own (1006.1, 1006.2's own words and 1006.3 to 1006.3.2, 1010.3 to 1010.5.4,
+    1011, 1014 and 1015 aren't brought in yet, and 1024 to 1027 are flags of their own).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1022_2_exterior_exit_door
@@ -22460,7 +22460,7 @@ rules:
       aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. Whether the building has an interior exit stairway
     or ramp isn't a fact Gordium is given (a door marked an exit enclosure doesn't say so for floors the model doesn't hold),
-    so the 1023 flags show for every building. 1028.2 isn't brought in yet (its own section group); 1024 is flags of its own.
+    so the 1023 flags show for every building. 1024 and 1028.2 are flags of their own.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_2_enclosure_construction
@@ -22911,8 +22911,8 @@ rules:
       and the passageway isn''t needed where the passageway is protected and pressurized as the enclosure is, and the enclosure
       may egress through areas on the level of exit discharge or vestibules as 1028 allows (1028.2: no more than half of the
       exit stairways and ramps, under its conditions): smokeproof enclosures aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 707, 711 and 1028 aren't brought in (1028 is
-    its own section group).
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 707 and 711 aren't brought in; 1028 is flags
+    of its own.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_12_2_smokeproof_access
@@ -23227,9 +23227,9 @@ rules:
     expect: needs_review
     note: 'The occupancy isn''t stated: a person checks.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 1025.2 (where the markings go, labeled reference)
-    is quoted here. 1028.2 isn't brought in yet (its own section group). Not shown for a building stated one group outside
-    A, B, E, I-1, M and R-1 (1025.1 names only those); shown for two or more groups or none stated. Whether the building is
-    a high-rise (403) isn't a fact Gordium is given.
+    is quoted here. 1028.2 is its own flag. Not shown for a building stated one group outside A, B, E, I-1, M and R-1 (1025.1
+    names only those); shown for two or more groups or none stated. Whether the building is a high-rise (403) isn't a fact Gordium
+    is given.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1025_2_1_steps
@@ -24101,7 +24101,8 @@ rules:
       of at least 35 square feet or an exterior stairway or ramp; nor in Group R-3 of at most four stories where it serves
       individual dwelling units and discharges directly to grade: exterior stairways, their separation and walls aren''t in
       the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 1020's heading isn't brought in, but its parts
+    1020.1 to 1020.7 are (the corridor rules).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1028_2_exit_discharge
@@ -24164,7 +24165,8 @@ rules:
       worked out, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9g. 1028.1 (its scope, labeled reference) is quoted
     here. 708 isn't brought in. Exterior exit doors are marked in the model, but a door marked at the level of exit discharge
-    doesn't say which exits pass through the lobby or a vestibule before it.
+    doesn't say which exits pass through the lobby or a vestibule before it. Of 1003 to 1015, which 1028.1 names, 1011, 1014
+    and 1015 aren't brought in yet.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1028_3_exit_discharge_width
