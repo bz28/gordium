@@ -197,3 +197,26 @@ def test_a_room_whose_reasons_cant_be_read_keeps_no_value_it_arrives_with():
     escape_openings.link(parts, desc)                   # never a crash
     assert "sleeping_room_door_to_outside" not in parts["sleeping_room"][0]["measures"]
 
+
+def test_hand_built_stories_are_never_a_guess_or_a_crash():
+    """Skeptic of a152d6ce: two story parts sharing the room's level id are no one story (never the last one's place,
+    a guess); a story exit count that isn't a whole count, story facts of the wrong shape, a room id that isn't
+    text: not known, never a crash."""
+    parts, desc = _parts()
+    parts["story"] = [{"id": "L1", "measures": {"story_fourth_or_higher_above_grade_plane": False}},
+                      {"id": "L1", "measures": {"story_fourth_or_higher_above_grade_plane": True}}]
+    escape_openings.link(parts, desc)
+    assert "sleeping_room_fourth_or_higher" not in parts["sleeping_room"][0]["measures"]
+    for count in (None, "2", True, 1.5, -3, float("nan"), float("inf"), ["x"]):
+        p = _linked(story={"id": "L1", "measures": {"story_exit_count": count}})
+        assert "sleeping_room_story_one_exit" not in p["measures"], count
+    assert _linked(story={"id": "L1", "measures": {"story_exit_count": 1}})["measures"][
+        "sleeping_room_story_one_exit"] is True
+    for story in ({"id": "L1", "measures": 5}, {"id": "L1", "measures": True, "not_measured": ["x"]},
+                  {"id": ["L1"], "measures": {}}):
+        _linked(story=story)                             # never a crash
+    parts, desc = _parts()
+    parts["story"] = 5
+    parts["sleeping_room"][0]["more"] = {"described_id": ["b"]}
+    escape_openings.link(parts, desc)                   # never a crash
+

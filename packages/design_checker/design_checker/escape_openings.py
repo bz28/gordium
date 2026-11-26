@@ -66,6 +66,13 @@ def _stray(parts, openings) -> bool:
     return False
 
 
+def _count(v) -> bool:
+    """A whole count of exits, never negative (a hand-built story's null, text, true, NaN, 1.5 or -3 is none)."""
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return False
+    return v >= 0 and (isinstance(v, int) or (v - v == 0 and v.is_integer()))     # a float: finite and whole
+
+
 def link(parts: dict, description) -> None:
     """Add the four measures to every sleeping room part in `parts` (the routes' parts and the interior measuring's
     sleeping rooms and openings, together), in place."""
@@ -77,7 +84,10 @@ def link(parts: dict, description) -> None:
     for r in given if isinstance(given, list) else []:
         if isinstance(r, dict) and isinstance(r.get("id"), str):
             by_id.setdefault(r["id"], []).append(r)
-    stories = {s.get("id"): s for s in parts.get("story") or [] if isinstance(s, dict)}
+    stories = {}                                         # one story per id: two sharing one are no one story
+    for s in parts.get("story") if isinstance(parts.get("story"), list) else []:
+        if isinstance(s, dict) and isinstance(s.get("id"), str):
+            stories.setdefault(s["id"], []).append(s)
     openings = parts.get(OPENINGS)
     doors = parts.get("means_of_egress_door")
     stray = isinstance(openings, list) and _stray(parts, openings)
@@ -97,7 +107,7 @@ def link(parts: dict, description) -> None:
         pid = part.get("id")
         more = part.get("more") if isinstance(part.get("more"), dict) else {}
         rid = more.get("described_id", pid)       # the description's id (egress._escape_openings)
-        same = by_id.get(rid, [])
+        same = by_id.get(rid, []) if isinstance(rid, str) else []
         # the openings marked in it (none counted where the id is more than one room's: review round 1)
         if len(same) > 1:
             why["sleeping_room_escape_openings"] = WHY["room_id_shared"].format(name=name)
@@ -113,21 +123,26 @@ def link(parts: dict, description) -> None:
             reason = WHY["no_room"].format(name=name)
         elif not isinstance(level, str):
             reason = WHY["no_level"].format(name=name)
-        elif level not in stories:
+        elif len(stories.get(level, [])) != 1:
             reason = WHY["no_story"].format(name=name, level=level)
         else:
             reason = None
         for mine, (theirs, worked) in LINKED.items():
-            story = stories.get(level) if reason is None else None
-            if story is not None and theirs in (story.get("measures") or {}):
-                value = worked(story["measures"][theirs])
+            story = stories[level][0] if reason is None else None
+            given = story.get("measures") if story is not None else None
+            raw = given.get(theirs) if isinstance(given, dict) else None
+            known = isinstance(given, dict) and theirs in given
+            if known and mine == "sleeping_room_story_one_exit" and not _count(raw):
+                why[mine] = WHY["story_not_measured"].format(name=name, reason=f"its {theirs} is not a count")
+            elif known:
+                value = worked(raw)
                 if value is None:
                     why[mine] = WHY["two_exits"].format(name=name)
                 else:
                     m[mine] = value
             elif story is not None:
-                why[mine] = WHY["story_not_measured"].format(
-                    name=name, reason=(story.get("not_measured") or {}).get(theirs, "not measured"))
+                said = story.get("not_measured") if isinstance(story.get("not_measured"), dict) else {}
+                why[mine] = WHY["story_not_measured"].format(name=name, reason=said.get(theirs, "not measured"))
             else:
                 why[mine] = reason
         # a door of its own to outside
