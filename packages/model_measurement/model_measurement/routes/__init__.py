@@ -29,7 +29,9 @@ it, never holding a pass.
 
 The pieces (decision 11): floor.py reads each story's floor, zones and rings (decisions 1, 1a, 10); paths.py draws
 decision 2's routes; remote.py gives decision 3's travel figure; common_path.py decision 5's; dead_ends.py decision
-6's dead ends and corridor widths; straight.py decision 7's remoteness and diagonal; areas.py decision 8's areas.
+6's dead ends and corridor widths; straight.py decision 7's remoteness and diagonal; areas.py decision 8's areas;
+story_place.py each story's place against the grade plane; spaces.py the rooms grouped into spaces (rooms exiting
+outside, here); dwelling_units.py the dwelling units on a story (docs/decisions/2026-11-25_story_facts_from_the_model.md).
 Here: the story's exit count (distinct `exit_id`s); each space's exit access doors (a door from which a permitted
 route reaches an exit without coming back into the room, never one into a closet or toilet: such a door reaches
 none) and passages, counted once each; the travel from those doors (`egress_travel_from_room_door`) and within a
