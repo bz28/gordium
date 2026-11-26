@@ -345,7 +345,8 @@ def test_a_unit_marked_a_hall_with_its_own_toilet_never_drops_out_of_the_count(h
     assert count(control) == 2
 
 
-@pytest.mark.parametrize("function", ["Residential", "residential ", "R-2", "dormitory", "institutional_sleeping"])
+@pytest.mark.parametrize("function", ["Residential", "residential ", "R-2", "dormitory", "institutional_sleeping",
+                                      ["residential"], {"a": 1}])     # (round 11: not text crashed)
 @pytest.mark.parametrize("hall", ["lobby", "corridor"])
 def test_a_unit_marked_a_hall_stating_an_unlisted_function_never_drops_out(hall, function):
     """Review round 10 (PR 3): the hall check fired only on the exact word residential; a unit marked a hall stating a
@@ -359,3 +360,12 @@ def test_a_unit_marked_a_hall_stating_an_unlisted_function_never_drops_out(hall,
     control = layout([("residential", 1, 1)] * 3, (False, False))
     next(r for r in control["rooms"] if r["id"] == "c")["function"] = "business"
     assert count(control) == 3
+
+
+def test_a_residential_corridor_beside_units_stating_no_function_says_to_mark_them():
+    """Review round 11 (PR 3): a real corridor marked residential whose apartments state no function yet was told it
+    "may be a dwelling unit marked a hall"; the actionable reason is the apartments' missing function."""
+    desc = layout([(None, 1, 1)] * 3, (False, False))
+    next(r for r in desc["rooms"] if r["id"] == "c")["function"] = "residential"
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_function_unknown", got

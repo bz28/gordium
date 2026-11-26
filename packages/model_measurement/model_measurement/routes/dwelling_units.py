@@ -84,13 +84,17 @@ def units_on(story, items: dict, is_exit, stair_in, links_read) -> int:
     unit_rooms = {r for g in found for r in g          # the rooms of groups holding a lived-in residential room
                   if any(story.rooms[x].use not in NOT_LIVED_IN and (items.get(x) or {}).get("function") == RESIDENTIAL
                          for x in g)}
+    unsaid = {r for g in found for r in g              # groups with a lived-in room stating no function: they stop
+              if any(story.rooms[x].use not in NOT_LIVED_IN and          # below with their own reason
+                     not isinstance((items.get(x) or {}).get("function"), str) for x in g)}
     links = [set(d.sides) for d in story.doors.values()] + [{a, b} for a, b, _ in story.passages]
     for rid in sorted(set(story.rooms) - grouped):       # a shared room that may be a unit marked wrong would drop it
         room, function = story.rooms[rid], (items.get(rid) or {}).get("function")
         if rid not in hall_rooms and function is not None:   # an exit stating a function (a unit's door marked an exit)
             raise Stop("units_exit_function", name=room.name)
-        if rid in hall_rooms and function is not None and function not in NOT_DWELLING and \
-                not any(rid in sides and sides & unit_rooms for sides in links):   # a "hall" opening into no unit
+        if rid in hall_rooms and function is not None and \
+                not (isinstance(function, str) and function in NOT_DWELLING) and \
+                not any(rid in sides and sides & (unit_rooms | unsaid) for sides in links):   # opening into no unit
             raise Stop("units_hall_residential", name=room.name)
     count = 0
     for g in found:
