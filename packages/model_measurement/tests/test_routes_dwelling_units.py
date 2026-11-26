@@ -254,3 +254,15 @@ def test_a_shared_room_of_another_use_between_two_rooms_of_a_group_may_be_shared
                       door("vc", (23.75, 12.75), (0, 1), ("v", "outside"))]
     got = count(desc)
     assert isinstance(got, Stop) and got.key == "units_shared_room", got
+
+
+@pytest.mark.parametrize("use", ["closet", "toilet", "accessory_storage"])
+def test_a_closet_marked_residential_between_two_rooms_may_be_shared(use):
+    """Review round 5 (PR 3): a closet, toilet or storeroom marked residential, opening onto two units' rooms: still
+    maybe shared (the room's own use, not only its function, stops the count)."""
+    desc = layout([("residential", 1, 1), ("residential", 1, 0), ("business", 1, 1)], (False, False))
+    desc["rooms"].append(room("k", rect(0, 10.5, 23.5, 15), use=use, lockable=False, pass_through=False,
+                              function="residential"))
+    desc["doors"] += [door("k0", (5, 10.25), (1, 0), ("s0", "k")), door("k1", (17, 10.25), (1, 0), ("s1", "k"))]
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_shared_room", got

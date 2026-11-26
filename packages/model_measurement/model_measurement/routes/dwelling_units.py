@@ -18,8 +18,8 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md, step 3):
   rooms all state a listed other function (NOT_DWELLING) is no dwelling unit; one with a room stating none, or one not
   on the list (a typo, dormitory, institutional sleeping), may be one: not measured.
 - A group with a stair, ramp or ladder within it (or one not read, or not said to be none: it may be anywhere), or
-  with a closet, toilet or storeroom opening onto two or more of its rooms, may hold the upper part of a unit whose
-  door is downstairs, or two units sharing that room: not measured.
+  with a closet, toilet or storeroom, or a room not itself residential, opening onto two or more of its rooms, may
+  hold the upper part of a unit whose door is downstairs, or two units sharing that room: not measured.
 - A dwelling unit reaches the exits without passing through another (1016.2.1), so a group with one way out to a
   shared space is one unit: Gordium's reading, to confirm, said with every row reading the count (`rests_on`, RESTS_ON),
   which also says the count holds only if 1016.2.1 is met (a flag, a person's check, in every Group R-2 answer). It
@@ -55,7 +55,7 @@ QUOTE_1016_2_1 = ("each tenant space, dwelling unit and sleeping unit shall be p
 # for it (shown always, a person's check: general.bc_1016_2_1_multiple_tenants), never holding a pass
 RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with a residential room and one way out to the "
             "corridors, lobbies, exits or outside is one dwelling unit. It holds only if every room shared between "
-            "dwelling units is marked a corridor or lobby (a shared vestibule or landing marked otherwise would join "
+            "dwelling units is marked a corridor or lobby (a shared vestibule or landing marked residential would join "
             "two units into one) and BCNYS 1016.2.1 (p.341) is met: \"" + QUOTE_1016_2_1 + "\"")
 
 
