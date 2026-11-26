@@ -39,6 +39,7 @@ import site
 import subprocess
 import sys
 import sysconfig
+import tempfile
 import time
 from pathlib import Path
 
@@ -269,6 +270,8 @@ def _python_roots() -> list[Path]:
     never law. A root that holds the repo itself is left out, so nothing of the repo is ever taken for Python's."""
     paths = {sys.prefix, sys.base_prefix, sys.exec_prefix, sys.base_exec_prefix, *site.getsitepackages(),
              site.getusersitepackages(), *(sysconfig.get_paths().values())}
+    if sys.pycache_prefix:                      # fresh()'s own empty cache folder: compiled from source, this run
+        paths.add(sys.pycache_prefix)
     roots = []
     for p in sorted(paths):
         r = Path(p).resolve()
@@ -326,9 +329,14 @@ def fresh(folder: Path) -> bytes:
     # this repo's packages alone: another entry (an empty one is the folder it runs in) would change what the import
     # lists, so the certificate would differ by machine; everything else comes from Python's own installation
     ours = [str(p) for p in _import_path(REPO)]
-    env = dict(os.environ, PYTHONPATH=os.pathsep.join(ours))
-    done = subprocess.run([sys.executable, "-P", "-c", _CHILD, str(Path(folder).resolve()), str(REPO)],
-                          capture_output=True, env=env, cwd=str(REPO))
+    # and never the repo's compiled caches (__pycache__): Python trusts one by its source's size and time to the
+    # second, so a same-size edit could run the old code beside the new source's sha256 (review round 5). The child
+    # compiles every module from its source, into an empty folder of its own, written nowhere
+    with tempfile.TemporaryDirectory(prefix="gordium_publish_") as cache:
+        env = dict(os.environ, PYTHONPATH=os.pathsep.join(ours), PYTHONPYCACHEPREFIX=cache,
+                   PYTHONDONTWRITEBYTECODE="1")
+        done = subprocess.run([sys.executable, "-P", "-c", _CHILD, str(Path(folder).resolve()), str(REPO)],
+                              capture_output=True, env=env, cwd=str(REPO))
     if done.returncode != 0:
         why = done.stderr.decode("utf-8", "replace").strip().splitlines()
         raise PublishError(f"the fresh compile of {_shown(folder)} failed: {why[-1] if why else done.returncode}")

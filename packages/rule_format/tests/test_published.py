@@ -297,6 +297,31 @@ def test_a_new_package_folder_makes_every_certificate_stale(copy):
         new.rmdir()
     assert [published.stale(copy / law, repo=copy) for law in LAWS] == [[]] * len(LAWS)
 
+
+def test_a_same_size_edit_to_a_validator_module_is_compiled_from_its_source_never_its_old_cache(copy):
+    """Review round 5 (two sceptics): the fresh compile could run a module's old __pycache__ .pyc after a same-size
+    edit with its time kept (Python trusts a cache by its source's size and time to the second), so the certificate
+    paired the new source's sha256 with the old code's answer, and neither stale() nor --check could see it. The
+    compile now always runs the source the validator hashes: here the edit adds a problem, and publish refuses."""
+    module = copy / "packages/rule_format/rule_format/state_law.py"
+    kept, cert = module.read_bytes(), (copy / CERT).read_bytes()
+    old, new = b'out = [] if isinstance(s.get("name")', b'out = [1]if isinstance(s.get("name")'
+    assert kept.count(old) == 1 and len(old) == len(new)
+    import importlib.util
+    stat = module.stat()
+    subprocess.run([sys.executable, "-c", f"import py_compile; py_compile.compile({str(module)!r}, "
+                    f"cfile={importlib.util.cache_from_source(str(module))!r})"], check=True)   # the old code's cache
+    try:
+        module.write_bytes(kept.replace(old, new))
+        os.utime(module, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+        code, out = _run(copy, MAINE)
+        assert code == 1 and "its law has a problem: 1" in out, out
+    finally:
+        module.write_bytes(kept)
+        os.utime(module, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+        (copy / CERT).write_bytes(cert)
+    assert published.stale(copy / MAINE, repo=copy) == []
+
 # ---- in-process -----------------------------------------------------------------------------------------------------
 
 def test_the_typed_json_keeps_dates_and_sets_and_refuses_what_it_cant_keep():
