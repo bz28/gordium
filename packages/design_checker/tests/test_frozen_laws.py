@@ -110,3 +110,15 @@ def test_a_check_with_a_stale_certificate_needs_review_for_that_law_and_says_why
     assert "frozen copy can't be used" in mine[0]["reason"] and "no certificate at" in mine[0]["reason"]
     assert result["egress"]["results"] == {} and result["sections"][0]["key"] == "zoning"
     assert result["view"]["state"] != present.COMPLIES
+
+
+def test_a_checks_rules_are_parsed_from_the_very_bytes_the_certificate_was_checked_against(monkeypatch):
+    """Review round 1 of PR 3: nothing failed if the checker went back to reading the rulebook from disk after the
+    certificate's check, so a rulebook saved in between could be checked against rules no one validated. Any later
+    read of the rulebook here gives no rules: the check's rules still come from the bytes frozen() hashed."""
+    from pathlib import Path
+    folder, book = place(REPO / ITHACA).inherited_rulebooks()[0]
+    real = egress.load
+    monkeypatch.setattr(egress, "load", lambda p: {"rules": []} if Path(p) == Path(book) else real(p))
+    law = egress.laws(ITHACA)["laws"][0]
+    assert law["rules"] and law["rules"] == load(book)["rules"]
