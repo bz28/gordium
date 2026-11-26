@@ -10,7 +10,7 @@ name: Windows
 # Pythons.
 on:
   schedule:
-    - cron: "0 7 * * *"     # 02:00 New York time
+    - cron: "0 7 * * *"     # 07:00 UTC: 02:00 in New York in winter, 03:00 in summer
   workflow_dispatch:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
