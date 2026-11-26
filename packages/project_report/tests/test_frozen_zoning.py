@@ -47,3 +47,31 @@ def test_the_report_and_the_check_take_the_rules_from_the_bytes_checked_never_a_
     monkeypatch.setattr(report, "load", lambda p: {"rules": []} if Path(p) == book else real(p))
     t = report.tables(SITE)
     assert t["rules"] == load(book)["rules"] and t["output"] and t["uses"]
+
+
+def test_a_checks_verdicts_come_from_the_checked_rulebook_never_a_second_read_in_check(monkeypatch):
+    """Review round 1 of PR 4 (F2): check.py read the rulebook again after the report's checks, so a rulebook saved in
+    between could decide a verdict from rules no one checked. With check.load giving rules that would fail everything
+    for this rulebook, the check's rows are the same as with the real one."""
+    import copy
+    import sys
+    from design_checker import check
+    sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
+    from test_measure import FACTS, box, lot
+    site = {"units": "ft", "lot": lot([(0, 0), (60, 0), (60, 110), (0, 110)]),
+            "buildings": [box(10, 25, 40, 75, 0, 30)], "problems": []}
+    before = check.check_site(copy.deepcopy(site), dict(FACTS))["view"]["items"]
+    book = rulebook_for(ITHACA, FACTS["zone"])
+    real = check.load
+
+    def edited(p):
+        got = real(p)
+        if Path(p) == book:
+            got = copy.deepcopy(got)
+            for r in got["rules"]:
+                if r.get("check"):
+                    r["check"] = "front_yard < 0"
+        return got
+    monkeypatch.setattr(check, "load", edited)
+    after = check.check_site(copy.deepcopy(site), dict(FACTS))["view"]["items"]
+    assert [(i["id"], i["status"]) for i in after] == [(i["id"], i["status"]) for i in before]

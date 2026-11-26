@@ -21,7 +21,7 @@ $project = Join-Path $PSScriptRoot "src\Gordium.Revit.Addin"
 $clone = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 if ($Dev -and $Architect) { throw "-Dev and -Architect: choose one (-Dev adds the Trial panel's developer tools)" }
 $trialBuild = if ($Dev) { "true" } else { "false" }
-# Compile, then freeze (rule_format/published.py): each state law's certificate is written from exactly the files
+# Compile, then freeze (rule_format/published.py): each rulebook's certificate (state laws' and zoning districts') is written from exactly the files
 # installed, with the Python the add-in runs (gordium_python.txt pointed at this clone's packages, or its venv), so the
 # worker reads laws validated once. A law with problems is refused here, before anything is installed.
 $python = if ($Python) { (Resolve-Path $Python).Path } else { Join-Path $clone ".venv\Scripts\python.exe" }
@@ -31,7 +31,7 @@ $kept = $env:PYTHONPATH
 try {
     $env:PYTHONPATH = $packages
     & $python -m rule_format publish
-    if ($LASTEXITCODE -ne 0) { throw "python -m rule_format publish failed: a state law can't be published (see above)" }
+    if ($LASTEXITCODE -ne 0) { throw "python -m rule_format publish failed: a rulebook can't be published (see above)" }
 } finally { $env:PYTHONPATH = $kept }
 # -t:Rebuild: the trial switch is compiled in, so a build left by the other kind is never reused
 dotnet build $project -c Release -f $tfm -v q -t:Rebuild "-p:GordiumTrial=$trialBuild"

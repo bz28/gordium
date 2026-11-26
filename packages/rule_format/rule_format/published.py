@@ -6,7 +6,7 @@ from. While rules are draft (approval is deferred, principle 2) certificates are
 (.gitignore): built by `python -m rule_format publish` (CI before the tests, a session-wide pytest fixture, the
 Revit add-in's install script, the goldens and permit-sheet commands when one is missing).
 
-    python -m rule_format publish [folder]          # writes each state law's certificate (refused if it has problems)
+    python -m rule_format publish [folder ...]      # writes each rulebook's certificate (refused if it has problems)
     python -m rule_format publish --check [folder]  # a fresh compile must give the same bytes; names what changed
 
 A certificate (FORMAT) is sorted-key JSON with no timestamps, so the same inputs give the same bytes on every
@@ -17,17 +17,16 @@ machine:
   opened (recorded by an "open" audit hook in the fresh process, never a list kept by hand), with every file of the
   law folder (place_files, so a file that appears is caught) and the shared files every check reads (shared_files);
 - `listed`: {folder: sha256 of its entry names} of every repo folder the compile listed (the same audit hook's
-  os.scandir and os.listdir): the compile's answer can turn on which names exist, not only on what files say (a
-  rule's notes may name a repo file: rulebook._in_repo walks the repo's names), so a name that appears or goes in
-  any of them makes the certificate stale. Every folder of the law folder and of the shared files is listed too,
-  whatever the compile lists (it also asks whether a file exists, which no audit event shows). Names tools make as
-  they run, and what publish writes, are left out (rulebook.generated_name, the same rule the repo walk follows);
+  os.scandir and os.listdir), the walk of the repo's names left out (`repo_names` below), and every folder of the law
+  folder and of the shared files whatever the compile lists (it also asks whether a file exists, which no audit event
+  shows): a name that appears or goes in any of them makes the certificate stale. Names tools make as they run, and
+  what publish writes, are left out (rulebook.generated_name, the same rule the repo walk follows);
 - `repo_names`: {name: whether a repo file has it} for each file name the compile asked about (a rule's notes may
   name a repo file: rulebook._in_repo), in place of listing every folder of the repo (its walk is left out of `listed`);
 - `validator`: {path: sha256} of the repo's modules the compile imported (packages/);
 - `outside_repo_reads`: files the compile opened outside the repo and outside Python's own installation (the code
   cache, say): must be empty, and publish refuses a certificate otherwise;
-- `result`: compile_law's {problems, kinds, documents}, typed (a date stays a date, a set a set: _encode), so a
+- `result`: compile_law's (a state law) or compile_zoning's (a place's district) {problems, kinds, documents}, typed (a date stays a date, a set a set: _encode), so a
   certificate read back equals a live compile by value. Publish refuses a certificate with problems.
 
 stale() is the cheap recheck (no compile): every input and validator file hashed again and the folder globbed again.
@@ -51,7 +50,7 @@ from .rulebook import (PUBLISHED_SUFFIX, REPO, STATE_SETTINGS, Context, building
                        rules_folder, term_file_problems)
 from .state_law import state_settings_problems
 
-FORMAT = "gordium.published_law/1"
+FORMAT = "gordium.published_law/2"   # /2: repo_names (PR 4); a /1 certificate is refused, by its format
 PUBLISHED = "7_published_rulebooks"
 SUFFIX = PUBLISHED_SUFFIX
 SOURCES = "1_source_documents/sources.yaml"
@@ -305,7 +304,8 @@ def _child(folder: str, repo: str, seen: list, on: list) -> bytes:
     opened = list(seen)
     modules = sorted({Path(f).resolve() for m in list(sys.modules.values())
                       if isinstance(f := getattr(m, "__file__", None), str)})
-    return json.dumps({_rel(b, REPO): _certificate(folder, b, r, opened, modules, asked[b]) for b, r in results.items()},
+    shared = _shared(folder, opened, modules)
+    return json.dumps({_rel(b, REPO): _certificate(shared, b, r, asked[b]) for b, r in results.items()},
                       sort_keys=True).encode("utf-8")
 
 
@@ -324,7 +324,9 @@ def _python_roots() -> list[Path]:
     return roots
 
 
-def _certificate(folder: Path, book: Path, result: dict, seen: list, modules: list[Path], asked: dict) -> dict:
+def _shared(folder: Path, seen: list, modules: list[Path]) -> dict:
+    """What every certificate of one compile process has the same: its inputs, listings, validator, outside reads and
+    code version (worked out once per folder: a place has a certificate per district, review round 1 of PR 4)."""
     roots, packages = _python_roots(), REPO / "packages"
     inputs, listed, outside = set(), set(), set()
     for event, raw in seen:
@@ -357,13 +359,19 @@ def _certificate(folder: Path, book: Path, result: dict, seen: list, modules: li
     return {
         "format": FORMAT,
         "law": _rel(folder, REPO),
-        "book": {"path": _rel(book, REPO), "sha256": _sha(book)},
         "code_version": {d.get("file"): d.get("sha256") for d in sources if isinstance(d, dict)},
         "inputs": {p: _sha(REPO / p) for p in sorted(inputs)},
         "listed": {d: _listing(REPO / d) for d in sorted(listed)},
-        "repo_names": dict(sorted(asked.items())),     # each name the compile asked is a repo file's, and the answer
         "validator": dict(sorted(validator.items())),
         "outside_repo_reads": sorted(outside),
+    }
+
+
+def _certificate(shared: dict, book: Path, result: dict, asked: dict) -> dict:
+    return {
+        **shared,
+        "book": {"path": _rel(book, REPO), "sha256": _sha(book)},
+        "repo_names": dict(sorted(asked.items())),     # each name the compile asked is a repo file's, and the answer
         "result": _encode({"problems": result["problems"], "kinds": result["kinds"],
                            "documents": result["documents"]}),
     }
@@ -488,7 +496,7 @@ def stale(folder: Path, book: Path | None = None, repo: Path = REPO) -> list[str
 
 
 def frozen(folder: Path, book: Path, repo: Path = REPO) -> dict:
-    """compile_law's answer for a state law, read from its certificate after checking it still matches every file it
+    """compiled()'s answer for a rulebook (a state law's or a zoning district's), read from its certificate after checking it still matches every file it
     was worked out from (stale's checks): {"problems", "documents", "kinds"} as compile_law gives them, and "book":
     the rulebook's bytes, exactly the ones whose sha256 the certificate holds (read once, so a rulebook saved between
     the check and its reading is never taken for the one checked). A certificate that is missing, stale, of an
