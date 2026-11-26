@@ -221,10 +221,15 @@ def test_the_pr_example_well_stated_in_revit_passes_its_size_and_ladder_rules():
 def test_a_ladder_the_open_window_blocks_fails_1031_5_2_and_a_blank_ladder_needs_review():
     got = _outcomes(dict(FULL, ladder="ladder_blocked", ladder_encroachment=0))
     assert got["general.bc_1031_5_2_area_well_ladder_over_44"] == "fail", got
-    # reaching 4 in into the well besides: still no ladder it accepts, so 1031.5.2 fails it (the size rules read the
-    # reach as for any ladder or steps in a well over 44 in deep)
-    got = _outcomes(dict(FULL, ladder="ladder_blocked"))
-    assert got["general.bc_1031_5_2_area_well_ladder_over_44"] == "fail", got
+    # reaching 4 in into the well besides: still no ladder it accepts, so 1031.5.2 fails it; whether the exception
+    # allows an obstructed ladder's reach is an open question, so no size rule in either code passes it (review round 2)
+    for word in ("ladder_blocked", "steps_blocked", None):
+        well = {k: v for k, v in dict(FULL, ladder=word).items() if v is not None}
+        got, house = _outcomes(well), _house_outcomes(well)
+        if word:
+            assert got["general.bc_1031_5_2_area_well_ladder_over_44"] == "fail", got
+        assert {got[r] for r in WELL_RULES[:3]} == {"needs_review"}, (word, got)
+        assert {house[r] for r in HOUSE_SIZE_RULES} == {"needs_review"}, (word, house)
     # not stated whether it is a ladder, steps or none: the 50 in well's ladder rule needs review; the ladder's and the
     # steps' own sizes pass where every one stated is within both (either way it complies), and need review where one
     # falls short (an 11 in ladder or steps: which it is decides)

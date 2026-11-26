@@ -17155,35 +17155,44 @@ rules:
   title: An area well of at least 9 sq ft below grade (BCNYS 1031.5, 1031.5.1)
   applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
   check: (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment
-    <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher or (occupancy_group
-    in ["R-2"] and not opening_room_one_exit)
+    <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher
+    or (occupancy_group in ["R-2"] and not opening_room_one_exit)
   review_when:
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_door_to_outside
     reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded, or not known), but
       its room has a door to outside: exception 2 sets the opening aside where that door is an exit or exit access door opening
       directly into a public way, or a yard, court or exterior egress balcony leading to one, which the model doesn''t show:
       a person checks.'
   - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
     reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded, or not known), in
       a Group R-2 or R-3 building sprinklered throughout (stated, or not ruled out): exception 5 sets the opening aside for
       a sleeping room in a basement with two means of egress, or one and an escape opening, which the model doesn''t show:
       a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_has_other_openings
     reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded, or not known), but
       its room has another escape opening marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not
       be the one relied on (an extra window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_area >= 9 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))))
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6))))
     reason: 'The opening is below the adjacent grade with no area well of 9 sq ft clear (short, crowded, or not known), in
       a building of two or more groups: whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t
       shown: a person checks.'
+  - when: opening_below_grade and area_well_area >= 9 and not area_well_ladder and area_well_other_encroachment <= 0 and area_well_ladder_encroachment
+      > 0 and area_well_ladder_encroachment <= 6 and area_well_depth > 44 and not opening_room_fourth_or_higher and not (occupancy_group
+      in ["R-2"] and not opening_room_one_exit)
+    reason: 'A ladder or steps the open window or door obstructs (or not stated clear of it) reaches 6 in or less into the
+      well''s required dimensions, in a well over 44 in deep: whether it is ''the ladder or steps required by Section 1031.5.2''
+      whose reach the exception allows is an open question (1031.5.2''s own rule fails the obstruction). A person checks.'
   for_each: emergency_escape_opening
   within: sleeping_room
   when_none: not_applicable
@@ -17494,6 +17503,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_has_other_openings: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -17523,6 +17533,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_has_other_openings: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -17618,6 +17629,66 @@ rules:
     - outcome: needs_review
       part: o1
       within: r1
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 10
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          area_well_depth: 50
+          area_well_ladder: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'A required ladder, not obstructed, reaching 3 in: the exception allows it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_area: 10
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          area_well_depth: 50
+          area_well_ladder: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A ladder the open window obstructs reaching 3 in: whether the exception allows its reach is an open question.'
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). An opening whose bottom is below the adjacent grade has an area well (1031.5) of at least 9 sq ft horizontal
     area (1031.5.1), to its walls, with nothing standing in it reaching into its required dimensions but the ladder or steps
@@ -17631,39 +17702,106 @@ rules:
     story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  open_questions:
+  - Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose reach
+    into the well the exception allows?
+  research:
+  - question: Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose
+      reach into the well the exception allows?
+    searched:
+    - 1031.5.1
+    - 1031.5.2
+    sources: []
+    why_open: '1031.5.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
+      the emergency escape and rescue opening when the window or door is in the open position'', so the plain reading is that
+      an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
+      words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
+      (or unstated) ladder needs review, never a pass. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
+      (the same words) reads it the same way. Searched: 1031.5.1 and 1031.5.2 whole; not yet searched: New York State''s code
+      interpretations and IBC commentary on 1031.5.1.'
+  revised:
+  - field: check
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: review_when
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: examples
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: open_questions
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
 - id: general.bc_1031_5_1_area_well_min_projection
   kind: rule
   topic: means_of_egress
   title: Area well at least 36 in out from the wall (BCNYS 1031.5.1)
   applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
   check: (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment
-    <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher or (occupancy_group
-    in ["R-2"] and not opening_room_one_exit)
+    <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher
+    or (occupancy_group in ["R-2"] and not opening_room_one_exit)
   review_when:
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_door_to_outside
     reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), but its room has a
       door to outside: exception 2 sets the opening aside where that door is an exit or exit access door opening directly
       into a public way, or a yard, court or exterior egress balcony leading to one, which the model doesn''t show: a person
       checks.'
   - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
     reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), in a Group R-2 or R-3
       building sprinklered throughout (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room in
       a basement with two means of egress, or one and an escape opening, which the model doesn''t show: a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_has_other_openings
     reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), but its room has another
       escape opening marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied
       on (an extra window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_projection >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))))
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6))))
     reason: 'The opening has an area well short of 36 inches out clear (short, crowded, or not known), in a building of two
       or more groups: whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  - when: opening_below_grade and area_well_projection >= 36 and not area_well_ladder and area_well_other_encroachment <=
+      0 and area_well_ladder_encroachment > 0 and area_well_ladder_encroachment <= 6 and area_well_depth > 44 and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit)
+    reason: 'A ladder or steps the open window or door obstructs (or not stated clear of it) reaches 6 in or less into the
+      well''s required dimensions, in a well over 44 in deep: whether it is ''the ladder or steps required by Section 1031.5.2''
+      whose reach the exception allows is an open question (1031.5.2''s own rule fails the obstruction). A person checks.'
   for_each: emergency_escape_opening
   within: sleeping_room
   when_none: not_applicable
@@ -17967,6 +18105,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_has_other_openings: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -17996,6 +18135,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_has_other_openings: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -18091,6 +18231,66 @@ rules:
     - outcome: needs_review
       part: o1
       within: r1
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 40
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          area_well_depth: 50
+          area_well_ladder: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'A required ladder, not obstructed, reaching 3 in: the exception allows it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_projection: 40
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          area_well_depth: 50
+          area_well_ladder: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A ladder the open window obstructs reaching 3 in: whether the exception allows its reach is an open question.'
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). Its area well''s horizontal projection is 36 inches or more to its walls, and nothing standing in it reaches
     into it but the ladder or steps 1031.5.2 requires, those no more than 6 inches (not measured yet, a review); short of
@@ -18103,39 +18303,106 @@ rules:
     round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  open_questions:
+  - Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose reach
+    into the well the exception allows?
+  research:
+  - question: Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose
+      reach into the well the exception allows?
+    searched:
+    - 1031.5.1
+    - 1031.5.2
+    sources: []
+    why_open: '1031.5.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
+      the emergency escape and rescue opening when the window or door is in the open position'', so the plain reading is that
+      an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
+      words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
+      (or unstated) ladder needs review, never a pass. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
+      (the same words) reads it the same way. Searched: 1031.5.1 and 1031.5.2 whole; not yet searched: New York State''s code
+      interpretations and IBC commentary on 1031.5.1.'
+  revised:
+  - field: check
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: review_when
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: examples
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: open_questions
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
 - id: general.bc_1031_5_1_area_well_min_width
   kind: rule
   topic: means_of_egress
   title: Area well at least 36 in wide (BCNYS 1031.5.1)
   applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
   check: (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment <= 0 and (area_well_ladder_encroachment
-    <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher or (occupancy_group
-    in ["R-2"] and not opening_room_one_exit)
+    <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) or opening_room_fourth_or_higher
+    or (occupancy_group in ["R-2"] and not opening_room_one_exit)
   review_when:
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_door_to_outside
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_door_to_outside
     reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), but its room has a
       door to outside: exception 2 sets the opening aside where that door is an exit or exit access door opening directly
       into a public way, or a yard, court or exterior egress balcony leading to one, which the model doesn''t show: a person
       checks.'
   - when: occupancy_group in ["R-2", "R-3"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and (sprinklered_903_3_1_1
-      or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2 or sprinklered_903_3_1_3)
     reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), in a Group R-2 or
       R-3 building sprinklered throughout (stated, or not ruled out): exception 5 sets the opening aside for a sleeping room
       in a basement with two means of egress, or one and an escape opening, which the model doesn''t show: a person checks.'
   - when: occupancy_group in ["R-2", "R-3", "R-4"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6)))) and
-      not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and opening_room_has_other_openings
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6)))) and not opening_room_fourth_or_higher and not (occupancy_group in ["R-2"] and not opening_room_one_exit) and
+      opening_room_has_other_openings
     reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), but its room has another
       escape opening marked: 1031.2 asks each sleeping room for not fewer than one, so this one may not be the one relied
       on (an extra window needn''t meet 1031.3): a person checks.'
   - when: occupancy_group in ["mixed"] and not (not opening_below_grade or (area_well_width >= 36 and area_well_other_encroachment
-      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_depth > 44 and area_well_ladder_encroachment <= 6))))
+      <= 0 and (area_well_ladder_encroachment <= 0 or (area_well_ladder and area_well_depth > 44 and area_well_ladder_encroachment
+      <= 6))))
     reason: 'The opening has an area well short of 36 inches wide clear (short, crowded, or not known), in a building of two
       or more groups: whether its room is in a Group R-2, R-3 or R-4 occupancy 1031.2 asks it of isn''t shown: a person checks.'
+  - when: opening_below_grade and area_well_width >= 36 and not area_well_ladder and area_well_other_encroachment <= 0 and
+      area_well_ladder_encroachment > 0 and area_well_ladder_encroachment <= 6 and area_well_depth > 44 and not opening_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not opening_room_one_exit)
+    reason: 'A ladder or steps the open window or door obstructs (or not stated clear of it) reaches 6 in or less into the
+      well''s required dimensions, in a well over 44 in deep: whether it is ''the ladder or steps required by Section 1031.5.2''
+      whose reach the exception allows is an open question (1031.5.2''s own rule fails the obstruction). A person checks.'
   for_each: emergency_escape_opening
   within: sleeping_room
   when_none: not_applicable
@@ -18439,6 +18706,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_has_other_openings: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -18468,6 +18736,7 @@ rules:
           opening_room_fourth_or_higher: false
           opening_room_has_other_openings: false
           area_well_depth: 50
+          area_well_ladder: true
         name: Escape window, its well with something in it
         within: r1
       sleeping_room:
@@ -18563,6 +18832,66 @@ rules:
     - outcome: needs_review
       part: o1
       within: r1
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 40
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          area_well_depth: 50
+          area_well_ladder: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+    note: 'A required ladder, not obstructed, reaching 3 in: the exception allows it.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Escape window
+        within: r1
+        measures:
+          opening_below_grade: true
+          area_well_width: 40
+          area_well_other_encroachment: 0
+          area_well_ladder_encroachment: 3
+          opening_room_fourth_or_higher: false
+          opening_room_door_to_outside: false
+          opening_room_has_other_openings: false
+          area_well_depth: 50
+          area_well_ladder: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A ladder the open window obstructs reaching 3 in: whether the exception allows its reach is an open question.'
   notes: 'Section group 8c: every escape opening the description marks in a sleeping room (the interior measuring''s, as the
     house code''s). Its area well''s width is 36 inches or more to its walls, and nothing standing in it reaches into it but
     the ladder or steps 1031.5.2 requires, those no more than 6 inches (not measured yet, a review); short of 36 inches it
@@ -18575,6 +18904,64 @@ rules:
     round 1), or where the room''s story isn''t known (not measured yet). Hand-drafted in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  open_questions:
+  - Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose reach
+    into the well the exception allows?
+  research:
+  - question: Is a ladder or steps the open window or door obstructs "The ladder or steps required by Section 1031.5.2" whose
+      reach into the well the exception allows?
+    searched:
+    - 1031.5.1
+    - 1031.5.2
+    sources: []
+    why_open: '1031.5.2 requires the ladder or steps of a well over 44 in deep and says they ''shall not be obstructed by
+      the emergency escape and rescue opening when the window or door is in the open position'', so the plain reading is that
+      an obstructed one isn''t the ladder the exception names and its reach has no exception (a fail); but the exception''s
+      words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
+      (or unstated) ladder needs review, never a pass. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
+      (the same words) reads it the same way. Searched: 1031.5.1 and 1031.5.2 whole; not yet searched: New York State''s code
+      interpretations and IBC commentary on 1031.5.1.'
+  revised:
+  - field: check
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: review_when
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: examples
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: open_questions
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
+      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
+      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
+      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
+      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
 - id: general.bc_1031_5_1_area_well_allows_full_opening
   kind: rule
   topic: means_of_egress

@@ -159,6 +159,7 @@ def _comparisons(check: str, aside: list | None = None):
         if aside is not None and (words := _aside(node)):
             if words not in aside:
                 aside.append(words)
+            out.append(("", "aside", node))          # its measures still shown in the Proposed column
             continue
         if isinstance(node, ast.Compare) and len(node.ops) == 1 and type(node.ops[0]) in SIGN:
             left, op, right = node.left, type(node.ops[0]), node.comparators[0]
@@ -188,7 +189,7 @@ def in_words(text: str) -> str:
 def compared(check) -> set[str]:
     """The measures the check compares with a limit (or needs yes/no): what a schedule column is about."""
     got = _comparisons(check, []) if isinstance(check, str) else None
-    return {c[0] for c in got or [] if c}
+    return {c[0] for c in got or [] if c and c[1] != "aside"}
 
 
 def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None) -> tuple[str, str]:
@@ -205,6 +206,8 @@ def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None)
             f"{measure_words(m)} {value(values.get(m), unit_of(kind, m))}" for m in sorted(values)) or ""
     kinds = _kinds(allowed or {}, parts.measure_kinds(kind))
     need, have = [], []
+    shown_aside = sorted({n.id for c in got if c[1] == "aside" for n in ast.walk(c[2]) if isinstance(n, ast.Name)})
+    got = [c for c in got if c[1] != "aside"]
     named = len(got) > 1
     for m, op, right in got:
         unit = unit_of(kind, m)
@@ -225,4 +228,6 @@ def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None)
             need.append(f"{label}{SIGN[op]} {text}" + (f" {'sq ft' if unit == 'sf' else unit}" if unit in ("in", "sf")
                                                       else ""))
         have.append(f"{label}{value(values.get(m), unit, toward(op, True))}")
+    # the measures set aside, as the part has them (the value that may decide a fail is never hidden)
+    have += [f"{measure_words(m)} {value(values.get(m), unit_of(kind, m))}" for m in shown_aside]
     return "; ".join(need + aside), "; ".join(have)
