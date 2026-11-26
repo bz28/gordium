@@ -113,3 +113,23 @@ def test_the_walk_two_only_where_every_way_out_reaches_two_distinct_exits():
             assert g["two"] is want, (exits, split, served, i, g)
             seen.add(want)
     assert seen == {True, False}
+
+
+def test_an_exit_reached_only_through_another_units_room_never_counts():
+    """1016.2.1: no route through an adjacent dwelling unit. The corridor cut in two (b0's half reaches exit x only),
+    and a neighbour's living room, which routes may cross (marked pass-through), opening into both halves: its routes
+    reach exit y through it, but that room is another space's, so b0 still reaches one exit. Two units joined by a
+    door (a lock-off), each with its own door to the corridor, aren't worked out (two ways out of one space)."""
+    desc = corridor(split=True)
+    desc["rooms"].append(room("nb", rect(12, -12, 24, -7), use="other", lockable=False, pass_through=True))
+    desc["doors"] += [door("n1", (14, -6.75), (1, 0), ("nb", "c")), door("n2", (21, -6.75), (1, 0), ("nb", "c2"))]
+    out = measure(desc)
+    story = out["parts"]["story"][0]
+    assert story["measures"]["egress_travel_distance"] > 0           # the routes walk through nb (they reach y)
+    got = {p["id"]: p["more"].get(EXITS_REACHED) for p in out["parts"]["space"]}
+    assert got["b0"]["two"] is False and got["b0"]["doors"] == {"e0": ["x"]}, got["b0"]
+    # a lock-off: b0 and b1 joined by a door, each with its own door to the whole corridor
+    desc = corridor()
+    desc["doors"].append(door("j", (11.75, 5), (0, 1), ("b0", "b1")))
+    got = reached(desc)
+    assert got["b0"]["two"] is False and "2 ways out" in got["b0"]["why"], got["b0"]

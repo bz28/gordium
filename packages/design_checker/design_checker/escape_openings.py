@@ -11,9 +11,9 @@ Building Code's own reading of the building already knows of it, with no new geo
   1031.2 item 1, Group R-2 "in stories with only one exit or access to only one exit"); a story with two or more
   doesn't show that the room's occupants have access to more than one (each dwelling unit may reach only one, as
   Table 1006.3.4(1) permits: review round 1), so there it is no only where the routes show every way out of the
-  room reaches two or more separate and distinct exits (the routes' space part, `exits_reached`: 1006.3, 202 COMMON
-  PATH OF EGRESS TRAVEL), else not measured. A room the routes reach through the room it serves (decision 1a) says
-  that reading beside it (`confirm`).
+  room reaches two or more separate and distinct exits through its own space and the corridors and lobbies only (the
+  routes' space part, `exits_reached`: 1006.3, 202 COMMON PATH OF EGRESS TRAVEL, 1016.2.1), else not measured. A
+  `confirm` the routes give the room's exit count is said beside it too.
 - `sleeping_room_door_to_outside`: whether any door of the room (the routes' door parts whose sides name it) has
   outside on its other side (1031.2 exception 2: an exit door or exit access door that opens directly into a public
   way, yard, court or exterior egress balcony); no, only where every door of the description has both its sides
