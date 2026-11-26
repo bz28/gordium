@@ -676,3 +676,15 @@ def test_openings_that_arent_a_list_of_openings_leave_the_place_not_known(openin
     got = places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})
     assert FIRST not in got["L0"]["measures"]
     assert _reason(got).startswith(STOPS["ground_openings_not_read"].split("{")[0])
+
+
+@pytest.mark.parametrize("well", [5, "deep", [-2], {}, {"floor_elevation": None}, {"width": 40}])
+def test_an_area_well_whose_floor_cant_be_read_leaves_the_place_not_known(well):
+    """Cold round 2 of the room-id fix: an area well given at an opening is the lowest ground there; one whose floor
+    can't be read leaves the stories' places not measured, never placed as if there were no well."""
+    desc, stories = building([[5]])
+    desc["openings"] = [{"id": "w", "area_well": well}]
+    got = places(desc, Reader("ft"), {"L0": ""}, stories, {"flat": 0})
+    assert FIRST not in got["L0"]["measures"]
+    assert _reason(got).startswith(STOPS["ground_openings_not_read"].split("{")[0])
+

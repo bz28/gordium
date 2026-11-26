@@ -293,7 +293,9 @@ def _stated_ground(description, reader) -> list | None:
         try:
             for v in (given if isinstance(given, list) else [] if given is None else [given]):
                 out.append(reader.length(v, "the ground outside an opening"))
-            if isinstance(well, dict) and well.get("floor_elevation") is not None:
+            if well is not None and not (isinstance(well, dict) and well.get("floor_elevation") is not None):
+                return None                              # a well whose floor can't be read: the lowest ground isn't
+            if well is not None:
                 out.append(reader.length(well["floor_elevation"], "an area well's floor"))
         except InteriorStop:
             return None
