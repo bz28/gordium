@@ -112,3 +112,7 @@ One more wrong "no": a stair wholly in a room drawn with no door or opening (the
 ## Review round 10 of step 2 (2026-11-26)
 
 Round 9's "joined to something" was too weak: a stair in rooms joined only to each other, or only to the outside, still counted as elsewhere. As a class: a stair is placed outside a space only when every nosing stands in the shared circulation (a corridor, lobby or exit, or a room of a space opening into one). One test, three cases.
+
+## Review round 11 of step 2 (2026-11-26)
+
+One more wrong "no": a door drawn on another level than its room vanished from the room's story (the routes stop only the door's own story), so the shared corridor looked like the space's one way out. Now a door or opening the description gives for a room of the story, but not read there, leaves the story not measured. One test.

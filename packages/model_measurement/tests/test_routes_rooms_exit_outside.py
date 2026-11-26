@@ -29,7 +29,7 @@ from model_measurement.routes.stops import STOPS, Stop  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[3]
 OUTSIDE_KEYS = {"outside_no_rooms", "outside_door_not_marked", "outside_way_unclear", "outside_hall_unclear",
-                "outside_into_exit", "outside_stair"}
+                "outside_into_exit", "outside_stair", "outside_link_elsewhere"}
 KINDS = ("marked", "unmarked", "stair", "none")
 SIDES = ("door", "passage", "wall")
 
@@ -250,6 +250,7 @@ def test_each_reason_has_a_case():
     assert into == STOPS["outside_into_exit"].format(name="r0", door="se")
     seen.add("outside_into_exit")
     seen.add("outside_stair")                            # test_a_stair_within_a_space_on_the_shared_corridor...
+    seen.add("outside_link_elsewhere")                   # test_a_door_drawn_on_another_level_is_never_a_no
     assert seen == OUTSIDE_KEYS
 
 
@@ -417,3 +418,16 @@ def test_a_stair_in_rooms_joined_only_to_each_other_or_the_outside_may_be_the_sp
     desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
     desc["stairs"] = [{"id": "st", "nosings": [[[13, 2, 0], [15, 2, 0]]]}]          # in room 1, on the corridor
     assert _story(desc)["measures"][OUTSIDE_FACT] is False
+
+
+def test_a_door_drawn_on_another_level_is_never_a_no():
+    """Review round 11 (PR 2): room 0's own exterior door put on another level vanished from its story (stopped only
+    there), so the shared corridor looked like its one way out: "no". A door or opening the description gives for a
+    room of the story but the story didn't read leaves it not measured."""
+    desc = row(("marked", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    desc["levels"].append({"id": "L2", "name": "Level 2", "elevation": 10})
+    desc["rooms"].append(room("u", rect(0, 0, 10, 10), use="other", lockable=False, pass_through=False, level="L2",
+                              floor_elevation=10))
+    next(d for d in desc["doors"] if d["id"] == "o0")["level"] = "L2"
+    got = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
+    assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_link_elsewhere"].format(name="r0")

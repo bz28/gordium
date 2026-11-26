@@ -89,7 +89,8 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     for level, story in floor.stories.items():
         uses = {rid: (items.get(rid) or {}).get("use") for rid in story.rooms}
         here = [u for u in unknown if u.get("level") == level]
-        _story_parts(story, uses, items, here, parts, clearance, description.get("building"), stairs)
+        _story_parts(story, uses, items, here, parts, clearance, description.get("building"), stairs,
+                     _links_listed(description))
     for sp in parts["story"]:                            # where each story sits against the grade plane
         got = placed[sp["id"]]
         sp["measures"].update(got["measures"])
@@ -163,7 +164,7 @@ def _readings(part, name, readings, words) -> None:
     part["not_measured"][name] = Stop("readings", question=question, words=words).reason
 
 
-def _story_parts(story, uses, items, unknown, parts, r, building, stairs) -> None:
+def _story_parts(story, uses, items, unknown, parts, r, building, stairs, listed=()) -> None:
     sp = _part(story.level, story.name)
     parts["story"].append(sp)
     routes = None
@@ -182,7 +183,7 @@ def _story_parts(story, uses, items, unknown, parts, r, building, stairs) -> Non
             sp["confirm"] = {m: words for m in READ_THROUGH}
     _story_areas(sp, story, uses, [name_of(u) for u in unknown])
     try:
-        sp["measures"][OUTSIDE_FACT] = rooms_exit_outside(story, items, building, stairs)
+        sp["measures"][OUTSIDE_FACT] = rooms_exit_outside(story, items, building, stairs, listed)
     except Stop as s:
         sp["not_measured"][OUTSIDE_FACT] = s.reason
     for m in ("story_occupant_load",):
@@ -528,7 +529,7 @@ ENTERED_EXITS = ("exit_enclosure", "exit_passageway")    # the exits a door ente
 OUTSIDE_FACT = "story_rooms_exit_directly_outside"
 
 
-def rooms_exit_outside(story, items: dict | None = None, building: dict | None = None, stairs=()) -> bool:
+def rooms_exit_outside(story, items: dict | None = None, building: dict | None = None, stairs=(), listed=()) -> bool:
     """Whether the story relies on BCNYS 1006.3.4 item 2 ("Rooms, areas and spaces complying with Section 1006.2.1 with
     exits that discharge directly to the exterior at the level of exit discharge, are permitted to have one exit or
     access to a single exit", p.317): every space on it has an exit of its own straight outside.
@@ -548,6 +549,17 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
     or only through an exit, or none. A story whose routes aren't read isn't measured either."""
     if story.stops:
         raise Stop("story_not_measured", reasons="; ".join(story.stops))
+    # every door and opening the description gives touching a room of this story must be this story's: one drawn on
+    # another level (and so not read here) may be a space's own way out
+    here = {r for r in story.rooms}
+    read_doors = set(story.doors)
+    read_pairs = {frozenset((a, b)) for a, b, _ in story.passages}
+    for kind, key, sides in listed:
+        if not set(sides) & here:
+            continue
+        if (kind == "door" and key not in read_doors) or (kind == "passage" and frozenset(sides) not in read_pairs):
+            raise Stop("outside_link_elsewhere", name=", ".join(sorted(story.rooms[r].name for r in set(sides) & here
+                                                                         if story.rooms.get(r) is not None)) or "?")
     items = items or {}
     found, halls = spaces.spaces(story, _is_exit)
     groups = [set(g) for g in found]
@@ -603,6 +615,18 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
     if unclear:
         raise unclear
     return True
+
+
+def _links_listed(description) -> list:
+    """Every door and passage the description gives: (kind, id, sides as room ids) for each one readable that far."""
+    out = []
+    for d in description.get("doors") or []:
+        if isinstance(d, dict) and isinstance(d.get("sides"), list):
+            out.append(("door", d.get("id"), [x for x in d["sides"] if isinstance(x, str)]))
+    for g in description.get("passages") or []:
+        if isinstance(g, dict) and isinstance(g.get("rooms"), list):
+            out.append(("passage", None, [x for x in g["rooms"] if isinstance(x, str)]))
+    return out
 
 
 def _room_name(story, rid) -> str:
