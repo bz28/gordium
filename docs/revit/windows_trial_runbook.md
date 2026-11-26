@@ -311,7 +311,7 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 Autodesk recommends 32 GB of RAM for Revit 2027; Revit has
 a 30-day free trial; `PropertyLine.GetBoundary` exists only in the Revit 2027 API; Rhino.Inside.Revit has no
 stable Revit 2027 release and pyRevit v7's CPython is experimental, which is why the add-in is C# talking to the
-same Python worker. CI already runs the tests on Windows (`.github/workflows/windows.yml`, job `windows`: on main, and on a PR once it is labelled merge-ready). The commands
+same Python worker. CI already runs the tests on Windows (`.github/workflows/windows.yml`, job `windows`: nightly on main, and on a PR once it is labelled merge-ready). The commands
 and file layouts above were read from the repository, and the worker, its BOM refusal and the conformance command
 were run on the Mac.
 
