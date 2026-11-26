@@ -40,12 +40,14 @@ def test_the_compliant_stair_measures_within_every_limit():
         assert m["stair_clear_width"] == 44                                                 # 1011.2
         assert more["stair_handrail_sides"] == 2 and more["stair_clear_width_at_handrail"] == 37   # 1011.11, 1014.9
     assert guards["g1"]["measures"] == {"guard_height": 42, "guard_opening_sphere": 3.5}    # 1015.3, 1015.4 (under 4)
+    # the header's own headroom figures (review round 3)
+    assert {f: stairs[f]["measures"]["stair_headroom"] for f in stairs} == {"f1": 98.5, "f2": 108}
 
 
 def test_the_failing_stair_breaks_exactly_the_limits_it_was_built_to():
     stairs, guards = _measured("failing")
     assert {f: stairs[f]["measures"]["stair_riser_height"] for f in stairs} == {"f1": 8, "f2": 8}   # > 7 3/4 in
-    assert stairs["f1"]["measures"]["stair_headroom"] >= 80
+    assert stairs["f1"]["measures"]["stair_headroom"] == 124                               # its 132 in slab, 8 in up
     assert stairs["f2"]["measures"]["stair_headroom"] == 76                                 # < 80 in under the beam
     assert stairs["f1"]["more"]["stair_handrail_sides"] == 2
     assert stairs["f2"]["more"]["stair_handrail_sides"] == 1                                # its north side has none
