@@ -242,6 +242,34 @@ results:
   general.bc_1013_6_1_exit_sign_graphics: needs_review
   general.bc_1013_6_2_exit_sign_illumination_intensity: needs_review
   general.bc_1013_6_3_exit_sign_power_source: needs_review
+  # section group 9c: 1009's accessible means of egress, each a person's check (Chapter 11 isn't brought in, and areas of refuge, elevators and signs aren't in the model); 1009.3.3's areas of refuge at stairways don't apply to Group R-2
+  general.bc_1009_1_accessible_means_of_egress_required: needs_review
+  general.bc_1009_2_continuity_and_components: needs_review
+  general.bc_1009_2_1_elevators_required: needs_review
+  general.bc_1009_2_2_doors: needs_review
+  general.bc_1009_3_1_exit_access_stairways: needs_review
+  general.bc_1009_3_2_stairway_width: needs_review
+  general.bc_1009_3_3_area_of_refuge_at_stairways: not_applicable   # Group R-2 (exception 5)
+  general.bc_1009_4_1_elevator_standby_power: needs_review
+  general.bc_1009_4_2_elevator_area_of_refuge: needs_review
+  general.bc_1009_5_platform_lifts: needs_review
+  general.bc_1009_6_areas_of_refuge: needs_review
+  general.bc_1009_6_1_area_of_refuge_travel_distance: needs_review
+  general.bc_1009_6_2_area_of_refuge_stairway_or_elevator_access: needs_review
+  general.bc_1009_6_3_area_of_refuge_size: needs_review
+  general.bc_1009_6_4_area_of_refuge_separation: needs_review
+  general.bc_1009_6_5_area_of_refuge_two_way_communication: needs_review
+  general.bc_1009_7_exterior_areas_for_assisted_rescue: needs_review
+  general.bc_1009_7_1_assisted_rescue_size: needs_review
+  general.bc_1009_7_2_assisted_rescue_separation: needs_review
+  general.bc_1009_7_3_assisted_rescue_openness: needs_review
+  general.bc_1009_7_4_assisted_rescue_stairways: needs_review
+  general.bc_1009_8_two_way_communication: needs_review
+  general.bc_1009_8_1_two_way_communication_system: needs_review
+  general.bc_1009_8_2_two_way_communication_directions: needs_review
+  general.bc_1009_9_accessibility_signage: needs_review
+  general.bc_1009_10_directional_signage: needs_review
+  general.bc_1009_11_instructions: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

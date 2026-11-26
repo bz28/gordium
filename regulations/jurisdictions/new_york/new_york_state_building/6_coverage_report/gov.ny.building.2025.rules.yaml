@@ -293,6 +293,141 @@ pieces:
     heading: Illumination required by an emergency electrical system › Illumination level under emergency power
     rules:
     - general.bc_1008_3_2_emergency_illumination_level
+  '1009.1':
+    label: flag
+    heading: Accessible means of egress › Accessible means of egress required
+    rules:
+    - general.bc_1009_1_accessible_means_of_egress_required
+  '1009.2':
+    label: flag
+    heading: Accessible means of egress › Continuity and components
+    rules:
+    - general.bc_1009_2_continuity_and_components
+  1009.2.1:
+    label: flag
+    heading: Continuity and components › Elevators required
+    rules:
+    - general.bc_1009_2_1_elevators_required
+  1009.2.2:
+    label: flag
+    heading: Continuity and components › Doors
+    rules:
+    - general.bc_1009_2_2_doors
+  1009.3.1:
+    label: flag
+    heading: Stairways › Exit access stairways
+    rules:
+    - general.bc_1009_3_1_exit_access_stairways
+  1009.3.2:
+    label: flag
+    heading: Stairways › Stairway width
+    rules:
+    - general.bc_1009_3_2_stairway_width
+  1009.3.3:
+    label: flag
+    heading: Stairways › Area of refuge
+    rules:
+    - general.bc_1009_3_3_area_of_refuge_at_stairways
+  1009.4.1:
+    label: flag
+    heading: Elevators › Standby power
+    rules:
+    - general.bc_1009_4_1_elevator_standby_power
+  1009.4.2:
+    label: flag
+    heading: Elevators › Area of refuge
+    rules:
+    - general.bc_1009_4_2_elevator_area_of_refuge
+  '1009.5':
+    label: flag
+    heading: Accessible means of egress › Platform lifts
+    rules:
+    - general.bc_1009_5_platform_lifts
+  '1009.6':
+    label: flag
+    heading: Accessible means of egress › Areas of refuge
+    rules:
+    - general.bc_1009_6_areas_of_refuge
+  1009.6.1:
+    label: flag
+    heading: Areas of refuge › Travel distance
+    rules:
+    - general.bc_1009_6_1_area_of_refuge_travel_distance
+  1009.6.2:
+    label: flag
+    heading: Areas of refuge › Stairway or elevator access
+    rules:
+    - general.bc_1009_6_2_area_of_refuge_stairway_or_elevator_access
+  1009.6.3:
+    label: flag
+    heading: Areas of refuge › Size
+    rules:
+    - general.bc_1009_6_3_area_of_refuge_size
+  1009.6.4:
+    label: flag
+    heading: Areas of refuge › Separation
+    rules:
+    - general.bc_1009_6_4_area_of_refuge_separation
+  1009.6.5:
+    label: flag
+    heading: Areas of refuge › Two-way communication
+    rules:
+    - general.bc_1009_6_5_area_of_refuge_two_way_communication
+  '1009.7':
+    label: flag
+    heading: Accessible means of egress › Exterior areas for assisted rescue
+    rules:
+    - general.bc_1009_7_exterior_areas_for_assisted_rescue
+  1009.7.1:
+    label: flag
+    heading: Exterior areas for assisted rescue › Size
+    rules:
+    - general.bc_1009_7_1_assisted_rescue_size
+  1009.7.2:
+    label: flag
+    heading: Exterior areas for assisted rescue › Separation
+    rules:
+    - general.bc_1009_7_2_assisted_rescue_separation
+  1009.7.3:
+    label: flag
+    heading: Exterior areas for assisted rescue › Openness
+    rules:
+    - general.bc_1009_7_3_assisted_rescue_openness
+  1009.7.4:
+    label: flag
+    heading: Exterior areas for assisted rescue › Stairways
+    rules:
+    - general.bc_1009_7_4_assisted_rescue_stairways
+  '1009.8':
+    label: flag
+    heading: Accessible means of egress › Two-way communication
+    rules:
+    - general.bc_1009_8_two_way_communication
+  1009.8.1:
+    label: flag
+    heading: Two-way communication › System requirements
+    rules:
+    - general.bc_1009_8_1_two_way_communication_system
+  1009.8.2:
+    label: flag
+    heading: Two-way communication › Directions
+    rules:
+    - general.bc_1009_8_2_two_way_communication_directions
+  '1009.9':
+    label: flag
+    heading: Accessible means of egress › Signage
+    rules:
+    - general.bc_1009_9_accessibility_signage
+  '1009.10':
+    label: flag
+    heading: Accessible means of egress › Directional signage
+    rules:
+    - general.bc_1009_10_directional_signage
+  '1009.11':
+    label: flag
+    heading: Accessible means of egress › Instructions
+    rules:
+    - general.bc_1009_11_instructions
   '1010.1':
     label: flag
     heading: General
