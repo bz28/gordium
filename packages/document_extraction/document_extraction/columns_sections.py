@@ -184,7 +184,7 @@ def split(rows: list[dict], brought_in: dict, style_name: str) -> dict:
             tid = in_table[(r["page"], r["line"])]
             table = next((u for u in units if u["id"] == tid and u["kind"] == "table"), None)
             if table is None:                  # (a table's lines named in two runs are one piece)
-                table = {"id": tid, "title": text, "kind": "table", "members": []}
+                table = {"id": tid, "title": "", "kind": "table", "members": []}   # titled once read
                 units.append(table)
             table["members"].append(r)
             continue
@@ -335,6 +335,10 @@ def split(rows: list[dict], brought_in: dict, style_name: str) -> dict:
                  for pid, words in known.items() for w in (words or {})
                  if pid not in keep or w not in undefined.get(pid, ())]
     problems += [p for u in units if u["id"] in keep for p in u.get("loose", [])]
+    for u in units:
+        if u["kind"] == "table":         # its title, from all the lines it is printed on
+            u["title"] = icc_sections.joined_title(icc_sections.table_title_lines(
+                u["members"], style.table or re.compile(r"$^")))
     pieces, outside = [], []
     for u in units:
         if u["id"] in keep:
