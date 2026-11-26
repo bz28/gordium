@@ -935,6 +935,7 @@
 "packages/model_measurement/tests/test_routes_remote.py::test_the_sampled_figure_is_above_every_point_of_a_grid_and_close_to_it[corridor_two_exits]": 15.4,
 "packages/model_measurement/tests/test_routes_remote.py::test_the_sampled_figure_is_above_every_point_of_a_grid_and_close_to_it[l_corridor]": 6.1,
 "packages/model_measurement/tests/test_routes_remote.py::test_the_sampled_figure_is_above_every_point_of_a_grid_and_close_to_it[table_room]": 11.9,
+"packages/model_measurement/tests/test_routes_rooms_exit_outside.py::test_the_four_unit_apartment_its_apartments_reach_the_outside_only_by_the_corridor_and_stairs": 20.2,
 "packages/model_measurement/tests/test_routes_served.py::test_20_the_closets_door_is_its_exit_access_door_and_the_figures_say_the_reading": 6.7,
 "packages/model_measurement/tests/test_routes_served.py::test_a_closets_route_measured_over_the_story_is_a_number": 6.6,
 "packages/model_measurement/tests/test_routes_served.py::test_no_confirm_where_no_room_is_served": 4.9,
