@@ -299,7 +299,22 @@ public sealed class PaneTests
         var change = CheckChanges.Between(Model(House()), new DateTime(2026, 11, 22, 14, 32, 0), Model(HouseAfter()));
         Assert.NotNull(change);
         // UI polish change 40: "Since 14:32 · 9 results changed", four listed, "Show all 9" opens every one in place
-        Assert.Equal("Since 14:32 · 9 results changed", PaneWords.ChangeHeading(change!));
+        // egress UI audit, finding 4: results no longer in the check are counted apart, never as "changed" (the house's
+        // nine: three changed, six left the check)
+        var gone = change!.Rows.Count(r => r.After is null);
+        Assert.Equal((3, 6), (change.Rows.Count - gone, gone));
+        Assert.Equal($"Since 14:32 · {change.Rows.Count - gone} results changed · {gone} left the check", PaneWords.ChangeHeading(change));
+        RowChange Row(string id, Verdict? before, Verdict? after) => new(id, id, before, after, id);
+        var at = new DateTime(2026, 11, 26, 10, 0, 0);
+        Assert.Equal("Since 10:00 · 2 results changed · 3 left the check", PaneWords.ChangeHeading(new CheckChange("", [
+            Row("a", Verdict.NeedsReview, Verdict.Complies), Row("b", null, Verdict.NeedsReview),
+            Row("c", Verdict.NeedsReview, null), Row("d", Verdict.NeedsReview, null), Row("e", Verdict.DoesNotComply, null)], 0, true) { Since = at }));
+        Assert.Equal("Since 10:00 · 1 result left the check", PaneWords.ChangeHeading(new CheckChange("", [Row("c", Verdict.NeedsReview, null)], 0, true) { Since = at }));
+        Assert.Equal("Since 10:00 · 3 results left the check", PaneWords.ChangeHeading(new CheckChange("", [
+            Row("c", Verdict.NeedsReview, null), Row("d", Verdict.Complies, null), Row("e", Verdict.DoesNotComply, null)], 0, true) { Since = at }));
+        Assert.Equal("Since 10:00 · 1 result changed", PaneWords.ChangeHeading(new CheckChange("", [Row("a", Verdict.NeedsReview, Verdict.Complies)], 0, true) { Since = at }));
+        Assert.Equal("1 result changed · 1 left the check", PaneWords.ChangeHeading(new CheckChange("", [
+            Row("a", Verdict.NeedsReview, Verdict.Complies), Row("c", Verdict.NeedsReview, null)], 0, true)));
         Assert.Equal(4, PaneWords.ChangesShown(change!).Count);
         Assert.Equal("Show all 9", PaneWords.ChangesMore(change!));
         Assert.Equal(change!.Rows, PaneWords.ChangesShown(change!, all: true));
