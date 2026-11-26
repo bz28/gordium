@@ -48,11 +48,14 @@ def test_its_rooms_openings_and_doors_are_never_read_as_a_houses():
     d["rooms"] = [{"id": "office", "name": "Office"}]
     d["openings"] = [{"id": "w1", "name": "Window"}]
     d["doors"] = [{"id": "d1", "name": "Door"}]
-    d["has_none"] = [{"kind": "ramp", "source": "the house's own claim"}]
+    d["has_none"] = [{"kind": "sleeping_loft", "source": "the house's own claim"}]
+    assert egress.measure_interior(d)["parts"]["stair"][0]["measures"]["stair_serves_sleeping_loft"] is False
     got = egress._stairs_and_guards(d)
     assert set(got["parts"]) == {"stair", "guard"}
     assert got["parts"]["stair"] and got["parts"]["guard"] is not None
     assert got["problems"] == [], got["problems"]
+    # a house's claims are never read (review round 1): "no sleeping lofts" sets nothing on a building's stair
+    assert all("stair_serves_sleeping_loft" not in s["measures"] for s in got["parts"]["stair"])
 
 
 def test_stairs_not_given_are_not_read_never_none():
