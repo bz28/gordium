@@ -57,6 +57,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private readonly Action _projectInformation;
     private readonly Action _setUp;
     private readonly Action<IReadOnlyList<MarkWrite>> _saveAnswers;
+    private readonly Action _moreTime;                        // "Try again with more time" (UI polish change 15)
     // UI polish changes 22, 23: the answers chosen in the questions card, not saved yet (each new check starts afresh)
     private SetupDraft _answers = new();
     private readonly C.TextBlock _sub = Small("");
@@ -117,9 +118,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     private readonly Dictionary<string, (ResultModel Model, LookedAt Looked, IReadOnlyDictionary<string, string> Labels)> _ticked = new(StringComparer.Ordinal);
 
     internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action projectInformation,
-                         Action<CardRequest> card, Action setUp, PanelTheme theme, Action<IReadOnlyList<MarkWrite>>? saveAnswers = null)
+                         Action<CardRequest> card, Action setUp, PanelTheme theme, Action<IReadOnlyList<MarkWrite>>? saveAnswers = null,
+                         Action? moreTime = null)
     {
         _saveAnswers = saveAnswers ?? (_ => { });
+        _moreTime = moreTime ?? checkAgain;
         _zoom = zoom;
         _card = card;
         _select = select;
@@ -236,7 +239,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     {
         _missing.Children.Clear();
         if (checking is not null)
-            _missing.Children.Add(Banner(PanelStatus.Review, PanelTokens.BgSurface, PanelTokens.Line, Progressing(checking), bottom: 10));
+        {
+            var progress = Progressing();
+            progress.Margin = new W.Thickness(0, 0, 0, 12);
+            _missing.Children.Add(progress);
+        }
         if (!PaneWords.WelcomeShows(PaneShows.Welcome, _everShown))
             return;
         var card = new C.StackPanel { Tag = WelcomeTag };
@@ -320,25 +327,76 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     /// <summary>The welcome card's tag (the tests find it by it).</summary>
     internal const string WelcomeTag = "pane.welcome";
 
-    /// <summary>The check's progress as a card (the intuitive pane, change 12): what is happening, in plain words, and
-    /// that Revit is free; the bar moves on its own (no stage is measured as a share of the whole).</summary>
-    private W.UIElement Progressing(string line)
+    /// <summary>The check's progress as one card (UI polish change 12): "Checking {project}", three steps (Read the
+    /// model ✓ 2 s · Checking zoning and egress rules 34 s · Showing results), the checker's own stage under the one
+    /// running, and one line on what is safe (Revit waits while it reads; free while it checks; after 40 s, that large
+    /// models take a minute or two). Redrawn each second while the checker works.</summary>
+    private C.Border Progressing()
     {
+        _progressCard = new C.Border { BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4), Padding = new W.Thickness(12, 10, 12, 12), Tag = ProgressTag };
+        _progressCard.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
+        _progressCard.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
+        DrawSteps();
+        return _progressCard;
+    }
+
+    /// <summary>The progress card's tag (the renders find it by it).</summary>
+    internal const string ProgressTag = "pane.progress";
+
+    private void DrawSteps()
+    {
+        if (_progressCard is null)
+            return;
+        var checking = _stage == CheckStage.Checking ? DateTime.Now - _checkSince : TimeSpan.Zero;
         var p = new C.StackPanel();
-        p.Children.Add(Typed(new C.TextBlock { Text = PaneWords.Checking(_checkingProject), FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
-        _progressLine = Small(line, top: 2);
-        p.Children.Add(_progressLine);
-        var bar = new C.ProgressBar { IsIndeterminate = true, Height = 4, Margin = new W.Thickness(0, 6, 0, 0), BorderThickness = new W.Thickness(0) };
+        p.Children.Add(Typed(new C.TextBlock { Text = PaneWords.Checking(_checkingProject), TextWrapping = W.TextWrapping.Wrap }, "type.title"));
+        foreach (var step in CheckSteps.Of(_stage, _readTook, checking))
+        {
+            var line = new C.DockPanel { Margin = new W.Thickness(0, 8, 0, 0) };
+            if (step.Time is { } time)
+            {
+                var t = Small(time);
+                C.DockPanel.SetDock(t, C.Dock.Right);
+                line.Children.Add(t);
+            }
+            var mark = step.State switch
+            {
+                StepState.Done => Ink(Typed(new C.TextBlock { Text = "✓", Width = 18 }, Body), PanelTokens.Marked),
+                StepState.Running => Ink(Typed(new C.TextBlock { Text = "●", Width = 18 }, Body), PanelTokens.Accent),
+                _ => Ink(Typed(new C.TextBlock { Text = "○", Width = 18 }, Body), PanelTokens.TextMuted),
+            };
+            C.DockPanel.SetDock(mark, C.Dock.Left);
+            line.Children.Add(mark);
+            var words = new C.StackPanel();
+            var w = Typed(new C.TextBlock { Text = step.Words, TextWrapping = W.TextWrapping.Wrap }, Body);
+            words.Children.Add(step.State == StepState.Waiting ? Ink(w, PanelTokens.TextMuted) : w);
+            if (step.State == StepState.Running && _stage == CheckStage.Checking && _checkerStep is { Length: > 0 } said)
+                words.Children.Add(Small(said, top: 1));          // the checker's own stage ("Measuring the building…")
+            line.Children.Add(words);
+            p.Children.Add(line);
+        }
+        var bar = new C.ProgressBar { IsIndeterminate = true, Height = 3, Margin = new W.Thickness(0, 10, 0, 0), BorderThickness = new W.Thickness(0) };
         bar.SetResourceReference(C.Control.ForegroundProperty, PanelTokens.Accent);
         bar.SetResourceReference(C.Control.BackgroundProperty, PanelTokens.Line);
         p.Children.Add(bar);
-        return p;
+        p.Children.Add(Small(CheckSteps.Note(_stage, checking), top: 8));
+        W.Automation.AutomationProperties.SetName(p, string.Join(", ", CheckSteps.Of(_stage, _readTook, checking).Select(s => $"{s.Words}: {s.State}")));
+        _progressCard.Child = p;
+    }
+
+    /// <summary>The checker's progress line (its stage in its words), under the running step.</summary>
+    internal void Step(string words)
+    {
+        _checkerStep = words;
+        DrawSteps();
     }
 
     private string? _checkingProject;
-
-    /// <summary>The progress card's line, ticked with the checker's seconds.</summary>
-    private C.TextBlock? _progressLine;
+    private C.Border? _progressCard;
+    private CheckStage _stage = CheckStage.Idle;
+    private DateTime _readSince, _checkSince;
+    private TimeSpan? _readTook;
+    private string? _checkerStep;
 
     private const string CheckingNoResults = "Checking: no results yet";
 
@@ -385,7 +443,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
         _everShown |= content.Model is not null;
         _title.Text = PaneWords.HeaderTitle(content.Project);
-        _sub.Text = $"Checked {content.When:HH:mm}";
+        _sub.Text = content.Model?.Stale is not null ? PaneWords.StaleSub(content.Model.StaleKind ?? StaleReason.ModelChanged, content.When)
+                                                     : $"Checked {content.When:HH:mm}";
         Say(_checkAgainState.Status(ClearPrefills.PanelStatus(content.MarksAdded, content.ClearWords, stale: content.Model?.Stale is not null)));
         _summary = null;
         _missing.Children.Clear();
@@ -498,17 +557,15 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             switch (part)
             {
                 case PanelPart.Stale:
-                    // plain words and the way out in the banner itself (the intuitive pane, change 11); the worker's
-                    // or the add-in's own stale words (a cancelled check's) on hover
-                    var sw = new C.StackPanel { ToolTip = model.Stale };
+                    // one slim banner without a button (UI polish change 39): the header's button is the one action
+                    var sw = new C.StackPanel { Tag = StaleTag };
                     var why = model.StaleKind ?? StaleReason.ModelChanged;
-                    sw.Children.Add(Typed(new C.TextBlock { Text = PaneWords.StaleTitle(why, _content?.When ?? DateTime.Now), FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
-                    sw.Children.Add(Small(PaneWords.StaleWords(why), top: 2));
-                    var sa = CauseCardsView.Primary("Check again", () => _checkAgain());
-                    sa.HorizontalAlignment = W.HorizontalAlignment.Left;
-                    sa.Margin = new W.Thickness(0, 6, 0, 0);
-                    sw.Children.Add(sa);
-                    summary.Children.Add(Banner(PanelStatus.Stale, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, sw, bottom: 6));
+                    var at = _content?.When ?? DateTime.Now;
+                    sw.Children.Add(Typed(new C.TextBlock { Text = PaneWords.StaleTitle(why, at), FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Caption));
+                    sw.Children.Add(Small(PaneWords.StaleWords(why, at), top: 1));
+                    var slim = Banner(PanelStatus.Stale, PanelTokens.BgSurface, PanelTokens.Line, sw, bottom: 6);
+                    slim.Padding = new W.Thickness(8, 4, 8, 4);
+                    summary.Children.Add(slim);
                     if (model.Views is not null && _change is { } afterStale)
                         summary.Children.Add(ChangeLine(afterStale, stale));
                     break;
@@ -554,9 +611,12 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
                     summary.Children.Add(WithGlyph(state, Ink(Typed(new C.TextBlock
                     {
                         Text = model.Stale is null ? ResultText.StateWords(model.State)
-                            : PaneWords.StaleState(ResultText.StateWords(model.State), model.StaleKind ?? StaleReason.ModelChanged),
+                            : PaneWords.StaleState(ResultText.StateWords(model.State), _content?.When ?? DateTime.Now),
                         TextWrapping = W.TextWrapping.Wrap,
-                    }, stale ? "type.title" : "type.state"), StatusLook.Colour(state)), size: stale ? 16 : 18));   // stale: smaller, its "(before ...)" on one line
+                    }, stale ? "type.title" : "type.state"), StatusLook.Colour(state)), size: stale ? 16 : 18));   // stale: smaller, its "(at 14:32)" on one line
+                    // the counts in the past tense (change 39): what the check said then, never what holds now
+                    if (stale && model.Views is not null)
+                        summary.Children.Add(Small(ResultViews.SummaryPast(model.Groups.SelectMany(g => g.AllRows).Select(r => r.Verdict)), top: 2, bottom: 2));
                     break;
                 case PanelPart.Counts:
                     // the compact count bar (CountBar): one line per law, its short name and its most important
@@ -732,7 +792,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
 
     /// <summary>A check that failed: every row of the last check taken down, and why (held while a check runs: its
     /// progress line stays).</summary>
-    internal void Failed(string words)
+    internal void Failed(CheckFailure? failure)
     {
         _failed = true;
         _title.Text = PaneWords.HeaderTitle(null);              // nothing of a project shown: never the last one's name
@@ -744,39 +804,55 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         _bodyHost.Child = _missingScroll;
         Relayout();
         _sub.Text = "Not checked";
-        if (words.Length == 0)
+        if (failure is null)
         {
             _sub.Text = _everShown ? "Not checked" : PaneWords.NotCheckedYet;
             Say("");
             Welcome();                                          // a cancelled first check: back to the empty pane
             return;
         }
-        // the error as one plain sentence (the intuitive pane, change 10); the technical words (the exception, the
-        // log's path) go to the clipboard and the tooltip, not the screen
-        var card = new C.StackPanel { Tag = ErrorTag, ToolTip = words };
-        card.Children.Add(Typed(new C.TextBlock { Text = PaneWords.ErrorTitle, FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
-        card.Children.Add(Typed(new C.TextBlock { Text = PaneWords.ErrorWords, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 4, 0, 0) }, Body));
+        // one message per failure (UI polish change 13): what happened and what is safe, what to do, its one button;
+        // the technical words (the exception, the log's path) only on the clipboard, never on screen or in a tooltip
+        // (change 14)
+        var words = failure.Details;
+        var card = new C.StackPanel { Tag = ErrorTag };
+        card.Children.Add(Typed(new C.TextBlock { Text = failure.Title, FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
+        card.Children.Add(Typed(new C.TextBlock { Text = failure.Words, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 4, 0, 0) }, Body));
+        if (failure.Done is { } done)                           // what was already written to the project, on screen
+            card.Children.Add(Small(done, top: 4));
+        if (failure.Next is { } next)
+            card.Children.Add(Small(next, top: 4));
         var buttons = new C.WrapPanel { Margin = new W.Thickness(0, 8, 0, 0) };
-        var again = CauseCardsView.Primary(PaneWords.TryAgain, () => _checkAgain());
-        again.Margin = new W.Thickness(0, 0, 8, 0);
-        buttons.Children.Add(again);
-        var copy = CauseCardsView.Secondary(PaneWords.CopyDetails, () =>
+        if (failure.ActionWords is { } act)
         {
-            try
+            var again = CauseCardsView.Primary(act, failure.Action == FailureAction.TryAgainWithMoreTime ? _moreTime : _checkAgain);
+            again.Margin = new W.Thickness(0, 0, 8, 4);
+            buttons.Children.Add(again);
+        }
+        if (words.Length > 0)
+        {
+            var copy = CauseCardsView.Secondary(CheckFailures.CopyDetails, () =>
             {
-                W.Clipboard.SetText(words);
-            }
-            catch (System.Runtime.InteropServices.ExternalException)
-            {
-                // another program holds the clipboard: the details stay in the tooltip
-            }
-        });
-        copy.ToolTip = words;
-        buttons.Children.Add(copy);
+                try
+                {
+                    W.Clipboard.SetText(words);
+                    Say("The details are copied: paste them into your message to support.");
+                }
+                catch (System.Runtime.InteropServices.ExternalException)
+                {
+                    Say("The clipboard is in use by another program: try Copy details again.");
+                }
+            });
+            copy.Margin = new W.Thickness(0, 0, 0, 4);
+            buttons.Children.Add(copy);
+        }
         card.Children.Add(buttons);
         _missing.Children.Add(Banner(PanelStatus.Review, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, card, bottom: 6));
         Say("");
     }
+
+    /// <summary>The slim stale banner's tag (the renders find it by it).</summary>
+    internal const string StaleTag = "pane.stale";
 
     /// <summary>The error card's tag (the tests find it by it).</summary>
     internal const string ErrorTag = "pane.error";
@@ -823,6 +899,17 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
     /// works the line counts its seconds (Revit's thread is free then; during the read nothing is drawn).</summary>
     internal void Progress(CheckStage stage, DateTime since)
     {
+        if (stage == CheckStage.Reading && _stage != CheckStage.Reading)
+        {
+            _readSince = since;
+            _readTook = null;
+            _checkerStep = null;
+        }
+        if (stage == CheckStage.Checking && _stage == CheckStage.Reading)
+            _readTook = since - _readSince;
+        if (stage == CheckStage.Checking)
+            _checkSince = since;
+        _stage = stage;
         _checkAgainState.Running(CheckWords.Progress(stage, DateTime.Now - since) ?? Checking);
         Say(_checkAgainState.Line);
         _again.Content = CheckWords.Button(stage);
@@ -838,10 +925,14 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         }
         else if (ShowsSetup)
         {
-            var foot = new C.Border { Child = Progressing(_checkAgainState.Line), BorderThickness = new W.Thickness(0, 1, 0, 0), Padding = new W.Thickness(12, 8, 12, 10) };
-            foot.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
-            foot.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
-            _setupFoot.Child = foot;
+            // the form hidden behind the progress (change 12: one thing on screen while waiting); it comes back as it
+            // was when the check ends (cancelled, or a fact still missing)
+            var card = Progressing();
+            card.Margin = new W.Thickness(12, 8, 12, 12);
+            _setupFoot.Child = card;
+            C.DockPanel.SetDock(_setupFoot, C.Dock.Top);
+            if (_setupScroll is not null)
+                _setupScroll.Visibility = W.Visibility.Collapsed;
             Say("");
         }
         _ticks?.Stop();
@@ -856,8 +947,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             _checkAgainState.Running(CheckWords.Checking(DateTime.Now - since));
             if (showing)
                 Say(_checkAgainState.Line);
-            if (_progressLine is not null)
-                _progressLine.Text = _checkAgainState.Line;
+            DrawSteps();
         };
         _ticks.Start();
     }
@@ -871,7 +961,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         Say(_checkAgainState.Stop(_status.Text));        // what the check's redraw had to say, or a failure's words
         _again.Content = CheckWords.CheckAgain;
         _again.IsEnabled = _checkAgainState.Enabled;
-        _progressLine = null;
+        _progressCard = null;
+        _stage = CheckStage.Idle;
+        C.DockPanel.SetDock(_setupFoot, C.Dock.Bottom);
+        if (_setupScroll is not null)
+            _setupScroll.Visibility = W.Visibility.Visible;     // the form back as it was
         if (ShowsSetup && _setup is not null)
             _setupFoot.Child = _setup.Footer;                   // the form's own foot back
         if (_content is null && _sub.Text == CheckingNoResults)
@@ -899,7 +993,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
             case PanelHad.Missing:
                 break;                                      // what to fill in, as it was
             default:
-                Failed("");                                 // the empty or error state: no rows
+                Failed(null);                               // the empty or error state: no rows
                 if (restored == PanelHad.Nothing)
                     _failed = false;
                 break;
