@@ -1233,3 +1233,23 @@ def test_every_section_group_9_reference_with_words_to_follow_is_quoted_by_a_rul
         for s in lab["sources"]:
             lines, _ = _quoted(book, s["page"], *s["lines"])
             assert set(range(s["lines"][0], s["lines"][1] + 1)) <= lines, (pid, s["page"], s["lines"])
+
+
+def test_each_section_group_9_flag_names_what_it_points_to_that_isnt_brought_in():
+    """Review round 3 of section group 9a (P3): the README says of each reference not brought in that 'the rule's notes
+    say so'; 1012.8's flag pointed to 1014 and 1012.6's to ICC A117.1 without saying. Every section (or ICC A117.1)
+    a group 9 flag's quotes name, and that isn't brought in, is named in the flag's notes."""
+    labels = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]
+    brought = set(labels)
+    for r in load(RULEBOOK)["rules"]:
+        sid = r["id"].removeprefix("general.bc_").split("_")[0]
+        if r.get("kind") != "flag" or sid not in GROUP_9_SECTIONS:
+            continue
+        quotes = " ".join(s["quote"] for s in r["sources"])
+        named = set(re.findall(r"(?:Sections?|through|or|and|,) (\d{3,4}(?:\.\d+)*)", quotes))
+        named |= {"ICC A117.1"} if "ICC A117.1" in quotes else set()
+        said = r.get("notes") or ""                  # the notes, where the flag says what isn't brought in
+        for ref in sorted(named):
+            if ref in brought or any(p.startswith(ref + ".") for p in brought):
+                continue
+            assert ref in said, (r["id"], ref)
