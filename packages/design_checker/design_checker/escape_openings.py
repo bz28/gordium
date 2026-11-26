@@ -160,7 +160,12 @@ def _to_openings(rooms: list, openings) -> None:
         if isinstance(r, dict) and isinstance(r.get("id"), str):
             by_id.setdefault(r["id"], []).append(r)
     for o in openings:
-        if not isinstance(o, dict) or not isinstance(o.setdefault("measures", {}), dict)                 or not isinstance(o.setdefault("not_measured", {}), dict):
+        if not isinstance(o, dict):
+            continue
+        if isinstance(o.get("measures"), dict):            # the room's facts are only ever the room's: none given
+            for mine in FROM_ROOM:                         # by the opening itself stands (review of 4d2cd872)
+                o["measures"].pop(mine, None)
+        if not isinstance(o.setdefault("measures", {}), dict) or not isinstance(o.setdefault("not_measured", {}), dict):
             continue                              # an unreadable opening: its rows say so (rule_format.parts)
         m, why = o["measures"], o["not_measured"]
         where = o.get("within")

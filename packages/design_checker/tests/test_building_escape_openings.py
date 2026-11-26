@@ -203,3 +203,14 @@ def test_an_opening_within_no_sleeping_room_read_leaves_every_rooms_count_unknow
         assert "may be this room's" in p["not_measured"]["sleeping_room_escape_openings"]
     assert _linked()["measures"]["sleeping_room_escape_openings"] == 1
 
+
+def test_an_opening_never_keeps_a_room_fact_of_its_own():
+    """Review of the unreadable-opening skip (a false pass): an opening that carries a room fact itself (here, that its
+    room is on the fourth story or higher) and can't be read keeps none of it: the room's facts are only the room's."""
+    one = {"id": "L1", "measures": {"story_exit_count": 1, "story_fourth_or_higher_above_grade_plane": False}}
+    for why in (None, [], {}):
+        parts, desc = _parts(story=one, openings=[{"id": "v", "within": "b", "not_measured": why, "measures": {
+            "opening_net_clear_area": 4.0, "opening_room_fourth_or_higher": True}}])
+        escape_openings.link(parts, desc)
+        assert parts["emergency_escape_opening"][0]["measures"].get("opening_room_fourth_or_higher") is not True, why
+
