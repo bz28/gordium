@@ -309,6 +309,10 @@ REACH_MARKS = {"other_encroachment": "its mark for anything else reaching into t
                "ladder": "its mark for what the well has to climb out by",
                "depth": "its mark for the well's depth"}
 REACH_FIELDS = {words: well_field(key) for key, words in REACH_MARKS.items()}
+# a statement given but not read, by its short name in a reason
+UNREAD_NAMES = {"other_encroachment": "how far anything else reaches into its well",
+                "ladder_encroachment": "how far its ladder or steps reach into its well",
+                "ladder": "what its well has to climb out by", "depth": "its well's depth"}
 
 # {measure: (the field that states it, the marks its reasons name)}: what panel_data names in a mark's cause
 WELL_FIELDS = {**{m: (well_field(k), mark) for k, (m, _, _, mark) in STATED_WELL.items() if m},
@@ -408,9 +412,13 @@ def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict]:
     law = Words("only the ladder or steps required in a well over 44 in deep may, 6 in at most")
 
     def missing(key, which, given):
-        # a reach (or what decides one) left out says so; one given but not read points to its own reason (round 3)
-        return Stop("well_size_reach_not_stated" if given is None else "well_size_reach_unread", name=name,
-                    which=Words(which), mark=Words(REACH_MARKS[key])).reason
+        # a reach (or what decides one) left out says so; one given but not read points to its own reason (round 3),
+        # by a short name of its own (round 4)
+        if given is None:
+            return Stop("well_size_reach_not_stated", name=name, which=Words(which),
+                        mark=Words(REACH_MARKS[key])).reason
+        return Stop("well_size_reach_unread", name=name, which=Words(UNREAD_NAMES[key]),
+                    mark=Words(REACH_MARKS[key])).reason
 
     why = None
     if other is None:
@@ -423,7 +431,12 @@ def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict]:
     elif reach is None:
         why = missing("ladder_encroachment", "how far its ladder or steps reach into the well's required "
                       "dimensions (0 for nothing)", s.get("ladder_encroachment"))
-    elif reach != 0 and (reach > 6 or ladder is False or (depth is not None and depth <= 44)):
+    elif reach != 0 and ladder is False:
+        # a blocked ladder or steps (none can't reach): 1031.5.2 doesn't accept them, so no reach is allowed them;
+        # what settles it is the ladder itself (round 4: the card named the reach)
+        why = Stop("well_size_ladder_not_accepted", name=name, got=Words(f"{reach:g} in"),
+                   mark=Words(REACH_MARKS["ladder"])).reason
+    elif reach != 0 and (reach > 6 or (depth is not None and depth <= 44)):
         why = Stop("well_size_reach_over", name=name, which=Words("its ladder or steps"), got=Words(f"{reach:g} in"),
                    law=law, mark=Words(REACH_MARKS["ladder_encroachment"])).reason
     elif reach != 0 and ladder is None:

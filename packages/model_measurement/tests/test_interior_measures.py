@@ -1990,6 +1990,9 @@ STOP_CASES = {
     "well_size_reach_not_stated": _set(("openings", 0, "stated_well"), {"width": 36}),
     "well_size_reach_over": _set(("openings", 0, "stated_well"), {"width": 36, "other_encroachment": 2}),
     "well_size_reach_unread": _set(("openings", 0, "stated_well"), {"width": 36, "other_encroachment": "x"}),
+    "well_size_ladder_not_accepted": _set(("openings", 0, "stated_well"), {"width": 36, "other_encroachment": 0,
+                                                                           "ladder": "ladder_blocked",
+                                                                           "ladder_encroachment": 2}),
 }
 
 
