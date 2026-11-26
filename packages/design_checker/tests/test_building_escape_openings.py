@@ -167,9 +167,15 @@ def test_each_escape_opening_carries_its_rooms_four_facts():
     parts["emergency_escape_opening"].append({"id": "x", "within": "nowhere", "measures": {}})
     escape_openings.link(parts, desc)
     w, x = parts["emergency_escape_opening"]
+    # x may be w's room's too (it is within no sleeping room read: 8a's stray opening), so whether w's room has
+    # another isn't known; the other three facts are its room's
     assert w["measures"] == {"opening_room_fourth_or_higher": False, "opening_room_one_exit": True,
-                             "opening_room_door_to_outside": False, "opening_room_has_other_openings": False}
+                             "opening_room_door_to_outside": False}
+    assert "may be this room's" in w["not_measured"]["opening_room_has_other_openings"]
     assert not set(w["measures"]) & set(w["not_measured"])
+    parts, desc = _parts(story=one)
+    escape_openings.link(parts, desc)
+    assert parts["emergency_escape_opening"][0]["measures"]["opening_room_has_other_openings"] is False
     assert not set(escape_openings.FROM_ROOM) & set(x["measures"])
     assert set(escape_openings.FROM_ROOM) <= set(x["not_measured"])
     parts, desc = _parts()                                   # two exits: not measured on the room, nor on its opening
