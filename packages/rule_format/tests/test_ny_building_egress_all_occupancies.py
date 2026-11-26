@@ -903,14 +903,22 @@ def test_table_1020_3_within_a_dwelling_unit_needs_review_only_while_not_ruled_o
 def test_more_than_one_reads_the_same_comparison_in_every_piece():
     """Review round 1 of group 5b (P3): 1005.5's 'Where more than one exit ... is required' was read 'none' while
     1020.5's same words read '>': the second reading says what the printed sentence says of each number, so 'more
-    than <n>' is '>' everywhere in this book (a condition, but a comparison all the same)."""
+    than <n>' is '>' everywhere in this book (a condition, but a comparison all the same). Section group 9a: where the
+    sentence denies the verb before it ('shall not overhang that post or pylon more than 4 inches', 1003.3.2), the
+    number is a maximum, '<=': the one such sentence is named here, its words checked, so no other may slip through."""
     pieces = load(NY / "text_verification.yaml")["pieces"]
+    denied = {("1003.3.2", "more than 4 inch"): "shall not overhang that post or pylon more than 4 inches"}
     seen = []
     for pid, e in pieces.items():
         for n, comp in zip(e["second_reading_numbers"], e["second_reading_comparisons"]):
-            if str(n).startswith("more than "):
+            if str(n).startswith("more than ") and (pid, n) not in denied:
                 seen.append((pid, n, comp))
     assert seen and all(comp == ">" for _, _, comp in seen), [x for x in seen if x[2] != ">"]
+    for (pid, n), words in denied.items():
+        e = pieces[pid]
+        assert e["second_reading_comparisons"][e["second_reading_numbers"].index(n)] == "<=", (pid, n)
+        assert any(words in " ".join(s["quote"].split()) for s in load(NY / "3_section_labels/gov.ny.building.2025.yaml")[
+            "labels"][pid]["sources"]), (pid, words)
 
 
 def test_the_readmes_not_brought_in_list_names_no_section_brought_in():
