@@ -1318,7 +1318,7 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
     confirms each piece (check.confirm_advice). For random houses on the plain lot, tax map and survey, doing
     exactly what a row's "To comply" says (a yard: that wall pulled back by the figure, the house's height kept; the
     height: the roof lowered, or the front yard made deeper) makes that row COMPLY and leaves no row worse (review
-    round 4: a whole-building move it said before broke other yards). The 80 houses run in 4 chunks, each asserting
+    round 4: a whole-building move it said before broke other yards). The 80 houses run in 8 chunks, each asserting
     its own share of the coverage (_CHUNKS); the wording, word for word, is the next test."""
     houses = [h for h in _random_houses() if h[0] in _CHUNKS[chunk]]
     tried, kinds = _follow_to_comply(houses)
