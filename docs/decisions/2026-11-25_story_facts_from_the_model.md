@@ -120,3 +120,7 @@ One more wrong "no": a door drawn on another level than its room vanished from t
 ## Review round 12 of step 2 (2026-11-26)
 
 Three more (never a pass): a hall or exit was taken as shared circulation by its use alone, so a unit's own stairwell marked a corridor or lobby still placed its stair elsewhere (now only halls two or more spaces open into, the exits entered from them, and those spaces' rooms are shared); a doors or passages value that isn't a list crashed round 11's check (now it, or a door whose rooms can't be read, leaves the story not measured). Pins for each, and for round 11's opening half.
+
+## Review round 13 of step 2 (2026-11-26)
+
+One more wrong "no": a patio door listed among the `openings` (every window and door that could be an escape opening) but not in `doors` was never read as a way out. As a class, one check (`links_read_here`, used again by step 3's count): every door, opening, and listed opening that is or may be a door touching a room of the story must be read on it, and any whose rooms can't be read stops the measuring. Round 12's pins for unreadable doors moved onto another level so they fail on revert.
