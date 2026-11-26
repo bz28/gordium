@@ -171,6 +171,7 @@ def measure_opening(o: dict, reader, floor_of) -> tuple[dict, dict, dict]:
         for n in names:
             stopped[n] = reason
 
+    bottoms = []
     try:
         clear, bottoms = clear_opening(o, reader)
     except Stop as s:
@@ -213,7 +214,7 @@ def measure_opening(o: dict, reader, floor_of) -> tuple[dict, dict, dict]:
         except Stop as s:
             stop_all(("area_well_area", "area_well_width", "area_well_projection", "area_well_depth"), s.reason)
     if "stated_well" in o:
-        given, why = stated_well(o, reader, more)
+        given, why = stated_well(o, reader, more, bottoms if clear not in (None, NONE) else [])
         measures.update(given)
         stopped.update(why)
     return measures, more, stopped
@@ -307,13 +308,17 @@ WELL_FIELDS = {**{m: (well_field(k), mark) for k, (m, _, _, mark) in STATED_WELL
                **{m: (well_field("ladder"), STATED_WELL["ladder"][3]) for m in LADDER_MEASURES}}
 
 
-def stated_well(o: dict, reader, more: dict) -> tuple[dict, dict]:
+def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict]:
     """(measures, not_measured) from what the architect states of the opening and its area well (`stated_well`, a
     host's marks). Each one given is handed to the rules as the architect's statement; one left out is not stated (its
     reason names the mark that states it), never 0 or no. Where the drawn well (`area_well`, kept
     in `more`) gives the same measure, the two must agree within 1/16 in (1/16 sq ft for the area), else neither is
-    used; a stated area over the stated width times projection can't be. A key the format doesn't know, or
-    `stated_well` not a mapping, refuses every stated measure (a mistyped key must never read as settled)."""
+    used; a stated area over the stated width times projection can't be. Not below grade can't stand beside a drawn
+    well, or a ground given above the clear opening's bottom (`bottoms`, every bottom it could have). A ladder or steps
+    The well's size (area, width, projection) is handed to the rules only once its required dimensions are stated clear
+    but for the required ladder or steps (6 in at most, a well over 44 in deep): the house code's size rules (RCNYS
+    R319.4.1) read the size alone (review round 1: a well crowded by a meter passed them). A key the format doesn't know, or `stated_well` not a mapping,
+    refuses every stated measure (a mistyped key must never read as settled)."""
     name = name_of(o)
     s = o.get("stated_well")
     if not isinstance(s, dict) or (extra := sorted(str(k) for k in s if k not in STATED_WELL)):
@@ -332,10 +337,15 @@ def stated_well(o: dict, reader, more: dict) -> tuple[dict, dict]:
         got = s.get(key)
         try:
             if got is None:
+                drawn = more.get(measure)
+                if isinstance(drawn, (int, float)) and not isinstance(drawn, bool):
+                    raise stop("well_drawn_not_stated", key)
                 raise stop("well_not_stated", key)
             if kind == "yes_no":
                 if not isinstance(got, bool):
                     raise stop("well_stated_not_read", key, got=given_as(got))
+                if key == "below_grade" and got is False and (shown := _drawn_below(o, reader, bottoms)):
+                    raise stop("well_below_disagree", key, shown=Words(shown))
                 measures[measure] = got
                 continue
             try:
@@ -380,7 +390,32 @@ def stated_well(o: dict, reader, more: dict) -> tuple[dict, dict]:
         for m in climb:
             measures.pop(m, None)
             stopped[m] = s_.reason
+    # the well's size goes to the rules only once its required dimensions are stated clear, as BCNYS 1031.5.1 and
+    # RCNYS R319.4.1 ask (nothing in them but the required ladder or steps, a well over 44 in deep, those 6 in at most):
+    # the house code's size rules read the size alone (review round 1: a 36 in well with a meter in it passed them)
+    other, reach = measures.get("area_well_other_encroachment"), measures.get("area_well_ladder_encroachment")
+    depth = measures.get("area_well_depth")
+    if not (other == 0 and (reach == 0 or (measures.get("area_well_ladder") is True and depth is not None
+                                            and depth > 44 and reach is not None and reach <= 6))):
+        why = stop("well_size_held_back", "area").reason
+        for m in ("area_well_area", "area_well_width", "area_well_projection"):
+            if m in measures:
+                measures.pop(m)
+                stopped[m] = why
     return measures, stopped
+
+
+def _drawn_below(o: dict, reader, bottoms) -> str | None:
+    """What the drawing shows of an opening below the ground, or None: a drawn area well, or a ground given outside it
+    above a bottom its clear opening could have."""
+    if o.get("area_well") is not None:
+        return "a drawn area well"
+    try:
+        top = max(grounds(o, reader))
+    except Stop:
+        return None
+    return f"the ground outside it at {tidy(top):g} in, above its clear opening's bottom" if any(
+        b < top for b in bottoms) else None
 
 
 def _area(reader, value, what: str) -> float:

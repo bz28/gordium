@@ -174,6 +174,9 @@ public sealed class HardwareAndWellMarksTests
         SetMark(house, "we1", Marks.WellWidth, new(true, Number: 3.5));
         SetMark(house, "we1", Marks.WellProjection, new(true, Number: 3.25));
         SetMark(house, "we1", Marks.WellLadder, new(true, Text: "Steps blocked when open"));
+        // the well's size goes to the rules only once nothing but a required ladder or steps reaches into it
+        SetMark(house, "we1", Marks.WellLadderEncroachment, new(true, Number: 0.0));
+        SetMark(house, "we1", Marks.WellOtherEncroachment, new(true, Number: 0.0));
         var read = InteriorReader.Read(house.Model());
         var path = Path.Combine(Path.GetTempPath(), $"gordium_well_{Guid.NewGuid():N}.json");
         File.WriteAllText(path, read.Interior.ToJsonString());

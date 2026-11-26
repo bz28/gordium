@@ -222,4 +222,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `well_disagree` | the opening {name}'s drawn area well gives {what} as {drawn}, and what is stated of it ({mark}) {stated}: which is right isn't clear |
 | `well_area_over_size` | the opening {name} states {what} as more than its width times its projection ({width} in by {projection} in, {rectangle} sq ft), which a well within them can't hold: one of the three is wrong ({mark}) |
 | `well_no_ladder_reaches` | the opening {name}'s area well has no ladder or steps, yet {what} is stated as {got} ({mark}) |
+| `well_drawn_not_stated` | the opening {name}'s drawn area well gives {what}, but a drawn well's sizes aren't handed to the rules yet, and it isn't stated ({mark}) |
+| `well_below_disagree` | the opening {name} is stated not to be below the adjacent grade, yet the model shows {shown}: which is right isn't clear ({mark}) |
+| `well_size_held_back` | the opening {name}'s area well isn't stated clear of everything in its required dimensions but the required ladder or steps (in a well over 44 in deep, 6 in at most), so its size isn't handed to the rules: give how far the ladder or steps, and anything else, reach into it (0 for none) ({mark}) |
 | `well_stated_unread` | the opening {name}'s stated area well isn't read: {what} |

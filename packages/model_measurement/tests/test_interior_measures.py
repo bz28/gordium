@@ -1983,6 +1983,11 @@ STOP_CASES = {
     "well_area_over_size": _set(("openings", 0, "stated_well"), {"area": 2000, "width": 36, "projection": 36}),
     "well_no_ladder_reaches": _set(("openings", 0, "stated_well"), {"ladder": "none", "ladder_encroachment": 3}),
     "well_stated_unread": _set(("openings", 0, "stated_well"), {"depht": 50}),
+    "well_drawn_not_stated": _with(base, lambda d: d["openings"][0].update(
+        area_well={"floor_elevation": -10, "width": 36, "projection": 36}, stated_well={})),
+    "well_below_disagree": _with(base, lambda d: d["openings"][0].update(ground_outside=30,
+                                                                          stated_well={"below_grade": False})),
+    "well_size_held_back": _set(("openings", 0, "stated_well"), {"width": 36, "other_encroachment": 2}),
 }
 
 

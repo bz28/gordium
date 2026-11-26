@@ -80,13 +80,29 @@ def test_a_statement_gordium_cant_read_gives_no_value_and_says_why(key, value, s
 
 @pytest.mark.parametrize("word", sorted(LADDER_WORDS))
 def test_the_ladder_word_gives_both_ladder_measures(word):
-    well = dict(FULL, ladder=word)
-    if word == "none":
-        well.pop("ladder_encroachment")
+    well = dict(FULL, ladder=word, ladder_encroachment=0)                # nothing reaches into the well
     m, _, _ = opening_measures(stated(well))
     assert (m["area_well_ladder"], m["area_well_steps"]) == LADDER_WORDS[word]
     # a ladder or steps the open window blocks is never the ladder 1031.5.2 accepts
     assert m["area_well_ladder"] is (word in ("ladder", "steps"))
+
+
+@pytest.mark.parametrize("word", ["none", "ladder_blocked", "steps_blocked"])
+@pytest.mark.parametrize("reach", [{"ladder_encroachment": 8}, {"other_encroachment": 10}, {"other_encroachment": None},
+                                   {"ladder_encroachment": None}])
+def test_a_wells_size_is_held_back_while_anything_but_the_required_ladder_may_reach_into_it(word, reach):
+    # review round 1 (a false pass): the house code's size rules (RCNYS R319.4.1) read the size alone, so a 36 in well
+    # with a meter (or a blocked ladder) in it passed them; held back, they need review
+    well = {k: v for k, v in {**FULL, "ladder": word, "ladder_encroachment": 0, **reach}.items() if v is not None}
+    if word == "none" and "ladder_encroachment" in reach:
+        well.pop("ladder_encroachment", None)                            # with none, it is 0 by itself
+        well["other_encroachment"] = 10
+    m, stopped, _ = opening_measures(stated(well))
+    for k in ("area_well_area", "area_well_width", "area_well_projection"):
+        assert k not in m and "size isn't handed to the rules" in stopped[k], (word, reach, k)
+    assert (m["area_well_ladder"], m["area_well_steps"]) == LADDER_WORDS[word]
+    got = _house_outcomes({**well, "depth": 30, "width": 36, "projection": 36, "area": 36 * 36})
+    assert "pass" not in {got[r] for r in HOUSE_SIZE_RULES}, got
 
 
 def test_no_ladder_means_nothing_climbs_into_the_well_and_a_reach_stated_besides_refuses():
@@ -111,7 +127,7 @@ def test_a_ladder_not_stated_leaves_a_reach_that_is_stated_as_it_is():
 
 
 def test_a_stated_size_that_disagrees_with_the_drawn_well_gives_neither():
-    d = stated(dict(FULL, width=40, depth=20), ground_outside=30)
+    d = stated(dict(FULL, width=40, depth=20, ladder_encroachment=0), ground_outside=30)
     d["openings"][0]["area_well"] = {"floor_elevation": 10, "width": 36, "projection": 38}
     m, stopped, more = opening_measures(d)
     assert "area_well_width" not in m and "drawn area well gives" in stopped["area_well_width"]
@@ -141,7 +157,8 @@ def test_a_feet_description_states_its_sizes_in_feet_and_its_area_in_square_feet
     o = d["openings"][0]
     o["frame"] = {k: v / 12 for k, v in o["frame"].items()}
     o["hinged"] = {**o["hinged"], "sash_width": 2.5, "sash_thickness": 2 / 12}
-    o["stated_well"] = {"area": 9.5, "width": 3.5, "projection": 3.25, "depth": 4}
+    o["stated_well"] = {"area": 9.5, "width": 3.5, "projection": 3.25, "depth": 4, "ladder": "none",
+                        "other_encroachment": 0}
     got = measure(d)["parts"]["emergency_escape_opening"][0]["measures"]
     assert (got["area_well_area"], got["area_well_width"], got["area_well_projection"], got["area_well_depth"]) == \
         (9.5, 42.0, 39.0, 48.0)
@@ -198,8 +215,12 @@ def test_the_pr_example_well_stated_in_revit_passes_its_size_and_ladder_rules():
 
 
 def test_a_ladder_the_open_window_blocks_fails_1031_5_2_and_a_blank_ladder_needs_review():
+    got = _outcomes(dict(FULL, ladder="ladder_blocked", ladder_encroachment=0))
+    assert got["general.bc_1031_5_2_area_well_ladder_over_44"] == "fail", got
+    # reaching into the well besides: still no ladder it accepts, and its size held back, so no size rule passes
     got = _outcomes(dict(FULL, ladder="ladder_blocked"))
     assert got["general.bc_1031_5_2_area_well_ladder_over_44"] == "fail", got
+    assert "pass" not in {got[r] for r in WELL_RULES[:3]}, got
     # not stated whether it is a ladder, steps or none: the 50 in well's ladder rule needs review; the ladder's and the
     # steps' own sizes pass where every one stated is within both (either way it complies), and need review where one
     # falls short (an 11 in ladder or steps: which it is decides)
@@ -216,3 +237,69 @@ def test_a_ladder_the_open_window_blocks_fails_1031_5_2_and_a_blank_ladder_needs
 def test_nothing_stated_never_passes_and_not_below_grade_needs_no_well():
     assert "pass" not in _outcomes({}).values()
     assert set(_outcomes({"below_grade": False}).values()) == {"pass"}
+
+
+HOUSE_SIZE_RULES = ("general.r319_4_1_area_well_min_width", "general.r319_4_1_area_well_min_projection",
+                    "general.r319_4_1_area_well_min_area")
+
+
+@functools.cache
+def _house_book():
+    from rule_format.rulebook import REPO, Context, load
+    ny = REPO / "regulations/jurisdictions/new_york/new_york_state"
+    return ({r["id"]: r for r in load(ny / "5_building_code_rules/drafted/general.yaml")["rules"]},
+            Context.for_jurisdiction(ny).allowed())
+
+
+def _house_outcomes(well):
+    """The house code's area well size rules (RCNYS R319.4.1) for the base bedroom's window stated so, one window's
+    own outcome (parts.part_outcome)."""
+    from rule_format import parts
+    rules, allowed = _house_book()
+    part = measure(stated(well))["parts"]["emergency_escape_opening"][0]
+    out = {}
+    for rid in HOUSE_SIZE_RULES:
+        rule = rules[rid]
+        out[rid] = parts.part_outcome(rule, part["measures"], allowed)
+    return out
+
+
+def test_a_clear_well_with_no_ladder_passes_the_house_size_rules():
+    well = {**FULL, "ladder": "none", "depth": 30, "width": 36, "projection": 36, "area": 36 * 36}
+    well.pop("ladder_encroachment")
+    assert {_house_outcomes(well)[r] for r in HOUSE_SIZE_RULES} == {"pass"}
+
+
+@pytest.mark.parametrize("shown", ["well", "ground"])
+def test_not_below_grade_cant_stand_beside_a_drawn_well_or_ground_above_the_opening(shown):
+    # review round 1 (a false pass from a hand-written description): stated not below grade, drawn below it
+    d = stated({"below_grade": False})
+    if shown == "well":
+        d["openings"][0].update(area_well={"floor_elevation": 10, "width": 36, "projection": 36}, ground_outside=30)
+    else:
+        d["openings"][0]["ground_outside"] = 30                        # base()'s clear bottom is at 20
+    m, stopped, _ = opening_measures(d)
+    assert "opening_below_grade" not in m and "yet the model shows" in stopped["opening_below_grade"]
+    d["openings"][0]["ground_outside"] = 0
+    d["openings"][0].pop("area_well", None)
+    m, _, _ = opening_measures(d)
+    assert m["opening_below_grade"] is False
+
+
+def test_a_drawn_wells_size_not_stated_says_the_drawing_gives_it():
+    # review round 1: "the model doesn't give it" was false beside a drawn well
+    d = stated({"below_grade": True}, ground_outside=30)
+    d["openings"][0]["area_well"] = {"floor_elevation": 10, "width": 36, "projection": 36}
+    _, stopped, more = opening_measures(d)
+    assert more["area_well_width"] == 36.0
+    assert "drawn area well gives" in stopped["area_well_width"] and "doesn't give it" not in stopped["area_well_width"]
+
+
+@pytest.mark.parametrize("ladder, depth, reach, handed", [
+    ("ladder", 50, 6, True), ("ladder", 50, 7, False), ("ladder", 44, 2, False), ("steps", 45, 6, True),
+    ("ladder_blocked", 50, 2, False), ("ladder", 30, 0, True), (None, 50, 2, False)])
+def test_only_the_required_ladder_may_reach_into_the_well_for_its_size_to_be_handed_on(ladder, depth, reach, handed):
+    well = {k: v for k, v in {**FULL, "ladder": ladder, "depth": depth, "ladder_encroachment": reach}.items()
+            if v is not None}
+    m, _, _ = opening_measures(stated(well))
+    assert ("area_well_width" in m) is handed, (ladder, depth, reach)
