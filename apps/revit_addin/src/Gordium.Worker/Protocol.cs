@@ -19,6 +19,28 @@ public static class Protocol
     /// <summary>The site description version (<c>gordium.site/1</c>) the worker must read.</summary>
     public const string SiteSchema = "gordium.site/1";
 
+    /// <summary>A progress line of request <paramref name="id"/> (<c>{"id": n, "step": "Measuring the building…"}</c>:
+    /// the worker writes one as each stage starts, and again while a stage runs, when the request asked with
+    /// <c>"progress": true</c>), its words; null for any other line (the answer: it has <c>ok</c>).</summary>
+    internal static string? StepOf(string line, long id)
+    {
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(line);
+            var o = doc.RootElement;
+            return o.ValueKind == System.Text.Json.JsonValueKind.Object && !o.TryGetProperty("ok", out _)
+                   && o.TryGetProperty("step", out var s) && s.ValueKind == System.Text.Json.JsonValueKind.String
+                   && o.TryGetProperty("id", out var i) && i.ValueKind == System.Text.Json.JsonValueKind.Number
+                   && i.TryGetInt64(out var got) && got == id
+                ? s.GetString()
+                : null;
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return null;                                  // not JSON: the answer's own reading says so
+        }
+    }
+
     /// <summary>A request's own fields (protocol.py, ENVELOPE): never a command's. <c>progress</c> is for the older
     /// <c>check</c> and <c>start</c> only, which this client doesn't send.</summary>
     internal static readonly string[] Envelope = ["id", "cmd", "protocol", "progress", "want"];

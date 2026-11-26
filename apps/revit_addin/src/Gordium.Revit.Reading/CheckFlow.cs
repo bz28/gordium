@@ -205,7 +205,8 @@ public sealed class CheckFlow
     /// worker being started waited for, then the check_site, both under the check's token (Cancel stops the worker:
     /// WorkerClient stops it on a cancel); the outcome (the answer, or the fault or cancel) and the seconds waited are
     /// given to <paramref name="arrived"/> on a pool thread, whatever happens. The task ends after it.</summary>
-    public Task Send(long ticket, Task<WorkerClient> worker, ProjectRequest request, Action<Task<CheckResult>, double> arrived)
+    public Task Send(long ticket, Task<WorkerClient> worker, ProjectRequest request, Action<Task<CheckResult>, double> arrived,
+                     TimeSpan? silence = null, IProgress<string>? step = null)
     {
         ArgumentNullException.ThrowIfNull(worker);
         ArgumentNullException.ThrowIfNull(request);
@@ -215,7 +216,7 @@ public sealed class CheckFlow
         return Task.Run(async () =>
             {
                 var client = await worker.WaitAsync(cancel).ConfigureAwait(false);
-                return await ProjectCheck.SendAsync(client, request, cancel).ConfigureAwait(false);
+                return await ProjectCheck.SendAsync(client, request, cancel, silence, step).ConfigureAwait(false);
             }, cancel)
             .ContinueWith(sent => arrived(sent, Stopwatch.GetElapsedTime(started).TotalSeconds),
                           CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
@@ -284,8 +285,7 @@ public static class CheckWords
     };
 
     /// <summary>A second check asked for while one runs.</summary>
-    public const string Refused = "A check is already running: wait for its answer, or click Cancel in the Gordium " +
-                                  "pane, then check again.";
+    public const string Refused = "A check is already running. Wait for it, or cancel it first (Cancel, at the top of the Gordium pane).";
 
     /// <summary>What the panel says after Cancel, by what it went back to.</summary>
     public static string Cancelled(PanelHad had) => had switch
