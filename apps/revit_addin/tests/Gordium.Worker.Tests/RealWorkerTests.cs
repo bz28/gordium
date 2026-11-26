@@ -327,7 +327,8 @@ public sealed class RealWorkerDiesTests
     public async Task A_python_that_isnt_there_is_a_clear_error()
     {
         var options = new WorkerOptions { PythonPath = Path.Combine(Env.Repo, "no_such_python"), WorkingDirectory = Env.Repo };
-        var e = await Assert.ThrowsAsync<WorkerExitedException>(() => WorkerClient.StartAsync(options));
+        // the pane says the checker didn't start (UI polish PR 5 review round 8), never that it closed before answering
+        var e = await Assert.ThrowsAsync<WorkerUnavailableException>(() => WorkerClient.StartAsync(options));
         Assert.Contains("couldn't be started", e.Message);
     }
 }

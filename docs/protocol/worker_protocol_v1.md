@@ -18,7 +18,7 @@ A request is one JSON object on one line: `{"id": 7, "cmd": "box.view", "protoco
 - `id`: any value; the answer carries it back.
 - `cmd`: the command.
 - `protocol`: required for every command on this page; `"1.x"` is understood, any other major version refused.
-- `progress` (optional, `check` and `start` only): progress lines before the answer.
+- `progress` (optional, `check`, `start`, `check_site` and `start_site`): progress lines before the answer, `{"id": 7, "step": "Measuring the building…"}`, one as each stage starts and the same again, marked `"again": true`, every 15 s while it runs (a host that shows or records stages skips the repeats); the answer is always the request's last line. The Revit add-in asks for them on `check_site` and stops the worker when it says nothing for 60 s, or when the whole check passes its ceiling (ten times the silence, at least 10 minutes); "Try again with more time" doubles both.
 - `want` (optional, session commands only): the answers asked for ([below](#session-commands)).
 
 The answer: `{"id": 7, "ok": true, "result": {...}, "about": {...}}`, or `{"id": 7, "ok": false, "error":
