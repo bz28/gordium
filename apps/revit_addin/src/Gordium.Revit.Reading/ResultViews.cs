@@ -109,9 +109,15 @@ public static class ResultViews
         ArgumentNullException.ThrowIfNull(result);
         var rows = result.Items.Select(i => (Item: i, Row: ResultRows.Row(i))).ToList();
         var scoped = rows.Where(r => DraftedForOneGroup(r.Item.Raw)).ToList();
+        var fix = FixGroups(rows);
+        // the results in review that wait on a question of the questions card (never more than there are)
+        var answers = fix.Where(g => g.Kind == FixKind.Answer).ToList();
+        var onQuestions = answers.SelectMany(g => g.Rows)
+                                 .Where(r => r.Verdict == Verdict.NeedsReview).Select(r => r.Id).Distinct(StringComparer.Ordinal).Count();
         return new ResultViewsModel(Summary(rows.Select(r => r.Row.Verdict)),
-                                    Headline(rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id))),
-                                    FixGroups(rows), CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
+                                    Headline(rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id)), onQuestions,
+                                             answers.Sum(g => g.Cards.Count)),
+                                    fix, CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
         {
             Scope = scoped.Count == 0 ? null : ScopeWords(scoped.Count),
             Scoped = scoped.Select(r => r.Row.Id).ToHashSet(StringComparer.Ordinal),
@@ -184,8 +190,11 @@ public static class ResultViews
 
     /// <summary>The headline sentence (change 19): what fails first; else that nothing fails yet and how many results
     /// wait on the architect; never that the design complies (a check where everything Gordium checked complies still
-    /// says Gordium doesn't check everything).</summary>
-    public static string Headline(IEnumerable<(Verdict Verdict, string Rule)> rows)
+    /// says Gordium doesn't check everything). <paramref name="onQuestions"/>: how many of the results in review wait on
+    /// a question of the questions card (null: all of them, as the approved words say). Only those are said to wait on
+    /// the questions (egress UI audit: "80 results can't be decided until the questions below are answered" with 2
+    /// waiting on the one question left, the rest on marks and checks by hand).</summary>
+    public static string Headline(IEnumerable<(Verdict Verdict, string Rule)> rows, int? onQuestions = null, int? questions = null)
     {
         var list = rows.ToList();
         var all = list.Select(r => r.Verdict).ToList();
@@ -196,7 +205,14 @@ public static class ResultViews
             return (fails == 1 ? "1 rule fails. Fix it first" : $"{fails} rules fail. Fix them first")
                    + (review == 0 ? "." : $"; {Results(review)} also need{(review == 1 ? "s" : "")} review.");
         if (review > 0)
-            return $"Nothing fails yet. {Results(review)} can't be decided until the questions below are answered.";
+        {
+            var asked = Math.Min(onQuestions ?? review, review);
+            // the card's own count: "the question below" when it asks one (review round 1)
+            var below = questions == 1 ? "the question below" : "the questions below";
+            return asked == review ? $"Nothing fails yet. {Results(review)} can't be decided until {below} {(questions == 1 ? "is" : "are")} answered."
+                : asked == 0 ? $"Nothing fails yet. {Results(review)} need{(review == 1 ? "s" : "")} review: {(review == 1 ? "it" : "each")} says below what it needs."
+                : $"Nothing fails yet. {Results(review)} need{(review == 1 ? "s" : "")} review; {asked} of them wait{(asked == 1 ? "s" : "")} on {below}.";
+        }
         if (notChecked > 0)
             return $"Nothing fails and nothing needs review, but {Results(notChecked)} {(notChecked == 1 ? "is" : "are")} not checked yet by Gordium: check {(notChecked == 1 ? "it" : "them")} by hand.";
         return all.Count == 0
