@@ -1148,10 +1148,12 @@ def same_laws(monkeypatch):
     and taken out for stale-law bugs, docs/decisions/2026-11-23_laws_validation_speed.md). check_site asks
     egress.laws for them on every call, and that re-checks the state law's whole rulebook each time (about 70% of
     a call); between two houses it can't change (the same place, no file touched), so every check_site here is the
-    real one, run on laws read by the real egress.laws, each call getting its own deep copy (nothing one check
-    does to it reaches the next). Only for CITY; any other place is read as usual. It can't hide a stale-law
-    bug: what these tests check is the advice, not the reading of the laws, and after each test a fresh read
-    must still equal the reused one (a file changed, or a result captured under another test's patch, fails)."""
+    real one, run on laws read by the real egress.laws, each call getting its own deep copy (a deep copy shares
+    functions, so each law's section lookup and its table are shared; nothing writes to them, and the guard
+    below compares the table). Only for CITY; any other place is read as usual. It can't hide a stale-law bug:
+    these tests check the advice, not the reading of the laws, and after each test a fresh read must still
+    equal the reused one (a file changed, a shared table changed, or a result captured under another test's
+    patch, fails)."""
     from design_checker import egress
     real = egress.laws
     if CITY not in _LAWS_ONCE:
@@ -1331,7 +1333,8 @@ def test_to_comply_says_the_requirement_word_for_word_and_doing_it_makes_the_row
     the west side lot line as drawn (10'-0" required, the lot lines ±2'-0") — now 7'-0 5/8" at its closest"; on the
     tax map "whatever the survey shows" and the as-drawn figure, on a survey one number; a yard the height bonus
     raises also says what it needs "if it stays 36'-6" tall", or that alone when its own figure wouldn't do while it
-    stays that tall. (Split from the 80 random houses above for time, every assert kept.) Plus the fixed cases review rounds found (a lot's own size, the raised yard, G1 and G3)."""
+    stays that tall. (Split from the 80 random houses above for time, every assert kept.) Plus the fixed cases
+    review rounds found (a lot's own size, the raised yard, G1 and G3)."""
     from design_checker.check import check_site
     from test_measure import lot as lot_of
     plain = lot_of([(0, 0), (50, 0), (50, 100), (0, 100)])
