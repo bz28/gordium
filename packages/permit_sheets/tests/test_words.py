@@ -25,10 +25,14 @@ def test_an_area_well_size_rows_reach_is_said_in_words_and_its_values_never_roun
     assert "area well depth 3'-8\"" in have and "over" not in have, have
     # a depth the checker can't use (a well floor drawn above the ground, or not a finite number) is printed as it is,
     # never "over", and never stops the sheets being made (review round 6)
-    for bad in (-1, float("nan"), float("inf")):
+    for bad in (-1, float("nan"), float("inf"), 1e308, 10 ** 400, "50", True):
         _, have = required_and_proposed(rule, {"area_well_width": 40, "area_well_ladder": True, "area_well_depth": bad,
                                                "area_well_ladder_encroachment": 3, "area_well_other_encroachment": 0})
         assert "over" not in have, (bad, have)
+    # a reach given as a yes/no value isn't 0: the ladder and depth stay shown
+    _, have = required_and_proposed(rule, {"area_well_width": 40, "area_well_ladder": True, "area_well_depth": 30,
+                                           "area_well_ladder_encroachment": False, "area_well_other_encroachment": 0})
+    assert "clear of the open window" in have, have
     # R319.4.2's check reads the ladder alone: never set aside
     ladder = next(r for r in book["rules"] if r["id"] == "general.r319_4_2_area_well_ladder_over_44")
     assert required_and_proposed(ladder, {"area_well_ladder": False})[0] == "yes"

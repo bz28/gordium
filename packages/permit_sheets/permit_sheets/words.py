@@ -84,13 +84,22 @@ def unit_of(kind: str, measure: str) -> str:
     return ((parts.registry().get(kind) or {}).get("measures", {}).get(measure) or {}).get("unit", "")
 
 
+def _finite(v) -> bool:
+    """A number a sheet can print in feet and inches or sq ft: finite, and still finite at 1/8 in or 0.01 sq ft (an
+    integer too big for a float, or 1e308 times 8, is not)."""
+    try:
+        return math.isfinite(float(v)) and math.isfinite(float(v) * 100)
+    except OverflowError:
+        return False
+
+
 def value(v, unit: str, direction: str = "nearest") -> str:
     """One value as a sheet prints it; None is "not measured"."""
     if v is None:
         return NOT_MEASURED
     if type(v) is bool:
         return "yes" if v else "no"
-    if isinstance(v, (int, float)) and math.isfinite(v):
+    if isinstance(v, (int, float)) and _finite(v):
         if unit == "in":
             return length(float(v), direction)
         if unit == "sf":
@@ -251,7 +260,8 @@ def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None)
         have.append(f"{label}{value(values.get(m), unit, toward(op, True))}")
     # the measures set aside, as the part has them (the value that may decide a fail is never hidden)
     # rounded the way that never favours compliance: a reach (at most) up, the depth (more than 44 in) down
-    if values.get("area_well_ladder_encroachment") == 0:       # nothing reaches in: the ladder and depth decide nothing
+    reach = values.get("area_well_ladder_encroachment")
+    if type(reach) in (int, float) and reach == 0:             # nothing reaches in: the ladder and depth decide nothing
         shown_aside = [m for m in shown_aside if m not in ("area_well_ladder", "area_well_depth")]
     have += [f"{ASIDE_WORDS.get(m, measure_words(m))} {_aside_value(m, values.get(m), unit_of(kind, m))}"
              for m in shown_aside]
