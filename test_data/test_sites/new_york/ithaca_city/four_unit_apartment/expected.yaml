@@ -173,6 +173,13 @@ results:
   general.bc_1010_2_13_controlled_egress: not_applicable
   general.bc_1010_2_14_elevator_lobby_doors: needs_review
   general.bc_1010_2_15_correctional_facilities: needs_review
+  # section group 8a: each apartment is one room said not to be a sleeping room, so no sleeping room is read: 1031.2's
+  # escape opening rule needs review (a dwelling's bedrooms aren't drawn), never a pass; Group R-2, so its three flags
+  # (basements, opening to a public way, operable from inside) are person's checks
+  general.bc_1031_2_escape_opening_where_required: needs_review
+  general.bc_1031_2_basements: needs_review
+  general.bc_1031_2_openings_to_public_way: needs_review
+  general.bc_1031_2_1_operational_constraints: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

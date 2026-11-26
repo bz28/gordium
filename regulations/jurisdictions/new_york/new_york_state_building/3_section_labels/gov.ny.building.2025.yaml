@@ -1512,6 +1512,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:habitable_space:
+    label: reference
+    topic: definitions
+    reason: 'Defines HABITABLE SPACE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 10
+      - 11
+      quote: '[BG] HABITABLE SPACE. A space in a building for living, sleeping, eating or cooking. Bathrooms, toilet rooms,
+        closets, halls, storage or utility spaces and similar areas are not considered habitable spaces.'
+    piece_sha256: 488ee09b45c53d9dbcc6de65b285dde7dcea762a77dfab4b171dbdeb5ada15a7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:handling:
     label: reference
     topic: definitions
@@ -2828,6 +2844,24 @@ labels:
       quote: '[BF] STEEP-SLOPE. A roof slope 2 units vertical in 12 units horizontal (17-percent slope) or greater.'
     piece_sha256: 50c969202b1359cfe09f233ac9ad454f815333adc004deed2c318c3f9c8abd4a
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:storm_shelter:
+    label: reference
+    topic: definitions
+    reason: 'Defines STORM SHELTER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 63
+      lines:
+      - 3
+      - 7
+      quote: '[BG] STORM SHELTER. A building, structure or portions thereof, constructed in accordance with ICC 500 and designated
+        for use during hurricanes, tornadoes or other severe windstorms. Community storm shelter. A storm shelter not defined
+        as a “Residential storm shelter.” Residential storm shelter. A storm shelter serving occupants of dwelling units and
+        having an occupant load not exceeding 16 persons.'
+    piece_sha256: aa68da3deb3b5b326bb2aefc851a1678479322b3c7d10d605c05ba9adf6466fe
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:story:
@@ -5704,5 +5738,78 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in by review round 1
       of section group 1 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a section that tightens a drafted
       table''s limit for some condition.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1031.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Says emergency escape and rescue openings comply with Section 1031: no requirement of its own, the sections after
+      it are checked.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 56
+      - 56
+      quote: 1031.1 General. Emergency escape and rescue openings shall comply with the requirements of this section.
+    piece_sha256: b7ab9d597bd16f9fe680d4369c73a505933438fa68644d87c0440a74c741b151
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1031.2':
+    label: rule
+    topic: means_of_egress
+    reason: 'Where emergency escape and rescue openings are required (Group R-2 in stories with one exit, Groups R-3 and R-4:
+      basements and sleeping rooms below the fourth story) and where they open: checkable per sleeping room from its marked
+      openings, its story and its doors; basements and what lies outside each opening are person''s checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 359
+      lines:
+      - 57
+      - 58
+      quote: '1031.2 Where required. In addition to the means of egress required by this chapter, emergency escape and rescue
+        openings shall be provided in the following occupancies:'
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 3
+      - 23
+      quote: '1. Group R-2 occupancies located in stories with only one exit or access to only one exit as permitted by Tables
+        1006.3.4(1) and 1006.3.4(2). 2. Group R-3 and R-4 occupancies. Basements and sleeping rooms below the fourth story
+        above grade plane shall have not fewer than one emergency escape and rescue opening in accordance with this section.
+        Where basements contain one or more sleeping rooms, an emergency escape and rescue opening shall be required in each
+        sleeping room, but shall not be required in adjoining areas of the basement. Such openings shall open directly into
+        a public way or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way.
+        Exceptions: 1. Basements with a ceiling height of less than 80 inches (2032 mm) shall not be required to have emergency
+        escape and rescue openings. 2. Emergency escape and rescue openings are not required from basements or sleeping rooms
+        that have an exit door or exit access door that opens directly into a public way or to a yard, court or exterior egress
+        balcony that leads to a public way. 3. Basements without habitable spaces and having not more than 200 square feet
+        (18.6 m[fn2]) in floor area shall not be required to have emergency escape and rescue openings. 4. Storm shelters
+        are not required to comply with this section where the shelter is constructed in accordance with ICC 500. 5. Within
+        individual dwelling and sleeping units in Groups R-2 and R-3, where the building is equipped throughout with an automatic
+        sprinkler system installed in accordance with Section 903.3.1.1, 903.3.1.2 or 903.3.1.3, sleeping rooms in base- ments
+        shall not be required to have emergency escape and rescue openings provided that the basement has one of the following:
+        5.1. One means of egress and one emergency escape and rescue opening. 5.2. Two means of egress.'
+    piece_sha256: 7574a7ac92ac8eb1c6ef2505b330d00f1b3db10e35bd345db643e05e9958d370
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1031.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Escape openings operate from inside without keys or tools: how each opening works isn''t in the model, a person''s
+      check where the building may be Group R-2, R-3 or R-4.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 360
+      lines:
+      - 24
+      - 26
+      quote: 1031.2.1 Operational constraints and opening control devices. Emergency escape and rescue openings shall be operational
+        from inside the room without the use of keys or tools. Window-opening control devices complying with ASTM F2090 shall
+        be permitted for use on windows serving as a required emergency escape and rescue opening.
+    piece_sha256: 3f297335b1b526856741d17864bf872258b3b7bedebd495328118712b7a59f57
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Section group 8a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft

@@ -15359,3 +15359,345 @@ rules:
     within correctional and detention facilities" isn't one occupancy group.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1031_2_escape_opening_where_required
+  kind: rule
+  topic: means_of_egress
+  title: An escape opening in each sleeping room where 1031.2 requires one (BCNYS 1031.2)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  check: sleeping_room_escape_openings >= 1 or sleeping_room_fourth_or_higher or (occupancy_group in ["R-2"] and not
+    sleeping_room_story_one_exit)
+  review_when:
+  - when: occupancy_group in ["R-2", "R-3", "R-4"] and not sleeping_room_escape_openings >= 1 and not sleeping_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not sleeping_room_story_one_exit) and sleeping_room_door_to_outside
+    reason: 'No escape opening marked, but the room has a door to outside: exception 2 sets the opening aside where that door
+      is an exit or exit access door opening directly into a public way, or a yard, court or exterior egress balcony leading
+      to one, which the model doesn''t show: a person checks.'
+  - when: occupancy_group in ["R-2", "R-3"] and not sleeping_room_escape_openings >= 1 and not sleeping_room_fourth_or_higher
+      and not (occupancy_group in ["R-2"] and not sleeping_room_story_one_exit) and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      or sprinklered_903_3_1_3)
+    reason: 'No escape opening marked, in a Group R-2 or R-3 building sprinklered throughout (stated, or not ruled out): exception
+      5 sets it aside for a sleeping room in a basement that has two means of egress, or one and an escape opening; whether
+      the room is in a basement, and the basement''s egress, aren''t shown: a person checks.'
+  - when: occupancy_group in ["mixed"] and not sleeping_room_escape_openings >= 1
+    reason: 'No escape opening marked, in a building of two or more groups: whether the room is in a Group R-2, R-3 or R-4
+      occupancy that 1031.2 asks it of isn''t shown: a person checks.'
+  for_each: sleeping_room
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 359
+    lines:
+    - 57
+    - 58
+    quote: '1031.2 Where required. In addition to the means of egress required by this chapter, emergency escape and rescue
+      openings shall be provided in the following occupancies:'
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 3
+    - 23
+    quote: '1. Group R-2 occupancies located in stories with only one exit or access to only one exit as permitted by Tables
+      1006.3.4(1) and 1006.3.4(2). 2. Group R-3 and R-4 occupancies. Basements and sleeping rooms below the fourth story above
+      grade plane shall have not fewer than one emergency escape and rescue opening in accordance with this section. Where
+      basements contain one or more sleeping rooms, an emergency escape and rescue opening shall be required in each sleeping
+      room, but shall not be required in adjoining areas of the basement. Such openings shall open directly into a public
+      way or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way. Exceptions:
+      1. Basements with a ceiling height of less than 80 inches (2032 mm) shall not be required to have emergency escape and
+      rescue openings. 2. Emergency escape and rescue openings are not required from basements or sleeping rooms that have
+      an exit door or exit access door that opens directly into a public way or to a yard, court or exterior egress balcony
+      that leads to a public way. 3. Basements without habitable spaces and having not more than 200 square feet (18.6 m[fn2])
+      in floor area shall not be required to have emergency escape and rescue openings. 4. Storm shelters are not required
+      to comply with this section where the shelter is constructed in accordance with ICC 500. 5. Within individual dwelling
+      and sleeping units in Groups R-2 and R-3, where the building is equipped throughout with an automatic sprinkler system
+      installed in accordance with Section 903.3.1.1, 903.3.1.2 or 903.3.1.3, sleeping rooms in base- ments shall not be required
+      to have emergency escape and rescue openings provided that the basement has one of the following: 5.1. One means of
+      egress and one emergency escape and rescue opening. 5.2. Two means of egress.'
+  examples:
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      sleeping_room:
+      - id: r1
+        name: Bedroom with an escape window
+        measures:
+          sleeping_room_escape_openings: 1
+          sleeping_room_fourth_or_higher: false
+          sleeping_room_door_to_outside: false
+    rows:
+    - part: r1
+      outcome: pass
+    expect: pass
+    note: One escape opening marked.
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      sleeping_room:
+      - id: r1
+        name: Bedroom with none, on the second story
+        measures:
+          sleeping_room_escape_openings: 0
+          sleeping_room_fourth_or_higher: false
+          sleeping_room_door_to_outside: false
+    rows:
+    - part: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-3, below the fourth story above grade plane, no door to outside, not sprinklered: it needs one.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      sleeping_room:
+      - id: r1
+        name: Bedroom with none, on the fifth story
+        measures:
+          sleeping_room_escape_openings: 0
+          sleeping_room_fourth_or_higher: true
+    rows:
+    - part: r1
+      outcome: pass
+    expect: pass
+    note: 1031.2 asks it only of sleeping rooms below the fourth story above grade plane.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      sleeping_room:
+      - id: r1
+        name: Apartment bedroom with none, its story with two exits
+        measures:
+          sleeping_room_escape_openings: 0
+          sleeping_room_fourth_or_higher: false
+          sleeping_room_story_one_exit: false
+          sleeping_room_door_to_outside: false
+    rows:
+    - part: r1
+      outcome: pass
+    expect: pass
+    note: Group R-2 is asked only in stories with one exit, or access to only one exit, as Tables 1006.3.4(1) and (2) permit.
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      sleeping_room:
+      - id: r1
+        name: Apartment bedroom with none, its story with one exit
+        measures:
+          sleeping_room_escape_openings: 0
+          sleeping_room_fourth_or_higher: false
+          sleeping_room_story_one_exit: true
+          sleeping_room_door_to_outside: false
+    rows:
+    - part: r1
+      outcome: fail
+    expect: fail
+    note: 'Group R-2 on a story with one exit: it needs one.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      sleeping_room:
+      - id: r1
+        name: Bedroom with none and a door to the yard
+        measures:
+          sleeping_room_escape_openings: 0
+          sleeping_room_fourth_or_higher: false
+          sleeping_room_door_to_outside: true
+    rows:
+    - part: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 2: the door may be an exit door opening into a yard that leads to a public way.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      sleeping_room:
+      - id: r1
+        name: Bedroom with none, sprinklered
+        measures:
+          sleeping_room_escape_openings: 0
+          sleeping_room_fourth_or_higher: false
+          sleeping_room_door_to_outside: false
+    rows:
+    - part: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 5: a sprinklered building''s basement sleeping rooms may go without; whether this one is in a basement
+      isn''t shown.'
+  - given:
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      sleeping_room:
+      - id: r1
+        name: Bedroom whose story isn't known
+        measures:
+          sleeping_room_escape_openings: 0
+          sleeping_room_door_to_outside: false
+    rows:
+    - part: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Whether it is below the fourth story above grade plane isn''t known: a person checks.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      sprinklered_903_3_1_3: false
+    parts:
+      sleeping_room:
+      - id: r1
+        name: Bedroom with none, in a building of two groups
+        measures:
+          sleeping_room_escape_openings: 0
+          sleeping_room_fourth_or_higher: false
+          sleeping_room_door_to_outside: false
+    rows:
+    - part: r1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether it is in a Group R-2, R-3 or R-4 occupancy isn''t shown.'
+  - given:
+      occupancy_group: B
+    parts:
+      sleeping_room: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 1031.2 asks Groups R-2, R-3 and R-4 only.
+  - given:
+      occupancy_group: R-3
+    parts:
+      sleeping_room: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No sleeping room read: a dwelling''s sleeping rooms may not be drawn, a person checks.'
+  notes: 'Section group 8a: every sleeping room the description states (`sleeping: true`), never a room it says isn''t one;
+    an enclosed space with no room drawn in it needs review. Its escape openings are those the description marks in it; whether
+    it is below the fourth story above grade plane, and its story''s exits, are its story''s, as the routes read them (not
+    measured: a review). It complies with an opening marked (each opening''s own requirements are its own checks: 1031.2''s
+    public way and 1031.2.1''s operation here, 1031.3 to 1031.6 to follow), on the fourth story or higher, or in Group R-2
+    on a story with two or more exits (Gordium''s reading of item 1: no Table 1006.3.4 one-exit allowance is taken there).
+    It fails a sleeping room with none in Group R-3 or R-4, or Group R-2 on a story with one exit, below the fourth story,
+    with no door to outside (exception 2) and, in Group R-2 or R-3, no sprinkler system (exception 5). Exceptions 1 and 3
+    are for basements (their own flag); exception 4''s storm shelters (ICC 500) aren''t sleeping rooms (Gordium''s reading).
+    New York''s 1031.2 names no Group I-1. Hand-drafted in a Claude Code session (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_2_basements
+  kind: flag
+  topic: means_of_egress
+  title: An escape opening in each basement (BCNYS 1031.2)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 6
+    - 17
+    quote: 'Basements and sleeping rooms below the fourth story above grade plane shall have not fewer than one emergency
+      escape and rescue opening in accordance with this section. Where basements contain one or more sleeping rooms, an emergency
+      escape and rescue opening shall be required in each sleeping room, but shall not be required in adjoining areas of the
+      basement. Such openings shall open directly into a public way or to a yard or court that opens to a public way, or to
+      an egress balcony that leads to a public way. Exceptions: 1. Basements with a ceiling height of less than 80 inches
+      (2032 mm) shall not be required to have emergency escape and rescue openings. 2. Emergency escape and rescue openings
+      are not required from basements or sleeping rooms that have an exit door or exit access door that opens directly into
+      a public way or to a yard, court or exterior egress balcony that leads to a public way. 3. Basements without habitable
+      spaces and having not more than 200 square feet (18.6 m[fn2]) in floor area shall not be required to have emergency
+      escape and rescue openings. 4. Storm shelters are not required to comply with this section where the shelter is constructed
+      in accordance with ICC 500.'
+  examples:
+  - given:
+      occupancy_group: R-3
+    expect: needs_review
+    note: 'A basement has at least one emergency escape and rescue opening (each of its sleeping rooms one, its adjoining
+      areas none), except a basement with a ceiling under 80 inches, one with an exit door or exit access door opening directly
+      into a public way, or a yard, court or exterior egress balcony leading to one, one without habitable spaces of 200 square
+      feet or less, and a storm shelter built to ICC 500 (in Group R-2, only in stories with one exit or access to one exit,
+      as Tables 1006.3.4(1) and (2) permit): basements aren''t read in the model, so a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: Not Group R-2, R-3 or R-4.
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 8a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_2_openings_to_public_way
+  kind: flag
+  topic: means_of_egress
+  title: Escape openings open to a public way, yard or court (BCNYS 1031.2)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 8
+    - 9
+    quote: rescue opening shall be required in each sleeping room, but shall not be required in adjoining areas of the basement.
+      Such openings shall open directly into a public way or to a yard or court that opens to a public way, or to an egress
+      balcony that leads to a public way.
+  examples:
+  - given:
+      occupancy_group: R-2
+    expect: needs_review
+    note: 'Each emergency escape and rescue opening opens directly into a public way, or to a yard or court that opens to
+      a public way, or to an egress balcony that leads to a public way: what lies outside each opening isn''t in the model,
+      so a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: Not Group R-2, R-3 or R-4.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 8a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1031_2_1_operational_constraints
+  kind: flag
+  topic: means_of_egress
+  title: Escape openings work from inside without keys or tools (BCNYS 1031.2.1)
+  applies_when: occupancy_group in ["R-2", "R-3", "R-4", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 360
+    lines:
+    - 24
+    - 26
+    quote: 1031.2.1 Operational constraints and opening control devices. Emergency escape and rescue openings shall be operational
+      from inside the room without the use of keys or tools. Window-opening control devices complying with ASTM F2090 shall
+      be permitted for use on windows serving as a required emergency escape and rescue opening.
+  examples:
+  - given:
+      occupancy_group: R-3
+    expect: needs_review
+    note: 'Each emergency escape and rescue opening operates from inside the room without keys or tools; window-opening control
+      devices complying with ASTM F2090 are permitted on a window serving as one: how each opening works isn''t in the model,
+      so a person''s check.'
+  - given:
+      occupancy_group: B
+    expect: not_applicable
+    note: Not Group R-2, R-3 or R-4.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 8a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft

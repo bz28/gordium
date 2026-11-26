@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 99 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 104 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1365,6 +1365,7 @@
     "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): door electric lock not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door latched not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door occupant load not measured: Gordium doesn't measure this yet; door panic hardware not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable)",
     "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): door electric lock not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door latched not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door occupant load not measured: Gordium doesn't measure this yet; door panic hardware not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable)",
     "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): door electric lock not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door latched not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door occupant load not measured: Gordium doesn't measure this yet; door panic hardware not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable)",
+    "Sleeping rooms · An escape opening in each sleeping room where 1031.2 requires one: Sleeping rooms: no sleeping rooms",
     "Egress · Group I-4: A person checks this (Gordium doesn't decide it): Which group the building is in decides every limit below; the architect states it, a person confirms.",
     "Egress · Child day care classified Group E: A person checks this (Gordium doesn't decide it): More than five but not more than 100 children 2 1/2 or younger, in rooms on a level of exit discharge each with an exit door directly outside: Group E, not I-4; the architect states it.",
     "Egress · Care during religious functions: A person checks this (Gordium doesn't decide it): Part of the primary occupancy: the architect states it.",
@@ -1441,7 +1442,11 @@
     "Egress · How a delayed egress lock works and is signed: A person checks this (Gordium doesn't decide it): A delayed egress lock releases at once when the sprinkler or fire detection system activates or the power fails, can be released at the fire command center and other approved places, and opens within 15 seconds (30 where approved) after a push of no more than 3 seconds, sounding an alarm by the door and rearmed only by hand; a path passes through at most one (two, with a combined delay of 30 seconds at most, in Groups I-1 Condition 2, I-2 and I-3, and in Groups I-1 Condition 1 and I-4 sprinklered throughout per 903.3.1.1); a sign within 12 inches above the door's exit hardware reads PUSH (or PULL) UNTIL ALARM SOUNDS. DOOR CAN BE OPENED IN 15 [30] SECONDS, meeting ICC A117.1's visual characters (not required where approved in Group I care areas that need restraint or containment); emergency lighting is on the egress side; and the locking device is listed to UL 294 or UL 1034: delayed egress locks aren't in the model, so a person's check.",
     "Egress · Controlled egress locks in Groups I-1 and I-2: A person checks this (Gordium doesn't decide it): Controlled egress locks, where staff control egress because the clinical needs of persons receiving care require containment, are permitted in Groups I-1 and I-2 in buildings sprinklered throughout per 903.3.1.1 or with an approved automatic smoke detection system per 907, where the locks release on that system and on loss of power, can be released by a switch at the fire command center, a nursing station or another approved place that breaks the lock's power, no one passes more than one such door before an exit (items 1 to 4 not applying to psychiatric or cognitive treatment areas, or to a listed egress control system against child abduction in a Group I-2 hospital's nursery and obstetric areas), the unlocking procedures are part of the approved emergency plan (Fire Code Chapter 4), all clinical staff have the keys or codes, emergency lighting is at the door, and the locking device is listed to UL 294 or UL 1034: controlled egress locks aren't in the model, so a person's check.",
     "Egress · Electrically locked exit access doors from elevator lobbies: A person checks this (Gordium doesn't decide it): An electrically locked exit access door from an elevator lobby is permitted only where every occupant of the floor can reach at least two exits without passing through the lobby; the building is sprinklered throughout per 903.3.1.1 with a fire alarm system per 907, and the lobby has automatic smoke detection per 907; the fire alarm (other than by a manual box) unlocks it until reset; losing power unlocks it; a switch at the fire command center, a security station or another approved place unlocks it; a two-way communication system per 1009.8.1 and 1009.8.2 beside the door reaches a constantly attended station that can unlock it; emergency lighting is on both sides of the door; and the locking device is listed to UL 294 or UL 1034: electric locks aren't in the model, so a person's check.",
-    "Egress · Locked egress doors in correctional and detention facilities: A person checks this (Gordium doesn't decide it): In buildings within correctional and detention facilities, egress doors serving rooms or spaces of persons whose movements are controlled for security may be locked where their egress control devices unlock by hand and by at least one of a sprinkler system per 903.3.1.1, an approved manual fire alarm box, or a signal from a constantly attended location: whether the building is within such a facility isn't in the model, so a person's check."
+    "Egress · Locked egress doors in correctional and detention facilities: A person checks this (Gordium doesn't decide it): In buildings within correctional and detention facilities, egress doors serving rooms or spaces of persons whose movements are controlled for security may be locked where their egress control devices unlock by hand and by at least one of a sprinkler system per 903.3.1.1, an approved manual fire alarm box, or a signal from a constantly attended location: whether the building is within such a facility isn't in the model, so a person's check.",
+    "Egress · An escape opening in each basement: A person checks this (Gordium doesn't decide it): A basement has at least one emergency escape and rescue opening (each of its sleeping rooms one, its adjoining areas none), except a basement with a ceiling under 80 inches, one with an exit door or exit access door opening directly into a public way, or a yard, court or exterior egress balcony leading to one, one without habitable spaces of 200 square feet or less, and a storm shelter built to ICC 500 (in Group R-2, only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit): basements aren't read in the model, so a person's check.",
+    "Egress · Escape openings open to a public way: A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening opens directly into a public way, or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way: what lies outside each opening isn't in the model, so a person's check.",
+    "Egress · Escape openings work from inside without keys or tools: A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening operates from inside the room without keys or tools; window-opening control devices complying with ASTM F2090 are permitted on a window serving as one: how each opening works isn't in the model, so a person's check.",
+    "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
   "red": [],
@@ -62896,6 +62901,151 @@
      }
     },
     {
+     "id": "general.bc_1031_2_escape_opening_where_required@-/-",
+     "rule": "general.bc_1031_2_escape_opening_where_required",
+     "name": "Sleeping rooms · An escape opening in each sleeping room where 1031.2 requires one (BCNYS 1031.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Sleeping rooms: no sleeping rooms",
+     "use_detail": false,
+     "part": {
+      "part": "sleeping_room",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Sleeping rooms: no sleeping rooms",
+      "quotes": [
+       {
+        "text": "1031.2 Where required. In addition to the means of egress required by this chapter, emergency escape and rescue openings shall be provided in the following occupancies:",
+        "where": "1031.2, 2025 Building Code of New York State (BCNYS), PDF p.359",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 359,
+        "lines": [
+         57,
+         58
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1. Group R-2 occupancies located in stories with only one exit or access to only one exit as permitted by Tables 1006.3.4(1) and 1006.3.4(2). 2. Group R-3 and R-4 occupancies. Basements and sleeping rooms below the fourth story above grade plane shall have not fewer than one emergency escape and rescue opening in accordance with this section. Where basements contain one or more sleeping rooms, an emergency escape and rescue opening shall be required in each sleeping room, but shall not be required in adjoining areas of the basement. Such openings shall open directly into a public way or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way. Exceptions: 1. Basements with a ceiling height of less than 80 inches (2032 mm) shall not be required to have emergency escape and rescue openings. 2. Emergency escape and rescue openings are not required from basements or sleeping rooms that have an exit door or exit access door that opens directly into a public way or to a yard, court or exterior egress balcony that leads to a public way. 3. Basements without habitable spaces and having not more than 200 square feet (18.6 m[fn2]) in floor area shall not be required to have emergency escape and rescue openings. 4. Storm shelters are not required to comply with this section where the shelter is constructed in accordance with ICC 500. 5. Within individual dwelling and sleeping units in Groups R-2 and R-3, where the building is equipped throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1, 903.3.1.2 or 903.3.1.3, sleeping rooms in base- ments shall not be required to have emergency escape and rescue openings provided that the basement has one of the following: 5.1. One means of egress and one emergency escape and rescue opening. 5.2. Two means of egress.",
+        "where": "1031.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         3,
+         23
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1031.2, 2025 Building Code of New York State (BCNYS), PDF p.359",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 359,
+        "lines": [
+         57,
+         58
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         3,
+         23
+        ]
+       }
+      ]
+     },
+     "element": "Sleeping rooms",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "inputs": [],
+      "notes": [
+       "no sleeping rooms"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "fact:occupancy_group",
+       "words": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "field": "facts.occupancy_group"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:sleeping_room:sleeping_room_escape_openings:",
+       "words": "sleeping room escape openings not measured (or not usable)",
+       "elements": [],
+       "measure": "sleeping_room_escape_openings"
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.2",
+      "quote": "1031.2 Where required. In addition to the means of egress required by this chapter, emergency escape and rescue openings shall be provided in the following occupancies:"
+     },
+     "asks": [
+      {
+       "key": "field:building.occupancy_groups",
+       "why": "occupancy group (the building's one group, or mixed): not stated for the project",
+       "elements": [],
+       "measure": "occupancy_group",
+       "kind": "mark",
+       "field": "building.occupancy_groups",
+       "headline": "Set the occupancy group"
+      },
+      {
+       "key": "model:sleeping_room:sleeping_room_escape_openings:",
+       "why": "sleeping room escape openings not measured (or not usable)",
+       "elements": [],
+       "measure": "sleeping_room_escape_openings",
+       "kind": "fix_model",
+       "headline": "Fix the model so the sleeping room escape openings can be measured"
+      }
+     ],
+     "rule_name": "An escape opening in each sleeping room where 1031.2 requires one",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.2",
+      "piece_title": "Where required"
+     }
+    },
+    {
      "id": "egress.general.bc_308_5_classification",
      "rule": "general.bc_308_5_classification",
      "name": "Egress · Group I-4, day care facilities (BCNYS 308.5)",
@@ -68378,6 +68528,269 @@
      }
     },
     {
+     "id": "egress.general.bc_1031_2_basements",
+     "rule": "general.bc_1031_2_basements",
+     "name": "Egress · An escape opening in each basement (BCNYS 1031.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A basement has at least one emergency escape and rescue opening (each of its sleeping rooms one, its adjoining areas none), except a basement with a ceiling under 80 inches, one with an exit door or exit access door opening directly into a public way, or a yard, court or exterior egress balcony leading to one, one without habitable spaces of 200 square feet or less, and a storm shelter built to ICC 500 (in Group R-2, only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit): basements aren't read in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A basement has at least one emergency escape and rescue opening (each of its sleeping rooms one, its adjoining areas none), except a basement with a ceiling under 80 inches, one with an exit door or exit access door opening directly into a public way, or a yard, court or exterior egress balcony leading to one, one without habitable spaces of 200 square feet or less, and a storm shelter built to ICC 500 (in Group R-2, only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit): basements aren't read in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "Basements and sleeping rooms below the fourth story above grade plane shall have not fewer than one emergency escape and rescue opening in accordance with this section. Where basements contain one or more sleeping rooms, an emergency escape and rescue opening shall be required in each sleeping room, but shall not be required in adjoining areas of the basement. Such openings shall open directly into a public way or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way. Exceptions: 1. Basements with a ceiling height of less than 80 inches (2032 mm) shall not be required to have emergency escape and rescue openings. 2. Emergency escape and rescue openings are not required from basements or sleeping rooms that have an exit door or exit access door that opens directly into a public way or to a yard, court or exterior egress balcony that leads to a public way. 3. Basements without habitable spaces and having not more than 200 square feet (18.6 m[fn2]) in floor area shall not be required to have emergency escape and rescue openings. 4. Storm shelters are not required to comply with this section where the shelter is constructed in accordance with ICC 500.",
+        "where": "1031.2, 2025 Building Code of New York State (BCNYS), PDF p.360"
+       }
+      ],
+      "citation": "1031.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.2",
+      "quote": "Basements and sleeping rooms below the fourth story above grade plane shall have not fewer than one emergency escape and rescue opening in accordance with this section. Where basements contain one or more sleeping rooms, an emergency escape and rescue opening shall be required in each sleeping room, but shall not be required in adjoining areas of the basement. Such openings shall open directly into a public way or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way. Exceptions: 1. Basements with a ceiling height of less than 80 inches (2032 mm) shall not be required to have emergency escape and rescue openings. 2. Emergency escape and rescue openings are not required from basements or sleeping rooms that have an exit door or exit access door that opens directly into a public way or to a yard, court or exterior egress balcony that leads to a public way. 3. Basements without habitable spaces and having not more than 200 square feet (18.6 m[fn2]) in floor area shall not be required to have emergency escape and rescue openings. 4. Storm shelters are not required to comply with this section where the shelter is constructed in accordance with ICC 500."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1031_2_basements",
+       "words": "A person checks this (Gordium doesn't decide it): A basement has at least one emergency escape and rescue opening (each of its sleeping rooms one, its adjoining areas none), except a basement with a ceiling under 80 inches, one with an exit door or exit access door opening directly into a public way, or a yard, court or exterior egress balcony leading to one, one without habitable spaces of 200 square feet or less, and a storm shelter built to ICC 500 (in Group R-2, only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit): basements aren't read in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1031_2_basements",
+       "why": "A person checks this (Gordium doesn't decide it): A basement has at least one emergency escape and rescue opening (each of its sleeping rooms one, its adjoining areas none), except a basement with a ceiling under 80 inches, one with an exit door or exit access door opening directly into a public way, or a yard, court or exterior egress balcony leading to one, one without habitable spaces of 200 square feet or less, and a storm shelter built to ICC 500 (in Group R-2, only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit): basements aren't read in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "An escape opening in each basement",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.2",
+      "piece_title": "Where required"
+     }
+    },
+    {
+     "id": "egress.general.bc_1031_2_openings_to_public_way",
+     "rule": "general.bc_1031_2_openings_to_public_way",
+     "name": "Egress · Escape openings open to a public way, yard or court (BCNYS 1031.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening opens directly into a public way, or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way: what lies outside each opening isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening opens directly into a public way, or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way: what lies outside each opening isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "rescue opening shall be required in each sleeping room, but shall not be required in adjoining areas of the basement. Such openings shall open directly into a public way or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way.",
+        "where": "1031.2, 2025 Building Code of New York State (BCNYS), PDF p.360"
+       }
+      ],
+      "citation": "1031.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.2",
+      "quote": "rescue opening shall be required in each sleeping room, but shall not be required in adjoining areas of the basement. Such openings shall open directly into a public way or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1031_2_openings_to_public_way",
+       "words": "A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening opens directly into a public way, or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way: what lies outside each opening isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1031_2_openings_to_public_way",
+       "why": "A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening opens directly into a public way, or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way: what lies outside each opening isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Escape openings open to a public way, yard or court",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.2",
+      "piece_title": "Where required"
+     }
+    },
+    {
+     "id": "egress.general.bc_1031_2_1_operational_constraints",
+     "rule": "general.bc_1031_2_1_operational_constraints",
+     "name": "Egress · Escape openings work from inside without keys or tools (BCNYS 1031.2.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening operates from inside the room without keys or tools; window-opening control devices complying with ASTM F2090 are permitted on a window serving as one: how each opening works isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening operates from inside the room without keys or tools; window-opening control devices complying with ASTM F2090 are permitted on a window serving as one: how each opening works isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1031.2.1 Operational constraints and opening control devices. Emergency escape and rescue openings shall be operational from inside the room without the use of keys or tools. Window-opening control devices complying with ASTM F2090 shall be permitted for use on windows serving as a required emergency escape and rescue opening.",
+        "where": "1031.2.1, 2025 Building Code of New York State (BCNYS), PDF p.360"
+       }
+      ],
+      "citation": "1031.2.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1031.2.1",
+      "quote": "1031.2.1 Operational constraints and opening control devices. Emergency escape and rescue openings shall be operational from inside the room without the use of keys or tools. Window-opening control devices complying with ASTM F2090 shall be permitted for use on windows serving as a required emergency escape and rescue opening."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1031_2_1_operational_constraints",
+       "words": "A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening operates from inside the room without keys or tools; window-opening control devices complying with ASTM F2090 are permitted on a window serving as one: how each opening works isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1031_2_1_operational_constraints",
+       "why": "A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening operates from inside the room without keys or tools; window-opening control devices complying with ASTM F2090 are permitted on a window serving as one: how each opening works isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Escape openings work from inside without keys or tools",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1031",
+      "section_title": "Emergency Escape and Rescue",
+      "piece": "1031.2.1",
+      "piece_title": "Operational constraints and opening control devices"
+     }
+    },
+    {
+     "id": "egress.interior#1",
+     "rule": null,
+     "name": "Interior drawing",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)",
+      "quotes": [],
+      "citation": "",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": null,
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "drawing:The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)",
+       "words": "The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)",
+       "elements": [],
+       "field": "openings[].escape"
+      }
+     ],
+     "asks": [
+      {
+       "key": "drawing:The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)",
+       "why": "The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)",
+       "elements": [],
+       "kind": "mark",
+       "headline": "The interior drawing",
+       "field": "openings[].escape"
+      }
+     ]
+    },
+    {
      "id": "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf",
      "rule": "general.bc_1006_2_1_1_three_or_more_exits",
      "name": "Level 1 › STAIR WEST L1 (2) · Three exits from 501-1,000 occupants, four above (BCNYS 1006.2.1.1)",
@@ -72761,7 +73174,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 99 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 104 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -73278,6 +73691,7 @@
       "general.bc_1010_1_1_door_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781",
       "general.bc_1010_1_2_1_direction_of_swing@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781",
       "general.bc_1010_2_8_panic_hardware@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781",
+      "general.bc_1031_2_escape_opening_where_required@-/-",
       "egress.general.bc_308_5_classification",
       "egress.general.bc_308_5_1_group_e",
       "egress.general.bc_308_5_2_religious_worship",
@@ -73354,7 +73768,11 @@
       "egress.general.bc_1010_2_12_1_delayed_egress_locking_system",
       "egress.general.bc_1010_2_13_controlled_egress",
       "egress.general.bc_1010_2_14_elevator_lobby_doors",
-      "egress.general.bc_1010_2_15_correctional_facilities"
+      "egress.general.bc_1010_2_15_correctional_facilities",
+      "egress.general.bc_1031_2_basements",
+      "egress.general.bc_1031_2_openings_to_public_way",
+      "egress.general.bc_1031_2_1_operational_constraints",
+      "egress.interior#1"
      ],
      "lines": [
       {
@@ -73840,6 +74258,19 @@
        "title": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): 3 need review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say which side it swings into, and Gordium has no mark for it in the model yet, occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet · not read yet: door occupant load",
        "mark": "?",
        "name": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10)"
+      },
+      {
+       "key": "review#d53153fb91",
+       "tier": "review",
+       "items": [
+        "general.bc_1031_2_escape_opening_where_required@-/-"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Sleeping rooms: 1 needs review: no sleeping rooms",
+       "mark": "?",
+       "name": "Sleeping rooms"
       },
       {
        "key": "review#e2688efa33",
@@ -74841,9 +75272,61 @@
        "title": "Egress · Locked egress doors in correctional and detention facilities (BCNYS 1010.2.15): A person checks this (Gordium doesn't decide it): In buildings within correctional and detention facilities, egress doors serving rooms or spaces of persons whose movements are controlled for security may be locked where their egress control devices unlock by hand and by at least one of a sprinkler system per 903.3.1.1, an approved manual fire alarm box, or a signal from a constantly attended location: whether the building is within such a facility isn't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Locked egress doors in correctional and detention facilities (BCNYS 1010.2.15)"
+      },
+      {
+       "key": "review#1d1b8523ae",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1031_2_basements"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · An escape opening in each basement (BCNYS 1031.2): A person checks this (Gordium doesn't decide it): A basement has at least one emergency escape and rescue opening (each of its sleeping rooms one, its adjoining areas none), except a basement with a ceiling under 80 inches, one with an exit door or exit access door opening directly into a public way, or a yard, court or exterior egress balcony leading to one, one without habitable spaces of 200 square feet or less, and a storm shelter built to ICC 500 (in Group R-2, only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit): basements aren't read in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · An escape opening in each basement (BCNYS 1031.2)"
+      },
+      {
+       "key": "review#a28d053cb3",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1031_2_openings_to_public_way"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Escape openings open to a public way, yard or court (BCNYS 1031.2): A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening opens directly into a public way, or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way: what lies outside each opening isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Escape openings open to a public way, yard or court (BCNYS 1031.2)"
+      },
+      {
+       "key": "review#7abc34bed4",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1031_2_1_operational_constraints"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Escape openings work from inside without keys or tools (BCNYS 1031.2.1): A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening operates from inside the room without keys or tools; window-opening control devices complying with ASTM F2090 are permitted on a window serving as one: how each opening works isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Escape openings work from inside without keys or tools (BCNYS 1031.2.1)"
+      },
+      {
+       "key": "review#3b8d16e054",
+       "tier": "review",
+       "items": [
+        "egress.interior#1"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)",
+       "mark": "?",
+       "name": "Interior drawing"
       }
      ],
-     "count": 99,
+     "count": 104,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -75009,9 +75492,10 @@
         "general.bc_table_1020_2_i1_i3@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_table_1020_2_i4@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
         "general.bc_1020_3_corridor_capacity@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
-        "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc"
+        "general.bc_table_1020_3_corridor_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7dc",
+        "general.bc_1031_2_escape_opening_where_required@-/-"
        ],
-       "rules": 39,
+       "rules": 40,
        "field": "facts.occupancy_group"
       },
       {
@@ -75182,6 +75666,17 @@
        ],
        "rules": 1,
        "field": "facts.sprinklered_903_3_1_1"
+      },
+      {
+       "key": "drawing:The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)",
+       "kind": "mark",
+       "words": "The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)",
+       "elements": [],
+       "items": [
+        "egress.interior#1"
+       ],
+       "rules": 1,
+       "field": "openings[].escape"
       },
       {
        "key": "question:accessory_area_face",
@@ -75966,6 +76461,36 @@
         "egress.general.bc_1010_2_15_correctional_facilities"
        ],
        "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1031_2_basements",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A basement has at least one emergency escape and rescue opening (each of its sleeping rooms one, its adjoining areas none), except a basement with a ceiling under 80 inches, one with an exit door or exit access door opening directly into a public way, or a yard, court or exterior egress balcony leading to one, one without habitable spaces of 200 square feet or less, and a storm shelter built to ICC 500 (in Group R-2, only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit): basements aren't read in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1031_2_basements"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1031_2_openings_to_public_way",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening opens directly into a public way, or to a yard or court that opens to a public way, or to an egress balcony that leads to a public way: what lies outside each opening isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1031_2_openings_to_public_way"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1031_2_1_operational_constraints",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening operates from inside the room without keys or tools; window-opening control devices complying with ASTM F2090 are permitted on a window serving as one: how each opening works isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1031_2_1_operational_constraints"
+       ],
+       "rules": 1
       }
      ]
     },
@@ -76319,7 +76844,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "99 to review · 30 comply"
+     "summary": "104 to review · 30 comply"
     }
    ],
    "contents": [
@@ -88586,7 +89111,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 193
+          "not_for_checking": 195
          },
          "pieces": [
           {
@@ -89154,6 +89679,12 @@
            "rules": []
           },
           {
+           "id": "202:habitable_space",
+           "title": "HABITABLE SPACE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:handling",
            "title": "HANDLING",
            "coverage": "not_for_checking",
@@ -89636,6 +90167,12 @@
           {
            "id": "202:steep_slope",
            "title": "STEEP-SLOPE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:storm_shelter",
+           "title": "STORM SHELTER",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -92083,17 +92620,46 @@
          "number": "1031",
          "title": "Emergency Escape and Rescue",
          "book_page": 338,
-         "coverage": "not_brought_in",
+         "coverage": "rules",
          "whole": false,
-         "counts": {},
-         "pieces": []
+         "counts": {
+          "rules": 1,
+          "flag": 1,
+          "not_for_checking": 1
+         },
+         "pieces": [
+          {
+           "id": "1031.2",
+           "title": "Where required",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1031_2_escape_opening_where_required",
+            "general.bc_1031_2_basements",
+            "general.bc_1031_2_openings_to_public_way"
+           ]
+          },
+          {
+           "id": "1031.2.1",
+           "title": "Operational constraints and opening control devices",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1031_2_1_operational_constraints"
+           ]
+          },
+          {
+           "id": "1031.1",
+           "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         }
        ],
        "coverage": "rules",
        "counts": {
-        "rules": 7,
+        "rules": 8,
         "flag": 3,
-        "not_brought_in": 21
+        "not_brought_in": 20
        }
       },
       {
@@ -95924,6 +96490,7 @@
    "general.bc_1010_2_8_panic_hardware@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77f": "needs_review",
    "general.bc_1010_2_8_panic_hardware@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b780": "needs_review",
    "general.bc_1010_2_8_panic_hardware@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781": "needs_review",
+   "general.bc_1031_2_escape_opening_where_required@-/-": "needs_review",
    "egress.general.bc_308_5_classification": "needs_review",
    "egress.general.bc_308_5_1_group_e": "needs_review",
    "egress.general.bc_308_5_2_religious_worship": "needs_review",
@@ -96001,6 +96568,10 @@
    "egress.general.bc_1010_2_13_controlled_egress": "needs_review",
    "egress.general.bc_1010_2_14_elevator_lobby_doors": "needs_review",
    "egress.general.bc_1010_2_15_correctional_facilities": "needs_review",
+   "egress.general.bc_1031_2_basements": "needs_review",
+   "egress.general.bc_1031_2_openings_to_public_way": "needs_review",
+   "egress.general.bc_1031_2_1_operational_constraints": "needs_review",
+   "egress.interior#1": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7da": "complies",
@@ -96045,7 +96616,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "99 to review · 30 comply"
+    "summary": "104 to review · 30 comply"
    }
   ],
   "egress": {
@@ -101065,6 +101636,19 @@
      "unknown": [],
      "home": "Level 2",
      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): door electric lock not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door latched not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; door occupant load not measured: Gordium doesn't measure this yet; door panic hardware not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say what latches or locks it (panic or fire exit hardware, with or without an electric lock it releases, another latch or lock, or none), and Gordium has no mark for it in the model yet; occupancy group (the building's one group, or mixed) not measured (or not usable); occupied outdoor areas (whether the occupants use yards, patios or roofs, per 1004.7) not measured (or not usable)"
+    },
+    {
+     "rule": "general.bc_1031_2_escape_opening_where_required",
+     "part": "sleeping_room",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "no sleeping rooms",
+     "values": {},
+     "none": true,
+     "unknown": [],
+     "line": "Sleeping rooms: no sleeping rooms"
     }
    ],
    "results": {
@@ -101125,6 +101709,7 @@
     "general.bc_1010_1_2_1_direction_of_swing": "needs_review",
     "general.bc_1010_1_3_2_sliding_door_latch": "not_applicable",
     "general.bc_1010_2_8_panic_hardware": "needs_review",
+    "general.bc_1031_2_escape_opening_where_required": "needs_review",
     "general.bc_308_5_classification": "needs_review",
     "general.bc_308_5_1_group_e": "needs_review",
     "general.bc_308_5_2_religious_worship": "needs_review",
@@ -101201,7 +101786,10 @@
     "general.bc_1010_2_12_1_delayed_egress_locking_system": "needs_review",
     "general.bc_1010_2_13_controlled_egress": "needs_review",
     "general.bc_1010_2_14_elevator_lobby_doors": "needs_review",
-    "general.bc_1010_2_15_correctional_facilities": "needs_review"
+    "general.bc_1010_2_15_correctional_facilities": "needs_review",
+    "general.bc_1031_2_basements": "needs_review",
+    "general.bc_1031_2_openings_to_public_way": "needs_review",
+    "general.bc_1031_2_1_operational_constraints": "needs_review"
    },
    "interior": {
     "parts": {
@@ -105092,9 +105680,13 @@
         ]
        }
       }
-     ]
+     ],
+     "sleeping_room": [],
+     "emergency_escape_opening": null
     },
-    "problems": [],
+    "problems": [
+     "opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
+    ],
     "not_checked": [],
     "has_none": {}
    },
@@ -105125,9 +105717,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "c89777f99d316e8cb4480886a22d3b0797187fd7f6d1aaefd65c4d98445d3382",
+  "worker_fingerprint": "9a87d7039702de55c75c9d278a6fa25ebacedf7f1c76a582c5200554b6a5678b",
   "rulebook": {
-   "new_york/ithaca_city": "bb3224e08317ce6879bebef16d0a7743179d14b807dd61aab05365054450914d"
+   "new_york/ithaca_city": "e0c97f762eb9864b4b6c7a010545614fe2df6841bde8a5ea82567129ab2047b5"
   }
  }
 }

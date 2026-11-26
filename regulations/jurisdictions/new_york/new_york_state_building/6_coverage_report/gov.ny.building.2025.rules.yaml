@@ -495,4 +495,16 @@ pieces:
     heading: Common path of egress travel
     rules:
     - general.bc_1030_8_fixed_seating_common_path
+  '1031.2':
+    label: rule
+    heading: Where required
+    rules:
+    - general.bc_1031_2_escape_opening_where_required
+    - general.bc_1031_2_basements
+    - general.bc_1031_2_openings_to_public_way
+  1031.2.1:
+    label: flag
+    heading: Where required › Operational constraints and opening control devices
+    rules:
+    - general.bc_1031_2_1_operational_constraints
 not_checked_yet: []

@@ -201,9 +201,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37); section group 6c 1010.1.3, 1010.1.4, 1010.1.5,
     1010.1.6 and 1010.1.7 (42; 1010.1.3.2's is a door's row, not a building line); section group 6d 1010.2 to
     1010.2.6 and Table 1010.2.4 (50; 1010.2.7's is for Groups E, B and I-4); section group 6e 1010.2.8.1 to
-    1010.2.12.1, 1010.2.14 and 1010.2.15 (61; 1010.2.13's is for Groups I-1 and I-2)."""
+    1010.2.12.1, 1010.2.14 and 1010.2.15 (61; 1010.2.13's is for Groups I-1 and I-2); section group 8a 1031.2's basements and public way and
+    1031.2.1 (64)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 61 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 64 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -452,3 +453,24 @@ def test_panic_hardware_as_sent_and_with_each_doors_hardware_stated(got):
     stated = _check(desc, egress.measure_routes(desc))
     assert {r["outcome"] for r in stated["rows"] if r["rule"] == PANIC} == {"pass"}
     assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == set()
+
+
+# ---- section group 8a (2026-11-26): emergency escape and rescue openings, where required ------------------------------
+
+ESCAPE = "general.bc_1031_2_escape_opening_where_required"
+
+
+def test_escape_openings_as_sent_and_with_one_room_stated_a_sleeping_room(got):
+    """Before: each apartment is one room said not to be a sleeping room, so no sleeping room is read and 1031.2's rule
+    needs review (a dwelling's bedrooms aren't drawn), never a pass. After, one apartment stated a sleeping room (the
+    description gives no openings, so none is counted): it is read, linked to its story (Level 1, two exits: Group R-2 is asked only on a story with one exit), so it complies with
+    no escape opening marked; only that rule changes."""
+    assert got["results"][ESCAPE] == present.REVIEW
+    assert [r["outcome"] for r in got["rows"] if r["rule"] == ESCAPE] == [present.REVIEW]
+    desc = build.interior_of()
+    desc["rooms"][0]["sleeping"] = True
+    stated = _check(desc, egress.measure_routes(desc))
+    rows = [r for r in stated["rows"] if r["rule"] == ESCAPE]
+    assert [(r["id"], r["outcome"]) for r in rows] == [(desc["rooms"][0]["id"] + " (sleeping room)", "pass")]
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == {ESCAPE}
+
