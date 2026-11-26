@@ -33,7 +33,7 @@ PLACE_KEYS = {"no_ground", "ground_existing", "ground_assumed", "ground_spots_no
               "place_level_not_read", "place_split_level", "place_either", "place_either_levels",
               "place_too_many_levels", "ground_buildings_apart", "place_levels_not_all", "place_description",
               "ground_spots_not_finished", "ground_disagrees", "ground_openings_not_read", "ground_disagrees_spots",
-              "place_story_spread", "place_level_inside_story", "place_under_lowest"}
+              "place_story_spread", "place_level_inside_story", "place_under_lowest", "place_levels_disagree"}
 
 
 def building(floors, extra_levels=(), outline=BOX):
@@ -327,6 +327,9 @@ def test_each_reason_a_place_isnt_measured():
     desc, stories = building([[0]])
     desc["rooms"] = []
     said("place_no_rooms", _reason(places(desc, Reader("ft"), {"L0": "Level 0"}, stories, {"flat": 0})))
+    desc, stories = building([[-20], [1]])
+    desc["levels"][1]["elevation"] = -1                # the stories' levels say -1 ft, every level's list 1 ft
+    said("place_levels_disagree", _reason(places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})))
     assert seen == PLACE_KEYS
 
 

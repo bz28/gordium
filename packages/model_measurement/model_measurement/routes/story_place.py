@@ -154,6 +154,15 @@ def places(description: dict, reader, levels: dict, stories: dict, ground: dict 
             return none(Stop("place_level_not_read", name=name).reason)
     if any(lid not in elevation for lid in stories):
         return none(Stop("place_levels_not_all").reason)
+    for item in description.get("levels") if isinstance(description.get("levels"), list) else []:
+        lid = item.get("id") if isinstance(item, dict) else None
+        if isinstance(lid, str) and lid in elevation:    # the stories' levels and every level must agree on a height
+            try:
+                z = reader.length(item.get("elevation"), "its elevation")
+            except (InteriorStop, TypeError, AttributeError):
+                return none(Stop("place_level_not_read", name=names[lid]).reason)
+            if abs(z - elevation[lid]) > SAME:
+                return none(Stop("place_levels_disagree", name=names[lid]).reason)
     for lid, (f_lo, f_hi) in list(floors.items()):       # the level's own floor too: an enclosed space with no
         z = elevation[lid]                               # room drawn in it is on it, its floor not given
         floors[lid] = (min(f_lo, z), max(f_hi, z))
