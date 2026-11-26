@@ -10,7 +10,10 @@ Building Code's own reading of the building already knows of it, with no new geo
 - `sleeping_room_story_one_exit`: yes where the room's story has one exit (its `story_exit_count` under two:
   1031.2 item 1, Group R-2 "in stories with only one exit or access to only one exit"); a story with two or more
   doesn't show that the room's occupants have access to more than one (each dwelling unit may reach only one, as
-  Table 1006.3.4(1) permits: review round 1), so not measured there.
+  Table 1006.3.4(1) permits: review round 1), so there it is no only where the routes show every way out of the
+  room reaches two or more separate and distinct exits (the routes' space part, `exits_reached`: 1006.3, 202 COMMON
+  PATH OF EGRESS TRAVEL), else not measured. A room the routes reach through the room it serves (decision 1a) says
+  that reading beside it (`confirm`).
 - `sleeping_room_door_to_outside`: whether any door of the room (the routes' door parts whose sides name it) has
   outside on its other side (1031.2 exception 2: an exit door or exit access door that opens directly into a public
   way, yard, court or exterior egress balcony); no, only where every door of the description has both its sides
@@ -38,7 +41,7 @@ WHY = {
     "door_sides_not_read": "a door's sides aren't read, so whether the sleeping room {name} has a door to outside "
                            "isn't known",
     "two_exits": "the sleeping room {name}'s story has two or more exits, but whether its occupants have access to "
-                 "more than one (not only one, as Table 1006.3.4(1) permits) isn't worked out",
+                 "more than one (not only one, as Table 1006.3.4(1) permits) isn't worked out: {why}",
     "room_id_shared": "the sleeping room {name}'s id is more than one room's, so which openings and doors are its "
                       "isn't known",
 }
@@ -57,6 +60,10 @@ def link(parts: dict, description) -> None:
         if isinstance(r, dict) and isinstance(r.get("id"), str):
             by_id.setdefault(r["id"], []).append(r)
     stories = {s.get("id"): s for s in parts.get("story") or [] if isinstance(s, dict)}
+    spaces = {}                                          # the routes' space parts, by (room id, level)
+    for s in parts.get("space") or []:
+        if isinstance(s, dict):
+            spaces.setdefault((s.get("id"), s.get("within")), []).append(s)
     openings = parts.get(OPENINGS)
     doors = parts.get("means_of_egress_door")
     for part in rooms:
@@ -91,8 +98,16 @@ def link(parts: dict, description) -> None:
             story = stories.get(level) if reason is None else None
             if story is not None and theirs in (story.get("measures") or {}):
                 value = worked(story["measures"][theirs])
-                if value is None:
-                    why[mine] = WHY["two_exits"].format(name=name)
+                if value is None:                        # two or more exits on the story: the room's own reach
+                    value, said = _reach(spaces.get((rid, level)) or [], name)
+                    if value is None:
+                        why[mine] = WHY["two_exits"].format(name=name, why=said)
+                    else:
+                        m[mine] = value
+                        part.setdefault("more", {})["exits_reached"] = said
+                        confirm = (spaces[(rid, level)][0].get("confirm") or {}).get("space_exit_count")
+                        if confirm:                      # its routes run through the room it serves: the reading
+                            part.setdefault("confirm", {})[mine] = confirm
                 else:
                     m[mine] = value
             elif story is not None:
@@ -115,6 +130,20 @@ def link(parts: dict, description) -> None:
                 why["sleeping_room_door_to_outside"] = WHY["door_sides_not_read"].format(name=name)
             continue
         m["sleeping_room_door_to_outside"] = any(rid in s and OUTSIDE in s for s in sides)
+
+
+def _reach(found: list, name):
+    """(False, the doors and the exits each reaches) where the routes show every way out of the sleeping room reaches
+    two or more separate and distinct exits; (None, why not) otherwise. `found`: the routes' space parts for the room
+    on its level (one expected)."""
+    if len(found) != 1:
+        return None, f"the routes give {'no' if not found else len(found)} space part(s) for {name}"
+    got = (found[0].get("more") or {}).get("exits_reached")
+    if not isinstance(got, dict):
+        return None, (found[0].get("not_measured") or {}).get("space_exit_count") or "its routes aren't measured"
+    if got.get("two") is not True or not isinstance(got.get("doors"), dict) or not got["doors"] or             not all(isinstance(v, list) and len(set(v)) >= 2 for v in got["doors"].values()):
+        return None, str(got.get("why") or "not every way out of it reaches two exits")
+    return False, got["doors"]
 
 
 __all__ = ["link", "NEW_MEASURES"]

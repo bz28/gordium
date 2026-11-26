@@ -146,6 +146,9 @@ def _story_parts(story, uses, items, unknown, parts, r):
             parts["space"][-1]["confirm"] = {m: words for m in ("space_exit_count", "space_common_path")}
             parts["space"][-1]["more"]["served_through"] = story.served_by[rid]   # its egress is through that room
             # (1004.2: its occupant load adds to that room's; design_checker/occupant_load.py)
+        if routes is not None and room is not None and item.get("sleeping") is True:     # 1031.2 item 1's reach
+            parts["space"][-1]["more"][EXITS_REACHED] = _exits_reached(story, routes, room, access.get(rid),
+                                                                       figures.get(rid))
         if use is None:                                   # it may be a corridor: never "no corridors" on its say
             cp = _part(f"{rid} (as a corridor)", name, story.level)
             cp["maybe"] = Stop("area_no_use", name=name).reason
@@ -519,6 +522,54 @@ def _in_room(story, routes, rid, doors) -> float:
             return best
 
     return farthest(_Within).figure
+
+
+EXITS_REACHED = "exits_reached"
+
+
+def _exits_reached(story, routes, room, access, figure) -> dict:
+    """Whether the sleeping room's occupants have access to two or more separate and distinct exits (BCNYS 1031.2 item
+    1: "access to only one exit"; 1006.3: "access to the required number of separate and distinct exits"; 202 COMMON
+    PATH OF EGRESS TRAVEL: "to that point where the occupants have separate and distinct access to two exits"), from
+    its routes: {"two": True, "doors": {door id: [exit ids]}} where every exit access door of the room reaches two or
+    more distinct exits (by `exit_id`, never by door: two doors into one stair are one exit) onward, and every point
+    of the room reaches one of those doors (its own common path figure measured); else {"two": False, "why": ...}.
+    Routes to two exits part where they lead to different exits (an exit's door is an end, never passed through), so
+    each door's routes give separate and distinct access to both; the shared stretch before is the common path,
+    limited on its own (1006.2.1). A passage out of the room, a room crossed by routes (its zone), a door that is
+    itself an exit, or a door reaching one exit only: not worked out (never a guess: two exits set aside the escape
+    opening 1031.2 item 1 asks)."""
+    if isinstance(access, Stop):
+        return {"two": False, "why": access.reason}
+    if isinstance(figure, Stop) or figure is None:
+        return {"two": False, "why": figure.reason if isinstance(figure, Stop) else
+                "the room's own common path isn't measured, so whether every point reaches a door out isn't known"}
+    if not access:
+        return {"two": False, "why": Stop("no_exit_access", name=room.name).reason}
+    if story.zone_of.get(room.id) is not None:
+        return {"two": False, "why": f"routes may cross the room {room.name} (it is part of the floor they walk), "
+                                     "so which exits each of its points reaches isn't worked out"}
+    reached = {}
+    for did in sorted(access):
+        door = story.doors.get(did)
+        if door is None:
+            return {"two": False, "why": f"the room {room.name} opens by a passage ({did}): which exits each point "
+                                         "reaches through it isn't worked out"}
+        if door.exit_kind:
+            return {"two": False, "why": f"the door {door.name} of the room {room.name} is itself an exit"}
+        got = []
+        for e in sorted(routes.exits):
+            wanted = frozenset({e})
+            if math.isfinite(routes._chain(wanted)[0].get(did, math.inf)) or (
+                    room.id in story.served_by and
+                    routes.tied_onward(room, did, wanted, _xy(door.centre), frozenset()) is not None):
+                got.append(e)
+        reached[did] = got
+        if len(got) < 2:
+            return {"two": False, "doors": reached,
+                    "why": f"the door {door.name} of the room {room.name} reaches "
+                           f"{'one exit' if got else 'no exit'} ({', '.join(got) or 'none'}) on its story"}
+    return {"two": True, "doors": reached}
 
 
 ENTERED_EXITS = ("exit_enclosure", "exit_passageway")    # the exits a door enters as a room (IBC 1016.1's list)

@@ -7,6 +7,7 @@ sleeping room then linked to its story and doors (design_checker.escape_openings
 import copy
 from pathlib import Path
 
+import pytest
 import yaml
 
 from design_checker import code_scope, egress, escape_openings
@@ -98,7 +99,7 @@ def test_each_sleeping_room_is_linked_to_its_story_its_openings_and_its_doors():
     assert p["measures"] == {"sleeping_room_escape_openings": 1, "sleeping_room_door_to_outside": False}
     # review round 1 (a false pass): a story's two exits don't show the room's occupants reach two (each dwelling unit
     # may reach only one, Table 1006.3.4(1)), so the one-exit question stays open there
-    assert p["not_measured"]["sleeping_room_story_one_exit"].endswith("isn't worked out")
+    assert "isn't worked out: the routes give no space part(s) for Bedroom" in p["not_measured"]["sleeping_room_story_one_exit"]
     # its story's place not measured: the room's isn't either, with the story's reason (never a guess)
     assert "sleeping_room_fourth_or_higher" not in p["measures"]
     assert p["not_measured"]["sleeping_room_fourth_or_higher"].endswith("Gordium doesn't measure this yet")
@@ -153,3 +154,54 @@ def test_a_room_id_two_rooms_share_counts_no_openings_and_no_doors():
     for k in ("sleeping_room_escape_openings", "sleeping_room_door_to_outside", "sleeping_room_fourth_or_higher"):
         assert k not in p["measures"] and p["not_measured"][k], k
 
+
+# --- a sleeping room's own reach to the exits (1031.2 item 1, "access to only one exit"; PR: R-2 sleeping rooms) ----
+
+def _with_space(more=None, confirm=None, within="L1", twice=False):
+    parts, desc = _parts()
+    space = {"id": "b", "name": "Bedroom", "within": within, "measures": {}, "not_measured": {}, "more": more or {}}
+    if confirm:
+        space["confirm"] = confirm
+    parts["space"] = [space] + ([dict(space)] if twice else [])
+    escape_openings.link(parts, desc)
+    return parts["sleeping_room"][0]
+
+
+def test_two_exits_on_the_story_and_every_way_out_of_the_room_reaching_two_is_no_one_exit():
+    """BCNYS 1031.2 item 1 asks the escape opening of Group R-2 "in stories with only one exit or access to only one
+    exit": where the routes show every door out of the room reaches two separate and distinct exits (1006.3; 202
+    COMMON PATH OF EGRESS TRAVEL), the room isn't on such a story: no, with the doors and exits said."""
+    p = _with_space({"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}}})
+    assert p["measures"]["sleeping_room_story_one_exit"] is False
+    assert p["more"]["exits_reached"] == {"d": ["x", "y"]}
+
+
+@pytest.mark.parametrize("more, why", [
+    ({"exits_reached": {"two": False, "why": "the door d reaches one exit (x)"}}, "reaches one exit"),
+    ({"exits_reached": {"two": True, "doors": {"d": ["x", "x"]}}}, "reaches two exits"),     # one exit named twice
+    ({"exits_reached": {"two": True, "doors": {}}}, "reaches two exits"),                  # no door at all
+    ({"exits_reached": {"two": True, "doors": {"d": ["x", "y"], "e": ["x"]}}}, "reaches two exits"),
+    ({"exits_reached": {"two": "yes", "doors": {"d": ["x", "y"]}}}, "reaches two exits"),
+    ({"exits_reached": ["x", "y"]}, "routes aren't measured"),
+    ({}, "routes aren't measured"),
+])
+def test_anything_short_of_every_way_out_reaching_two_exits_leaves_it_unmeasured(more, why):
+    """A wrong no sets aside the escape opening 1031.2 asks (a false pass), so anything but a whole, well-formed two
+    leaves the one-exit question open, with the routes' reason."""
+    p = _with_space(more)
+    assert "sleeping_room_story_one_exit" not in p["measures"]
+    assert why in p["not_measured"]["sleeping_room_story_one_exit"], p["not_measured"]
+
+
+def test_the_rooms_own_space_part_on_its_own_level_only():
+    """A space part of another level with the same id, or two parts for the room, never stand in for its own."""
+    for kw in ({"within": "L2"}, {"twice": True}):
+        p = _with_space({"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}}}, **kw)
+        assert "sleeping_room_story_one_exit" not in p["measures"], kw
+
+
+def test_a_reach_through_a_room_the_routes_read_through_says_the_reading():
+    p = _with_space({"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}}},
+                    confirm={"space_exit_count": "Gordium's reading: Bedroom through Closet"})
+    assert p["measures"]["sleeping_room_story_one_exit"] is False
+    assert p["confirm"]["sleeping_room_story_one_exit"] == "Gordium's reading: Bedroom through Closet"
