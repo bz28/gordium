@@ -88,3 +88,7 @@ One more wrong "no": a stair within a space (a two-story unit's own stair down t
 ## Review round 6 of step 2 (2026-11-26)
 
 Round 5's stair check read a description with no stairs list (stairs not read: the format's silence) as one with no stairs, so the upper floor of a two-story unit could still read "no". Now "no" needs the stairs listed (each placed outside the space; one that can't be read may be anywhere) and ramps, alternating tread devices and ship's ladders given as empty or said to be none (`has_none`, with a source); malformed stair data no longer stops the measuring. One test.
+
+## Review round 7 of step 2 (2026-11-26)
+
+The routes read `has_none` loosely, taking claims the format refuses (contradicted by a ramp list, a mistyped key, a reading not true or false, a kind said twice) as "no ramps", a wrong "no"; an unhashable kind stopped the measuring. Now only the format's own claims (`interior.has_none.read`, not a reading) rule a ramp, alternating tread device or ship's ladder out, and a stair in no room of the story may be anywhere (only a stair placed in another room is outside the space). One test for the claims.

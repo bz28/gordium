@@ -129,12 +129,14 @@ def _stair_points(description) -> list:
         except (InteriorStop, TypeError, IndexError, AttributeError, KeyError):    # unreadable: may be anywhere
             pts = []
         out.append({"points": pts})
-    claims = description.get("has_none") if isinstance(description.get("has_none"), list) else []
-    said = {c.get("kind") for c in claims if isinstance(c, dict) and isinstance(c.get("source"), str)
-            and c["source"].strip() and c.get("reading") is not True}
+    from model_measurement.interior.has_none import read as has_none
+    claims, _ = has_none(description)                    # the format's own reading of the claims (refused: not said)
+    said = {kind for kind, c in claims.items() if c["reading"] is False}
     for key, kind in OTHER_WAYS:
-        if not (description.get(key) == [] or kind in said):
-            out.append(ANYWHERE)
+        given = description.get(key)
+        if given == [] or (given is None and kind in said):
+            continue
+        out.append(ANYWHERE)
     return out
 
 
@@ -604,13 +606,16 @@ def _room_name(story, rid) -> str:
 
 
 def _stair_in(stair, group, story) -> bool:
-    """Whether any nosing end of a stair (plan points, inches) stands in a room of `group`, or can't be placed: a
-    stair whose points can't be read may be anywhere."""
+    """Whether a stair may stand in `group`: a nosing end (plan points, inches) in or within an inch of one of its
+    rooms, or the stair not placed in another room of the story (its points can't be read, or none stands in a room
+    outside the group): only a stair placed elsewhere is outside it."""
     points = stair.get("points")
     if not points:
         return True
-    return any(story.rooms[r] is not None and story.rooms[r].outline.buffer(1).contains(Point(p)) for p in points
-               for r in group)
+    rooms = {r: room for r, room in story.rooms.items() if room is not None}
+    if any(rooms[r].outline.buffer(1).contains(Point(p)) for p in points for r in group if r in rooms):
+        return True
+    return not any(room.outline.contains(Point(p)) for p in points for r, room in rooms.items() if r not in group)
 
 
 def _is_exit(story, rid) -> bool:

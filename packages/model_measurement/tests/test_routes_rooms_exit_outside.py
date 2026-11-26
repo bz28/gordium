@@ -311,7 +311,9 @@ def test_a_stair_within_a_space_on_the_shared_corridor_is_never_a_no():
     desc["stairs"] = [{"id": "st", "nosings": [[[2, 2, 0], [4, 2, 0]], [[2, 3, 0.6], [4, 3, 0.6]]]}]
     got = _story(desc)
     assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_stair"].format(name="r0")
-    desc["stairs"] = [{"id": "st", "nosings": [[[2, 50, 0], [4, 50, 0]]]}]          # nowhere in the space
+    desc["stairs"] = [{"id": "st", "nosings": [[[2, 50, 0], [4, 50, 0]]]}]          # in no room at all: may be
+    assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False                 # anywhere
+    desc["stairs"] = [{"id": "st", "nosings": [[[22, 2, 0], [24, 2, 0]]]}]          # in room 2, another space
     assert _story(desc)["measures"][OUTSIDE_FACT] is False
     desc["stairs"] = [{"id": "st", "nosings": "unreadable"}]
     assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False
@@ -331,3 +333,26 @@ def test_stairs_not_read_or_a_ramp_not_ruled_out_is_never_a_no():
         assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_stair"].format(name="r0"), drop
     for bad in (5, [{"nosings": [[{"x": 1}, [1, 1, 0]]]}]):
         assert {"points": []} in _stair_points({**desc, "stairs": bad})
+
+
+@pytest.mark.parametrize("change", ["contradicted", "extra_key", "reading_not_bool", "twice", "unhashable"])
+def test_a_has_none_claim_the_format_refuses_never_rules_out_a_ramp(change):
+    """Review round 7 (PR 2): the routes read has_none loosely, taking claims the format refuses (contradicted by a
+    ramp list, a mistyped key, a reading not true or false, a kind said twice) as "no ramps", giving a wrong "no"; an
+    unhashable kind crashed the measuring. Now only the format's own claims count."""
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    if change == "contradicted":
+        desc["ramps"] = [{"id": "rp"}]
+    elif change == "extra_key":
+        desc["has_none"][0] = {"kind": "ramp", "source": "s", "readng": True}
+    elif change == "reading_not_bool":
+        desc["has_none"][0] = {"kind": "ramp", "source": "s", "reading": "yes"}
+    elif change == "twice":
+        desc["has_none"].append({"kind": "ramp", "source": "t", "reading": True})
+    else:
+        desc["has_none"].append({"kind": {"x": 1}, "source": "s"})
+        desc["has_none"].append({"kind": ["ramp"], "source": "s"})
+    if change != "unhashable":
+        assert _story(desc)["not_measured"][OUTSIDE_FACT] == STOPS["outside_stair"].format(name="r0"), change
+    got = measure(desc)["parts"]["story"][0]
+    assert got["measures"].get(OUTSIDE_FACT) is not True or change == "unhashable"
