@@ -282,7 +282,10 @@ SCOPE = {"Table 1017.2": (341, 28, 59), "Table 1006.2.1": (315, 21, 44), "1006.2
          "1005.7": (314, 37, 38), "1005.7.1": (314, 39, 49), "1005.7.2": (314, 50, 53),
          "1005.7.3": (314, 54, 54),
          "1010.1": (322, 28, 36), "1010.1.1": (322, 37, 58), "1010.1.1 (part 2)": (323, 3, 5),
-         "1010.1.1.1": (323, 6, 10)}                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
+         "1010.1.1.1": (323, 6, 10),
+         # section group 7c: Section 1011, stairways
+         "1011.1": (331, 45, 48), "1011.2": (331, 49, 57), "1011.3": (332, 3, 12), "1011.5.2": (332, 19, 39),
+         "1011.5.4": (332, 44, 53), "1011.6": (333, 17, 32), "1011.11": (334, 12, 29)}                                                       # section group 5c      # review round 1 of group 4c: its five conditions quoted too
 ROWS_1017 = [f"general.bc_table_1017_2_{v[3]}" for v in TABLE_1017_2.values()]
 HANDLERS = {
     # Table 1017.2 note a's sections, and its notes b to e
@@ -327,9 +330,27 @@ HANDLERS = {
     "1010.4": ("general.bc_1010_1_doors_general", "1010.4"), "1010.4.1": ("general.bc_1010_1_doors_general", "1010.4.1"),
     "1010.5": ("general.bc_1010_1_doors_general", "1010.5"), "1010.5.4": ("general.bc_1010_1_doors_general", "1010.5.4"),
     "421.4.2": ("general.bc_1010_1_1_door_width", "421.4.2"), "421": ("general.bc_1010_1_1_door_width", "421.4.2"),
+    # section group 7c: Section 1011's (the rest of 1011 and the devices: the 1011.1 flag; spiral stairways: a review
+    # in each rule; stepped aisles' 1030.14.2 and sloping public ways' 1011.5.4.1: a review where not in an enclosure)
+    "1011.13": ("general.bc_1011_1_stairways_general", "1011.13"),
+    "1011.14": ("general.bc_1011_1_stairways_general", "1011.14"),
+    "1011.15": ("general.bc_1011_1_stairways_general", "1011.14"),
+    "1011.16": ("general.bc_1011_1_stairways_general", "1011.14"),
+    "1009.3": ("general.bc_1011_2_stair_width", "1009.3"),
+    "1011.10": (["general.bc_1011_2_stair_width", "general.bc_1011_3_stair_headroom",
+                 "general.bc_1011_5_2_riser_height", "general.bc_1011_5_2_tread_depth",
+                 "general.bc_1011_11_stair_handrails"], "1011.10"),
+    "1030.14.2": (["general.bc_1011_5_2_riser_height", "general.bc_1011_5_2_tread_depth",
+                   "general.bc_1011_5_4_riser_uniformity"], "1030.14.2"),
+    "503.1": (["general.bc_1011_5_2_riser_height", "general.bc_1011_5_2_tread_depth"], "503.1"),
+    "1011.5": ("general.bc_1011_5_4_tread_uniformity", "winders"),
+    "1011.5.4.1": (["general.bc_1011_5_2_riser_height", "general.bc_1011_5_4_riser_uniformity"], "1011.5.4.1"),
+    "1009.6.3": ("general.bc_1011_6_stair_landings", "wheelchair"),
+    "1014.4": ("general.bc_1011_11_stair_handrails", "handhold"),
 }
 NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
-            "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1"}          # the piece naming itself
+            "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1", "1011.1", "1011.2", "1011.3",
+            "1011.5.2", "1011.5.4", "1011.6", "1011.11"}          # the piece naming itself
 # lines that name no section and set nothing: 'For SI' and 'NP =' (Table 1006.2.1), 'For SI' (Table 1017.2),
 # 'Exceptions:' (1020.5)
 UNQUOTED = {(315, 34), (315, 35), (341, 39), (344, 39),
@@ -969,3 +990,96 @@ def test_1010_1_1_takes_no_size_from_anything_but_the_stated_clear_opening(ctx, 
         for g in ("B", "R-2", "I-2"):
             assert _one(rules[rid], "means_of_egress_door", _door(), {"occupancy_group": g} | NO_UNITS, ctx) ==                 "needs_review", (rid, g)
 
+
+
+# ---- section group 7c (2026-11-26): Section 1011, stairways (pp.331-334) ----------------------------------------------
+# the figures typed from the page; a flight in an exit stair enclosure (no dwelling-unit exception reaches it), not
+# spiral, unless said
+IN = {"stair_in_exit_enclosure": True, "stair_spiral": False}
+
+
+def _stair(rules, rid, measures, given, ctx):
+    return _one(rules[rid], "stair", IN | measures, given, ctx)
+
+
+def test_1011_5_2_risers_and_treads_at_their_limits_and_just_past(ctx, rules):
+    rise, tread = "general.bc_1011_5_2_riser_height", "general.bc_1011_5_2_tread_depth"
+    assert _cites(rules[rise], 332, 19) and _cites(rules[tread], 332, 21)
+    b = {"occupancy_group": "B"}
+    assert _stair(rules, rise, {"stair_riser_height": 7, "stair_riser_variation": 0}, b, ctx) == "pass"      # 7 in max
+    assert _stair(rules, rise, {"stair_riser_height": 7.01, "stair_riser_variation": 0}, b, ctx) == "fail"
+    assert _stair(rules, rise, {"stair_riser_height": 6, "stair_riser_variation": 2}, b, ctx) == "pass"      # 4 in min
+    assert _stair(rules, rise, {"stair_riser_height": 6, "stair_riser_variation": 2.01}, b, ctx) == "fail"
+    assert _stair(rules, tread, {"stair_tread_depth": 11}, b, ctx) == "pass"                                  # 11 in
+    assert _stair(rules, tread, {"stair_tread_depth": 10.99}, b, ctx) == "fail"
+    # exception 3 (p.332, lines 29-31): Group R-3, 7 3/4 in and 10 in (the nosing projection not measured: review)
+    assert _cites(rules[rise], 332, 31)
+    r3 = {"occupancy_group": "R-3"}
+    assert _stair(rules, rise, {"stair_riser_height": 7.75, "stair_riser_variation": 0}, r3, ctx) == "pass"
+    assert _stair(rules, rise, {"stair_riser_height": 7.76, "stair_riser_variation": 0}, r3, ctx) == "fail"
+    assert _stair(rules, tread, {"stair_tread_depth": 10}, r3, ctx) == "needs_review"
+    assert _stair(rules, tread, {"stair_tread_depth": 9.99}, r3, ctx) == "fail"
+    # within a dwelling unit in Group R-2 (not shown outside one): 7 3/4 in may apply; in an exit enclosure it can't
+    r2 = {"occupancy_group": "R-2"}
+    assert _stair(rules, rise, {"stair_riser_height": 7.5, "stair_riser_variation": 0}, r2, ctx) == "fail"
+    assert _stair(rules, rise, {"stair_riser_height": 7.5, "stair_riser_variation": 0,
+                                "stair_in_exit_enclosure": False}, r2, ctx) == "needs_review"
+    # exception 5 (p.332, lines 37-39): Group I-3's guard towers, 8 in and 9 in
+    i3 = {"occupancy_group": "I-3"}
+    assert _stair(rules, rise, {"stair_riser_height": 8, "stair_riser_variation": 0}, i3, ctx) == "needs_review"
+    assert _stair(rules, rise, {"stair_riser_height": 8.01, "stair_riser_variation": 0}, i3, ctx) == "fail"
+    assert _stair(rules, tread, {"stair_tread_depth": 9}, i3, ctx) == "needs_review"
+    assert _stair(rules, tread, {"stair_tread_depth": 8.99}, i3, ctx) == "fail"
+
+
+def test_1011_5_4_uniformity_at_three_eighths(ctx, rules):
+    for which in ("riser", "tread"):
+        rid = f"general.bc_1011_5_4_{which}_uniformity"
+        assert _cites(rules[rid], 332, 45)
+        assert _stair(rules, rid, {f"stair_{which}_variation": 0.375}, {}, ctx) == "pass"
+        assert _stair(rules, rid, {f"stair_{which}_variation": 0.38}, {}, ctx) == "fail"
+
+
+def test_1011_3_headroom_at_80_in_and_a_spiral_stairways_78(ctx, rules):
+    rid = "general.bc_1011_3_stair_headroom"
+    assert _cites(rules[rid], 332, 3) and _cites(rules[rid], 332, 8)
+    b = {"occupancy_group": "B"}
+    assert _stair(rules, rid, {"stair_headroom": 80, "stair_headroom_past_bottom": 80}, b, ctx) == "pass"
+    assert _stair(rules, rid, {"stair_headroom": 79.99, "stair_headroom_past_bottom": 80}, b, ctx) == "fail"
+    assert _stair(rules, rid, {"stair_headroom": 80, "stair_headroom_past_bottom": 79.99}, b, ctx) == "fail"
+    spiral = {"stair_spiral": True}
+    got = _stair(rules, rid, spiral | {"stair_headroom": 78, "stair_headroom_past_bottom": 78}, b, ctx)
+    assert got == "needs_review"
+    assert _stair(rules, rid, spiral | {"stair_headroom": 77.99, "stair_headroom_past_bottom": 78}, b, ctx) == "fail"
+    # exception 2 (p.332, lines 9-12): a floor opening's 4 3/4 in in Group R-3: a person checks
+    got = _stair(rules, rid, {"stair_headroom": 76, "stair_headroom_past_bottom": 90}, {"occupancy_group": "R-3"}, ctx)
+    assert got == "needs_review"
+
+
+def test_1011_2_width_at_44_36_and_20_in(ctx, rules):
+    rid = "general.bc_1011_2_stair_width"
+    assert _cites(rules[rid], 331, 50) and _cites(rules[rid], 331, 53) and _cites(rules[rid], 331, 56)
+    sprinklered = {"occupancy_group": "B", "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False}
+    assert _stair(rules, rid, {"stair_clear_width": 44}, sprinklered, ctx) == "pass"
+    assert _stair(rules, rid, {"stair_clear_width": 43.99}, sprinklered, ctx) == "needs_review"   # under 50 occupants?
+    assert _stair(rules, rid, {"stair_clear_width": 36}, sprinklered, ctx) == "needs_review"
+    assert _stair(rules, rid, {"stair_clear_width": 35.99}, sprinklered, ctx) == "fail"
+    r3 = {"occupancy_group": "R-3", "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False}
+    assert _stair(rules, rid, {"stair_clear_width": 20}, r3, ctx) == "needs_review"              # a chairlift
+    assert _stair(rules, rid, {"stair_clear_width": 19.99}, r3, ctx) == "fail"
+    unsprinklered = {"occupancy_group": "B", "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False}
+    assert _stair(rules, rid, {"stair_clear_width": 60}, unsprinklered, ctx) == "needs_review"   # 1009.3
+
+
+def test_1011_11_handrails_on_each_side(ctx, rules):
+    rid = "general.bc_1011_11_stair_handrails"
+    assert _cites(rules[rid], 334, 12)
+    nine = {"stair_riser_count": 9}
+    both, one, none = ({"stair_handrail_sides": n, "stair_handrail_each_side": n == 2} for n in (2, 1, 0))
+    assert _stair(rules, rid, nine | both, {}, ctx) == "pass"
+    assert _stair(rules, rid, nine | one, {}, ctx) == "fail"
+    # exception 1 (line 15): a spiral stairway, or within a dwelling unit, one side; exception 5 (line 24): two risers
+    assert _stair(rules, rid, nine | one | {"stair_spiral": True}, {}, ctx) == "needs_review"
+    assert _stair(rules, rid, nine | one | {"stair_in_exit_enclosure": False}, {}, ctx) == "needs_review"
+    assert _stair(rules, rid, {"stair_riser_count": 2} | none, {}, ctx) == "needs_review"
+    assert _stair(rules, rid, {"stair_riser_count": 3} | none, {}, ctx) == "fail"

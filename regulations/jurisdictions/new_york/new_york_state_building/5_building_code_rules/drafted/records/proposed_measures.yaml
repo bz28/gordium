@@ -26,6 +26,7 @@ sprinklered_903_3_1_1:
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1007_1_2_space_three_or_more
+  - general.bc_1011_2_stair_width
   - general.bc_1017_2_travel_distance
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
@@ -71,6 +72,7 @@ sprinklered_903_3_1_2:
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1007_1_2_space_three_or_more
+  - general.bc_1011_2_stair_width
   - general.bc_1020_3_corridor_capacity
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
@@ -155,6 +157,10 @@ occupancy_group:
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1010_1_1_door_width
+  - general.bc_1011_2_stair_width
+  - general.bc_1011_3_stair_headroom
+  - general.bc_1011_5_2_riser_height
+  - general.bc_1011_5_2_tread_depth
   - general.bc_1016_2_intervening_spaces_other_groups
   - general.bc_1016_2_other_occupancies
   - general.bc_1017_2_2_f1_s1_increase

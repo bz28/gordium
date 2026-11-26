@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 73 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 76 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1345,6 +1345,15 @@
     "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D08) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D09) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
     "Level 2 › Single-Flush: Door 36\" x 84\": Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable); door leaves not measured: the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark); occupancy group (the building's one group, or mixed) not measured (or not usable)",
+    "Stairs · Stairway requirements a person checks: Stairs: the stairs aren't read yet",
+    "Stairs · Stairway width at least 44 in: Stairs: the stairs aren't read yet",
+    "Stairs · Stairway headroom at least 80 in above the nosings: Stairs: the stairs aren't read yet",
+    "Stairs · Stair risers 4 to 7 in: Stairs: the stairs aren't read yet",
+    "Stairs · Stair treads at least 11 in deep: Stairs: the stairs aren't read yet",
+    "Stairs · Stair risers within 3/8 in of each other in a flight: Stairs: the stairs aren't read yet",
+    "Stairs · Stair treads within 3/8 in of each other in a flight: Stairs: the stairs aren't read yet",
+    "Stairs · A landing at the top and bottom of each stairway: Stairs: the stairs aren't read yet",
+    "Stairs · Handrails on each side of a flight: Stairs: the stairs aren't read yet",
     "Egress · Group I-4: A person checks this (Gordium doesn't decide it): Which group the building is in decides every limit below; the architect states it, a person confirms.",
     "Egress · Child day care classified Group E: A person checks this (Gordium doesn't decide it): More than five but not more than 100 children 2 1/2 or younger, in rooms on a level of exit discharge each with an exit door directly outside: Group E, not I-4; the architect states it.",
     "Egress · Care during religious functions: A person checks this (Gordium doesn't decide it): Part of the primary occupancy: the architect states it.",
@@ -1385,7 +1394,7 @@
     "Egress · Corridor width in a building of two or more groups: A person checks this (Gordium doesn't decide it): A building of two or more groups: 1004.4 applies the means of egress requirements to each portion by its own occupancy, and a corridor two occupancies share meets the more stringent (Group E's 72 in, Group I-2's 96 in); which room is which occupancy isn't marked yet, so a person checks.",
     "Egress · Corridor width kept clear: A person checks this (Gordium doesn't decide it): The corridor's width is measured between its walls and what the model draws in it; a door swinging into it, furniture or equipment the model doesn't show, and 1005.7's encroachments (its own flags since section group 5c) are a person's check.",
     "Egress · Corridors not used as air ducts: A person checks this (Gordium doesn't decide it): The air system isn't in the model: whether a corridor serves as a supply, return, exhaust, relief or ventilation duct, or a ceiling plenum above it is used as 1020.6.1 permits, is a person's check.",
-    "Egress · Stairway capacity: A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+    "Egress · Stairway capacity: A person checks this (Gordium doesn't decide it): The load each stairway serves isn't worked out: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
     "Egress · Other components' capacity: A person checks this (Gordium doesn't decide it): Doors, ramps and exit passageways aren't measured for capacity: 0.2 in for each occupant they serve (0.15 with a sprinkler system and a voice/alarm system, other than Groups H and I-2) is a person's check. Corridors are the rule of their own.",
     "Egress · Egress width never reduced toward the public way: A person checks this (Gordium doesn't decide it): The width or capacity required from a story never narrows along the path of egress travel to the public way: the routes measure each story's spaces and corridors, not the exits and discharge beyond them, so a person's check.",
     "Egress · Losing one exit leaves half the capacity: A person checks this (Gordium doesn't decide it): Where more than one exit is required, losing any one exit (or access to it) leaves at least half the required capacity or width: the exits' widths aren't measured, so a person's check.",
@@ -1395,7 +1404,9 @@
     "Egress · Protruding objects per 1003.3: A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
     "Egress · Doors recognizable as doors: A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's clear width and height are rules of their own; 1010.1.2 to 1010.3.4 follow in section group 6.",
     "Egress · Each door's capacity for its occupant load: A person checks this (Gordium doesn't decide it): Each door opening's capacity is enough for the occupants it serves (1005.3.2: 0.2 in each, 0.15 in with a sprinkler system and an emergency voice/alarm system, other than Groups H and I-2): which occupants each door serves isn't worked out, so a person's check.",
-    "Egress · Nothing projects into a door's clear opening: A person checks this (Gordium doesn't decide it): No projection into a door's required clear width below 34 in, at most 4 in between 34 and 80 in, and door closers, overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn't in the model, so a person's check."
+    "Egress · Nothing projects into a door's clear opening: A person checks this (Gordium doesn't decide it): No projection into a door's required clear width below 34 in, at most 4 in between 34 and 80 in, and door closers, overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn't in the model, so a person's check.",
+    "Interior drawing: The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+    "Interior drawing: The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)"
    ]
   },
   "red": [],
@@ -59486,6 +59497,1391 @@
      }
     },
     {
+     "id": "general.bc_1011_1_stairways_general@-/-",
+     "rule": "general.bc_1011_1_stairways_general",
+     "name": "Stairs · Stairway requirements a person checks (BCNYS 1011.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Stairs: the stairs aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "stair",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Stairs: the stairs aren't read yet",
+      "quotes": [
+       {
+        "text": "1011.1 General. Stairways serving occupied portions of a building shall comply with the requirements of Sections 1011.2 through 1011.13. Alternating tread devices shall comply with Section 1011.14. Ship’s ladders shall comply with Section 1011.15. Ladders shall comply with Section 1011.16. Exception: Within rooms or spaces used for assembly purposes, stepped aisles shall comply with Section 1030.",
+        "where": "1011.1, 2025 Building Code of New York State (BCNYS), PDF p.331",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 331,
+        "lines": [
+         45,
+         48
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1011.5.1 Dimension reference surfaces. For the purpose of this section, all dimensions are exclusive of carpets, rugs or runners.",
+        "where": "1011.5.1, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         18,
+         18
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "1011.11 Handrails. Flights of stairways shall have handrails on each side and shall comply with Section 1014. Where glass is used to provide the handrail, the handrail shall comply with Section 2407.",
+        "where": "1011.11, 2025 Building Code of New York State (BCNYS), PDF p.334",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 334,
+        "lines": [
+         12,
+         13
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1011.1, 2025 Building Code of New York State (BCNYS), PDF p.331",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 331,
+        "lines": [
+         45,
+         48
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         18,
+         18
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 334,
+        "lines": [
+         12,
+         13
+        ]
+       }
+      ]
+     },
+     "element": "Stairs",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the stairs weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "drawing:the stairs weren't sent from the model",
+       "words": "the stairs weren't sent from the model",
+       "elements": []
+      },
+      {
+       "kind": "decide",
+       "key": "flag",
+       "words": "a flag rule: a person decides, even once it is measured",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1011.1",
+      "quote": "1011.1 General. Stairways serving occupied portions of a building shall comply with the requirements of Sections 1011.2 through 1011.13. Alternating tread devices shall comply with Section 1011.14. Ship’s ladders shall comply with Section 1011.15. Ladders shall comply with Section 1011.16. Exception: Within rooms or spaces used for assembly purposes, stepped aisles shall comply with Section 1030."
+     },
+     "asks": [
+      {
+       "key": "drawing:the stairs weren't sent from the model",
+       "why": "the stairs weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The stairs weren't sent from the model"
+      },
+      {
+       "key": "flag",
+       "why": "a flag rule: a person decides, even once it is measured",
+       "elements": [],
+       "kind": "decide",
+       "headline": "The code leaves this to judgment: read the words and decide"
+      }
+     ],
+     "rule_name": "Stairway requirements a person checks",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1011",
+      "section_title": "Stairways",
+      "piece": "1011.1",
+      "piece_title": "General"
+     }
+    },
+    {
+     "id": "general.bc_1011_2_stair_width@-/-",
+     "rule": "general.bc_1011_2_stair_width",
+     "name": "Stairs · Stairway width at least 44 in, 36 in under 50 occupants (BCNYS 1011.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Stairs: the stairs aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "stair",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Stairs: the stairs aren't read yet",
+      "quotes": [
+       {
+        "text": "1011.2 Width and capacity. The required capacity of stairways shall be determined as specified in Section 1005.1, but the minimum width shall be not less than 44 inches (1118 mm). The minimum width for stairways that serve as part of the accessible means of egress shall comply with Section 1009.3.",
+        "where": "1011.2, 2025 Building Code of New York State (BCNYS), PDF p.331",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 331,
+        "lines": [
+         49,
+         51
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Exceptions: 1. Stairways serving an occupant load of less than 50 shall have a width of not less than 36 inches (914 mm). 2. Spiral stairways as provided for in Section 1011.10. 3. Where an incline platform lift or stairway chairlift is installed on stairways serving occupancies in Group R-3, or within dwelling units in occupancies in Group R-2, a clear passage width not less than 20 inches (508 mm) shall be provided. Where the seat and platform can be folded when not in use, the distance shall be measured from the folded position.",
+        "where": "1011.2, 2025 Building Code of New York State (BCNYS), PDF p.331",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 331,
+        "lines": [
+         52,
+         57
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1011.2, 2025 Building Code of New York State (BCNYS), PDF p.331",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 331,
+        "lines": [
+         49,
+         51
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 331,
+        "lines": [
+         52,
+         57
+        ]
+       }
+      ]
+     },
+     "element": "Stairs",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the stairs weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "model:stair:stair_clear_width:",
+       "words": "clear width not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_clear_width"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the stairs weren't sent from the model",
+       "words": "the stairs weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1011.2",
+      "quote": "1011.2 Width and capacity. The required capacity of stairways shall be determined as specified in Section 1005.1, but the minimum width shall be not less than 44 inches (1118 mm). The minimum width for stairways that serve as part of the accessible means of egress shall comply with Section 1009.3."
+     },
+     "asks": [
+      {
+       "key": "model:stair:stair_clear_width:",
+       "why": "clear width not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_clear_width",
+       "kind": "fix_model",
+       "headline": "Fix the model so the clear width can be measured"
+      },
+      {
+       "key": "drawing:the stairs weren't sent from the model",
+       "why": "the stairs weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The stairs weren't sent from the model"
+      }
+     ],
+     "rule_name": "Stairway width at least 44 in, 36 in under 50 occupants",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1011",
+      "section_title": "Stairways",
+      "piece": "1011.2",
+      "piece_title": "Width and capacity"
+     }
+    },
+    {
+     "id": "general.bc_1011_3_stair_headroom@-/-",
+     "rule": "general.bc_1011_3_stair_headroom",
+     "name": "Stairs · Stairway headroom at least 80 in above the nosings (BCNYS 1011.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Stairs: the stairs aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "stair",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Stairs: the stairs aren't read yet",
+      "quotes": [
+       {
+        "text": "1011.3 Headroom. Stairways shall have a headroom clearance of not less than 80 inches (2032 mm) measured vertically from a line connecting the nosings. Such headroom shall be continuous above the stairway to the point where the line intersects the landing below, one tread depth beyond the bottom riser. The minimum clearance shall be maintained the full width of the stairway and landing.",
+        "where": "1011.3, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         3,
+         6
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Exceptions: 1. Spiral stairways complying with Section 1011.10 are permitted a 78-inch (1981 mm) headroom clearance. 2. In Group R-3 occupancies; within dwelling units in Group R-2 occupancies; and in Group U occupancies that are acces- sory to a Group R-3 occupancy or accessory to individual dwelling units in Group R-2 occupancies; where the nosings of treads at the side of a flight extend under the edge of a floor opening through which the stair passes, the floor opening shall be allowed to project horizontally into the required headroom not more than 4 3/4 inches (121 mm).",
+        "where": "1011.3, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         7,
+         12
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1011.3, 2025 Building Code of New York State (BCNYS), PDF p.332",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         3,
+         6
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         7,
+         12
+        ]
+       }
+      ]
+     },
+     "element": "Stairs",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the stairs weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "model:stair:stair_headroom:",
+       "words": "headroom not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_headroom"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the stairs weren't sent from the model",
+       "words": "the stairs weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1011.3",
+      "quote": "1011.3 Headroom. Stairways shall have a headroom clearance of not less than 80 inches (2032 mm) measured vertically from a line connecting the nosings. Such headroom shall be continuous above the stairway to the point where the line intersects the landing below, one tread depth beyond the bottom riser. The minimum clearance shall be maintained the full width of the stairway and landing."
+     },
+     "asks": [
+      {
+       "key": "model:stair:stair_headroom:",
+       "why": "headroom not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_headroom",
+       "kind": "fix_model",
+       "headline": "Fix the model so the headroom can be measured"
+      },
+      {
+       "key": "drawing:the stairs weren't sent from the model",
+       "why": "the stairs weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The stairs weren't sent from the model"
+      }
+     ],
+     "rule_name": "Stairway headroom at least 80 in above the nosings",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1011",
+      "section_title": "Stairways",
+      "piece": "1011.3",
+      "piece_title": "Headroom"
+     }
+    },
+    {
+     "id": "general.bc_1011_5_2_riser_height@-/-",
+     "rule": "general.bc_1011_5_2_riser_height",
+     "name": "Stairs · Stair risers 4 to 7 in (7 3/4 in in Group R-3) (BCNYS 1011.5.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Stairs: the stairs aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "stair",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Stairs: the stairs aren't read yet",
+      "quotes": [
+       {
+        "text": "1011.5.2 Riser height and tread depth. Stair riser heights shall be 7 inches (178 mm) maximum and 4 inches (102 mm) mini- mum. The riser height shall be measured vertically between the nosings of adjacent treads or between the stairway landing and the adjacent tread. Rectangular tread depths shall be 11 inches (279 mm) minimum measured horizontally between the vertical",
+        "where": "1011.5.2, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         19,
+         21
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Exceptions: 1. Spiral stairways in accordance with Section 1011.10. 2. Stairways connecting stepped aisles to cross aisles or concourses shall be permitted to use the riser/tread dimension in Section 1030.14.2. 3. In Group R-3 occupancies; within dwelling units in Group R-2 occupancies not required by Chapter 11 to be Accessible or Type A dwelling or sleeping units; and in Group U occupancies that are accessory to a Group R-3 occupancy or accessory to individual dwelling units in Group R-2 occupancies; the maximum riser height shall be 7 3/4 inches (197 mm); the minimum tread depth shall be 10 inches (254 mm); the minimum winder tread depth at the walkline shall be 10 inches (254 mm); and the minimum winder tread depth shall be 6 inches (152 mm). A nosing projection not less than 3/4 inch (19.1 mm) but not more than 1 1/4 inches (32 mm) shall be provided on stairways with solid risers where the tread depth is less than 11 inches (279 mm).",
+        "where": "1011.5.2, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         25,
+         35
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "4. See Section 503.1 of the Existing Building Code of New York State for the replacement of existing stairways.",
+        "where": "1011.5.2, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         36,
+         36
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "5. In Group I-3 facilities, stairways providing access to guard towers, observation stations and control rooms, not more than 250 square feet (23 m[fn2]) in area, shall be permitted to have a maximum riser height of 8 inches (203 mm) and a minimum tread depth of 9 inches (229 mm).",
+        "where": "1011.5.2, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         37,
+         39
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1011.5.2, 2025 Building Code of New York State (BCNYS), PDF p.332",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         19,
+         21
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         25,
+         35
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         36,
+         36
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         37,
+         39
+        ]
+       }
+      ]
+     },
+     "element": "Stairs",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the stairs weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "model:stair:stair_riser_height:",
+       "words": "riser height not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_riser_height"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the stairs weren't sent from the model",
+       "words": "the stairs weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1011.5.2",
+      "quote": "1011.5.2 Riser height and tread depth. Stair riser heights shall be 7 inches (178 mm) maximum and 4 inches (102 mm) mini- mum. The riser height shall be measured vertically between the nosings of adjacent treads or between the stairway landing and the adjacent tread. Rectangular tread depths shall be 11 inches (279 mm) minimum measured horizontally between the vertical"
+     },
+     "asks": [
+      {
+       "key": "model:stair:stair_riser_height:",
+       "why": "riser height not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_riser_height",
+       "kind": "fix_model",
+       "headline": "Fix the model so the riser height can be measured"
+      },
+      {
+       "key": "drawing:the stairs weren't sent from the model",
+       "why": "the stairs weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The stairs weren't sent from the model"
+      }
+     ],
+     "rule_name": "Stair risers 4 to 7 in (7 3/4 in in Group R-3)",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1011",
+      "section_title": "Stairways",
+      "piece": "1011.5.2",
+      "piece_title": "Riser height and tread depth"
+     }
+    },
+    {
+     "id": "general.bc_1011_5_2_tread_depth@-/-",
+     "rule": "general.bc_1011_5_2_tread_depth",
+     "name": "Stairs · Stair treads at least 11 in deep (BCNYS 1011.5.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Stairs: the stairs aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "stair",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Stairs: the stairs aren't read yet",
+      "quotes": [
+       {
+        "text": "the adjacent tread. Rectangular tread depths shall be 11 inches (279 mm) minimum measured horizontally between the vertical planes of the foremost projection of adjacent treads and at a right angle to the tread’s nosing. Winder treads shall have a minimum tread depth of 11 inches (279 mm) between the vertical planes of the foremost projection of adjacent treads at the intersections with the walkline and a minimum tread depth of 10 inches (254 mm) within the clear width of the stair.",
+        "where": "1011.5.2, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         21,
+         24
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Exceptions: 1. Spiral stairways in accordance with Section 1011.10. 2. Stairways connecting stepped aisles to cross aisles or concourses shall be permitted to use the riser/tread dimension in Section 1030.14.2. 3. In Group R-3 occupancies; within dwelling units in Group R-2 occupancies not required by Chapter 11 to be Accessible or Type A dwelling or sleeping units; and in Group U occupancies that are accessory to a Group R-3 occupancy or accessory to individual dwelling units in Group R-2 occupancies; the maximum riser height shall be 7 3/4 inches (197 mm); the minimum tread depth shall be 10 inches (254 mm); the minimum winder tread depth at the walkline shall be 10 inches (254 mm); and the minimum winder tread depth shall be 6 inches (152 mm). A nosing projection not less than 3/4 inch (19.1 mm) but not more than 1 1/4 inches (32 mm) shall be provided on stairways with solid risers where the tread depth is less than 11 inches (279 mm).",
+        "where": "1011.5.2, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         25,
+         35
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "4. See Section 503.1 of the Existing Building Code of New York State for the replacement of existing stairways.",
+        "where": "1011.5.2, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         36,
+         36
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "5. In Group I-3 facilities, stairways providing access to guard towers, observation stations and control rooms, not more than 250 square feet (23 m[fn2]) in area, shall be permitted to have a maximum riser height of 8 inches (203 mm) and a minimum tread depth of 9 inches (229 mm).",
+        "where": "1011.5.2, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         37,
+         39
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1011.5.2, 2025 Building Code of New York State (BCNYS), PDF p.332",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         21,
+         24
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         25,
+         35
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         36,
+         36
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         37,
+         39
+        ]
+       }
+      ]
+     },
+     "element": "Stairs",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the stairs weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "model:stair:stair_tread_depth:",
+       "words": "tread depth not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_tread_depth"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the stairs weren't sent from the model",
+       "words": "the stairs weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1011.5.2",
+      "quote": "the adjacent tread. Rectangular tread depths shall be 11 inches (279 mm) minimum measured horizontally between the vertical planes of the foremost projection of adjacent treads and at a right angle to the tread’s nosing. Winder treads shall have a minimum tread depth of 11 inches (279 mm) between the vertical planes of the foremost projection of adjacent treads at the intersections with the walkline and a minimum tread depth of 10 inches (254 mm) within the clear width of the stair."
+     },
+     "asks": [
+      {
+       "key": "model:stair:stair_tread_depth:",
+       "why": "tread depth not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_tread_depth",
+       "kind": "fix_model",
+       "headline": "Fix the model so the tread depth can be measured"
+      },
+      {
+       "key": "drawing:the stairs weren't sent from the model",
+       "why": "the stairs weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The stairs weren't sent from the model"
+      }
+     ],
+     "rule_name": "Stair treads at least 11 in deep",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1011",
+      "section_title": "Stairways",
+      "piece": "1011.5.2",
+      "piece_title": "Riser height and tread depth"
+     }
+    },
+    {
+     "id": "general.bc_1011_5_4_riser_uniformity@-/-",
+     "rule": "general.bc_1011_5_4_riser_uniformity",
+     "name": "Stairs · Stair risers within 3/8 in of each other in a flight (BCNYS 1011.5.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Stairs: the stairs aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "stair",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Stairs: the stairs aren't read yet",
+      "quotes": [
+       {
+        "text": "1011.5.4 Dimensional uniformity. Stair treads and risers shall be of uniform size and shape. The tolerance between the largest and smallest riser height or between the largest and smallest tread depth shall not exceed 3/8 inch (9.5 mm) in any flight of stairs. The greatest winder tread depth at the walkline within any flight of stairs shall not exceed the smallest by more than 3/8 inch (9.5 mm).",
+        "where": "1011.5.4, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         44,
+         47
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Exceptions: 1. Stairways connecting stepped aisles to cross aisles or concourses shall be permitted to comply with the dimensional nonuniformity in Section 1030.14.2. 2. Consistently shaped winders, complying with Section 1011.5, differing from rectangular treads in the same flight of stairs. 3. Nonuniform riser dimension complying with Section 1011.5.4.1.",
+        "where": "1011.5.4, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         48,
+         53
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1011.5.4, 2025 Building Code of New York State (BCNYS), PDF p.332",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         44,
+         47
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         48,
+         53
+        ]
+       }
+      ]
+     },
+     "element": "Stairs",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the stairs weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "model:stair:stair_riser_variation:",
+       "words": "riser variation not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_riser_variation"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the stairs weren't sent from the model",
+       "words": "the stairs weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1011.5.4",
+      "quote": "1011.5.4 Dimensional uniformity. Stair treads and risers shall be of uniform size and shape. The tolerance between the largest and smallest riser height or between the largest and smallest tread depth shall not exceed 3/8 inch (9.5 mm) in any flight of stairs. The greatest winder tread depth at the walkline within any flight of stairs shall not exceed the smallest by more than 3/8 inch (9.5 mm)."
+     },
+     "asks": [
+      {
+       "key": "model:stair:stair_riser_variation:",
+       "why": "riser variation not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_riser_variation",
+       "kind": "fix_model",
+       "headline": "Fix the model so the riser variation can be measured"
+      },
+      {
+       "key": "drawing:the stairs weren't sent from the model",
+       "why": "the stairs weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The stairs weren't sent from the model"
+      }
+     ],
+     "rule_name": "Stair risers within 3/8 in of each other in a flight",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1011",
+      "section_title": "Stairways",
+      "piece": "1011.5.4",
+      "piece_title": "Dimensional uniformity"
+     }
+    },
+    {
+     "id": "general.bc_1011_5_4_tread_uniformity@-/-",
+     "rule": "general.bc_1011_5_4_tread_uniformity",
+     "name": "Stairs · Stair treads within 3/8 in of each other in a flight (BCNYS 1011.5.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Stairs: the stairs aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "stair",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Stairs: the stairs aren't read yet",
+      "quotes": [
+       {
+        "text": "1011.5.4 Dimensional uniformity. Stair treads and risers shall be of uniform size and shape. The tolerance between the largest and smallest riser height or between the largest and smallest tread depth shall not exceed 3/8 inch (9.5 mm) in any flight of stairs. The greatest winder tread depth at the walkline within any flight of stairs shall not exceed the smallest by more than 3/8 inch (9.5 mm).",
+        "where": "1011.5.4, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         44,
+         47
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Exceptions: 1. Stairways connecting stepped aisles to cross aisles or concourses shall be permitted to comply with the dimensional nonuniformity in Section 1030.14.2. 2. Consistently shaped winders, complying with Section 1011.5, differing from rectangular treads in the same flight of stairs. 3. Nonuniform riser dimension complying with Section 1011.5.4.1.",
+        "where": "1011.5.4, 2025 Building Code of New York State (BCNYS), PDF p.332",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         48,
+         53
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1011.5.4, 2025 Building Code of New York State (BCNYS), PDF p.332",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         44,
+         47
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 332,
+        "lines": [
+         48,
+         53
+        ]
+       }
+      ]
+     },
+     "element": "Stairs",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the stairs weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "model:stair:stair_tread_variation:",
+       "words": "tread variation not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_tread_variation"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the stairs weren't sent from the model",
+       "words": "the stairs weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1011.5.4",
+      "quote": "1011.5.4 Dimensional uniformity. Stair treads and risers shall be of uniform size and shape. The tolerance between the largest and smallest riser height or between the largest and smallest tread depth shall not exceed 3/8 inch (9.5 mm) in any flight of stairs. The greatest winder tread depth at the walkline within any flight of stairs shall not exceed the smallest by more than 3/8 inch (9.5 mm)."
+     },
+     "asks": [
+      {
+       "key": "model:stair:stair_tread_variation:",
+       "why": "tread variation not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_tread_variation",
+       "kind": "fix_model",
+       "headline": "Fix the model so the tread variation can be measured"
+      },
+      {
+       "key": "drawing:the stairs weren't sent from the model",
+       "why": "the stairs weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The stairs weren't sent from the model"
+      }
+     ],
+     "rule_name": "Stair treads within 3/8 in of each other in a flight",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1011",
+      "section_title": "Stairways",
+      "piece": "1011.5.4",
+      "piece_title": "Dimensional uniformity"
+     }
+    },
+    {
+     "id": "general.bc_1011_6_stair_landings@-/-",
+     "rule": "general.bc_1011_6_stair_landings",
+     "name": "Stairs · A landing at the top and bottom of each stairway (BCNYS 1011.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Stairs: the stairs aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "stair",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Stairs: the stairs aren't read yet",
+      "quotes": [
+       {
+        "text": "1011.6 Stairway landings. There shall be a floor or landing at the top and bottom of each stairway. The width of landings, measured perpendicularly to the direction of travel, shall be not less than the width of stairways served. Every landing shall have a minimum depth, measured parallel to the direction of travel, equal to the width of the stairway or 48 inches (1219 mm), whichever is less. Doors opening onto a landing shall not reduce the landing to less than one-half the required width. When fully open, the door shall not proj- ect more than 7 inches (178 mm) into the required width of a landing. Where wheelchair spaces are required on the stairway landing in accordance with Section 1009.6.3, the wheelchair space shall not be located in the required width of the landing and doors shall not swing over the wheelchair spaces.",
+        "where": "1011.6, 2025 Building Code of New York State (BCNYS), PDF p.333",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 333,
+        "lines": [
+         17,
+         23
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Exceptions: 1. Where stairways connect stepped aisles to cross aisles or concourses, stairway landings are not required at the transition between stairways and stepped aisles constructed in accordance with Section 1030. 2. Where curved stairways of constant radius have intermediate landings, the landing depth shall be measured horizontally between the intersection of the walkline of the lower flight at the landing nosing and the intersection of the walkline of the upper flight at the nosing of the lowest tread of the upper flight. 3. Where a landing turns 90 degrees (1.57 rad) or more, the minimum landing depth in accordance with this section shall not be required where the landing provided is not less than that described by an arc with a radius equal to the width of the flight served.",
+        "where": "1011.6, 2025 Building Code of New York State (BCNYS), PDF p.333",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 333,
+        "lines": [
+         24,
+         32
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1011.6, 2025 Building Code of New York State (BCNYS), PDF p.333",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 333,
+        "lines": [
+         17,
+         23
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 333,
+        "lines": [
+         24,
+         32
+        ]
+       }
+      ]
+     },
+     "element": "Stairs",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the stairs weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "drawing:the stairs weren't sent from the model",
+       "words": "the stairs weren't sent from the model",
+       "elements": []
+      },
+      {
+       "kind": "decide",
+       "key": "flag",
+       "words": "a flag rule: a person decides, even once it is measured",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1011.6",
+      "quote": "1011.6 Stairway landings. There shall be a floor or landing at the top and bottom of each stairway. The width of landings, measured perpendicularly to the direction of travel, shall be not less than the width of stairways served. Every landing shall have a minimum depth, measured parallel to the direction of travel, equal to the width of the stairway or 48 inches (1219 mm), whichever is less. Doors opening onto a landing shall not reduce the landing to less than one-half the required width. When fully open, the door shall not proj- ect more than 7 inches (178 mm) into the required width of a landing. Where wheelchair spaces are required on the stairway landing in accordance with Section 1009.6.3, the wheelchair space shall not be located in the required width of the landing and doors shall not swing over the wheelchair spaces."
+     },
+     "asks": [
+      {
+       "key": "drawing:the stairs weren't sent from the model",
+       "why": "the stairs weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The stairs weren't sent from the model"
+      },
+      {
+       "key": "flag",
+       "why": "a flag rule: a person decides, even once it is measured",
+       "elements": [],
+       "kind": "decide",
+       "headline": "The code leaves this to judgment: read the words and decide"
+      }
+     ],
+     "rule_name": "A landing at the top and bottom of each stairway",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1011",
+      "section_title": "Stairways",
+      "piece": "1011.6",
+      "piece_title": "Stairway landings"
+     }
+    },
+    {
+     "id": "general.bc_1011_11_stair_handrails@-/-",
+     "rule": "general.bc_1011_11_stair_handrails",
+     "name": "Stairs · Handrails on each side of a flight (BCNYS 1011.11)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "Stairs: the stairs aren't read yet",
+     "use_detail": false,
+     "part": {
+      "part": "stair",
+      "id": null,
+      "name": null,
+      "within": null
+     },
+     "detail": {
+      "line": "Stairs: the stairs aren't read yet",
+      "quotes": [
+       {
+        "text": "1011.11 Handrails. Flights of stairways shall have handrails on each side and shall comply with Section 1014. Where glass is used to provide the handrail, the handrail shall comply with Section 2407.",
+        "where": "1011.11, 2025 Building Code of New York State (BCNYS), PDF p.334",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 334,
+        "lines": [
+         12,
+         13
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       },
+       {
+        "text": "Exceptions: 1. Flights of stairways within dwelling units and flights of spiral stairways are permitted to have a handrail on one side only. 2. Decks, patios and walkways that have a single change in elevation where the landing depth on each side of the change of elevation is greater than what is required for a landing do not require handrails. 3. In Group R-3 occupancies, a change in elevation consisting of a single riser at an entrance or egress door does not require handrails. 4. Changes in room elevations of three or fewer risers within dwelling units and sleeping units in Groups R-2 and R-3 do not require handrails. 5. Where a platform lift is in a stationary position and the floor of the platform lift serves as the upper landing of a stairway, handrails shall not be required on the stairway, provided that all of the following criteria are met: 5.1. The stairway contains not more than two risers. 5.2. A handhold, positioned horizontally or vertically, is located on one side of the stairway adjacent to the top landing. 5.3. The handhold is located not less than 34 inches (864 mm) and not more than 42 inches (1067 mm) above the bottom landing of the stairway. 5.4. The handhold gripping surface complies with Section 1014.4, and is not less than 4.5 inches (114 mm) in length.",
+        "where": "1011.11, 2025 Building Code of New York State (BCNYS), PDF p.334",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 334,
+        "lines": [
+         14,
+         29
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
+       }
+      ],
+      "citation": "1011.11, 2025 Building Code of New York State (BCNYS), PDF p.334",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null,
+      "sources": [
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 334,
+        "lines": [
+         12,
+         13
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 334,
+        "lines": [
+         14,
+         29
+        ]
+       }
+      ]
+     },
+     "element": "Stairs",
+     "open": {
+      "gordium": null,
+      "measures": [],
+      "gaps": [],
+      "notes": [],
+      "inputs": [
+       "the stairs weren't sent from the model"
+      ],
+      "decide": false
+     },
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "model:stair:stair_handrail_each_side:",
+       "words": "handrail each side not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_handrail_each_side"
+      },
+      {
+       "kind": "fix_model",
+       "key": "model:stair:stair_handrail_sides:",
+       "words": "handrail sides not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_handrail_sides"
+      },
+      {
+       "kind": "fix_model",
+       "key": "drawing:the stairs weren't sent from the model",
+       "words": "the stairs weren't sent from the model",
+       "elements": []
+      }
+     ],
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1011.11",
+      "quote": "1011.11 Handrails. Flights of stairways shall have handrails on each side and shall comply with Section 1014. Where glass is used to provide the handrail, the handrail shall comply with Section 2407."
+     },
+     "asks": [
+      {
+       "key": "model:stair:stair_handrail_each_side:",
+       "why": "handrail each side not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_handrail_each_side",
+       "kind": "fix_model",
+       "headline": "Fix the model so the handrail each side can be measured"
+      },
+      {
+       "key": "model:stair:stair_handrail_sides:",
+       "why": "handrail sides not measured (or not usable)",
+       "elements": [],
+       "measure": "stair_handrail_sides",
+       "kind": "fix_model",
+       "headline": "Fix the model so the handrail sides can be measured"
+      },
+      {
+       "key": "drawing:the stairs weren't sent from the model",
+       "why": "the stairs weren't sent from the model",
+       "elements": [],
+       "kind": "fix_model",
+       "headline": "The stairs weren't sent from the model"
+      }
+     ],
+     "rule_name": "Handrails on each side of a flight",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1011",
+      "section_title": "Stairways",
+      "piece": "1011.11",
+      "piece_title": "Handrails"
+     }
+    },
+    {
      "id": "egress.general.bc_308_5_classification",
      "rule": "general.bc_308_5_classification",
      "name": "Egress · Group I-4, day care facilities (BCNYS 308.5)",
@@ -62345,11 +63741,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): The load each stairway serves isn't worked out: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): The load each stairway serves isn't worked out: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
       "quotes": [
        {
         "text": "1005.3.1 Stairways. The capacity, in inches, of means of egress stairways shall be calculated by multiplying the occupant load served by such stairways by a means of egress capacity factor of 0.3 inch (7.6 mm) per occupant. Where stairways serve more than one story, only the occupant load of each story considered individually shall be used in calculating the required capacity of the stairways serving that story.",
@@ -62378,14 +63774,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1005_3_1_stairway_capacity",
-       "words": "A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The load each stairway serves isn't worked out: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1005_3_1_stairway_capacity",
-       "why": "A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): The load each stairway serves isn't worked out: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -63122,6 +64518,112 @@
       "piece": "1010.1.1.1",
       "piece_title": "Projections into clear opening"
      }
+    },
+    {
+     "id": "egress.interior#1",
+     "rule": null,
+     "name": "Interior drawing",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+      "quotes": [],
+      "citation": "",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": null,
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "drawing:The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+       "words": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+       "elements": [],
+       "field": "stairs"
+      }
+     ],
+     "asks": [
+      {
+       "key": "drawing:The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+       "why": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+       "elements": [],
+       "kind": "mark",
+       "headline": "The interior drawing",
+       "field": "stairs"
+      }
+     ]
+    },
+    {
+     "id": "egress.interior#2",
+     "rule": null,
+     "name": "Interior drawing",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
+      "quotes": [],
+      "citation": "",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": null,
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "drawing:The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
+       "words": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
+       "elements": [],
+       "field": "guards"
+      }
+     ],
+     "asks": [
+      {
+       "key": "drawing:The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
+       "why": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
+       "elements": [],
+       "kind": "mark",
+       "headline": "The interior drawing",
+       "field": "guards"
+      }
+     ]
     },
     {
      "id": "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf",
@@ -67507,7 +69009,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 73 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 76 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -68004,6 +69506,15 @@
       "general.bc_1010_1_1_door_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77f",
       "general.bc_1010_1_1_door_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b780",
       "general.bc_1010_1_1_door_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781",
+      "general.bc_1011_1_stairways_general@-/-",
+      "general.bc_1011_2_stair_width@-/-",
+      "general.bc_1011_3_stair_headroom@-/-",
+      "general.bc_1011_5_2_riser_height@-/-",
+      "general.bc_1011_5_2_tread_depth@-/-",
+      "general.bc_1011_5_4_riser_uniformity@-/-",
+      "general.bc_1011_5_4_tread_uniformity@-/-",
+      "general.bc_1011_6_stair_landings@-/-",
+      "general.bc_1011_11_stair_handrails@-/-",
       "egress.general.bc_308_5_classification",
       "egress.general.bc_308_5_1_group_e",
       "egress.general.bc_308_5_2_religious_worship",
@@ -68054,7 +69565,9 @@
       "egress.general.bc_1005_7_3_protruding_objects",
       "egress.general.bc_1010_1_doors_general",
       "egress.general.bc_1010_1_1_door_capacity",
-      "egress.general.bc_1010_1_1_1_projections"
+      "egress.general.bc_1010_1_1_1_projections",
+      "egress.interior#1",
+      "egress.interior#2"
      ],
      "lines": [
       {
@@ -68520,6 +70033,27 @@
        "title": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): 1 needs review: to give: corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit) not measured (or not usable), the door Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10) doesn't say how many leaves it has (one; or a pair with no mullion, or a mullioned pair whose clear width isn't the narrower leaf's: two), and the model doesn't give it (a door type's leaves mark), occupancy group (the building's one group, or mixed) not measured (or not usable)",
        "mark": "?",
        "name": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10)"
+      },
+      {
+       "key": "review#36f7761001",
+       "tier": "review",
+       "items": [
+        "general.bc_1011_1_stairways_general@-/-",
+        "general.bc_1011_2_stair_width@-/-",
+        "general.bc_1011_3_stair_headroom@-/-",
+        "general.bc_1011_5_2_riser_height@-/-",
+        "general.bc_1011_5_2_tread_depth@-/-",
+        "general.bc_1011_5_4_riser_uniformity@-/-",
+        "general.bc_1011_5_4_tread_uniformity@-/-",
+        "general.bc_1011_6_stair_landings@-/-",
+        "general.bc_1011_11_stair_handrails@-/-"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 9,
+       "title": "Stairs: 9 need review: to give: the stairs weren't sent from the model",
+       "mark": "?",
+       "name": "Stairs"
       },
       {
        "key": "review#e2688efa33",
@@ -69050,7 +70584,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Stairway capacity, 0.3 or 0.2 in per occupant (BCNYS 1005.3.1): A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+       "title": "Egress · Stairway capacity, 0.3 or 0.2 in per occupant (BCNYS 1005.3.1): A person checks this (Gordium doesn't decide it): The load each stairway serves isn't worked out: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
        "mark": "?",
        "name": "Egress · Stairway capacity, 0.3 or 0.2 in per occupant (BCNYS 1005.3.1)"
       },
@@ -69183,13 +70717,120 @@
        "title": "Egress · Nothing projects into a door's clear opening (BCNYS 1010.1.1.1): A person checks this (Gordium doesn't decide it): No projection into a door's required clear width below 34 in, at most 4 in between 34 and 80 in, and door closers, overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Nothing projects into a door's clear opening (BCNYS 1010.1.1.1)"
+      },
+      {
+       "key": "review#3b8d16e054",
+       "tier": "review",
+       "items": [
+        "egress.interior#1"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+       "mark": "?",
+       "name": "Interior drawing"
+      },
+      {
+       "key": "review#a23e6c4654",
+       "tier": "review",
+       "items": [
+        "egress.interior#2"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
+       "mark": "?",
+       "name": "Interior drawing"
       }
      ],
-     "count": 73,
+     "count": 76,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
      "causes": [
+      {
+       "key": "drawing:the stairs weren't sent from the model",
+       "kind": "fix_model",
+       "words": "the stairs weren't sent from the model",
+       "elements": [],
+       "items": [
+        "general.bc_1011_1_stairways_general@-/-",
+        "general.bc_1011_6_stair_landings@-/-"
+       ],
+       "rules": 2
+      },
+      {
+       "key": "model:stair:stair_clear_width:",
+       "kind": "fix_model",
+       "words": "clear width not measured (or not usable)",
+       "elements": [],
+       "items": [
+        "general.bc_1011_2_stair_width@-/-"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "model:stair:stair_headroom:",
+       "kind": "fix_model",
+       "words": "headroom not measured (or not usable)",
+       "elements": [],
+       "items": [
+        "general.bc_1011_3_stair_headroom@-/-"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "model:stair:stair_riser_height:",
+       "kind": "fix_model",
+       "words": "riser height not measured (or not usable)",
+       "elements": [],
+       "items": [
+        "general.bc_1011_5_2_riser_height@-/-"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "model:stair:stair_tread_depth:",
+       "kind": "fix_model",
+       "words": "tread depth not measured (or not usable)",
+       "elements": [],
+       "items": [
+        "general.bc_1011_5_2_tread_depth@-/-"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "model:stair:stair_riser_variation:",
+       "kind": "fix_model",
+       "words": "riser variation not measured (or not usable)",
+       "elements": [],
+       "items": [
+        "general.bc_1011_5_4_riser_uniformity@-/-"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "model:stair:stair_tread_variation:",
+       "kind": "fix_model",
+       "words": "tread variation not measured (or not usable)",
+       "elements": [],
+       "items": [
+        "general.bc_1011_5_4_tread_uniformity@-/-"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "model:stair:stair_handrail_each_side:",
+       "kind": "fix_model",
+       "words": "handrail each side not measured (or not usable)",
+       "elements": [],
+       "items": [
+        "general.bc_1011_11_stair_handrails@-/-"
+       ],
+       "rules": 1
+      },
       {
        "key": "fact:occupancy_group",
        "kind": "mark",
@@ -69464,6 +71105,28 @@
        ],
        "rules": 1,
        "field": "facts.sprinklered_903_3_1_1"
+      },
+      {
+       "key": "drawing:The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+       "kind": "mark",
+       "words": "The interior drawing: the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+       "elements": [],
+       "items": [
+        "egress.interior#1"
+       ],
+       "rules": 1,
+       "field": "stairs"
+      },
+      {
+       "key": "drawing:The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
+       "kind": "mark",
+       "words": "The interior drawing: the guards weren't read: the model doesn't say these are all the guards (or that there are none)",
+       "elements": [],
+       "items": [
+        "egress.interior#2"
+       ],
+       "rules": 1,
+       "field": "guards"
       },
       {
        "key": "question:accessory_area_face",
@@ -69882,7 +71545,7 @@
       {
        "key": "reason:egress.general.bc_1005_3_1_stairway_capacity",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): The stairways' clear widths aren't measured: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The load each stairway serves isn't worked out: 0.3 in for each occupant of the story they serve (0.2 with a sprinkler system and a voice/alarm system, other than Groups H and I-2; assembly seating's own factors) is a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1005_3_1_stairway_capacity"
@@ -70341,7 +72004,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "73 to review · 30 comply"
+     "summary": "76 to review · 30 comply"
     }
    ],
    "contents": [
@@ -82608,7 +84271,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 158
+          "not_for_checking": 169
          },
          "pieces": [
           {
@@ -82626,6 +84289,12 @@
           {
            "id": "202:accessible",
            "title": "ACCESSIBLE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:accessible_means_of_egress",
+           "title": "ACCESSIBLE MEANS OF EGRESS",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -82702,6 +84371,12 @@
            "rules": []
           },
           {
+           "id": "202:authority_having_jurisdiction",
+           "title": "AUTHORITY HAVING JURISDICTION",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:automatic",
            "title": "AUTOMATIC",
            "coverage": "not_for_checking",
@@ -82774,6 +84449,12 @@
            "rules": []
           },
           {
+           "id": "202:certificate_of_occupancy",
+           "title": "CERTIFICATE OF OCCUPANCY",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:combustible_liquid",
            "title": "COMBUSTIBLE LIQUID",
            "coverage": "not_for_checking",
@@ -82788,6 +84469,12 @@
           {
            "id": "202:compressed_gas",
            "title": "COMPRESSED GAS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:construction_documents",
+           "title": "CONSTRUCTION DOCUMENTS",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -82866,6 +84553,18 @@
           {
            "id": "202:emergency_escape_and_rescue_opening",
            "title": "EMERGENCY ESCAPE AND RESCUE OPENING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:existing_building",
+           "title": "EXISTING BUILDING",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:existing_building_code_of_new_york_state",
+           "title": "EXISTING BUILDING CODE OF NEW YORK STATE",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -83040,6 +84739,12 @@
           {
            "id": "202:grade_plane_story_above",
            "title": "GRADE PLANE, STORY ABOVE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:guard",
+           "title": "GUARD",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -83260,8 +84965,26 @@
            "rules": []
           },
           {
+           "id": "202:part_1203",
+           "title": "PART 1203",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:part_1203_compliant_code_enforcement_program",
+           "title": "PART 1203—COMPLIANT CODE ENFORCEMENT PROGRAM",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:penthouse",
            "title": "PENTHOUSE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:permit",
+           "title": "PERMIT",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -83448,6 +85171,12 @@
           {
            "id": "202:stairway_scissor",
            "title": "STAIRWAY, SCISSOR",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:stairway_spiral",
+           "title": "STAIRWAY, SPIRAL",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -85210,10 +86939,85 @@
          "number": "1011",
          "title": "Stairways",
          "book_page": 310,
-         "coverage": "not_brought_in",
+         "coverage": "rules",
          "whole": false,
-         "counts": {},
-         "pieces": []
+         "counts": {
+          "rules": 5,
+          "flag": 2,
+          "not_for_checking": 2
+         },
+         "pieces": [
+          {
+           "id": "1011.1",
+           "title": "General",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1011_1_stairways_general"
+           ]
+          },
+          {
+           "id": "1011.2",
+           "title": "Width and capacity",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1011_2_stair_width"
+           ]
+          },
+          {
+           "id": "1011.3",
+           "title": "Headroom",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1011_3_stair_headroom"
+           ]
+          },
+          {
+           "id": "1011.5.2",
+           "title": "Riser height and tread depth",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1011_5_2_riser_height",
+            "general.bc_1011_5_2_tread_depth"
+           ]
+          },
+          {
+           "id": "1011.5.4",
+           "title": "Dimensional uniformity",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1011_5_4_riser_uniformity",
+            "general.bc_1011_5_4_tread_uniformity"
+           ]
+          },
+          {
+           "id": "1011.6",
+           "title": "Stairway landings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1011_6_stair_landings"
+           ]
+          },
+          {
+           "id": "1011.11",
+           "title": "Handrails",
+           "coverage": "rules",
+           "rules": [
+            "general.bc_1011_11_stair_handrails"
+           ]
+          },
+          {
+           "id": "1011.5",
+           "title": "Stair treads and risers",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1011.5.1",
+           "title": "Dimension reference surfaces",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "1012",
@@ -85656,9 +87460,9 @@
        ],
        "coverage": "rules",
        "counts": {
-        "rules": 7,
+        "rules": 8,
         "flag": 3,
-        "not_brought_in": 21
+        "not_brought_in": 20
        }
       },
       {
@@ -89469,6 +91273,15 @@
    "general.bc_1010_1_1_door_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b77f": "needs_review",
    "general.bc_1010_1_1_door_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b780": "needs_review",
    "general.bc_1010_1_1_door_width@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b781": "needs_review",
+   "general.bc_1011_1_stairways_general@-/-": "needs_review",
+   "general.bc_1011_2_stair_width@-/-": "needs_review",
+   "general.bc_1011_3_stair_headroom@-/-": "needs_review",
+   "general.bc_1011_5_2_riser_height@-/-": "needs_review",
+   "general.bc_1011_5_2_tread_depth@-/-": "needs_review",
+   "general.bc_1011_5_4_riser_uniformity@-/-": "needs_review",
+   "general.bc_1011_5_4_tread_uniformity@-/-": "needs_review",
+   "general.bc_1011_6_stair_landings@-/-": "needs_review",
+   "general.bc_1011_11_stair_handrails@-/-": "needs_review",
    "egress.general.bc_308_5_classification": "needs_review",
    "egress.general.bc_308_5_1_group_e": "needs_review",
    "egress.general.bc_308_5_2_religious_worship": "needs_review",
@@ -89520,6 +91333,8 @@
    "egress.general.bc_1010_1_doors_general": "needs_review",
    "egress.general.bc_1010_1_1_door_capacity": "needs_review",
    "egress.general.bc_1010_1_1_1_projections": "needs_review",
+   "egress.interior#1": "needs_review",
+   "egress.interior#2": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7da": "complies",
@@ -89564,7 +91379,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "73 to review · 30 comply"
+    "summary": "76 to review · 30 comply"
    }
   ],
   "egress": {
@@ -93854,6 +95669,123 @@
      "unknown": [],
      "home": "Level 2",
      "line": "Level 2 › Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D10): Door clear height at least 80 in (BCNYS 1010.1.1): complies"
+    },
+    {
+     "rule": "general.bc_1011_1_stairways_general",
+     "part": "stair",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the stairs aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Stairs: the stairs aren't read yet"
+    },
+    {
+     "rule": "general.bc_1011_2_stair_width",
+     "part": "stair",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the stairs aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Stairs: the stairs aren't read yet"
+    },
+    {
+     "rule": "general.bc_1011_3_stair_headroom",
+     "part": "stair",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the stairs aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Stairs: the stairs aren't read yet"
+    },
+    {
+     "rule": "general.bc_1011_5_2_riser_height",
+     "part": "stair",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the stairs aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Stairs: the stairs aren't read yet"
+    },
+    {
+     "rule": "general.bc_1011_5_2_tread_depth",
+     "part": "stair",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the stairs aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Stairs: the stairs aren't read yet"
+    },
+    {
+     "rule": "general.bc_1011_5_4_riser_uniformity",
+     "part": "stair",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the stairs aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Stairs: the stairs aren't read yet"
+    },
+    {
+     "rule": "general.bc_1011_5_4_tread_uniformity",
+     "part": "stair",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the stairs aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Stairs: the stairs aren't read yet"
+    },
+    {
+     "rule": "general.bc_1011_6_stair_landings",
+     "part": "stair",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the stairs aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Stairs: the stairs aren't read yet"
+    },
+    {
+     "rule": "general.bc_1011_11_stair_handrails",
+     "part": "stair",
+     "id": null,
+     "name": null,
+     "within": null,
+     "outcome": "needs_review",
+     "reason": "the stairs aren't read yet",
+     "values": {},
+     "none": false,
+     "unknown": [],
+     "line": "Stairs: the stairs aren't read yet"
     }
    ],
    "results": {
@@ -93910,6 +95842,15 @@
     "general.bc_1020_7_continuity": "needs_review",
     "general.bc_1010_1_1_door_width": "needs_review",
     "general.bc_1010_1_1_door_height": "pass",
+    "general.bc_1011_1_stairways_general": "needs_review",
+    "general.bc_1011_2_stair_width": "needs_review",
+    "general.bc_1011_3_stair_headroom": "needs_review",
+    "general.bc_1011_5_2_riser_height": "needs_review",
+    "general.bc_1011_5_2_tread_depth": "needs_review",
+    "general.bc_1011_5_4_riser_uniformity": "needs_review",
+    "general.bc_1011_5_4_tread_uniformity": "needs_review",
+    "general.bc_1011_6_stair_landings": "needs_review",
+    "general.bc_1011_11_stair_handrails": "needs_review",
     "general.bc_308_5_classification": "needs_review",
     "general.bc_308_5_1_group_e": "needs_review",
     "general.bc_308_5_2_religious_worship": "needs_review",
@@ -97841,9 +99782,14 @@
         ]
        }
       }
-     ]
+     ],
+     "stair": null,
+     "guard": null
     },
-    "problems": [],
+    "problems": [
+     "the stairs weren't read: the model doesn't say these are all the stairs (or that there are none)",
+     "the guards weren't read: the model doesn't say these are all the guards (or that there are none)"
+    ],
     "not_checked": [],
     "has_none": {}
    },
@@ -97874,9 +99820,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "aec6a4c74905cfdc997635b8b8bd94f025be14212fddbd59903affa54415cf71",
+  "worker_fingerprint": "c521a4269875cb3c99f85e32e2b35bb0adfb94a5c7c1db097805bc97b8b8a98b",
   "rulebook": {
-   "new_york/ithaca_city": "6963c3b08879178c881c819f1454c207c51d83ff2484695de386d2f1d823fed5"
+   "new_york/ithaca_city": "d12293375d749b1d2de6f67e14cd89b348bac6872514959c27ec5284e8df4fa7"
   }
  }
 }

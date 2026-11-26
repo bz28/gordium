@@ -357,3 +357,15 @@ def test_a_door_with_no_stated_clear_opening_is_never_sized_from_its_leaf(got):
     mine = [r for r in stated["rows"] if r["rule"] in (WIDTH, HEIGHT) and r["id"] == desc["doors"][0]["id"]]
     assert len(mine) == 2 and {r["outcome"] for r in mine} == {"needs_review"}
     assert stated["results"][WIDTH] == present.REVIEW and stated["results"][HEIGHT] == present.REVIEW
+
+
+# ---- section group 7c (2026-11-26): Section 1011's stairs --------------------------------------------------------------
+
+def test_its_stairs_are_not_described_so_every_stair_line_needs_review(got):
+    """Before: no rule read a stair. After: Section 1011's seven rules and two flags each give one line, and the
+    apartment's two stairs aren't described (its 9 by 6 ft enclosures can't hold a code-sized stair), so no flight is
+    read and every line needs review, never a pass; nothing else changes (expected.yaml holds every other line as it
+    was)."""
+    stair = {k: v for k, v in got["results"].items() if k.startswith("general.bc_1011_")}
+    assert len(stair) == 9 and set(stair.values()) == {present.REVIEW}
+    assert got["interior"]["parts"]["stair"] is None

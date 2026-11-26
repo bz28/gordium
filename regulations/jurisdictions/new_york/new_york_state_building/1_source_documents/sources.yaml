@@ -78,13 +78,16 @@ documents:
       # distribution between exits, convergence, p.314, with 1005.7 after: section group 5b). 1005.7 with 1005.7.1 to
       # 1005.7.3 (encroachment, p.314, with SECTION 1006 after: section group 5c). 1010.1 alone (doors in the means
       # of egress, p.322) and 1010.1.1 with 1010.1.1.1 (size of doors, and projections into the clear opening,
-      # pp.322-323, with 1010.1.2 after: section group 6a).
-      pages: 32-68, 79, 99, 147, 273-274, 311-318, 322-323, 340-345, 354-355
+      # pp.322-323, with 1010.1.2 after: section group 6a). 1011.1, 1011.2, 1011.3, 1011.5 alone, 1011.5.1, 1011.5.2,
+      # 1011.5.4 alone, 1011.6 and 1011.11 (stairways: scope, width, headroom, risers and treads and their uniformity,
+      # landings, handrails, pp.331-334, with 1011.12 after: section group 7c, docs/decisions/
+      # 2026-11-23_ny_building_egress_all_occupancies.md).
+      pages: 32-68, 79, 99, 147, 273-274, 311-318, 322-323, 331-334, 340-345, 354-355
       sections: ['308.5', '508.2', '1004', Table 1004.5, '1005.1', '1005.2', '1005.3', '1005.4', '1005.5', '1005.6', '1005.7', '1006.2.1', Table 1006.2.1, '1006.2.2', '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(1),
                  Table 1006.3.4(2),
-                 '1007.1', '1010.1.1', '1016.2', '1017', Table 1017.2, '1018.4', '1020.1', '1020.2', Table 1020.2, '1020.3', Table 1020.3,
+                 '1007.1', '1010.1.1', '1011.1', '1011.2', '1011.3', '1011.5.1', '1011.5.2', '1011.6', '1011.11', '1016.2', '1017', Table 1017.2, '1018.4', '1020.1', '1020.2', Table 1020.2, '1020.3', Table 1020.3,
                  '1020.4', '1020.5', '1020.6', '1020.7']
-      alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1010.1', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
+      alone: ['407.4.2', '903.3.1.1', '903.3.1.2', '1010.1', '1011.5', '1011.5.4', '1030.7', '1030.8']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
           the rule measures the story's floor area by both of the book's own measures of floor area (README).
@@ -238,6 +241,11 @@ documents:
             italics (p.314, exception 1); Section 202 defines EMERGENCY VOICE/ALARM COMMUNICATIONS (p.42), which the
             phrase doesn''t name whole, so it isn''t brought in by it. Whether the building has such a system per
             907.5.2.2 (not brought in) is the architect''s statement (the fact emergency_voice_alarm_system).'
+        202:permit:
+          code enforcement program: 'The book prints "Code Enforcement Program" in italics in PERMIT''s Operating permit
+            (p.56, line 53: "the authority having jurisdiction''s Code Enforcement Program"); Section 202 defines PART
+            1203—COMPLIANT CODE ENFORCEMENT PROGRAM (brought in), which the phrase doesn''t name whole. An
+            administrative term, used by no rule (section group 7c brings PERMIT in through CONSTRUCTION DOCUMENTS).'
     contents: >
       Commercial egress step 1 (2026-11-21), the limits Gordium's route measures feed, as the Maine rulebook drafted
       them for a day-care centre (regulations/jurisdictions/maine/maine_state/): 1017 and Table 1017.2 (exit access
