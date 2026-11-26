@@ -625,12 +625,13 @@ def rooms_exit_outside(story, items: dict | None = None, building: dict | None =
 def _links_listed(description) -> list:
     """Every way between rooms, or out, the description gives: (kind, id, room ids) for each door, passage, and opening
     that may be a door (`openings` lists windows and doors: one whose operation names a door, or doesn't say, may be a
-    door to the outside the `doors` list left out: one with a listed door's id is that door, as Revit sends each); one
-    whose rooms can't be read (or a list that isn't one) as ("unread", None, []): it may be any room's."""
+    door to the outside the `doors` list left out: one with a listed door's id, naming one of its rooms or none, is
+    that door, as Revit sends each; a fixed unit doesn't open, so is never a way out); one whose rooms can't be read (or
+    a list that isn't one) as ("unread", None, []): it may be any room's."""
     out = []
     given_doors = description.get("doors")
-    door_ids = {d.get("id") for d in given_doors if isinstance(d, dict) and isinstance(d.get("id"), str)} \
-        if isinstance(given_doors, list) else set()
+    door_sides = {d["id"]: d.get("sides") for d in given_doors if isinstance(d, dict) and isinstance(d.get("id"), str)} \
+        if isinstance(given_doors, list) else {}
     for key, kind, sides_key in (("doors", "door", "sides"), ("passages", "passage", "rooms"),
                                  ("openings", "opening", "room")):
         given = description.get(key)
@@ -643,15 +644,20 @@ def _links_listed(description) -> list:
             sides = d.get(sides_key) if isinstance(d, dict) else None
             if kind == "opening":
                 operation = d.get("operation") if isinstance(d, dict) else None
-                if isinstance(operation, str) and IS_DOOR.get(operation) is False:
-                    continue                             # a window
-                if isinstance(d, dict) and d.get("id") in door_ids:
+                if isinstance(operation, str) and (IS_DOOR.get(operation) is False or operation == "fixed"):
+                    continue                             # a window, or a unit that doesn't open
+                oid = d.get("id") if isinstance(d, dict) else None
+                if isinstance(oid, str) and oid in door_sides and \
+                        (sides is None or (isinstance(door_sides[oid], list) and sides in door_sides[oid])):
                     continue                             # a listed door, judged as one
                 sides = [sides] if isinstance(sides, str) else None
             if not isinstance(sides, list) or not all(isinstance(x, str) for x in sides):
                 out.append(("unread", None, []))
                 continue
-            out.append((kind, d.get("id") if kind != "passage" else None, list(sides)))
+            ref = d.get("id") if kind != "passage" else None
+            if not isinstance(ref, str) or (kind == "opening" and ref in door_sides):
+                ref = None                               # no id, or a door's id for another room: never a door read
+            out.append((kind, ref, list(sides)))
     return out
 
 
