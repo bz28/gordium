@@ -139,9 +139,12 @@ def _aside_value(m: str, v, unit: str) -> str:
     if m == "area_well_depth":
         shown = value(v, unit, toward(ast.Gt, True))
         # the checker's own comparison (formula: two numbers within its tolerance are equal), never a raw v > 44
-        over = isinstance(v, (int, float)) and formula.evaluate(
-            "area_well_depth > 44", {"area_well_depth": v},
-            _kinds({}, parts.measure_kinds("emergency_escape_opening"))) is True
+        try:
+            over = isinstance(v, (int, float)) and formula.evaluate(
+                "area_well_depth > 44", {"area_well_depth": v},
+                _kinds({}, parts.measure_kinds("emergency_escape_opening"))) is True
+        except (formula.MissingMeasure, formula.EvaluationError):
+            over = False                          # a value the checker can't use (negative, not finite): as it is
         return f"over {shown}" if over and shown == value(44, unit) else shown
     return value(v, unit, toward(ast.LtE, True))
 
