@@ -1516,12 +1516,12 @@
     "Egress · Areas of refuge reached by an accessible means of egress: A person checks this (Gordium doesn't decide it): Every required area of refuge is reached from the space it serves by an accessible means of egress: areas of refuge aren't in the model, so a person's check.",
     "Egress · Travel distance to an area of refuge: A person checks this (Gordium doesn't decide it): The travel distance from any accessible space to an area of refuge is no more than the exit access travel distance the occupancy is allowed (1017.1): areas of refuge aren't marked in the model, so the routes don't measure travel to one, a person's check.",
     "Egress · Areas of refuge with direct access to a stair or elevator: A person checks this (Gordium doesn't decide it): Every required area of refuge has direct access to a stairway complying with 1009.3 and 1023 or an elevator complying with 1009.4 (or, at the level of exit discharge, an interior area of refuge to an exterior exit door): areas of refuge aren't in the model, so a person's check.",
-    "Egress · Areas of refuge' wheelchair spaces: A person checks this (Gordium doesn't decide it): Each area of refuge holds one 30 by 52 inch wheelchair space for each 200 occupants or part of 200 it and the areas it serves hold, the spaces not reducing the means of egress minimum width or required capacity, and none blocked by more than one adjoining space: areas of refuge aren't in the model, so a person's check.",
+    "Egress · Wheelchair spaces in areas of refuge: A person checks this (Gordium doesn't decide it): Each area of refuge holds one 30 by 52 inch wheelchair space for each 200 occupants or part of 200 it and the areas it serves hold, the spaces not reducing the means of egress minimum width or required capacity, and none blocked by more than one adjoining space: areas of refuge aren't in the model, so a person's check.",
     "Egress · Areas of refuge separated by a smoke barrier or horizontal exit: A person checks this (Gordium doesn't decide it): Each area of refuge is separated from the rest of the story by a smoke barrier (709) or a horizontal exit (1026) and designed to keep smoke out; not required within an interior exit stairway enclosure (1023), or in outdoor facilities whose exit access is essentially open to the outside: areas of refuge aren't in the model, so a person's check.",
     "Egress · Two-way communication in areas of refuge: A person checks this (Gordium doesn't decide it): Areas of refuge have a two-way communication system complying with 1009.8.1 and 1009.8.2: areas of refuge aren't in the model, so a person's check.",
     "Egress · Exterior areas for assisted rescue where required: A person checks this (Gordium doesn't decide it): An exterior area for assisted rescue is reached by an accessible route from the area it serves, and one is provided on the exterior landing (1009.7.1 to 1009.7.4) where the exit discharge has no accessible route from an exit on the level of exit discharge to a public way: the site's accessible routes aren't in the model, so a person's check.",
-    "Egress · Exterior areas for assisted rescue' wheelchair spaces: A person checks this (Gordium doesn't decide it): Each exterior area for assisted rescue holds wheelchair spaces as 1009.6.3 sizes them: such areas aren't in the model, so a person's check.",
-    "Egress · Exterior areas for assisted rescue' rated walls: A person checks this (Gordium doesn't decide it): The exterior walls between an exterior area for assisted rescue and the building's interior are rated at least 1 hour from the inside, extending at least 10 feet beyond the landing on either side (or equivalent rated construction at least 4 feet out from the wall beside the landing) and from the ground to at least 10 feet above the area's floor or the roof line, whichever is lower, openings protected per 716; neither the rating nor the opening protectives is required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: such areas and wall ratings aren't in the model, so a person's check.",
+    "Egress · Wheelchair spaces in exterior areas for assisted rescue: A person checks this (Gordium doesn't decide it): Each exterior area for assisted rescue holds wheelchair spaces as 1009.6.3 sizes them: such areas aren't in the model, so a person's check.",
+    "Egress · Rated walls at exterior areas for assisted rescue: A person checks this (Gordium doesn't decide it): The exterior walls between an exterior area for assisted rescue and the building's interior are rated at least 1 hour from the inside, extending at least 10 feet beyond the landing on either side (or equivalent rated construction at least 4 feet out from the wall beside the landing) and from the ground to at least 10 feet above the area's floor or the roof line, whichever is lower, openings protected per 716; neither the rating nor the opening protectives is required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: such areas and wall ratings aren't in the model, so a person's check.",
     "Egress · Exterior areas for assisted rescue open to the air: A person checks this (Gordium doesn't decide it): An exterior area for assisted rescue is open to the outside air, its sides other than the separation walls at least 50 percent open, the openings spread to keep smoke and toxic gases from gathering: such areas aren't in the model, so a person's check.",
     "Egress · Assisted rescue stairways 48 inches between handrails: A person checks this (Gordium doesn't decide it): Stairways in the means of egress from an exterior area for assisted rescue have at least 48 inches clear between handrails; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: such areas aren't in the model, so a person's check.",
     "Egress · Two-way communication at elevator landings: A person checks this (Gordium doesn't decide it): A two-way communication system complying with 1009.8.1 and 1009.8.2 is at the landing serving each elevator or bank of elevators on each accessible floor one or more stories above or below the level of exit discharge; not required where the system is in areas of refuge (1009.6.5), on floors with ramps complying with 1012, at landings serving only service elevators outside the accessible means of egress and the required accessible route, only freight elevators, or a private residence elevator, or in Group I-2 or I-3 facilities: elevators aren't in the model, so a person's check.",
@@ -74901,7 +74901,7 @@
     {
      "id": "egress.general.bc_1009_6_3_area_of_refuge_size",
      "rule": "general.bc_1009_6_3_area_of_refuge_size",
-     "name": "Egress · Areas of refuge' wheelchair spaces (BCNYS 1009.6.3)",
+     "name": "Egress · Wheelchair spaces in areas of refuge (BCNYS 1009.6.3)",
      "group": "law",
      "status": "needs_review",
      "mark": "?",
@@ -74956,7 +74956,7 @@
        "headline": "Check this by hand: a person decides it"
       }
      ],
-     "rule_name": "Areas of refuge' wheelchair spaces",
+     "rule_name": "Wheelchair spaces in areas of refuge",
      "in_code": {
       "document": "2025 Building Code of New York State (BCNYS)",
       "file": "gov.ny.building.2025.pdf",
@@ -75181,7 +75181,7 @@
     {
      "id": "egress.general.bc_1009_7_1_assisted_rescue_size",
      "rule": "general.bc_1009_7_1_assisted_rescue_size",
-     "name": "Egress · Exterior areas for assisted rescue' wheelchair spaces (BCNYS 1009.7.1)",
+     "name": "Egress · Wheelchair spaces in exterior areas for assisted rescue (BCNYS 1009.7.1)",
      "group": "law",
      "status": "needs_review",
      "mark": "?",
@@ -75236,7 +75236,7 @@
        "headline": "Check this by hand: a person decides it"
       }
      ],
-     "rule_name": "Exterior areas for assisted rescue' wheelchair spaces",
+     "rule_name": "Wheelchair spaces in exterior areas for assisted rescue",
      "in_code": {
       "document": "2025 Building Code of New York State (BCNYS)",
       "file": "gov.ny.building.2025.pdf",
@@ -75251,7 +75251,7 @@
     {
      "id": "egress.general.bc_1009_7_2_assisted_rescue_separation",
      "rule": "general.bc_1009_7_2_assisted_rescue_separation",
-     "name": "Egress · Exterior areas for assisted rescue' rated walls (BCNYS 1009.7.2)",
+     "name": "Egress · Rated walls at exterior areas for assisted rescue (BCNYS 1009.7.2)",
      "group": "law",
      "status": "needs_review",
      "mark": "?",
@@ -75306,7 +75306,7 @@
        "headline": "Check this by hand: a person decides it"
       }
      ],
-     "rule_name": "Exterior areas for assisted rescue' rated walls",
+     "rule_name": "Rated walls at exterior areas for assisted rescue",
      "in_code": {
       "document": "2025 Building Code of New York State (BCNYS)",
       "file": "gov.ny.building.2025.pdf",
@@ -83324,9 +83324,9 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Areas of refuge' wheelchair spaces (BCNYS 1009.6.3): A person checks this (Gordium doesn't decide it): Each area of refuge holds one 30 by 52 inch wheelchair space for each 200 occupants or part of 200 it and the areas it serves hold, the spaces not reducing the means of egress minimum width or required capacity, and none blocked by more than one adjoining space: areas of refuge aren't in the model, so a person's check.",
+       "title": "Egress · Wheelchair spaces in areas of refuge (BCNYS 1009.6.3): A person checks this (Gordium doesn't decide it): Each area of refuge holds one 30 by 52 inch wheelchair space for each 200 occupants or part of 200 it and the areas it serves hold, the spaces not reducing the means of egress minimum width or required capacity, and none blocked by more than one adjoining space: areas of refuge aren't in the model, so a person's check.",
        "mark": "?",
-       "name": "Egress · Areas of refuge' wheelchair spaces (BCNYS 1009.6.3)"
+       "name": "Egress · Wheelchair spaces in areas of refuge (BCNYS 1009.6.3)"
       },
       {
        "key": "review#faf54511b7",
@@ -83376,9 +83376,9 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Exterior areas for assisted rescue' wheelchair spaces (BCNYS 1009.7.1): A person checks this (Gordium doesn't decide it): Each exterior area for assisted rescue holds wheelchair spaces as 1009.6.3 sizes them: such areas aren't in the model, so a person's check.",
+       "title": "Egress · Wheelchair spaces in exterior areas for assisted rescue (BCNYS 1009.7.1): A person checks this (Gordium doesn't decide it): Each exterior area for assisted rescue holds wheelchair spaces as 1009.6.3 sizes them: such areas aren't in the model, so a person's check.",
        "mark": "?",
-       "name": "Egress · Exterior areas for assisted rescue' wheelchair spaces (BCNYS 1009.7.1)"
+       "name": "Egress · Wheelchair spaces in exterior areas for assisted rescue (BCNYS 1009.7.1)"
       },
       {
        "key": "review#a113083475",
@@ -83389,9 +83389,9 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Exterior areas for assisted rescue' rated walls (BCNYS 1009.7.2): A person checks this (Gordium doesn't decide it): The exterior walls between an exterior area for assisted rescue and the building's interior are rated at least 1 hour from the inside, extending at least 10 feet beyond the landing on either side (or equivalent rated construction at least 4 feet out from the wall beside the landing) and from the ground to at least 10 feet above the area's floor or the roof line, whichever is lower, openings protected per 716; neither the rating nor the opening protectives is required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: such areas and wall ratings aren't in the model, so a person's check.",
+       "title": "Egress · Rated walls at exterior areas for assisted rescue (BCNYS 1009.7.2): A person checks this (Gordium doesn't decide it): The exterior walls between an exterior area for assisted rescue and the building's interior are rated at least 1 hour from the inside, extending at least 10 feet beyond the landing on either side (or equivalent rated construction at least 4 feet out from the wall beside the landing) and from the ground to at least 10 feet above the area's floor or the roof line, whichever is lower, openings protected per 716; neither the rating nor the opening protectives is required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: such areas and wall ratings aren't in the model, so a person's check.",
        "mark": "?",
-       "name": "Egress · Exterior areas for assisted rescue' rated walls (BCNYS 1009.7.2)"
+       "name": "Egress · Rated walls at exterior areas for assisted rescue (BCNYS 1009.7.2)"
       },
       {
        "key": "review#514fed4f9b",
@@ -115841,7 +115841,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "57ea9b5c79f8dfab01469d1a7d8b6abe0bfa34d22d08f903a3f268e85492aa1e"
+   "new_york/ithaca_city": "2c0e617def2a705153b9d10fde4b32eb51f1291ae905ddbb91ea012982bcfe41"
   }
  }
 }

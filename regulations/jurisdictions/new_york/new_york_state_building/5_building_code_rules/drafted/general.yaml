@@ -21646,7 +21646,7 @@ rules:
 - id: general.bc_1009_6_3_area_of_refuge_size
   kind: flag
   topic: means_of_egress
-  title: Areas of refuge' wheelchair spaces (BCNYS 1009.6.3)
+  title: Wheelchair spaces in areas of refuge (BCNYS 1009.6.3)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 321
@@ -21748,7 +21748,7 @@ rules:
 - id: general.bc_1009_7_1_assisted_rescue_size
   kind: flag
   topic: means_of_egress
-  title: Exterior areas for assisted rescue' wheelchair spaces (BCNYS 1009.7.1)
+  title: Wheelchair spaces in exterior areas for assisted rescue (BCNYS 1009.7.1)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 321
@@ -21771,7 +21771,7 @@ rules:
 - id: general.bc_1009_7_2_assisted_rescue_separation
   kind: flag
   topic: means_of_egress
-  title: Exterior areas for assisted rescue' rated walls (BCNYS 1009.7.2)
+  title: Rated walls at exterior areas for assisted rescue (BCNYS 1009.7.2)
   applies_when: not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
   sources:
   - file: gov.ny.building.2025.pdf
