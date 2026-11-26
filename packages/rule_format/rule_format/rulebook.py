@@ -1534,10 +1534,12 @@ _repo_file_names: set[str] | None = None
 # folder listings a published law's certificate keeps (rule_format/published.py): one rule for both, so a certificate
 # never leaves out a name this walk could see, and publishing never changes what it sees.
 # Every name the repo's .gitignore files ignore is one (test_published pins it): Rhino's lock and backup files beside
-# an open model (review round 2) are no more the repo's than a Python cache.
+# an open model (review round 2) are no more the repo's than a Python cache. Except a name Python can import: a
+# compiled module (.pyd, .pyc) beside a validator's .py is imported in its place, so it must change the listing
+# (review round 3); Python's own caches are in __pycache__, left out whole.
 GENERATED_NAMES = ("__pycache__", "bin", "obj", "TestResults", "7_published_rulebooks", "venv", "dist", "build")
 PUBLISHED_SUFFIX = ".published.json"
-GENERATED_SUFFIXES = (".egg-info", PUBLISHED_SUFFIX, ".rhl", ".3dmbak", ".pyc", ".pyo", ".pyd")
+GENERATED_SUFFIXES = (".egg-info", PUBLISHED_SUFFIX, ".rhl", ".3dmbak")
 
 
 def generated_name(name: str) -> bool:
