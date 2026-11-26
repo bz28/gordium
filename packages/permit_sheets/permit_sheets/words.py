@@ -107,7 +107,10 @@ def value(v, unit: str, direction: str = "nearest") -> str:
         if unit == "count":
             return str(int(v)) if float(v).is_integer() else f"{v:g}"
         return f"{v:g}"
-    return str(v)
+    try:
+        return str(v)
+    except ValueError:                                  # an integer too long for Python to write out
+        return "a number too large to print"
 
 
 def toward(sign_op, for_proposed: bool) -> str:
