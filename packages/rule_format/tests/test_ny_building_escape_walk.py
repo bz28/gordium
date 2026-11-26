@@ -189,23 +189,28 @@ def _well(**m):
     return {k: v for k, v in m.items() if v is not U}
 
 
+# review round 2 of 8c: how far anything standing in the well reaches into its required dimensions is its own fact
+# (area_well_encroachment), never read from area_well_ladder (no for an obstructed ladder too): within 6 in, or past
+ENCROACH = (U, 0, 6, 7)
+
+
 def _required_cases():
     for below in TRI:
         for area in (U, 8, 9):
-            for ladder in TRI:
-                ok = below is False or (area is not U and area >= 9 and ladder is False)
-                yield _well(opening_below_grade=below, area_well_area=area, area_well_ladder=ladder), ok, \
-                    below is True and area is not U and area < 9
+            for enc in ENCROACH:
+                ok = below is False or (area is not U and area >= 9 and enc is not U and enc <= 6)
+                past = below is True and ((area is not U and area < 9) or (enc is not U and enc > 6))
+                yield _well(opening_below_grade=below, area_well_area=area, area_well_encroachment=enc), ok, past
 
 
 def _side_cases(name):
     def cases():
         for below in TRI:
             for v in (U, 29, 30, 35, 36):
-                for ladder in TRI:
-                    m = _well(opening_below_grade=below, **{name: v}, area_well_ladder=ladder)
-                    ok = below is False or (v is not U and v >= 36 and ladder is False)
-                    past = below is True and v is not U and v < 36
+                for enc in ENCROACH:
+                    m = _well(opening_below_grade=below, **{name: v}, area_well_encroachment=enc)
+                    ok = below is False or (v is not U and v >= 36 and enc is not U and enc <= 6)
+                    past = below is True and ((v is not U and v < 36) or (enc is not U and enc > 6))
                     yield m, ok, past
     return cases
 
