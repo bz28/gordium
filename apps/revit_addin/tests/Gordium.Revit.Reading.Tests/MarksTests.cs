@@ -99,7 +99,7 @@ public sealed class MarksTests
             ("Gordium: Corridors within dwelling units", "a61d6738-cc50-4a7a-bf34-eb258e6b55d7", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Emergency voice/alarm system", "f4184d32-275e-4423-90c6-66a2e4d247ee", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Mezzanines", "c2f4615d-5335-49cc-a997-311bac414fbd", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
-            ("Gordium: Bowling lanes", "5049ea17-952b-4916-b429-896167244126", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Loads not by area", "5049ea17-952b-4916-b429-896167244126", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // the dwelling's own facts the code decision reads (review round 1: an ask named marks Revit didn't have)
             ("Gordium: Dwelling units", "aa32131a-e757-47a3-abf8-9deb81d7a09a", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Units in the attached building", "bccb088a-c087-475f-9ff9-53fd10133d0e", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),

@@ -584,7 +584,7 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
                  "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "OTHER_LEVELS_FIELD", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
                  "CORRIDOR_READINGS",     # the readings' own words: a load given, never asked
                  # the ceiling's (a load bounded, never a reason a load isn't given; BOUND_FACT_WHY is a fact's ask)
-                 "GROUPS_FACT", "FIXED_SEATING", "BOWLING", "OUTDOOR", "MEZZANINES", "BOUND", "IF_STATED",
+                 "NOT_BY_AREA", "OUTDOOR", "MEZZANINES", "BOUND", "IF_STATED",
                  "BOUND_WHY", "BOUND_FACT_WHY"}
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
@@ -632,10 +632,10 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
 
 
 # ---- the ceiling on a load not worked out (occupant_load._bounds; docs/decisions/2026-11-26_occupant_load_upper_bound.md)
-STATED = {"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r", "assembly_fixed_seating": False,
-          "bowling_lanes": False, "occupied_outdoor_areas": False, "mezzanines": False}
+STATED = {"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r", "loads_not_by_area": False,
+          "occupied_outdoor_areas": False, "mezzanines": False}
 ELSEWHERE_FUNCTIONS = {"assembly_fixed_seats", "bowling_center", "concentrated_business", "mall"}
-NO_FACTS = ("assembly_fixed_seating", "bowling_lanes", "occupied_outdoor_areas", "mezzanines")
+NO_FACTS = ("loads_not_by_area", "occupied_outdoor_areas", "mezzanines")
 
 
 def _story(gross=1800.0, areas=(690.0, 690.0), functions=(None, None)):
@@ -657,45 +657,39 @@ def _ceilings(parts):
 def test_the_densest_factor_is_standing_space_and_no_function_with_a_factor_is_denser():
     """The proof's first step (1004.5, Table 1004.5, 1004.5.1): of every function the table gives a factor, the
     fewest square feet per occupant is 5 (Standing space 5 net), and 1004.5.1's increase stops at 7, so no function
-    worked out from its area gives more than one occupant per 5 sq ft. The four the table sends elsewhere are the only
-    ones without a factor, and each is kept out of the ceiling by a stated fact: fixed seats (1004.6) by the
-    fixed-seating fact, bowling lanes (by the lane) by the bowling-lanes fact, concentrated business (NY 1004.8: 'the
-    actual occupant load as approved') by Group B, malls (402.8.2) by Group M; and stated on a room, any of them
-    leaves its story with no ceiling."""
+    worked out from its area gives more than one occupant per 5 sq ft. The four the table sends elsewhere (fixed seats,
+    1004.6, in any use; bowling lanes; concentrated business use, NY 1004.8's 'actual occupant load as approved'; a
+    mall, 402.8.2) are the only ones without a factor, and all four are kept out by one stated fact, loads_not_by_area,
+    whatever the building's groups (round 2: a fixed-seat classroom isn't assembly, and a live/work unit's business
+    area is Group R-2, 508.5.2); stated on a room, any of them leaves its story with no ceiling."""
     assert occupant_load.densest(FACTORS) == 5
     assert [f for f, e in FACTORS["functions"].items() if e["factor"] == 5] == ["assembly_standing"]
     assert FACTORS["functions"]["assembly_standing"]["source"]["quote"] == "Standing space 5 net"
     assert {f for f, e in FACTORS["functions"].items() if e["factor"] is None} == ELSEWHERE_FUNCTIONS
     assert FACTORS["increase_cap"] == 7 and occupant_load.densest({"functions": {}, "increase_cap": 7}) == 7
-    assert occupant_load.NO_FACTS == NO_FACTS and occupant_load.UNBOUNDED_GROUPS == ("B", "M")
+    assert occupant_load.NO_FACTS == NO_FACTS
+    assert not hasattr(occupant_load, "UNBOUNDED_GROUPS")       # no group is taken as a proof of what's inside it
     for fn in ELSEWHERE_FUNCTIONS:
         parts, desc = _story(functions=(fn, None))
         occupant_load.apply(parts, desc, FACTORS, STATED)
         assert _ceilings(parts) == [None, None, None], fn
 
 
-ALL_FACTS = ["occupancy_groups", *NO_FACTS]
-
-
 @pytest.mark.parametrize("building, proven, hoped", [
     (STATED, 360, None),                                                           # 1,800 / 5
     ({**STATED, "sprinkler_system": "none"}, 360, None),                           # the sprinkler system: no matter
-    ({**STATED, "occupancy_groups": ["A-3"]}, 360, None),        # Group A's unbounded rooms are the stated facts
+    *[({**STATED, "occupancy_groups": g}, 360, None)                               # the groups: no matter (round 2)
+      for g in (["A-3"], ["B"], ["M"], ["F1"], None)],
     ({**STATED, "mezzanines": None}, None, (360, ["mezzanines"])),                 # 1004.2.2: never assumed none
-    ({**STATED, "bowling_lanes": None}, None, (360, ["bowling_lanes"])),
+    ({**STATED, "loads_not_by_area": None}, None, (360, ["loads_not_by_area"])),
+    ({**STATED, "loads_not_by_area": "no"}, None, (360, ["loads_not_by_area"])),   # not yes or no: not stated
     ({**STATED, "occupied_outdoor_areas": None}, None, (360, ["occupied_outdoor_areas"])),
-    ({}, None, (360, ALL_FACTS)),
-    # round 1 (F1): groups Gordium can't read (code_scope.GROUPS) are not stated, never "none of B or M"
-    ({**STATED, "occupancy_groups": ["b"]}, None, (360, ["occupancy_groups"])),
-    ({**STATED, "occupancy_groups": ["a-3"]}, None, (360, ["occupancy_groups"])),
-    ({**STATED, "occupancy_groups": ["F1"]}, None, (360, ["occupancy_groups"])),
-    ({**STATED, "occupancy_groups": "R-2"}, None, (360, ["occupancy_groups"])),
-    ({**STATED, "occupancy_groups": []}, None, (360, ["occupancy_groups"])),
+    ({}, None, (360, list(NO_FACTS))),
 ])
 def test_the_ceiling_by_hand(building, proven, hoped):
     """The apartment's story by hand: 1,800 sq ft at one occupant per 5 sq ft is 360, proven only where the building
-    states every fact the ceiling needs (groups Gordium reads, none B or M; no fixed assembly seating, bowling lanes,
-    occupied outdoor areas or mezzanines), else what stating them would prove, naming the facts not stated."""
+    states each fact the ceiling needs no (no area counted by seats, lanes or actual load, no occupied outdoor areas,
+    no mezzanine), else what stating them would prove, naming the facts not stated."""
     parts, desc = _story()
     occupant_load.apply(parts, desc, FACTORS, building)
     for got in _ceilings(parts):
@@ -707,16 +701,13 @@ def test_the_ceiling_by_hand(building, proven, hoped):
             assert stated is None
 
 
-@pytest.mark.parametrize("building", [
-    {**STATED, "occupancy_groups": g} for g in (["B"], ["M"], ["R-2", "B"])] + [
-    {**STATED, fact: True} for fact in NO_FACTS])
-def test_no_ceiling_where_a_room_could_hold_more_than_its_area_allows(building):
-    """Group B (1004.8's actual load as approved), Group M (402.8.2), or the building stating fixed assembly seating
-    (1004.6: by the seat), bowling lanes (by the lane), outdoor areas the occupants use (1004.7 adds their load to the
-    building's) or a mezzanine (1004.2.2 adds its people to a room on an adjacent level): no ceiling at all, and
-    nothing to ask that would give one."""
+@pytest.mark.parametrize("fact", NO_FACTS)
+def test_no_ceiling_where_a_room_could_hold_more_than_its_area_allows(fact):
+    """The building stating an area counted by seats, lanes or actual load (1004.6, Table 1004.5's bowling row, 1004.8,
+    402.8.2), outdoor areas the occupants use (1004.7 adds their load to the building's) or a mezzanine (1004.2.2 adds
+    its people to a room on an adjacent level): no ceiling at all, and nothing to ask that would give one."""
     parts, desc = _story()
-    occupant_load.apply(parts, desc, FACTORS, building)
+    occupant_load.apply(parts, desc, FACTORS, {**STATED, fact: True})
     assert _ceilings(parts) == [None, None, None]
 
 

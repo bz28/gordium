@@ -19,17 +19,17 @@ Where a space's or story's occupant load isn't worked out, Gordium gives it a **
 - **Rounded up:** an occupant load is a number of people. A computed 49.5 is 50 people, so a rule asking "fewer than 50" is never passed on it.
 
 The ceiling is **proven** only where the building states every fact it needs:
-- its occupancy groups, all ones Gordium reads, with neither B nor M among them;
-- no fixed assembly seating;
-- no bowling lanes;
+- no area whose occupant load Table 1004.5 counts by something other than its floor area (fixed seats in any use, bowling lanes, a concentrated business use, a mall);
 - no outdoor areas the occupants use;
 - no mezzanine.
+
+The occupancy groups don't matter: no group is taken as proof of what is inside it (review round 2).
 
 Where any of these isn't stated, the ceiling is only what stating them would prove. A row it would settle asks for those facts first, before the rooms' functions. Where the building states one of them the other way, there is no ceiling at all.
 
 A rule is decided on the ceiling only where the checker can prove the rule gives the same answer for every load from none up to the ceiling (`rule_format/parts.py`, `under_bounds`). Each of its formulas must move only one way as the load grows (`formula.truth_direction`), and give the same truth at none and at the ceiling. A rule whose formula the proof can't follow (an `if ... else`, an `==`) is left as it was. So the story rule 1006.3.3 ("2 exits if 500 or fewer, else 3"), written as an if-else, is not decided this way yet.
 
-**On the apartment:** no function stated, Group R-2, and the facts stated no. The ceiling is 1,800 / 5 = 360, so each apartment's 1006.2.1.1 row complies. With the mezzanine fact left blank, the rows ask "Say whether the building has a mezzanine", and nothing else, before the rooms' functions.
+**On the apartment:** no function stated, and the three facts stated no. The ceiling is 1,800 / 5 = 360, so each apartment's 1006.2.1.1 row complies. With the mezzanine fact left blank, the rows ask "Say whether the building has a mezzanine", and nothing else, before the rooms' functions.
 
 ## Why it is a true ceiling (the law)
 
@@ -42,13 +42,12 @@ All quotes are from the 2025 Building Code of New York State. Nothing below is G
    - 1004.5 also says: "Where an intended function is not listed in Table 1004.5, the building official shall establish a function based on a listed function". So every function takes one of these factors.
 2. **The increase can't go past 5.** 1004.5.1 lets a design take more occupants than the table gives, but only while "the occupant load does not exceed one occupant per 7 square feet". That is sparser than 5, so it never raises a load past area / 5.
 3. **Fewer is allowed, never more.** The 1004.5 exception ("although less than those determined by calculation") only lowers a load.
-4. **The four rows with no factor are each kept out by something the building states:**
-   - **Fixed seats.** 1004.6: "the occupant load shall be determined by the number of fixed seats installed therein". Kept out by `assembly_fixed_seating: false`. Its Revit mark (Gordium: Fixed assembly seating) covers fixed seating used for assembly in any group.
-   - **Bowling centers.** "allow 5 persons for each lane including 15 feet of runway": counted by the lane, not the area. Kept out by `bowling_lanes: false` (Gordium: Bowling lanes), whatever the building's group.
-   - **Concentrated business use.** NY's own 1004.8: "the actual occupant load as approved, but not less than one occupant per 50 square feet". No most is printed. These are business use areas, Group B (304.1), so a stated Group B means no ceiling.
-   - **Malls.** "See Section 402.8.2". A stated Group M means no ceiling.
+4. **The four rows with no factor are kept out by one fact the building states**, `loads_not_by_area: false` (Gordium: Loads not by area), whatever its groups:
+   - **Fixed seats.** 1004.6: "For areas having fixed seats and aisles, the occupant load shall be determined by the number of fixed seats installed therein", in any use, not only assembly.
+   - **Bowling centers.** "allow 5 persons for each lane including 15 feet of runway": counted by the lane, not the area.
+   - **Concentrated business use.** NY's own 1004.8: "the actual occupant load as approved, but not less than one occupant per 50 square feet". No most is printed. It can sit in a Group R-2 building too (508.5.2: "Live/work units shall be classified as a Group R-2 occupancy").
+   - **Malls.** "See Section 402.8.2".
    - A room whose stated function is one of these, or isn't one of the table's, leaves its story with no ceiling.
-   - Occupancy groups Gordium can't read (`code_scope.GROUPS`) count as not stated.
 5. **Rooms people walk through add nothing from outside the story.** 1004.2.1 adds the loads of rooms whose occupants "egress from one or more rooms, areas or spaces through others". Those rooms are on the same story, so the story's area covers them. 1004.2.3: "Other than for the egress components designed for convergence in accordance with Section 1005.6, the occupant load from separate stories shall not be added." 1005.6 is about "the capacity of the means of egress from the point of convergence" for stairways and ramps. It sizes those components and adds no other story's people to a room's count.
 6. **Mezzanines.** 1004.2.2: "That portion of the occupant load of a mezzanine with required egress through a room, area or space on an adjacent level shall be added to the occupant load of that room". That could be a room on this story or the next one. So the ceiling needs `mezzanines: false` (Gordium: Mezzanines) and never counts a share instead (review round 1).
 7. **Outdoor areas.** 1004.7: "Where outdoor areas are to be used by persons in addition to the occupants of the building, and the path of egress travel from the outdoor areas passes through the building, means of egress requirements for the building shall be based on the sum". So the ceiling needs `occupied_outdoor_areas: false`.
@@ -58,7 +57,7 @@ A walk test checks the ceiling on the apartment. In 60 cases, every room gets an
 ## The new facts
 
 - `building.mezzanines` (yes/no): the building has a mezzanine (505.2). In Revit: **Gordium: Mezzanines**, a Yes/No on Project Information.
-- `building.bowling_lanes` (yes/no): any room has bowling lanes. In Revit: **Gordium: Bowling lanes**, a Yes/No on Project Information.
+- `building.loads_not_by_area` (yes/no): any area's occupant load is counted by its seats, lanes or actual load (the four rows above). In Revit: **Gordium: Loads not by area**, a Yes/No on Project Information.
 
 The pane's answer cards need every fact they ask to have its mark, so both come with one.
 

@@ -328,7 +328,7 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
 # ---- the ceiling on an occupant load not worked out (occupant_load._bounds, 2026-11-26: the egress UI audit's 6) -------
 
 THREE = "general.bc_1006_2_1_1_three_or_more_exits"
-CEILING_FACTS = {"assembly_fixed_seating": False, "bowling_lanes": False, "occupied_outdoor_areas": False}
+CEILING_FACTS = {"loads_not_by_area": False, "occupied_outdoor_areas": False}
 
 
 def _no_functions(**building):
@@ -348,8 +348,8 @@ def test_the_three_exit_rule_settles_on_the_floor_area_with_no_function_stated(r
                                                                               ceiling):
     """The audit's finding 6: with no room function stated, the four apartments' 1006.2.1.1 rows asked for each
     room's function, though no function can put 501 people on a 1,800 sq ft story. With the building's facts the
-    ceiling needs stated (Group R-2; no fixed assembly seating, bowling lanes, outdoor areas the occupants use or
-    mezzanines), each apartment's row complies on the ceiling; the rows that change are only rules reading an
+    ceiling needs stated (no area counted by seats, lanes or actual load, no outdoor areas the occupants use, no
+    mezzanine), each apartment's row complies on the ceiling; the rows that change are only rules reading an
     occupant load, only from needs review, and never to a fail. Where one fact is missing it asks that fact (here
     mezzanines), before the rooms' functions."""
     building = {**CEILING_FACTS, "sprinkler_system": sprinkler, **({} if mezzanines is None else

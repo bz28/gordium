@@ -387,13 +387,14 @@ public static class Marks
         "Its occupants add to a room on an adjacent level (1004.2.2), so with no room function set Gordium bounds a story's occupant load by its floor area alone only where the building has none. " +
         "No: there is none (with the other facts that bound stated, a story holds at most one occupant per 5 sq ft of it). Yes: no such bound. Blank: no such bound, and asked where No would settle a rule.");
 
-    /// <summary>Whether the building has bowling lanes (<c>building.bowling_lanes</c>, BCNYS Table 1004.5): read by the
-    /// occupant loads' ceiling (occupant_load.py), never a rule's own measure.</summary>
-    public static readonly MarkDefinition BowlingLanes = new(
-        "Gordium: Bowling lanes", new("5049ea17-952b-4916-b429-896167244126"), MarkValueKind.YesNo,
-        MarkBinding.Instance, [ProjectInformation], "building.bowling_lanes",
-        "Yes when any room has bowling lanes, whatever the building's group. BCNYS Table 1004.5: \"Bowling centers, allow 5 persons for each lane including 15 feet of runway\": counted by the lane, not the floor area. " +
-        "No: there are none (with the other facts that bound stated, a story holds at most one occupant per 5 sq ft of it). Yes: no such bound. Blank: no such bound, and asked where No would settle a rule.");
+    /// <summary>Whether any area's occupant load is counted by something other than its floor area
+    /// (<c>building.loads_not_by_area</c>, BCNYS Table 1004.5's rows with no factor): read by the occupant loads'
+    /// ceiling (occupant_load.py), never a rule's own measure.</summary>
+    public static readonly MarkDefinition LoadsNotByArea = new(
+        "Gordium: Loads not by area", new("5049ea17-952b-4916-b429-896167244126"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.loads_not_by_area",
+        "Yes when any room or area of the building has an occupant load Table 1004.5 counts by something other than its floor area, whatever its use or group: fixed seats or benches (BCNYS 1004.6: \"determined by the number of fixed seats installed therein\"), bowling lanes (\"allow 5 persons for each lane\"), a concentrated business use such as a call center or trading floor (1004.8: \"the actual occupant load as approved\"), or a covered or open mall (402.8.2). " +
+        "No: there is none (with the other facts that bound stated, a story holds at most one occupant per 5 sq ft of it). Yes: no such bound. Blank: no such bound, and asked where No would settle a rule.");
 
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
@@ -694,7 +695,7 @@ public static class Marks
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
         EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased, OtherLevelsReachCorridors,
-        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm, Mezzanines, BowlingLanes,
+        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm, Mezzanines, LoadsNotByArea,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,
