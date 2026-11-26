@@ -205,3 +205,17 @@ def test_a_reach_through_a_room_the_routes_read_through_says_the_reading():
                     confirm={"space_exit_count": "Gordium's reading: Bedroom through Closet"})
     assert p["measures"]["sleeping_room_story_one_exit"] is False
     assert p["confirm"]["sleeping_room_story_one_exit"] == "Gordium's reading: Bedroom through Closet"
+
+
+def test_the_rooms_reach_decides_the_one_exit_question_only():
+    """Review round 2 (PR 3): the reach fallback ran for every linked measure; a story's fourth-or-higher given as null
+    would have taken the room's reach as its value. Now only the one-exit question reads the reach, and a null story
+    value is never a value."""
+    parts, desc = _parts(story={"id": "L1", "measures": {"story_exit_count": 2,
+                                                        "story_fourth_or_higher_above_grade_plane": None}})
+    parts["space"] = [{"id": "b", "within": "L1", "measures": {}, "not_measured": {},
+                       "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}}}}]
+    escape_openings.link(parts, desc)
+    p = parts["sleeping_room"][0]
+    assert p["measures"]["sleeping_room_story_one_exit"] is False
+    assert "sleeping_room_fourth_or_higher" not in p["measures"] and p["not_measured"]["sleeping_room_fourth_or_higher"]

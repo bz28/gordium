@@ -99,7 +99,7 @@ def link(parts: dict, description) -> None:
             story = stories.get(level) if reason is None else None
             if story is not None and theirs in (story.get("measures") or {}):
                 value = worked(story["measures"][theirs])
-                if value is None:                        # two or more exits on the story: the room's own reach
+                if value is None and mine == "sleeping_room_story_one_exit":    # two or more exits: the room's reach
                     value, said = _reach(spaces.get((rid, level)) or [], name)
                     if value is None:
                         why[mine] = WHY["two_exits"].format(name=name, why=said)
@@ -109,6 +109,8 @@ def link(parts: dict, description) -> None:
                         confirm = (spaces[(rid, level)][0].get("confirm") or {}).get("space_exit_count")
                         if confirm:                      # its routes run through the room it serves: the reading
                             part.setdefault("confirm", {})[mine] = confirm
+                elif value is None:                      # a story value that settles nothing (null): never a value
+                    why[mine] = WHY["story_not_measured"].format(name=name, reason=f"its {theirs} is not given")
                 else:
                     m[mine] = value
             elif story is not None:
@@ -142,7 +144,8 @@ def _reach(found: list, name):
     got = (found[0].get("more") or {}).get("exits_reached")
     if not isinstance(got, dict):
         return None, (found[0].get("not_measured") or {}).get("space_exit_count") or "its routes aren't measured"
-    whole = got.get("two") is True and isinstance(got.get("doors"), dict) and bool(got["doors"]) and         all(isinstance(v, list) and len(set(v)) >= 2 for v in got["doors"].values())
+    whole = (got.get("two") is True and isinstance(got.get("doors"), dict) and bool(got["doors"])
+             and all(isinstance(v, list) and len(set(v)) >= 2 for v in got["doors"].values()))
     if not whole:
         return None, str(got.get("why") or "not every way out of it reaches two exits")
     return False, got["doors"]

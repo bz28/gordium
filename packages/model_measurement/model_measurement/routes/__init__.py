@@ -545,8 +545,8 @@ def _exits_reached(story, routes, room, access, figure, building=None) -> dict:
     where it surely leads this story's occupants out: an exterior exit door at the level of exit discharge, or a door
     into an exit enclosure or passageway whose room has its own such door on this story, or on a story with no door to
     outside (an upper story); a stair entered on the level it discharges through a lobby or corridor (1028.1), or
-    whose door out isn't marked, leads back through the same story (review round 1, `_egress_sides`' own test). Not worked out: a space with two or more
-    ways out to the halls, exits or outside (two units joined by a door, a lock-off, can't be told apart), a passage
+    whose door out isn't marked, leads back through the same story (review round 1, `_egress_sides`' own test). Not
+    worked out: a space with two or more ways out to the halls, exits or outside (two units joined by a door, a lock-off, can't be told apart), a passage
     out of the room, a room routes cross, a room it serves (decision 1a), a door of the room that is itself an exit, a
     door reaching one exit only. Never a guess: two exits set aside the escape opening 1031.2 item 1 asks."""
     if isinstance(access, Stop):
@@ -576,6 +576,16 @@ def _exits_reached(story, routes, room, access, figure, building=None) -> dict:
             return not outside_doors or any(d.exit_id in o.sides and o.exit_kind == "exterior_at_discharge"
                                             for o in outside_doors)
         return False                                     # a horizontal exit, an exterior stair or ramp: not here
+
+    def why_doubt(d):                                    # why an exit reached isn't counted, in its own words
+        if d.exit_kind in ENTERED_EXITS and d.exit_id in d.sides:
+            return (f"{d.exit_id}: a stair or passageway on a story with a door to outside, with no door out of its "
+                    "own marked an exterior exit door (it may discharge back through this story, 1028.1)")
+        if d.exit_kind == "horizontal_exit":
+            return f"{d.exit_id}: a horizontal exit, not counted here"
+        if OUTSIDE_SIDE in d.sides:
+            return f"{d.exit_id}: a door to outside not marked an exterior exit door at the level of exit discharge"
+        return f"{d.exit_id}: an exit of a kind not counted here ({d.exit_kind})"
     links = [tuple(d.sides) for d in story.doors.values()] + [(a, b) for a, b, _ in story.passages]
     own, todo = set(), [room.id]                         # the room's own space
     while todo:
@@ -600,7 +610,7 @@ def _exits_reached(story, routes, room, access, figure, building=None) -> dict:
                                          "reaches through it isn't worked out"}
         if door.exit_kind:
             return {"two": False, "why": f"the door {door.name} of the room {room.name} is itself an exit"}
-        got, doubt, seen, todo = set(), set(), {did}, [did]
+        got, doubt, seen, todo = set(), {}, {did}, [did]
         while todo:                                      # door to door through the allowed rooms' floors only
             v = todo.pop()
             for u, zone, _ in edges.get(v, []):
@@ -608,7 +618,10 @@ def _exits_reached(story, routes, room, access, figure, building=None) -> dict:
                     continue
                 seen.add(u)
                 if story.doors[u].exit_kind:             # an exit: an end, never passed through
-                    (got if leads_out(story.doors[u]) else doubt).add(story.doors[u].exit_id)
+                    if leads_out(story.doors[u]):
+                        got.add(story.doors[u].exit_id)
+                    else:
+                        doubt[story.doors[u].exit_id] = why_doubt(story.doors[u])
                 else:
                     todo.append(u)
         reached[did] = sorted(got)
@@ -619,9 +632,7 @@ def _exits_reached(story, routes, room, access, figure, building=None) -> dict:
                            "space and the corridors"
                            + ("" if within is False else " (a corridor is crossed only where the building states none "
                                                          "is within a dwelling unit)")
-                           + (f"; {', '.join(sorted(doubt - got))} not surely leading this story out (a stair entered "
-                              "on the level it discharges, or its door out not marked an exterior exit door)"
-                              if doubt - got else "")}
+                           + "".join(f"; not counted, {doubt[e]}" for e in sorted(set(doubt) - got))}
     return {"two": True, "doors": reached}
 
 

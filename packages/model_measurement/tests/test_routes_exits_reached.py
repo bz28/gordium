@@ -173,4 +173,14 @@ def test_a_stair_entered_on_the_level_it_discharges_is_no_second_exit_unless_its
     if how == "door_out_marked":
         assert got["b0"] == {"two": True, "doors": {"e0": ["S", "x"]}}, got["b0"]
     else:
-        assert got["b0"]["two"] is False and "not surely leading this story out" in got["b0"]["why"], got["b0"]
+        assert got["b0"]["two"] is False and "no door out of its own marked an exterior exit door" in got["b0"]["why"]
+
+
+def test_an_exit_not_counted_says_its_own_reason():
+    """Review round 2 (PR 3): every exit left out was said to be a stair on its discharge level; a horizontal exit
+    says it is one."""
+    desc = corridor(split=True)
+    desc["doors"].append(door("hx", (17.75, -3.5), (0, 1), ("c", "c2"), exit_id="H", kind="horizontal_exit"))
+    got = reached(desc)["b0"]
+    assert got["two"] is False and "H: a horizontal exit, not counted here" in got["why"], got
+    assert "a stair or passageway" not in got["why"]
