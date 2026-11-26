@@ -1,15 +1,18 @@
 """The stair test building (Building Code section group 7: stairs 1011, handrails 1014, guards 1015): one exit stair
 enclosure, two stories, with a code-sized two-flight stair (a switchback: up east, a turn landing, up west), a
-landing at each floor, a handrail on both sides of each flight and a guard at Level 2's open landing edge, the door
-opening onto the bottom landing. Written as the interior description (gordium.interior/1) the checker reads, in
-inches, in two variants:
+landing at each floor, a handrail on both sides of each flight and a guard at Level 2's open landing edge; on each
+story a corridor west of the enclosure, its door into the enclosure marked an exit stair enclosure (so the stair is
+outside every dwelling unit: none of 1011.5.2's, 1011.11's or 1015.3's dwelling-unit exceptions can apply), opening
+onto the landing. Written as the interior description (gordium.interior/1) the checker reads, in inches, in two
+variants:
 
     stair_enclosure_compliant.yaml   every stair, handrail and guard figure within the 2025 Building Code of New York
                                       State's limits (worked by hand in the file's header)
-    stair_enclosure_failing.yaml     the same stair with known failures: 7 1/2 in risers (1011.5.2: at most 7 in), a
-                                      beam leaving 76 in of headroom over the upper flight (1011.3: 80 in), no handrail
-                                      on the upper flight's wall side (1011.11, 1014.1: both sides), and a 36 in guard
-                                      (1015.3: 42 in)
+    stair_enclosure_failing.yaml     the same stair with known failures, each past any exception's figure too: 8 in
+                                      risers (1011.5.2: at most 7 in; 7 3/4 in within a dwelling unit), a beam leaving
+                                      76 in of headroom over the upper flight (1011.3: 80 in), no handrail on the upper
+                                      flight's wall side (1011.11: both sides), and a 34 in guard (1015.3: 42 in; 36 in
+                                      within a dwelling unit)
 
 Gordium's own test building, not a real project, and not built in Revit (its stairs are checked from the description;
 ModelBuild doesn't place stairs yet). The four-unit apartment's enclosures (9 x 6 ft) can't hold a code-sized stair:
@@ -35,12 +38,14 @@ WALL = 4              # the wall between the two flights
 TREAD = 11            # 1011.5.2: at least 11 in
 LANDING = 44          # each landing as deep as the stair is wide (1011.6)
 TREADS = 8            # per flight: 9 risers, the last onto the landing above
-RAIL = 3.5            # a handrail's projection into the flight from its wall (1014.8: at most 4 1/2 in)
+RAIL = 3.5            # a handrail's projection into the flight from its wall (1014.9: at most 4 1/2 in)
 BEAM = (84, 96)       # the failing variant's beam over flight 2, x from and to
+CORRIDOR = 120        # the corridor west of the enclosure, x -WALL-120 .. -WALL
+DOOR_Y = 22           # each story's door into the enclosure, centred on y 22 (onto the landing at x 0..44)
 
 
 def _variant(failing: bool) -> dict:
-    riser = 7.5 if failing else 6.5                    # 1011.5.2: 4 to 7 in
+    riser = 8 if failing else 6.5                      # 1011.5.2: 4 to 7 in (7 3/4 in within a dwelling unit)
     story = 18 * riser                                 # floor to floor: two flights of 9 risers
     run = TREADS * TREAD
     long_ = LANDING + run + LANDING                    # bottom (and Level 2) landing, the flight, the turn landing
@@ -89,25 +94,42 @@ def _variant(failing: bool) -> dict:
            if failing else []),
     }
     # Level 2's landing (x 0..44) is open over flight 1 below along x 44, y 0..44: a guard there, 42 in (36 failing)
-    top = story + (36 if failing else 42)
-    balusters = [{"left": u, "right": u + 1.5, "bottom": story + 3.5, "top": top - 1.5} for u in range(4, 40, 5)]
+    top = story + (34 if failing else 42)
+    # balusters 1 1/2 in wide, 3 1/2 in apart, from 2 1/2 in off the south wall to the centre wall: no opening over 3 1/2 in
+    balusters = [{"left": 2.5 + 5 * k, "right": 4 + 5 * k, "bottom": story + 3.5, "top": top - 1.5} for k in range(9)]
     guard = {"id": "g1", "name": "Level 2 landing guard", "walking_surface": story, "top": top,
              "extent": {"left": 0, "right": WIDTH},
              "members": [{"left": 0, "right": WIDTH, "bottom": top - 1.5, "top": top},
                          {"left": 0, "right": WIDTH, "bottom": story, "top": story + 3.5}] + balusters}
 
-    def room(level, z):
+    def room(level, z, floor):
         return {"id": f"{level}S", "name": f"Stair {level}", "sleeping": False, "level": level, "use": "other",
                 "lockable": False, "pass_through": False, "floor_elevation": z,
-                "floor": plan((0, 0), (long_, 0), (long_, wide), (0, wide)), "holes": [], "obstructions": []}
+                "floor": floor, "holes": [], "obstructions": []}
+
+    def corridor(level, z):
+        x0, x1 = -WALL - CORRIDOR, -WALL
+        return {"id": f"{level}C", "name": f"Corridor {level}", "sleeping": False, "level": level, "use": "corridor",
+                "lockable": False, "pass_through": True, "floor_elevation": z,
+                "floor": plan((x0, 0), (x1, 0), (x1, wide), (x0, wide)), "holes": [], "obstructions": []}
+
+    def door(level):
+        return {"id": f"{level}D", "name": f"Stair door {level}", "level": level, "sides": [f"{level}C", f"{level}S"],
+                "exit": False, "exit_kind": "exit_enclosure", "exit_id": "stair", "operation": "side_hinged",
+                "plan": {"centre": [-WALL / 2, DOOR_Y], "along": [0, 1], "clear_width": 34, "wall_thickness": WALL}}
 
     return {
         "format": "gordium.interior/1",
         "units": "in",
         "levels": [{"id": "L1", "name": "Level 1", "elevation": 0}, {"id": "L2", "name": "Level 2", "elevation": story}],
-        "rooms": [room("L1", 0), room("L2", story)],
+        # Level 1's floor at 0 under the whole enclosure; Level 2's only its landing (x 0..44): the rest is open to
+        # the flights below, which is the edge its guard stands at
+        "rooms": [room("L1", 0, plan((0, 0), (long_, 0), (long_, wide), (0, wide))),
+                  room("L2", story, plan((0, 0), (LANDING, 0), (LANDING, wide), (0, wide))),
+                  corridor("L1", 0), corridor("L2", story)],
         "openings": [],
-        "doors": [],
+        "doors": [door("L1"), door("L2")],             # (exit: a house's required exit door; this is no house)
+        "passages": [],
         "stairs": [flight1, flight2],
         "guards": [guard],
         "building": {"occupancy_groups": ["R-2"], "sprinkler_system": "none"},
@@ -119,16 +141,20 @@ HEADERS = {
 # New York State (section group 7; written by apps/revit_addin/tools/evals/make_stair_building.py, never edited by
 # hand). Inches. Worked by hand: risers 6.5 in (1011.5.2: 4 to 7 in), 18 of them, 117 in floor to floor; treads 11 in
 # (at least 11 in); each flight 44 in wide between its walls (1011.2: 44 in) with a handrail on both sides projecting
-# 3.5 in (1014.8: at most 4 1/2 in), so 37 in clear between them; headroom over flight 1 at its first nosing 105 - 6.5
+# 3.5 in (1014.9: at most 4 1/2 in), so 37 in clear between them; headroom over flight 1 at its first nosing 105 - 6.5
 # = 98.5 in and the ceiling 225 in beyond (1011.3: 80 in); landings 44 in deep (1011.6: the stair's width); Level 2's
-# open landing edge guarded 42 in high (1015.3: 42 in), balusters 3.5 in apart (1015.4: a 4 in sphere doesn't pass).
+# open landing edge guarded 42 in high (1015.3: 42 in), no opening in it over 3.5 in (1015.4: a 4 in sphere doesn't
+# pass). Each story's door from its corridor is marked an exit stair enclosure: the stair is in no dwelling unit.
 # Gordium's own test building, not a real project.
 """,
     True: """# The stair test building, failing: the compliant one (stair_enclosure_compliant.yaml) with known failures
 # (section group 7; written by apps/revit_addin/tools/evals/make_stair_building.py, never edited by hand). Inches.
-# Risers 7.5 in (1011.5.2: at most 7 in); a beam over flight 2 leaving 76 in of headroom above its nosings
-# (1011.3: 80 in); no handrail on flight 2's north wall side (its right, looking up; 1011.11, 1014.1: on both sides); Level 2's landing guard
-# 36 in high (1015.3: 42 in). Everything else as the compliant variant. Gordium's own test building, not a real project.
+# Risers 8 in, so 144 in floor to floor (1011.5.2: at most 7 in; 7 3/4 in within a dwelling unit); a beam over flight
+# 2 leaving 76 in of headroom above its nosings (1011.3: 80 in); no handrail on flight 2's north wall side (its right,
+# looking up; 1011.11: on both sides), so 40.5 in clear at its one handrail; Level 2's landing guard 34 in high
+# (1015.3: 42 in; 36 in within a dwelling unit). Each failure is past any exception's figure, and the stair is marked
+# in no dwelling unit as the compliant one is. Everything else as the compliant variant. Gordium's own test building,
+# not a real project.
 """,
 }
 

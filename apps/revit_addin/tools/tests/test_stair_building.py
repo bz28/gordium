@@ -38,17 +38,35 @@ def test_the_compliant_stair_measures_within_every_limit():
         assert m["stair_riser_variation"] == 0                                              # 1011.5.4
         assert m["stair_headroom"] >= 80                                                    # 1011.3
         assert m["stair_clear_width"] == 44                                                 # 1011.2
-        assert more["stair_handrail_sides"] == 2 and more["stair_clear_width_at_handrail"] == 37   # 1014.1, 1014.8
-    assert guards["g1"]["measures"] == {"guard_height": 42, "guard_opening_sphere": 4}      # 1015.3, 1015.4
+        assert more["stair_handrail_sides"] == 2 and more["stair_clear_width_at_handrail"] == 37   # 1011.11, 1014.9
+    assert guards["g1"]["measures"] == {"guard_height": 42, "guard_opening_sphere": 3.5}    # 1015.3, 1015.4 (under 4)
 
 
 def test_the_failing_stair_breaks_exactly_the_limits_it_was_built_to():
     stairs, guards = _measured("failing")
-    assert {f: stairs[f]["measures"]["stair_riser_height"] for f in stairs} == {"f1": 7.5, "f2": 7.5}   # > 7 in
+    assert {f: stairs[f]["measures"]["stair_riser_height"] for f in stairs} == {"f1": 8, "f2": 8}   # > 7 3/4 in
     assert stairs["f1"]["measures"]["stair_headroom"] >= 80
     assert stairs["f2"]["measures"]["stair_headroom"] == 76                                 # < 80 in under the beam
     assert stairs["f1"]["more"]["stair_handrail_sides"] == 2
     assert stairs["f2"]["more"]["stair_handrail_sides"] == 1                                # its north side has none
-    assert guards["g1"]["measures"]["guard_height"] == 36                                   # < 42 in
+    assert guards["g1"]["measures"]["guard_height"] == 34                                   # < 36 in
+    # nothing else broken (review round 1): every other figure the rules read as the compliant one's
     for f in ("f1", "f2"):
-        assert stairs[f]["measures"]["stair_tread_depth"] == 11 and stairs[f]["measures"]["stair_clear_width"] == 44
+        m = stairs[f]["measures"]
+        assert m["stair_tread_depth"] == 11 and m["stair_clear_width"] == 44 and m["stair_riser_variation"] == 0
+    assert stairs["f1"]["more"]["stair_clear_width_at_handrail"] == 37
+    assert guards["g1"]["measures"]["guard_opening_sphere"] == 3.5
+
+
+def test_the_stair_is_marked_outside_every_dwelling_unit_and_level_2_is_open_over_the_flights():
+    # review round 1: with no exit mark a stair in an R-2 building may be within a dwelling unit, where 1011.5.2,
+    # 1011.11 and 1015.3 allow 7 3/4 in risers, one handrail and 36 in guards; and Level 2's floor is only its landing,
+    # so its guarded edge really drops onto flight 1
+    import yaml
+    for variant in ("compliant", "failing"):
+        d = yaml.safe_load((HERE / f"stair_enclosure_{variant}.yaml").read_text(encoding="utf-8"))
+        doors = {x["level"]: x for x in d["doors"]}
+        assert set(doors) == {"L1", "L2"}
+        assert all(x["exit_kind"] == "exit_enclosure" and x["sides"][1].endswith("S") for x in doors.values())
+        l2 = next(r for r in d["rooms"] if r["id"] == "L2S")
+        assert max(x for x, _ in l2["floor"]) <= 44
