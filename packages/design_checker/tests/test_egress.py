@@ -300,6 +300,48 @@ def test_a_check_validates_the_state_rules_the_same_with_or_without_the_code_cac
     assert asked == [{"use_cache": False}] * 2       # a design's check never reads it (both of New York's books)
 
 
+def test_a_designs_check_reads_no_book_text_from_the_code_cache_even_where_the_cache_has_it(monkeypatch, tmp_path):
+    """The open finding of docs/decisions/2026-11-23_laws_validation_speed.md: with use_cache=False the state book's
+    text was still read from the code cache wherever the cache had it (so a laptop with the cache and CI without it
+    could differ). A code cache holding the Residential Code's text, built here so this fails on any machine: a
+    design's check reads none of it, and gives exactly the answer it gives with no cache at all."""
+    from rule_format.rulebook import Context, cached_text
+    monkeypatch.setenv("GORDIUM_CODE_CACHE", str(tmp_path / "none"))
+    without = egress.laws(ITHACA)
+    (entry,) = [d for d in load(STATE / "1_source_documents/sources.yaml")["documents"] if d.get("kept_outside_repo")]
+    monkeypatch.setenv("GORDIUM_CODE_CACHE", str(tmp_path / "cache"))
+    text = cached_text(entry)
+    text.parent.mkdir(parents=True)
+    rows = [{"file": entry["file"], "sha256": entry["sha256"]}, {"page": 1, "line": 1, "text": "SECTION R101 GENERAL"}]
+    text.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    assert Context.for_jurisdiction(STATE, use_cache=False).pages == {}           # never read at a design's check
+    got = egress.laws(ITHACA)
+    assert [{k: v for k, v in law.items() if k != "section_of"} for law in got["laws"]] == \
+        [{k: v for k, v in law.items() if k != "section_of"} for law in without["laws"]]
+
+
+def test_compile_law_is_the_one_place_a_state_law_is_validated_and_never_raises(monkeypatch):
+    """compile_law (to be frozen) gives the problems, documents and kinds; laws() takes them as they are: a problem
+    there means no rules (needs review, never a row), and sources that can't be read are a problem, never a crash."""
+    folder, book = place(ITHACA).inherited_rulebooks()[0]
+    good = egress.compile_law(folder, book)
+    assert set(good) == {"problems", "documents", "kinds"} and good["problems"] == [] and good["documents"]
+    found = egress.laws(ITHACA)["laws"][0]
+    assert {k: found[k] for k in good} == good and found["rules"] and found["section_of"]
+    monkeypatch.setattr(egress, "compile_law", lambda f, b: {**good, "problems": ["a quote isn't at its lines"]})
+    refused = egress.laws(ITHACA)["laws"][0]
+    assert refused["problems"] == ["a quote isn't at its lines"] and refused["rules"] == [] and refused["section_of"] is None
+    monkeypatch.undo()
+    from rule_format.rulebook import Context
+
+    def broken(cls, j, **kw):
+        raise OSError("disk gone")
+    monkeypatch.setattr(Context, "for_jurisdiction", classmethod(broken))
+    assert egress.compile_law(folder, book) == {"problems": ["its sources can't be read (OSError: disk gone)"],
+                                                "documents": {}, "kinds": {}}
+    assert egress.laws(ITHACA)["laws"][0]["rules"] == []
+
+
 def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer():
     """Review round 1 (F3, confirmed by two sceptics): rows not applicable are left out of the panel, so a law whose
     every row is not applicable had no item, and the design read "complies" beside its needs-review section."""

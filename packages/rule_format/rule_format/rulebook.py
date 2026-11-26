@@ -450,8 +450,10 @@ class Context:
                 ctx._problem(name, f"its extracted text isn't in the code cache for this extractor version "
                                    f"({_shown_cache(extracted)}): run python -m document_extraction (it needs "
                                    "pdfplumber; the version is book_text.extractor_key)")
-            # Text is only trusted for a document whose own checks all passed.
-            if extracted.exists() and name not in ctx.file_problems:
+            # Text is only trusted for a document whose own checks all passed. With use_cache=False (a design's
+            # check) a kept-outside book's text is never read from the code cache, even where the cache has it, so
+            # the check gives the same answer on every machine (docs/decisions/2026-11-23_laws_validation_speed.md)
+            if extracted.exists() and name not in ctx.file_problems and not (outside and not use_cache):
                 ctx._load_extracted(name, sha, extracted, brought_in_pages(entry) if outside else None,
                                     _misreads(entry) if outside else None)
                 # (an outside book with no brought_in.pages has a problem, so is never loaded whole)
