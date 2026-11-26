@@ -60819,7 +60819,7 @@
       {
        "kind": "fix_model",
        "key": "model:stair:stair_handrail_each_side:",
-       "words": "handrail each side not measured (or not usable)",
+       "words": "handrail on each side not measured (or not usable)",
        "elements": [],
        "measure": "stair_handrail_each_side"
       },
@@ -60847,11 +60847,11 @@
      "asks": [
       {
        "key": "model:stair:stair_handrail_each_side:",
-       "why": "handrail each side not measured (or not usable)",
+       "why": "handrail on each side not measured (or not usable)",
        "elements": [],
        "measure": "stair_handrail_each_side",
        "kind": "fix_model",
-       "headline": "Fix the model so the handrail each side can be measured"
+       "headline": "Fix the model so the handrail on each side can be measured"
       },
       {
        "key": "model:stair:stair_handrail_sides:",
@@ -70824,7 +70824,7 @@
       {
        "key": "model:stair:stair_handrail_each_side:",
        "kind": "fix_model",
-       "words": "handrail each side not measured (or not usable)",
+       "words": "handrail on each side not measured (or not usable)",
        "elements": [],
        "items": [
         "general.bc_1011_11_stair_handrails@-/-"
@@ -99820,9 +99820,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "c521a4269875cb3c99f85e32e2b35bb0adfb94a5c7c1db097805bc97b8b8a98b",
+  "worker_fingerprint": "fd998f59f860c08a31f2b68af33af26b617a856517edba1c411700b1cd4a49f6",
   "rulebook": {
-   "new_york/ithaca_city": "d12293375d749b1d2de6f67e14cd89b348bac6872514959c27ec5284e8df4fa7"
+   "new_york/ithaca_city": "fb4a8fd4b2ebfed26749c517a9931d8d884674015a98e119878883efa8bb44aa"
   }
  }
 }
