@@ -1323,3 +1323,10 @@ def test_no_source_or_law_file_holds_a_control_character():
                     bad.append(str(f.relative_to(REPO)))
     assert not bad, bad
 
+
+def test_no_title_puts_a_bare_apostrophe_after_a_word_not_ending_in_s():
+    """Review round 2 of section group 9c (P3): 'Areas of refuge' wheelchair spaces' put a plural's apostrophe on a
+    word that isn't plural. A title people read never has a bare apostrophe after a letter other than s."""
+    bad = [r["id"] for r in load(RULEBOOK)["rules"] if re.search(r"[a-rt-z]' ", r.get("title") or "")]
+    assert not bad, bad
+

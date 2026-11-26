@@ -21272,10 +21272,10 @@ rules:
       exits (1026), ramps (1012), areas of refuge (1009.6) or exterior areas for assisted rescue (1009.7) serving exits at
       the level of exit discharge: accessible means of egress aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units must
-    be accessible) and ICC A117.1 aren't brought in; how Gordium will read A117.1 isn't settled yet. Accessible means
-    of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's
-    check, never a pass or a fail. 1104, 1019.3, 1019.4, 1023, 1026 and 1027 aren't brought in (1019 to 1027 are later PRs of
-    section group 9).
+    be accessible) and ICC A117.1 aren't brought in; how Gordium will read A117.1 isn't settled yet. Accessible means of egress,
+    areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a person's check,
+    never a pass or a fail. 1104, 1023, 1026 and 1027 aren't brought in (1023 to 1027 are later PRs of section group 9); 1019.3
+    and 1019.4 are section group 9d's flags.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_2_1_elevators_required
@@ -21646,7 +21646,7 @@ rules:
 - id: general.bc_1009_6_3_area_of_refuge_size
   kind: flag
   topic: means_of_egress
-  title: Areas of refuge' wheelchair spaces (BCNYS 1009.6.3)
+  title: Wheelchair spaces in areas of refuge (BCNYS 1009.6.3)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 321
@@ -21748,7 +21748,7 @@ rules:
 - id: general.bc_1009_7_1_assisted_rescue_size
   kind: flag
   topic: means_of_egress
-  title: Exterior areas for assisted rescue' wheelchair spaces (BCNYS 1009.7.1)
+  title: Wheelchair spaces in exterior areas for assisted rescue (BCNYS 1009.7.1)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 321
@@ -21771,7 +21771,7 @@ rules:
 - id: general.bc_1009_7_2_assisted_rescue_separation
   kind: flag
   topic: means_of_egress
-  title: Exterior areas for assisted rescue' rated walls (BCNYS 1009.7.2)
+  title: Rated walls at exterior areas for assisted rescue (BCNYS 1009.7.2)
   applies_when: not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
   sources:
   - file: gov.ny.building.2025.pdf
