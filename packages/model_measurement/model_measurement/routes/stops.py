@@ -192,9 +192,10 @@ STOPS = {
                          "unit's own way out, so the units aren't counted",
     "units_exit_function": "the room {name} is taken as an exit, yet states a function (an exit has none: a unit's "
                            "door marked an exit?): it may be a dwelling unit, so the units aren't counted",
-    "units_hall_residential": "the room {name}, marked a corridor or lobby, is residential and opens only into halls, "
-                              "exits or the outside: it may be a dwelling unit marked a hall, so the units aren't "
-                              "counted",
+    "units_hall_residential": "the room {name}, marked a corridor or lobby, states a function a dwelling unit may "
+                              "have and opens into no room of a dwelling unit (only into halls, exits, the outside, or "
+                              "toilets, closets or rooms of another use): it may be a dwelling unit marked a hall, so "
+                              "the units aren't counted",
     "units_shared_room": "the room {room} (a closet, toilet or storeroom, or a room not itself residential) opens onto "
                          "two or more rooms of the space of {name}: it may be shared by two dwelling units",
     "units_no_entrance": "the space of {name} has no door or opening to a corridor, an exit or the outside: it may be "

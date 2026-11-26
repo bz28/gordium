@@ -339,6 +339,23 @@ def test_a_unit_marked_a_hall_with_its_own_toilet_never_drops_out_of_the_count(h
         b2.pop("function")
     got = count(desc)
     assert isinstance(got, Stop) and got.key == "units_hall_residential", (hall, back, got)
+    assert "no room of a dwelling unit" in got.reason                    # review round 10: the words say why
     control = layout([("residential", 1, 1), ("residential", 1, 1), ("business", 1, 1)], (False, False))
     next(r for r in control["rooms"] if r["id"] == "c")["function"] = "residential"
     assert count(control) == 2
+
+
+@pytest.mark.parametrize("function", ["Residential", "residential ", "R-2", "dormitory", "institutional_sleeping"])
+@pytest.mark.parametrize("hall", ["lobby", "corridor"])
+def test_a_unit_marked_a_hall_stating_an_unlisted_function_never_drops_out(hall, function):
+    """Review round 10 (PR 3): the hall check fired only on the exact word residential; a unit marked a hall stating a
+    function not on the list (a typo, R-2, dormitory) dropped out (3 counted 2). Any function a dwelling unit may have
+    stops it; a corridor stating a listed other use (business), or none, still counts 3."""
+    desc = layout([("residential", 1, 1)] * 3, (False, False))
+    s2 = next(r for r in desc["rooms"] if r["id"] == "s2")
+    s2.update(use=hall, function=function)
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_hall_residential", (hall, function, got)
+    control = layout([("residential", 1, 1)] * 3, (False, False))
+    next(r for r in control["rooms"] if r["id"] == "c")["function"] = "business"
+    assert count(control) == 3

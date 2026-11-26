@@ -157,6 +157,10 @@ One more undercount: a vestibule, laundry or mail room of another function (busi
 
 No undercount found. The closet, toilet or storeroom clause is pinned again (one marked residential, shared by two units); the words say which rooms stop the count, and that only a shared room marked residential is left to the words beside it.
 
+## Review round 6 of step 3 (2026-11-26)
+
+No undercount found. Two doc fixes: the routes' list of pieces names story_place, spaces and dwelling_units, and the by-hand questions' comment says they also cover a fact not measured on this model.
+
 ## Review round 7 of step 3 (2026-11-26)
 
 One more undercount (a possible false pass): a unit's own door drawn on another level vanished from its story, so two units joined by a door looked like one with a single way out, and 1016.2.1 doesn't catch it (each has its own door). The count now runs step 2's check first (`links_read_here`, a required argument so no caller can leave it out): every door, opening, and listed opening that may be a door for the story's rooms must be read on it, and one whose rooms can't be read stops the count. One test, three cases.
@@ -168,3 +172,7 @@ One more undercount, on a model marked wrong (a possible false pass): a one-room
 ## Review round 9 of step 3 (2026-11-26)
 
 Round 8's check missed one step: a unit marked a hall whose own back room is a toilet or closet (a group of its own, nothing lived in) still dropped out. Now a residential corridor or lobby must open into a room of a dwelling unit. A unit marked a hall or exit stating no function can't be told from a real one: the words beside the count now say the count holds only if no room of a dwelling unit is marked a corridor, lobby or exit. One test, three cases, and the words pinned.
+
+## Review round 10 of step 3 (2026-11-26)
+
+One more undercount on a model marked wrong: the hall check fired only on the exact word residential, so a unit marked a hall stating a function not on the list (a typo, R-2, dormitory) still dropped out. Now any stated function a dwelling unit may have (anything but a listed other use) on a corridor or lobby opening into no room of a dwelling unit stops the count, and its words say so. One test, ten cases; the round 6 entry added.

@@ -29,8 +29,9 @@ How (docs/decisions/2026-11-25_story_facts_from_the_model.md, step 3):
 - Not measured either where the story's routes aren't read (a room or door not read, an enclosed space with no room
   drawn in it: it may be a unit), or a room has no `use` (it may be a corridor).
 - A unit marked shared space would drop out of the count: a room taken as an exit that states a function (an exit has
-  none), or a corridor or lobby stating residential that opens into no room of a dwelling unit (only into halls,
-  exits, the outside, or a toilet or closet of its own), leaves it not measured. One so marked stating no function
+  none), or a corridor or lobby stating a function a dwelling unit may have (residential, or one not on the list)
+  that opens into no room of a dwelling unit (only into halls, exits, the outside, or a toilet or closet of its own),
+  leaves it not measured. One so marked stating no function
   can't be told from a real corridor or exit: the words beside the count name it.
 Never a guess: a count too low could pass a one-exit story Table 1006.3.4(1) allows only up to 4 units.
 """
@@ -88,7 +89,7 @@ def units_on(story, items: dict, is_exit, stair_in, links_read) -> int:
         room, function = story.rooms[rid], (items.get(rid) or {}).get("function")
         if rid not in hall_rooms and function is not None:   # an exit stating a function (a unit's door marked an exit)
             raise Stop("units_exit_function", name=room.name)
-        if rid in hall_rooms and function == RESIDENTIAL and \
+        if rid in hall_rooms and function is not None and function not in NOT_DWELLING and \
                 not any(rid in sides and sides & unit_rooms for sides in links):   # a "hall" opening into no unit
             raise Stop("units_hall_residential", name=room.name)
     count = 0
