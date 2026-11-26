@@ -52,6 +52,9 @@ FACTS = {
     "merchandise_pads": "yes_no",             # Group M merchandise pads (1018.4: their own common path)
     "occupied_outdoor_areas": "yes_no",       # outdoor areas the occupants use (1004.7)
     "occupant_load_increased": "yes_no",      # the design takes 1004.5.1's increased occupant load (up to 1 per 7 sq ft)
+    # the building has a mezzanine (505.2: an intermediate level within a story): its occupants add to the room below
+    # (1004.2.2), so only where it states none is a story's floor area / 5 the most its spaces can hold (occupant_load)
+    "mezzanines": "yes_no",
     # section group 4 (corridors): another level's occupants reach a corridor (an unenclosed stairway or ramp, a
     # mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's load doesn't
     # bound the corridor's; and the building is (or holds) an ambulatory care facility (Table 1020.3's 72 in)

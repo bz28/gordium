@@ -314,15 +314,23 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
         known = {**values, **mine}
         result, unknown, reason = part_outcome(rule, known, allowed), None, None
         combos = _combinations(rule, part, own, mine)
+        hoped = None
         if combos is not None:                   # measures given as named readings: every combination decides
             result, reason = _under_readings(rule, known, allowed, combos)
         elif result == "needs_review" and (unknown := fails_whatever(rule, known, allowed)):
             result = "fail"                      # fails whatever the measures not given are (2026-10-21)
+        elif result == "needs_review" and (got := under_bounds(rule, part, own, known, allowed)) is not None:
+            if got[0] == "proven":               # the same answer for every value up to the measure's ceiling
+                result, reason = got[1], got[2]
+            else:                                # stating these facts would prove it: asked for (words only)
+                hoped = got[1]
         shown = {m: mine.get(m) for m in sorted(formula_names(rule) & own)}
         why = _maybe(part) or maybe
         if why and result != "not_applicable":   # it, or the part it sits in, may not be of its kind at all
             return _row(rule, "needs_review", part, within, reason=why, values=shown)
         row = _row(rule, result, part, within, reason=reason, values=shown, unknown=unknown)
+        if hoped:
+            row["bound_facts"] = hoped
         confirm = _confirm(part, mine, shown) if result != "not_applicable" else []
         confirm = list(dict.fromkeys(confirm))
         if confirm and result == "pass":         # a pass that stands on a reading to confirm: never a pass on it
@@ -509,6 +517,80 @@ def _under_readings(rule: dict, known: dict, allowed: dict, combos: list) -> tup
     bad = [a for a, r in got if r != "pass"]
     good = [a for a, r in got if r == "pass"]
     return "needs_review", reading_words([a for a, _ in got], good, bad)
+
+
+# A part's ceilings on measures it has no value for (`bounds`: {measure: {"at_most": n, "why": words, "if_stated"?:
+# {"at_most": n, "why", "facts": [the building facts that, stated, prove it]}}}): the most the measure can be, proven
+# by the measuring (design_checker/occupant_load.py: a story's area at the densest occupant load factor). A rule is
+# decided on them only where every formula it has is provably monotone in each such measure (formula.truth_direction:
+# its truth moves one way as the measure grows) and gives the same truth at none and at the ceiling: then it gives
+# that truth for every value between, so no value the measure can really take decides it otherwise.
+BOUNDS = "bounds"
+CEILING, IF_STATED = "at_most", "if_stated"
+MAX_BOUNDED = 3                     # more ceilings on one row than this: not tried (2 ** n corners)
+SETTLED_WORDS = {"pass": "complies", "fail": "does not comply", "not_applicable": "does not apply"}
+
+
+def _ceiling(v) -> bool:
+    return type(v) in (int, float) and v == v and v != float("inf") and v >= 0
+
+
+def under_bounds(rule: dict, part: dict, own: set, known: dict, allowed: dict):
+    """The rule on a part whose open measures have ceilings (BOUNDS): ("proven", outcome, reason) where it gives
+    one answer for every value from none up to the proven ceilings; ("hoped", facts) where it would at the ceilings
+    stating those facts gives (words only: the row keeps its own result); None otherwise. Only ever an answer the
+    law's words give at every value the measure can take (principle 4)."""
+    given = part.get(BOUNDS)
+    if not isinstance(given, dict):
+        return None
+    try:
+        names = formula_names(rule)
+    except FormulaError:
+        return None
+    open_ = sorted(n for n in names & own if known.get(n) is None and isinstance(given.get(n), dict))
+    if not open_ or len(open_) > MAX_BOUNDED:
+        return None
+    texts = [t for t in [rule.get("applies_when"), rule.get("check")] + [r.get("when") for r in
+                                                                        rule.get("review_when", [])]
+             if isinstance(t, str)]
+    try:
+        if any(n in formula.names(t) and formula.truth_direction(t, n) is None for t in texts for n in open_):
+            return None
+    except FormulaError:
+        return None
+    from .rulebook import _condition, _kinds
+    kinds = _kinds(allowed, measure_kinds(rule.get("for_each")))
+
+    def settles(tops: dict):
+        corners = [dict(zip(open_, c)) for c in itertools.product(*[(0, tops[n]) for n in open_])]
+        for t in texts:
+            if not formula.names(t) & set(open_):
+                continue
+            seen = set()
+            for c in corners:
+                try:
+                    seen.add(_condition(t, {**known, **c}, kinds))
+                except (MissingMeasure, EvaluationError, FormulaError, ArithmeticError):
+                    return None
+            if len(seen) != 1:
+                return None
+        got = {part_outcome(rule, {**known, **c}, allowed) for c in corners}
+        return got.pop() if len(got) == 1 and got != {"needs_review"} else None
+
+    tops = {n: given[n].get(CEILING) for n in open_}
+    if all(_ceiling(v) for v in tops.values()) and (out := settles(tops)):
+        kind = rule.get("for_each")
+        said = "; ".join(f"its {_plain(n.removeprefix(f'{kind}_'))} can be at most {tops[n]:g}" + (
+            f": {given[n]['why']}" if isinstance(given[n].get("why"), str) else "") for n in open_)
+        return "proven", out, f"{SETTLED_WORDS[out]} at any value up to the most it can be ({said})"
+    hoped, facts = {}, []
+    for n in open_:
+        stated = given[n].get(IF_STATED) if isinstance(given[n].get(IF_STATED), dict) else {}
+        hoped[n] = stated.get(CEILING, tops[n])
+        facts += [f for f in stated.get("facts") or [] if isinstance(f, str) and f not in facts]
+    if facts and all(_ceiling(v) for v in hoped.values()) and settles(hoped):
+        return "hoped", facts
+    return None
 
 
 def building_values(values: dict) -> dict:

@@ -13,7 +13,7 @@ import sys
 
 import pytest
 
-from design_checker import code_scope, egress, present
+from design_checker import code_scope, egress, occupant_load, present
 from rule_format.rulebook import REPO, Context, load
 
 sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
@@ -323,6 +323,61 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
         "general.bc_1020_3_corridor_capacity": ("needs_review", "pass"),
         "general.bc_table_1020_3_corridor_width": ("needs_review", "pass")}
     assert all(m == {} for m in moved.values()), moved
+
+
+# ---- the ceiling on an occupant load not worked out (occupant_load._bounds, 2026-11-26: the egress UI audit's 6) -------
+
+THREE = "general.bc_1006_2_1_1_three_or_more_exits"
+CEILING_FACTS = {"assembly_fixed_seating": False, "occupied_outdoor_areas": False}
+
+
+def _no_functions(**building):
+    desc = build.interior_of()
+    for r in desc["rooms"]:
+        r.pop("function", None)
+    desc["building"] = {**desc["building"], **building}
+    return desc
+
+
+@pytest.mark.parametrize("sprinkler, mezzanines, ceiling", [
+    ("none", None, 480),           # 1,800 sq ft and a third more for mezzanines (505.2.1), / 5: no mezzanine fact needed
+    ("nfpa_13r", False, 360),      # stated none: 1,800 / 5
+    ("nfpa_13r", None, None),      # 13R: half more (exception 3), 540, over 500: the mezzanine fact is asked
+])
+def test_the_three_exit_rule_settles_on_the_floor_area_with_no_function_stated(routes, before, sprinkler, mezzanines,
+                                                                              ceiling):
+    """The audit's finding 6: with no room function stated, the four apartments' 1006.2.1.1 rows asked for each
+    room's function, though no function can put 501 people on a 1,800 sq ft story. With the building's facts the
+    ceiling needs stated (Group R-2, no fixed assembly seating, no outdoor areas the occupants use, and mezzanines
+    ruled out or their most counted), each apartment's row complies on the ceiling; the rows that change are only
+    rules reading an occupant load, only from needs review, and never to a fail. Where the ceiling is over 500 it
+    asks the one fact that would settle it (mezzanines), before the rooms' functions."""
+    building = {**CEILING_FACTS, "sprinkler_system": sprinkler, **({} if mezzanines is None else
+                                                                   {"mezzanines": mezzanines})}
+    now = _check(_no_functions(**building), routes)
+    rows = [r for r in now["rows"] if r["rule"] == THREE and r["name"].startswith("Apartment")]
+    assert len(rows) == 4
+    if ceiling is None:
+        assert {r["outcome"] for r in rows} == {present.REVIEW}
+        assert all(r["bound_facts"] == ["mezzanines"] for r in rows)
+        items = [i for i in now["items"] if i["rule"] == THREE and i["status"] == present.REVIEW]
+        assert len(items) == 4 and all(i["causes"][0]["field"] == "building.mezzanines" for i in items), items
+        return
+    assert {r["outcome"] for r in rows} == {"pass"}
+    assert all(f"can be at most {ceiling}" in r["reason"] for r in rows), rows[0]["reason"]
+    with pytest.MonkeyPatch.context() as m:          # the same building and facts with no ceiling: what it moves
+        m.setattr(occupant_load, "_bounds", lambda *a, **k: None)
+        base = _check(_no_functions(**building), routes)
+    rules = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+                                      / "5_building_code_rules/drafted/general.yaml")["rules"]}
+    moved = {k: (base["results"][k], now["results"][k]) for k in now["results"]
+             if now["results"][k] != base["results"].get(k)}
+    assert THREE in moved
+    for k, (was, is_) in moved.items():
+        r = rules.get(k.split(":")[0])
+        assert r is not None and re.search(r"(space|story)_occupant_load", str(
+            [r.get(f) for f in ("check", "review_when", "applies_when")])), k
+        assert was == present.REVIEW and is_ != "fail", (k, was, is_)
 
 
 # ---- section group 6a (2026-11-25): door size, 1010.1.1, from each door's maker's stated clear opening ----------------

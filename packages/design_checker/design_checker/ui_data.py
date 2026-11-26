@@ -65,6 +65,7 @@ FIELD_HEADLINES = {
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
+    "building.mezzanines": "Say whether the building has a mezzanine (505.2)",
     "doors[].leaves": "Set each door type's leaves (a pair with a mullion: 1 only at the narrower leaf's clear width)",
     "facts.corner_lot": "Is the lot on two streets? (Corner lot, §325-19C)",
     "facts.lot_surveyed": "Say whether the lot outline is from a survey",

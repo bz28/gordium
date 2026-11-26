@@ -488,6 +488,8 @@ MEASURE_NAMES = {
     "ambulatory_care_facility": "ambulatory care facility (whether the building is or holds one, per Table 1020.3)",
     "corridors_within_dwelling_units": "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit)",
     "emergency_voice_alarm_system": "emergency voice/alarm system (whether the whole building has one per 907.5.2.2)",
+    "mezzanines": "mezzanines (whether the building has any, per 505.2)",
+    "occupancy_groups": "occupancy groups (the building's Chapter 3 groups)",
     "space_is_exit": "exit status (whether the space is itself an exit)",
     "space_occupant_load": "occupant load",
     "story_first_above_or_below_grade": "whether the story is the first above or below grade",
