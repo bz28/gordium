@@ -1256,7 +1256,7 @@ def test_no_rule_text_carries_yaml_quoting_into_what_people_read():
     assert not bad, bad
 
 
-GROUP_9_SECTIONS = ("1003", "1012", "1008", "1013", "1009")        # section groups 9a and 9b
+GROUP_9_SECTIONS = ("1003", "1012", "1008", "1013", "1009")        # section groups 9a to 9c
 
 
 def test_every_section_group_9_reference_with_words_to_follow_is_quoted_by_a_rule():

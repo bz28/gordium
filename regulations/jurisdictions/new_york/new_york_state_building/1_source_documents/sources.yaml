@@ -363,7 +363,7 @@ documents:
         '1009.4.2':
           smoke-protected: 'As 1009.3.3 (p.320, line 49, exception 4). Read by 1009.4.2''s flag (section group 9c).'
         '1009.7.2':
-          fire-resistance-rated: 'As 1020.6.1 ("The fire-resistance-rated exterior wall construction", p.321, line 25): the
+          fire-resistance-rated: 'As 1020.6.1 ("The fire-resistance-rated construction shall extend vertically", p.321, line 28, and line 30): the
             defined term is FIRE-RESISTANCE RATING, brought in. Read by 1009.7.2''s flag (section group 9c).'
     contents: >
       Commercial egress step 1 (2026-11-21), the limits Gordium's route measures feed, as the Maine rulebook drafted

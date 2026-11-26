@@ -202,7 +202,7 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     1010.1.6 and 1010.1.7 (42; 1010.1.3.2's is a door's row, not a building line); section group 6d 1010.2 to
     1010.2.6 and Table 1010.2.4 (50; 1010.2.7's is for Groups E, B and I-4); section group 6e 1010.2.8.1 to
     1010.2.12.1, 1010.2.14 and 1010.2.15 (61; 1010.2.13's is for Groups I-1 and I-2); section group 8a 1031.2's basements and public way and
-    1031.2.1 (64); section group 8c 1031.5.3's drainage and 1031.6's bars (66); section group 9a 1003.2 to 1003.7's nine and 1012's seventeen ramp flags (a building's ramps aren't a fact Gordium is given, so they show for every building) (92); section group 9b 1008's eight and 1013's nine lighting and exit-sign flags but 1008.2.2's (Group I-2) and 1013.2's (Group R-1) (107); section group 9c 1009's twenty-seven accessible-egress flags but 1009.3.3's (not in Group R-2) (133)."""
+    1031.2.1 (64); section group 8c 1031.5.3's drainage and 1031.6's bars (66); section group 9a 1003.2 to 1003.7's nine and 1012's seventeen ramp flags (a building's ramps aren't a fact Gordium is given, so they show for every building) (92); section group 9b 1008's eight and 1013's nine lighting and exit-sign flags but 1008.2.2's (Group I-2) and 1013.2's (Group R-1) (107); section group 9c 1009's twenty-seven accessible-egress flags but 1009.3.3's (the building is Group R-2, exception 5) (133)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
     assert len(flags) == 133 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
