@@ -734,8 +734,47 @@ def test_no_text_calls_a_brought_in_section_not_brought_in():
     # gates 1010.4 and turnstiles 1010.5 (not brought in)") calls every section in it not brought in
     listed = re.compile(r"([^;:()]{0,160})\(([^()]*?)\b(?:not|none|neither) brought in\)")
 
+    # review round 2 of section group 9e (P3): a clause saying its sections "isn't" or "aren't" brought in
+    # ("1023 isn't brought in yet", "1006.1 to 1006.3.2, 1011 ... aren't brought in"), a range holding every section
+    # from its first to its last; what a bracket says is left to the bracket checks
+    said = re.compile(r"\b(?:is|are)(?:n'?'?t| not)(?: yet)? brought in")
+    num = r"(?<![\d.])(?<!Table )(\d{3,4}(?:\.\d+)*)(?![\d])"
+
+    def key(n):
+        return tuple(int(x) for x in n.split("."))
+
+    def in_range(a, b):
+        return any(key(a) <= key(s) <= key(b) + (999,) for s in secs + alone)
+
+    def said_stale(t):
+        out = []
+        for clause in re.split(r"(?<=[;:])\s|(?<=[a-z)'\"])\.\s", t):
+            m = said.search(clause)
+            if not m:
+                continue
+            head = clause[:m.start()]
+            if head.count("(") > head.count(")"):          # said inside a bracket: the bracket's own list
+                head = head[head.rindex("(") + 1:]
+            while re.search(r"\([^()]*\)", head):
+                head = re.sub(r"\([^()]*\)", "", head)
+            # only the list the verb is said of ("..., while 1015 isn't": 1015, not the sentence's subject)
+            head = " ".join(head.split()) + " "
+            head = re.search(r"((?:(?:Sections? )?\d{3,4}(?:\.\d+)*(?:''?s own words)?(?:,? (?:and|or|to|with) |, | ))*)$",
+                             head).group(1)
+            for a, b in re.findall(num + r" to " + num, head):
+                if in_range(a, b):
+                    out.append(clause)
+            head = re.sub(num + r" to " + num, "", head)
+            out += [clause for n in re.findall(num, head) if brought_in(n)]
+        return out
+
+    assert said_stale("1023 isn't brought in yet.") and said_stale("1006.1 to 1006.3.2 and 1011 aren't brought in.")
+    assert not said_stale("1104 and 3006 aren't brought in (1023 is its own).")
+    assert not said_stale("Exits meet 1003 to 1015 (1011 and 1014 aren't brought in yet).")
+    assert not said_stale("1012.9 was a reference, so nothing showed while 1015 isn't brought in.")
+
     def stale(t):
-        out = [m.group(0) for m in pat.finditer(t) if brought_in(m.group(1))]
+        out = [m.group(0) for m in pat.finditer(t) if brought_in(m.group(1))] + said_stale(t)
         for m in listed.finditer(t):
             if re.search(r"\d{3}", m.group(2)):
                 continue
@@ -1454,9 +1493,13 @@ def test_1019_3s_congregate_residence_exception_is_for_stairways_only(rules):
 # (a ramp given a stairways-only exception, a condition of two dropped, "not less than" said as "up to") lets a person
 # accept what the law forbids. Each phrase below is the book's limit in the reason's words; each banned phrase was one.
 SHOWN_MUST_SAY = {
-    "general.bc_1023_1_interior_exit_stairways_general": (["except as 1028.2 permits"], ["but as 1028.2 allows"]),
-    "general.bc_1023_2_enclosure_construction": (["exit stairways (not ramps) within an atrium enclosed per 404.6 or per 510.2",
-                                                  "exit stairways and ramps in Group I-3 per 408.3.8"], []),
+    "general.bc_1023_1_interior_exit_stairways_general": (["except as 1028.2 permits (no more than half"], ["but as 1028.2 allows"]),
+    # review round 2: 510.2's exception isn't an atrium's
+    "general.bc_1023_2_enclosure_construction": (["exit stairways (not ramps) within an atrium enclosed per 404.6,",
+                                                  "exit stairways (not ramps) per 510.2",
+                                                  "exit stairways and ramps in Group I-3 per 408.3.8"],
+                                                 ["atrium enclosed per 404.6 or per 510.2"]),
+    "general.bc_1023_3_termination": (["that form one continuous protected enclosure"], []),
     "general.bc_1023_7_2_roof_assemblies": (["unless the code otherwise requires it", "extending at least 10 feet above the roof"],
                                             ["up to 10 feet"]),
     "general.bc_1023_12_1_smokeproof_termination": (["and the openings are protected as for access from other floors"], []),
@@ -1510,7 +1553,9 @@ def test_1022_1s_notes_name_what_of_1003_to_1015_isnt_brought_in(rules):
     through 1015'; its notes named only 1011, 1014 and 1015 as not brought in, but 1006's general parts and 1010.3 to
     1010.5.4 aren't either."""
     notes = rules["general.bc_1022_1_exits_general"]["notes"]
-    assert all(s in notes for s in ("1006.1 to 1006.3.2", "1010.3 to 1010.5.4", "1011", "1014", "1015"))
+    assert all(s in notes for s in ("1006.1, 1006.2's own words and 1006.3 to 1006.3.2", "1010.3 to 1010.5.4", "1011",
+                                    "1014", "1015"))
+    assert "1006.1 to 1006.3.2" not in notes         # review round 2: that range holds 1006.2.1 and 1006.2.2, brought in
 
 
 def test_the_readme_names_each_section_group_9e_flag_that_reads_icc_a117_1():
