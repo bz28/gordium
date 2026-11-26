@@ -32,7 +32,8 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
    test written the wrong way round (">= 1") gives the looser limit to the wrong stairs and passes this check; the
    worked examples and the answer key comparison are what catch it. review_when is checked by value only. But a
    section's number the law names ("Section 9.7, in which case": a decimal in digits, no unit, no limit words, read
-   "none") is never a quantity, so it backs no number anywhere, an if's test included (_named_part).
+   "none") is never a quantity, so it backs no number anywhere: a comparison, an if's test, a term multiplied
+   into a formula, review_when (_named_part).
    A reading with limit words of its own ("more than one") is backed only by a quote printing those words before
    it, never by the bare value elsewhere in the quote (a list item's "1. In open parking garages": _has_words).
    A count, a degree or a percent backs only a number with no unit of its own (a count, or a coefficient such as
@@ -430,10 +431,10 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
                        "the flag doesn't resolve it: a person decides (make the rule a flag, which needs review)")
             continue
         fits = [c for c in fits if c["resolved"]]
-        if directions and op is None and not in_formula and _named_part(fits) \
-                and not all(c.get("unverified") for c in fits):    # (with a direction: refused below, as "none")
+        if _named_part(fits) and not all(c.get("unverified") for c in fits):   # anywhere: a test, a term, review_when
             out.append(f"number {shown} in '{key}' is the number of a section the law names ({fits[0]['piece']}: "
-                       f"{fits[0]['shown']!r}), never a quantity: nothing may be compared with it, even in an if's test")
+                       f"{fits[0]['shown']!r}), never a quantity: no formula may use it (a test, a term of a "
+                       "formula, review_when)")
             continue
         if not directions or op is None:
             continue

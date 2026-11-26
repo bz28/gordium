@@ -302,3 +302,13 @@ def test_a_sections_number_is_never_compared_with_even_in_an_ifs_test():
     got = code_numbers.problems({**rule, "check": "corridor_dead_end_length <= (50 if stories > 9.7 else 20)"},
                                 rule["sources"], ctx)
     assert any("9.7" in p and "section" in p for p in got), got
+
+
+@pytest.mark.parametrize("change", [
+    {"applies_when": "nfpa_day_care_occupancy and stories * 9.7 <= 50"},      # a term multiplied in (review round 2)
+    {"check": "corridor_dead_end_length <= (50 if stories * 9.7 > 20 else 20)"},
+    {"review_when": [{"when": "stories > 9.7", "why": "a section's number as a count"}]}])
+def test_a_sections_number_backs_no_term_of_a_formula_nor_a_review_when(change):
+    rule, ctx = _rule("maine/maine_state", "general.nfpa_16_2_5_2_dead_end")
+    got = code_numbers.problems({**rule, **change}, rule["sources"], ctx)
+    assert any("9.7" in p and "section" in p for p in got), got
