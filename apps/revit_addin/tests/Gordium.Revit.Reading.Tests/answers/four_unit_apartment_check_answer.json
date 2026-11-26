@@ -63826,6 +63826,19 @@
         "document": "2025 Building Code of New York State (BCNYS)",
         "url": "https://archive.org/details/gov.ny.building.2025",
         "in_repo": false
+       },
+       {
+        "text": "1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the window or door is in the open position. Ladders or steps required by this section shall not be required to comply with Section 1011.",
+        "where": "1031.5.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
        }
       ],
       "citation": "1031.5, 2025 Building Code of New York State (BCNYS), PDF p.360",
@@ -63849,6 +63862,14 @@
         "lines": [
          40,
          44
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
         ]
        }
       ]
@@ -63986,6 +64007,19 @@
         "document": "2025 Building Code of New York State (BCNYS)",
         "url": "https://archive.org/details/gov.ny.building.2025",
         "in_repo": false
+       },
+       {
+        "text": "1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the window or door is in the open position. Ladders or steps required by this section shall not be required to comply with Section 1011.",
+        "where": "1031.5.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
        }
       ],
       "citation": "1031.5.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
@@ -64001,6 +64035,14 @@
         "lines": [
          40,
          44
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
         ]
        }
       ]
@@ -64138,6 +64180,19 @@
         "document": "2025 Building Code of New York State (BCNYS)",
         "url": "https://archive.org/details/gov.ny.building.2025",
         "in_repo": false
+       },
+       {
+        "text": "1031.5.2 Ladders or steps. Area wells with a vertical depth of more than 44 inches (1118 mm) shall be equipped with an approved permanently affixed ladder or steps. The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the window or door is in the open position. Ladders or steps required by this section shall not be required to comply with Section 1011.",
+        "where": "1031.5.2, 2025 Building Code of New York State (BCNYS), PDF p.360",
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
+        ],
+        "document": "2025 Building Code of New York State (BCNYS)",
+        "url": "https://archive.org/details/gov.ny.building.2025",
+        "in_repo": false
        }
       ],
       "citation": "1031.5.1, 2025 Building Code of New York State (BCNYS), PDF p.360",
@@ -64153,6 +64208,14 @@
         "lines": [
          40,
          44
+        ]
+       },
+       {
+        "file": "gov.ny.building.2025.pdf",
+        "page": 360,
+        "lines": [
+         45,
+         48
         ]
        }
       ]
@@ -108115,9 +108178,9 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "e1a74096b959033c3fef4233d8d57ba8988c7502ed042d2d96fb06c503b5cf3c",
+  "worker_fingerprint": "99dfcfe40171e52828241740d7831258b3c51a7f1c536c541fa48176dcff7b60",
   "rulebook": {
-   "new_york/ithaca_city": "f341e145f0d162991f1f79ac8907d82248dd23a7df0d7262ef3fca567c35f628"
+   "new_york/ithaca_city": "69047660ce2a349603aa8095610838d9d6ab85a6900601e54df2477ae209b958"
   }
  }
 }
