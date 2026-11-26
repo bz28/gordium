@@ -1570,21 +1570,21 @@
     "Egress · Exit passageway ventilation kept separate: A person checks this (Gordium doesn't decide it): Equipment and ductwork ventilating an exit passageway is outside the building with ducts enclosed as shafts, or within the passageway taking air from and discharging it directly outdoors (or through ducts enclosed as shafts), or within the building separated as shafts; openings into the rated construction are only those needed for maintenance and operation, protected per 716 for shaft enclosures; and the system is independent of the building's other ventilation: ventilation isn't in the model, so a person's check.",
     "Egress · Exterior walls of exit passageways and the walls near them: A person checks this (Gordium doesn't decide it): An exit passageway's exterior walls meet 705; where nonrated walls or unprotected openings enclose its exterior and other parts of the building expose them at an angle under 180 degrees, building exterior walls within 10 feet horizontally are rated at least 1 hour with openings protected at least 3/4 hour, from the ground to 10 feet above the passageway's floor or to the roof line, whichever is lower: ratings and angles aren't in the model, so a person's check.",
     "Egress · Standpipes in exit passageways where 905.3 and 905.4 require them: A person checks this (Gordium doesn't decide it): Standpipes and standpipe hose connections are provided where 905.3 and 905.4 require them: standpipes aren't in the model, so a person's check.",
-    "Egress · Luminous egress path markings in high-rise buildings: A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
-    "Egress · Luminous stripes on the leading edge of each step: A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
-    "Egress · Luminous stripes on the leading edge of landings: A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
-    "Egress · Luminous stripes on handrails and their extensions: A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
-    "Egress · Perimeter demarcation lines in exit enclosures: A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
-    "Egress · Floor-mounted demarcation lines: A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
-    "Egress · Wall-mounted demarcation lines: A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
-    "Egress · Demarcation lines continuous from wall to floor: A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
-    "Egress · Obstacles in the exit path outlined: A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
-    "Egress · Low-location emergency exit symbol on exit path doors: A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
-    "Egress · Luminous markings on exit path door hardware: A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
-    "Egress · Luminous stripes on exit path door frames: A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
-    "Egress · Luminous markings uniform within an enclosure: A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
-    "Egress · Luminous marking materials: A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
-    "Egress · Light for photoluminescent markings: A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+    "Egress · Luminous egress path markings in high-rise buildings: A person checks this (Gordium doesn't decide it): A high-rise building (one with an occupied floor or occupiable roof more than 75 feet above the lowest level of fire department vehicle access, 202) of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+    "Egress · Luminous stripes on the leading edge of each step: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): a solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (Gordium's reading of the printed double negative, a person confirms) (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+    "Egress · Luminous stripes on the leading edge of landings: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+    "Egress · Luminous stripes on handrails and their extensions: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+    "Egress · Perimeter demarcation lines in exit enclosures: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+    "Egress · Floor-mounted demarcation lines: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
+    "Egress · Wall-mounted demarcation lines: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
+    "Egress · Demarcation lines continuous from wall to floor: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+    "Egress · Obstacles in the exit path outlined: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating equal bands of luminous material and black, at most 2 inches thick, at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+    "Egress · Low-location emergency exit symbol on exit path doors: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+    "Egress · Luminous markings on exit path door hardware: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+    "Egress · Luminous stripes on exit path door frames: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+    "Egress · Luminous markings uniform within an enclosure: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+    "Egress · Luminous marking materials: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+    "Egress · Light for photoluminescent markings: A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
@@ -78789,11 +78789,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): A high-rise building (one with an occupied floor or occupiable roof more than 75 feet above the lowest level of fire department vehicle access, 202) of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): A high-rise building (one with an occupied floor or occupiable roof more than 75 feet above the lowest level of fire department vehicle access, 202) of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.1 General. Approved luminous egress path markings delineating the exit path shall be provided in high-rise buildings of Group A, B, E, I-1, M or R-1 occupancies in accordance with this section. Exception: Luminous egress path markings shall not be required on the level of exit discharge in lobbies that serve as part of the exit path in accordance with Section 1028.2, Exception 1.",
@@ -78822,14 +78822,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_1_luminous_markings_where_required",
-       "words": "A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A high-rise building (one with an occupied floor or occupiable roof more than 75 feet above the lowest level of fire department vehicle access, 202) of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_1_luminous_markings_where_required",
-       "why": "A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): A high-rise building (one with an occupied floor or occupiable roof more than 75 feet above the lowest level of fire department vehicle access, 202) of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -78863,11 +78863,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): a solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (Gordium's reading of the printed double negative, a person confirms) (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): a solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (Gordium's reading of the printed double negative, a person confirms) (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.1 Steps. A solid and continuous stripe shall be applied to the horizontal leading edge of each step and shall extend for the full length of the step. Outlining stripes shall have a minimum horizontal width of 1 inch (25 mm) and a maximum width of 2 inches (51 mm). The leading edge of the stripe shall be placed not more than 1/2 inch (12.7 mm) from the leading edge of the step and the stripe shall not overlap the leading edge of the step by not more than 1/2 inch (12.7 mm) down the vertical face of the step. Exception: The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed in accordance with UL 1994.",
@@ -78892,14 +78892,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_1_steps",
-       "words": "A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): a solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (Gordium's reading of the printed double negative, a person confirms) (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_1_steps",
-       "why": "A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): a solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (Gordium's reading of the printed double negative, a person confirms) (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -78933,11 +78933,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.2 Landings. The leading edge of landings shall be marked with a stripe consistent with the dimensional requirements for steps.",
@@ -78962,14 +78962,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_2_landings",
-       "words": "A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_2_landings",
-       "why": "A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79003,11 +79003,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.3 Handrails. Handrails and handrail extensions shall be marked with a solid and continuous stripe having a minimum width of 1 inch (25 mm). The stripe shall be placed on the top surface of the handrail for the entire length of the handrail, including extensions and newel post caps. Where handrails or handrail extensions bend or turn corners, the stripe shall not have a gap of more than 4 inches (102 mm). Exception: The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed in accordance with UL 1994.",
@@ -79032,14 +79032,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_3_handrails",
-       "words": "A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_3_handrails",
-       "why": "A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79073,11 +79073,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.4 Perimeter demarcation lines. Stair landings and other floor areas within interior exit stairways, interior exit ramps and exit passageways, with the exception of the sides of steps, shall be provided with solid and continuous demarcation lines on the floor or on the walls or a combination of both. The stripes shall be 1 to 2 inches (25 mm to 51 mm) wide with interruptions not exceeding 4 inches (102 mm). Exception: The minimum width of 1 inch (25 mm) shall not apply to outlining stripes listed in accordance with UL 1994.",
@@ -79102,14 +79102,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_4_perimeter_demarcation_lines",
-       "words": "A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_4_perimeter_demarcation_lines",
-       "why": "A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79143,11 +79143,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.4.1 Floor-mounted demarcation lines. Perimeter demarcation lines shall be placed within 4 inches (102 mm) of the wall and shall extend to within 2 inches (51 mm) of the markings on the leading edge of landings. The demarcation lines shall continue across the floor in front of all doors. Exception: Demarcation lines shall not extend in front of exit discharge doors that lead out of an exit and through which occupants must travel to complete the exit path.",
@@ -79172,14 +79172,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_4_1_floor_mounted_lines",
-       "words": "A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_4_1_floor_mounted_lines",
-       "why": "A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79213,11 +79213,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.4.2 Wall-mounted demarcation lines. Perimeter demarcation lines shall be placed on the wall with the bottom edge of the stripe not more than 4 inches (102 mm) above the finished floor. At the top or bottom of the stairs, demarcation lines shall drop vertically to the floor within 2 inches (51 mm) of the step or landing edge. Demarcation lines on walls shall transition vertically to the floor and then extend across the floor where a line on the floor is the only practical method of outlining the path. Where the wall line is broken by a door, demarcation lines on walls shall continue across the face of the door or transition to the floor and extend across the floor in front of such door. Exception: Demarcation lines shall not extend in front of exit discharge doors that lead out of an exit and through which occupants must travel to complete the exit path.",
@@ -79242,14 +79242,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_4_2_wall_mounted_lines",
-       "words": "A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_4_2_wall_mounted_lines",
-       "why": "A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79283,11 +79283,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.4.3 Transition. Where a wall-mounted demarcation line transitions to a floor-mounted demarcation line, or vice versa, the wall-mounted demarcation line shall drop vertically to the floor to meet a complimentary extension of the floor-mounted demarcation line, thus forming a continuous marking.",
@@ -79312,14 +79312,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_4_3_transition",
-       "words": "A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_4_3_transition",
-       "why": "A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79353,11 +79353,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating equal bands of luminous material and black, at most 2 inches thick, at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating equal bands of luminous material and black, at most 2 inches thick, at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.5 Obstacles. Obstacles at or below 6 feet 6 inches (1981 mm) in height and projecting more than 4 inches (102 mm) into the egress path shall be outlined with markings not less than 1 inch (25 mm) in width comprised of a pattern of alternating equal bands, of luminous material and black, with the alternating bands not more than 2 inches (51 mm) thick and angled at 45 degrees (0.79 rad). Obstacles shall include, but are not limited to, standpipes, hose cabinets, wall projections and restricted height areas. However, such markings shall not conceal any required information or indicators including but not limited to instructions to occu- pants for the use of standpipes. Exception: The minimum width of 1 inch (25 mm) shall not apply to markings listed in accordance with UL 1994.",
@@ -79382,14 +79382,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_5_obstacles",
-       "words": "A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating equal bands of luminous material and black, at most 2 inches thick, at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_5_obstacles",
-       "why": "A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating equal bands of luminous material and black, at most 2 inches thick, at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79423,11 +79423,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.6.1 Emergency exit symbol. The doors shall be identified by a low-location luminous emergency exit symbol comply- ing with NFPA 170. The exit symbol shall be not less than 4 inches (102 mm) in height and shall be mounted on the door, centered horizontally, with the top of the symbol not higher than 18 inches (457 mm) above the finished floor.",
@@ -79456,14 +79456,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_6_1_emergency_exit_symbol",
-       "words": "A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_6_1_emergency_exit_symbol",
-       "why": "A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79497,11 +79497,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.6.2 Door hardware markings. Door hardware shall be marked with not less than 16 square inches (10 323 mm[fn2)] of luminous material. This marking shall be located behind, immediately adjacent to, or on the door handle or escutcheon. Where a panic bar is installed, such material shall be not less than 1 inch (25 mm) wide for the entire length of the actuating bar or touchpad.",
@@ -79526,14 +79526,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_6_2_door_hardware_markings",
-       "words": "A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_6_2_door_hardware_markings",
-       "why": "A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79567,11 +79567,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.2.6.3 Door frame markings. The top and sides of the door frame shall be marked with a solid and continuous 1-inch- to 2-inch-wide (25 mm to 51 mm) stripe. Where the door molding does not provide sufficient flat surface on which to locate the stripe, the stripe shall be permitted to be located on the wall surrounding the frame.",
@@ -79596,14 +79596,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_2_6_3_door_frame_markings",
-       "words": "A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_2_6_3_door_frame_markings",
-       "why": "A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79637,11 +79637,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.3 Uniformity. Placement and dimensions of markings shall be consistent and uniform throughout the same enclosure.",
@@ -79666,14 +79666,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_3_uniformity",
-       "words": "A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_3_uniformity",
-       "why": "A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79707,11 +79707,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.4 Self-luminous and photoluminescent. Luminous egress path markings shall be permitted to be made of any material, including paint, provided that an electrical charge is not required to maintain the required luminance. Such materials shall include, but not be limited to, self-luminous materials and photoluminescent materials. Materials shall comply with either of the following standards: 1. UL 1994. 2. ASTM E2072, except that the charging source shall be 1 footcandle (11 lux) of fluorescent illumination for 60 minutes, and the minimum luminance shall be 30 milicandelas per square meter at 10 minutes and 5 milicandelas per square meter after 90 minutes.",
@@ -79736,14 +79736,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_4_self_luminous_photoluminescent",
-       "words": "A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_4_self_luminous_photoluminescent",
-       "why": "A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -79777,11 +79777,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
       "quotes": [
        {
         "text": "1025.5 Illumination. Where photoluminescent exit path markings are installed, they shall be provided with not less than 1 footcan- dle (11 lux) of illumination for not less than 60 minutes prior to periods when the building is occupied and continuously during occupancy.",
@@ -79806,14 +79806,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1025_5_illumination",
-       "words": "A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1025_5_illumination",
-       "why": "A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -88034,7 +88034,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Luminous egress path markings in high-rise buildings (BCNYS 1025.1): A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+       "title": "Egress · Luminous egress path markings in high-rise buildings (BCNYS 1025.1): A person checks this (Gordium doesn't decide it): A high-rise building (one with an occupied floor or occupiable roof more than 75 feet above the lowest level of fire department vehicle access, 202) of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Luminous egress path markings in high-rise buildings (BCNYS 1025.1)"
       },
@@ -88047,7 +88047,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Luminous stripes on the leading edge of each step (BCNYS 1025.2.1): A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "title": "Egress · Luminous stripes on the leading edge of each step (BCNYS 1025.2.1): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): a solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (Gordium's reading of the printed double negative, a person confirms) (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Luminous stripes on the leading edge of each step (BCNYS 1025.2.1)"
       },
@@ -88060,7 +88060,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Luminous stripes on the leading edge of landings (BCNYS 1025.2.2): A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+       "title": "Egress · Luminous stripes on the leading edge of landings (BCNYS 1025.2.2): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Luminous stripes on the leading edge of landings (BCNYS 1025.2.2)"
       },
@@ -88073,7 +88073,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Luminous stripes on handrails and their extensions (BCNYS 1025.2.3): A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "title": "Egress · Luminous stripes on handrails and their extensions (BCNYS 1025.2.3): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Luminous stripes on handrails and their extensions (BCNYS 1025.2.3)"
       },
@@ -88086,7 +88086,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Perimeter demarcation lines in exit enclosures (BCNYS 1025.2.4): A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "title": "Egress · Perimeter demarcation lines in exit enclosures (BCNYS 1025.2.4): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Perimeter demarcation lines in exit enclosures (BCNYS 1025.2.4)"
       },
@@ -88099,7 +88099,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Floor-mounted demarcation lines (BCNYS 1025.2.4.1): A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "title": "Egress · Floor-mounted demarcation lines (BCNYS 1025.2.4.1): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Floor-mounted demarcation lines (BCNYS 1025.2.4.1)"
       },
@@ -88112,7 +88112,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Wall-mounted demarcation lines (BCNYS 1025.2.4.2): A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "title": "Egress · Wall-mounted demarcation lines (BCNYS 1025.2.4.2): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Wall-mounted demarcation lines (BCNYS 1025.2.4.2)"
       },
@@ -88125,7 +88125,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Demarcation lines continuous from wall to floor (BCNYS 1025.2.4.3): A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+       "title": "Egress · Demarcation lines continuous from wall to floor (BCNYS 1025.2.4.3): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Demarcation lines continuous from wall to floor (BCNYS 1025.2.4.3)"
       },
@@ -88138,7 +88138,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Obstacles in the exit path outlined (BCNYS 1025.2.5): A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+       "title": "Egress · Obstacles in the exit path outlined (BCNYS 1025.2.5): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating equal bands of luminous material and black, at most 2 inches thick, at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Obstacles in the exit path outlined (BCNYS 1025.2.5)"
       },
@@ -88151,7 +88151,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Low-location emergency exit symbol on exit path doors (BCNYS 1025.2.6.1): A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+       "title": "Egress · Low-location emergency exit symbol on exit path doors (BCNYS 1025.2.6.1): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Low-location emergency exit symbol on exit path doors (BCNYS 1025.2.6.1)"
       },
@@ -88164,7 +88164,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Luminous markings on exit path door hardware (BCNYS 1025.2.6.2): A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "title": "Egress · Luminous markings on exit path door hardware (BCNYS 1025.2.6.2): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Luminous markings on exit path door hardware (BCNYS 1025.2.6.2)"
       },
@@ -88177,7 +88177,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Luminous stripes on exit path door frames (BCNYS 1025.2.6.3): A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "title": "Egress · Luminous stripes on exit path door frames (BCNYS 1025.2.6.3): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Luminous stripes on exit path door frames (BCNYS 1025.2.6.3)"
       },
@@ -88190,7 +88190,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Luminous markings uniform within an enclosure (BCNYS 1025.3): A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+       "title": "Egress · Luminous markings uniform within an enclosure (BCNYS 1025.3): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Luminous markings uniform within an enclosure (BCNYS 1025.3)"
       },
@@ -88203,7 +88203,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Luminous marking materials (BCNYS 1025.4): A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+       "title": "Egress · Luminous marking materials (BCNYS 1025.4): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Luminous marking materials (BCNYS 1025.4)"
       },
@@ -88216,7 +88216,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Light for photoluminescent markings (BCNYS 1025.5): A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+       "title": "Egress · Light for photoluminescent markings (BCNYS 1025.5): A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Light for photoluminescent markings (BCNYS 1025.5)"
       },
@@ -90535,7 +90535,7 @@
       {
        "key": "reason:egress.general.bc_1025_1_luminous_markings_where_required",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A high-rise building (one with an occupied floor or occupiable roof more than 75 feet above the lowest level of fire department vehicle access, 202) of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2), but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the building is a high-rise and its markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_1_luminous_markings_where_required"
@@ -90545,7 +90545,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_1_steps",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): A solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): a solid, continuous stripe 1 to 2 inches wide runs the full length of each step's leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (Gordium's reading of the printed double negative, a person confirms) (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_1_steps"
@@ -90555,7 +90555,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_2_landings",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_2_landings"
@@ -90565,7 +90565,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_3_handrails",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_3_handrails"
@@ -90575,7 +90575,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_4_perimeter_demarcation_lines",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_4_perimeter_demarcation_lines"
@@ -90585,7 +90585,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_4_1_floor_mounted_lines",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings' edge markings and continue across the floor in front of every door, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_4_1_floor_mounted_lines"
@@ -90595,7 +90595,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_4_2_wall_mounted_lines",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors leading out of the exit: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is the only practical way to outline the path, and continue across a door's face or the floor in front of it, but not in front of exit discharge doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_4_2_wall_mounted_lines"
@@ -90605,7 +90605,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_4_3_transition",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_4_3_transition"
@@ -90615,7 +90615,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_5_obstacles",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating equal bands of luminous material and black, at most 2 inches thick, at 45 degrees, concealing no required information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_5_obstacles"
@@ -90625,7 +90625,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_6_1_emergency_exit_symbol",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top at most 18 inches above the floor: markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_6_1_emergency_exit_symbol"
@@ -90635,7 +90635,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_6_2_door_hardware_markings",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_6_2_door_hardware_markings"
@@ -90645,7 +90645,7 @@
       {
        "key": "reason:egress.general.bc_1025_2_6_3_door_frame_markings",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding has too little flat surface: markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_2_6_3_door_frame_markings"
@@ -90655,7 +90655,7 @@
       {
        "key": "reason:egress.general.bc_1025_3_uniformity",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_3_uniformity"
@@ -90665,7 +90665,7 @@
       {
        "key": "reason:egress.general.bc_1025_4_self_luminous_photoluminescent",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_4_self_luminous_photoluminescent"
@@ -90675,7 +90675,7 @@
       {
        "key": "reason:egress.general.bc_1025_5_illumination",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B, E, I-1, M or R-1 (1025.1, 1025.2): photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building is occupied and all through occupancy: lighting and markings aren't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1025_5_illumination"
@@ -121839,7 +121839,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "41e8b97a88f58c399cffe21168a9913b9e8f815778a735fa66c3c715ad1b9f41"
+   "new_york/ithaca_city": "32b9efb0fa1d2a4202c3986902b25d151b0b6c5c981b9267ed435eac84dc6d44"
   }
  }
 }

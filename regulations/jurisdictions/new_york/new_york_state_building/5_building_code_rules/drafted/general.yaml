@@ -23211,8 +23211,9 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'A high-rise building of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating the
-      exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2),
+    note: 'A high-rise building (one with an occupied floor or occupiable roof more than 75 feet above the lowest level of
+      fire department vehicle access, 202) of Group A, B, E, I-1, M or R-1 has approved luminous egress path markings delineating
+      the exit path in its interior exit stairways, interior exit ramps and exit passageways, per 1025.2.1 to 1025.2.6.3 (1025.2),
       but not on the level of exit discharge in lobbies serving as part of the exit path per 1028.2 exception 1: whether the
       building is a high-rise and its markings aren''t in the model, so a person''s check.'
   - given:
@@ -23253,9 +23254,11 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'A solid, continuous stripe 1 to 2 inches wide runs the full length of each step''s leading edge, placed within
-      1/2 inch of the edge and lapping down its face by at most 1/2 inch (the 1 inch minimum not applying to stripes listed
-      per UL 1994): markings aren''t in the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): a solid, continuous stripe 1 to 2 inches wide runs the full length of each step''s
+      leading edge, placed within 1/2 inch of the edge and lapping down its face by at most 1/2 inch (Gordium''s reading of
+      the printed double negative, a person confirms) (the 1 inch minimum not applying to stripes listed per UL 1994): markings
+      aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23267,8 +23270,11 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The occupancy isn''t stated: a person checks.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. UL 1994 isn't brought in. Not shown for a building
-    stated one group outside A, B, E, I-1, M and R-1 (1025.1 names only those); shown for two or more groups or none stated.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9f. UL 1994 isn''t brought in. The book prints ''the
+    stripe shall not overlap the leading edge of the step by not more than 1/2 inch'', a double negative; read as its evident
+    meaning, an overlap of at most 1/2 inch down the step''s face (the stripe placed within 1/2 inch of the edge): Gordium''s
+    reading, for a person to confirm. Not shown for a building stated one group outside A, B, E, I-1, M and R-1 (1025.1 names
+    only those); shown for two or more groups or none stated.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1025_2_2_landings
@@ -23288,8 +23294,9 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'The leading edge of each landing is marked with a stripe meeting the dimensions for steps: markings aren''t in
-      the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): the leading edge of each landing is marked with a stripe meeting the dimensions for
+      steps: markings aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23325,9 +23332,10 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Handrails and their extensions carry a solid, continuous stripe at least 1 inch wide on the top surface for their
-      whole length, newel post caps included, with no gap over 4 inches at bends and corners (the 1 inch minimum not applying
-      to stripes listed per UL 1994): markings aren''t in the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): handrails and their extensions carry a solid, continuous stripe at least 1 inch wide
+      on the top surface for their whole length, newel post caps included, with no gap over 4 inches at bends and corners
+      (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23363,10 +23371,11 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Stair landings and other floor areas in interior exit stairways, ramps and exit passageways, but the sides of steps,
-      have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide with breaks of at most
-      4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren''t in the model, so a person''s
-      check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): stair landings and other floor areas in interior exit stairways, ramps and exit passageways,
+      but the sides of steps, have solid, continuous demarcation lines on the floor, the walls or both, 1 to 2 inches wide
+      with breaks of at most 4 inches (the 1 inch minimum not applying to stripes listed per UL 1994): markings aren''t in
+      the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23401,9 +23410,11 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches of the landings'' edge markings
-      and continue across the floor in front of every door, but not in front of exit discharge doors leading out of the exit:
-      markings aren''t in the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): floor-mounted demarcation lines are within 4 inches of the wall, reach within 2 inches
+      of the landings'' edge markings and continue across the floor in front of every door, but not in front of exit discharge
+      doors that lead out of the exit and that occupants must pass through to complete the exit path: markings aren''t in
+      the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23442,10 +23453,12 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Wall-mounted demarcation lines have their bottom edge at most 4 inches above the finished floor, drop to the floor
-      within 2 inches of the step or landing edge at the top and bottom of stairs, move to the floor where a floor line is
-      the only practical way to outline the path, and continue across a door''s face or the floor in front of it, but not
-      in front of exit discharge doors leading out of the exit: markings aren''t in the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): wall-mounted demarcation lines have their bottom edge at most 4 inches above the
+      finished floor, drop to the floor within 2 inches of the step or landing edge at the top and bottom of stairs, move
+      to the floor where a floor line is the only practical way to outline the path, and continue across a door''s face or
+      the floor in front of it, but not in front of exit discharge doors that lead out of the exit and that occupants must
+      pass through to complete the exit path: markings aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23479,9 +23492,10 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Where a wall-mounted demarcation line becomes a floor-mounted one, or the other way round, the wall line drops
-      vertically to the floor to meet the floor line, making one continuous marking: markings aren''t in the model, so a person''s
-      check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): where a wall-mounted demarcation line becomes a floor-mounted one, or the other way
+      round, the wall line drops vertically to the floor to meet the floor line, making one continuous marking: markings aren''t
+      in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23519,10 +23533,12 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the egress path (standpipes, hose
-      cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide of alternating luminous and
-      black bands at most 2 inches thick at 45 degrees, concealing no required information (the 1 inch minimum not applying
-      to markings listed per UL 1994): markings aren''t in the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): obstacles at or below 6 feet 6 inches high projecting more than 4 inches into the
+      egress path (standpipes, hose cabinets, wall projections, low headroom) are outlined with markings at least 1 inch wide
+      of alternating equal bands of luminous material and black, at most 2 inches thick, at 45 degrees, concealing no required
+      information (the 1 inch minimum not applying to markings listed per UL 1994): markings aren''t in the model, so a person''s
+      check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23563,9 +23579,10 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Each door occupants pass through to complete the exit path carries markings per 1025.2.6.1 to 1025.2.6.3 (1025.2.6):
-      a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered on the door with its top
-      at most 18 inches above the floor: markings aren''t in the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): each door occupants pass through to complete the exit path carries markings per 1025.2.6.1
+      to 1025.2.6.3 (1025.2.6): a low-location luminous emergency exit symbol per NFPA 170, at least 4 inches high, centered
+      on the door with its top at most 18 inches above the floor: markings aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23601,9 +23618,10 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Door hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or
-      escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren''t
-      in the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind,
+      beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar
+      or touchpad: markings aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23637,8 +23655,10 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'The top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall
-      where the molding has too little flat surface: markings aren''t in the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches
+      wide, on the surrounding wall where the molding has too little flat surface: markings aren''t in the model, so a person''s
+      check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23670,8 +23690,9 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Markings are placed and sized consistently and uniformly throughout the same enclosure: markings aren''t in the
-      model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): markings are placed and sized consistently and uniformly throughout the same enclosure:
+      markings aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23708,10 +23729,11 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Luminous egress path markings may be of any material, paint included, needing no electrical charge to keep their
-      luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072 (charged by 1 footcandle of fluorescent
-      light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes and 5 after 90 minutes): markings aren''t
-      in the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): luminous egress path markings may be of any material, paint included, needing no
+      electrical charge to keep their luminance (self-luminous or photoluminescent), complying with UL 1994 or ASTM E2072
+      (charged by 1 footcandle of fluorescent light for 60 minutes, at least 30 millicandelas per square meter at 10 minutes
+      and 5 after 90 minutes): markings aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23746,8 +23768,10 @@ rules:
   - given:
       occupancy_group: B
     expect: needs_review
-    note: 'Photoluminescent exit path markings get at least 1 footcandle of light for at least 60 minutes before the building
-      is occupied and all through occupancy: lighting and markings aren''t in the model, so a person''s check.'
+    note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
+      E, I-1, M or R-1 (1025.1, 1025.2): photoluminescent exit path markings get at least 1 footcandle of light for at least
+      60 minutes before the building is occupied and all through occupancy: lighting and markings aren''t in the model, so
+      a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
