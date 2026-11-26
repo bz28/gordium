@@ -116,3 +116,7 @@ Two more undercounts: a stair within a group (the upper floor of a two-story uni
 ## Review round 3 of step 3 (2026-11-26)
 
 No undercount found. Hardening: the stair check is required of every caller (left out, it would have counted none); the module's words name the listed other uses; a ramp not said to be none is pinned too. Two common layouts will come out not measured, and are the first cases for the room mark Gordium: Unit if they prove common: an apartment with a balcony door to the outside besides its entry (two ways out), and a bath opening onto two rooms of one unit (a room shared between rooms of the group).
+
+## Review round 4 of step 3 (2026-11-26)
+
+One more undercount: a vestibule, laundry or mail room of another function (business, accessory storage) holding a group's one way out, with two units opening into it, counted one unit, and 1016.2.1 doesn't catch it. Now any room not itself residential (or a toilet, closet or storeroom) opening onto two or more rooms of a group leaves the count not measured; only a shared room marked residential is left to the words beside the count. One test.

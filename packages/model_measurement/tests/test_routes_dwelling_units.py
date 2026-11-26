@@ -79,6 +79,11 @@ def oracle(suites, joins):
         if joined:
             old = owner[i + 1]
             owner = [owner[i] if o == old else o for o in owner]
+    for i, (function, n, _) in enumerate(suites):   # a room not itself residential opening onto two or more rooms
+        links = (n == 2) + sum(1 for k in (i - 1, i) if 0 <= k < 2 and joins[k])    # of its group: maybe shared
+        residential_group = any(f == "residential" for k, (f, _, _) in enumerate(suites) if owner[k] == owner[i])
+        if function != "residential" and links >= 2 and residential_group:
+            return None
     total = 0
     for o in set(owner):
         members = [suites[i] for i in range(3) if owner[i] == o]
@@ -235,3 +240,17 @@ def test_a_closet_between_two_rooms_of_a_group_may_be_shared():
     desc["doors"] = [d for d in desc["doors"] if d["id"] != "k1"]
     desc["doors"].append(door("e10", (15, -0.25), (1, 0), ("s1", "c")))
     assert count(desc) == 2
+
+
+@pytest.mark.parametrize("function", ["business", "accessory_storage_mechanical"])
+def test_a_shared_room_of_another_use_between_two_rooms_of_a_group_may_be_shared(function):
+    """Review round 4 (PR 3): a vestibule or laundry (use other, a non-residential function) with the group's one way
+    out, two units opening into it: counted one unit; 1016.2.1 doesn't catch it (nobody passes through another unit).
+    A room of another function between two rooms of a group now leaves the count not measured."""
+    desc = layout([("residential", 1, 0), ("residential", 1, 0), ("business", 1, 1)], (False, False))
+    desc["rooms"].append(room("v", rect(0, 10.5, 23.5, 15), use="other", lockable=False, pass_through=True,
+                              function=function))
+    desc["doors"] += [door("va", (5, 10.25), (1, 0), ("s0", "v")), door("vb", (17, 10.25), (1, 0), ("s1", "v")),
+                      door("vc", (23.75, 12.75), (0, 1), ("v", "outside"))]
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_shared_room", got

@@ -2,7 +2,7 @@
 2025 Building Code of New York State reads ("MAXIMUM NUMBER OF DWELLING UNITS": 4 on a story with one exit, Group
 R-2; p.317).
 
-    units_on(story, items) -> int, or raises Stop (not measured, with its reason)
+    units_on(story, items, is_exit, stair_in) -> int, or raises Stop (not measured, with its reason)
 
 The law: DWELLING UNIT (202, p.41): "A single unit providing complete, independent living facilities for one or more
 persons, including permanent provisions for living, sleeping, eating, cooking and sanitation." 1016.2.1 (p.341):
@@ -92,8 +92,11 @@ def units_on(story, items: dict, is_exit, stair_in) -> int:
             raise Stop("units_entrances", name=names, count=len(entrances), doors=", ".join(entrances))
         if stair_in(g):                                  # a way to another story: the upper part of a unit whose door
             raise Stop("units_stair", name=names)        # is downstairs may share this group's one way out
-        for r in g:                                      # a closet, toilet or storeroom between two parts of it may
-            if story.rooms[r].use in NOT_LIVED_IN:       # be shared by two units
+        for r in g:                                      # a closet, toilet or storeroom, or a room of another
+            if story.rooms[r].use in NOT_LIVED_IN or \
+                    (items.get(r) or {}).get("function") != RESIDENTIAL:     # function (a shared vestibule, laundry,
+                #                                                              mail room), between two parts of it may
+                #                                                              be shared by two units
                 others = {x for _, sides in links if r in sides for x in sides} - {r}
                 if len(others & g) >= 2:
                     raise Stop("units_shared_room", name=names, room=story.rooms[r].name)
