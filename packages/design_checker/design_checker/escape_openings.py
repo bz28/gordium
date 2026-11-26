@@ -56,6 +56,8 @@ WHY = {
                            "isn't known",
     "two_exits": "the sleeping room {name}'s story has two or more exits, but whether its occupants have access to "
                  "more than one (not only one, as Table 1006.3.4(1) permits) isn't worked out",
+    "opening_stray": "an emergency escape and rescue opening of the description is within no sleeping room read (none "
+                     "named, a room not read, or one that can't be read), so it may be this room's",
     "room_id_shared": "the sleeping room {name}'s id is more than one room's, so which openings and doors are its "
                       "isn't known",
 }
@@ -69,6 +71,32 @@ COMPLIES = "opening_room_other_compliant"           # section group 8d: on each 
 COUNT = "sleeping_room_compliant_openings"           # section group 8d: on each sleeping room
 
 
+def _stray(parts, openings) -> bool:
+    """An opening that may be any room's, as rule_format.parts.rows reads it: one that can't be read (not a mapping,
+    no id, an id two parts share), or one within no part of a kind it may sit in (no `within`, a mistyped room, an id
+    two parts share); one within a part of another such kind (a basement) is that part's."""
+    from rule_format import parts as part_rules
+    ids = part_rules._ids(parts)
+    kind_of = {p["id"]: k for k, given in parts.items() if isinstance(given, list)
+               for p in given if isinstance(p, dict) and isinstance(p.get("id"), str)}
+    may = part_rules.registry()[OPENINGS].get("within", [])
+    for o in openings:
+        if not (isinstance(o, dict) and isinstance(o.get("id"), str) and o["id"].strip() and ids.get(o["id"]) == 1
+                and isinstance(o.get("measures", {}), dict)):
+            return True
+        where = o.get("within")
+        if not isinstance(where, str) or ids.get(where) != 1 or kind_of.get(where) not in may:
+            return True
+    return False
+
+
+def _count(v) -> bool:
+    """A whole count of exits, never negative (a hand-built story's null, text, true, NaN, 1.5 or -3 is none)."""
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return False
+    return v >= 0 and (isinstance(v, int) or (v - v == 0 and v.is_integer()))     # a float: finite and whole
+
+
 def link(parts: dict, description, rules=None) -> None:
     """Add the four measures to every sleeping room part in `parts` (the routes' parts and the interior measuring's
     sleeping rooms and openings, together), in place; with the law's `rules`, which openings comply (8d)."""
@@ -80,23 +108,35 @@ def link(parts: dict, description, rules=None) -> None:
     for r in given if isinstance(given, list) else []:
         if isinstance(r, dict) and isinstance(r.get("id"), str):
             by_id.setdefault(r["id"], []).append(r)
-    stories = {s.get("id"): s for s in parts.get("story") or [] if isinstance(s, dict)}
+    stories = {}                                         # one story per id: two sharing one are no one story
+    for s in parts.get("story") if isinstance(parts.get("story"), list) else []:
+        if isinstance(s, dict) and isinstance(s.get("id"), str):
+            stories.setdefault(s["id"], []).append(s)
     openings = parts.get(OPENINGS)
     doors = parts.get("means_of_egress_door")
+    stray = isinstance(openings, list) and _stray(parts, openings)
     for part in rooms:
         if not isinstance(part, dict) or part.get("maybe"):
             continue                 # an enclosed space that may not be a room at all: every row of it needs review
-        m = part.setdefault("measures", {})
-        why = part.setdefault("not_measured", {})
-        for k in NEW_MEASURES:           # the house measuring's "not measured yet" for these: this link decides them
-            why.pop(k, None)
+        if not isinstance(part.get("not_measured", {}), dict):
+            part["not_measured"] = {}    # reasons that can't be read: the link's own (its values are popped below)
+        if not isinstance(part.setdefault("measures", {}), dict):
+            continue                 # a room that can't be read: its rows say so (rule_format.parts)
+        part.setdefault("not_measured", {})
+        m, why = part["measures"], part["not_measured"]
+        for k in NEW_MEASURES:           # the house measuring's "not measured yet" for these, and any value a part
+            why.pop(k, None)             # arrives with: this link decides them, never a stale one beside its reason
+            m.pop(k, None)
         name = part.get("name") or part.get("id")
         pid = part.get("id")
-        rid = (part.get("more") or {}).get("described_id", pid)       # the description's id (egress._escape_openings)
-        same = by_id.get(rid, [])
+        more = part.get("more") if isinstance(part.get("more"), dict) else {}
+        rid = more.get("described_id", pid)       # the description's id (egress._escape_openings)
+        same = by_id.get(rid, []) if isinstance(rid, str) else []
         # the openings marked in it (none counted where the id is more than one room's: review round 1)
         if len(same) > 1:
             why["sleeping_room_escape_openings"] = WHY["room_id_shared"].format(name=name)
+        elif stray:
+            why["sleeping_room_escape_openings"] = WHY["opening_stray"]
         elif isinstance(openings, list):
             m["sleeping_room_escape_openings"] = sum(1 for o in openings if isinstance(o, dict) and o.get("within") == pid)
         else:
@@ -107,21 +147,26 @@ def link(parts: dict, description, rules=None) -> None:
             reason = WHY["no_room"].format(name=name)
         elif not isinstance(level, str):
             reason = WHY["no_level"].format(name=name)
-        elif level not in stories:
+        elif len(stories.get(level, [])) != 1:
             reason = WHY["no_story"].format(name=name, level=level)
         else:
             reason = None
         for mine, (theirs, worked) in LINKED.items():
-            story = stories.get(level) if reason is None else None
-            if story is not None and theirs in (story.get("measures") or {}):
-                value = worked(story["measures"][theirs])
+            story = stories[level][0] if reason is None else None
+            given = story.get("measures") if story is not None else None
+            raw = given.get(theirs) if isinstance(given, dict) else None
+            known = isinstance(given, dict) and theirs in given
+            if known and mine == "sleeping_room_story_one_exit" and not _count(raw):
+                why[mine] = WHY["story_not_measured"].format(name=name, reason=f"its {theirs} is not a count")
+            elif known:
+                value = worked(raw)
                 if value is None:
                     why[mine] = WHY["two_exits"].format(name=name)
                 else:
                     m[mine] = value
             elif story is not None:
-                why[mine] = WHY["story_not_measured"].format(
-                    name=name, reason=(story.get("not_measured") or {}).get(theirs, "not measured"))
+                said = story.get("not_measured") if isinstance(story.get("not_measured"), dict) else {}
+                why[mine] = WHY["story_not_measured"].format(name=name, reason=said.get(theirs, "not measured"))
             else:
                 why[mine] = reason
         # a door of its own to outside
@@ -131,7 +176,8 @@ def link(parts: dict, description, rules=None) -> None:
         if not isinstance(doors, list):
             why["sleeping_room_door_to_outside"] = WHY["doors_not_read"].format(name=name)
             continue
-        sides = [((d.get("more") or {}).get("sides")) for d in doors if isinstance(d, dict)]
+        sides = [(d["more"].get("sides") if isinstance(d.get("more"), dict) else None)
+                 for d in doors if isinstance(d, dict)]
         if any(not isinstance(s, list) for s in sides) or len(sides) != len(doors):
             if any(isinstance(s, list) and rid in s and OUTSIDE in s for s in sides):
                 m["sleeping_room_door_to_outside"] = True
@@ -209,21 +255,6 @@ def _unknown_why(answers, held) -> str:
         "whether its escape openings comply isn't known (one of them can't be read)"
 
 
-def _stray(parts, openings) -> bool:
-    """An opening within no sleeping room read (no `within`, a mistyped one, or one two parts share), as
-    rule_format.parts.rows reads it: it could be any room's, so no room's count is known (review round 3 of 8d). One
-    within a part of another kind it may sit in (a basement) is that part's, not a stray."""
-    ids = part_rules._ids(parts)
-    kind_of = {p["id"]: k for k, given in parts.items() if isinstance(given, list)
-               for p in given if isinstance(p, dict) and isinstance(p.get("id"), str)}
-    may = part_rules.registry()[OPENINGS].get("within", [])
-    for o in openings:
-        where = o.get("within")
-        if ids.get(where) != 1 or kind_of.get(where) not in may:
-            return True
-    return False
-
-
 def _compliance(parts, rooms: list, openings, rules) -> None:
     held = limits(rules)
     by_room, unread = {}, set()
@@ -235,9 +266,9 @@ def _compliance(parts, rooms: list, openings, rules) -> None:
         by_room.setdefault(o.get("within"), []).append(o)
     good_ids = {id(o) for o in good or []}
     for r in rooms:
-        if not isinstance(r, dict) or r.get("maybe"):
-            continue
-        m, why = r.setdefault("measures", {}), r.setdefault("not_measured", {})
+        if not isinstance(r, dict) or r.get("maybe") or not isinstance(r.get("measures"), dict)                 or not isinstance(r.get("not_measured"), dict):
+            continue                             # a room link left alone (it can't be read): its rows say so
+        m, why = r["measures"], r["not_measured"]
         why.pop(COUNT, None)
         m.pop(COUNT, None)
         if not isinstance(openings, list):
@@ -287,17 +318,27 @@ def _to_openings(rooms: list, openings) -> None:
         if isinstance(r, dict) and isinstance(r.get("id"), str):
             by_id.setdefault(r["id"], []).append(r)
     for o in openings:
-        if not isinstance(o, dict) or not isinstance(o.setdefault("measures", {}), dict)                 or not isinstance(o.setdefault("not_measured", {}), dict):
+        if not isinstance(o, dict):
+            continue
+        if isinstance(o.get("measures"), dict):            # the room's facts are only ever the room's: none given
+            for mine in FROM_ROOM:                         # by the opening itself stands (review of 4d2cd872)
+                o["measures"].pop(mine, None)
+        if not isinstance(o.setdefault("measures", {}), dict) or not isinstance(o.setdefault("not_measured", {}), dict):
             continue                              # an unreadable opening: its rows say so (rule_format.parts)
         m, why = o["measures"], o["not_measured"]
-        same = by_id.get(o.get("within"), [])
+        where = o.get("within")
+        same = by_id.get(where, []) if isinstance(where, str) else []
         room = same[0] if len(same) == 1 and not same[0].get("maybe") else None
+        if room is not None and not (isinstance(room.get("measures"), dict)
+                                     and isinstance(room.get("not_measured", {}), dict)):
+            room = None                                    # a room that can't be read gives its openings nothing
         for mine, theirs in FROM_ROOM.items():
             why.pop(mine, None)
-            if room is not None and theirs in (room.get("measures") or {}):
-                m[mine] = room["measures"][theirs]
+            given, said = (room["measures"], room.get("not_measured") or {}) if room is not None else ({}, {})
+            if room is not None and theirs in given and theirs not in said:     # its own value, no reason beside it
+                m[mine] = given[theirs]
             elif room is not None:
-                why[mine] = (room.get("not_measured") or {}).get(theirs, "its room's isn't known")
+                why[mine] = said.get(theirs, "its room's isn't known")
             else:
                 why[mine] = "the room it is in isn't one sleeping room read"
 

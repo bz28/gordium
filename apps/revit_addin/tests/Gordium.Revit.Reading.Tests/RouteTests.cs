@@ -120,6 +120,21 @@ public sealed class RouteTests
     }
 
     [Fact]
+    public void Every_level_is_sent_in_all_levels_one_with_nothing_drawn_on_it_too()
+    {
+        // an open parking story with no room, door or enclosed area: not a story the routes measure (levels), but one
+        // that may be the first above grade plane, so the story places (story_place.py) need it
+        var floor = new FakeFloor();
+        floor.Levels!.Add(new LevelRecord("level-parking", "Parking", floor.Fake.Place(0, 0, -10).Z));
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Equal([FakeFloor.Level], read.Interior["levels"]!.AsArray().Select(l => l!["id"]!.GetValue<string>()));
+        var all = read.Interior["all_levels"]!.AsArray();
+        Assert.Equal([FakeFloor.Level, "level-parking"], all.Select(l => l!["id"]!.GetValue<string>()));
+        Assert.Equal("Parking", all[1]!["name"]!.GetValue<string>());
+        Assert.Equal(-10.0, all[1]!["elevation"]!.GetValue<double>(), 9);
+    }
+
+    [Fact]
     public void The_story_under_turned_and_moved_shared_coordinates_reads_the_same()
     {
         var turn = Transform3.TurnThenMove(Math.PI / 6, new Xyz(875_000.25, -12_345.5, 400.0));
