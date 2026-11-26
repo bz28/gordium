@@ -211,8 +211,11 @@ building:
   occupant_load_increased: false       # the design takes BCNYS 1004.5.1's increased occupant load (up to one per
                                        # 7 sq ft); not stated, the occupant loads' upper reading is at least that
   mezzanines: false                    # the building has a mezzanine (BCNYS 505.2: an intermediate level within a
-                                       # story); its occupants add to the room below (1004.2.2), so only where false
-                                       # is a story's floor area / 5 the most its spaces hold (no Revit mark yet)
+                                       # story); its occupants add to a room on an adjacent level (1004.2.2)
+  bowling_lanes: false                 # any room has bowling lanes (Table 1004.5 counts them by the lane, not the
+                                       # area); only where this, mezzanines, assembly_fixed_seating and
+                                       # occupied_outdoor_areas are all false is a story's floor area / 5 the most
+                                       # its spaces hold (design_checker/occupant_load.py)
   other_level_egress_into_corridors: false  # another level's occupants reach a corridor: an unenclosed exit access
                                        # stairway or ramp (BCNYS 1019), a mezzanine (1004.2.2), stairs converging
                                        # (1005.6) or an exit stair discharging into one; only where false is a

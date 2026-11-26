@@ -378,6 +378,23 @@ public static class Marks
         "With an automatic sprinkler system throughout too (NFPA 13; NFPA 13R in Group R only, elsewhere a person checks), BCNYS 1005.3.1 and 1005.3.2 exception 1 lower the egress capacity factors (other than Groups H and I-2): 0.15 in per occupant for corridors and other components, 0.2 in for stairways. " +
         "No: the full factors (0.2 in and 0.3 in). Blank: a capacity met only at the lower factor needs review.");
 
+    /// <summary>Whether the building has a mezzanine (<c>building.mezzanines</c>, BCNYS 505.2): read by the occupant
+    /// loads' ceiling (occupant_load.py), never a rule's own measure.</summary>
+    public static readonly MarkDefinition Mezzanines = new(
+        "Gordium: Mezzanines", new("c2f4615d-5335-49cc-a997-311bac414fbd"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.mezzanines",
+        "Yes when the building has a mezzanine: BCNYS 202 MEZZANINE, \"An intermediate level or levels between the floor and ceiling of any story\". " +
+        "Its occupants add to a room on an adjacent level (1004.2.2), so with no room function set Gordium bounds a story's occupant load by its floor area alone only where the building has none. " +
+        "No: there is none (with the other facts that bound stated, a story holds at most one occupant per 5 sq ft of it). Yes: no such bound. Blank: no such bound, and asked where No would settle a rule.");
+
+    /// <summary>Whether the building has bowling lanes (<c>building.bowling_lanes</c>, BCNYS Table 1004.5): read by the
+    /// occupant loads' ceiling (occupant_load.py), never a rule's own measure.</summary>
+    public static readonly MarkDefinition BowlingLanes = new(
+        "Gordium: Bowling lanes", new("5049ea17-952b-4916-b429-896167244126"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.bowling_lanes",
+        "Yes when any room has bowling lanes, whatever the building's group. BCNYS Table 1004.5: \"Bowling centers, allow 5 persons for each lane including 15 feet of runway\": counted by the lane, not the floor area. " +
+        "No: there are none (with the other facts that bound stated, a story holds at most one occupant per 5 sq ft of it). Yes: no such bound. Blank: no such bound, and asked where No would settle a rule.");
+
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
         "Gordium: Atrium", new("8c3211a5-546b-463e-8d8c-b70fd753c1b6"), MarkValueKind.YesNo,
@@ -677,7 +694,7 @@ public static class Marks
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
         EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased, OtherLevelsReachCorridors,
-        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm,
+        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm, Mezzanines, BowlingLanes,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,

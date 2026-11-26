@@ -328,7 +328,7 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
 # ---- the ceiling on an occupant load not worked out (occupant_load._bounds, 2026-11-26: the egress UI audit's 6) -------
 
 THREE = "general.bc_1006_2_1_1_three_or_more_exits"
-CEILING_FACTS = {"assembly_fixed_seating": False, "occupied_outdoor_areas": False}
+CEILING_FACTS = {"assembly_fixed_seating": False, "bowling_lanes": False, "occupied_outdoor_areas": False}
 
 
 def _no_functions(**building):
@@ -340,18 +340,18 @@ def _no_functions(**building):
 
 
 @pytest.mark.parametrize("sprinkler, mezzanines, ceiling", [
-    ("none", None, 480),           # 1,800 sq ft and a third more for mezzanines (505.2.1), / 5: no mezzanine fact needed
-    ("nfpa_13r", False, 360),      # stated none: 1,800 / 5
-    ("nfpa_13r", None, None),      # 13R: half more (exception 3), 540, over 500: the mezzanine fact is asked
+    ("none", False, 360),          # 1,800 sq ft / 5
+    ("nfpa_13r", False, 360),      # the sprinkler system changes nothing here
+    ("nfpa_13r", None, None),      # a mezzanine not ruled out (1004.2.2): no ceiling; the mezzanine fact is asked
 ])
 def test_the_three_exit_rule_settles_on_the_floor_area_with_no_function_stated(routes, before, sprinkler, mezzanines,
                                                                               ceiling):
     """The audit's finding 6: with no room function stated, the four apartments' 1006.2.1.1 rows asked for each
     room's function, though no function can put 501 people on a 1,800 sq ft story. With the building's facts the
-    ceiling needs stated (Group R-2, no fixed assembly seating, no outdoor areas the occupants use, and mezzanines
-    ruled out or their most counted), each apartment's row complies on the ceiling; the rows that change are only
-    rules reading an occupant load, only from needs review, and never to a fail. Where the ceiling is over 500 it
-    asks the one fact that would settle it (mezzanines), before the rooms' functions."""
+    ceiling needs stated (Group R-2; no fixed assembly seating, bowling lanes, outdoor areas the occupants use or
+    mezzanines), each apartment's row complies on the ceiling; the rows that change are only rules reading an
+    occupant load, only from needs review, and never to a fail. Where one fact is missing it asks that fact (here
+    mezzanines), before the rooms' functions."""
     building = {**CEILING_FACTS, "sprinkler_system": sprinkler, **({} if mezzanines is None else
                                                                    {"mezzanines": mezzanines})}
     now = _check(_no_functions(**building), routes)

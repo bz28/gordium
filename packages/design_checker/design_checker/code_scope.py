@@ -55,6 +55,8 @@ FACTS = {
     # the building has a mezzanine (505.2: an intermediate level within a story): its occupants add to the room below
     # (1004.2.2), so only where it states none is a story's floor area / 5 the most its spaces can hold (occupant_load)
     "mezzanines": "yes_no",
+    # the building has bowling lanes (Table 1004.5 counts a bowling center by the lane, not the area)
+    "bowling_lanes": "yes_no",
     # section group 4 (corridors): another level's occupants reach a corridor (an unenclosed stairway or ramp, a
     # mezzanine, stairs converging or discharging into one: 1004.2.2, 1004.2.3, 1005.6), so the story's load doesn't
     # bound the corridor's; and the building is (or holds) an ambulatory care facility (Table 1020.3's 72 in)
@@ -151,7 +153,9 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         "other_level_egress_into_corridors": "Gordium: Other levels reach corridors",
         "ambulatory_care_facility": "Gordium: Ambulatory care facility",
         "corridors_within_dwelling_units": "Gordium: Corridors within dwelling units",
-        "emergency_voice_alarm_system": "Gordium: Emergency voice/alarm system"}
+        "emergency_voice_alarm_system": "Gordium: Emergency voice/alarm system",
+        # the occupant loads' ceiling (occupant_load._bounds): a mezzanine's occupants add to the room below
+        "mezzanines": "Gordium: Mezzanines", "bowling_lanes": "Gordium: Bowling lanes"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise

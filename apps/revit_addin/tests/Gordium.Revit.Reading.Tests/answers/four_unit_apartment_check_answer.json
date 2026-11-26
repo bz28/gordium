@@ -37967,7 +37967,7 @@
       {
        "kind": "mark",
        "key": "fact:occupancy_groups",
-       "words": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, none of them A, B or M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "words": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, neither B nor M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
        "elements": [],
        "measure": "occupancy_groups",
        "field": "building.occupancy_groups"
@@ -37979,6 +37979,14 @@
        "elements": [],
        "measure": "assembly_fixed_seating",
        "field": "building.assembly_fixed_seating"
+      },
+      {
+       "kind": "mark",
+       "key": "fact:bowling_lanes",
+       "words": "bowling lanes (whether the building has any, per Table 1004.5): not stated for the project. Once the building states it has no bowling lanes, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "elements": [],
+       "measure": "bowling_lanes",
+       "field": "building.bowling_lanes"
       },
       {
        "kind": "mark",
@@ -38016,7 +38024,7 @@
      "asks": [
       {
        "key": "field:building.occupancy_groups",
-       "why": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, none of them A, B or M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "why": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, neither B nor M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
        "elements": [],
        "measure": "occupancy_groups",
        "kind": "mark",
@@ -38031,6 +38039,15 @@
        "kind": "mark",
        "field": "building.assembly_fixed_seating",
        "headline": "Say whether any room has fixed assembly seating"
+      },
+      {
+       "key": "field:building.bowling_lanes",
+       "why": "bowling lanes (whether the building has any, per Table 1004.5): not stated for the project. Once the building states it has no bowling lanes, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "elements": [],
+       "measure": "bowling_lanes",
+       "kind": "mark",
+       "field": "building.bowling_lanes",
+       "headline": "Say whether the building has bowling lanes"
       },
       {
        "key": "field:building.occupied_outdoor_areas",
@@ -38170,7 +38187,7 @@
       {
        "kind": "mark",
        "key": "fact:occupancy_groups",
-       "words": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, none of them A, B or M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "words": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, neither B nor M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
        "elements": [],
        "measure": "occupancy_groups",
        "field": "building.occupancy_groups"
@@ -38182,6 +38199,14 @@
        "elements": [],
        "measure": "assembly_fixed_seating",
        "field": "building.assembly_fixed_seating"
+      },
+      {
+       "kind": "mark",
+       "key": "fact:bowling_lanes",
+       "words": "bowling lanes (whether the building has any, per Table 1004.5): not stated for the project. Once the building states it has no bowling lanes, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "elements": [],
+       "measure": "bowling_lanes",
+       "field": "building.bowling_lanes"
       },
       {
        "kind": "mark",
@@ -38219,7 +38244,7 @@
      "asks": [
       {
        "key": "field:building.occupancy_groups",
-       "why": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, none of them A, B or M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "why": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, neither B nor M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
        "elements": [],
        "measure": "occupancy_groups",
        "kind": "mark",
@@ -38234,6 +38259,15 @@
        "kind": "mark",
        "field": "building.assembly_fixed_seating",
        "headline": "Say whether any room has fixed assembly seating"
+      },
+      {
+       "key": "field:building.bowling_lanes",
+       "why": "bowling lanes (whether the building has any, per Table 1004.5): not stated for the project. Once the building states it has no bowling lanes, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "elements": [],
+       "measure": "bowling_lanes",
+       "kind": "mark",
+       "field": "building.bowling_lanes",
+       "headline": "Say whether the building has bowling lanes"
       },
       {
        "key": "field:building.occupied_outdoor_areas",
@@ -38373,7 +38407,7 @@
       {
        "kind": "mark",
        "key": "fact:occupancy_groups",
-       "words": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, none of them A, B or M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "words": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, neither B nor M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
        "elements": [],
        "measure": "occupancy_groups",
        "field": "building.occupancy_groups"
@@ -38385,6 +38419,14 @@
        "elements": [],
        "measure": "assembly_fixed_seating",
        "field": "building.assembly_fixed_seating"
+      },
+      {
+       "kind": "mark",
+       "key": "fact:bowling_lanes",
+       "words": "bowling lanes (whether the building has any, per Table 1004.5): not stated for the project. Once the building states it has no bowling lanes, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "elements": [],
+       "measure": "bowling_lanes",
+       "field": "building.bowling_lanes"
       },
       {
        "kind": "mark",
@@ -38422,7 +38464,7 @@
      "asks": [
       {
        "key": "field:building.occupancy_groups",
-       "why": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, none of them A, B or M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "why": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, neither B nor M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
        "elements": [],
        "measure": "occupancy_groups",
        "kind": "mark",
@@ -38437,6 +38479,15 @@
        "kind": "mark",
        "field": "building.assembly_fixed_seating",
        "headline": "Say whether any room has fixed assembly seating"
+      },
+      {
+       "key": "field:building.bowling_lanes",
+       "why": "bowling lanes (whether the building has any, per Table 1004.5): not stated for the project. Once the building states it has no bowling lanes, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "elements": [],
+       "measure": "bowling_lanes",
+       "kind": "mark",
+       "field": "building.bowling_lanes",
+       "headline": "Say whether the building has bowling lanes"
       },
       {
        "key": "field:building.occupied_outdoor_areas",
@@ -38576,7 +38627,7 @@
       {
        "kind": "mark",
        "key": "fact:occupancy_groups",
-       "words": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, none of them A, B or M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "words": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, neither B nor M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
        "elements": [],
        "measure": "occupancy_groups",
        "field": "building.occupancy_groups"
@@ -38588,6 +38639,14 @@
        "elements": [],
        "measure": "assembly_fixed_seating",
        "field": "building.assembly_fixed_seating"
+      },
+      {
+       "kind": "mark",
+       "key": "fact:bowling_lanes",
+       "words": "bowling lanes (whether the building has any, per Table 1004.5): not stated for the project. Once the building states it has no bowling lanes, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "elements": [],
+       "measure": "bowling_lanes",
+       "field": "building.bowling_lanes"
       },
       {
        "kind": "mark",
@@ -38625,7 +38684,7 @@
      "asks": [
       {
        "key": "field:building.occupancy_groups",
-       "why": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, none of them A, B or M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "why": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, neither B nor M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
        "elements": [],
        "measure": "occupancy_groups",
        "kind": "mark",
@@ -38640,6 +38699,15 @@
        "kind": "mark",
        "field": "building.assembly_fixed_seating",
        "headline": "Say whether any room has fixed assembly seating"
+      },
+      {
+       "key": "field:building.bowling_lanes",
+       "why": "bowling lanes (whether the building has any, per Table 1004.5): not stated for the project. Once the building states it has no bowling lanes, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "elements": [],
+       "measure": "bowling_lanes",
+       "kind": "mark",
+       "field": "building.bowling_lanes",
+       "headline": "Say whether the building has bowling lanes"
       },
       {
        "key": "field:building.occupied_outdoor_areas",
@@ -69694,7 +69762,7 @@
       {
        "key": "fact:occupancy_groups",
        "kind": "mark",
-       "words": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, none of them A, B or M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
+       "words": "occupancy groups (the building's Chapter 3 groups): not stated for the project. Once the building's groups are stated, neither B nor M, the story's floor area alone can settle this: no room holds more than one occupant per 5 sq ft, whatever its function",
        "elements": [],
        "items": [
         "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cc",
@@ -91931,6 +91999,7 @@
      "bound_facts": [
       "occupancy_groups",
       "assembly_fixed_seating",
+      "bowling_lanes",
       "occupied_outdoor_areas",
       "mezzanines"
      ],
@@ -91991,6 +92060,7 @@
      "bound_facts": [
       "occupancy_groups",
       "assembly_fixed_seating",
+      "bowling_lanes",
       "occupied_outdoor_areas",
       "mezzanines"
      ],
@@ -92015,6 +92085,7 @@
      "bound_facts": [
       "occupancy_groups",
       "assembly_fixed_seating",
+      "bowling_lanes",
       "occupied_outdoor_areas",
       "mezzanines"
      ],
@@ -92075,6 +92146,7 @@
      "bound_facts": [
       "occupancy_groups",
       "assembly_fixed_seating",
+      "bowling_lanes",
       "occupied_outdoor_areas",
       "mezzanines"
      ],
@@ -95814,10 +95886,11 @@
         "story_occupant_load": {
          "if_stated": {
           "at_most": 360,
-          "why": "the story's 1,800 sq ft, at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions",
+          "why": "the story's 1,800 sq ft at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling lanes, occupied outdoor areas or mezzanines)",
           "facts": [
            "occupancy_groups",
            "assembly_fixed_seating",
+           "bowling_lanes",
            "occupied_outdoor_areas",
            "mezzanines"
           ]
@@ -97190,10 +97263,11 @@
         "story_occupant_load": {
          "if_stated": {
           "at_most": 360,
-          "why": "the story's 1,800 sq ft, at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions",
+          "why": "the story's 1,800 sq ft at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling lanes, occupied outdoor areas or mezzanines)",
           "facts": [
            "occupancy_groups",
            "assembly_fixed_seating",
+           "bowling_lanes",
            "occupied_outdoor_areas",
            "mezzanines"
           ]
@@ -97269,10 +97343,11 @@
         "space_occupant_load": {
          "if_stated": {
           "at_most": 360,
-          "why": "the story's 1,800 sq ft, at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions",
+          "why": "the story's 1,800 sq ft at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling lanes, occupied outdoor areas or mezzanines)",
           "facts": [
            "occupancy_groups",
            "assembly_fixed_seating",
+           "bowling_lanes",
            "occupied_outdoor_areas",
            "mezzanines"
           ]
@@ -97370,10 +97445,11 @@
         "space_occupant_load": {
          "if_stated": {
           "at_most": 360,
-          "why": "the story's 1,800 sq ft, at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions",
+          "why": "the story's 1,800 sq ft at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling lanes, occupied outdoor areas or mezzanines)",
           "facts": [
            "occupancy_groups",
            "assembly_fixed_seating",
+           "bowling_lanes",
            "occupied_outdoor_areas",
            "mezzanines"
           ]
@@ -97471,10 +97547,11 @@
         "space_occupant_load": {
          "if_stated": {
           "at_most": 360,
-          "why": "the story's 1,800 sq ft, at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions",
+          "why": "the story's 1,800 sq ft at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling lanes, occupied outdoor areas or mezzanines)",
           "facts": [
            "occupancy_groups",
            "assembly_fixed_seating",
+           "bowling_lanes",
            "occupied_outdoor_areas",
            "mezzanines"
           ]
@@ -97548,10 +97625,11 @@
         "space_occupant_load": {
          "if_stated": {
           "at_most": 360,
-          "why": "the story's 1,800 sq ft, at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions",
+          "why": "the story's 1,800 sq ft at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling lanes, occupied outdoor areas or mezzanines)",
           "facts": [
            "occupancy_groups",
            "assembly_fixed_seating",
+           "bowling_lanes",
            "occupied_outdoor_areas",
            "mezzanines"
           ]
@@ -97625,10 +97703,11 @@
         "space_occupant_load": {
          "if_stated": {
           "at_most": 360,
-          "why": "the story's 1,800 sq ft, at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions",
+          "why": "the story's 1,800 sq ft at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling lanes, occupied outdoor areas or mezzanines)",
           "facts": [
            "occupancy_groups",
            "assembly_fixed_seating",
+           "bowling_lanes",
            "occupied_outdoor_areas",
            "mezzanines"
           ]
@@ -97702,10 +97781,11 @@
         "space_occupant_load": {
          "if_stated": {
           "at_most": 360,
-          "why": "the story's 1,800 sq ft, at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions",
+          "why": "the story's 1,800 sq ft at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling lanes, occupied outdoor areas or mezzanines)",
           "facts": [
            "occupancy_groups",
            "assembly_fixed_seating",
+           "bowling_lanes",
            "occupied_outdoor_areas",
            "mezzanines"
           ]
@@ -97779,10 +97859,11 @@
         "space_occupant_load": {
          "if_stated": {
           "at_most": 360,
-          "why": "the story's 1,800 sq ft, at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions",
+          "why": "the story's 1,800 sq ft at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling lanes, occupied outdoor areas or mezzanines)",
           "facts": [
            "occupancy_groups",
            "assembly_fixed_seating",
+           "bowling_lanes",
            "occupied_outdoor_areas",
            "mezzanines"
           ]
@@ -97856,10 +97937,11 @@
         "space_occupant_load": {
          "if_stated": {
           "at_most": 360,
-          "why": "the story's 1,800 sq ft, at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions",
+          "why": "the story's 1,800 sq ft at the densest Table 1004.5 allows, one occupant per 5 sq ft as for standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling lanes, occupied outdoor areas or mezzanines)",
           "facts": [
            "occupancy_groups",
            "assembly_fixed_seating",
+           "bowling_lanes",
            "occupied_outdoor_areas",
            "mezzanines"
           ]
@@ -98306,7 +98388,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "8d4bba430fee25c7e38fb940c082a73a577e7f2aa7d20744f03fd8ff4334129d",
+  "worker_fingerprint": "176c9a9ed563e47e5e744535b1bc07efc2babbd7d5f2a27b1958908e3da317de",
   "rulebook": {
    "new_york/ithaca_city": "6963c3b08879178c881c819f1454c207c51d83ff2484695de386d2f1d823fed5"
   }

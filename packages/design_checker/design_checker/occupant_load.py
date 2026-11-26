@@ -34,7 +34,8 @@ worked out (_corridor_loads).
 
 Where a space's or story's load isn't worked out (a room's function not stated, a room others pass through), it
 still has a ceiling: no occupant can take less than the densest factor Table 1004.5 gives (one per 5 sq ft net,
-standing space), so the whole story, its mezzanines added, can't hold more than its floor area / 5 (_bounds;
+standing space), so a story the building states has no mezzanine, bowling lanes, fixed assembly seating or occupied
+outdoor areas can't hold more than its floor area / 5 (_bounds;
 docs/decisions/2026-11-26_occupant_load_upper_bound.md proves it from the law, with the facts it needs stated). The
 ceiling is given as the part's `bounds`; a rule settles on it only where the law's words are provably the same for
 every load from none up to it (rule_format.parts.rows), so it never decides a rule a load under it could decide
@@ -108,33 +109,29 @@ CORRIDOR_FUNCTION = ("{name}'s use is corridor, yet it states the function {f!r}
 
 
 # ---- the ceiling on a load not worked out (docs/decisions/2026-11-26_occupant_load_upper_bound.md) ----------------
-# the building facts it needs (each the building block's own: code_scope.FACTS), in the order an architect is asked
-GROUPS_FACT, FIXED_SEATING, OUTDOOR, MEZZANINES = ("occupancy_groups", "assembly_fixed_seating",
-                                                   "occupied_outdoor_areas", "mezzanines")
-BOUND_FACTS = (GROUPS_FACT, FIXED_SEATING, OUTDOOR, MEZZANINES)
-# groups whose rooms may take a load no area factor bounds: Group A's fixed seats (1004.6: by the seats) and bowling
-# lanes (Table 1004.5: by the lane), Group B's concentrated business use (NY 1004.8: "the actual occupant load as
-# approved", no most), Group M's malls (402.8.2): with any of these, no ceiling at all
-UNBOUNDED_GROUP = ("A-", "B", "M")
-# groups a special industrial occupancy may be in (503.1.1): 505.2.1 exception 1 lets its mezzanines reach 2/3
-SPECIAL_INDUSTRIAL = ("F-", "H-", "S-")
-# 505.2.1: a room's mezzanines at most 1/3 of its floor area; 1/2 with an NFPA 13 or 13R system (exceptions 2 and 3);
-# 2/3 for a special industrial occupancy (exception 1)
-MEZZANINE_SHARE = {"base": 1 / 3, "sprinklered": 1 / 2, "special_industrial": 2 / 3}
-SPRINKLERED_FOR_MEZZANINES = ("nfpa_13", "nfpa_13r")
+# the building facts it needs (each the building block's own: code_scope.FACTS), in the order an architect is asked.
+# Each yes/no fact must be stated no: a room whose load no area bounds (1004.6's fixed seats, Table 1004.5's bowling
+# lanes, counted by the seat or the lane), outdoor areas whose people add to the building's (1004.7), or a mezzanine
+# whose people add to a room on an adjacent level (1004.2.2)
+GROUPS_FACT, FIXED_SEATING, BOWLING, OUTDOOR, MEZZANINES = ("occupancy_groups", "assembly_fixed_seating",
+                                                            "bowling_lanes", "occupied_outdoor_areas", "mezzanines")
+NO_FACTS = (FIXED_SEATING, BOWLING, OUTDOOR, MEZZANINES)
+BOUND_FACTS = (GROUPS_FACT,) + NO_FACTS
+# groups whose rooms may take a load no area factor bounds: Group B's concentrated business use (NY 1004.8: "the actual
+# occupant load as approved", no most), Group M's malls (402.8.2): with either, no ceiling at all
+UNBOUNDED_GROUPS = ("B", "M")
 BOUND = "at_most"                 # a part's `bounds[measure]`: {BOUND: n, "why"} proven; IF_STATED: what stating
 IF_STATED = "if_stated"           # the facts would prove ({BOUND: n, "why", "facts": [...]}), never a value
-BOUND_WHY = ("the story's {area:,.0f} sq ft{mezz}, at the densest Table 1004.5 allows, one occupant per {d:g} sq ft "
-             "as for standing space, whatever the rooms' functions")
-BOUND_MEZZ = " plus its mezzanines' most, {share} of the rooms they are in per 505.2.1"
-BOUND_NO_MEZZ = ", which the building states has no mezzanine"
-SHARE_WORDS = {1 / 3: "one-third", 1 / 2: "one-half", 2 / 3: "two-thirds"}
+BOUND_WHY = ("the story's {area:,.0f} sq ft at the densest Table 1004.5 allows, one occupant per {d:g} sq ft as for "
+             "standing space, whatever the rooms' functions (the building states no fixed assembly seating, bowling "
+             "lanes, occupied outdoor areas or mezzanines)")
 # a row the ceiling would settle once the building states these facts (rule_format.parts.rows' `bound_facts`): each
 # fact asked for, in words (panel_data's cause, the pane's ask), before the rooms' functions
 BOUND_FACT_WHY = ("{what}: not stated for the project. Once {once}, the story's floor area alone can settle this: no "
                   "room holds more than one occupant per 5 sq ft, whatever its function")
-BOUND_FACT_ONCE = {GROUPS_FACT: "the building's groups are stated, none of them A, B or M",
+BOUND_FACT_ONCE = {GROUPS_FACT: "the building's groups are stated, neither B nor M",
                    FIXED_SEATING: "the building states no room has fixed assembly seating",
+                   BOWLING: "the building states it has no bowling lanes",
                    OUTDOOR: "the building states its occupants use no outdoor areas",
                    MEZZANINES: "the building states it has no mezzanine"}
 
@@ -158,27 +155,16 @@ def _area(part: dict, name: str):
     return v
 
 
-def _mezzanine_share(groups, sprinkler) -> float:
-    """The most a room's mezzanines can hold, as a share of its floor area (505.2.1 and its exceptions), where the
-    building doesn't state it has none: Type I or II construction isn't a fact Gordium has, so every exception it
-    allows is taken. `groups` None (not stated) or a group a special industrial occupancy may be in: 2/3."""
-    if groups is None or any(g.startswith(SPECIAL_INDUSTRIAL) for g in groups):
-        return MEZZANINE_SHARE["special_industrial"]
-    if sprinkler not in ("none", "nfpa_13d"):          # NFPA 13 or 13R, or not stated
-        return MEZZANINE_SHARE["sprinklered"]
-    return MEZZANINE_SHARE["base"]
-
-
 def _bounds(story: dict, mine: list, rooms: dict, factors: dict, building: dict | None, corridor_ids=()) -> None:
     """The ceiling on the story's occupant load, and on each of its spaces' (a space's load, its intervening rooms'
-    and mezzanines' added by 1004.2.1 and 1004.2.2, is part of its story's; 1004.2.3 adds no other story's), set as
-    `bounds` on each that has no value or readings: {BOUND: n, "why"} where the building's facts prove it, and
-    {IF_STATED: {BOUND: n, "why", "facts"}} where stating those facts would give a lower one. n is the story's floor
-    area (the larger of its gross floor area and its spaces' areas added) with its mezzanines' most, divided by the
-    densest factor, rounded up (an occupant load is a number of persons). None at all where a room's stated function
-    has no factor (1004.6, 1004.8, a bowling lane, a mall) or isn't the table's, where the story's or a space's area
-    isn't measured, or where the building states fixed assembly seating, outdoor areas its occupants use (1004.7
-    adds theirs), or a group in UNBOUNDED_GROUP."""
+    added by 1004.2.1, is part of its story's; 1004.2.3 adds no other story's), set as `bounds` on each that has no
+    value or readings: {BOUND: n, "why"} where the building's facts prove it, and {IF_STATED: {BOUND: n, "why",
+    "facts"}} where stating the facts not yet stated would. n is the story's floor area (the larger of its gross floor
+    area and its spaces' areas added) divided by the densest factor, rounded up (an occupant load is a number of
+    persons). None at all where a room's stated function has no factor (1004.6, 1004.8, a bowling lane, a mall) or
+    isn't the table's, where the story's or a space's area isn't measured, where the building states one of NO_FACTS
+    yes, or states a group in UNBOUNDED_GROUPS. Groups Gordium can't read (code_scope.GROUPS) are not stated."""
+    from design_checker.code_scope import GROUPS
     b = building if isinstance(building, dict) else {}
     d = densest(factors)
     gross = _area(story, "story_gross_floor_area")
@@ -192,45 +178,25 @@ def _bounds(story: dict, mine: list, rooms: dict, factors: dict, building: dict 
         f = ((factors["functions"].get(fn) if isinstance(fn, str) else None) or {}).get("factor")
         if isinstance(f, bool) or not isinstance(f, (int, float)) or f <= 0:
             return
-    area = max(gross, sum(areas))
     missing = []
     groups = b.get(GROUPS_FACT)
-    if not (isinstance(groups, list) and groups and all(isinstance(g, str) for g in groups)):
-        groups = None
-        missing.append(GROUPS_FACT)
-    elif any(g.startswith(UNBOUNDED_GROUP[0]) or g in UNBOUNDED_GROUP[1:] for g in groups):
+    if not (isinstance(groups, list) and groups and all(isinstance(g, str) and g in GROUPS for g in groups)):
+        missing.append(GROUPS_FACT)                   # not stated, or not groups Gordium reads: never "none of B, M"
+    elif any(g in UNBOUNDED_GROUPS for g in groups):
         return
-    for fact in (FIXED_SEATING, OUTDOOR):
+    for fact in NO_FACTS:
         if b.get(fact) is True:
             return
         if b.get(fact) is not False:
             missing.append(fact)
-    mezz = b.get(MEZZANINES)
-    sprinkler = b.get("sprinkler_system")
-
-    def ceiling(share):
-        words = BOUND_WHY.format(area=area, d=d, mezz=BOUND_MEZZ.format(share=SHARE_WORDS[share]) if share
-                                 else BOUND_NO_MEZZ if mezz is False else "")
-        return math.ceil(area * (1 + share) / d - 1e-9), words
-    proven = None
-    if not missing:
-        n, why = ceiling(0 if mezz is False else _mezzanine_share(groups, sprinkler))
-        proven = {BOUND: n, "why": why}
-    hoped = list(missing) + ([MEZZANINES] if mezz is None else [])
-    stated = None
-    if hoped:                         # every unstated fact as the bound needs it: groups none of A, B, M or industry
-        n, why = ceiling(0 if mezz is not True else _mezzanine_share([], sprinkler))
-        if proven is None or n < proven[BOUND]:
-            stated = {BOUND: n, "why": why, "facts": hoped}
-    if proven is None and stated is None:
-        return
+    area = max(gross, sum(areas))
+    n = math.ceil(area / d - 1e-9)
+    entry = {BOUND: n, "why": BOUND_WHY.format(area=area, d=d)}
+    got = entry if not missing else {IF_STATED: {**entry, "facts": missing}}
     for part, name in [(story, "story_occupant_load")] + [(p, "space_occupant_load") for p in mine]:
         if name in part["measures"] or (part.get("readings") or {}).get(name):
             continue
-        got = dict(proven or {})
-        if stated is not None:
-            got[IF_STATED] = dict(stated)
-        part.setdefault("bounds", {})[name] = got
+        part.setdefault("bounds", {})[name] = {k: dict(v) if isinstance(v, dict) else v for k, v in got.items()}
 
 
 def factors_of(path) -> dict:
