@@ -62,5 +62,8 @@ internal sealed class Pane
     /// <summary>A group, card or node opened (or folded) by its key.</summary>
     public void Toggle(string key) => _view.ToggleOpen(key);
 
-    public void Failed(string words) => _view.Failed(words);
+    public void Failed(CheckFailure failure) => _view.Failed(failure);
+
+    /// <summary>The checker's progress line (its stage).</summary>
+    public void Step(string words) => _view.Step(words);
 }

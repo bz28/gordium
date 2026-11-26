@@ -127,8 +127,10 @@ def _stair_points(description) -> list:
         stairs = []
     for st in stairs:
         try:
-            pts = [(reader.length(e[0], "a nosing"), reader.length(e[1], "a nosing"))
-                   for n in st.get("nosings") or [] for e in n]
+            nosings = st.get("nosings") or []
+            if any(not isinstance(n, list) or len(n) != 2 for n in nosings):
+                raise TypeError                          # a nosing that isn't two ends: may be anywhere
+            pts = [(reader.length(e[0], "a nosing"), reader.length(e[1], "a nosing")) for n in nosings for e in n]
         except (InteriorStop, TypeError, IndexError, AttributeError, KeyError):    # unreadable: may be anywhere
             pts = []
         out.append({"points": pts})
@@ -164,7 +166,7 @@ def _readings(part, name, readings, words) -> None:
     part["not_measured"][name] = Stop("readings", question=question, words=words).reason
 
 
-def _story_parts(story, uses, items, unknown, parts, r, building=None, stairs=()) -> None:
+def _story_parts(story, uses, items, unknown, parts, r, building, stairs) -> None:
     sp = _part(story.level, story.name)
     parts["story"].append(sp)
     routes = None
@@ -628,7 +630,10 @@ def _stair_in(stair, group, story) -> bool:
     rooms = {r: room for r, room in story.rooms.items() if room is not None}
     if any(rooms[r].outline.buffer(1).contains(Point(p)) for p in points for r in group if r in rooms):
         return True
-    return not all(any(room.outline.contains(Point(p)) for r, room in rooms.items() if r not in group)
+    # elsewhere only in rooms joined to something (a door or an opening): a room drawn with none may be this space's
+    # own stairwell with its opening left out
+    joined = {r for d in story.doors.values() for r in d.sides} | {r for a, b, _ in story.passages for r in (a, b)}
+    return not all(any(room.outline.contains(Point(p)) for r, room in rooms.items() if r not in group and r in joined)
                    for p in points)
 
 
