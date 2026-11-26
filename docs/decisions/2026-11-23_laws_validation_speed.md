@@ -47,7 +47,7 @@ Principle 1: documents are turned into rules once per code version, and approved
 
 **Built (PR 4, 2026-11-26):** each zoning district's rulebook has its own certificate too (`compile_zoning`: the place's sources, definitions and uses, and the rulebook), read by `project_report.tables`; the check takes its rules and uses from there instead of reading the rulebook again. The repo walk of the plain-words check (above, PR 2) is no longer kept as a listing of every folder it went through (with that, any new file anywhere made a certificate stale): a certificate keeps each file name its rules asked about and the answer (`repo_names`, format `gordium.published_law/2`). One check: 0.80 s before PR 4, 0.61 s after (2.6 s before PR 3).
 
-**Built (PR 5):** the System Map, CLAUDE.md's layout line for `7_published_rulebooks/` and its READMEs.
+**Built (PR 5, 2026-11-26):** the System Map, CLAUDE.md's layout line for `7_published_rulebooks/` and its READMEs.
 
 ## Open finding (fixed 2026-11-26, PR 1 above)
 
