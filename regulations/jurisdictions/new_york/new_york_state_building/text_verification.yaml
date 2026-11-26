@@ -1815,6 +1815,10 @@ pieces:
     - <=
     - between
     - between
+    flags:
+    - 'The three lowered 50s of LD50 and LC50 (p.65, lines 9, 12 and 16, sources.yaml not_fractions) were placed on
+      lines of their own by the step''s engineer, as the book prints them under their lines; the helper read every other
+      character from the image alone (step g9c).'
   202:trim:
     piece_sha256: a50c365023e107da8eab8f57defaddf42c7c9a7db84a49d484e64c9ba5f4e6da
     numbers: []
@@ -3632,7 +3636,7 @@ pieces:
     - none
     flags:
     - '''1008.2 inch'': the section number 1008.2 before the next sentence''s "In the event" (''Section 1008.2. In'');
-      the number reader takes the next sentence''s first word for a unit (fixed on main by PR #235). A cross-reference, no
+      the number reader takes the next sentence''s first word for a unit (fixed by PR #235, not merged yet). A cross-reference, no
       limit, so the second reading (none) is right.'
   '1008.2':
     piece_sha256: 10f44a1c97d9c12f1fce5c4c45f5c96208d0b3ca2121aa7d3f24ee1b687221e0
@@ -3874,7 +3878,7 @@ pieces:
       words miss it (numbers.py reads comparison words only directly before a number or after its unit). The second reading
       is right.'
     - '''1009.5 inch'': the section number 1009.5 before the next sentence''s ''In'' (''Section 1009.3, 1009.4 or 1009.5.
-      2. In''); the number reader takes the next sentence''s first word for a unit (fixed on main by PR #235). A cross-reference,
+      2. In''); the number reader takes the next sentence''s first word for a unit (fixed by PR #235, not merged yet). A cross-reference,
       no limit, so the second reading (none) is right.'
   '1009.2':
     piece_sha256: 0e9e6c892f67c40b1b2908aed75bf4601bb7a731ea215ca393ed7ef30175d213

@@ -290,7 +290,7 @@ def test_the_contents_list_every_chapter_and_never_hide_a_rows_section(apartment
     chapters = [c for c in bc["chapters"] if c["kind"] == "chapter"]
     assert [c["number"] for c in chapters] == [str(n) for n in range(1, 36)]
     egress = next(c for c in chapters if c["number"] == "10")
-    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 15   # section group 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009
+    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 13   # section group 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1018 (whole now) and 1019
     sections = {s["number"]: s for s in egress["sections"]}
     assert sections["1006"]["coverage"] == "rules" and sections["1006"]["whole"] is False
     assert sections["1017"]["whole"] is True and sections["1011"]["coverage"] == "not_brought_in"

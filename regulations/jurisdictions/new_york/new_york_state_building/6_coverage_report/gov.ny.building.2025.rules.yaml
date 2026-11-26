@@ -779,11 +779,36 @@ pieces:
     heading: Atriums › Exit access travel distance at other than the level of exit discharge
     rules:
     - general.bc_1017_3_2_3_atrium
+  '1018.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_1018_1_aisles_general
+  '1018.3':
+    label: flag
+    heading: Aisles in Groups B and M
+    rules:
+    - general.bc_1018_3_aisles_groups_b_m
   '1018.4':
     label: flag
     heading: Aisle accessways in Group M
     rules:
     - general.bc_1018_4_merchandise_pads
+  '1018.5':
+    label: flag
+    heading: Aisles in other than assembly spaces and Groups B and M
+    rules:
+    - general.bc_1018_5_aisles_other_occupancies
+  '1019.3':
+    label: flag
+    heading: Exit access stairways and ramps › Occupancies other than Groups I-2 and I-3
+    rules:
+    - general.bc_1019_3_exit_access_stairway_enclosure
+  '1019.4':
+    label: flag
+    heading: Exit access stairways and ramps › Group I-2 and I-3 occupancies
+    rules:
+    - general.bc_1019_4_exit_access_stairways_groups_i2_i3
   '1020.2':
     label: rule
     heading: Construction

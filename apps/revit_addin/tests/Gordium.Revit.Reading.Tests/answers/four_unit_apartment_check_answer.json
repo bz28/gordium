@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 177 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 182 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1530,6 +1530,11 @@
     "Egress · Area of refuge and assisted rescue door signs: A person checks this (Gordium doesn't decide it): Each door to an area of refuge from an adjacent floor area is signed \"AREA OF REFUGE\", and each door to an exterior area for assisted rescue \"EXTERIOR AREA FOR ASSISTED RESCUE\", in ICC A117.1's visual characters with the International Symbol of Accessibility, lit where 1013.3 requires exit sign illumination, with visual, raised character and braille signs per ICC A117.1 at each such door (1013.4): signs aren't in the model, so a person's check.",
     "Egress · Directional signs to the accessible means of egress: A person checks this (Gordium doesn't decide it): Directional signs showing every other means of egress, and which are accessible, are at exits serving a required accessible space that don't give an approved accessible means of egress, at elevator landings and within areas of refuge: signs aren't in the model, so a person's check.",
     "Egress · Posted instructions in areas of refuge: A person checks this (Gordium doesn't decide it): Areas of refuge, exterior areas for assisted rescue and the places 1009.8 requires two-way communication have posted instructions for emergencies in ICC A117.1's visual characters: that those able to use the exit stairway do so at once unless assisting others, the planned help with stairs or supervised elevators and how to summon it, and how to use the two-way communication system where provided: signs aren't in the model, so a person's check.",
+    "Egress · Aisles from every occupied portion kept clear: A person checks this (Gordium doesn't decide it): Aisles or aisle accessways are provided from every occupied portion of the exit access holding seats, tables, furnishings, displays and similar fixtures or equipment, their minimum width or required capacity unobstructed but for encroachments complying with 1005.7; in a room or space used for assembly, aisles and aisle accessways comply with 1030 (1018.2): furniture and fixtures aren't in the model, so a person's check.",
+    "Egress · Aisle width in Groups B and M: A person checks this (Gordium doesn't decide it): In Groups B and M, an aisle is at least as wide as 1005.1 requires for the occupant load it serves and at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+    "Egress · Aisle width in other occupancies: A person checks this (Gordium doesn't decide it): Outside rooms or spaces used for assembly and outside Groups B and M, an aisle has the capacity 1005.1 requires for the occupant load it serves and is at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+    "Egress · Exit access stairways and ramps enclosed between stories: A person checks this (Gordium doesn't decide it): Outside Groups I-2 and I-3, a floor opening holding an exit access stairway or ramp is enclosed in a shaft built to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; within a Group R-3 congregate residence or a Group R-4 facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway's or ramp's projected area, with a draft curtain and closely spaced sprinklers per NFPA 13 (outside Groups B and M, connecting no more than four stories); within an atrium complying with 404; in an open parking garage it alone serves; serving smoke-protected or open-air assembly seating within 1030.7's travel; between a balcony, gallery or press box and the main assembly floor; and exterior ones between occupiable roofs: which stairways are exit access stairways, and their enclosures, aren't in the model, so a person's check.",
+    "Egress · Exit access stairways enclosed in Groups I-2 and I-3: A person checks this (Gordium doesn't decide it): In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in a shaft built to 713, but Group I-3's built to 408 need none: enclosures aren't in the model, so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
@@ -75879,6 +75884,368 @@
      }
     },
     {
+     "id": "egress.general.bc_1018_1_aisles_general",
+     "rule": "general.bc_1018_1_aisles_general",
+     "name": "Egress · Aisles from every occupied portion kept clear (BCNYS 1018.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Aisles or aisle accessways are provided from every occupied portion of the exit access holding seats, tables, furnishings, displays and similar fixtures or equipment, their minimum width or required capacity unobstructed but for encroachments complying with 1005.7; in a room or space used for assembly, aisles and aisle accessways comply with 1030 (1018.2): furniture and fixtures aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Aisles or aisle accessways are provided from every occupied portion of the exit access holding seats, tables, furnishings, displays and similar fixtures or equipment, their minimum width or required capacity unobstructed but for encroachments complying with 1005.7; in a room or space used for assembly, aisles and aisle accessways comply with 1030 (1018.2): furniture and fixtures aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1018.1 General. Aisles and aisle accessways serving as a portion of the exit access in the means of egress system shall comply with the requirements of this section. Aisles or aisle accessways shall be provided from all occupied portions of the exit access that contain seats, tables, furnishings, displays and similar fixtures or equipment. The minimum width or required capacity of aisles shall be unobstructed. Exception: Encroachments complying with Section 1005.7.",
+        "where": "1018.1, 2025 Building Code of New York State (BCNYS), PDF p.342"
+       },
+       {
+        "text": "1018.2 Aisles in assembly spaces. Aisles and aisle accessways serving a room or space used for assembly purposes shall comply with Section 1030.",
+        "where": "1018.2, 2025 Building Code of New York State (BCNYS), PDF p.342"
+       }
+      ],
+      "citation": "1018.1, 2025 Building Code of New York State (BCNYS), PDF p.342",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1018.1",
+      "quote": "1018.1 General. Aisles and aisle accessways serving as a portion of the exit access in the means of egress system shall comply with the requirements of this section. Aisles or aisle accessways shall be provided from all occupied portions of the exit access that contain seats, tables, furnishings, displays and similar fixtures or equipment. The minimum width or required capacity of aisles shall be unobstructed. Exception: Encroachments complying with Section 1005.7."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1018_1_aisles_general",
+       "words": "A person checks this (Gordium doesn't decide it): Aisles or aisle accessways are provided from every occupied portion of the exit access holding seats, tables, furnishings, displays and similar fixtures or equipment, their minimum width or required capacity unobstructed but for encroachments complying with 1005.7; in a room or space used for assembly, aisles and aisle accessways comply with 1030 (1018.2): furniture and fixtures aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1018_1_aisles_general",
+       "why": "A person checks this (Gordium doesn't decide it): Aisles or aisle accessways are provided from every occupied portion of the exit access holding seats, tables, furnishings, displays and similar fixtures or equipment, their minimum width or required capacity unobstructed but for encroachments complying with 1005.7; in a room or space used for assembly, aisles and aisle accessways comply with 1030 (1018.2): furniture and fixtures aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Aisles from every occupied portion kept clear",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1018",
+      "section_title": "Aisles",
+      "piece": "1018.1",
+      "piece_title": "General"
+     }
+    },
+    {
+     "id": "egress.general.bc_1018_3_aisles_groups_b_m",
+     "rule": "general.bc_1018_3_aisles_groups_b_m",
+     "name": "Egress · Aisle width in Groups B and M (BCNYS 1018.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): In Groups B and M, an aisle is at least as wide as 1005.1 requires for the occupant load it serves and at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): In Groups B and M, an aisle is at least as wide as 1005.1 requires for the occupant load it serves and at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+      "quotes": [
+       {
+        "text": "1018.3 Aisles in Groups B and M. In Group B and M occupancies, the minimum clear aisle width shall be determined by Section 1005.1 for the occupant load served, but shall be not less than that required for corridors by Section 1020.3. Exception: Nonpublic aisles serving less than 50 people and not required to be accessible by Chapter 11 need not exceed 28 inches (711 mm) in width.",
+        "where": "1018.3, 2025 Building Code of New York State (BCNYS), PDF p.342"
+       }
+      ],
+      "citation": "1018.3, 2025 Building Code of New York State (BCNYS), PDF p.342",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1018.3",
+      "quote": "1018.3 Aisles in Groups B and M. In Group B and M occupancies, the minimum clear aisle width shall be determined by Section 1005.1 for the occupant load served, but shall be not less than that required for corridors by Section 1020.3. Exception: Nonpublic aisles serving less than 50 people and not required to be accessible by Chapter 11 need not exceed 28 inches (711 mm) in width."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1018_3_aisles_groups_b_m",
+       "words": "A person checks this (Gordium doesn't decide it): In Groups B and M, an aisle is at least as wide as 1005.1 requires for the occupant load it serves and at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1018_3_aisles_groups_b_m",
+       "why": "A person checks this (Gordium doesn't decide it): In Groups B and M, an aisle is at least as wide as 1005.1 requires for the occupant load it serves and at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Aisle width in Groups B and M",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1018",
+      "section_title": "Aisles",
+      "piece": "1018.3",
+      "piece_title": "Aisles in Groups B and M"
+     }
+    },
+    {
+     "id": "egress.general.bc_1018_5_aisles_other_occupancies",
+     "rule": "general.bc_1018_5_aisles_other_occupancies",
+     "name": "Egress · Aisle width in other occupancies (BCNYS 1018.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Outside rooms or spaces used for assembly and outside Groups B and M, an aisle has the capacity 1005.1 requires for the occupant load it serves and is at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Outside rooms or spaces used for assembly and outside Groups B and M, an aisle has the capacity 1005.1 requires for the occupant load it serves and is at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+      "quotes": [
+       {
+        "text": "1018.5 Aisles in other than assembly spaces and Groups B and M. In other than rooms or spaces used for assembly purposes and Group B and M occupancies, the minimum clear aisle capacity shall be determined by Section 1005.1 for the occupant load served, but the width shall be not less than that required for corridors by Section 1020.3. Exception: Nonpublic aisles serving less than 50 people and not required to be accessible by Chapter 11 need not exceed 28 inches (711 mm) in width.",
+        "where": "1018.5, 2025 Building Code of New York State (BCNYS), PDF p.343"
+       }
+      ],
+      "citation": "1018.5, 2025 Building Code of New York State (BCNYS), PDF p.343",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1018.5",
+      "quote": "1018.5 Aisles in other than assembly spaces and Groups B and M. In other than rooms or spaces used for assembly purposes and Group B and M occupancies, the minimum clear aisle capacity shall be determined by Section 1005.1 for the occupant load served, but the width shall be not less than that required for corridors by Section 1020.3. Exception: Nonpublic aisles serving less than 50 people and not required to be accessible by Chapter 11 need not exceed 28 inches (711 mm) in width."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1018_5_aisles_other_occupancies",
+       "words": "A person checks this (Gordium doesn't decide it): Outside rooms or spaces used for assembly and outside Groups B and M, an aisle has the capacity 1005.1 requires for the occupant load it serves and is at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1018_5_aisles_other_occupancies",
+       "why": "A person checks this (Gordium doesn't decide it): Outside rooms or spaces used for assembly and outside Groups B and M, an aisle has the capacity 1005.1 requires for the occupant load it serves and is at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Aisle width in other occupancies",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1018",
+      "section_title": "Aisles",
+      "piece": "1018.5",
+      "piece_title": "Aisles in other than assembly spaces and Groups B and M"
+     }
+    },
+    {
+     "id": "egress.general.bc_1019_3_exit_access_stairway_enclosure",
+     "rule": "general.bc_1019_3_exit_access_stairway_enclosure",
+     "name": "Egress · Exit access stairways and ramps enclosed between stories (BCNYS 1019.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Outside Groups I-2 and I-3, a floor opening holding an exit access stairway or ramp is enclosed in a shaft built to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; within a Group R-3 congregate residence or a Group R-4 facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway's or ramp's projected area, with a draft curtain and closely spaced sprinklers per NFPA 13 (outside Groups B and M, connecting no more than four stories); within an atrium complying with 404; in an open parking garage it alone serves; serving smoke-protected or open-air assembly seating within 1030.7's travel; between a balcony, gallery or press box and the main assembly floor; and exterior ones between occupiable roofs: which stairways are exit access stairways, and their enclosures, aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Outside Groups I-2 and I-3, a floor opening holding an exit access stairway or ramp is enclosed in a shaft built to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; within a Group R-3 congregate residence or a Group R-4 facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway's or ramp's projected area, with a draft curtain and closely spaced sprinklers per NFPA 13 (outside Groups B and M, connecting no more than four stories); within an atrium complying with 404; in an open parking garage it alone serves; serving smoke-protected or open-air assembly seating within 1030.7's travel; between a balcony, gallery or press box and the main assembly floor; and exterior ones between occupiable roofs: which stairways are exit access stairways, and their enclosures, aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1019.1 General. Exit access stairways and ramps serving as an exit access component in a means of egress system shall comply with the requirements of this section. The number of stories connected by exit access stairways and ramps shall include basements, but not mezzanines.",
+        "where": "1019.1, 2025 Building Code of New York State (BCNYS), PDF p.343"
+       },
+       {
+        "text": "1019.2 All occupancies. Exit access stairways and ramps that serve floor levels within a single story are not required to be enclosed.",
+        "where": "1019.2, 2025 Building Code of New York State (BCNYS), PDF p.343"
+       },
+       {
+        "text": "1019.3 Occupancies other than Groups I-2 and I-3. In other than Group I-2 and I-3 occupancies, floor openings containing exit access stairways or ramps shall be enclosed with a shaft enclosure constructed in accordance with Section 713. Exceptions: 1. Exit access stairways and ramps within a two-story opening complying with Section 712.1.9. 2. In Group R-1, R-2 or R-3 occupancies, exit access stairways and ramps connecting four stories or less serving and contained within an individual dwelling unit or sleeping unit or live/work unit. 3. Exit access stairways serving and contained within a Group R-3 congregate residence or a Group R-4 facility are not required to be enclosed. 4. Exit access stairways and ramps in buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1, where the area of the vertical opening between stories does not exceed twice the horizontal projected area of the stairway or ramp and the opening is protected by a draft curtain and closely spaced sprinklers in accordance with NFPA 13. In other than Group B and M occupancies, this provision is limited to openings that do not connect more than four stories. 5. Exit access stairways and ramps within an atrium complying with the provisions of Section 404. 6. Exit access stairways and ramps in open parking garages that serve only the parking garage. 7. Exit access stairways and ramps serving smoke-protected or open-air assembly seating complying with the exit access travel distance requirements of Section 1030.7. 8. Exit access stairways and ramps between the balcony, gallery or press box and the main assembly floor in occupancies such as theaters, places of religious worship, auditoriums and sports facilities. 9. Exterior exit access stairways or ramps between occupiable roofs.",
+        "where": "1019.3, 2025 Building Code of New York State (BCNYS), PDF p.343"
+       }
+      ],
+      "citation": "1019.1, 2025 Building Code of New York State (BCNYS), PDF p.343",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1019.1",
+      "quote": "1019.1 General. Exit access stairways and ramps serving as an exit access component in a means of egress system shall comply with the requirements of this section. The number of stories connected by exit access stairways and ramps shall include basements, but not mezzanines."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1019_3_exit_access_stairway_enclosure",
+       "words": "A person checks this (Gordium doesn't decide it): Outside Groups I-2 and I-3, a floor opening holding an exit access stairway or ramp is enclosed in a shaft built to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; within a Group R-3 congregate residence or a Group R-4 facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway's or ramp's projected area, with a draft curtain and closely spaced sprinklers per NFPA 13 (outside Groups B and M, connecting no more than four stories); within an atrium complying with 404; in an open parking garage it alone serves; serving smoke-protected or open-air assembly seating within 1030.7's travel; between a balcony, gallery or press box and the main assembly floor; and exterior ones between occupiable roofs: which stairways are exit access stairways, and their enclosures, aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1019_3_exit_access_stairway_enclosure",
+       "why": "A person checks this (Gordium doesn't decide it): Outside Groups I-2 and I-3, a floor opening holding an exit access stairway or ramp is enclosed in a shaft built to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; within a Group R-3 congregate residence or a Group R-4 facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway's or ramp's projected area, with a draft curtain and closely spaced sprinklers per NFPA 13 (outside Groups B and M, connecting no more than four stories); within an atrium complying with 404; in an open parking garage it alone serves; serving smoke-protected or open-air assembly seating within 1030.7's travel; between a balcony, gallery or press box and the main assembly floor; and exterior ones between occupiable roofs: which stairways are exit access stairways, and their enclosures, aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit access stairways and ramps enclosed between stories (BCNYS 1019.3)",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1019",
+      "section_title": "Exit Access Stairways and Ramps",
+      "piece": "1019.1",
+      "piece_title": "General"
+     }
+    },
+    {
+     "id": "egress.general.bc_1019_4_exit_access_stairways_groups_i2_i3",
+     "rule": "general.bc_1019_4_exit_access_stairways_groups_i2_i3",
+     "name": "Egress · Exit access stairways enclosed in Groups I-2 and I-3 (BCNYS 1019.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in a shaft built to 713, but Group I-3's built to 408 need none: enclosures aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in a shaft built to 713, but Group I-3's built to 408 need none: enclosures aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1019.4 Group I-2 and I-3 occupancies. In Group I-2 and I-3 occupancies, floor openings between stories containing exit access stair- ways or ramps are required to be enclosed with a shaft enclosure constructed in accordance with Section 713. Exception: In Group I-3 occupancies, exit access stairways or ramps constructed in accordance with Section 408 are not required to be enclosed.",
+        "where": "1019.4, 2025 Building Code of New York State (BCNYS), PDF p.343"
+       }
+      ],
+      "citation": "1019.4, 2025 Building Code of New York State (BCNYS), PDF p.343",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1019.4",
+      "quote": "1019.4 Group I-2 and I-3 occupancies. In Group I-2 and I-3 occupancies, floor openings between stories containing exit access stair- ways or ramps are required to be enclosed with a shaft enclosure constructed in accordance with Section 713. Exception: In Group I-3 occupancies, exit access stairways or ramps constructed in accordance with Section 408 are not required to be enclosed."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1019_4_exit_access_stairways_groups_i2_i3",
+       "words": "A person checks this (Gordium doesn't decide it): In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in a shaft built to 713, but Group I-3's built to 408 need none: enclosures aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1019_4_exit_access_stairways_groups_i2_i3",
+       "why": "A person checks this (Gordium doesn't decide it): In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in a shaft built to 713, but Group I-3's built to 408 need none: enclosures aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Exit access stairways enclosed in Groups I-2 and I-3",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1019",
+      "section_title": "Exit Access Stairways and Ramps",
+      "piece": "1019.4",
+      "piece_title": "Group I-2 and I-3 occupancies"
+     }
+    },
+    {
      "id": "egress.interior#1",
      "rule": null,
      "name": "Interior drawing",
@@ -80315,7 +80682,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 177 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 182 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -80997,6 +81364,11 @@
       "egress.general.bc_1009_9_accessibility_signage",
       "egress.general.bc_1009_10_directional_signage",
       "egress.general.bc_1009_11_instructions",
+      "egress.general.bc_1018_1_aisles_general",
+      "egress.general.bc_1018_3_aisles_groups_b_m",
+      "egress.general.bc_1018_5_aisles_other_occupancies",
+      "egress.general.bc_1019_3_exit_access_stairway_enclosure",
+      "egress.general.bc_1019_4_exit_access_stairways_groups_i2_i3",
       "egress.interior#1"
      ],
      "lines": [
@@ -83498,6 +83870,71 @@
        "name": "Egress · Posted instructions in areas of refuge (BCNYS 1009.11)"
       },
       {
+       "key": "review#6e8861cee6",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1018_1_aisles_general"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Aisles from every occupied portion kept clear (BCNYS 1018.1): A person checks this (Gordium doesn't decide it): Aisles or aisle accessways are provided from every occupied portion of the exit access holding seats, tables, furnishings, displays and similar fixtures or equipment, their minimum width or required capacity unobstructed but for encroachments complying with 1005.7; in a room or space used for assembly, aisles and aisle accessways comply with 1030 (1018.2): furniture and fixtures aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Aisles from every occupied portion kept clear (BCNYS 1018.1)"
+      },
+      {
+       "key": "review#1dd217a9d2",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1018_3_aisles_groups_b_m"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Aisle width in Groups B and M (BCNYS 1018.3): A person checks this (Gordium doesn't decide it): In Groups B and M, an aisle is at least as wide as 1005.1 requires for the occupant load it serves and at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Aisle width in Groups B and M (BCNYS 1018.3)"
+      },
+      {
+       "key": "review#be359d5087",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1018_5_aisles_other_occupancies"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Aisle width in other occupancies (BCNYS 1018.5): A person checks this (Gordium doesn't decide it): Outside rooms or spaces used for assembly and outside Groups B and M, an aisle has the capacity 1005.1 requires for the occupant load it serves and is at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Aisle width in other occupancies (BCNYS 1018.5)"
+      },
+      {
+       "key": "review#13d2f15f69",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1019_3_exit_access_stairway_enclosure"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit access stairways and ramps enclosed between stories (BCNYS 1019.3): A person checks this (Gordium doesn't decide it): Outside Groups I-2 and I-3, a floor opening holding an exit access stairway or ramp is enclosed in a shaft built to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; within a Group R-3 congregate residence or a Group R-4 facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway's or ramp's projected area, with a draft curtain and closely spaced sprinklers per NFPA 13 (outside Groups B and M, connecting no more than four stories); within an atrium complying with 404; in an open parking garage it alone serves; serving smoke-protected or open-air assembly seating within 1030.7's travel; between a balcony, gallery or press box and the main assembly floor; and exterior ones between occupiable roofs: which stairways are exit access stairways, and their enclosures, aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit access stairways and ramps enclosed between stories (BCNYS 1019.3)"
+      },
+      {
+       "key": "review#d1e5eebb67",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1019_4_exit_access_stairways_groups_i2_i3"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Exit access stairways enclosed in Groups I-2 and I-3 (BCNYS 1019.4): A person checks this (Gordium doesn't decide it): In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in a shaft built to 713, but Group I-3's built to 408 need none: enclosures aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Exit access stairways enclosed in Groups I-2 and I-3 (BCNYS 1019.4)"
+      },
+      {
        "key": "review#3b8d16e054",
        "tier": "review",
        "items": [
@@ -83511,7 +83948,7 @@
        "name": "Interior drawing"
       }
      ],
-     "count": 177,
+     "count": 182,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -85408,6 +85845,56 @@
         "egress.general.bc_1009_11_instructions"
        ],
        "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1018_1_aisles_general",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Aisles or aisle accessways are provided from every occupied portion of the exit access holding seats, tables, furnishings, displays and similar fixtures or equipment, their minimum width or required capacity unobstructed but for encroachments complying with 1005.7; in a room or space used for assembly, aisles and aisle accessways comply with 1030 (1018.2): furniture and fixtures aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1018_1_aisles_general"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1018_3_aisles_groups_b_m",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): In Groups B and M, an aisle is at least as wide as 1005.1 requires for the occupant load it serves and at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1018_3_aisles_groups_b_m"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1018_5_aisles_other_occupancies",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Outside rooms or spaces used for assembly and outside Groups B and M, an aisle has the capacity 1005.1 requires for the occupant load it serves and is at least as wide as 1020.3 requires of corridors; a nonpublic aisle serving fewer than 50 people and not required to be accessible by Chapter 11 need not be wider than 28 inches: aisles between fixtures aren't drawn, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1018_5_aisles_other_occupancies"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1019_3_exit_access_stairway_enclosure",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Outside Groups I-2 and I-3, a floor opening holding an exit access stairway or ramp is enclosed in a shaft built to 713 (the stories it connects counting basements, not mezzanines; one serving floor levels within a single story needs no enclosure, 1019.2), except within a two-story opening complying with 712.1.9; connecting four stories or fewer within one Group R-1, R-2 or R-3 dwelling, sleeping or live/work unit; within a Group R-3 congregate residence or a Group R-4 facility; in a building sprinklered throughout per 903.3.1.1 where the opening is no more than twice the stairway's or ramp's projected area, with a draft curtain and closely spaced sprinklers per NFPA 13 (outside Groups B and M, connecting no more than four stories); within an atrium complying with 404; in an open parking garage it alone serves; serving smoke-protected or open-air assembly seating within 1030.7's travel; between a balcony, gallery or press box and the main assembly floor; and exterior ones between occupiable roofs: which stairways are exit access stairways, and their enclosures, aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1019_3_exit_access_stairway_enclosure"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1019_4_exit_access_stairways_groups_i2_i3",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): In Groups I-2 and I-3, a floor opening between stories holding an exit access stairway or ramp is enclosed in a shaft built to 713, but Group I-3's built to 408 need none: enclosures aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1019_4_exit_access_stairways_groups_i2_i3"
+       ],
+       "rules": 1
       }
      ]
     },
@@ -85761,7 +86248,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "177 to review · 30 comply"
+     "summary": "182 to review · 30 comply"
     }
    ],
    "contents": [
@@ -98028,7 +98515,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 213
+          "not_for_checking": 215
          },
          "pieces": [
           {
@@ -98776,6 +99263,12 @@
            "rules": []
           },
           {
+           "id": "202:live_work_unit",
+           "title": "LIVE/WORK UNIT",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
            "id": "202:load_factor",
            "title": "LOAD FACTOR",
            "coverage": "not_for_checking",
@@ -99084,6 +99577,12 @@
           {
            "id": "202:shaft",
            "title": "SHAFT",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:shaft_enclosure",
+           "title": "SHAFT ENCLOSURE",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -102078,7 +102577,8 @@
          "coverage": "flag",
          "whole": false,
          "counts": {
-          "flag": 1
+          "flag": 1,
+          "not_for_checking": 4
          },
          "pieces": [
           {
@@ -102088,6 +102588,30 @@
            "rules": [
             "general.bc_1018_4_merchandise_pads"
            ]
+          },
+          {
+           "id": "1018.1",
+           "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1018.2",
+           "title": "Aisles in assembly spaces",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1018.3",
+           "title": "Aisles in Groups B and M",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1018.5",
+           "title": "Aisles in other than assembly spaces and Groups B and M",
+           "coverage": "not_for_checking",
+           "rules": []
           }
          ]
         },
@@ -102095,10 +102619,43 @@
          "number": "1019",
          "title": "Exit Access Stairways and Ramps",
          "book_page": 322,
-         "coverage": "not_brought_in",
-         "whole": false,
-         "counts": {},
-         "pieces": []
+         "coverage": "not_for_checking",
+         "whole": true,
+         "counts": {
+          "not_for_checking": 5
+         },
+         "pieces": [
+          {
+           "id": "1019",
+           "title": "EXIT ACCESS STAIRWAYS AND RAMPS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1019.1",
+           "title": "General",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1019.2",
+           "title": "All occupancies",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1019.3",
+           "title": "Occupancies other than Groups I-2 and I-3",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1019.4",
+           "title": "Group I-2 and I-3 occupancies",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "1020",
@@ -102457,7 +103014,8 @@
        "counts": {
         "rules": 8,
         "flag": 8,
-        "not_brought_in": 15
+        "not_for_checking": 1,
+        "not_brought_in": 14
        }
       },
       {
@@ -106453,6 +107011,11 @@
    "egress.general.bc_1009_9_accessibility_signage": "needs_review",
    "egress.general.bc_1009_10_directional_signage": "needs_review",
    "egress.general.bc_1009_11_instructions": "needs_review",
+   "egress.general.bc_1018_1_aisles_general": "needs_review",
+   "egress.general.bc_1018_3_aisles_groups_b_m": "needs_review",
+   "egress.general.bc_1018_5_aisles_other_occupancies": "needs_review",
+   "egress.general.bc_1019_3_exit_access_stairway_enclosure": "needs_review",
+   "egress.general.bc_1019_4_exit_access_stairways_groups_i2_i3": "needs_review",
    "egress.interior#1": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
@@ -106498,7 +107061,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "177 to review · 30 comply"
+    "summary": "182 to review · 30 comply"
    }
   ],
   "egress": {
@@ -111911,7 +112474,12 @@
     "general.bc_1009_8_2_two_way_communication_directions": "needs_review",
     "general.bc_1009_9_accessibility_signage": "needs_review",
     "general.bc_1009_10_directional_signage": "needs_review",
-    "general.bc_1009_11_instructions": "needs_review"
+    "general.bc_1009_11_instructions": "needs_review",
+    "general.bc_1018_1_aisles_general": "needs_review",
+    "general.bc_1018_3_aisles_groups_b_m": "needs_review",
+    "general.bc_1018_5_aisles_other_occupancies": "needs_review",
+    "general.bc_1019_3_exit_access_stairway_enclosure": "needs_review",
+    "general.bc_1019_4_exit_access_stairways_groups_i2_i3": "needs_review"
    },
    "interior": {
     "parts": {
@@ -115841,7 +116409,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "bfb19173b9c8526d7c09d0de1ba9f1772904293057256d38ce1d17f7a9387fe7"
+   "new_york/ithaca_city": "3aa8085c6ad1264866898246fce3216dd3deae2e6faae527ed67be684cb728b2"
   }
  }
 }
