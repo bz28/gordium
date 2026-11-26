@@ -59,12 +59,15 @@ RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with a residenti
             "two units into one) and BCNYS 1016.2.1 (p.341) is met: \"" + QUOTE_1016_2_1 + "\"")
 
 
-def units_on(story, items: dict, is_exit, stair_in) -> int:
+def units_on(story, items: dict, is_exit, stair_in, links_read) -> int:
     """The dwelling units on the story (see the module's words). `items`: the description's rooms by id (their
     `function`); `is_exit(story, room id)`: whether the room is itself an exit (routes._is_exit, Stop where unclear);
-    `stair_in(group)`: whether a stair, ramp or ladder may stand in the group (one not read may be anywhere)."""
+    `stair_in(group)`: whether a stair, ramp or ladder may stand in the group (one not read may be anywhere);
+    `links_read()`: raises Stop unless every door and opening the description gives for the story's rooms was read on
+    it (routes.links_read_here: one drawn on another level would hide a unit's own door, two units counted one)."""
     if story.stops:
         raise Stop("story_not_measured", reasons="; ".join(story.stops))
+    links_read()
     for rid, room in sorted(story.rooms.items()):
         if room.use is None:                             # it may be a corridor joining two units into one group
             raise Stop("units_use_unknown", name=room.name)

@@ -144,3 +144,7 @@ One more undercount: a vestibule, laundry or mail room of another function (busi
 ## Review round 5 of step 3 (2026-11-26)
 
 No undercount found. The closet, toilet or storeroom clause is pinned again (one marked residential, shared by two units); the words say which rooms stop the count, and that only a shared room marked residential is left to the words beside it.
+
+## Review round 7 of step 3 (2026-11-26)
+
+One more undercount (a possible false pass): a unit's own door drawn on another level vanished from its story, so two units joined by a door looked like one with a single way out, and 1016.2.1 doesn't catch it (each has its own door). The count now runs step 2's check first (`links_read_here`, a required argument so no caller can leave it out): every door, opening, and listed opening that may be a door for the story's rooms must be read on it, and one whose rooms can't be read stops the count. One test, three cases.

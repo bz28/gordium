@@ -185,6 +185,11 @@ STOPS = {
                               "dwelling unit, or a room shared between units, isn't known",
     "units_stair": "the space of {name} may have a stair, ramp or ladder within it (one not read, or not said to be "
                    "none, may be anywhere): it may hold the upper part of a dwelling unit whose door is downstairs",
+    "units_link_elsewhere": "a door or opening of the room {name} isn't read on this story (drawn on another level, "
+                            "or listed only among the openings?): it may be a dwelling unit's own way out, so the "
+                            "units aren't counted",
+    "units_link_unread": "a door or opening the model gives can't be read (which rooms it joins): it may be a dwelling "
+                         "unit's own way out, so the units aren't counted",
     "units_shared_room": "the room {room} (a closet, toilet or storeroom, or a room not itself residential) opens onto "
                          "two or more rooms of the space of {name}: it may be shared by two dwelling units",
     "units_no_entrance": "the space of {name} has no door or opening to a corridor, an exit or the outside: it may be "

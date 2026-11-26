@@ -26,7 +26,7 @@ from model_measurement.routes.stops import STOPS, Stop  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[3]
 UNITS_KEYS = {"units_use_unknown", "units_function_unknown", "units_no_entrance", "units_entrances", "units_stair",
-              "units_shared_room"}
+              "units_shared_room", "units_link_elsewhere", "units_link_unread"}
 FUNCTIONS = ("residential", "business", None)
 
 
@@ -62,12 +62,13 @@ def layout(suites, joins):
 
 def count(desc):
     """The story's count as measure() works it out (the stairs read as it reads them), or its Stop."""
-    from model_measurement.routes import _stair_in, _stair_points
+    from model_measurement.routes import _links_listed, _stair_in, _stair_points, links_read_here
     story = read(desc).stories["L1"]
     stairs = _stair_points(desc)
     try:
         return units_on(story, {r["id"]: r for r in desc["rooms"]}, _is_exit,
-                        lambda g: any(_stair_in(st, g, story) for st in stairs))
+                        lambda g: any(_stair_in(st, g, story) for st in stairs),
+                        lambda: links_read_here(story, _links_listed(desc), "units"))
     except Stop as s:
         return s
 
@@ -154,6 +155,7 @@ def test_each_reason_has_a_case():
         seen.add(key)
     seen.add("units_use_unknown")                        # test_a_room_with_no_use_given_may_be_a_corridor...
     seen |= {"units_stair", "units_shared_room"}         # the round 2 tests below
+    seen |= {"units_link_elsewhere", "units_link_unread"}    # test_a_units_own_door_drawn_on_another_level...
     assert seen == UNITS_KEYS
 
 
@@ -227,6 +229,8 @@ def test_a_stair_in_a_group_or_not_read_never_counts_it_as_one_unit():
     assert isinstance(got, Stop) and got.key == "units_stair", got
     with pytest.raises(TypeError):                       # no caller can leave the stair check out
         units_on(read(desc).stories["L1"], {}, _is_exit)
+    with pytest.raises(TypeError):                       # nor the check that every door was read on the story
+        units_on(read(desc).stories["L1"], {}, _is_exit, lambda g: False)
 
 
 def test_a_closet_between_two_rooms_of_a_group_may_be_shared():
@@ -266,3 +270,33 @@ def test_a_closet_marked_residential_between_two_rooms_may_be_shared(use):
     desc["doors"] += [door("k0", (5, 10.25), (1, 0), ("s0", "k")), door("k1", (17, 10.25), (1, 0), ("s1", "k"))]
     got = count(desc)
     assert isinstance(got, Stop) and got.key == "units_shared_room", got
+
+
+def _hidden(desc, how):
+    """The description with one door moved, or made unreadable, onto a second level L2 (so L1 itself reads whole)."""
+    desc["levels"].insert(0, {"id": "L2", "name": "Level 2", "elevation": 0})
+    desc["rooms"].append(room("u", rect(-30, 0, -20, 10), use="other", lockable=False, pass_through=False,
+                              level="L2"))
+    if how == "moved":
+        next(d for d in desc["doors"] if d["id"] == "e10")["level"] = "L2"
+    elif how == "unreadable":
+        desc["doors"].append(dict(desc["doors"][0], id="z", level="L2", sides="s1"))
+    else:                                                # a door listed only among the openings
+        desc["openings"] = [{"id": "p", "room": "s1", "operation": "sliding_door", "escape": False}]
+    return desc
+
+
+@pytest.mark.parametrize("how", ["moved", "unreadable", "opening"])
+def test_a_units_own_door_drawn_on_another_level_never_undercounts(how):
+    """Review round 7 (PR 3): suite 1's own door to the corridor drawn on another level vanished from its story (the
+    routes stop only the door's own story), so the lock-off pair 0-1 had one way out: one unit, where there may be two
+    (1016.2.1 doesn't catch it: each has its own door). The same for a door whose rooms can't be read, or one listed
+    only among the openings. Every door and opening the description gives for the story's rooms must be read on it."""
+    base = layout([("residential", 1, 1), ("residential", 1, 1), ("business", 1, 1)], (True, False))
+    assert count(base).key == "units_entrances"
+    desc = _hidden(layout([("residential", 1, 1), ("residential", 1, 1), ("business", 1, 1)], (True, False)), how)
+    got = count(desc)
+    key = "units_link_unread" if how == "unreadable" else "units_link_elsewhere"
+    assert isinstance(got, Stop) and got.key == key, (how, got)
+    story = {s["id"]: s for s in measure(desc)["parts"]["story"]}["L1"]
+    assert UNITS_FACT not in story["measures"] and UNITS_FACT not in story.get("rests_on", {}), how
