@@ -342,7 +342,7 @@ public sealed class SetupStepsTests
     public void A_failed_check_drops_the_last_project_s_name()
     {
         var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
-        var failed = view[view.IndexOf("    internal void Failed(string words)", StringComparison.Ordinal)..];
+        var failed = view[view.IndexOf("    internal void Failed(CheckFailure? failure)", StringComparison.Ordinal)..];   // UI polish PR 5
         failed = failed[..failed.IndexOf("\n    }\n", StringComparison.Ordinal)];
         Assert.Contains("_title.Text = PaneWords.HeaderTitle(null);", failed, StringComparison.Ordinal);
     }

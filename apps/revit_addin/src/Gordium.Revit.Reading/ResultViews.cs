@@ -172,8 +172,8 @@ public static class ResultViews
         (Verdict.NotApplicable, "didn't apply", "didn't apply"),
     ];
 
-    /// <summary>The summary line in the past tense, for results the model changed after ("1 failed · 132 needed
-    /// review"): what the check said then, never what holds now.</summary>
+    /// <summary>The summary line in the past tense, for results the model changed after (UI polish change 39: "1
+    /// failed · 132 needed review"): what the check said then, never what holds now.</summary>
     public static string SummaryPast(IEnumerable<Verdict> verdicts)
     {
         var all = verdicts.ToList();

@@ -26,13 +26,17 @@ table, e.g. {"id": 10, "cmd": "box.view", "protocol": "1.3", "state": {...}}: ev
 docs/protocol/worker_protocol_v1.md. Answers:
 {"id": 1, "ok": true, "result": {...}} or {"id": 1, "ok": false, "error": "..."}. A request with "progress": true
 also gets {"id": 1, "step": "Measuring the building…"} lines before its answer, one as each stage starts (the
-plugin's progress line; the answer is always the request's last line). The process stays up, so a
+plugin's progress line; the answer is always the request's last line), and the same line again, marked
+{"again": true}, every HEARTBEAT seconds while a stage runs, so a host that stops a check only when the worker falls
+silent (the Revit add-in, which also has a ceiling on the whole check) never stops a long check for being long; a host that shows or records stages (Rhino,
+the recorded sessions) skips the repeats. The process stays up, so a
 check after an edit doesn't pay for starting Python and loading the rules again.
 """
 
 import json
 import os
 import sys
+import threading
 import traceback
 from pathlib import Path
 
@@ -119,17 +123,62 @@ def serve(stdin=sys.stdin, stdout=sys.stdout) -> None:
             except (ValueError, RecursionError) as e:  # not UTF-8, a number too long, nesting too deep, not an object
                 request, reply = {}, {"id": None, "ok": False, "error": f"not a request: {type(e).__name__}: {e}"[:500]}
             else:
-                reply = answer(request, _steps(request, stdout) if request.get("progress") else None)
+                if request.get("progress"):
+                    with _Steps(request, stdout) as step:
+                        reply = answer(request, step)
+                else:
+                    reply = answer(request, None)
             stdout.write(json.dumps(reply) + "\n")
             stdout.flush()
 
 
-def _steps(request: dict, stdout):
-    """A request's progress lines, each written (and flushed) as its stage starts."""
-    def step(text: str) -> None:
-        stdout.write(json.dumps({"id": request.get("id"), "step": text}) + "\n")
-        stdout.flush()
-    return step
+# How often a request that asked for progress hears its current stage again while it runs (seconds).
+HEARTBEAT = 15.0
+
+
+class _Steps:
+    """A request's progress lines: one written (and flushed) as each stage starts, and the current one again every
+    HEARTBEAT seconds until the answer, from a second thread (one lock: a line is never written into another). The
+    answer is always the request's last line: the beat stops, under the lock, before it is written."""
+
+    def __init__(self, request: dict, stdout):
+        self._id = request.get("id")
+        self._out = stdout
+        self._lock = threading.Lock()
+        self._done = threading.Event()
+        self._last = "Working…"
+        self._beat = threading.Thread(target=self._run, daemon=True)
+
+    def _write(self, line: dict) -> None:
+        self._out.write(json.dumps(line) + "\n")
+        self._out.flush()
+
+    def __call__(self, text: str) -> None:
+        with self._lock:                              # the stage and its line together: a repeat never comes after a newer stage
+            if self._done.is_set():
+                return
+            self._last = text
+            self._write({"id": self._id, "step": text})
+
+    def repeat(self) -> None:
+        """The current stage again, read under the lock (so never an older one after a newer), marked as a repeat."""
+        with self._lock:
+            if self._done.is_set():
+                return
+            self._write({"id": self._id, "step": self._last, "again": True})
+
+    def _run(self) -> None:
+        while not self._done.wait(HEARTBEAT):
+            self.repeat()
+
+    def __enter__(self):
+        self._beat.start()
+        return self
+
+    def __exit__(self, *exc) -> None:
+        with self._lock:
+            self._done.set()
+        self._beat.join()
 
 
 def main(argv: list[str]) -> int:
