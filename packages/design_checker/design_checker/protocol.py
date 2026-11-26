@@ -12,6 +12,7 @@ import hashlib
 from pathlib import Path
 
 from rule_format.place import places
+from rule_format.published import place_files, shared_files
 from rule_format.rulebook import REPO
 
 from .site_json import SCHEMA
@@ -40,18 +41,8 @@ def code_files() -> list[Path]:
     the shared files every check reads too: under regulations/ outside any place's folder (the rule topics,
     document_extraction_guide/vocabulary.yaml, and who may approve, reviewers.yaml: rule_format.rulebook), and the
     research reports under docs/research/ that definitions and rules cite (each cited heading must be there)."""
-    packages, regulations = REPO / "packages", REPO / "regulations"
-    shared = [f for f in regulations.rglob("*") if f.is_file() and "jurisdictions" not in f.relative_to(regulations).parts
-              and not f.name.startswith(".")]
-    shared += [f for f in (REPO / "docs/research").rglob("*") if f.is_file() and not f.name.startswith(".")]
-    return [f for f in packages.rglob("*") if f.is_file() and _kept(f.relative_to(packages))] + shared
-
-
-def place_files(folder: Path) -> list[Path]:
-    """Every file of a place's folder a check can read: its settings, rules, definitions, labels, extracted text,
-    what isn't checked yet; of its source documents only sources.yaml (their fingerprints), not the PDFs."""
-    return [f for f in Path(folder).rglob("*") if f.is_file() and not f.name.startswith(".")
-            and (f.parent.name != "1_source_documents" or f.name == "sources.yaml")]
+    packages = REPO / "packages"
+    return [f for f in packages.rglob("*") if f.is_file() and _kept(f.relative_to(packages))] + shared_files(REPO)
 
 
 def worker_fingerprint() -> str:

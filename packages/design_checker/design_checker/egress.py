@@ -46,8 +46,8 @@ from rule_format import parts as part_rules
 from rule_format.formula import names as formula_names
 from rule_format.labels import load_pieces
 from rule_format.place import place as place_of
-from rule_format.rulebook import REPO, STATE_SETTINGS, Context, load, rulebook_file_problems
-from rule_format.state_law import state_settings_problems
+from rule_format.published import compile_law, unreadable as _unreadable   # the validation (frozen: published.py)
+from rule_format.rulebook import REPO, STATE_SETTINGS, load
 
 from design_checker import code_scope, each_part, occupant_load, present
 
@@ -134,28 +134,6 @@ def laws(jurisdiction) -> dict:
         law["not_checked_yet"], law["coverage_problem"] = _not_checked_yet(folder, law["rules"])
         out.append(law)
     return {"place": p.name, "folder": p.folder, "laws": out}
-
-
-def compile_law(folder: Path, book: Path) -> dict:
-    """The costly part of reading one state law, and the part that will be frozen ("compile, then freeze",
-    docs/decisions/2026-11-23_laws_validation_speed.md): {"problems": everything wrong with its sources, its settings
-    and its rulebook (empty: the rules pass every rule check), "documents": its sources.yaml entries, "kinds": the
-    measures its rules may name beyond use and district}. Never raises: sources that can't be read are a problem,
-    so the law gives no rules (needs review, never a row). Reads nothing from the code cache (use_cache=False), so the
-    same files give the same answer on every machine."""
-    out = {"problems": [], "documents": {}, "kinds": {}}
-    try:          # never a crash (zoning's answer goes with it), never a rule used unchecked
-        ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
-        out["problems"] = ctx.problems + state_settings_problems(folder, ctx) + rulebook_file_problems(book, ctx)
-        out["documents"] = ctx.sources
-        out["kinds"] = {k: v for k, v in ctx.allowed().items() if k not in ("use", "district")}
-    except Exception as e:
-        out["problems"] = [_unreadable(e)]
-    return out
-
-
-def _unreadable(e: Exception) -> str:
-    return f"its sources can't be read ({type(e).__name__}: {e})"
 
 
 def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]:

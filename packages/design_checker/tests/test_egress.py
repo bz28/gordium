@@ -25,6 +25,7 @@ import sys as _sys  # noqa: E402
 _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))   # egress_house beside this file
 import egress_house  # noqa: E402
 from design_checker.check import check_site, summary
+from rule_format import published
 from rule_format.place import place
 from rule_format.rulebook import REPO, building_code_rulebook, load
 
@@ -223,7 +224,7 @@ def test_a_space_whose_use_isnt_known_keeps_every_bedroom_rule_from_passing_and_
 
 
 def test_rules_that_fail_the_rule_checks_are_never_used(monkeypatch):
-    monkeypatch.setattr(egress, "rulebook_file_problems", lambda path, ctx: ["a quote isn't at its lines"])
+    monkeypatch.setattr(published, "rulebook_file_problems", lambda path, ctx: ["a quote isn't at its lines"])
     result = check_site(SITE, dict(FACTS), interior=sill_too_high())
     mine = law_items(result)
     assert [(i["id"], i["status"]) for i in mine] == [("egress.rules", present.REVIEW)]
@@ -385,7 +386,7 @@ def test_an_interior_with_number_keys_is_fingerprinted_never_a_crash():
 
 def test_rules_that_cant_be_used_are_said_even_while_no_rooms_are_drawn(monkeypatch):
     """Review round 2 (F2): "waiting" would hide that the state's rules don't pass the rule checks."""
-    monkeypatch.setattr(egress, "rulebook_file_problems", lambda path, ctx: ["a quote isn't at its lines"])
+    monkeypatch.setattr(published, "rulebook_file_problems", lambda path, ctx: ["a quote isn't at its lines"])
     result = check_site(SITE, dict(FACTS))
     assert [(i["id"], i["status"]) for i in law_items(result)] == [("egress.rules", present.REVIEW)]
     assert result["sections"][1]["state"] == present.REVIEW
