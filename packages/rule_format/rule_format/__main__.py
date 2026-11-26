@@ -4,6 +4,8 @@
     python -m rule_format place --write   # writes the plugin's copy of its place's settings (place.py)
     python -m rule_format cite new_york/ithaca_city zoning_charts_2026-04.pdf 3 "Height in feet 35 ft"
                                    # prints the lines to cite: lines: [31, 31]
+    python -m rule_format publish [folder]          # freezes each state law's validation (rule_format/published.py)
+    python -m rule_format publish --check [folder]  # a fresh compile must give the same certificate, byte for byte
 
 For each place and each state law folder (a state's own law, e.g. New York's Residential Code, with a state.yaml
 instead of a jurisdiction.yaml; its text_verification.yaml too): its settings file (jurisdiction.yaml, read by the registry in place.py), its source documents (fingerprints, extracted text), its definitions and
@@ -163,4 +165,7 @@ if __name__ == "__main__":
         places.PLUGIN_FILE.write_text(places.plugin_file_text(), encoding="utf-8")
         print(f"wrote {places.PLUGIN_FILE.relative_to(REPO)}")
         sys.exit(0)
+    if sys.argv[1:2] == ["publish"]:                     # compile, then freeze: published.py
+        from . import published
+        sys.exit(published.main(sys.argv[2:]))
     sys.exit(cite(sys.argv[2:]) if sys.argv[1:2] == ["cite"] else main())
