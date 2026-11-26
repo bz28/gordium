@@ -97862,7 +97862,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "cd419de66956d23a86a096d5ac3d94652ffddeb03e127ce39cc3b228dc2b70e3",
+  "worker_fingerprint": "40f5deac295224f86861e8926e355c59049af3d27f3ee1c5a209e26fdfb51d29",
   "rulebook": {
    "new_york/ithaca_city": "fe370285f1df51c84c92e17abcbb9152043f873bd3d604b01b59dfea8c607cdd"
   }
