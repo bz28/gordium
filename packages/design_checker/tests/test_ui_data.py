@@ -744,7 +744,9 @@ def test_the_trial_requests_adu_follow_ups_hang_on_is_there_an_adu(apartment):
     for a in by_field["facts.adu_existing_building"]:
         assert a["depends_on"] == {"field": "facts.adu_detached", "moot_if": [False]}
     assert all("depends_on" not in a for a in by_field.get("facts.accessory_dwelling_unit") or [])
-    assert all("depends_on" in a for a in asks if (a.get("field") or "")[len("facts."):] in ui_data.MOOT_WHEN)
+    from design_checker.host_core.facts import ROW_ONLY_FACTS
+    follow = {f"facts.{k}" for k in ROW_ONLY_FACTS}
+    assert all(("depends_on" in a) == (a.get("field") in follow) for a in asks)
 
 
 def test_every_restatement_of_the_leaves_rule_carries_the_mullioned_pair():
