@@ -1,0 +1,218 @@
+# The stair test building, failing: the compliant one (stair_enclosure_compliant.yaml) with known failures
+# (section group 7; written by apps/revit_addin/tools/evals/make_stair_building.py, never edited by hand). Inches.
+# Risers 8 in, so 144 in floor to floor (1011.5.2: at most 7 in; 7 3/4 in within a dwelling unit); a beam over flight
+# 2 leaving 76 in of headroom above its nosings (1011.3: 80 in); no handrail on flight 2's north wall side (its right,
+# looking up; 1011.11: on both sides), so 40.5 in clear at its one handrail; Level 2's landing guard 34 in high
+# (1015.3: 42 in; 36 in within a dwelling unit). Each failure is past every exception open to this stair (an R-2
+# building's stair, marked in no dwelling unit as the compliant one is; a guard at a landing). Everything else as the compliant variant. Gordium's own test building,
+# not a real project.
+
+format: gordium.interior/1
+units: in
+levels:
+- {id: L1, name: Level 1, elevation: 0}
+- {id: L2, name: Level 2, elevation: 144}
+rooms:
+- id: L1S
+  name: Stair L1
+  sleeping: false
+  level: L1
+  use: other
+  lockable: false
+  pass_through: false
+  floor_elevation: 0
+  floor:
+  - [0, 0]
+  - [176, 0]
+  - [176, 92]
+  - [0, 92]
+  holes: []
+  obstructions: []
+- id: L2S
+  name: Stair L2
+  sleeping: false
+  level: L2
+  use: other
+  lockable: false
+  pass_through: false
+  floor_elevation: 144
+  floor:
+  - [0, 0]
+  - [44, 0]
+  - [44, 92]
+  - [0, 92]
+  holes: []
+  obstructions: []
+- id: L1C
+  name: Corridor L1
+  sleeping: false
+  level: L1
+  use: corridor
+  lockable: false
+  pass_through: true
+  floor_elevation: 0
+  floor:
+  - [-124, 0]
+  - [-4, 0]
+  - [-4, 92]
+  - [-124, 92]
+  holes: []
+  obstructions: []
+- id: L2C
+  name: Corridor L2
+  sleeping: false
+  level: L2
+  use: corridor
+  lockable: false
+  pass_through: true
+  floor_elevation: 144
+  floor:
+  - [-124, 0]
+  - [-4, 0]
+  - [-4, 92]
+  - [-124, 92]
+  holes: []
+  obstructions: []
+openings: []
+doors:
+- id: L1D
+  name: Stair door L1
+  level: L1
+  sides: [L1C, L1S]
+  exit: false
+  exit_kind: exit_enclosure
+  exit_id: L1S
+  operation: side_hinged
+  plan:
+    centre: [-2.0, 22]
+    along: [0, 1]
+    clear_width: 34
+    wall_thickness: 4
+- id: L2D
+  name: Stair door L2
+  level: L2
+  sides: [L2C, L2S]
+  exit: false
+  exit_kind: exit_enclosure
+  exit_id: L2S
+  operation: side_hinged
+  plan:
+    centre: [-2.0, 22]
+    along: [0, 1]
+    clear_width: 34
+    wall_thickness: 4
+passages: []
+stairs:
+- id: f1
+  name: Flight 1 (Level 1 to the turn landing)
+  bottom_elevation: 0
+  spiral: false
+  nosings:
+  - - [44, 0, 8]
+    - [44, 44, 8]
+  - - [55, 0, 16]
+    - [55, 44, 16]
+  - - [66, 0, 24]
+    - [66, 44, 24]
+  - - [77, 0, 32]
+    - [77, 44, 32]
+  - - [88, 0, 40]
+    - [88, 44, 40]
+  - - [99, 0, 48]
+    - [99, 44, 48]
+  - - [110, 0, 56]
+    - [110, 44, 56]
+  - - [121, 0, 64]
+    - [121, 44, 64]
+  - - [132, 0, 72]
+    - [132, 44, 72]
+  sides:
+    left:
+    - [32, 44]
+    - [144, 44]
+    right:
+    - [32, 0]
+    - [144, 0]
+  handrails:
+  - side: left
+    inner_edge:
+    - [33, 40.5]
+    - [144, 40.5]
+  - side: right
+    inner_edge:
+    - [33, 3.5]
+    - [144, 3.5]
+  overhead:
+  - - [0, 0, 132]
+    - [44, 0, 132]
+    - [44, 92, 132]
+    - [0, 92, 132]
+  - - [44, 0, 252]
+    - [176, 0, 252]
+    - [176, 92, 252]
+    - [44, 92, 252]
+- id: f2
+  name: Flight 2 (the turn landing to Level 2)
+  bottom_elevation: 72
+  spiral: false
+  nosings:
+  - - [132, 92, 80]
+    - [132, 48, 80]
+  - - [121, 92, 88]
+    - [121, 48, 88]
+  - - [110, 92, 96]
+    - [110, 48, 96]
+  - - [99, 92, 104]
+    - [99, 48, 104]
+  - - [88, 92, 112]
+    - [88, 48, 112]
+  - - [77, 92, 120]
+    - [77, 48, 120]
+  - - [66, 92, 128]
+    - [66, 48, 128]
+  - - [55, 92, 136]
+    - [55, 48, 136]
+  - - [44, 92, 144]
+    - [44, 48, 144]
+  sides:
+    left:
+    - [144, 48]
+    - [32, 48]
+    right:
+    - [144, 92]
+    - [32, 92]
+  handrails:
+  - side: left
+    inner_edge:
+    - [143, 51.5]
+    - [32, 51.5]
+  overhead:
+  - - [0, 0, 252]
+    - [176, 0, 252]
+    - [176, 92, 252]
+    - [0, 92, 252]
+  - - [84, 48, 190.9090909090909]
+    - [96, 48, 190.9090909090909]
+    - [96, 92, 190.9090909090909]
+    - [84, 92, 190.9090909090909]
+guards:
+- id: g1
+  name: Level 2 landing guard
+  walking_surface: 144
+  top: 178
+  extent: {left: 0, right: 44}
+  members:
+  - {left: 0, right: 44, bottom: 176.5, top: 178}
+  - {left: 0, right: 44, bottom: 144, top: 147.5}
+  - {left: 2.5, right: 4, bottom: 147.5, top: 176.5}
+  - {left: 7.5, right: 9, bottom: 147.5, top: 176.5}
+  - {left: 12.5, right: 14, bottom: 147.5, top: 176.5}
+  - {left: 17.5, right: 19, bottom: 147.5, top: 176.5}
+  - {left: 22.5, right: 24, bottom: 147.5, top: 176.5}
+  - {left: 27.5, right: 29, bottom: 147.5, top: 176.5}
+  - {left: 32.5, right: 34, bottom: 147.5, top: 176.5}
+  - {left: 37.5, right: 39, bottom: 147.5, top: 176.5}
+  - {left: 42.5, right: 44, bottom: 147.5, top: 176.5}
+building:
+  occupancy_groups: [R-2]
+  sprinkler_system: none
