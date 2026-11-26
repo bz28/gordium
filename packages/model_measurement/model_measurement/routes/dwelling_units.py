@@ -52,8 +52,9 @@ and the drawing disagree or don't settle it:
   left unmarked, or a room shared between units not marked a corridor or lobby; a corridor or lobby with no mark
   stating such a function that opens into rooms of fewer than two named units (a shared residential lobby opens into
   two or more), or an exit with no mark stating any.
-What is left is said with the count: a unit none of whose rooms is marked, all of them marked corridors, lobbies or
-exits stating no function, can't be told from shared halls.
+What is left is said with the count (MARKED: every room of a dwelling unit carries its unit's name): a unit none of
+whose rooms is marked, all of them marked corridors, lobbies or exits, can't be told from shared halls where they
+state no function, or a residential one and open into rooms of two or more named units (as a shared lobby does).
 """
 
 import re
@@ -88,7 +89,8 @@ RESTS_ON = ("Gordium's reading, to confirm: each group of rooms with a residenti
 UNIT = "unit"                                            # rooms[].unit: the architect's unit mark (Gordium: Unit)
 # said with every row reading a count from the marks (parts.yaml `architect_stated`): the statement it stands on
 MARKED = ("counted from the rooms' unit marks (Gordium: Unit), the architect's statement: each name given is one "
-          "dwelling unit, and every room of a dwelling unit on the story carries its unit's name")
+          "dwelling unit, and every room of a dwelling unit on the story carries its unit's name (a unit's room left "
+          "unmarked and marked a corridor or lobby can't be told from a hall shared between units)")
 # two or more units named in one mark ("1A, 1B", "1A and 1B", "1A/1B"): a room can't be in two units
 _SEVERAL = re.compile(r"[,;&+/|]|\band\b", re.IGNORECASE)
 

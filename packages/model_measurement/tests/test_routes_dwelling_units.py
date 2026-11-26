@@ -572,4 +572,25 @@ def test_an_unmarked_hall_stating_a_units_function_must_open_into_two_named_unit
         desc = layout([("residential", 1, 1)] * 3, (True, True))
         _room(desc, "s0")["unit"], _room(desc, "s2")["unit"] = "A", "B"
         _room(desc, "s1").update(use=hall, function=function)
-        assert count(desc) == 2, (hall, function)
+        assert count(desc) == 2, (hall, function)        # (a studio so marked can't be told apart: the words say so)
+        assert "can't be told from a hall shared between units" in MARKED
+
+
+def test_an_entry_lobby_stating_residential_into_no_unit_stops_with_words_that_dont_ask_a_mark_check():
+    """Review round 3 (PR 1): an entry lobby between the corridor and the outside, stating residential (its occupant
+    load needs a function), opens into no unit's room: it stops the marks' count (it may be a unit marked a lobby), and
+    the reason no longer tells the architect to check marks that can't clear it."""
+    desc = layout([("residential", 1, 1)] * 3, (False, False))
+    for i in range(3):
+        _room(desc, f"s{i}")["unit"] = f"U{i}"
+    desc["rooms"].append(room("L", rect(-6.5, -6.5, -0.5, -0.5), use="lobby", lockable=False, pass_through=True,
+                              function="residential"))
+    x = next(d for d in desc["doors"] if d["id"] == "x")
+    x["sides"] = ["L", "outside"]
+    x["plan"]["centre"] = [-6.75, -3.5]
+    desc["doors"].append(door("cl", (-0.25, -3.5), (0, 1), ("c", "L")))
+    got = count(desc)
+    assert isinstance(got, Stop) and got.key == "units_mark_hall_function", got
+    assert "check the units' marks" not in got.reason and "mark its unit if it is one" in got.reason
+    _room(desc, "L").pop("function")                     # stating none: a hall, the three units counted
+    assert count(desc) == 3
