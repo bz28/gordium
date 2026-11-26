@@ -96,7 +96,7 @@ public static class Marks
     public static readonly MarkDefinition CorridorFireRating = new(
         "Gordium: Corridor rating minutes", new("3e9778e1-4f8d-40cc-a224-58933cb06a45"), MarkValueKind.Integer,
         MarkBinding.Instance, [Rooms], "rooms[].fire_rating_hours",
-        "On a room whose Gordium: Use is Corridor: the fire-resistance rating of its walls, in minutes (0 where they aren't rated; 30 for 1/2 hour, 60 for 1 hour; the least, where its walls differ), as the wall assemblies are rated. " +
+        "A count: on a room whose Gordium: Use is Corridor, the minutes of fire-resistance rating of its walls (0 where they aren't rated; 30 for 1/2 hour, 60 for 1 hour; the least, where its walls differ), as the wall assemblies are rated. " +
         "BCNYS 1020.2: \"Corridors shall be fire-resistance rated in accordance with Table 1020.2.\" Blank: the corridor rating rules need review.");
 
     /// <summary>Whether a corridor's walls are smoke partitions (<c>rooms[].walls_smoke_partitions</c>, NFPA 101 2012 8.4).</summary>
