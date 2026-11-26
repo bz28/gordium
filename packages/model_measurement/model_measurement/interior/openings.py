@@ -21,8 +21,8 @@ import math
 from shapely.geometry import box
 from shapely.ops import unary_union
 
-from model_measurement.interior.read import choice, number, tidy
-from model_measurement.interior.stops import Stop
+from model_measurement.interior.read import choice, name_of, number, tidy
+from model_measurement.interior.stops import Stop, Words, given_as
 
 SLIDING = ("double_hung", "single_hung", "horizontal_slider", "sliding_door")
 HINGED = ("casement", "side_hinged_door")
@@ -212,6 +212,10 @@ def measure_opening(o: dict, reader, floor_of) -> tuple[dict, dict, dict]:
             more.update(area_well(o, reader))
         except Stop as s:
             stop_all(("area_well_area", "area_well_width", "area_well_projection", "area_well_depth"), s.reason)
+    if "stated_well" in o:
+        given, why = stated_well(o, reader, more)
+        measures.update(given)
+        stopped.update(why)
     return measures, more, stopped
 
 
@@ -249,3 +253,141 @@ def area_well(o: dict, reader) -> dict:
     depth = max(grounds(o, reader)) - floor          # deepest: R319.4.2's ladder turns on the depth
     return {"area_well_area": tidy(width * projection / 144), "area_well_width": tidy(width),
             "area_well_projection": tidy(projection), "area_well_depth": tidy(depth)}
+
+
+# ---- what the architect states of the opening and its area well (`stated_well`; in Revit, the window's or door's own
+# marks: a well isn't in Revit's vocabulary, and the ground at a window isn't read yet) ----------------------------------
+
+# the description's key -> (the measure it gives, what it says in a reason, its kind: yes_no; size, a length that can't
+# be less than zero, in inches; area, in square feet; word, the ladder's), and the marks its reasons name, in plain
+# words (in Revit, Gordium: Below grade and the Gordium: Well marks on the window or door)
+STATED_WELL = {
+    "below_grade": ("opening_below_grade", "whether the bottom of its clear opening is below the adjacent grade",
+                    "yes_no", "its below-grade mark"),
+    "area": ("area_well_area", "its area well's horizontal area", "area", "its area well marks"),
+    "width": ("area_well_width", "its area well's width along the wall", "size", "its area well marks"),
+    "projection": ("area_well_projection", "its area well's projection out from the wall", "size",
+                   "its area well marks"),
+    "depth": ("area_well_depth", "its area well's vertical depth", "size", "its area well marks"),
+    "ladder": (None, "what its area well has to climb out by (a ladder, steps or none)", "word",
+               "its area well marks"),
+    "ladder_width": ("area_well_ladder_width", "the inside width of its area well's ladder or steps", "size",
+                     "its area well marks"),
+    "ladder_projection": ("area_well_ladder_projection", "how far its area well ladder's rungs stand out from the wall",
+                          "size", "its area well marks"),
+    "rung_spacing": ("area_well_rung_spacing", "the spacing of its area well ladder's rungs", "size",
+                     "its area well marks"),
+    "step_tread": ("area_well_step_tread", "the tread depth of its area well's steps", "size", "its area well marks"),
+    "step_riser": ("area_well_step_riser", "the riser height of its area well's steps", "size",
+                   "its area well marks"),
+    "full_height": ("area_well_ladder_full_height", "whether its area well's ladder or steps run its full height",
+                    "yes_no", "its area well marks"),
+    "ladder_encroachment": ("area_well_ladder_encroachment",
+                            "how far its area well's ladder or steps reach into the well's required dimensions", "size",
+                            "its area well marks"),
+    "other_encroachment": ("area_well_other_encroachment",
+                           "how far anything else in its area well reaches into the well's required dimensions", "size",
+                           "its area well marks"),
+}
+# `ladder`'s words -> (area_well_ladder, area_well_steps). A ladder or steps the opening blocks when open is no ladder
+# 1031.5.2 accepts ("The ladder or steps shall not be obstructed by the emergency escape and rescue opening when the
+# window or door is in the open position."), but steps are still steps
+LADDER_WORDS = {"ladder": (True, False), "steps": (True, True), "ladder_blocked": (False, False),
+                "steps_blocked": (False, True), "none": (False, False)}
+LADDER_MEASURES = ("area_well_ladder", "area_well_steps")
+
+
+def well_field(key: str) -> str:
+    """The description's field a stated measure comes from (a host's mark answers it: design_checker.panel_data)."""
+    return f"openings[].stated_well.{key}"
+
+
+# {measure: (the field that states it, the marks its reasons name)}: what panel_data names in a mark's cause
+WELL_FIELDS = {**{m: (well_field(k), mark) for k, (m, _, _, mark) in STATED_WELL.items() if m},
+               **{m: (well_field("ladder"), STATED_WELL["ladder"][3]) for m in LADDER_MEASURES}}
+
+
+def stated_well(o: dict, reader, more: dict) -> tuple[dict, dict]:
+    """(measures, not_measured) from what the architect states of the opening and its area well (`stated_well`, a
+    host's marks). Each one given is handed to the rules as the architect's statement; one left out is not stated (its
+    reason names the mark that states it), never 0 or no. Where the drawn well (`area_well`, kept
+    in `more`) gives the same measure, the two must agree within 1/16 in (1/16 sq ft for the area), else neither is
+    used; a stated area over the stated width times projection can't be. A key the format doesn't know, or
+    `stated_well` not a mapping, refuses every stated measure (a mistyped key must never read as settled)."""
+    name = name_of(o)
+    s = o.get("stated_well")
+    if not isinstance(s, dict) or (extra := sorted(str(k) for k in s if k not in STATED_WELL)):
+        what = "it isn't a mapping" if not isinstance(s, dict) else ("it gives " + ", ".join(extra) +
+                                                                      ", which the format doesn't know")
+        return {}, {m: Stop("well_stated_unread", name=name, what=Words(what)).reason for m in WELL_FIELDS}
+
+    def stop(which, key, **more_blanks):
+        _, words, _, mark = STATED_WELL[key]
+        return Stop(which, name=name, what=Words(words), mark=Words(mark), **more_blanks)
+
+    measures, stopped = {}, {}
+    for key, (measure, words, kind, _) in STATED_WELL.items():
+        if kind == "word":
+            continue
+        got = s.get(key)
+        try:
+            if got is None:
+                raise stop("well_not_stated", key)
+            if kind == "yes_no":
+                if not isinstance(got, bool):
+                    raise stop("well_stated_not_read", key, got=given_as(got))
+                measures[measure] = got
+                continue
+            try:
+                value = reader.size(got, words) if kind == "size" else _area(reader, got, words)
+            except Stop as bad:
+                raise stop("well_stated_bad", key, reason=Words(bad.reason)) from None
+            drawn = more.get(measure)
+            if isinstance(drawn, (int, float)) and not isinstance(drawn, bool) and abs(drawn - value) > AGREE:
+                unit = " sq ft" if kind == "area" else " in"
+                raise stop("well_disagree", key, drawn=Words(f"{tidy(drawn):g}{unit}"),
+                           stated=Words(f"{tidy(value):g}{unit}"))
+            measures[measure] = tidy(value)
+        except Stop as s_:
+            stopped[measure] = s_.reason
+    area, w, p = (measures.get(k) for k in ("area_well_area", "area_well_width", "area_well_projection"))
+    if area is not None and w is not None and p is not None and area > w * p / 144 + AGREE:
+        # a well within its width and projection holds no more than their rectangle: one of the three is wrong
+        why = stop("well_area_over_size", "area", width=w, projection=p, rectangle=tidy(w * p / 144)).reason
+        for m in ("area_well_area", "area_well_width", "area_well_projection"):
+            measures.pop(m)
+            stopped[m] = why
+    word = s.get("ladder")
+    climb = LADDER_MEASURES
+    try:
+        if word is None:
+            raise stop("well_not_stated", "ladder")
+        if not isinstance(word, str) or word not in LADDER_WORDS:
+            raise stop("well_stated_not_read", "ladder", got=Words(f"{given_as(word)}, not one of " +
+                                                                 ", ".join(LADDER_WORDS)))
+        if word == "none":
+            # nothing to climb, so no ladder or steps reach into the well (parts.yaml: 0 where there are none); a
+            # reach stated besides, other than 0 (or one that can't be read), leaves which is right unclear
+            if s.get("ladder_encroachment") is not None and measures.get("area_well_ladder_encroachment") != 0:
+                climb = LADDER_MEASURES + ("area_well_ladder_encroachment",)
+                reach = measures.get("area_well_ladder_encroachment")
+                raise stop("well_no_ladder_reaches", "ladder_encroachment",
+                           got=Words(f"{reach:g} in" if reach is not None else "a value Gordium can't read"))
+            measures["area_well_ladder_encroachment"] = 0.0
+            stopped.pop("area_well_ladder_encroachment", None)
+        measures.update(zip(LADDER_MEASURES, LADDER_WORDS[word]))
+    except Stop as s_:
+        for m in climb:
+            measures.pop(m, None)
+            stopped[m] = s_.reason
+    return measures, stopped
+
+
+def _area(reader, value, what: str) -> float:
+    """An area in the description's units squared (square feet where `units` is ft), as square feet; never less than
+    zero."""
+    got = number(value, what)
+    if got < 0:
+        raise Stop("negative_area", what=what, value=tidy(got))
+    per = reader.times / reader.per                  # inches in one of the description's units
+    return got * per * per / 144

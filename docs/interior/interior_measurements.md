@@ -215,3 +215,11 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `door_stated_no_source` | the door's maker's clear opening doesn't say where it comes from (its source, such as the maker's catalogue): neither clear size counts |
 | `door_drawn_unread` | the door's clear {what} is drawn but can't be measured from the drawing ({reason}): the maker's stated one alone could be more than the door as drawn, so neither counts |
 | `not_positive` | {what} is {value} in: not more than zero |
+| `negative_area` | {what} is {value} sq ft: an area can't be less than zero |
+| `well_not_stated` | the opening {name} doesn't state {what}, and the model doesn't give it ({mark}) |
+| `well_stated_not_read` | the opening {name} states {what} as {got}, which Gordium can't read ({mark}) |
+| `well_stated_bad` | for the opening {name}, {reason} ({mark}) |
+| `well_disagree` | the opening {name}'s drawn area well gives {what} as {drawn}, and what is stated of it ({mark}) {stated}: which is right isn't clear |
+| `well_area_over_size` | the opening {name} states {what} as more than its width times its projection ({width} in by {projection} in, {rectangle} sq ft), which a well within them can't hold: one of the three is wrong ({mark}) |
+| `well_no_ladder_reaches` | the opening {name}'s area well has no ladder or steps, yet {what} is stated as {got} ({mark}) |
+| `well_stated_unread` | the opening {name}'s stated area well isn't read: {what} |

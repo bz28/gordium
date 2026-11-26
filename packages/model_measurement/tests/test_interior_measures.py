@@ -1973,6 +1973,16 @@ STOP_CASES = {
     "door_stated_no_source": _set(("doors", 0, "stated_clear"), {"width": 34, "height": 80}),
     "door_drawn_unread": _with(base, lambda d: d["doors"][0].update(
         stated_clear={"width": 34, "height": 80, "source": "A"}, head_stop_bottom=None)),
+    # what the architect states of an escape opening and its area well (stated_well, test_interior_stated_well.py)
+    "negative_area": _set(("openings", 0, "stated_well"), {"area": -9}),
+    "well_not_stated": _set(("openings", 0, "stated_well"), {}),
+    "well_stated_not_read": _set(("openings", 0, "stated_well"), {"below_grade": "yes"}),
+    "well_stated_bad": _set(("openings", 0, "stated_well"), {"width": -36}),
+    "well_disagree": _with(base, lambda d: d["openings"][0].update(
+        area_well={"floor_elevation": -10, "width": 36, "projection": 36}, stated_well={"width": 40})),
+    "well_area_over_size": _set(("openings", 0, "stated_well"), {"area": 2000, "width": 36, "projection": 36}),
+    "well_no_ladder_reaches": _set(("openings", 0, "stated_well"), {"ladder": "none", "ladder_encroachment": 3}),
+    "well_stated_unread": _set(("openings", 0, "stated_well"), {"depht": 50}),
 }
 
 

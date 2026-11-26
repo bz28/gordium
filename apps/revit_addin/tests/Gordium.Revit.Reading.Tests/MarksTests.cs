@@ -127,6 +127,23 @@ public sealed class MarksTests
             ("Gordium: Main building floor area", "f237131b-5e7e-4c8e-94df-a8538de16954", MarkValueKind.Area, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // a door type's leaves (BCNYS 1010.1.1: one leaf of a pair with no mullion gives the 32 in)
             ("Gordium: Leaves", "f23ad40b-e048-4b61-a92a-b7963e64d4cf", MarkValueKind.Integer, MarkBinding.Type, ["OST_Doors"]),
+            // what latches or locks each door (BCNYS 1010.2.8): no door family or type parameter says it
+            ("Gordium: Hardware", "9900f8fa-52dd-4654-bda2-1e1a4b9cb959", MarkValueKind.Text, MarkBinding.Instance, ["OST_Doors"]),
+            // an escape opening below grade and its area well (BCNYS 1031.5): a well isn't in Revit's vocabulary
+            ("Gordium: Below grade", "250e27a5-d58b-4ddf-8ece-b35235ccc1f2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well area", "6e368439-8dd1-48c8-99bf-eff9afd45b39", MarkValueKind.Area, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well width", "6305ccee-e00f-4870-868f-e58241f9a0ef", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well projection", "8814e090-d06c-467c-ae0f-c0518835997f", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well depth", "8aba2fba-b56c-4825-ab0f-86247ec221c8", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well ladder or steps", "a9a70071-4f69-40e0-9db5-a713f65b7e6a", MarkValueKind.Text, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well ladder width", "2cfc1b61-245d-4783-afab-6eefd4fae35a", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well rung projection", "18694498-b560-4e59-95ac-a555e05d71ec", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well rung spacing", "a380f476-72bc-4ee8-9720-296d49313a30", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well step tread", "8b6628e2-2ee7-434e-ad15-b563fa95ccca", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well step riser", "444f0f5a-3046-4ce6-91b7-570b5cf3e23c", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well ladder full height", "f982cb20-0562-4a16-9cd8-40f8642b9ddb", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well ladder encroachment", "f9c44848-4643-4aca-a1c2-e073d03694d8", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
+            ("Gordium: Well other encroachment", "961cebf6-451f-4b59-8151-f10eedcf1db5", MarkValueKind.Length, MarkBinding.Instance, ["OST_Windows", "OST_Doors"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

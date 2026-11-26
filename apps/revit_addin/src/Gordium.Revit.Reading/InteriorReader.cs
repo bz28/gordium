@@ -807,7 +807,45 @@ public static class InteriorReader
         else if (o.Kind == MarkedKind.Door)
             Out("stated_clear", "a door's maker's clear opening is sent with the door (doors); as an escape opening its " +
                                 "bottom isn't stated by a door's marks yet");
+        opening["stated_well"] = StatedWell(e, o, Out);
         return opening;
+    }
+
+    /// <summary>What the architect states of the opening and its area well (<c>stated_well</c>, BCNYS 1031.5): every
+    /// <see cref="Marks.WellMarks"/> mark set, as typed (a length in feet and an area in square feet, the description's
+    /// units); one blank is left out, which the measuring reads as not stated (never 0 or No), naming the field and the
+    /// mark. Always sent, so a blank one is said by name. A word Gordium can't read is said here and not sent. Only an
+    /// escape opening's blanks are noted (its rules read them): every other window's would be noise.</summary>
+    private static JsonObject StatedWell(MarkedElement e, OpeningMarks o, Action<string, string> note)
+    {
+        var well = new JsonObject();
+        foreach (var (mark, key) in Marks.WellMarks)
+        {
+            var v = MarkReading.Value(e, mark);
+            switch (mark.Kind)
+            {
+                case MarkValueKind.YesNo when Marks.YesNo(v) is { } yes:
+                    well[key] = yes;
+                    break;
+                case MarkValueKind.Length when Marks.Length(v) is { } feet:
+                    well[key] = feet;
+                    break;
+                case MarkValueKind.Area when Marks.Area(v) is { } squareFeet:
+                    well[key] = squareFeet;
+                    break;
+                case MarkValueKind.Text when Marks.Text(v) is { } word:
+                    if (WellLadderWords.Table.Of(word) is { } said)
+                        well[key] = said;
+                    else
+                        note("stated_well." + key, $"{mark.Name} is \"{word}\", not one of: {WellLadderWords.Listed}");
+                    break;
+                default:
+                    if (o.Escape is true)
+                        note("stated_well." + key, mark.Name + " is not set");
+                    break;
+            }
+        }
+        return well;
     }
 
     /// <summary>The window's (or, with <paramref name="door"/>, the door's) values the stamp is checked against, read
@@ -848,6 +886,14 @@ public static class InteriorReader
             Out("leaves", d.Leaves is { } n
                 ? $"{Marks.DoorLeaves.Name} is {n.ToString(System.Globalization.CultureInfo.InvariantCulture)} on its type, not 1 or 2"
                 : Marks.DoorLeaves.Name + " is not set on its type");
+        // what latches or locks it (BCNYS 1010.2.8): sent only as one of the list's words; blank or another word is said
+        // and not sent, so the panic hardware rule needs review for it (never a pass)
+        if (d.Hardware is { } hardware)
+            door["hardware"] = hardware;
+        else
+            Out("hardware", d.HardwareWord is { } typed
+                ? $"{Marks.DoorHardware.Name} is \"{typed}\", not one of: {HardwareWords.Table.Listed}"
+                : Marks.DoorHardware.Name + " is not set");
         Out("threshold_top", "a door's drawn stops, hinge, leaf, threshold and head stop aren't read from its family (door " +
                              "families don't model them consistently): its maker's clear opening is read instead");
         if (records.Openings.FirstOrDefault(x => x.UniqueId == d.Id) is not { } rec)
