@@ -392,3 +392,15 @@ def test_a_room_stopped_by_a_tie_is_not_measured_with_its_own_reason_never_calle
     shown = _over_rooms_measured(story, {"c": Stop("too_many_ties", most=64, x=63.232, y=37.844)})
     assert "no route" not in shown["label"] and "has none" not in shown["label"]
     assert shown["rooms_not_measured"] == {"CORRIDOR (26)": Stop("too_many_ties", most=64, x=63.232, y=37.844).reason}
+
+
+@pytest.mark.parametrize("key, bad", [("rooms", 5), ("rooms", True), ("unknown_spaces", 5), ("unknown_spaces", True),
+                                      ("unknown_spaces", "x")])
+def test_a_description_list_that_isnt_a_list_is_never_a_crash(key, bad):
+    """A hand-written description may give its rooms or unknown spaces as a number or text: the routes say what
+    they can't read (or measure without it), never a crash."""
+    from routes_layouts import room_on_corridor
+    d = dict(room_on_corridor(), **{key: bad})
+    got = measure(d)
+    if key == "rooms":
+        assert got["problems"]
