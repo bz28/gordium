@@ -7553,7 +7553,7 @@ rules:
   - when: space_egress_through_electrically_locked_lobby > 0 and space_egress_through_locked_room == 0 and space_egress_through_kitchen_storage
       == 0 and space_egress_sleeping_through_sleeping_or_toilet == 0
     reason: 'Egress passes through an elevator lobby whose exit access door is electrically locked: allowed by item 4''s exception
-      only for a door complying with 1010.2.14 (not brought in): a person checks the door.'
+      only for a door complying with 1010.2.14 (its own flag): a person checks the door.'
   for_each: space
   when_none: needs_review
   sources:
@@ -7674,7 +7674,7 @@ rules:
       outcome: needs_review
     expect: needs_review
     note: 'Through an elevator lobby whose exit access door is electrically locked: item 4''s exception, if the door complies
-      with 1010.2.14 (not brought in): a person checks.'
+      with 1010.2.14 (its own flag): a person checks.'
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
@@ -7688,8 +7688,8 @@ rules:
   notes: 'Items 4, 5 and 6 are measurable from the path; item 1 (enclosed elevator lobbies, Section 3006, not brought in)
     and items 2 and 3 (adjoining rooms accessory to one another with a discernible path; Group H''s hazard) are a person''s.
     Item 6''s exceptions (a kitchen within the same dwelling or sleeping unit; a Group M stockroom) are not Group I-4''s;
-    item 4''s exception covers only an elevator lobby''s electrically locked exit access door complying with 1010.2.14 (not
-    brought in): such lobbies are counted apart (counted apart) and need review; every other lockable room, an enclosed elevator
+    item 4''s exception covers only an elevator lobby''s electrically locked exit access door complying with 1010.2.14 (its
+    own flag): such lobbies are counted apart (counted apart) and need review; every other lockable room, an enclosed elevator
     lobby included, is a locked room and fails. Hand-drafted in a Claude Code session (2026-11-21).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -7748,7 +7748,7 @@ rules:
   - when: space_egress_through_electrically_locked_lobby > 0 and space_egress_through_locked_room == 0 and space_egress_through_kitchen_storage
       == 0 and space_egress_sleeping_through_sleeping_or_toilet == 0
     reason: 'Egress passes through an elevator lobby whose exit access door is electrically locked: allowed by item 4''s exception
-      only for a door complying with 1010.2.14 (not brought in): a person checks the door.'
+      only for a door complying with 1010.2.14 (its own flag): a person checks the door.'
   - when: space_egress_through_kitchen_storage > 0 and space_egress_through_locked_room == 0 and space_egress_sleeping_through_sleeping_or_toilet
       == 0 and occupancy_group in ["I-1", "R-1", "R-2", "R-3", "R-4"]
     reason: 'Through a kitchen in a group with dwelling or sleeping units: item 6''s exception 1 allows a kitchen area serving
@@ -13220,7 +13220,8 @@ rules:
     note: 'Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials
       and aren''t concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1,
       and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn''t in the model, so a person''s check.
-      1010.1.1''s to 1010.2.7''s are rules and flags of their own; 1010.2.8 to 1010.3.4 follow in section group 6e.'
+      1010.1.1''s to 1010.2.15''s are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later
+      section group.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 6a. 1010.1 applies the rest of Section 1010 to
     every door in the means of egress, extra doors included ("in numbers greater than required"): the door rules read every
     door the model gives, required or not.'
@@ -14303,7 +14304,8 @@ rules:
       (section group 6e); a stairway door per 1010.2.6 still opens from the egress side: how each door locks isn''t in the
       model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-25), section group 6d. Locks, latches and hardware aren't in the model.
-    1010.2.8 to 1010.2.15 (panic hardware and the other locking systems) follow in section group 6e.
+    1010.2.8 to 1010.2.15 (panic hardware and the other locking systems) are rules and flags of their own (section group
+    6e).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1010_2_1_unlatching
@@ -14603,5 +14605,688 @@ rules:
     note: 'The occupancy isn''t stated: a person checks.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-25), section group 6d. Group B is asked in full: whether a Group
     B occupancy is educational isn''t stated.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_8_panic_hardware
+  kind: rule
+  topic: means_of_egress
+  title: Panic hardware on latched swinging doors, Groups A, E, H (BCNYS 1010.2.8)
+  check: not moe_door_swinging or not moe_door_latched or moe_door_panic_hardware or occupancy_group not in ["A-1", "A-2",
+    "A-3", "A-4", "A-5", "E", "H-1", "H-2", "H-3", "H-4", "H-5", "mixed"] or (moe_door_occupant_load < 50 and occupancy_group
+    not in ["H-1", "H-2", "H-3", "H-4", "H-5", "mixed"])
+  review_when:
+  - when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5"] and moe_door_swinging and moe_door_latched and not moe_door_panic_hardware
+      and not moe_door_occupant_load < 50
+    reason: 'A latched swinging door in a Group A building, with no panic or fire exit hardware stated: 1010.2.8 asks for
+      it where the door serves a room or space of 50 or more, but exception 1 lets a Group A building''s main exit have a
+      key-operated lock under 1010.2.4 item 3 (and exception 4 a courtroom''s door under 1010.2.12 item 3), which the model
+      doesn''t show, and how many each door serves isn''t worked out: a person checks.'
+  - when: occupancy_group in ["E"] and moe_door_swinging and moe_door_latched and not moe_door_panic_hardware and not moe_door_occupant_load
+      >= 50 and not moe_door_occupant_load < 50
+    reason: 'A latched swinging door in a Group E building, with no panic or fire exit hardware stated: 1010.2.8 asks for
+      it where the door serves a room or space of 50 or more, and how many each door serves isn''t worked out (a door may
+      serve other stories, or outdoor areas, the model doesn''t hold): a person checks.'
+  - when: (occupancy_group in ["H-1", "H-2", "H-3", "H-4", "H-5"] or (occupancy_group in ["E"] and not moe_door_occupant_load
+      < 50)) and moe_door_swinging and moe_door_latched and not moe_door_panic_hardware and moe_door_exterior and occupied_outdoor_areas
+    reason: 'A latched door to outside with no panic or fire exit hardware stated, in a building whose occupants use outdoor
+      areas (stated, or not ruled out): exception 3 lets an exit access door serving an occupied exterior area be locked under
+      1010.2.4 item 8 (a key-operated lock, a sign, a window, a telephone, at most 300 outside), which the model doesn''t
+      show: a person checks.'
+  - when: occupancy_group in ["mixed"] and moe_door_swinging and moe_door_latched and not moe_door_panic_hardware
+    reason: 'A latched swinging door with no panic or fire exit hardware stated, in a building of two or more groups: whether
+      it serves a Group H occupancy, or a Group A or E room or space of 50 or more, isn''t shown: a person checks.'
+  for_each: means_of_egress_door
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 326
+    lines:
+    - 31
+    - 39
+    quote: '1010.2.8 Panic and fire exit hardware. Swinging doors serving a Group H occupancy and swinging doors serving rooms
+      or spaces with an occupant load of 50 or more in a Group A or E occupancy shall not be provided with a latch or lock
+      other than panic hardware or fire exit hardware. Exceptions: 1. A main exit of a Group A occupancy shall be permitted
+      to have locking devices in accordance with Section 1010.2.4, Item 3. 2. Doors provided with panic hardware or fire exit
+      hardware and serving a Group A or E occupancy shall be permitted to be electrically locked in accordance with Section
+      1010.2.10. 3. Exit access doors serving occupied exterior areas shall be permitted to be locked in accordance with Section
+      1010.2.4, Item 8. 4. Courtrooms shall be permitted to be locked in accordance with Section 1010.2.12, Item 3.'
+  examples:
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: H-2
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Group H door with panic hardware
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: true
+          moe_door_exterior: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Its only latch is panic or fire exit hardware.
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: H-2
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Group H door with a lever latch, serving 5
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+          moe_door_exterior: false
+          moe_door_occupant_load: 5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group H: a latched swinging door has panic or fire exit hardware whatever the load.'
+  - given:
+      occupied_outdoor_areas: true
+      occupancy_group: H-2
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Group H door to a used outdoor area, with a lever latch
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+          moe_door_exterior: true
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Exception 3: it may be an exit access door serving the occupied exterior area, locked under 1010.2.4 item 8.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: H-2
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Group H door with no latch
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: No latch or lock, so nothing other than panic hardware.
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: H-2
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Group H sliding door with a latch
+        measures:
+          moe_door_swinging: false
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 1010.2.8 asks only swinging doors.
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: E
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Classroom door with a lever latch, serving 60
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+          moe_door_exterior: false
+          moe_door_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Group E, serving 50 or more: panic or fire exit hardware.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: E
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Classroom door with a lever latch, serving 30
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+          moe_door_exterior: false
+          moe_door_occupant_load: 30
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Under 50 in Group E.
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: E
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Classroom door with a lever latch, its load not worked out
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+          moe_door_exterior: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'How many it serves isn''t worked out: a person checks.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: A-3
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Hall door with a lever latch, serving 120
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+          moe_door_exterior: true
+          moe_door_occupant_load: 120
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group A: exception 1 lets the main exit have a key-operated lock under 1010.2.4 item 3, which the model doesn''t
+      show.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: B
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Office door with a lever latch, serving 120
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+          moe_door_occupant_load: 120
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 1010.2.8 asks nothing of a building of one group other than A, E or H.
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: mixed
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Door with a lever latch, serving 5, in a building of two groups
+        measures:
+          moe_door_swinging: true
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+          moe_door_occupant_load: 5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two or more groups: whether it serves a Group H occupancy isn''t shown.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: H-2
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Group H door whose hardware isn't stated
+        measures:
+          moe_door_swinging: true
+          moe_door_exterior: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'What latches it isn''t stated: a person checks.'
+  - given:
+      occupied_outdoor_areas: false
+      occupancy_group: H-2
+    parts:
+      means_of_egress_door: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No door read: a person checks.'
+  notes: 'Section group 6e: every door the model gives. What latches or locks it is the description''s `hardware` (panic,
+    latch or none; no Revit mark yet). It complies not swinging, with no latch or lock, with panic or fire exit hardware as
+    its only latch or lock, or in a building of one stated group other than A, E and H; under 50 in Group A or E only where
+    that load is stated by hand (how many people each door serves isn''t worked out, as for 1010.1.2.1). It fails a latched
+    swinging door with neither in a building stated Group H, or Group E serving 50 or more as stated (Gordium''s reading:
+    a door stated to serve 50 or more serves a room or space of 50 or more, the spaces whose egress passes through it counted
+    together), unless it is a door to outside in a building whose outdoor areas may be occupied (exception 3, 1010.2.4 item
+    8). Group A never fails: exception 1''s main exit (1010.2.4 item 3) isn''t shown. Exceptions 2 (electric locks on doors
+    with panic hardware, 1010.2.10) and 4 (courtrooms, Group A-3 or B) loosen nothing a fail rests on. Hand-drafted in a Claude
+    Code session (2026-11-26).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_8_1_refrigeration_machinery_rooms
+  kind: flag
+  topic: means_of_egress
+  title: 'Refrigeration machinery rooms'' doors (BCNYS 1010.2.8.1)'
+  applies_when: special_egress_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 326
+    lines:
+    - 40
+    - 42
+    quote: 1010.2.8.1 Refrigeration machinery room. Refrigeration machinery rooms larger than 1,000 square feet (93 m[fn2])
+      shall have not less than two exit or exit access doorways that swing in the direction of egress travel and shall be
+      equipped with panic hard- ware or fire exit hardware.
+  examples:
+  - given:
+      special_egress_spaces: true
+    expect: needs_review
+    note: 'A refrigeration machinery room larger than 1,000 sq ft has at least two exit or exit access doorways, swinging
+      in the direction of egress travel, with panic or fire exit hardware: which rooms are refrigeration machinery rooms isn''t
+      in the model, so a person''s check.'
+  - given:
+      special_egress_spaces: false
+    expect: not_applicable
+    note: No special egress spaces, so no refrigeration machinery room.
+  - given: {}
+    expect: needs_review
+    note: 'Whether the building has special egress spaces isn''t stated: a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e. A refrigeration machinery room is among the
+    special egress spaces (1006.2.2.2).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_8_2_electrical_rooms
+  kind: flag
+  topic: means_of_egress
+  title: 'Panic hardware on electrical rooms'' doors (BCNYS 1010.2.8.2)'
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 326
+    lines:
+    - 43
+    - 48
+    quote: 1010.2.8.2 Rooms with electrical equipment. Exit or exit access doors serving transformer vaults, rooms designated
+      for batteries or energy storage systems, or modular data centers shall be equipped with panic hardware or fire exit
+      hardware. Rooms containing electrical equipment rated 800 amperes or more that contain overcurrent devices, switching
+      devices or control devices and where the exit or exit access door is less than 25 feet (7620 mm) from the equipment
+      working space as required by NFPA 70, such doors shall not be provided with a latch or lock other than panic hardware
+      or fire exit hardware. The doors shall swing in the direction of egress travel.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Exit or exit access doors serving transformer vaults, rooms for batteries or energy storage systems, or modular
+      data centers have panic or fire exit hardware; and where a room holds electrical equipment rated 800 amperes or more
+      with overcurrent, switching or control devices and its door is less than 25 feet from the working space NFPA 70 requires,
+      the door has no latch or lock other than panic or fire exit hardware and swings in the direction of egress travel: which
+      rooms hold such equipment isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e. Shown for every building, since battery and
+    energy storage rooms and modular data centers aren't all among the special egress spaces.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_8_3_panic_hardware_installation
+  kind: flag
+  topic: means_of_egress
+  title: Panic and fire exit hardware installation (BCNYS 1010.2.8.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 326
+    lines:
+    - 49
+    - 53
+    quote: '1010.2.8.3 Installation. Where panic or fire exit hardware is installed, it shall comply with the following: 1.
+      Panic hardware shall be listed in accordance with UL 305. 2. Fire exit hardware shall be listed in accordance with UL
+      10C and UL 305. 3. The actuating portion of the releasing device shall extend not less than one-half of the door leaf
+      width. 4. The maximum unlatching force shall not exceed 15 pounds (67 N).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where panic or fire exit hardware is installed: panic hardware is listed to UL 305, fire exit hardware to UL 10C
+      and UL 305, the actuating portion of the releasing device extends at least one-half of the door leaf''s width, and it
+      unlatches with at most 15 pounds of force: the hardware''s listing and size aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_8_4_balanced_doors
+  kind: flag
+  topic: means_of_egress
+  title: Push-pad panic hardware on balanced doors (BCNYS 1010.2.8.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 326
+    lines:
+    - 54
+    - 55
+    quote: 1010.2.8.4 Balanced doors. If balanced doors are used and panic hardware is required, the panic hardware shall
+      be the push- pad type and the pad shall not extend more than one-half the width of the door measured from the latch
+      side.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where balanced doors are used and panic hardware is required, it is the push-pad type, the pad no more than one-half
+      the door''s width from the latch side: which doors are balanced isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_9_access_control
+  kind: flag
+  topic: means_of_egress
+  title: Doors with egress monitoring or access control (BCNYS 1010.2.9)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 326
+    lines:
+    - 56
+    - 57
+    quote: 1010.2.9 Monitored or recorded egress, and access control systems. Where electrical systems that monitor or record
+      egress activity are incorporated, or where the door has an access control system, the locking system on the egress side
+      of the door shall
+  - file: gov.ny.building.2025.pdf
+    page: 327
+    lines:
+    - 3
+    - 4
+    quote: comply with Section 1010.2.10, 1010.2.11, 1010.2.12, 1010.2.13, 1010.2.14 or 1010.2.15 or shall be readily openable
+      from the egress side without the use of a key or special knowledge or effort.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where electrical systems monitor or record egress, or a door has an access control system, its locking on the egress
+      side complies with one of 1010.2.10 to 1010.2.15, or the door opens readily from the egress side without a key or special
+      knowledge or effort: access control isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_10_door_hardware_release
+  kind: flag
+  topic: means_of_egress
+  title: Electric locks released by the door's hardware, not in Group H (BCNYS 1010.2.10)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 327
+    lines:
+    - 5
+    - 15
+    quote: '1010.2.10 Door hardware release of electrically locked egress doors. Door hardware release of electrical locking
+      systems shall be permitted on doors in the means of egress in any occupancy except Group H where installed and operated
+      in accordance with all of the following: 1. The door hardware that is affixed to the door leaf has an obvious method
+      of operation that is readily operated under all lighting conditions. 2. The door hardware is capable of being operated
+      with one hand and shall comply with Section 1010.2.1. 3. Operation of the door hardware directly interrupts the power
+      to the electric lock and unlocks the door immediately. 4. Loss of power to the electrical locking system automatically
+      unlocks the electric lock. 5. Where panic or fire exit hardware is required by Section 1010.2.8, operation of the panic
+      or fire exit hardware also releases the electric lock. 6. The electromechanical or electromagnetic locking device shall
+      be listed in accordance with either UL 294 or UL1034.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An electric lock released by the door''s own hardware is permitted on egress doors in any occupancy but Group H,
+      where that hardware is obvious to operate in all lighting, works with one hand and per 1010.2.1, cuts the lock''s power
+      and unlocks the door at once; losing power unlocks it; where 1010.2.8 asks for panic or fire exit hardware, that hardware
+      releases the lock too; and the locking device is listed to UL 294 or UL 1034: electric locks aren''t in the model, so
+      a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_11_sensor_release
+  kind: flag
+  topic: means_of_egress
+  title: Electric locks released by a sensor, not in Group H (BCNYS 1010.2.11)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 327
+    lines:
+    - 16
+    - 33
+    quote: '1010.2.11 Sensor release of electrically locked egress doors. Sensor release of electrical locking systems shall
+      be permitted on doors located in the means of egress in any occupancy except Group H where installed and operated in
+      accordance with all of the following criteria: 1. The sensor shall be installed on the egress side, arranged to detect
+      an occupant approaching the doors, and shall cause the electrical locking system to unlock the electric lock. 2. Upon
+      a signal from a sensor or loss of power to the sensor, the electrical locking system shall unlock the electric lock.
+      3. Loss of power to the electric lock or the electrical locking system shall automatically unlock the electric locks.
+      4. The doors shall be arranged to unlock the electric lock from a manual unlocking device located 40 inches to 48 inches
+      (1016 mm to 1219 mm) vertically above the floor and within 5 feet (1524 mm) of the secured doors. Ready access shall
+      be provided to the manual unlocking device and the device shall be clearly identified by a sign that reads “PUSH TO
+      EXIT.” When operated, the manual unlocking device shall result in direct interruption of power to the electric lock—indepen-
+      dent of other electronics—and the electric lock shall remain unlocked for not less than 30 seconds. 5. Activation of
+      the building fire alarm system, where provided, shall automatically unlock the electric lock, and the electric lock
+      shall remain unlocked until the fire alarm system has been reset. 6. Activation of the building automatic sprinkler
+      system or fire detection system, where provided, shall automatically unlock the electric lock. The electric lock shall
+      remain unlocked until the fire alarm system has been reset. 7. Emergency lighting shall be provided on the egress side
+      of the door. 8. The electromechanical or electromagnetic locking device shall be listed in accordance with either UL
+      294 or UL 1034.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An electric lock released by a sensor is permitted on egress doors in any occupancy but Group H, where the sensor
+      on the egress side detects an occupant approaching and unlocks it; a sensor''s signal or its loss of power unlocks it;
+      losing power to the lock or locking system unlocks it; a manual unlocking device 40 to 48 inches above the floor and
+      within 5 feet of the doors, readily reached and signed PUSH TO EXIT, cuts the lock''s power directly and keeps it unlocked
+      at least 30 seconds; the fire alarm system, where provided, unlocks it until reset, and so do the sprinkler or fire
+      detection system, where provided; emergency lighting is on the egress side; and the locking device is listed to UL 294
+      or UL 1034: electric locks aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_12_delayed_egress
+  kind: flag
+  topic: means_of_egress
+  title: Where delayed egress locks are permitted (BCNYS 1010.2.12)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 327
+    lines:
+    - 34
+    - 41
+    quote: 1010.2.12 Delayed egress. Delayed egress electrical locking systems shall be permitted on doors in the means of
+      egress serving the following occupancies in buildings that are equipped throughout with an automatic sprinkler system
+      in accordance with Section 903.3.1.1 or an approved automatic smoke or heat detection system installed in accordance
+      with Section 907. 1. Group B, F, I, M, R, S and U occupancies. 2. Group E classrooms with an occupant load of less than
+      50. 3. In courtrooms in Group A-3 and B occupancies, delayed egress electrical locking systems shall be permitted to
+      be installed on exit or exit access doors, other than the main exit or exit access door, in buildings that are equipped
+      through- out with an automatic sprinkler system in accordance with Section 903.3.1.1.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Delayed egress locks are permitted only in buildings sprinklered throughout per 903.3.1.1 or with an approved automatic
+      smoke or heat detection system per 907, and only for Groups B, F, I, M, R, S and U, Group E classrooms of under 50,
+      and courtrooms in Groups A-3 and B on doors other than the main exit or exit access door (there sprinklered throughout
+      per 903.3.1.1): delayed egress locks aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e. Shown for every building, since the model doesn't
+    say whether any door has a delayed egress lock.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_12_1_delayed_egress_locking_system
+  kind: flag
+  topic: means_of_egress
+  title: How a delayed egress lock works and is signed (BCNYS 1010.2.12.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 327
+    lines:
+    - 42
+    - 59
+    quote: '1010.2.12.1 Delayed egress locking system. The delayed egress electrical locking system shall be installed and
+      operated in accordance with all of the following: 1. The delay of the delayed egress electrical locking system shall
+      deactivate upon actuation of the automatic sprinkler system or automatic fire detection system, allowing immediate free
+      egress. 2. The delay of the delayed egress electrical locking system shall deactivate upon loss of power to the electrical
+      locking system or electrical lock, allowing immediate free egress. 3. The delay of the delayed egress locking electrical
+      system shall have the capability of being deactivated at the fire command center and other approved locations. 4. An
+      attempt to egress shall initiate an irreversible process that shall allow such egress in not more than 15 seconds when
+      a physical effort to exit is applied to the egress side door hardware for not more than 3 seconds. Initiation of the
+      irreversible process shall activate an audible signal in the vicinity of the door. Once the delay has been deactivated,
+      rearming the delay electronics shall be by manual means only. Exception: Where approved, a delay of not more than 30
+      seconds is permitted on a delayed egress door. 5. The egress path from any point shall not pass through more than one
+      delayed egress locking system. Exceptions: 1. In Group I-1, Condition 2, Group I-2 or I-3 occupancies, the egress path
+      from any point in the building shall pass through not more than two delayed egress locking systems provided that the
+      combined delay does not exceed 30 seconds.'
+  - file: gov.ny.building.2025.pdf
+    page: 328
+    lines:
+    - 3
+    - 17
+    quote: '2. In Group I-1, Condition 1 or Group I-4 occupancies, the egress path from any point in the building shall pass
+      through not more than two delayed egress locking systems provided the combined delay does not exceed 30 seconds and
+      the building is equipped throughout with an automatic sprinkler system in accor- dance with Section 903.3.1.1. 6. A
+      sign shall be provided on the door and shall be located above and within 12 inches (305 mm) of the door exit hardware.
+      Exception: Where approved, in Group I occupancies, the installation of a sign is not required where care recipients
+      who because of clinical needs require restraint or containment as part of the function of the treatment area. 6.1. For
+      doors that swing in the direction of egress, the sign shall read, "PUSH UNTIL ALARM SOUNDS. DOOR CAN BE OPENED IN 15
+      [30] SECONDS." 6.2. For doors that swing in the opposite direction of egress, the sign shall read, "PULL UNTIL ALARM
+      SOUNDS. DOOR CAN BE OPENED IN 15 [30] SECONDS." 6.3. The sign shall comply with the visual character requirements in
+      ICC A117.1. 7. Emergency lighting shall be provided on the egress side of the door. 8. The electromechanical or electromagnetic
+      locking device shall be listed in accordance with either UL 294 or UL 1034.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A delayed egress lock releases at once when the sprinkler or fire detection system activates or the power fails,
+      can be released at the fire command center and other approved places, and opens within 15 seconds (30 where approved)
+      after a push of no more than 3 seconds, sounding an alarm by the door and rearmed only by hand; a path passes through
+      at most one (two, with a combined delay of 30 seconds at most, in Groups I-1 Condition 2, I-2 and I-3, and in Groups
+      I-1 Condition 1 and I-4 sprinklered throughout per 903.3.1.1); a sign within 12 inches above the door''s exit hardware
+      reads PUSH (or PULL) UNTIL ALARM SOUNDS. DOOR CAN BE OPENED IN 15 [30] SECONDS, meeting ICC A117.1''s visual characters
+      (not required where approved in Group I care areas that need restraint or containment); emergency lighting is on the
+      egress side; and the locking device is listed to UL 294 or UL 1034: delayed egress locks aren''t in the model, so a
+      person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_13_controlled_egress
+  kind: flag
+  topic: means_of_egress
+  title: Controlled egress locks in Groups I-1 and I-2 (BCNYS 1010.2.13)
+  applies_when: occupancy_group in ["I-1", "I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 328
+    lines:
+    - 18
+    - 43
+    quote: '1010.2.13 Controlled egress doors in Groups I-1 and I-2. Controlled egress electrical locking systems where egress
+      is controlled by authorized personnel shall be permitted on doors in the means of egress in Group I-1 or I-2 occupancies
+      where the clinical needs of persons receiving care require their containment. Controlled egress doors shall be permitted
+      in such occupancies where the building is equipped throughout with an automatic sprinkler system in accordance with
+      Section 903.3.1.1 or an approved auto- matic smoke detection system installed in accordance with Section 907, provided
+      that the doors are installed and operate in accordance with all of the following: 1. The door’s electric locks shall
+      unlock on actuation of the automatic sprinkler system or automatic smoke detection system allowing immediate free egress.
+      2. The door’s electric locks shall unlock on loss of power to the electrical locking system or to the electric lock
+      mechanism allowing immediate free egress. 3. The electrical locking system shall be installed to have the capability
+      of unlocking the electric locks by a switch located at the fire command center, a nursing station or other approved
+      location. The switch shall directly break power to the electric lock. 4. A building occupant shall not be required to
+      pass through more than one door equipped with a controlled egress locking system before entering an exit. 5. The procedures
+      for unlocking the doors shall be described and approved as part of the emergency planning and preparedness required
+      by Chapter 4 of the Fire Code of New York State. 6. All clinical staff shall have the keys, codes or other means necessary
+      to operate the controlled egress electrical locking systems. 7. Emergency lighting shall be provided at the door. 8.
+      The electromechanical or electromagnetic locking device shall be listed in accordance with either UL 294 or UL 1034.
+      Exceptions: 1. Items 1 through 4 shall not apply to doors to areas occupied by persons who, because of clinical needs,
+      require restraint or containment as part of the function of a psychiatric or cognitive treatment area. 2. Items 1 through
+      4 shall not apply to doors to areas where a listed egress control system is utilized to reduce the risk of child abduction
+      from nursery and obstetric areas of a Group I-2 hospital.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Controlled egress locks, where staff control egress because the clinical needs of persons receiving care require
+      containment, are permitted in Groups I-1 and I-2 in buildings sprinklered throughout per 903.3.1.1 or with an approved
+      automatic smoke detection system per 907, where the locks release on that system and on loss of power, can be released
+      by a switch at the fire command center, a nursing station or another approved place that breaks the lock''s power, no
+      one passes more than one such door before an exit (items 1 to 4 not applying to psychiatric or cognitive treatment areas,
+      or to a listed egress control system against child abduction in a Group I-2 hospital''s nursery and obstetric areas),
+      the unlocking procedures are part of the approved emergency plan (Fire Code Chapter 4), all clinical staff have the
+      keys or codes, emergency lighting is at the door, and the locking device is listed to UL 294 or UL 1034: controlled
+      egress locks aren''t in the model, so a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: Not Group I-1 or I-2.
+  - given:
+      occupancy_group: mixed
+    expect: needs_review
+    note: 'Two or more groups: one may be Group I-1 or I-2, a person checks.'
+  - given: {}
+    expect: needs_review
+    note: 'The occupancy isn''t stated: a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_14_elevator_lobby_doors
+  kind: flag
+  topic: means_of_egress
+  title: Electrically locked exit access doors from elevator lobbies (BCNYS 1010.2.14)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 328
+    lines:
+    - 44
+    - 60
+    quote: '1010.2.14 Elevator lobby exit access doors. Electrically locked exit access doors providing egress from elevator
+      lobbies shall meet the following conditions: 1. For all occupants of the floor, the path of exit access travel to not
+      less than two exits is not required to pass through the elevator lobby. 2. The building is equipped throughout with
+      an automatic sprinkler system in accordance with Section 903.3.1.1, and a fire alarm system in accordance with Section
+      907. Elevator lobbies shall be provided with an automatic smoke detection system in accordance with Section 907. 3.
+      Upon activation of the building fire alarm system by means other than a manual fire alarm box shall automatically unlock
+      the electric locks providing exit access from the elevator lobbies, and the electric locks shall remain unlocked until
+      the fire alarm system is reset. 4. The electric locks shall unlock on loss of power to the electric locks or electrical
+      locking system. 5. The electric locks shall have the capability of being unlocked by a switch located at the fire command
+      center, security station or other approved location. 6. A two-way communication system complying with Sections 1009.8.1
+      and 1009.8.2, shall be located in the elevator lobby adjacent to the electrically locked exit access door and connected
+      to an approved constantly attended station. This constantly attended station shall have the capability of unlocking
+      the electric locks of the elevator lobby exit access doors.'
+  - file: gov.ny.building.2025.pdf
+    page: 329
+    lines:
+    - 3
+    - 4
+    quote: 7. Emergency lighting shall be provided in the elevator lobby on both sides of the electrically locked door. 8.
+      The electromechanical or electromagnetic locking device shall be listed in accordance with either UL 294 or UL 1034.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An electrically locked exit access door from an elevator lobby is permitted only where every occupant of the floor
+      can reach at least two exits without passing through the lobby; the building is sprinklered throughout per 903.3.1.1
+      with a fire alarm system per 907, and the lobby has automatic smoke detection per 907; the fire alarm (other than by
+      a manual box) unlocks it until reset; losing power unlocks it; a switch at the fire command center, a security station
+      or another approved place unlocks it; a two-way communication system per 1009.8.1 and 1009.8.2 beside the door reaches
+      a constantly attended station that can unlock it; emergency lighting is on both sides of the door; and the locking device
+      is listed to UL 294 or UL 1034: electric locks aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e. Shown for every building; 1016.2 item 4's exception
+    names it for an elevator lobby's electrically locked exit access door.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1010_2_15_correctional_facilities
+  kind: flag
+  topic: means_of_egress
+  title: Locked egress doors in correctional and detention facilities (BCNYS 1010.2.15)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 329
+    lines:
+    - 5
+    - 11
+    quote: '1010.2.15 Locking arrangements in buildings within correctional facilities. In buildings within correctional and
+      detention facilities, doors in means of egress serving rooms or spaces occupied by persons whose movements are controlled
+      for security reasons shall be permitted to be locked where equipped with egress control devices that shall unlock manually
+      and by not less than one of the following means: 1. Activation of an automatic sprinkler system installed in accordance
+      with Section 903.3.1.1. 2. Activation of an approved manual fire alarm box. 3. A signal from a constantly attended location.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In buildings within correctional and detention facilities, egress doors serving rooms or spaces of persons whose
+      movements are controlled for security may be locked where their egress control devices unlock by hand and by at least
+      one of a sprinkler system per 903.3.1.1, an approved manual fire alarm box, or a signal from a constantly attended location:
+      whether the building is within such a facility isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 6e. Shown for every building, since "buildings
+    within correctional and detention facilities" isn't one occupancy group.
   drafted_by: claude_code/claude-opus-5-5
   status: draft

@@ -156,6 +156,23 @@ results:
   general.bc_1010_2_5_closet_doors: needs_review
   general.bc_1010_2_6_stairway_doors: needs_review
   general.bc_1010_2_7_educational_locking: not_applicable
+  # section group 6e: 1010.2.8 asks panic or fire exit hardware only in Groups A, E and H, so every door of this
+  # one-group R-2 complies (its hardware not stated); 1010.2.8.1's refrigeration rooms show (special_egress_spaces not
+  # stated); 1010.2.13's controlled egress is for Groups I-1 and I-2 only; the other locking systems aren't in the
+  # model, so each is a person's check
+  general.bc_1010_2_8_panic_hardware: pass
+  general.bc_1010_2_8_1_refrigeration_machinery_rooms: needs_review
+  general.bc_1010_2_8_2_electrical_rooms: needs_review
+  general.bc_1010_2_8_3_panic_hardware_installation: needs_review
+  general.bc_1010_2_8_4_balanced_doors: needs_review
+  general.bc_1010_2_9_access_control: needs_review
+  general.bc_1010_2_10_door_hardware_release: needs_review
+  general.bc_1010_2_11_sensor_release: needs_review
+  general.bc_1010_2_12_delayed_egress: needs_review
+  general.bc_1010_2_12_1_delayed_egress_locking_system: needs_review
+  general.bc_1010_2_13_controlled_egress: not_applicable
+  general.bc_1010_2_14_elevator_lobby_doors: needs_review
+  general.bc_1010_2_15_correctional_facilities: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

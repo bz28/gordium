@@ -310,6 +310,71 @@ pieces:
     heading: Door operations › Locking arrangements in educational occupancies
     rules:
     - general.bc_1010_2_7_educational_locking
+  1010.2.8:
+    label: rule
+    heading: Door operations › Panic and fire exit hardware
+    rules:
+    - general.bc_1010_2_8_panic_hardware
+  1010.2.8.1:
+    label: flag
+    heading: Panic and fire exit hardware › Refrigeration machinery room
+    rules:
+    - general.bc_1010_2_8_1_refrigeration_machinery_rooms
+  1010.2.8.2:
+    label: flag
+    heading: Panic and fire exit hardware › Rooms with electrical equipment
+    rules:
+    - general.bc_1010_2_8_2_electrical_rooms
+  1010.2.8.3:
+    label: flag
+    heading: Panic and fire exit hardware › Installation
+    rules:
+    - general.bc_1010_2_8_3_panic_hardware_installation
+  1010.2.8.4:
+    label: flag
+    heading: Panic and fire exit hardware › Balanced doors
+    rules:
+    - general.bc_1010_2_8_4_balanced_doors
+  1010.2.9:
+    label: flag
+    heading: Door operations › Monitored or recorded egress, and access control systems
+    rules:
+    - general.bc_1010_2_9_access_control
+  1010.2.10:
+    label: flag
+    heading: Door operations › Door hardware release of electrically locked egress doors
+    rules:
+    - general.bc_1010_2_10_door_hardware_release
+  1010.2.11:
+    label: flag
+    heading: Door operations › Sensor release of electrically locked egress doors
+    rules:
+    - general.bc_1010_2_11_sensor_release
+  1010.2.12:
+    label: flag
+    heading: Door operations › Delayed egress
+    rules:
+    - general.bc_1010_2_12_delayed_egress
+  1010.2.12.1:
+    label: flag
+    heading: Delayed egress › Delayed egress locking system
+    rules:
+    - general.bc_1010_2_12_1_delayed_egress_locking_system
+  1010.2.13:
+    label: flag
+    heading: Door operations › Controlled egress doors in Groups I-1 and I-2
+    rules:
+    - general.bc_1010_2_13_controlled_egress
+  1010.2.14:
+    label: flag
+    heading: Door operations › Elevator lobby exit access doors
+    rules:
+    - general.bc_1010_2_14_elevator_lobby_doors
+  1010.2.15:
+    label: flag
+    heading: Door operations › Locking arrangements in buildings within correctional facilities
+    rules:
+    - general.bc_1010_2_15_correctional_facilities
   '1016.2':
     label: rule
     heading: Egress through intervening spaces

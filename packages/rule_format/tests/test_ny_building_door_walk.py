@@ -339,3 +339,90 @@ def test_no_door_swing_passes_short_of_the_law_or_fails_within_it(rules, ctx):
                             bad.append((g, outdoor, swinging, swings, exterior, exit_, load, out, why))
     assert not bad, (len(bad), bad[:5])
     assert {"pass", "fail", "needs_review"} <= seen
+
+
+# ---- section group 6e (2026-11-26): panic and fire exit hardware, 1010.2.8 (p.326 lines 31-39) ----------------------
+# Strict (a pass allowed only here): the door isn't swinging, or has no latch or lock, or its only latch or lock is
+# panic or fire exit hardware, or the building is one stated group other than A, E and H, or one stated Group A or E
+# and the door serves under 50 at the most it can serve.
+# Loosest (a fail allowed only here): a swinging door, latched, without panic or fire exit hardware, in a building
+# stated Group H, or Group E serving 50 or more at the least it can serve; never Group A (exception 1: a main exit's
+# key-operated lock, 1010.2.4 item 3, isn't shown), and never a door that may be to outside where the building's
+# outdoor areas may be occupied (exception 3: an exit access door serving an occupied exterior area, 1010.2.4 item 8).
+PANIC_RULE = "general.bc_1010_2_8_panic_hardware"
+A_GROUPS = ("A-1", "A-2", "A-3", "A-4", "A-5")
+
+
+def _panic_part(swinging, latched, panic, exterior, load):
+    m = {k: v for k, v in (("moe_door_swinging", swinging), ("moe_door_latched", latched),
+                           ("moe_door_panic_hardware", panic), ("moe_door_exterior", exterior)) if v is not U}
+    part = {"id": "p", "measures": m}
+    if isinstance(load, tuple):
+        part["readings"] = {"moe_door_occupant_load": [{"value": v, "named": {"door_occupants_served": n}}
+                                                        for v, n in zip(load, ("none", "whole_building"))]}
+    elif load is not U:
+        m["moe_door_occupant_load"] = load
+    return part
+
+
+def _panic_wrong(out, group, swinging, latched, panic, exterior, load, outdoor):
+    low = high = None
+    if isinstance(load, tuple):
+        low, high = load
+    elif load is not U:
+        low = high = load
+    if out == "pass":
+        ok = swinging is False or latched is False or panic is True or (
+            group is not U and group != "mixed" and group not in A_GROUPS + H_GROUPS + ("E",)) or (
+            group in A_GROUPS + ("E",) and high is not None and high < 50)
+        return None if ok else "passes short of the strict reading"
+    if out == "fail":
+        exception_3 = exterior is not False and outdoor is not False
+        ok = swinging is True and latched is True and panic is False and not exception_3 and (
+            group in H_GROUPS or (group == "E" and low is not None and low >= 50))
+        return None if ok else "fails within the loosest reading"
+    if out == "not_applicable":
+        return "set aside: it applies to every door"
+    return None
+
+
+@pytest.mark.parametrize("outdoor", TRI, ids=("outdoor_yes", "outdoor_no", "outdoor_unstated"))
+def test_no_panic_hardware_row_passes_short_of_the_law_or_fails_within_it(rules, ctx, outdoor):
+    rule = {r["id"]: r for r in rules}[PANIC_RULE]
+    classes = group_classes(rule)
+    assert len(classes) >= 5                                 # A, E, H, mixed, unstated, the rest kept apart
+    bad, seen = [], set()
+    for rep, members in classes.items():
+        if True:
+            given = _given(rep, U) | ({} if outdoor is U else {"occupied_outdoor_areas": outdoor})
+            for swinging, latched, panic, exterior in itertools.product(TRI, TRI, TRI, TRI):
+                for load in LOADS:
+                    part = _panic_part(swinging, latched, panic, exterior, load)
+                    out = parts.rows(rule, {"means_of_egress_door": [part]}, given, ctx.allowed())[0]["outcome"]
+                    seen.add(out)
+                    for g in members:
+                        if why := _panic_wrong(out, g, swinging, latched, panic, exterior, load, outdoor):
+                            bad.append((g, outdoor, swinging, latched, panic, exterior, load, out, why))
+    assert not bad, (len(bad), bad[:5])
+    assert {"pass", "fail", "needs_review"} <= seen
+
+
+def test_the_panic_hardware_walks_collapse_keeps_the_groups_the_law_tells_apart(rules):
+    classes = group_classes({r["id"]: r for r in rules}[PANIC_RULE])
+    where = {g: rep for rep, members in classes.items() for g in members}
+    for a, b in (("A-3", "B"), ("E", "B"), ("H-2", "B"), ("A-3", "E"), ("E", "H-2"), ("A-3", "H-2"), ("mixed", "B"),
+                 (U, "B"), ("mixed", "H-2")):
+        assert where[a] is not where[b], (a, b)
+    assert where["A-1"] == where["A-5"] and where["H-1"] == where["H-5"] and where["B"] == where["R-2"]
+
+
+def test_a_door_whose_hardware_isnt_stated_never_passes_where_1010_2_8_may_ask_it(rules, ctx):
+    """The new fact: a swinging door whose hardware isn't stated (no Revit mark yet) needs review in every building
+    that may be Group A, E or H (stated, two or more groups, or not stated), never a pass."""
+    rule = {r["id"]: r for r in rules}[PANIC_RULE]
+    for g in A_GROUPS + H_GROUPS + ("E", "mixed", U):
+        for load in (U, 50, 120):
+            for outdoor in TRI:
+                given = _given(g, U) | ({} if outdoor is U else {"occupied_outdoor_areas": outdoor})
+                part = _panic_part(True, U, U, False, load)
+                assert _row(rule, part, given, ctx) == "needs_review", (g, load, outdoor)

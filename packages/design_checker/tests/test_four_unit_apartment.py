@@ -427,3 +427,26 @@ def test_a_door_to_outside_asks_whether_the_occupants_use_outdoor_areas(got):
         for i in items:
             asks = [ui_data._from_cause(c, "means_of_egress_door") for c in i.get("causes") or []]
             assert "building.occupied_outdoor_areas" in {a.get("field") for a in asks}, i["name"]
+
+
+# ---- section group 6e (2026-11-26): panic and fire exit hardware ------------------------------------------------------
+
+PANIC = "general.bc_1010_2_8_panic_hardware"
+
+
+def test_panic_hardware_as_sent_and_with_each_doors_hardware_stated(got):
+    """Before: 1010.2.8 complies on every door, its hardware not stated: it asks panic or fire exit hardware only in
+    Groups A, E and H, and the building is one group, R-2. After, every door stated latched by an ordinary latch:
+    still every door complies, and nothing else changes; 1010.2.8.1's refrigeration rooms need review (special egress
+    spaces not stated), and 1010.2.13's controlled egress (Groups I-1 and I-2) doesn't apply."""
+    assert got["results"][PANIC] == "pass"
+    rows = [r for r in got["rows"] if r["rule"] == PANIC]
+    assert len(rows) == 10 and {r["outcome"] for r in rows} == {"pass"}
+    assert got["results"]["general.bc_1010_2_8_1_refrigeration_machinery_rooms"] == present.REVIEW
+    assert got["results"]["general.bc_1010_2_13_controlled_egress"] == "not_applicable"
+    desc = build.interior_of()
+    for d in desc["doors"]:
+        d["hardware"] = "latch"
+    stated = _check(desc, egress.measure_routes(desc))
+    assert {r["outcome"] for r in stated["rows"] if r["rule"] == PANIC} == {"pass"}
+    assert {k for k in got["results"] if stated["results"][k] != got["results"][k]} == set()
