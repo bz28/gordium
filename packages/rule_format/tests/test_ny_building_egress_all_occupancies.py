@@ -366,7 +366,7 @@ HANDLERS = {
     "716": ("general.bc_table_1010_2_4_inactive_leaf_bolts", "716"),
     "403.5.3": ("general.bc_1010_2_6_stairway_doors", "403.5.3"),
     # section group 9a: 1003.2's exceptions (each only loosens the 7 ft 6 in; the flag never passes), 1003.5's
-    # exceptions and its stair, handrail and seating-aisle references, 1003.7's elevators (section group 9b's 1009)
+    # exceptions and its stair, handrail and seating-aisle references, 1003.7's elevators (section group 9c's 1009)
     "1011.3": ("general.bc_1003_2_ceiling_height", "1011.3"), "1208.2": ("general.bc_1003_2_ceiling_height", "1208.2"),
     "406.2.2": ("general.bc_1003_2_ceiling_height", "406.2.2"), "505.2": ("general.bc_1003_2_ceiling_height", "505.2"),
     "1011.5": ("general.bc_1003_5_elevation_change", "1011.5"),
