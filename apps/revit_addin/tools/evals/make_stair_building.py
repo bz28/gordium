@@ -8,7 +8,7 @@ variants:
 
     stair_enclosure_compliant.yaml   every stair, handrail and guard figure within the 2025 Building Code of New York
                                       State's limits (worked by hand in the file's header)
-    stair_enclosure_failing.yaml     the same stair with known failures, each past any exception's figure too: 8 in
+    stair_enclosure_failing.yaml     the same stair with known failures, each past every exception open to it: 8 in
                                       risers (1011.5.2: at most 7 in; 7 3/4 in within a dwelling unit), a beam leaving
                                       76 in of headroom over the upper flight (1011.3: 80 in), no handrail on the upper
                                       flight's wall side (1011.11: both sides), and a 34 in guard (1015.3: 42 in; 36 in
@@ -148,7 +148,7 @@ HEADERS = {
 # open landing edge guarded 42 in high (1015.3: 42 in), no opening in it over 3.5 in (1015.4: a 4 in sphere doesn't
 # pass); each handrail runs one tread past the bottom nosing and 12 in past the top one (1014.7). Each story's door
 # from its corridor is marked an exit stair enclosure: the stair is in no dwelling unit. Not described (so not
-# claimed): the handrails' height and grip (1014.2, 1014.3) and the landings' own outlines.
+# claimed): the handrails' height and grip (1014.2, 1014.4) and the landings' own outlines.
 # Gordium's own test building, not a real project.
 """,
     True: """# The stair test building, failing: the compliant one (stair_enclosure_compliant.yaml) with known failures
