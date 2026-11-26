@@ -3,8 +3,8 @@
 # Risers 8 in, so 144 in floor to floor (1011.5.2: at most 7 in; 7 3/4 in within a dwelling unit); a beam over flight
 # 2 leaving 76 in of headroom above its nosings (1011.3: 80 in); no handrail on flight 2's north wall side (its right,
 # looking up; 1011.11: on both sides), so 40.5 in clear at its one handrail; Level 2's landing guard 34 in high
-# (1015.3: 42 in; 36 in within a dwelling unit). Each failure is past any exception's figure, and the stair is marked
-# in no dwelling unit as the compliant one is. Everything else as the compliant variant. Gordium's own test building,
+# (1015.3: 42 in; 36 in within a dwelling unit). Each failure is past every exception open to this stair (an R-2
+# building's stair, marked in no dwelling unit as the compliant one is; a guard at a landing). Everything else as the compliant variant. Gordium's own test building,
 # not a real project.
 
 format: gordium.interior/1
@@ -136,12 +136,12 @@ stairs:
   handrails:
   - side: left
     inner_edge:
-    - [44, 40.5]
-    - [132, 40.5]
+    - [33, 40.5]
+    - [144, 40.5]
   - side: right
     inner_edge:
-    - [44, 3.5]
-    - [132, 3.5]
+    - [33, 3.5]
+    - [144, 3.5]
   overhead:
   - - [0, 0, 132]
     - [44, 0, 132]
@@ -184,8 +184,8 @@ stairs:
   handrails:
   - side: left
     inner_edge:
-    - [132, 51.5]
-    - [44, 51.5]
+    - [143, 51.5]
+    - [32, 51.5]
   overhead:
   - - [0, 0, 252]
     - [176, 0, 252]

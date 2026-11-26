@@ -73,8 +73,10 @@ def _variant(failing: bool) -> dict:
         # looking up the stair (toward +x): left is the centre wall (north), right the south wall
         "sides": {"left": plan((LANDING - 12, f1["y1"]), (LANDING + run + 12, f1["y1"])),
                   "right": plan((LANDING - 12, f1["y0"]), (LANDING + run + 12, f1["y0"]))},
-        "handrails": [{"side": "left", "inner_edge": plan((LANDING, f1["y1"] - RAIL), (LANDING + run, f1["y1"] - RAIL))},
-                      {"side": "right", "inner_edge": plan((LANDING, f1["y0"] + RAIL), (LANDING + run, f1["y0"] + RAIL))}],
+        # each handrail one tread past the bottom nosing and 12 in past the top one (1014.7: not continuous between
+        # flights), within the sides
+        "handrails": [{"side": "left", "inner_edge": plan((LANDING - TREAD, f1["y1"] - RAIL), (LANDING + run + 12, f1["y1"] - RAIL))},
+                      {"side": "right", "inner_edge": plan((LANDING - TREAD, f1["y0"] + RAIL), (LANDING + run + 12, f1["y0"] + RAIL))}],
         # above it: Level 2's landing slab over x 0..44, the enclosure's ceiling beyond
         "overhead": [[[0, 0, slab], [LANDING, 0, slab], [LANDING, wide, slab], [0, wide, slab]],
                      [[LANDING, 0, ceiling], [long_, 0, ceiling], [long_, wide, ceiling], [LANDING, wide, ceiling]]],
@@ -86,9 +88,9 @@ def _variant(failing: bool) -> dict:
         # looking up the stair (toward -x): left is the centre wall (south), right the north wall
         "sides": {"left": plan((LANDING + run + 12, f2["y0"]), (LANDING - 12, f2["y0"])),
                   "right": plan((LANDING + run + 12, f2["y1"]), (LANDING - 12, f2["y1"]))},
-        "handrails": [{"side": "left", "inner_edge": plan((LANDING + run, f2["y0"] + RAIL), (LANDING, f2["y0"] + RAIL))}]
+        "handrails": [{"side": "left", "inner_edge": plan((LANDING + run + TREAD, f2["y0"] + RAIL), (LANDING - 12, f2["y0"] + RAIL))}]
         + ([] if failing else
-           [{"side": "right", "inner_edge": plan((LANDING + run, f2["y1"] - RAIL), (LANDING, f2["y1"] - RAIL))}]),
+           [{"side": "right", "inner_edge": plan((LANDING + run + TREAD, f2["y1"] - RAIL), (LANDING - 12, f2["y1"] - RAIL))}]),
         "overhead": [[[0, 0, ceiling], [long_, 0, ceiling], [long_, wide, ceiling], [0, wide, ceiling]]]
         + ([[[BEAM[0], f2["y0"], beam], [BEAM[1], f2["y0"], beam], [BEAM[1], f2["y1"], beam], [BEAM[0], f2["y1"], beam]]]
            if failing else []),
@@ -144,7 +146,9 @@ HEADERS = {
 # 3.5 in (1014.9: at most 4 1/2 in), so 37 in clear between them; headroom over flight 1 at its first nosing 105 - 6.5
 # = 98.5 in, and over flight 2 108 in to the ceiling (1011.3: 80 in); landings 44 in deep (1011.6: the stair's width); Level 2's
 # open landing edge guarded 42 in high (1015.3: 42 in), no opening in it over 3.5 in (1015.4: a 4 in sphere doesn't
-# pass). Each story's door from its corridor is marked an exit stair enclosure: the stair is in no dwelling unit.
+# pass); each handrail runs one tread past the bottom nosing and 12 in past the top one (1014.7). Each story's door
+# from its corridor is marked an exit stair enclosure: the stair is in no dwelling unit. Not described (so not
+# claimed): the handrails' height and grip (1014.2, 1014.3) and the landings' own outlines.
 # Gordium's own test building, not a real project.
 """,
     True: """# The stair test building, failing: the compliant one (stair_enclosure_compliant.yaml) with known failures
@@ -152,8 +156,8 @@ HEADERS = {
 # Risers 8 in, so 144 in floor to floor (1011.5.2: at most 7 in; 7 3/4 in within a dwelling unit); a beam over flight
 # 2 leaving 76 in of headroom above its nosings (1011.3: 80 in); no handrail on flight 2's north wall side (its right,
 # looking up; 1011.11: on both sides), so 40.5 in clear at its one handrail; Level 2's landing guard 34 in high
-# (1015.3: 42 in; 36 in within a dwelling unit). Each failure is past any exception's figure, and the stair is marked
-# in no dwelling unit as the compliant one is. Everything else as the compliant variant. Gordium's own test building,
+# (1015.3: 42 in; 36 in within a dwelling unit). Each failure is past every exception open to this stair (an R-2
+# building's stair, marked in no dwelling unit as the compliant one is; a guard at a landing). Everything else as the compliant variant. Gordium's own test building,
 # not a real project.
 """,
 }

@@ -5,7 +5,9 @@
 # 3.5 in (1014.9: at most 4 1/2 in), so 37 in clear between them; headroom over flight 1 at its first nosing 105 - 6.5
 # = 98.5 in, and over flight 2 108 in to the ceiling (1011.3: 80 in); landings 44 in deep (1011.6: the stair's width); Level 2's
 # open landing edge guarded 42 in high (1015.3: 42 in), no opening in it over 3.5 in (1015.4: a 4 in sphere doesn't
-# pass). Each story's door from its corridor is marked an exit stair enclosure: the stair is in no dwelling unit.
+# pass); each handrail runs one tread past the bottom nosing and 12 in past the top one (1014.7). Each story's door
+# from its corridor is marked an exit stair enclosure: the stair is in no dwelling unit. Not described (so not
+# claimed): the handrails' height and grip (1014.2, 1014.3) and the landings' own outlines.
 # Gordium's own test building, not a real project.
 
 format: gordium.interior/1
@@ -137,12 +139,12 @@ stairs:
   handrails:
   - side: left
     inner_edge:
-    - [44, 40.5]
-    - [132, 40.5]
+    - [33, 40.5]
+    - [144, 40.5]
   - side: right
     inner_edge:
-    - [44, 3.5]
-    - [132, 3.5]
+    - [33, 3.5]
+    - [144, 3.5]
   overhead:
   - - [0, 0, 105.0]
     - [44, 0, 105.0]
@@ -185,12 +187,12 @@ stairs:
   handrails:
   - side: left
     inner_edge:
-    - [132, 51.5]
-    - [44, 51.5]
+    - [143, 51.5]
+    - [32, 51.5]
   - side: right
     inner_edge:
-    - [132, 88.5]
-    - [44, 88.5]
+    - [143, 88.5]
+    - [32, 88.5]
   overhead:
   - - [0, 0, 225.0]
     - [176, 0, 225.0]

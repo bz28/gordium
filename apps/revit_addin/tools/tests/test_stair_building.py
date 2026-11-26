@@ -57,7 +57,22 @@ def test_the_failing_stair_breaks_exactly_the_limits_it_was_built_to():
         m = stairs[f]["measures"]
         assert m["stair_tread_depth"] == 11 and m["stair_clear_width"] == 44 and m["stair_riser_variation"] == 0
     assert stairs["f1"]["more"]["stair_clear_width_at_handrail"] == 37
+    assert stairs["f2"]["more"]["stair_clear_width_at_handrail"] == 40.5                  # its one handrail (round 4)
     assert guards["g1"]["measures"]["guard_opening_sphere"] == 3.5
+
+
+def test_each_handrail_extends_past_its_flights_nosings():
+    # 1014.7 (review round 4): handrails not continuous between flights run 12 in past the top nosing and one tread
+    # past the bottom one; measured along the run from each flight's own first and top nosings
+    import yaml
+    for variant in ("compliant", "failing"):
+        d = yaml.safe_load((HERE / f"stair_enclosure_{variant}.yaml").read_text(encoding="utf-8"))
+        for st in d["stairs"]:
+            first, top = st["nosings"][0][0][0], st["nosings"][-1][0][0]
+            up = 1 if top > first else -1
+            for rail in st["handrails"]:
+                xs = [x * up for x, _ in rail["inner_edge"]]
+                assert min(xs) <= first * up - 11 and max(xs) >= top * up + 12, (variant, st["id"], rail)
 
 
 def test_the_stair_is_marked_outside_every_dwelling_unit_and_level_2_is_open_over_the_flights():
