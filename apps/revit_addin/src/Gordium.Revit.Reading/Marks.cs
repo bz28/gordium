@@ -183,14 +183,15 @@ public static class Marks
         "Gordium: Well ladder encroachment", new("f9c44848-4643-4aca-a1c2-e073d03694d8"), MarkValueKind.Length, MarkBinding.Instance,
         [Windows, Doors], "openings[].stated_well.ladder_encroachment",
         LengthWords + Projected + "how far the area well's ladder or steps (blocked or not) reach into the well's required dimensions (the 36 in by 36 in clear zone); 0 where they reach into none. " +
-        "BCNYS 1031.5.1 exception: \"The ladder or steps required by Section 1031.5.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well.\" " +
+        "BCNYS 1031.5.1 exception: \"The ladder or steps required by Section 1031.5.2 shall be permitted to encroach not more than 6 inches (152 mm) into the required dimensions of the area well.\" (RCNYS R319.4.1 has the same words.) " +
+        "Only a ladder or steps a well over 44 in deep requires, clear of the open window, may reach in, 6 in at most; any other reach fails the well's size (one the open window blocks, within 6 in, needs review). " +
         "Blank, with a ladder or steps: the well's size rules need review (with Gordium: Well ladder or steps None, it is 0).");
 
     public static readonly MarkDefinition WellOtherEncroachment = new(
         "Gordium: Well other encroachment", new("961cebf6-451f-4b59-8151-f10eedcf1db5"), MarkValueKind.Length, MarkBinding.Instance,
         [Windows, Doors], "openings[].stated_well.other_encroachment",
         LengthWords + Projected + "how far anything in the area well other than its ladder or steps (a meter, a downspout, a bracket) reaches into the well's required dimensions (the 36 in by 36 in clear zone); 0 where nothing does. " +
-        "No exception allows it (BCNYS 1031.5.1). Blank: the well's size rules need review.");
+        "No exception allows it (BCNYS 1031.5.1, RCNYS R319.4.1): anything over 0 fails the well's size. Blank: the well's size rules need review.");
 
     /// <summary>The area well marks, in the order the reader sends them, each with the <c>stated_well</c> key it fills.</summary>
     public static IReadOnlyList<(MarkDefinition Mark, string Key)> WellMarks { get; } =

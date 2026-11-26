@@ -14,7 +14,11 @@ def test_an_area_well_size_rows_reach_is_said_in_words_and_its_values_never_roun
                                               "area_well_other_encroachment": 0.04})
     assert need.startswith("area well width 3'-0\" min; nothing else in its required dimensions") and "per formula" not in need
     assert "area well ladder encroachment 6 1/8\"" in have and "area well other encroachment 1/8\"" in have, have
-    assert "area well depth 3'-8\"" in have and "ladder or steps clear of the open window yes" in have, have
+    assert "area well depth over 3'-8\"" in have and "ladder or steps clear of the open window yes" in have, have
+    # with nothing reaching in, the ladder and depth decide nothing and aren't shown
+    _, have = required_and_proposed(rule, {"area_well_width": 40, "area_well_ladder": False, "area_well_depth": 30,
+                                           "area_well_ladder_encroachment": 0, "area_well_other_encroachment": 0})
+    assert "clear of the open window" not in have and "depth" not in have, have
     # R319.4.2's check reads the ladder alone: never set aside
     ladder = next(r for r in book["rules"] if r["id"] == "general.r319_4_2_area_well_ladder_over_44")
     assert required_and_proposed(ladder, {"area_well_ladder": False})[0] == "yes"

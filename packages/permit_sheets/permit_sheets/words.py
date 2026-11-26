@@ -125,11 +125,21 @@ def measure_words(m: str) -> str:
 # words: an area well's size rules also read what reaches into the well (RCNYS R319.4.1's exception: only the ladder or
 # steps a well over 44 in deep requires, 6 in at most), which the "Required" column says in words, never as a formula
 ASIDE = (({"area_well_other_encroachment", "area_well_ladder_encroachment", "area_well_depth", "area_well_ladder"},
-          "nothing else in its required dimensions but the required ladder or steps (6 in at most)"),)
+          "nothing else in its required dimensions but the ladder or steps a well over 44 in deep requires, clear of "
+          "the open window (6 in at most)"),)
 
 
 # the set-aside measures' own words on a sheet (area_well_ladder is a ladder or steps the open window doesn't obstruct)
 ASIDE_WORDS = {"area_well_ladder": "ladder or steps clear of the open window"}
+
+
+def _aside_value(m: str, v, unit: str) -> str:
+    """A set-aside measure's value, rounded the way that never favours compliance: a reach (at most) up, the depth
+    (more than 44 in decides) down, said "over" where it is past 44 in but rounds to it."""
+    if m == "area_well_depth":
+        shown = value(v, unit, toward(ast.Gt, True))
+        return f"over {shown}" if isinstance(v, (int, float)) and v > 44 and shown == value(44, unit) else shown
+    return value(v, unit, toward(ast.LtE, True))
 
 
 def _aside(node) -> str | None:
@@ -234,7 +244,8 @@ def required_and_proposed(rule: dict, values: dict, allowed: dict | None = None)
         have.append(f"{label}{value(values.get(m), unit, toward(op, True))}")
     # the measures set aside, as the part has them (the value that may decide a fail is never hidden)
     # rounded the way that never favours compliance: a reach (at most) up, the depth (more than 44 in) down
-    have += [f"{ASIDE_WORDS.get(m, measure_words(m))} "
-             f"{value(values.get(m), unit_of(kind, m), toward(ast.Gt if m == 'area_well_depth' else ast.LtE, True))}"
+    if values.get("area_well_ladder_encroachment") == 0:       # nothing reaches in: the ladder and depth decide nothing
+        shown_aside = [m for m in shown_aside if m not in ("area_well_ladder", "area_well_depth")]
+    have += [f"{ASIDE_WORDS.get(m, measure_words(m))} {_aside_value(m, values.get(m), unit_of(kind, m))}"
              for m in shown_aside]
     return "; ".join(need + aside), "; ".join(have)

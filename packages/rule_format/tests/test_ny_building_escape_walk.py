@@ -219,7 +219,8 @@ def _clear_cases():
                 # well over 44 in deep): walked there alone, so the walk stays as quick as it was
                 for accepted in (TRI if ladder not in (U, 0) and depth == 45 else (U,)):
                     yield _well(area_well_other_encroachment=other, area_well_ladder_encroachment=ladder,
-                                area_well_depth=depth, area_well_ladder=accepted),                         _clear(other, ladder, depth, accepted), _crowded(other, ladder, depth)
+                                area_well_depth=depth, area_well_ladder=accepted), \
+                        _clear(other, ladder, depth, accepted), _crowded(other, ladder, depth)
 
 
 def _required_cases():

@@ -17715,7 +17715,7 @@ rules:
     sources:
     - rank: 4
       cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
-        quoting the IRC''s window well sections (R310.2.3), the same exception'
+        quoting the IRC''s ladder sentence of that edition (R310.2.3.1)'
       url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
       quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
         a permanently affixed ladder or steps usable with the window in the fully open position.'
@@ -17725,10 +17725,11 @@ rules:
       words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
       (or unstated) ladder needs review, never a pass. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
       (the same words) reads it the same way. Searched (2026-11-26): 1031.5.1 and 1031.5.2 whole, RCNYS R319.4.1 and R319.4.2
-      (the same words), a web search for ICC commentary (none found; New York State''s code interpretations not searched),
-      and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the required ladder or steps
-      "usable with the window in the fully open position" (leaning toward the plain reading) but says nothing of an obstructed
-      ladder''s reach.'
+      (the same words), a web search for ICC commentary (none found), a web search for New York State Department of State
+      code interpretations (2026-11-26: none on an obstructed well ladder found; only New York City''s own Building Code,
+      a separate code, came up), and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the
+      required ladder or steps "usable with the window in the fully open position" (leaning toward the plain reading) but
+      says nothing of an obstructed ladder''s reach.'
   revised:
   - field: check
     by: Claude for Ben (R319.4.1 area well reaches, review round 2)
@@ -17771,13 +17772,19 @@ rules:
       one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
       this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
   - field: notes
-    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
     date: 2026-11-26
-    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
-      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
-      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
-      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
-      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
+      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
+      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
+      none found on the point).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
+      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
+      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
+      none found on the point).'
 - id: general.bc_1031_5_1_area_well_min_projection
   kind: rule
   topic: means_of_egress
@@ -18335,7 +18342,7 @@ rules:
     sources:
     - rank: 4
       cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
-        quoting the IRC''s window well sections (R310.2.3), the same exception'
+        quoting the IRC''s ladder sentence of that edition (R310.2.3.1)'
       url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
       quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
         a permanently affixed ladder or steps usable with the window in the fully open position.'
@@ -18345,10 +18352,11 @@ rules:
       words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
       (or unstated) ladder needs review, never a pass. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
       (the same words) reads it the same way. Searched (2026-11-26): 1031.5.1 and 1031.5.2 whole, RCNYS R319.4.1 and R319.4.2
-      (the same words), a web search for ICC commentary (none found; New York State''s code interpretations not searched),
-      and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the required ladder or steps
-      "usable with the window in the fully open position" (leaning toward the plain reading) but says nothing of an obstructed
-      ladder''s reach.'
+      (the same words), a web search for ICC commentary (none found), a web search for New York State Department of State
+      code interpretations (2026-11-26: none on an obstructed well ladder found; only New York City''s own Building Code,
+      a separate code, came up), and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the
+      required ladder or steps "usable with the window in the fully open position" (leaning toward the plain reading) but
+      says nothing of an obstructed ladder''s reach.'
   revised:
   - field: check
     by: Claude for Ben (R319.4.1 area well reaches, review round 2)
@@ -18391,13 +18399,19 @@ rules:
       one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
       this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
   - field: notes
-    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
     date: 2026-11-26
-    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
-      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
-      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
-      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
-      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
+      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
+      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
+      none found on the point).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
+      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
+      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
+      none found on the point).'
 - id: general.bc_1031_5_1_area_well_min_width
   kind: rule
   topic: means_of_egress
@@ -18955,7 +18969,7 @@ rules:
     sources:
     - rank: 4
       cite: 'City of Boise, Planning and Development Services handout #438, Emergency escape and rescue openings (03/2022),
-        quoting the IRC''s window well sections (R310.2.3), the same exception'
+        quoting the IRC''s ladder sentence of that edition (R310.2.3.1)'
       url: https://www.cityofboise.org/media/14485/438_egress-windows-code-hand-out-2022_final.pdf
       quote: 'Ladder and steps: Window wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with
         a permanently affixed ladder or steps usable with the window in the fully open position.'
@@ -18965,10 +18979,11 @@ rules:
       words name the ladder the section requires, not one that complies with it, so a reach of 6 in or less by an obstructed
       (or unstated) ladder needs review, never a pass. 1031.5.2''s own rule fails the obstruction either way. RCNYS R319.4.1
       (the same words) reads it the same way. Searched (2026-11-26): 1031.5.1 and 1031.5.2 whole, RCNYS R319.4.1 and R319.4.2
-      (the same words), a web search for ICC commentary (none found; New York State''s code interpretations not searched),
-      and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the required ladder or steps
-      "usable with the window in the fully open position" (leaning toward the plain reading) but says nothing of an obstructed
-      ladder''s reach.'
+      (the same words), a web search for ICC commentary (none found), a web search for New York State Department of State
+      code interpretations (2026-11-26: none on an obstructed well ladder found; only New York City''s own Building Code,
+      a separate code, came up), and the City of Boise''s handout on the IRC''s same sections, whose earlier wording has the
+      required ladder or steps "usable with the window in the fully open position" (leaning toward the plain reading) but
+      says nothing of an obstructed ladder''s reach.'
   revised:
   - field: check
     by: Claude for Ben (R319.4.1 area well reaches, review round 2)
@@ -19011,13 +19026,19 @@ rules:
       one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
       this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
   - field: notes
-    by: Claude for Ben (R319.4.1 area well reaches, review round 2)
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
     date: 2026-11-26
-    why: 'PR feat/r319-well-encroachment''s review round 2: the exception names "The ladder or steps required by Section 1031.5.2",
-      which 1031.5.2 says "shall not be obstructed by the emergency escape and rescue opening when the window or door is in
-      the open position", so the 6 in reach is allowed only an unobstructed one (area_well_ladder); an obstructed or unstated
-      one within 6 in needs review (an open question), never a pass. The measuring''s size hold-back (PR #247) had covered
-      this; with the size rules reading the reaches themselves it went, so the rules read it now, as RCNYS R319.4.1''s do.'
+    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
+      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
+      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
+      none found on the point).'
+  - field: research
+    by: Claude for Ben (R319.4.1 area well reaches, review round 3)
+    date: 2026-11-26
+    why: 'PR feat/r319-well-encroachment''s review rounds 3 and 4: the notes say the 6 in is allowed only a required ladder
+      or steps not obstructed by the open window, an obstructed or unstated one within 6 in a review; the research cites the
+      City of Boise handout''s ladder sentence and records what was searched (ICC commentary and New York State''s code interpretations:
+      none found on the point).'
 - id: general.bc_1031_5_1_area_well_allows_full_opening
   kind: rule
   topic: means_of_egress
