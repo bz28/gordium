@@ -368,3 +368,11 @@ def test_the_unknown_reason_names_only_the_figures_that_left_it_unknown():
     escape_openings.link(parts, desc, _ny_rules())
     why = parts["sleeping_room"][0]["not_measured"]["sleeping_room_compliant_openings"]
     assert "opening_net_clear_area" in why and "area_well" not in why
+
+
+def test_a_rule_held_within_another_kind_leaves_compliance_unknown():
+    """Review round 4 of 8d: an opening rule within another kind (a basement-only requirement) isn't a sleeping room
+    opening's, so no limits are held (never a wrong fail on a requirement the room's opening doesn't have)."""
+    rules = _ny_rules()
+    other = [dict(r, within="basement") if r["id"].endswith("min_area") else r for r in rules]
+    assert escape_openings.limits(rules) and escape_openings.limits(other) == []

@@ -159,6 +159,8 @@ def limits(rules) -> list[str]:
     counting = [r for r in rules if isinstance(r.get("check"), str) and COUNT in r["check"]]
     if not over or any(not isinstance(r.get("limit"), str) for r in over):
         return []
+    if any(r.get("within") != KIND for r in over):       # review round 4: a rule held within another kind (a
+        return []                                         # basement's) isn't a sleeping room opening's requirement
     if any(part_rules.rule_problems(r) for r in over + counting):   # review round 3: a rule its own validation
         return []                                                     # refuses (a drifted limit) never counts
     if len({_when(r) for r in over + counting}) != 1:
