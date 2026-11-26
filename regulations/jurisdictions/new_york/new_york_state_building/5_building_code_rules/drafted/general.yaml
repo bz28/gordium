@@ -15378,6 +15378,10 @@ rules:
     reason: 'No escape opening marked, in a Group R-2 or R-3 building sprinklered throughout (stated, or not ruled out): exception
       5 sets it aside for a sleeping room in a basement that has two means of egress, or one and an escape opening; whether
       the room is in a basement, and the basement''s egress, aren''t shown: a person checks.'
+  - when: sleeping_room_escape_openings >= 1 and not sleeping_room_fourth_or_higher and not (occupancy_group in ["R-2"] and
+      not sleeping_room_story_one_exit)
+    reason: 'An escape opening is marked, but 1031.2 asks for one in accordance with this section: its size, sill height
+      and any area well (1031.3 to 1031.6) aren''t checked yet: a person checks.'
   - when: occupancy_group in ["mixed"] and not sleeping_room_escape_openings >= 1
     reason: 'No escape opening marked, in a building of two or more groups: whether the room is in a Group R-2, R-3 or R-4
       occupancy that 1031.2 asks it of isn''t shown: a person checks.'
@@ -15428,9 +15432,10 @@ rules:
           sleeping_room_door_to_outside: false
     rows:
     - part: r1
-      outcome: pass
-    expect: pass
-    note: One escape opening marked.
+      outcome: needs_review
+    expect: needs_review
+    note: 'One escape opening marked: its size and sill (1031.3 to 1031.6, section group 8b) aren''t checked yet, so a
+      person checks (review round 2).'
   - given:
       occupancy_group: R-3
       sprinklered_903_3_1_1: false
@@ -15595,16 +15600,16 @@ rules:
     note: 'No sleeping room read: a dwelling''s sleeping rooms may not be drawn, a person checks.'
   notes: 'Section group 8a: every sleeping room the description states (`sleeping: true`), never a room it says isn''t one;
     an enclosed space with no room drawn in it needs review. Its escape openings are those the description marks in it; whether
-    it is below the fourth story above grade plane, and its story''s exits, are its story''s, as the routes read them (not
-    measured: a review). It complies with an opening marked (each opening''s own requirements are its own checks: 1031.2''s
-    public way and 1031.2.1''s operation here, 1031.3 to 1031.6 to follow), on the fourth story or higher, or in Group R-2
-    where its occupants are shown to have access to two or more exits (item 1: "stories with only one exit or access to
-    only one exit"; a story''s two exits don''t show it, since each dwelling unit may reach only one under Table 1006.3.4(1),
-    so there it needs review: review round 1).
-    It fails a sleeping room with none in Group R-3 or R-4, or Group R-2 on a story with one exit, below the fourth story,
-    with no door to outside (exception 2) and, in Group R-2 or R-3, no sprinkler system (exception 5). Exceptions 1 and 3
-    are for basements (their own flag); exception 4''s storm shelters (ICC 500) aren''t sleeping rooms (Gordium''s reading).
-    New York''s 1031.2 names no Group I-1. Hand-drafted in a Claude Code session (2026-11-26).'
+    it is below the fourth story above grade plane, and its story''s exits, are its story''s, as the routes read them (not measured:
+    a review). It complies on the fourth story or higher, or in Group R-2 where its occupants are shown to have access to two
+    or more exits (item 1: "stories with only one exit or access to only one exit"; a story''s two exits don''t show it, since
+    each dwelling unit may reach only one under Table 1006.3.4(1), so there it needs review: review round 1). With an opening
+    marked it needs review until the opening''s size, sill and area well are checked (1031.3 to 1031.6, section group 8b: review
+    round 2; 1031.2''s public way and 1031.2.1''s operation are their own flags). It fails a sleeping room with none in Group
+    R-3 or R-4, or Group R-2 on a story with one exit, below the fourth story, with no door to outside (exception 2) and, in
+    Group R-2 or R-3, no sprinkler system (exception 5). Exceptions 1 and 3 are for basements (their own flag); exception 4''s
+    storm shelters (ICC 500) aren''t sleeping rooms (Gordium''s reading). New York''s 1031.2 names no Group I-1. Hand-drafted
+    in a Claude Code session (2026-11-26).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1031_2_basements

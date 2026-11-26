@@ -7,10 +7,11 @@ more, and not stated), each sleeping room fact yes, no and not measured, its esc
 story's exits 1, 2 or not measured, and the sprinkler systems stated none, one, or not stated. The oracle is written
 from the page here, never from the rule:
 
-- **Strict** (a pass allowed only here): an escape opening is marked in the room, or the room is on the fourth story
-  above grade plane or higher, or the building is stated Group R-2 and the room's story has two or more exits (item 1
-  asks Group R-2 only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit:
-  Gordium's reading, no one-exit allowance taken on a story with two).
+- **Strict** (a pass allowed only here): the room is on the fourth story above grade plane or higher, or the building
+  is stated Group R-2 and the room's occupants are shown to have access to two or more exits (item 1 asks Group R-2
+  only in stories with one exit or access to one exit, as Tables 1006.3.4(1) and (2) permit; a story's two exits
+  don't show it: review round 1). A marked opening alone isn't a pass until its size and sill are checked (1031.3 to
+  1031.6, section group 8b: review round 2).
 - **Loosest** (a fail allowed only here): a building stated Group R-3 or R-4, or Group R-2 with the room's story at
   one exit; no opening marked; below the fourth story; no door of the room to outside (exception 2: an exit door to a
   public way, yard, court or exterior egress balcony); and in Group R-2 or R-3 no sprinkler system stated (exception 5:
@@ -82,8 +83,7 @@ def _wrong(out, group, openings, fourth, exits, door, sprinkler):
     if group is not U and group not in ("R-2", "R-3", "R-4", "mixed"):
         return "not set aside where 1031.2 asks nothing"
     if out == "pass":
-        ok = (openings is not U and openings >= 1) or fourth is True or (
-            group == "R-2" and exits is False)
+        ok = fourth is True or (group == "R-2" and exits is False)
         return None if ok else "passes short of the strict reading"
     if out == "fail":
         required = group in ("R-3", "R-4") or (group == "R-2" and exits is True)
@@ -118,3 +118,14 @@ def test_no_sleeping_room_read_never_passes(rules, ctx):
             == "needs_review", group
         assert parts.rows(rule, {"sleeping_room": None}, _given(group, "none"), ctx.allowed())[0]["outcome"] \
             == "needs_review", group
+
+
+def test_a_marked_opening_alone_needs_review_until_its_size_is_checked(rules, ctx):
+    """Review round 2 of group 8a: 1031.2 asks for an opening "in accordance with this section"; until 1031.3 to 1031.6
+    (size, sill, area wells) are checked, a sleeping room that 1031.2 may ask passes on a marked opening never."""
+    rule = {r["id"]: r for r in rules}[RULE]
+    for group in ("R-2", "R-3", "R-4", "mixed", U):
+        out = parts.rows(rule, {"sleeping_room": [_part(1, False, True, False)]}, _given(group, "none"),
+                         ctx.allowed())[0]["outcome"]
+        assert out == "needs_review", group
+
