@@ -69,6 +69,9 @@ def row(kinds, joins, uses=("other", "other", "other"), corridor=None, function=
             doors.append(door(f"e{i}", ((xs[i][0] + xs[i][1]) / 2, 10.25), (1, 0), (f"r{i}", "c")))
         top = 16.5
     desc = description(rooms, doors, passages)
+    desc["stairs"] = []                                  # no stair, ramp or ladder on the story: said, as a host says it
+    desc["has_none"] = [{"kind": k, "source": "the test's row: none drawn"}
+                        for k in ("ramp", "alternating_tread_device", "ships_ladder")]
     if within is not None:
         desc["building"] = {"corridors_within_dwelling_units": within}
     desc["story_outlines"] = [{"level": "L1", "outer": [[-0.5, -0.5], [x + 0.5, -0.5], [x + 0.5, top + 0.5],
@@ -216,6 +219,10 @@ def test_the_four_unit_apartment_its_apartments_reach_the_outside_only_by_the_co
     import make_ny_build_data as build
     interior = build.interior_of()
     interior["building"] = {**interior["building"], "corridors_within_dwelling_units": False}
+    # its stairs within the two enclosures (exits), and no ramp or ladder: said, as the Revit reader says them
+    interior["stairs"] = [{"id": f"flight {x}", "nosings": [[[x, 13, 0], [x, 17, 0]]]} for x in (4.5, 55.5)]
+    interior["has_none"] = [{"kind": k, "source": "the eval building: none drawn"}
+                            for k in ("ramp", "alternating_tread_device", "ships_ladder")]
     assert [s["measures"][OUTSIDE_FACT] for s in measure(interior)["parts"]["story"]] == [False, False]
     got = measure(json.loads(APARTMENT.read_text(encoding="utf-8"))["interior"])
     for s in got["parts"]["story"]:
@@ -308,3 +315,19 @@ def test_a_stair_within_a_space_on_the_shared_corridor_is_never_a_no():
     assert _story(desc)["measures"][OUTSIDE_FACT] is False
     desc["stairs"] = [{"id": "st", "nosings": "unreadable"}]
     assert _story(desc)["measures"].get(OUTSIDE_FACT) is not False
+
+
+def test_stairs_not_read_or_a_ramp_not_ruled_out_is_never_a_no():
+    """Review round 6 (PR 2): no stairs list (not read: the format's silence) was taken as no stairs, so the upper floor
+    of a two-story unit on the shared corridor read "no" though its own stair may lead to its door out. A stair list
+    not given, a ramp, alternating tread device or ship's ladder not said to be none: may be anywhere, never a "no".
+    Malformed stairs never crash the measuring."""
+    from model_measurement.routes import _stair_points
+    desc = row(("none", "marked", "marked"), ("wall", "wall"), corridor=[0, 1], function="residential", within=False)
+    assert _story(desc)["measures"][OUTSIDE_FACT] is False
+    for drop in ("stairs", "has_none"):
+        d = {k: v for k, v in desc.items() if k != drop}
+        got = _story(d)
+        assert got["not_measured"][OUTSIDE_FACT] == STOPS["outside_stair"].format(name="r0"), drop
+    for bad in (5, [{"nosings": [[{"x": 1}, [1, 1, 0]]]}]):
+        assert {"points": []} in _stair_points({**desc, "stairs": bad})

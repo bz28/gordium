@@ -105,18 +105,36 @@ def measure(description, clearance: float = CLEARANCE, ground: dict | None = Non
     return out
 
 
+ANYWHERE = {"points": []}                                # a way to another story that may be in any room
+OTHER_WAYS = (("ramps", "ramp"), ("alternating_tread_devices", "alternating_tread_device"),
+              ("ships_ladders", "ships_ladder"))
+
+
 def _stair_points(description) -> list:
-    """Every stair the description gives ({"points": plan points of its nosings' ends, in inches}, or no points where
-    they can't be read: such a stair may be anywhere). The interior reading's own stairs (`stairs`, house egress)."""
+    """Every way to another story the description gives or doesn't rule out, each {"points": plan points of its
+    nosings' ends in inches}, or ANYWHERE: the stairs (`stairs`, house egress) read entry by entry, one that can't be
+    read anywhere; no `stairs` list at all (not read, the format's silence) one anywhere; a ramp, alternating tread
+    device or ship's ladder anywhere unless the description gives its list empty or says it has none (`has_none`
+    with a source), since none is said, never inferred."""
     reader = Reader(description["units"])
     out = []
-    for st in description.get("stairs") or []:
+    stairs = description.get("stairs")
+    if not isinstance(stairs, list):
+        out.append(ANYWHERE)
+        stairs = []
+    for st in stairs:
         try:
             pts = [(reader.length(e[0], "a nosing"), reader.length(e[1], "a nosing"))
                    for n in st.get("nosings") or [] for e in n]
-        except (InteriorStop, TypeError, IndexError, AttributeError):    # unreadable: may be anywhere
+        except (InteriorStop, TypeError, IndexError, AttributeError, KeyError):    # unreadable: may be anywhere
             pts = []
         out.append({"points": pts})
+    claims = description.get("has_none") if isinstance(description.get("has_none"), list) else []
+    said = {c.get("kind") for c in claims if isinstance(c, dict) and isinstance(c.get("source"), str)
+            and c["source"].strip() and c.get("reading") is not True}
+    for key, kind in OTHER_WAYS:
+        if not (description.get(key) == [] or kind in said):
+            out.append(ANYWHERE)
     return out
 
 
