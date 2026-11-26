@@ -45,3 +45,35 @@ def test_editing_one_side_only_is_refused():
     leaky["check"] = r["check"] + " or opening_net_clear_area >= 1"
     assert limit_problems(leaky)
     assert limit_problems({**r, "limit": ""}) and limit_problems({**r, "limit": "opening_net_clear_area >="})
+
+
+def test_shapes_that_let_a_rule_need_review_where_its_limit_holds_are_refused():
+    """Review round 1 of 8d: the shape is checked on the parsed formulas, never by text: (a) an if-else after the
+    limit, (b) "not (not (L))", (c) a band "not (L) or ...", (d) a band not gated by "not (L)", (e) a limit reading a fact
+    the rule reads elsewhere (a room's, copied onto the part) are each refused."""
+    r = next(x for x in _escape_rules() if x["id"] == "general.bc_1031_3_2_escape_opening_min_height")
+    L, rest = r["limit"], r["check"].split(") or ", 1)[1]
+    cases = {
+        "a": {"check": f"({L}) or opening_room_fourth_or_higher if opening_room_door_to_outside else opening_room_one_exit"},
+        "b": {"review_when": [{"when": f"not (not ({L})) and opening_room_one_exit", "reason": "x"}]},
+        "c": {"review_when": [{"when": f"not ({L}) or opening_net_clear_width > 0", "reason": "x"}]},
+        "d": {"review_when": [{"when": "opening_room_one_exit and not opening_operable", "reason": "x"}]},
+        "e": {"limit": f"{L} or opening_room_door_to_outside", "check": f"({L} or opening_room_door_to_outside) or {rest}"},
+    }
+    for name, change in cases.items():
+        bad = {**copy.deepcopy(r), **change}
+        if "limit" in change:
+            bad["review_when"] = [{**b, "when": b["when"].replace(f"not ({L})", f"not ({change['limit']})")}
+                                  for b in bad["review_when"]]
+        assert limit_problems(bad), name
+
+
+
+def test_the_room_facts_copied_onto_an_opening_are_marked_from_its_room():
+    """Review round 1 of 8d: the facts escape_openings.link copies from the sleeping room are marked `from`, so a
+    limit can't read them (5e above); every opening_room_ fact is one."""
+    from rule_format.parts import registry
+    m = registry()["emergency_escape_opening"]["measures"]
+    room = {k for k in m if k.startswith("opening_room_")}
+    assert room and all(m[k].get("from") == "sleeping_room" for k in room)
+    assert not [k for k, d in m.items() if "from" in d and k not in room]

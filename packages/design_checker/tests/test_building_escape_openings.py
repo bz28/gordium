@@ -246,3 +246,38 @@ def test_a_small_opening_beside_a_compliant_one_passes_1031_2_and_every_small_on
     assert room == ["fail"] and sizes == {"w": "fail", "v": "fail"}
     room, sizes = _room_check(SMALL, {k: v for k, v in GOOD.items() if k != "opening_sill_height"})   # one not known
     assert room == ["needs_review"] and sizes["w"] == "needs_review"
+
+
+WELL_SHORT = {**GOOD, "opening_below_grade": True, "area_well_area": 8, "area_well_projection": 36, "area_well_width": 36,
+              "area_well_depth": 30, "opening_fully_openable": True, "area_well_other_encroachment": 0,
+              "area_well_ladder_encroachment": 0}
+
+
+def test_an_area_well_short_of_its_limit_keeps_the_opening_from_counting():
+    """Review round 1 of 8d: the well and ladder limits count too. An opening below grade that meets 1031.3 but whose
+    well is under 9 sq ft doesn't comply: beside a compliant one, 1031.2 passes and its well row needs review; alone,
+    1031.2 fails where it requires one."""
+    room, _ = _room_check(WELL_SHORT, GOOD)
+    assert room == ["pass"]
+    room, _ = _room_check(WELL_SHORT, WELL_SHORT)
+    assert room == ["fail"]
+    assert escape_openings.complies({"measures": WELL_SHORT}, escape_openings.limits(_ny_rules())) is False
+    assert escape_openings.complies({"measures": {**WELL_SHORT, "area_well_area": 9}},
+                                    escape_openings.limits(_ny_rules())) is True
+
+
+def test_a_rule_over_escape_openings_with_no_limit_leaves_compliance_unknown():
+    """Review round 1 of 8d: an escape-opening rule without a limit has a requirement no count can read, so no opening
+    is counted compliant (never past a rule whose requirement isn't known)."""
+    rules = _ny_rules() + [{"id": "t.new", "for_each": "emergency_escape_opening", "check": "opening_operable"}]
+    assert escape_openings.limits(rules) == []
+    parts, desc = _parts(openings=[{"id": "w", "within": "b", "measures": dict(GOOD)}])
+    escape_openings.link(parts, desc, rules)
+    assert "sleeping_room_compliant_openings" not in parts["sleeping_room"][0]["measures"]
+
+
+def _ny_rules():
+    from rule_format.rulebook import load
+    return load(REPO / "regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/"
+                       "general.yaml")["rules"]
+

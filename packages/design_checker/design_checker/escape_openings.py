@@ -143,9 +143,12 @@ def link(parts: dict, description, rules=None) -> None:
 
 
 def limits(rules) -> list[str]:
-    """Every escape-opening rule's `limit` (section group 8d), in the rulebook's order."""
-    return [r["limit"] for r in rules or [] if isinstance(r, dict) and r.get("for_each") == OPENINGS
-            and isinstance(r.get("limit"), str)]
+    """Every escape-opening rule's `limit` (section group 8d), in the rulebook's order; none at all where one such rule
+    has no limit (review round 1 of 8d: never count an opening compliant past a rule whose requirement isn't known)."""
+    over = [r for r in rules or [] if isinstance(r, dict) and r.get("for_each") == OPENINGS]
+    if any(not isinstance(r.get("limit"), str) for r in over):
+        return []
+    return [r["limit"] for r in over]
 
 
 def complies(opening: dict, held: list[str]):

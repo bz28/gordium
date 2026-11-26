@@ -76,10 +76,10 @@ emergency_escape_opening:
     patio_cover_openings_open: {unit: yes_no, meaning: "Nothing fills the wall openings of the patio cover it opens into: no insect screening, plastic or glass"}
     # 2025 Building Code of New York State, section group 8b: the facts of the sleeping room it is in that decide whether
     # 1031.2 requires it, copied from the room (design_checker/escape_openings.py), so its size rules fail only where required
-    opening_room_fourth_or_higher: {unit: yes_no, meaning: "The sleeping room it is in is on the fourth story above grade plane or higher (the room's sleeping_room_fourth_or_higher)"}
-    opening_room_one_exit: {unit: yes_no, meaning: "The sleeping room it is in has only one exit, or access to only one exit (the room's sleeping_room_story_one_exit)"}
-    opening_room_door_to_outside: {unit: yes_no, meaning: "The sleeping room it is in has a door of its own to outside (the room's sleeping_room_door_to_outside)"}
-    opening_room_other_compliant: {unit: yes_no, meaning: "Another escape opening in the sleeping room it is in is known to comply with every escape-opening rule's limit (section group 8d, design_checker/escape_openings.py: the rulebook's own limits, three-valued); no where every other one is known not to (or there is none); 2025 Building Code of New York State 1031.2 asks 'not fewer than one' per room, so an opening that falls short beside one that complies isn't the one relied on"}
+    opening_room_fourth_or_higher: {unit: yes_no, from: sleeping_room, meaning: "The sleeping room it is in is on the fourth story above grade plane or higher (the room's sleeping_room_fourth_or_higher)"}
+    opening_room_one_exit: {unit: yes_no, from: sleeping_room, meaning: "The sleeping room it is in has only one exit, or access to only one exit (the room's sleeping_room_story_one_exit)"}
+    opening_room_door_to_outside: {unit: yes_no, from: sleeping_room, meaning: "The sleeping room it is in has a door of its own to outside (the room's sleeping_room_door_to_outside)"}
+    opening_room_other_compliant: {unit: yes_no, from: sleeping_room, meaning: "Another escape opening in the sleeping room it is in is known to comply with every escape-opening rule's limit (section group 8d, design_checker/escape_openings.py: the rulebook's own limits, three-valued); no where every other one is known not to (or there is none); 2025 Building Code of New York State 1031.2 asks 'not fewer than one' per room, so an opening that falls short beside one that complies isn't the one relied on"}
 
 stair:
   meaning: "A flight of stairs (one run of steps between landings)"
