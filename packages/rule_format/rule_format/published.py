@@ -393,23 +393,52 @@ def differences(old: dict, new: dict) -> list[str]:
 
 def stale(folder: Path, book: Path | None = None, repo: Path = REPO) -> list[str]:
     """[] when a law's certificate still matches its files, else why not, by name (no compile: every input and
-    validator file hashed again, and the law folder and shared files globbed again for a file that appeared)."""
+    validator file hashed again, every folder listed again, and the law folder and shared files globbed again for a
+    file that appeared)."""
     folder = Path(folder)
     book = book or building_code_rulebook(folder)
     if book is None:
         return []
+    return _read(folder, book, repo)[0]
+
+
+def frozen(folder: Path, book: Path, repo: Path = REPO) -> dict:
+    """compile_law's answer for a state law, read from its certificate after checking it still matches every file it
+    was worked out from (stale's checks): {"problems", "documents", "kinds"} as compile_law gives them, and "book":
+    the rulebook's bytes, exactly the ones whose sha256 the certificate holds (read once, so a rulebook saved between
+    the check and its reading is never taken for the one checked). A certificate that is missing, stale, of an
+    unknown format or unreadable gives a problem saying so and how to publish, no documents, no kinds and no book:
+    the law gives no rules (needs review, never a row). There is no live compile to fall back on. Never raises."""
+    try:
+        why, cert, book_bytes = _read(Path(folder), Path(book), Path(repo))
+        if not why:
+            result = result_of(cert)
+            if not (isinstance(result, dict) and result.get("problems") == [] and isinstance(result.get("documents"), dict)
+                    and isinstance(result.get("kinds"), dict)):
+                why = [f"{_shown(certificate_path(folder, book))} holds no usable result: run {PUBLISH}"]
+    except Exception as e:      # never a crash (zoning's answer goes with it), never a rule used unchecked
+        why = [f"{_shown(certificate_path(folder, book))} can't be checked ({type(e).__name__}: {e}): run {PUBLISH}"]
+    if why:
+        return {"problems": why, "documents": {}, "kinds": {}, "book": None}
+    return {"problems": [], "documents": result["documents"], "kinds": result["kinds"], "book": book_bytes}
+
+
+def _read(folder: Path, book: Path, repo: Path) -> tuple[list[str], dict | None, bytes | None]:
+    """(why the certificate doesn't match its files, or [], the certificate, the rulebook's bytes)."""
     path = certificate_path(folder, book)
     try:
         cert = json.loads(path.read_bytes())
     except FileNotFoundError:
-        return [f"no certificate at {_shown(path)}: run {PUBLISH}"]
+        return [f"no certificate at {_shown(path)}: run {PUBLISH}"], None, None
     except ValueError as e:
-        return [f"{_shown(path)} isn't readable JSON ({e}): run {PUBLISH}"]
+        return [f"{_shown(path)} isn't readable JSON ({e}): run {PUBLISH}"], None, None
     if not isinstance(cert, dict) or cert.get("format") != FORMAT:
-        return [f"{_shown(path)} isn't a {FORMAT} certificate: run {PUBLISH}"]
+        return [f"{_shown(path)} isn't a {FORMAT} certificate: run {PUBLISH}"], None, None
     out = []
     try:
-        if cert["law"] != _rel(folder, repo) or cert["book"] != {"path": _rel(book, repo), "sha256": _sha(book)}:
+        book_bytes = book.read_bytes() if book.is_file() else None
+        now = {"path": _rel(book, repo), "sha256": None if book_bytes is None else hashlib.sha256(book_bytes).hexdigest()}
+        if cert["law"] != _rel(folder, repo) or cert["book"] != now:
             out.append(f"the rulebook changed: {_rel(book, repo)}")
         for key, what in (("inputs", "input"), ("validator", "validator file")):
             for name, sha in cert[key].items():
@@ -424,8 +453,9 @@ def stale(folder: Path, book: Path | None = None, repo: Path = REPO) -> list[str
             out.append(f"new file: {name}")
         out += refusals(cert)
     except (KeyError, TypeError, AttributeError, ValueError) as e:
-        return [f"{_shown(path)} can't be read as a {FORMAT} certificate ({type(e).__name__}: {e}): run {PUBLISH}"]
-    return [f"{_shown(path)} is stale ({w}): run {PUBLISH}" for w in out]
+        return ([f"{_shown(path)} can't be read as a {FORMAT} certificate ({type(e).__name__}: {e}): run {PUBLISH}"],
+                None, None)
+    return [f"{_shown(path)} is stale ({w}): run {PUBLISH}" for w in out], cert, book_bytes
 
 
 def ensure(missing_only: bool = False, repo: Path = REPO) -> list[str]:

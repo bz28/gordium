@@ -224,7 +224,7 @@ def test_a_space_whose_use_isnt_known_keeps_every_bedroom_rule_from_passing_and_
 
 
 def test_rules_that_fail_the_rule_checks_are_never_used(monkeypatch):
-    monkeypatch.setattr(published, "rulebook_file_problems", lambda path, ctx: ["a quote isn't at its lines"])
+    _refuse_rule_checks(monkeypatch)
     result = check_site(SITE, dict(FACTS), interior=sill_too_high())
     mine = law_items(result)
     assert [(i["id"], i["status"]) for i in mine] == [("egress.rules", present.REVIEW)]
@@ -283,73 +283,89 @@ def test_the_waiting_words_never_promise_parts_the_drawing_isnt_read_for():
     assert "handrails, guards and the exit door are checked" not in egress.WAITING_WHY
 
 
-def test_a_check_validates_the_state_rules_the_same_with_or_without_the_code_cache(monkeypatch, tmp_path):
-    """Review round 1 (F2): the book's quotes are checked by python -m rule_format where the cache is, never at a
-    design's check, so the same design gets the same answer on every machine."""
-    with_cache = egress.laws(ITHACA)
+def _compiled():
+    """compile_law of each law Ithaca inherits, live (what publish freezes)."""
+    return [published.compile_law(f, b) for f, b in place(ITHACA).inherited_rulebooks()]
+
+
+def _refuse_rule_checks(monkeypatch, problem="a quote isn't at its lines"):
+    """A rulebook that fails the rule checks: such a law is never published (publish refuses it), so the check reads
+    what compile_law says of it, live, here (rule_format/published.py)."""
+    monkeypatch.setattr(published, "rulebook_file_problems", lambda path, ctx: [problem])
+    monkeypatch.setattr(egress, "frozen", lambda f, b: {**published.compile_law(f, b), "book": None})
+
+
+def test_a_law_is_validated_the_same_with_or_without_the_code_cache_and_a_check_validates_nothing(monkeypatch,
+                                                                                                 tmp_path):
+    """Review round 1 (F2): the book's quotes are checked by python -m rule_format where the cache is, never in the
+    validation a check's answer rests on (compile_law, frozen by publish), so the same design gets the same answer on
+    every machine. And a check itself validates nothing: it reads the frozen answer."""
+    with_cache = _compiled()
     monkeypatch.setenv("GORDIUM_CODE_CACHE", str(tmp_path / "none"))
-    without = egress.laws(ITHACA)
-    assert [(l["problems"], l["rules"]) for l in with_cache["laws"]] == [(l["problems"], l["rules"])
-                                                                         for l in without["laws"]]
+    assert _compiled() == with_cache
     from rule_format.rulebook import Context
     assert Context.for_jurisdiction(STATE, use_cache=False).pages == {}       # the book's text is never read
     asked = []
     real = Context.for_jurisdiction.__func__
     monkeypatch.setattr(Context, "for_jurisdiction",
                         classmethod(lambda cls, j, **kw: asked.append(kw) or real(cls, j, **kw)))
-    egress.laws(ITHACA)
-    assert asked == [{"use_cache": False}] * 2       # a design's check never reads it (both of New York's books)
+    _compiled()
+    assert asked == [{"use_cache": False}] * 2       # the validation never reads it (both of New York's books)
+    asked.clear()
+    assert all(law["rules"] for law in egress.laws(ITHACA)["laws"]) and asked == []    # a check validates nothing
 
 
-def test_a_designs_check_reads_no_book_text_from_the_code_cache_even_where_the_cache_has_it(monkeypatch, tmp_path):
+def test_a_laws_validation_reads_no_book_text_from_the_code_cache_even_where_the_cache_has_it(monkeypatch, tmp_path):
     """The open finding of docs/decisions/2026-11-23_laws_validation_speed.md: with use_cache=False the state book's
     text was still read from the code cache wherever the cache had it (so a laptop with the cache and CI without it
-    could differ). A code cache holding the Residential Code's text, built here so this fails on any machine: a
-    design's check reads none of it, and gives exactly the answer it gives with no cache at all."""
+    could differ). A code cache holding the Residential Code's text, built here so this fails on any machine: the
+    validation reads none of it, and gives exactly the answer it gives with no cache at all."""
     from rule_format.rulebook import Context, cached_text
     monkeypatch.setenv("GORDIUM_CODE_CACHE", str(tmp_path / "none"))
-    without = egress.laws(ITHACA)
+    without = _compiled()
     (entry,) = [d for d in load(STATE / "1_source_documents/sources.yaml")["documents"] if d.get("kept_outside_repo")]
     monkeypatch.setenv("GORDIUM_CODE_CACHE", str(tmp_path / "cache"))
     text = cached_text(entry)
     text.parent.mkdir(parents=True)
     rows = [{"file": entry["file"], "sha256": entry["sha256"]}, {"page": 1, "line": 1, "text": "SECTION R101 GENERAL"}]
     text.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
-    assert Context.for_jurisdiction(STATE, use_cache=False).pages == {}           # never read at a design's check
-    got = egress.laws(ITHACA)
-    assert [{k: v for k, v in law.items() if k != "section_of"} for law in got["laws"]] == \
-        [{k: v for k, v in law.items() if k != "section_of"} for law in without["laws"]]
+    assert Context.for_jurisdiction(STATE, use_cache=False).pages == {}           # never read by the validation
+    assert _compiled() == without
 
 
-def test_compile_law_is_the_one_place_a_state_law_is_validated_and_never_raises(monkeypatch):
-    """compile_law (to be frozen) gives the problems, documents and kinds; laws() takes them as they are: a problem
-    there means no rules (needs review, never a row), and sources that can't be read are a problem, never a crash."""
+def test_a_check_takes_the_frozen_validation_as_it_is_and_compile_law_never_raises(monkeypatch):
+    """laws() takes frozen()'s answer (the certificate's compile_law result) as it is: a problem there means no rules
+    (needs review, never a row), said as the frozen copy being unusable. compile_law (what is frozen) gives the
+    problems, documents and kinds, and sources that can't be read are a problem, never a crash."""
     folder, book = place(ITHACA).inherited_rulebooks()[0]
-    good = egress.compile_law(folder, book)
+    good = published.compile_law(folder, book)
     assert set(good) == {"problems", "documents", "kinds"} and good["problems"] == [] and good["documents"]
     found = egress.laws(ITHACA)["laws"][0]
-    assert {k: found[k] for k in good} == good and found["rules"] and found["section_of"]
-    monkeypatch.setattr(egress, "compile_law", lambda f, b: {**good, "problems": ["a quote isn't at its lines"]})
+    assert {k: found[k] for k in good} == good and found["rules"] and found["section_of"] and not found["unpublished"]
+    stale = "regulations/x/general.published.json is stale (input changed: y): run python -m rule_format publish"
+    monkeypatch.setattr(egress, "frozen", lambda f, b: {"problems": [stale], "documents": {}, "kinds": {}, "book": None})
     refused = egress.laws(ITHACA)["laws"][0]
-    assert refused["problems"] == ["a quote isn't at its lines"] and refused["rules"] == [] and refused["section_of"] is None
+    assert refused["problems"] == [stale] and refused["rules"] == [] and refused["section_of"] is None
+    assert refused["unpublished"] and refused["documents"] == {} and refused["kinds"] == {}
+    mine = law_items(check_site(SITE, dict(FACTS), interior=sill_too_high()))
+    assert [(i["id"], i["status"]) for i in mine] == [("egress.rules", present.REVIEW)]   # a house: one law runs
+    assert all("frozen copy can't be used" in i["reason"] and stale in i["reason"] for i in mine)
     monkeypatch.undo()
     from rule_format.rulebook import Context
 
     def broken(cls, j, **kw):
         raise OSError("disk gone")
     monkeypatch.setattr(Context, "for_jurisdiction", classmethod(broken))
-    assert egress.compile_law(folder, book) == {"problems": ["its sources can't be read (OSError: disk gone)"],
-                                                "documents": {}, "kinds": {}}
-    assert egress.laws(ITHACA)["laws"][0]["rules"] == []
+    assert published.compile_law(folder, book) == {"problems": ["its sources can't be read (OSError: disk gone)"],
+                                                   "documents": {}, "kinds": {}}
     monkeypatch.undo()
 
     def bad_kinds(self):        # e.g. a proposed measure's unit that isn't a word: its sources were read, then this
         raise TypeError("bad unit")
     monkeypatch.setattr(Context, "allowed", bad_kinds)
-    late = egress.compile_law(folder, book)          # as before the split: the sources kept, no kinds, no rules
+    late = published.compile_law(folder, book)       # as before the split: the sources kept, no kinds, no rules
     assert late == {"problems": ["its sources can't be read (TypeError: bad unit)"], "documents": good["documents"],
                     "kinds": {}}
-    assert egress.laws(ITHACA)["laws"][0]["rules"] == []
 
 
 def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer():
@@ -386,7 +402,7 @@ def test_an_interior_with_number_keys_is_fingerprinted_never_a_crash():
 
 def test_rules_that_cant_be_used_are_said_even_while_no_rooms_are_drawn(monkeypatch):
     """Review round 2 (F2): "waiting" would hide that the state's rules don't pass the rule checks."""
-    monkeypatch.setattr(published, "rulebook_file_problems", lambda path, ctx: ["a quote isn't at its lines"])
+    _refuse_rule_checks(monkeypatch)
     result = check_site(SITE, dict(FACTS))
     assert [(i["id"], i["status"]) for i in law_items(result)] == [("egress.rules", present.REVIEW)]
     assert result["sections"][1]["state"] == present.REVIEW
@@ -430,6 +446,9 @@ def test_a_bad_state_settings_file_needs_review_never_takes_zoning_down(settings
         bad = lambda p: (_ for _ in ()).throw(yaml.YAMLError("bad")) if Path(p).name == "state.yaml" else real(p)
         monkeypatch.setattr(egress, "load", bad)
         monkeypatch.setattr(sl, "load", bad)
+    # a state.yaml edited so is a changed input: its law is refused (its certificate is stale, or never published:
+    # the validation, compile_law, finds the problem), so here the check reads what compile_law says, live
+    monkeypatch.setattr(egress, "frozen", lambda f, b: {**published.compile_law(f, b), "book": None})
     result = check_site(SITE, dict(FACTS), interior=sill_too_high())
     assert result["sections"][0]["key"] == "zoning"
     # every state.yaml is the bad one here, so neither says which buildings it covers: both run, each refused
