@@ -160,7 +160,9 @@ def test_an_opening_within_no_sleeping_room_read_leaves_every_rooms_count_unknow
     main's stated ground now does); one in the room itself still counts."""
     for other in ({"id": "v"}, {"id": "v", "within": "typo"}, {"id": "w", "within": "b"}, "not a part",
                   {"id": "v", "within": ["b"]}, {"id": "v", "within": {"id": "b"}},      # never a crash (review)
-                  {"id": "v", "within": "L1"}, {"id": "v", "within": "b", "measures": "big"}):  # a story isn't a room
+                  {"id": "v", "within": "L1"}, {"id": "v", "within": "b", "measures": "big"},  # a story isn't a room
+                  {"within": "b", "measures": {}}, {"id": 5, "within": "b"}, {"id": "", "within": "b"},
+                  {"id": "   ", "within": "b"}):        # no id, not text, blank: an opening that can't be read
         p = _linked(openings=[{"id": "w", "within": "b", "measures": {}}, other])
         assert "sleeping_room_escape_openings" not in p["measures"], other
         assert "may be this room's" in p["not_measured"]["sleeping_room_escape_openings"]
@@ -219,4 +221,11 @@ def test_hand_built_stories_are_never_a_guess_or_a_crash():
     parts["story"] = 5
     parts["sleeping_room"][0]["more"] = {"described_id": ["b"]}
     escape_openings.link(parts, desc)                   # never a crash
+
+
+def test_an_opening_in_a_room_whose_id_another_part_shares_leaves_the_count_unknown():
+    parts, desc = _parts()
+    parts["basement"] = [{"id": "b", "measures": {}}]    # the room's id is two parts': which is the opening's isn't known
+    escape_openings.link(parts, desc)
+    assert "sleeping_room_escape_openings" not in parts["sleeping_room"][0]["measures"]
 
