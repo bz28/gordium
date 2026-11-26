@@ -200,9 +200,10 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     stairways and 1005.3.2's doors, ramps and passageways (28); section group 5b 1005.4, 1005.5 and 1005.6 (31); section group 5c 1005.7.1 to 1005.7.3 (34);
     section group 6a 1010.1, 1010.1.1's capacity and 1010.1.1.1 (37); section group 6c 1010.1.3, 1010.1.4, 1010.1.5,
     1010.1.6 and 1010.1.7 (42; 1010.1.3.2's is a door's row, not a building line); section group 6d 1010.2 to
-    1010.2.6 and Table 1010.2.4 (50; 1010.2.7's is for Groups E, B and I-4)."""
+    1010.2.6 and Table 1010.2.4 (50; 1010.2.7's is for Groups E, B and I-4); section group 6e 1010.2.8.1 to
+    1010.2.12.1, 1010.2.14 and 1010.2.15 (61; 1010.2.13's is for Groups I-1 and I-2)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 50 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 61 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -252,7 +253,7 @@ CH10_BUILDING_MARKS = ("assembly_fixed_seating", "special_egress_spaces", "merch
 
 @pytest.mark.parametrize("stated", [False, True])
 def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got, laws, stated):
-    """The apartment as built, with the five marks set: No moves exactly the ten rules that wait on them (travel's
+    """The apartment as built, with the five marks set: No moves exactly the eleven rules that wait on them (travel's
     54 ft within Table 1017.2's 200 ft now passes; each flag of a space the building states it hasn't is not
     applicable), and Yes leaves every rule as it was with them blank (needs review: a person checks those spaces),
     never a pass. Left blank they are not sent (the add-in's BuildingFacts), so `got` is the unset reading."""
@@ -266,6 +267,7 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
     assert moved == {"general.bc_table_1017_2_a_e_f1_m_r_s1": ("needs_review", "pass"),
                      **{f"general.{r}": ("needs_review", "not_applicable") for r in (
                          "bc_1006_2_2_1_boiler_rooms", "bc_1006_2_2_2_refrigeration_machinery_rooms",
+                         "bc_1010_2_8_1_refrigeration_machinery_rooms",
                          "bc_1006_2_2_3_refrigerated_rooms", "bc_1006_2_2_4_electrical_rooms",
                          "bc_1006_2_2_5_vehicular_ramps", "bc_table_1017_2_note_a", "bc_1017_2_1_balcony_increase",
                          "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")}}

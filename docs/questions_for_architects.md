@@ -189,6 +189,15 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Until you answer:** Today, escape windows are not checked yet: check them by hand. From a model, Gordium measures both readings; where they disagree the window gets no grade-floor answer, so a rule that turns on it gets NEEDS REVIEW (the test house `test_data/interior_houses/5_basement_window_well/`).
 - **Options:** (a) the ground around the well (the stricter reading: a window deep in a well needs the full 5.7 sq ft); (b) the well's own floor.
 
+
+### 4.7 Panic hardware in a school: does a door "serve a room or space of 50 or more" when the rooms behind it are each under 50?
+
+- **The code's words** (2025 Building Code of New York State, for buildings other than houses): "Swinging doors serving a Group H occupancy and swinging doors serving rooms or spaces with an occupant load of 50 or more in a Group A or E occupancy shall not be provided with a latch or lock other than panic hardware or fire exit hardware" (1010.2.8, p.326 lines 31-33).
+- **What research found:** the whole of 1010.2.8 and its exceptions; 1010.1.2.1 (door swing), which uses the same "serving a room or area containing an occupant load of 50 or more"; 1004.2 (occupant loads add up along the means of egress). A door hardware consultant's guidance (idighardware.com, "Decoded: which doors need panic hardware", read 2026-11-26) says the load is the room's or space's, not how many people use the door, and that every door between such a space and the street "serves" it; it doesn't say whether a corridor door serving several rooms, each under 50, together 50 or more, serves "a space of 50 or more". The ICC's commentary wasn't read (Gordium doesn't fetch the ICC's website); no New York interpretation was found.
+- **Why it matters:** in a Group E building, a latched corridor door with an ordinary lever (no panic bar) behind which are two classrooms of 30 fails by the adding-up reading and passes by the one-room reading.
+- **Until you answer:** Today, Gordium doesn't work out how many people each door serves, so 1010.2.8 gives NEEDS REVIEW for such a door in Group E unless its load is typed in by hand; Gordium assumes the adding-up reading for a typed load (a door stated to serve 50 or more fails without panic hardware), so please confirm it. From a model, the same until door loads are measured.
+- **Options:** (a) add up every space whose way out passes through the door (Gordium's reading, the stricter); (b) only one room or space of 50 or more counts.
+
 ---
 
 ## 5. Accessory buildings, accessory dwelling units, and the R-3a, R-2c, R-3aa, R-3b, RU and B districts

@@ -14868,7 +14868,7 @@ rules:
     latch or none; no Revit mark yet). It complies not swinging, with no latch or lock, with panic or fire exit hardware as
     its only latch or lock, or in a building of one stated group other than A, E and H; under 50 in Group A or E only where
     that load is stated by hand (how many people each door serves isn''t worked out, as for 1010.1.2.1). It fails a latched
-    swinging door with neither in a building stated Group H, or Group E serving 50 or more as stated (Gordium''s reading:
+    swinging door with neither in a building stated Group H, or Group E serving 50 or more as stated (open question 3, Gordium''s reading:
     a door stated to serve 50 or more serves a room or space of 50 or more, the spaces whose egress passes through it counted
     together), unless it is a door to outside in a building whose outdoor areas may be occupied (exception 3, 1010.2.4 item
     8). Group A never fails: exception 1''s main exit (1010.2.4 item 3) isn''t shown. Exceptions 2 (electric locks on doors
