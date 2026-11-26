@@ -7190,8 +7190,8 @@ labels:
     reason: 'Every externally lit exit sign and directional exit sign (1013.6) has plainly legible letters at least 6
       inches high with principal strokes at least 3/4 inch wide; the letters of "EXIT", but the I, at least 2 inches wide
       and spaced at least 3/8 inch apart, larger signs in proportion; "EXIT" in high contrast with the background and clearly
-      discernible whether or not the sign''s lighting is on, and a chevron, if any, not readily turned: exit signs aren''t
-      in the model, so a person''s check.'
+      discernible whether or not the sign''s lighting is on, and a chevron, if any, not readily turned (Gordium reads this section''s "every exit sign" as the externally lit
+      ones, 1013.6, a reading to confirm): exit signs aren''t in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 337
@@ -7233,7 +7233,8 @@ labels:
     reason: 'Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or
       an on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost,
       not by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently
-      of external power need no connection: exit signs aren''t in the model, so a person''s check.'
+      of external power need no connection (Gordium reads this for every exit sign, internally lit ones too, since 2702.2.6
+      sends every exit sign''s emergency power here, a reading to confirm): exit signs aren''t in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 337
