@@ -35,7 +35,8 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
    "none") is never a quantity, so it backs no number anywhere: a comparison, an if's test, a term multiplied
    into a formula, review_when (_named_part).
    A reading with limit words of its own ("more than one") is backed only by a quote printing those words before
-   it, never by the bare value elsewhere in the quote (a list item's "1. In open parking garages": _has_words).
+   it, never by the bare value elsewhere in the quote (_has_words), and a list item's own number in a quote ("1. In
+   open parking garages", "this code. 2. In other than Group H") backs no reading at all (_without_list_numbers).
    A count, a degree or a percent backs only a number with no unit of its own (a count, or a coefficient such as
    the 0.5 of "one-half of the floor area"), never a length or an area.
 3. A number the verification file flags (a flag quoting it) counts only if the flag resolves it: it gives the
@@ -174,8 +175,8 @@ def _resolves(flag: str, comparison: str) -> bool:
 def _worded_statements(quote: str) -> set[tuple]:
     """(the words before it, value, unit) of every number a quote states, as the reading's own words are matched."""
     from document_extraction.numbers import statements
-    return {(" ".join(s["before"].lower().split()), value_of(s["value"]), s["unit"]) for s in statements(quote)
-            if value_of(s["value"]) is not None}
+    return {(" ".join(s["before"].lower().split()), value_of(s["value"]), s["unit"])
+            for s in statements(_without_list_numbers(quote)) if value_of(s["value"]) is not None}
 
 
 def _has_words(length: dict) -> bool:
@@ -197,7 +198,20 @@ def _named_part(fits: list[dict]) -> bool:
 def quote_statements(quote: str) -> set[tuple]:
     """(value, unit) of every number a quote states."""
     from document_extraction.numbers import statements
-    return {(value_of(s["value"]), s["unit"]) for s in statements(quote) if value_of(s["value"]) is not None}
+    return {(value_of(s["value"]), s["unit"]) for s in statements(_without_list_numbers(quote))
+            if value_of(s["value"]) is not None}
+
+
+# A list item's own number inside a quote: after the start, a stop, a colon or a semicolon, and followed by a stop
+# and a capital ("Exceptions: 1. In open parking garages", "this code. 2. In other than Group H", "3.1. Where")
+LIST_NUMBER = re.compile(r"(^|[.:;]\s+)\d+(?:\.\d+)*\.\s+(?=[A-Z\[])")
+
+
+def _without_list_numbers(quote: str) -> str:
+    """The quote with each list item's own number left out: it numbers an item, never a quantity, so it backs no
+    reading ("2. In other than Group H" once backed 1016.2's "two or more"). A number ending a sentence after a word
+    ("not more than 2. Where") is a quantity, and stays."""
+    return LIST_NUMBER.sub(lambda m: m[1], quote)
 
 
 def unverified_reading(entry: dict) -> dict:

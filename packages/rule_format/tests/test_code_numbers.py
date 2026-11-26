@@ -312,3 +312,17 @@ def test_a_sections_number_backs_no_term_of_a_formula_nor_a_review_when(change):
     rule, ctx = _rule("maine/maine_state", "general.nfpa_16_2_5_2_dead_end")
     got = code_numbers.problems({**rule, **change}, rule["sources"], ctx)
     assert any("9.7" in p and "section" in p for p in got), got
+
+
+def test_a_list_items_own_number_backs_no_reading_even_one_with_words_after_it():
+    # 1016.2 reads "two or more" (>=): limit words after the number, which _has_words doesn't see. Its item "2. In
+    # other than Group H occupancies" (once "2 inch") backed it as a bare 2 (review round 3)
+    rule, ctx = _rule("new_york/new_york_state_building", "general.bc_1016_2_intervening_spaces_other_groups")
+    source = {"file": "gov.ny.building.2025.pdf", "page": 340, "lines": [47, 48], "quote": (
+        "direct access to an exit is required by other sections of this code. 2. In other than Group H occupancies, "
+        "egress from a room or space is allowed to pass through adjoining or intervening rooms")}
+    got = code_numbers.problems({**rule, "applies_when": "stories >= 2"}, rule["sources"] + [source], ctx)
+    assert any("number 2 in 'applies_when'" in p for p in got), got
+    assert code_numbers.quote_statements("Exceptions: 1. In open parking garages") == set()
+    # a number ending a sentence after a word is a quantity, and stays
+    assert code_numbers.quote_statements("shall be not more than 2. Where") == {(2, "")}
