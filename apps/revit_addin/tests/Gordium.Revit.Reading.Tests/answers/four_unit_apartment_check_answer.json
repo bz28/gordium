@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 107 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 132 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1425,7 +1425,7 @@
     "Egress · Converging stairways' capacity added: A person checks this (Gordium doesn't decide it): Where egress from the stories above and below meets at an intermediate level, the capacity from there on is the larger of the widest minimum or the two stories' stairways' or ramps' required capacities added: the stairways aren't measured, so a person's check.",
     "Egress · Doors take at most 7 in: A person checks this (Gordium doesn't decide it): A door fully open takes at most 7 inches of the required width, in any position at most half (latch hardware 34 to 48 inches up aside; not inside an R-2 dwelling or sleeping unit or an R-3 dwelling unit): the doors' swing into a corridor isn't drawn, so a person's check.",
     "Egress · Trim at most 1 1/2 in each side into the width: A person checks this (Gordium doesn't decide it): Handrails project as 1014.9 allows, trim and similar at most 1 1/2 inches each side (Group I-2 Condition 1 corridors per 407.4.3): projections aren't drawn, so a person's check.",
-    "Egress · Protruding objects per 1003.3: A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+    "Egress · Protruding objects per 1003.3: A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (brought in by section group 9a, each of 1003.3.1 to 1003.3.4 its own flag): a person's check.",
     "Egress · Doors recognizable as doors: A person checks this (Gordium doesn't decide it): Doors in the means of egress are easily recognizable as doors, carry no mirrors or similar reflecting materials and aren't concealed by curtains, drapes or decorations; exterior exit doors also meet 1022.2, gates 1010.4 and 1010.4.1, and turnstiles 1010.5 to 1010.5.4 (none brought in): what a door looks like isn't in the model, so a person's check. 1010.1.1's to 1010.2.15's are rules and flags of their own; 1010.3 to 1010.3.4 (special doors) follow in a later section group.",
     "Egress · Each door's capacity for its occupant load: A person checks this (Gordium doesn't decide it): Each door opening's capacity is enough for the occupants it serves (1005.3.2: 0.2 in each, 0.15 in with a sprinkler system and an emergency voice/alarm system, other than Groups H and I-2): which occupants each door serves isn't worked out, so a person's check.",
     "Egress · Nothing projects into a door's clear opening: A person checks this (Gordium doesn't decide it): No projection into a door's required clear width below 34 in, at most 4 in between 34 and 80 in, and door closers, overhead doorstops, frame stops, power operators and electromagnetic locks no lower than 78 in: door hardware isn't in the model, so a person's check.",
@@ -1460,6 +1460,31 @@
     "Egress · Escape openings work from inside without keys or tools: A person checks this (Gordium doesn't decide it): Each emergency escape and rescue opening operates from inside the room without keys or tools; window-opening control devices complying with ASTM F2090 are permitted on a window serving as one: how each opening works isn't in the model, so a person's check.",
     "Egress · Area wells drain to the foundation drainage system: A person checks this (Gordium doesn't decide it): Each escape opening's area well is designed for proper drainage, connected to the building's foundation drainage system (1805), except on well-drained soil or sand-gravel mixtures (Group I Soils, 1803.5.1): drainage and soils aren't in the model, so a person's check.",
     "Egress · Bars: A person checks this (Gordium doesn't decide it): Bars, grilles, covers, screens or similar devices over escape openings or their area wells leave the net clear opening of 1031.3 and 1031.5, and are releasable or removable from inside without a key, tool or more force than the opening's normal operation: such devices aren't in the model, so a person's check.",
+    "Egress · Ceiling height of the means of egress: A person checks this (Gordium doesn't decide it): The means of egress has a ceiling at least 7 feet 6 inches above the finished floor, except sloped ceilings and the ceilings of dwelling and sleeping units in residential occupancies (each per 1208.2), projections 1003.3 allows, stair headroom (1011.3), door height (1010.1.1), ramp headroom (1012.5.2), the clear height of parking garages' traffic areas (406.2.2) and areas above and below mezzanines (505.2): ceiling heights along the means of egress aren't measured, so a person's check.",
+    "Egress · Headroom under protruding objects: A person checks this (Gordium doesn't decide it): Protruding objects on circulation paths may hang below 1003.2's ceiling height only where at least 80 inches of headroom is kept over every circulation path (walks, corridors, aisles and passageways), and they lower not more than half the ceiling area of a means of egress; door closers, overhead doorstops, frame stops, power door operators and electromagnetic locks may reach down to 78 inches in a door opening; where the clearance over a circulation path is less than 80 inches, a barrier is provided with its leading edge at most 27 inches above the floor: protruding objects aren't in the model, so a person's check.",
+    "Egress · Post-mounted objects: A person checks this (Gordium doesn't decide it): An object on a post or pylon overhangs it at most 4 inches where its leading edge's lowest point is more than 27 and less than 80 inches above the floor; a sign or other obstruction between posts or pylons more than 12 inches apart has its lowest edge at most 27 or at least 80 inches above the floor or ground (the sloping handrails of stairs and ramps aside): such objects aren't in the model, so a person's check.",
+    "Egress · Horizontal projections into circulation paths: A person checks this (Gordium doesn't decide it): Objects with leading edges more than 27 and not more than 80 inches above the floor project at most 4 inches into the circulation path (handrails up to 4 1/2 inches from the wall or guard): wall-mounted objects aren't in the model, so a person's check.",
+    "Egress · Protruding objects and accessible routes' width: A person checks this (Gordium doesn't decide it): Protruding objects don't reduce the minimum clear width of an accessible route: protruding objects and accessible routes aren't in the model, so a person's check.",
+    "Egress · Slip-resistant walking surfaces: A person checks this (Gordium doesn't decide it): The circulation paths of the means of egress have a slip-resistant surface, securely attached: floor finishes aren't in the model, so a person's check.",
+    "Egress · Changes in floor elevation: A person checks this (Gordium doesn't decide it): A change in elevation of less than 12 inches in the means of egress is made by a sloped surface, a ramp complying with 1012 where steeper than 1 in 20 (5 percent), with handrails or a contrasting floor finish where 6 inches or less; the exceptions are steps at exterior doors per 1010.1.4, a stair of one riser or of two risers and a tread where Chapter 11 doesn't require access (risers and treads per 1011.5, treads at least 13 inches deep, a handrail per 1014 within 30 inches of the centerline of the path), and a step under 12 inches in aisles serving seating where Chapter 11 doesn't require access (risers and treads per 1030.14, a handrail per 1030.16); throughout a story in Group I-2, any change in elevation in the means of egress serving nonambulatory persons is a ramp or sloped walkway: the routes read each story as one level, so changes in floor level within it aren't in the model, a person's check.",
+    "Egress · Means of egress continuity: A person checks this (Gordium doesn't decide it): The path of egress travel isn't interrupted by any building element other than a means of egress component; nothing but the projections this chapter permits obstructs a component's minimum width or required capacity; and the minimum width or required capacity of the means of egress system isn't diminished along the path of egress travel: the routes measure the corridors' clear width between the walls and what is drawn (Table 1020.3's rule), not every component's width or capacity along the path, so a person's check.",
+    "Egress · Elevators and escalators not a required means of egress: A person checks this (Gordium doesn't decide it): Elevators, escalators and moving walks are not used as a component of a required means of egress from any other part of the building, except elevators used as an accessible means of egress per 1009.4: which ways out the architect counts on beyond the doors and stairs the routes read isn't in the model, so a person's check.",
+    "Egress · Ramp slope: A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp cross slope: A person checks this (Gordium doesn't decide it): A ramp's slope measured perpendicular to the direction of travel is no steeper than 1 in 48 (2 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp run's rise: A person checks this (Gordium doesn't decide it): The rise of any ramp run is 30 inches at most: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp width and capacity: A person checks this (Gordium doesn't decide it): A means of egress ramp is at least as wide, and of at least the capacity, as 1020.3 requires of corridors, and at least 36 inches clear between handrails, if provided, or other permitted projections: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp headroom: A person checks this (Gordium doesn't decide it): At least 80 inches of headroom above the finished floor of the ramp run and any intermediate landings, over the full width of the ramp and landing: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp width kept clear: A person checks this (Gordium doesn't decide it): A means of egress ramp doesn't narrow in the direction of egress travel, nothing projects into the required ramp and landing width, and a door opening onto a landing leaves at least 42 inches clear: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp landings where required: A person checks this (Gordium doesn't decide it): A ramp has landings at the bottom and top of each ramp, at points of turning, at entrances, at exits and at doors (ICC A117.1's maneuvering clearances at an adjoining doorway may overlap the landing, 1012.6.5): ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp landing slope: A person checks this (Gordium doesn't decide it): A ramp landing is no steeper than 1 in 48 (2 percent) in any direction, with no changes in level: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp landing width: A person checks this (Gordium doesn't decide it): A ramp landing is at least as wide as the widest ramp run adjoining it: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp landing length: A person checks this (Gordium doesn't decide it): A ramp landing is at least 60 inches long; 36 inches within Group R-2 and R-3 dwelling and sleeping units not required to be Accessible, Type A or Type B units (1108), and not more than 48 inches is required in the direction of travel where the ramp isn't part of an accessible route: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp landings at a change in direction: A person checks this (Gordium doesn't decide it): Where the direction of travel changes at a landing between ramp runs, the landing is at least 60 by 60 inches (36 by 36 inches within Group R-2 and R-3 dwelling or sleeping units not required to be Accessible, Type A or Type B units, 1108): ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp construction materials: A person checks this (Gordium doesn't decide it): A ramp is built of materials the building's type of construction permits (wood handrails allowed in every type): construction types and materials aren't in the model, so a person's check.",
+    "Egress · Ramp surface: A person checks this (Gordium doesn't decide it): A ramp's surface is of slip-resistant materials, securely attached: finishes aren't in the model, so a person's check.",
+    "Egress · Outdoor ramps shed water: A person checks this (Gordium doesn't decide it): Outdoor ramps and their outdoor approaches are designed so water doesn't accumulate on walking surfaces: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp handrails: A person checks this (Gordium doesn't decide it): A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren't measured for the Building Code yet, so a person's check.",
+    "Egress · Ramp edge protection: A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
     "Interior drawing: The interior drawing: opening Single-Flush: Door 36\" x 84\" (NY four-unit eval) (D01) doesn't say whether it is an emergency escape and rescue opening (yes or no)"
    ]
   },
@@ -68394,11 +68419,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (brought in by section group 9a, each of 1003.3.1 to 1003.3.4 its own flag): a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (brought in by section group 9a, each of 1003.3.1 to 1003.3.4 its own flag): a person's check.",
       "quotes": [
        {
         "text": "1005.7 Encroachment. Encroachments into the required means of egress width shall be in accordance with the provisions of this section.",
@@ -68427,14 +68452,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_1005_7_3_protruding_objects",
-       "words": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (brought in by section group 9a, each of 1003.3.1 to 1003.3.4 its own flag): a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_1005_7_3_protruding_objects",
-       "why": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (brought in by section group 9a, each of 1003.3.1 to 1003.3.4 its own flag): a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -70858,6 +70883,1780 @@
       "section_title": "Emergency Escape and Rescue",
       "piece": "1031.6",
       "piece_title": "Bars, grilles, covers and screens"
+     }
+    },
+    {
+     "id": "egress.general.bc_1003_2_ceiling_height",
+     "rule": "general.bc_1003_2_ceiling_height",
+     "name": "Egress · Ceiling height of the means of egress (BCNYS 1003.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The means of egress has a ceiling at least 7 feet 6 inches above the finished floor, except sloped ceilings and the ceilings of dwelling and sleeping units in residential occupancies (each per 1208.2), projections 1003.3 allows, stair headroom (1011.3), door height (1010.1.1), ramp headroom (1012.5.2), the clear height of parking garages' traffic areas (406.2.2) and areas above and below mezzanines (505.2): ceiling heights along the means of egress aren't measured, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The means of egress has a ceiling at least 7 feet 6 inches above the finished floor, except sloped ceilings and the ceilings of dwelling and sleeping units in residential occupancies (each per 1208.2), projections 1003.3 allows, stair headroom (1011.3), door height (1010.1.1), ramp headroom (1012.5.2), the clear height of parking garages' traffic areas (406.2.2) and areas above and below mezzanines (505.2): ceiling heights along the means of egress aren't measured, so a person's check.",
+      "quotes": [
+       {
+        "text": "1003.2 Ceiling height. The means of egress shall have a ceiling height of not less than 7 feet 6 inches (2286 mm) above the finished floor. Exceptions: 1. Sloped ceilings in accordance with Section 1208.2. 2. Ceilings of dwelling units and sleeping units within residential occupancies in accordance with Section 1208.2. 3. Allowable projections in accordance with Section 1003.3. 4. Stair headroom in accordance with Section 1011.3. 5. Door height in accordance with Section 1010.1.1. 6. Ramp headroom in accordance with Section 1012.5.2. 7. The clear height of floor levels in vehicular and pedestrian traffic areas of public and private parking garages in accor- dance with Section 406.2.2. 8. Areas above and below mezzanine floors in accordance with Section 505.2.",
+        "where": "1003.2, 2025 Building Code of New York State (BCNYS), PDF p.310"
+       }
+      ],
+      "citation": "1003.2, 2025 Building Code of New York State (BCNYS), PDF p.310",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1003.2",
+      "quote": "1003.2 Ceiling height. The means of egress shall have a ceiling height of not less than 7 feet 6 inches (2286 mm) above the finished floor. Exceptions: 1. Sloped ceilings in accordance with Section 1208.2. 2. Ceilings of dwelling units and sleeping units within residential occupancies in accordance with Section 1208.2. 3. Allowable projections in accordance with Section 1003.3. 4. Stair headroom in accordance with Section 1011.3. 5. Door height in accordance with Section 1010.1.1. 6. Ramp headroom in accordance with Section 1012.5.2. 7. The clear height of floor levels in vehicular and pedestrian traffic areas of public and private parking garages in accor- dance with Section 406.2.2. 8. Areas above and below mezzanine floors in accordance with Section 505.2."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1003_2_ceiling_height",
+       "words": "A person checks this (Gordium doesn't decide it): The means of egress has a ceiling at least 7 feet 6 inches above the finished floor, except sloped ceilings and the ceilings of dwelling and sleeping units in residential occupancies (each per 1208.2), projections 1003.3 allows, stair headroom (1011.3), door height (1010.1.1), ramp headroom (1012.5.2), the clear height of parking garages' traffic areas (406.2.2) and areas above and below mezzanines (505.2): ceiling heights along the means of egress aren't measured, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1003_2_ceiling_height",
+       "why": "A person checks this (Gordium doesn't decide it): The means of egress has a ceiling at least 7 feet 6 inches above the finished floor, except sloped ceilings and the ceilings of dwelling and sleeping units in residential occupancies (each per 1208.2), projections 1003.3 allows, stair headroom (1011.3), door height (1010.1.1), ramp headroom (1012.5.2), the clear height of parking garages' traffic areas (406.2.2) and areas above and below mezzanines (505.2): ceiling heights along the means of egress aren't measured, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ceiling height of the means of egress",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1003",
+      "section_title": "General Means of Egress",
+      "piece": "1003.2",
+      "piece_title": "Ceiling height"
+     }
+    },
+    {
+     "id": "egress.general.bc_1003_3_1_headroom",
+     "rule": "general.bc_1003_3_1_headroom",
+     "name": "Egress · Headroom under protruding objects (BCNYS 1003.3.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Protruding objects on circulation paths may hang below 1003.2's ceiling height only where at least 80 inches of headroom is kept over every circulation path (walks, corridors, aisles and passageways), and they lower not more than half the ceiling area of a means of egress; door closers, overhead doorstops, frame stops, power door operators and electromagnetic locks may reach down to 78 inches in a door opening; where the clearance over a circulation path is less than 80 inches, a barrier is provided with its leading edge at most 27 inches above the floor: protruding objects aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Protruding objects on circulation paths may hang below 1003.2's ceiling height only where at least 80 inches of headroom is kept over every circulation path (walks, corridors, aisles and passageways), and they lower not more than half the ceiling area of a means of egress; door closers, overhead doorstops, frame stops, power door operators and electromagnetic locks may reach down to 78 inches in a door opening; where the clearance over a circulation path is less than 80 inches, a barrier is provided with its leading edge at most 27 inches above the floor: protruding objects aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1003.3 Protruding objects. Protruding objects on circulation paths shall comply with the requirements of Sections 1003.3.1 through 1003.3.4.",
+        "where": "1003.3, 2025 Building Code of New York State (BCNYS), PDF p.310"
+       },
+       {
+        "text": "1003.3.1 Headroom. Protruding objects are permitted to extend below the minimum ceiling height required by Section 1003.2 where a minimum headroom of 80 inches (2032 mm) is provided over any circulation paths, including walks, corridors, aisles and passageways. Not more than 50 percent of the ceiling area of a means of egress shall be reduced in height by protruding objects. Exception: Door closers, overhead doorstops, frame stops, power door operators and electromagnetic door locks shall be permitted to project into the door opening height not lower than 78 inches (1980 mm) above the floor.",
+        "where": "1003.3.1, 2025 Building Code of New York State (BCNYS), PDF p.310"
+       },
+       {
+        "text": "A barrier shall be provided where the vertical clearance above a circulation path is less than 80 inches (2032 mm) high above the finished floor. The leading edge of such a barrier shall be located 27 inches (686 mm) maximum above the finished floor.",
+        "where": "1003.3.1, 2025 Building Code of New York State (BCNYS), PDF p.311"
+       }
+      ],
+      "citation": "1003.3, 2025 Building Code of New York State (BCNYS), PDF p.310",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1003.3",
+      "quote": "1003.3 Protruding objects. Protruding objects on circulation paths shall comply with the requirements of Sections 1003.3.1 through 1003.3.4."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1003_3_1_headroom",
+       "words": "A person checks this (Gordium doesn't decide it): Protruding objects on circulation paths may hang below 1003.2's ceiling height only where at least 80 inches of headroom is kept over every circulation path (walks, corridors, aisles and passageways), and they lower not more than half the ceiling area of a means of egress; door closers, overhead doorstops, frame stops, power door operators and electromagnetic locks may reach down to 78 inches in a door opening; where the clearance over a circulation path is less than 80 inches, a barrier is provided with its leading edge at most 27 inches above the floor: protruding objects aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1003_3_1_headroom",
+       "why": "A person checks this (Gordium doesn't decide it): Protruding objects on circulation paths may hang below 1003.2's ceiling height only where at least 80 inches of headroom is kept over every circulation path (walks, corridors, aisles and passageways), and they lower not more than half the ceiling area of a means of egress; door closers, overhead doorstops, frame stops, power door operators and electromagnetic locks may reach down to 78 inches in a door opening; where the clearance over a circulation path is less than 80 inches, a barrier is provided with its leading edge at most 27 inches above the floor: protruding objects aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Headroom under protruding objects",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1003",
+      "section_title": "General Means of Egress",
+      "piece": "1003.3",
+      "piece_title": "Protruding objects"
+     }
+    },
+    {
+     "id": "egress.general.bc_1003_3_2_post_mounted_objects",
+     "rule": "general.bc_1003_3_2_post_mounted_objects",
+     "name": "Egress · Post-mounted objects (BCNYS 1003.3.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): An object on a post or pylon overhangs it at most 4 inches where its leading edge's lowest point is more than 27 and less than 80 inches above the floor; a sign or other obstruction between posts or pylons more than 12 inches apart has its lowest edge at most 27 or at least 80 inches above the floor or ground (the sloping handrails of stairs and ramps aside): such objects aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): An object on a post or pylon overhangs it at most 4 inches where its leading edge's lowest point is more than 27 and less than 80 inches above the floor; a sign or other obstruction between posts or pylons more than 12 inches apart has its lowest edge at most 27 or at least 80 inches above the floor or ground (the sloping handrails of stairs and ramps aside): such objects aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1003.3.2 Post-mounted objects. A free-standing object mounted on a post or pylon shall not overhang that post or pylon more than 4 inches (102 mm) where the lowest point of the leading edge is more than 27 inches (686 mm) and less than 80 inches (2032 mm) above the finished floor. Where a sign or other obstruction is mounted between posts or pylons and the clear distance between the posts or pylons is greater than 12 inches (305 mm), the lowest edge of such sign or obstruction shall be 27 inches (686 mm) maximum or 80 inches (2032 mm) minimum above the finished floor or ground. Exception: These requirements shall not apply to sloping portions of handrails between the top and bottom riser of stairs and above the ramp run.",
+        "where": "1003.3.2, 2025 Building Code of New York State (BCNYS), PDF p.311"
+       }
+      ],
+      "citation": "1003.3.2, 2025 Building Code of New York State (BCNYS), PDF p.311",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1003.3.2",
+      "quote": "1003.3.2 Post-mounted objects. A free-standing object mounted on a post or pylon shall not overhang that post or pylon more than 4 inches (102 mm) where the lowest point of the leading edge is more than 27 inches (686 mm) and less than 80 inches (2032 mm) above the finished floor. Where a sign or other obstruction is mounted between posts or pylons and the clear distance between the posts or pylons is greater than 12 inches (305 mm), the lowest edge of such sign or obstruction shall be 27 inches (686 mm) maximum or 80 inches (2032 mm) minimum above the finished floor or ground. Exception: These requirements shall not apply to sloping portions of handrails between the top and bottom riser of stairs and above the ramp run."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1003_3_2_post_mounted_objects",
+       "words": "A person checks this (Gordium doesn't decide it): An object on a post or pylon overhangs it at most 4 inches where its leading edge's lowest point is more than 27 and less than 80 inches above the floor; a sign or other obstruction between posts or pylons more than 12 inches apart has its lowest edge at most 27 or at least 80 inches above the floor or ground (the sloping handrails of stairs and ramps aside): such objects aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1003_3_2_post_mounted_objects",
+       "why": "A person checks this (Gordium doesn't decide it): An object on a post or pylon overhangs it at most 4 inches where its leading edge's lowest point is more than 27 and less than 80 inches above the floor; a sign or other obstruction between posts or pylons more than 12 inches apart has its lowest edge at most 27 or at least 80 inches above the floor or ground (the sloping handrails of stairs and ramps aside): such objects aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Post-mounted objects",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1003",
+      "section_title": "General Means of Egress",
+      "piece": "1003.3.2",
+      "piece_title": "Post-mounted objects"
+     }
+    },
+    {
+     "id": "egress.general.bc_1003_3_3_horizontal_projections",
+     "rule": "general.bc_1003_3_3_horizontal_projections",
+     "name": "Egress · Horizontal projections into circulation paths (BCNYS 1003.3.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Objects with leading edges more than 27 and not more than 80 inches above the floor project at most 4 inches into the circulation path (handrails up to 4 1/2 inches from the wall or guard): wall-mounted objects aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Objects with leading edges more than 27 and not more than 80 inches above the floor project at most 4 inches into the circulation path (handrails up to 4 1/2 inches from the wall or guard): wall-mounted objects aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1003.3.3 Horizontal projections. Objects with leading edges more than 27 inches (685 mm) and not more than 80 inches (2030 mm) above the finished floor shall not project horizontally more than 4 inches (102 mm) into the circulation path. Exception: Handrails are permitted to protrude 4 1/2 inches (114 mm) from the wall or guard.",
+        "where": "1003.3.3, 2025 Building Code of New York State (BCNYS), PDF p.311"
+       }
+      ],
+      "citation": "1003.3.3, 2025 Building Code of New York State (BCNYS), PDF p.311",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1003.3.3",
+      "quote": "1003.3.3 Horizontal projections. Objects with leading edges more than 27 inches (685 mm) and not more than 80 inches (2030 mm) above the finished floor shall not project horizontally more than 4 inches (102 mm) into the circulation path. Exception: Handrails are permitted to protrude 4 1/2 inches (114 mm) from the wall or guard."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1003_3_3_horizontal_projections",
+       "words": "A person checks this (Gordium doesn't decide it): Objects with leading edges more than 27 and not more than 80 inches above the floor project at most 4 inches into the circulation path (handrails up to 4 1/2 inches from the wall or guard): wall-mounted objects aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1003_3_3_horizontal_projections",
+       "why": "A person checks this (Gordium doesn't decide it): Objects with leading edges more than 27 and not more than 80 inches above the floor project at most 4 inches into the circulation path (handrails up to 4 1/2 inches from the wall or guard): wall-mounted objects aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Horizontal projections into circulation paths",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1003",
+      "section_title": "General Means of Egress",
+      "piece": "1003.3.3",
+      "piece_title": "Horizontal projections"
+     }
+    },
+    {
+     "id": "egress.general.bc_1003_3_4_clear_width",
+     "rule": "general.bc_1003_3_4_clear_width",
+     "name": "Egress · Protruding objects and accessible routes' width (BCNYS 1003.3.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Protruding objects don't reduce the minimum clear width of an accessible route: protruding objects and accessible routes aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Protruding objects don't reduce the minimum clear width of an accessible route: protruding objects and accessible routes aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1003.3.4 Clear width. Protruding objects shall not reduce the minimum clear width of accessible routes.",
+        "where": "1003.3.4, 2025 Building Code of New York State (BCNYS), PDF p.311"
+       }
+      ],
+      "citation": "1003.3.4, 2025 Building Code of New York State (BCNYS), PDF p.311",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1003.3.4",
+      "quote": "1003.3.4 Clear width. Protruding objects shall not reduce the minimum clear width of accessible routes."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1003_3_4_clear_width",
+       "words": "A person checks this (Gordium doesn't decide it): Protruding objects don't reduce the minimum clear width of an accessible route: protruding objects and accessible routes aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1003_3_4_clear_width",
+       "why": "A person checks this (Gordium doesn't decide it): Protruding objects don't reduce the minimum clear width of an accessible route: protruding objects and accessible routes aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Protruding objects and accessible routes' width",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1003",
+      "section_title": "General Means of Egress",
+      "piece": "1003.3.4",
+      "piece_title": "Clear width"
+     }
+    },
+    {
+     "id": "egress.general.bc_1003_4_slip_resistant_surface",
+     "rule": "general.bc_1003_4_slip_resistant_surface",
+     "name": "Egress · Slip-resistant walking surfaces (BCNYS 1003.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The circulation paths of the means of egress have a slip-resistant surface, securely attached: floor finishes aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The circulation paths of the means of egress have a slip-resistant surface, securely attached: floor finishes aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1003.4 Slip-resistant surface. Circulation paths of the means of egress shall have a slip-resistant surface and be securely attached.",
+        "where": "1003.4, 2025 Building Code of New York State (BCNYS), PDF p.311"
+       }
+      ],
+      "citation": "1003.4, 2025 Building Code of New York State (BCNYS), PDF p.311",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1003.4",
+      "quote": "1003.4 Slip-resistant surface. Circulation paths of the means of egress shall have a slip-resistant surface and be securely attached."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1003_4_slip_resistant_surface",
+       "words": "A person checks this (Gordium doesn't decide it): The circulation paths of the means of egress have a slip-resistant surface, securely attached: floor finishes aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1003_4_slip_resistant_surface",
+       "why": "A person checks this (Gordium doesn't decide it): The circulation paths of the means of egress have a slip-resistant surface, securely attached: floor finishes aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Slip-resistant walking surfaces",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1003",
+      "section_title": "General Means of Egress",
+      "piece": "1003.4",
+      "piece_title": "Slip-resistant surface"
+     }
+    },
+    {
+     "id": "egress.general.bc_1003_5_elevation_change",
+     "rule": "general.bc_1003_5_elevation_change",
+     "name": "Egress · Changes in floor elevation (BCNYS 1003.5)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A change in elevation of less than 12 inches in the means of egress is made by a sloped surface, a ramp complying with 1012 where steeper than 1 in 20 (5 percent), with handrails or a contrasting floor finish where 6 inches or less; the exceptions are steps at exterior doors per 1010.1.4, a stair of one riser or of two risers and a tread where Chapter 11 doesn't require access (risers and treads per 1011.5, treads at least 13 inches deep, a handrail per 1014 within 30 inches of the centerline of the path), and a step under 12 inches in aisles serving seating where Chapter 11 doesn't require access (risers and treads per 1030.14, a handrail per 1030.16); throughout a story in Group I-2, any change in elevation in the means of egress serving nonambulatory persons is a ramp or sloped walkway: the routes read each story as one level, so changes in floor level within it aren't in the model, a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A change in elevation of less than 12 inches in the means of egress is made by a sloped surface, a ramp complying with 1012 where steeper than 1 in 20 (5 percent), with handrails or a contrasting floor finish where 6 inches or less; the exceptions are steps at exterior doors per 1010.1.4, a stair of one riser or of two risers and a tread where Chapter 11 doesn't require access (risers and treads per 1011.5, treads at least 13 inches deep, a handrail per 1014 within 30 inches of the centerline of the path), and a step under 12 inches in aisles serving seating where Chapter 11 doesn't require access (risers and treads per 1030.14, a handrail per 1030.16); throughout a story in Group I-2, any change in elevation in the means of egress serving nonambulatory persons is a ramp or sloped walkway: the routes read each story as one level, so changes in floor level within it aren't in the model, a person's check.",
+      "quotes": [
+       {
+        "text": "1003.5 Elevation change. Where changes in elevation of less than 12 inches (305 mm) exist in the means of egress, sloped surfaces shall be used. Where the slope is greater than one unit vertical in 20 units horizontal (5-percent slope), ramps complying with Section 1012 shall be used. Where the difference in elevation is 6 inches (152 mm) or less, the ramp shall be equipped with either handrails or floor finish materials that contrast with adjacent floor finish materials. Exceptions: 1. Steps at exterior doors complying with Section 1010.1.4. 2. A stair with a single riser or with two risers and a tread is permitted at locations not required to be accessible by Chapter 11 where the risers and treads comply with Section 1011.5, the minimum depth of the tread is 13 inches (330 mm) and not less than one handrail complying with Section 1014 is provided within 30 inches (762 mm) of the centerline of the normal path of egress travel on the stair. 3. A step is permitted in aisles serving seating that has a difference in elevation less than 12 inches (305 mm) at locations not required to be accessible by Chapter 11, provided that the risers and treads comply with Section 1030.14 and the aisle is provided with a handrail complying with Section 1030.16. Throughout a story in a Group I-2 occupancy, any change in elevation in portions of the means of egress that serve nonambulatory persons shall be by means of a ramp or sloped walkway.",
+        "where": "1003.5, 2025 Building Code of New York State (BCNYS), PDF p.311"
+       }
+      ],
+      "citation": "1003.5, 2025 Building Code of New York State (BCNYS), PDF p.311",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1003.5",
+      "quote": "1003.5 Elevation change. Where changes in elevation of less than 12 inches (305 mm) exist in the means of egress, sloped surfaces shall be used. Where the slope is greater than one unit vertical in 20 units horizontal (5-percent slope), ramps complying with Section 1012 shall be used. Where the difference in elevation is 6 inches (152 mm) or less, the ramp shall be equipped with either handrails or floor finish materials that contrast with adjacent floor finish materials. Exceptions: 1. Steps at exterior doors complying with Section 1010.1.4. 2. A stair with a single riser or with two risers and a tread is permitted at locations not required to be accessible by Chapter 11 where the risers and treads comply with Section 1011.5, the minimum depth of the tread is 13 inches (330 mm) and not less than one handrail complying with Section 1014 is provided within 30 inches (762 mm) of the centerline of the normal path of egress travel on the stair. 3. A step is permitted in aisles serving seating that has a difference in elevation less than 12 inches (305 mm) at locations not required to be accessible by Chapter 11, provided that the risers and treads comply with Section 1030.14 and the aisle is provided with a handrail complying with Section 1030.16. Throughout a story in a Group I-2 occupancy, any change in elevation in portions of the means of egress that serve nonambulatory persons shall be by means of a ramp or sloped walkway."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1003_5_elevation_change",
+       "words": "A person checks this (Gordium doesn't decide it): A change in elevation of less than 12 inches in the means of egress is made by a sloped surface, a ramp complying with 1012 where steeper than 1 in 20 (5 percent), with handrails or a contrasting floor finish where 6 inches or less; the exceptions are steps at exterior doors per 1010.1.4, a stair of one riser or of two risers and a tread where Chapter 11 doesn't require access (risers and treads per 1011.5, treads at least 13 inches deep, a handrail per 1014 within 30 inches of the centerline of the path), and a step under 12 inches in aisles serving seating where Chapter 11 doesn't require access (risers and treads per 1030.14, a handrail per 1030.16); throughout a story in Group I-2, any change in elevation in the means of egress serving nonambulatory persons is a ramp or sloped walkway: the routes read each story as one level, so changes in floor level within it aren't in the model, a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1003_5_elevation_change",
+       "why": "A person checks this (Gordium doesn't decide it): A change in elevation of less than 12 inches in the means of egress is made by a sloped surface, a ramp complying with 1012 where steeper than 1 in 20 (5 percent), with handrails or a contrasting floor finish where 6 inches or less; the exceptions are steps at exterior doors per 1010.1.4, a stair of one riser or of two risers and a tread where Chapter 11 doesn't require access (risers and treads per 1011.5, treads at least 13 inches deep, a handrail per 1014 within 30 inches of the centerline of the path), and a step under 12 inches in aisles serving seating where Chapter 11 doesn't require access (risers and treads per 1030.14, a handrail per 1030.16); throughout a story in Group I-2, any change in elevation in the means of egress serving nonambulatory persons is a ramp or sloped walkway: the routes read each story as one level, so changes in floor level within it aren't in the model, a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Changes in floor elevation",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1003",
+      "section_title": "General Means of Egress",
+      "piece": "1003.5",
+      "piece_title": "Elevation change"
+     }
+    },
+    {
+     "id": "egress.general.bc_1003_6_means_of_egress_continuity",
+     "rule": "general.bc_1003_6_means_of_egress_continuity",
+     "name": "Egress · Means of egress continuity (BCNYS 1003.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The path of egress travel isn't interrupted by any building element other than a means of egress component; nothing but the projections this chapter permits obstructs a component's minimum width or required capacity; and the minimum width or required capacity of the means of egress system isn't diminished along the path of egress travel: the routes measure the corridors' clear width between the walls and what is drawn (Table 1020.3's rule), not every component's width or capacity along the path, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The path of egress travel isn't interrupted by any building element other than a means of egress component; nothing but the projections this chapter permits obstructs a component's minimum width or required capacity; and the minimum width or required capacity of the means of egress system isn't diminished along the path of egress travel: the routes measure the corridors' clear width between the walls and what is drawn (Table 1020.3's rule), not every component's width or capacity along the path, so a person's check.",
+      "quotes": [
+       {
+        "text": "1003.6 Means of egress continuity. The path of egress travel along a means of egress shall not be interrupted by a building element other than a means of egress component as specified in this chapter. Obstructions shall not be placed in the minimum width or required capacity of a means of egress component except projections permitted by this chapter. The minimum width or required capacity of a means of egress system shall not be diminished along the path of egress travel.",
+        "where": "1003.6, 2025 Building Code of New York State (BCNYS), PDF p.311"
+       }
+      ],
+      "citation": "1003.6, 2025 Building Code of New York State (BCNYS), PDF p.311",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1003.6",
+      "quote": "1003.6 Means of egress continuity. The path of egress travel along a means of egress shall not be interrupted by a building element other than a means of egress component as specified in this chapter. Obstructions shall not be placed in the minimum width or required capacity of a means of egress component except projections permitted by this chapter. The minimum width or required capacity of a means of egress system shall not be diminished along the path of egress travel."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1003_6_means_of_egress_continuity",
+       "words": "A person checks this (Gordium doesn't decide it): The path of egress travel isn't interrupted by any building element other than a means of egress component; nothing but the projections this chapter permits obstructs a component's minimum width or required capacity; and the minimum width or required capacity of the means of egress system isn't diminished along the path of egress travel: the routes measure the corridors' clear width between the walls and what is drawn (Table 1020.3's rule), not every component's width or capacity along the path, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1003_6_means_of_egress_continuity",
+       "why": "A person checks this (Gordium doesn't decide it): The path of egress travel isn't interrupted by any building element other than a means of egress component; nothing but the projections this chapter permits obstructs a component's minimum width or required capacity; and the minimum width or required capacity of the means of egress system isn't diminished along the path of egress travel: the routes measure the corridors' clear width between the walls and what is drawn (Table 1020.3's rule), not every component's width or capacity along the path, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Means of egress continuity",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1003",
+      "section_title": "General Means of Egress",
+      "piece": "1003.6",
+      "piece_title": "Means of egress continuity"
+     }
+    },
+    {
+     "id": "egress.general.bc_1003_7_elevators_escalators_moving_walks",
+     "rule": "general.bc_1003_7_elevators_escalators_moving_walks",
+     "name": "Egress · Elevators and escalators not a required means of egress (BCNYS 1003.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Elevators, escalators and moving walks are not used as a component of a required means of egress from any other part of the building, except elevators used as an accessible means of egress per 1009.4: which ways out the architect counts on beyond the doors and stairs the routes read isn't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Elevators, escalators and moving walks are not used as a component of a required means of egress from any other part of the building, except elevators used as an accessible means of egress per 1009.4: which ways out the architect counts on beyond the doors and stairs the routes read isn't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1003.7 Elevators, escalators and moving walks. Elevators, escalators and moving walks shall not be used as a component of a required means of egress from any other part of the building. Exception: Elevators used as an accessible means of egress in accordance with Section 1009.4.",
+        "where": "1003.7, 2025 Building Code of New York State (BCNYS), PDF p.311"
+       }
+      ],
+      "citation": "1003.7, 2025 Building Code of New York State (BCNYS), PDF p.311",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1003.7",
+      "quote": "1003.7 Elevators, escalators and moving walks. Elevators, escalators and moving walks shall not be used as a component of a required means of egress from any other part of the building. Exception: Elevators used as an accessible means of egress in accordance with Section 1009.4."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1003_7_elevators_escalators_moving_walks",
+       "words": "A person checks this (Gordium doesn't decide it): Elevators, escalators and moving walks are not used as a component of a required means of egress from any other part of the building, except elevators used as an accessible means of egress per 1009.4: which ways out the architect counts on beyond the doors and stairs the routes read isn't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1003_7_elevators_escalators_moving_walks",
+       "why": "A person checks this (Gordium doesn't decide it): Elevators, escalators and moving walks are not used as a component of a required means of egress from any other part of the building, except elevators used as an accessible means of egress per 1009.4: which ways out the architect counts on beyond the doors and stairs the routes read isn't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Elevators and escalators not a required means of egress",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1003",
+      "section_title": "General Means of Egress",
+      "piece": "1003.7",
+      "piece_title": "Elevators, escalators and moving walks"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_2_slope",
+     "rule": "general.bc_1012_2_slope",
+     "name": "Egress · Ramp slope (BCNYS 1012.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.2 Slope. Ramps used as part of a means of egress shall have a running slope not steeper than 1 unit vertical in 12 units horizon- tal (8.3-percent slope). The slope of other pedestrian ramps shall not be steeper than 1 unit vertical in 8 units horizontal (12.5- percent slope).",
+        "where": "1012.2, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       }
+      ],
+      "citation": "1012.2, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.2",
+      "quote": "1012.2 Slope. Ramps used as part of a means of egress shall have a running slope not steeper than 1 unit vertical in 12 units horizon- tal (8.3-percent slope). The slope of other pedestrian ramps shall not be steeper than 1 unit vertical in 8 units horizontal (12.5- percent slope)."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_2_slope",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_2_slope",
+       "why": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp slope",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.2",
+      "piece_title": "Slope"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_3_cross_slope",
+     "rule": "general.bc_1012_3_cross_slope",
+     "name": "Egress · Ramp cross slope (BCNYS 1012.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A ramp's slope measured perpendicular to the direction of travel is no steeper than 1 in 48 (2 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A ramp's slope measured perpendicular to the direction of travel is no steeper than 1 in 48 (2 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.3 Cross slope. The slope measured perpendicular to the direction of travel of a ramp shall not be steeper than one unit vertical in 48 units horizontal (2-percent slope).",
+        "where": "1012.3, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       }
+      ],
+      "citation": "1012.3, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.3",
+      "quote": "1012.3 Cross slope. The slope measured perpendicular to the direction of travel of a ramp shall not be steeper than one unit vertical in 48 units horizontal (2-percent slope)."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_3_cross_slope",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp's slope measured perpendicular to the direction of travel is no steeper than 1 in 48 (2 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_3_cross_slope",
+       "why": "A person checks this (Gordium doesn't decide it): A ramp's slope measured perpendicular to the direction of travel is no steeper than 1 in 48 (2 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp cross slope",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.3",
+      "piece_title": "Cross slope"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_4_vertical_rise",
+     "rule": "general.bc_1012_4_vertical_rise",
+     "name": "Egress · Ramp run's rise (BCNYS 1012.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): The rise of any ramp run is 30 inches at most: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): The rise of any ramp run is 30 inches at most: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.4 Vertical rise. The rise for any ramp run shall be 30 inches (762 mm) maximum.",
+        "where": "1012.4, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       }
+      ],
+      "citation": "1012.4, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.4",
+      "quote": "1012.4 Vertical rise. The rise for any ramp run shall be 30 inches (762 mm) maximum."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_4_vertical_rise",
+       "words": "A person checks this (Gordium doesn't decide it): The rise of any ramp run is 30 inches at most: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_4_vertical_rise",
+       "why": "A person checks this (Gordium doesn't decide it): The rise of any ramp run is 30 inches at most: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp run's rise",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.4",
+      "piece_title": "Vertical rise"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_5_1_width_and_capacity",
+     "rule": "general.bc_1012_5_1_width_and_capacity",
+     "name": "Egress · Ramp width and capacity (BCNYS 1012.5.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A means of egress ramp is at least as wide, and of at least the capacity, as 1020.3 requires of corridors, and at least 36 inches clear between handrails, if provided, or other permitted projections: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A means of egress ramp is at least as wide, and of at least the capacity, as 1020.3 requires of corridors, and at least 36 inches clear between handrails, if provided, or other permitted projections: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.5 Minimum dimensions. The minimum dimensions of means of egress ramps shall comply with Sections 1012.5.1 through 1012.5.3.",
+        "where": "1012.5, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       },
+       {
+        "text": "1012.5.1 Width and capacity. The minimum width and required capacity of a means of egress ramp shall be not less than that required for corridors by Section 1020.3. The clear width of a ramp between handrails, if provided, or other permissible projections shall be 36 inches (914 mm) minimum.",
+        "where": "1012.5.1, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       }
+      ],
+      "citation": "1012.5, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.5",
+      "quote": "1012.5 Minimum dimensions. The minimum dimensions of means of egress ramps shall comply with Sections 1012.5.1 through 1012.5.3."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_5_1_width_and_capacity",
+       "words": "A person checks this (Gordium doesn't decide it): A means of egress ramp is at least as wide, and of at least the capacity, as 1020.3 requires of corridors, and at least 36 inches clear between handrails, if provided, or other permitted projections: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_5_1_width_and_capacity",
+       "why": "A person checks this (Gordium doesn't decide it): A means of egress ramp is at least as wide, and of at least the capacity, as 1020.3 requires of corridors, and at least 36 inches clear between handrails, if provided, or other permitted projections: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp width and capacity",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.5",
+      "piece_title": "Minimum dimensions"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_5_2_headroom",
+     "rule": "general.bc_1012_5_2_headroom",
+     "name": "Egress · Ramp headroom (BCNYS 1012.5.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): At least 80 inches of headroom above the finished floor of the ramp run and any intermediate landings, over the full width of the ramp and landing: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): At least 80 inches of headroom above the finished floor of the ramp run and any intermediate landings, over the full width of the ramp and landing: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.5.2 Headroom. The minimum headroom in all parts of the means of egress ramp shall be not less than 80 inches (2032 mm) above the finished floor of the ramp run and any intermediate landings. The minimum clearance shall be maintained for the full width of the ramp and landing.",
+        "where": "1012.5.2, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       }
+      ],
+      "citation": "1012.5.2, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.5.2",
+      "quote": "1012.5.2 Headroom. The minimum headroom in all parts of the means of egress ramp shall be not less than 80 inches (2032 mm) above the finished floor of the ramp run and any intermediate landings. The minimum clearance shall be maintained for the full width of the ramp and landing."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_5_2_headroom",
+       "words": "A person checks this (Gordium doesn't decide it): At least 80 inches of headroom above the finished floor of the ramp run and any intermediate landings, over the full width of the ramp and landing: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_5_2_headroom",
+       "why": "A person checks this (Gordium doesn't decide it): At least 80 inches of headroom above the finished floor of the ramp run and any intermediate landings, over the full width of the ramp and landing: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp headroom",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.5.2",
+      "piece_title": "Headroom"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_5_3_restrictions",
+     "rule": "general.bc_1012_5_3_restrictions",
+     "name": "Egress · Ramp width kept clear (BCNYS 1012.5.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A means of egress ramp doesn't narrow in the direction of egress travel, nothing projects into the required ramp and landing width, and a door opening onto a landing leaves at least 42 inches clear: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A means of egress ramp doesn't narrow in the direction of egress travel, nothing projects into the required ramp and landing width, and a door opening onto a landing leaves at least 42 inches clear: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.5.3 Restrictions. Means of egress ramps shall not reduce in width in the direction of egress travel. Projections into the required ramp and landing width are prohibited. Doors opening onto a landing shall not reduce the clear width to less than 42 inches (1067 mm).",
+        "where": "1012.5.3, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       }
+      ],
+      "citation": "1012.5.3, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.5.3",
+      "quote": "1012.5.3 Restrictions. Means of egress ramps shall not reduce in width in the direction of egress travel. Projections into the required ramp and landing width are prohibited. Doors opening onto a landing shall not reduce the clear width to less than 42 inches (1067 mm)."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_5_3_restrictions",
+       "words": "A person checks this (Gordium doesn't decide it): A means of egress ramp doesn't narrow in the direction of egress travel, nothing projects into the required ramp and landing width, and a door opening onto a landing leaves at least 42 inches clear: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_5_3_restrictions",
+       "why": "A person checks this (Gordium doesn't decide it): A means of egress ramp doesn't narrow in the direction of egress travel, nothing projects into the required ramp and landing width, and a door opening onto a landing leaves at least 42 inches clear: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp width kept clear",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.5.3",
+      "piece_title": "Restrictions"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_6_landings",
+     "rule": "general.bc_1012_6_landings",
+     "name": "Egress · Ramp landings where required (BCNYS 1012.6)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A ramp has landings at the bottom and top of each ramp, at points of turning, at entrances, at exits and at doors (ICC A117.1's maneuvering clearances at an adjoining doorway may overlap the landing, 1012.6.5): ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A ramp has landings at the bottom and top of each ramp, at points of turning, at entrances, at exits and at doors (ICC A117.1's maneuvering clearances at an adjoining doorway may overlap the landing, 1012.6.5): ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.6 Landings. Ramps shall have landings at the bottom and top of each ramp, points of turning, entrance, exits and at doors. Landings shall comply with Sections 1012.6.1 through 1012.6.5.",
+        "where": "1012.6, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       },
+       {
+        "text": "1012.6.5 Doorways. Where doorways are located adjacent to a ramp landing, maneuvering clearances required by ICC A117.1 are permitted to overlap the required landing area.",
+        "where": "1012.6.5, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1012.6, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.6",
+      "quote": "1012.6 Landings. Ramps shall have landings at the bottom and top of each ramp, points of turning, entrance, exits and at doors. Landings shall comply with Sections 1012.6.1 through 1012.6.5."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_6_landings",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp has landings at the bottom and top of each ramp, at points of turning, at entrances, at exits and at doors (ICC A117.1's maneuvering clearances at an adjoining doorway may overlap the landing, 1012.6.5): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_6_landings",
+       "why": "A person checks this (Gordium doesn't decide it): A ramp has landings at the bottom and top of each ramp, at points of turning, at entrances, at exits and at doors (ICC A117.1's maneuvering clearances at an adjoining doorway may overlap the landing, 1012.6.5): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp landings where required",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.6",
+      "piece_title": "Landings"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_6_1_landing_slope",
+     "rule": "general.bc_1012_6_1_landing_slope",
+     "name": "Egress · Ramp landing slope (BCNYS 1012.6.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A ramp landing is no steeper than 1 in 48 (2 percent) in any direction, with no changes in level: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A ramp landing is no steeper than 1 in 48 (2 percent) in any direction, with no changes in level: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.6.1 Slope. Landings shall have a slope not steeper than one unit vertical in 48 units horizontal (2-percent slope) in any direc- tion. Changes in level are not permitted.",
+        "where": "1012.6.1, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       }
+      ],
+      "citation": "1012.6.1, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.6.1",
+      "quote": "1012.6.1 Slope. Landings shall have a slope not steeper than one unit vertical in 48 units horizontal (2-percent slope) in any direc- tion. Changes in level are not permitted."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_6_1_landing_slope",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp landing is no steeper than 1 in 48 (2 percent) in any direction, with no changes in level: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_6_1_landing_slope",
+       "why": "A person checks this (Gordium doesn't decide it): A ramp landing is no steeper than 1 in 48 (2 percent) in any direction, with no changes in level: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp landing slope",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.6.1",
+      "piece_title": "Slope"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_6_2_landing_width",
+     "rule": "general.bc_1012_6_2_landing_width",
+     "name": "Egress · Ramp landing width (BCNYS 1012.6.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A ramp landing is at least as wide as the widest ramp run adjoining it: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A ramp landing is at least as wide as the widest ramp run adjoining it: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.6.2 Width. The landing width shall be not less than the width of the widest ramp run adjoining the landing.",
+        "where": "1012.6.2, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       }
+      ],
+      "citation": "1012.6.2, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.6.2",
+      "quote": "1012.6.2 Width. The landing width shall be not less than the width of the widest ramp run adjoining the landing."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_6_2_landing_width",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp landing is at least as wide as the widest ramp run adjoining it: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_6_2_landing_width",
+       "why": "A person checks this (Gordium doesn't decide it): A ramp landing is at least as wide as the widest ramp run adjoining it: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp landing width",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.6.2",
+      "piece_title": "Width"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_6_3_landing_length",
+     "rule": "general.bc_1012_6_3_landing_length",
+     "name": "Egress · Ramp landing length (BCNYS 1012.6.3)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A ramp landing is at least 60 inches long; 36 inches within Group R-2 and R-3 dwelling and sleeping units not required to be Accessible, Type A or Type B units (1108), and not more than 48 inches is required in the direction of travel where the ramp isn't part of an accessible route: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A ramp landing is at least 60 inches long; 36 inches within Group R-2 and R-3 dwelling and sleeping units not required to be Accessible, Type A or Type B units (1108), and not more than 48 inches is required in the direction of travel where the ramp isn't part of an accessible route: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.6.3 Length. The landing length shall be 60 inches (1525 mm) minimum. Exceptions: 1. In Group R-2 and R-3 individual dwelling and sleeping units that are not required to be Accessible units, Type A units or Type B units in accordance with Section 1108, landings are permitted to be 36 inches (914 mm) minimum. 2. Where the ramp is not a part of an accessible route, the length of the landing shall not be required to be more than 48 inches (1219 mm) in the direction of travel.",
+        "where": "1012.6.3, 2025 Building Code of New York State (BCNYS), PDF p.335"
+       }
+      ],
+      "citation": "1012.6.3, 2025 Building Code of New York State (BCNYS), PDF p.335",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.6.3",
+      "quote": "1012.6.3 Length. The landing length shall be 60 inches (1525 mm) minimum. Exceptions: 1. In Group R-2 and R-3 individual dwelling and sleeping units that are not required to be Accessible units, Type A units or Type B units in accordance with Section 1108, landings are permitted to be 36 inches (914 mm) minimum. 2. Where the ramp is not a part of an accessible route, the length of the landing shall not be required to be more than 48 inches (1219 mm) in the direction of travel."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_6_3_landing_length",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp landing is at least 60 inches long; 36 inches within Group R-2 and R-3 dwelling and sleeping units not required to be Accessible, Type A or Type B units (1108), and not more than 48 inches is required in the direction of travel where the ramp isn't part of an accessible route: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_6_3_landing_length",
+       "why": "A person checks this (Gordium doesn't decide it): A ramp landing is at least 60 inches long; 36 inches within Group R-2 and R-3 dwelling and sleeping units not required to be Accessible, Type A or Type B units (1108), and not more than 48 inches is required in the direction of travel where the ramp isn't part of an accessible route: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp landing length",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.6.3",
+      "piece_title": "Length"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_6_4_change_in_direction",
+     "rule": "general.bc_1012_6_4_change_in_direction",
+     "name": "Egress · Ramp landings at a change in direction (BCNYS 1012.6.4)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Where the direction of travel changes at a landing between ramp runs, the landing is at least 60 by 60 inches (36 by 36 inches within Group R-2 and R-3 dwelling or sleeping units not required to be Accessible, Type A or Type B units, 1108): ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Where the direction of travel changes at a landing between ramp runs, the landing is at least 60 by 60 inches (36 by 36 inches within Group R-2 and R-3 dwelling or sleeping units not required to be Accessible, Type A or Type B units, 1108): ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.6.4 Change in direction. Where changes in direction of travel occur at landings provided between ramp runs, the landing shall be 60 inches by 60 inches (1524 mm by 1524 mm) minimum. Exception: In Group R-2 and R-3 individual dwelling or sleeping units that are not required to be Accessible units, Type A units or Type B units in accordance with Section 1108, landings are permitted to be 36 inches by 36 inches (914 mm by 914 mm) minimum.",
+        "where": "1012.6.4, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1012.6.4, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.6.4",
+      "quote": "1012.6.4 Change in direction. Where changes in direction of travel occur at landings provided between ramp runs, the landing shall be 60 inches by 60 inches (1524 mm by 1524 mm) minimum. Exception: In Group R-2 and R-3 individual dwelling or sleeping units that are not required to be Accessible units, Type A units or Type B units in accordance with Section 1108, landings are permitted to be 36 inches by 36 inches (914 mm by 914 mm) minimum."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_6_4_change_in_direction",
+       "words": "A person checks this (Gordium doesn't decide it): Where the direction of travel changes at a landing between ramp runs, the landing is at least 60 by 60 inches (36 by 36 inches within Group R-2 and R-3 dwelling or sleeping units not required to be Accessible, Type A or Type B units, 1108): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_6_4_change_in_direction",
+       "why": "A person checks this (Gordium doesn't decide it): Where the direction of travel changes at a landing between ramp runs, the landing is at least 60 by 60 inches (36 by 36 inches within Group R-2 and R-3 dwelling or sleeping units not required to be Accessible, Type A or Type B units, 1108): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp landings at a change in direction",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.6.4",
+      "piece_title": "Change in direction"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_7_ramp_construction",
+     "rule": "general.bc_1012_7_ramp_construction",
+     "name": "Egress · Ramp construction materials (BCNYS 1012.7)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A ramp is built of materials the building's type of construction permits (wood handrails allowed in every type): construction types and materials aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A ramp is built of materials the building's type of construction permits (wood handrails allowed in every type): construction types and materials aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.7 Ramp construction. Ramps shall be built of materials consistent with the types permitted for the type of construction of the building, except that wood handrails shall be permitted for all types of construction.",
+        "where": "1012.7, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1012.7, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.7",
+      "quote": "1012.7 Ramp construction. Ramps shall be built of materials consistent with the types permitted for the type of construction of the building, except that wood handrails shall be permitted for all types of construction."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_7_ramp_construction",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp is built of materials the building's type of construction permits (wood handrails allowed in every type): construction types and materials aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_7_ramp_construction",
+       "why": "A person checks this (Gordium doesn't decide it): A ramp is built of materials the building's type of construction permits (wood handrails allowed in every type): construction types and materials aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp construction materials",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.7",
+      "piece_title": "Ramp construction"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_7_1_ramp_surface",
+     "rule": "general.bc_1012_7_1_ramp_surface",
+     "name": "Egress · Ramp surface (BCNYS 1012.7.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A ramp's surface is of slip-resistant materials, securely attached: finishes aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A ramp's surface is of slip-resistant materials, securely attached: finishes aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.7.1 Ramp surface. The surface of ramps shall be of slip-resistant materials that are securely attached.",
+        "where": "1012.7.1, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1012.7.1, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.7.1",
+      "quote": "1012.7.1 Ramp surface. The surface of ramps shall be of slip-resistant materials that are securely attached."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_7_1_ramp_surface",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp's surface is of slip-resistant materials, securely attached: finishes aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_7_1_ramp_surface",
+       "why": "A person checks this (Gordium doesn't decide it): A ramp's surface is of slip-resistant materials, securely attached: finishes aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp surface",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.7.1",
+      "piece_title": "Ramp surface"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_7_2_outdoor_conditions",
+     "rule": "general.bc_1012_7_2_outdoor_conditions",
+     "name": "Egress · Outdoor ramps shed water (BCNYS 1012.7.2)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Outdoor ramps and their outdoor approaches are designed so water doesn't accumulate on walking surfaces: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Outdoor ramps and their outdoor approaches are designed so water doesn't accumulate on walking surfaces: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.7.2 Outdoor conditions. Outdoor ramps and outdoor approaches to ramps shall be designed so that water will not accu- mulate on walking surfaces.",
+        "where": "1012.7.2, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1012.7.2, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.7.2",
+      "quote": "1012.7.2 Outdoor conditions. Outdoor ramps and outdoor approaches to ramps shall be designed so that water will not accu- mulate on walking surfaces."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_7_2_outdoor_conditions",
+       "words": "A person checks this (Gordium doesn't decide it): Outdoor ramps and their outdoor approaches are designed so water doesn't accumulate on walking surfaces: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_7_2_outdoor_conditions",
+       "why": "A person checks this (Gordium doesn't decide it): Outdoor ramps and their outdoor approaches are designed so water doesn't accumulate on walking surfaces: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Outdoor ramps shed water",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.7.2",
+      "piece_title": "Outdoor conditions"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_8_handrails",
+     "rule": "general.bc_1012_8_handrails",
+     "name": "Egress · Ramp handrails (BCNYS 1012.8)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.8 Handrails. Ramps with a rise greater than 6 inches (152 mm) shall have handrails on both sides. Handrails shall comply with Section 1014.",
+        "where": "1012.8, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1012.8, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.8",
+      "quote": "1012.8 Handrails. Ramps with a rise greater than 6 inches (152 mm) shall have handrails on both sides. Handrails shall comply with Section 1014."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_8_handrails",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_8_handrails",
+       "why": "A person checks this (Gordium doesn't decide it): A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp handrails",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.8",
+      "piece_title": "Handrails"
+     }
+    },
+    {
+     "id": "egress.general.bc_1012_10_edge_protection",
+     "rule": "general.bc_1012_10_edge_protection",
+     "name": "Egress · Ramp edge protection (BCNYS 1012.10)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+      "quotes": [
+       {
+        "text": "1012.10 Edge protection. Edge protection complying with Section 1012.10.1 or 1012.10.2 shall be provided on each side of ramp runs and at each side of ramp landings. Exceptions: 1. Edge protection is not required on ramps that are not required to have handrails, provided they have flared sides that comply with the ICC A117.1 curb ramp provisions. 2. Edge protection is not required on the sides of ramp landings serving an adjoining ramp run or stairway. 3. Edge protection is not required on the sides of ramp landings having a vertical dropoff of not more than 1/2 inch (12.7 mm) within 10 inches (254 mm) horizontally of the required landing area.",
+        "where": "1012.10, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       },
+       {
+        "text": "1012.10.1 Curb, rail, wall or barrier. A curb, rail, wall or barrier shall be provided to serve as edge protection. A curb shall be not less than 4 inches (102 mm) in height. Barriers shall be constructed so that the barrier prevents the passage of a 4-inch-diameter (102 mm) sphere, where any portion of the sphere is within 4 inches (102 mm) of the floor or ground surface.",
+        "where": "1012.10.1, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       },
+       {
+        "text": "1012.10.2 Extended floor or ground surface. The floor or ground surface of the ramp run or landing shall extend 12 inches (305 mm) minimum beyond the inside face of a handrail complying with Section 1014.",
+        "where": "1012.10.2, 2025 Building Code of New York State (BCNYS), PDF p.336"
+       }
+      ],
+      "citation": "1012.10, 2025 Building Code of New York State (BCNYS), PDF p.336",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "1012.10",
+      "quote": "1012.10 Edge protection. Edge protection complying with Section 1012.10.1 or 1012.10.2 shall be provided on each side of ramp runs and at each side of ramp landings. Exceptions: 1. Edge protection is not required on ramps that are not required to have handrails, provided they have flared sides that comply with the ICC A117.1 curb ramp provisions. 2. Edge protection is not required on the sides of ramp landings serving an adjoining ramp run or stairway. 3. Edge protection is not required on the sides of ramp landings having a vertical dropoff of not more than 1/2 inch (12.7 mm) within 10 inches (254 mm) horizontally of the required landing area."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_1012_10_edge_protection",
+       "words": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_1012_10_edge_protection",
+       "why": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Ramp edge protection",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "10",
+      "chapter_title": "MEANS OF EGRESS",
+      "section": "1012",
+      "section_title": "Ramps",
+      "piece": "1012.10",
+      "piece_title": "Edge protection"
      }
     },
     {
@@ -75297,7 +77096,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 107 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 132 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -75909,6 +77708,31 @@
       "egress.general.bc_1031_2_1_operational_constraints",
       "egress.general.bc_1031_5_3_area_well_drainage",
       "egress.general.bc_1031_6_bars_grilles_covers_screens",
+      "egress.general.bc_1003_2_ceiling_height",
+      "egress.general.bc_1003_3_1_headroom",
+      "egress.general.bc_1003_3_2_post_mounted_objects",
+      "egress.general.bc_1003_3_3_horizontal_projections",
+      "egress.general.bc_1003_3_4_clear_width",
+      "egress.general.bc_1003_4_slip_resistant_surface",
+      "egress.general.bc_1003_5_elevation_change",
+      "egress.general.bc_1003_6_means_of_egress_continuity",
+      "egress.general.bc_1003_7_elevators_escalators_moving_walks",
+      "egress.general.bc_1012_2_slope",
+      "egress.general.bc_1012_3_cross_slope",
+      "egress.general.bc_1012_4_vertical_rise",
+      "egress.general.bc_1012_5_1_width_and_capacity",
+      "egress.general.bc_1012_5_2_headroom",
+      "egress.general.bc_1012_5_3_restrictions",
+      "egress.general.bc_1012_6_landings",
+      "egress.general.bc_1012_6_1_landing_slope",
+      "egress.general.bc_1012_6_2_landing_width",
+      "egress.general.bc_1012_6_3_landing_length",
+      "egress.general.bc_1012_6_4_change_in_direction",
+      "egress.general.bc_1012_7_ramp_construction",
+      "egress.general.bc_1012_7_1_ramp_surface",
+      "egress.general.bc_1012_7_2_outdoor_conditions",
+      "egress.general.bc_1012_8_handrails",
+      "egress.general.bc_1012_10_edge_protection",
       "egress.interior#1"
      ],
      "lines": [
@@ -77053,7 +78877,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Protruding objects per 1003.3 (BCNYS 1005.7.3): A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+       "title": "Egress · Protruding objects per 1003.3 (BCNYS 1005.7.3): A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (brought in by section group 9a, each of 1003.3.1 to 1003.3.4 its own flag): a person's check.",
        "mark": "?",
        "name": "Egress · Protruding objects per 1003.3 (BCNYS 1005.7.3)"
       },
@@ -77500,6 +79324,331 @@
        "name": "Egress · Bars, grilles, covers and screens over escape openings (BCNYS 1031.6)"
       },
       {
+       "key": "review#9adac78f45",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1003_2_ceiling_height"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ceiling height of the means of egress (BCNYS 1003.2): A person checks this (Gordium doesn't decide it): The means of egress has a ceiling at least 7 feet 6 inches above the finished floor, except sloped ceilings and the ceilings of dwelling and sleeping units in residential occupancies (each per 1208.2), projections 1003.3 allows, stair headroom (1011.3), door height (1010.1.1), ramp headroom (1012.5.2), the clear height of parking garages' traffic areas (406.2.2) and areas above and below mezzanines (505.2): ceiling heights along the means of egress aren't measured, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ceiling height of the means of egress (BCNYS 1003.2)"
+      },
+      {
+       "key": "review#662d826fa7",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1003_3_1_headroom"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Headroom under protruding objects (BCNYS 1003.3.1): A person checks this (Gordium doesn't decide it): Protruding objects on circulation paths may hang below 1003.2's ceiling height only where at least 80 inches of headroom is kept over every circulation path (walks, corridors, aisles and passageways), and they lower not more than half the ceiling area of a means of egress; door closers, overhead doorstops, frame stops, power door operators and electromagnetic locks may reach down to 78 inches in a door opening; where the clearance over a circulation path is less than 80 inches, a barrier is provided with its leading edge at most 27 inches above the floor: protruding objects aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Headroom under protruding objects (BCNYS 1003.3.1)"
+      },
+      {
+       "key": "review#58c1b0ecb0",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1003_3_2_post_mounted_objects"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Post-mounted objects (BCNYS 1003.3.2): A person checks this (Gordium doesn't decide it): An object on a post or pylon overhangs it at most 4 inches where its leading edge's lowest point is more than 27 and less than 80 inches above the floor; a sign or other obstruction between posts or pylons more than 12 inches apart has its lowest edge at most 27 or at least 80 inches above the floor or ground (the sloping handrails of stairs and ramps aside): such objects aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Post-mounted objects (BCNYS 1003.3.2)"
+      },
+      {
+       "key": "review#bcb93e38c4",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1003_3_3_horizontal_projections"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Horizontal projections into circulation paths (BCNYS 1003.3.3): A person checks this (Gordium doesn't decide it): Objects with leading edges more than 27 and not more than 80 inches above the floor project at most 4 inches into the circulation path (handrails up to 4 1/2 inches from the wall or guard): wall-mounted objects aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Horizontal projections into circulation paths (BCNYS 1003.3.3)"
+      },
+      {
+       "key": "review#bc2e6d834f",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1003_3_4_clear_width"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Protruding objects and accessible routes' width (BCNYS 1003.3.4): A person checks this (Gordium doesn't decide it): Protruding objects don't reduce the minimum clear width of an accessible route: protruding objects and accessible routes aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Protruding objects and accessible routes' width (BCNYS 1003.3.4)"
+      },
+      {
+       "key": "review#29819db638",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1003_4_slip_resistant_surface"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Slip-resistant walking surfaces (BCNYS 1003.4): A person checks this (Gordium doesn't decide it): The circulation paths of the means of egress have a slip-resistant surface, securely attached: floor finishes aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Slip-resistant walking surfaces (BCNYS 1003.4)"
+      },
+      {
+       "key": "review#c95dc7c7c6",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1003_5_elevation_change"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Changes in floor elevation (BCNYS 1003.5): A person checks this (Gordium doesn't decide it): A change in elevation of less than 12 inches in the means of egress is made by a sloped surface, a ramp complying with 1012 where steeper than 1 in 20 (5 percent), with handrails or a contrasting floor finish where 6 inches or less; the exceptions are steps at exterior doors per 1010.1.4, a stair of one riser or of two risers and a tread where Chapter 11 doesn't require access (risers and treads per 1011.5, treads at least 13 inches deep, a handrail per 1014 within 30 inches of the centerline of the path), and a step under 12 inches in aisles serving seating where Chapter 11 doesn't require access (risers and treads per 1030.14, a handrail per 1030.16); throughout a story in Group I-2, any change in elevation in the means of egress serving nonambulatory persons is a ramp or sloped walkway: the routes read each story as one level, so changes in floor level within it aren't in the model, a person's check.",
+       "mark": "?",
+       "name": "Egress · Changes in floor elevation (BCNYS 1003.5)"
+      },
+      {
+       "key": "review#fba7aacb4a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1003_6_means_of_egress_continuity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Means of egress continuity (BCNYS 1003.6): A person checks this (Gordium doesn't decide it): The path of egress travel isn't interrupted by any building element other than a means of egress component; nothing but the projections this chapter permits obstructs a component's minimum width or required capacity; and the minimum width or required capacity of the means of egress system isn't diminished along the path of egress travel: the routes measure the corridors' clear width between the walls and what is drawn (Table 1020.3's rule), not every component's width or capacity along the path, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Means of egress continuity (BCNYS 1003.6)"
+      },
+      {
+       "key": "review#c8c334db70",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1003_7_elevators_escalators_moving_walks"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Elevators and escalators not a required means of egress (BCNYS 1003.7): A person checks this (Gordium doesn't decide it): Elevators, escalators and moving walks are not used as a component of a required means of egress from any other part of the building, except elevators used as an accessible means of egress per 1009.4: which ways out the architect counts on beyond the doors and stairs the routes read isn't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Elevators and escalators not a required means of egress (BCNYS 1003.7)"
+      },
+      {
+       "key": "review#4fc914752d",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_2_slope"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp slope (BCNYS 1012.2): A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp slope (BCNYS 1012.2)"
+      },
+      {
+       "key": "review#3cc9227981",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_3_cross_slope"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp cross slope (BCNYS 1012.3): A person checks this (Gordium doesn't decide it): A ramp's slope measured perpendicular to the direction of travel is no steeper than 1 in 48 (2 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp cross slope (BCNYS 1012.3)"
+      },
+      {
+       "key": "review#907f73faa6",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_4_vertical_rise"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp run's rise (BCNYS 1012.4): A person checks this (Gordium doesn't decide it): The rise of any ramp run is 30 inches at most: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp run's rise (BCNYS 1012.4)"
+      },
+      {
+       "key": "review#922dbaab71",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_5_1_width_and_capacity"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp width and capacity (BCNYS 1012.5.1): A person checks this (Gordium doesn't decide it): A means of egress ramp is at least as wide, and of at least the capacity, as 1020.3 requires of corridors, and at least 36 inches clear between handrails, if provided, or other permitted projections: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp width and capacity (BCNYS 1012.5.1)"
+      },
+      {
+       "key": "review#2c65277a34",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_5_2_headroom"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp headroom (BCNYS 1012.5.2): A person checks this (Gordium doesn't decide it): At least 80 inches of headroom above the finished floor of the ramp run and any intermediate landings, over the full width of the ramp and landing: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp headroom (BCNYS 1012.5.2)"
+      },
+      {
+       "key": "review#d7a8a4b7b9",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_5_3_restrictions"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp width kept clear (BCNYS 1012.5.3): A person checks this (Gordium doesn't decide it): A means of egress ramp doesn't narrow in the direction of egress travel, nothing projects into the required ramp and landing width, and a door opening onto a landing leaves at least 42 inches clear: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp width kept clear (BCNYS 1012.5.3)"
+      },
+      {
+       "key": "review#2b11b4ad0c",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_6_landings"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp landings where required (BCNYS 1012.6): A person checks this (Gordium doesn't decide it): A ramp has landings at the bottom and top of each ramp, at points of turning, at entrances, at exits and at doors (ICC A117.1's maneuvering clearances at an adjoining doorway may overlap the landing, 1012.6.5): ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp landings where required (BCNYS 1012.6)"
+      },
+      {
+       "key": "review#58962ec483",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_6_1_landing_slope"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp landing slope (BCNYS 1012.6.1): A person checks this (Gordium doesn't decide it): A ramp landing is no steeper than 1 in 48 (2 percent) in any direction, with no changes in level: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp landing slope (BCNYS 1012.6.1)"
+      },
+      {
+       "key": "review#c7b27d3787",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_6_2_landing_width"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp landing width (BCNYS 1012.6.2): A person checks this (Gordium doesn't decide it): A ramp landing is at least as wide as the widest ramp run adjoining it: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp landing width (BCNYS 1012.6.2)"
+      },
+      {
+       "key": "review#0120d1d6ba",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_6_3_landing_length"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp landing length (BCNYS 1012.6.3): A person checks this (Gordium doesn't decide it): A ramp landing is at least 60 inches long; 36 inches within Group R-2 and R-3 dwelling and sleeping units not required to be Accessible, Type A or Type B units (1108), and not more than 48 inches is required in the direction of travel where the ramp isn't part of an accessible route: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp landing length (BCNYS 1012.6.3)"
+      },
+      {
+       "key": "review#d60ea0f850",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_6_4_change_in_direction"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp landings at a change in direction (BCNYS 1012.6.4): A person checks this (Gordium doesn't decide it): Where the direction of travel changes at a landing between ramp runs, the landing is at least 60 by 60 inches (36 by 36 inches within Group R-2 and R-3 dwelling or sleeping units not required to be Accessible, Type A or Type B units, 1108): ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp landings at a change in direction (BCNYS 1012.6.4)"
+      },
+      {
+       "key": "review#37bb09ba84",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_7_ramp_construction"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp construction materials (BCNYS 1012.7): A person checks this (Gordium doesn't decide it): A ramp is built of materials the building's type of construction permits (wood handrails allowed in every type): construction types and materials aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp construction materials (BCNYS 1012.7)"
+      },
+      {
+       "key": "review#5751889f5a",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_7_1_ramp_surface"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp surface (BCNYS 1012.7.1): A person checks this (Gordium doesn't decide it): A ramp's surface is of slip-resistant materials, securely attached: finishes aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp surface (BCNYS 1012.7.1)"
+      },
+      {
+       "key": "review#cb1288db6d",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_7_2_outdoor_conditions"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Outdoor ramps shed water (BCNYS 1012.7.2): A person checks this (Gordium doesn't decide it): Outdoor ramps and their outdoor approaches are designed so water doesn't accumulate on walking surfaces: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Outdoor ramps shed water (BCNYS 1012.7.2)"
+      },
+      {
+       "key": "review#495b111399",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_8_handrails"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp handrails (BCNYS 1012.8): A person checks this (Gordium doesn't decide it): A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp handrails (BCNYS 1012.8)"
+      },
+      {
+       "key": "review#4d0e9fee05",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_1012_10_edge_protection"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Ramp edge protection (BCNYS 1012.10): A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Ramp edge protection (BCNYS 1012.10)"
+      },
+      {
        "key": "review#3b8d16e054",
        "tier": "review",
        "items": [
@@ -77513,7 +79662,7 @@
        "name": "Interior drawing"
       }
      ],
-     "count": 107,
+     "count": 132,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -78364,7 +80513,7 @@
       {
        "key": "reason:egress.general.bc_1005_7_3_protruding_objects",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (not brought in): a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): Protruding objects meet 1003.3 (brought in by section group 9a, each of 1003.3.1 to 1003.3.4 its own flag): a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_1005_7_3_protruding_objects"
@@ -78708,6 +80857,256 @@
        "elements": [],
        "items": [
         "egress.general.bc_1031_6_bars_grilles_covers_screens"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1003_2_ceiling_height",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The means of egress has a ceiling at least 7 feet 6 inches above the finished floor, except sloped ceilings and the ceilings of dwelling and sleeping units in residential occupancies (each per 1208.2), projections 1003.3 allows, stair headroom (1011.3), door height (1010.1.1), ramp headroom (1012.5.2), the clear height of parking garages' traffic areas (406.2.2) and areas above and below mezzanines (505.2): ceiling heights along the means of egress aren't measured, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1003_2_ceiling_height"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1003_3_1_headroom",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Protruding objects on circulation paths may hang below 1003.2's ceiling height only where at least 80 inches of headroom is kept over every circulation path (walks, corridors, aisles and passageways), and they lower not more than half the ceiling area of a means of egress; door closers, overhead doorstops, frame stops, power door operators and electromagnetic locks may reach down to 78 inches in a door opening; where the clearance over a circulation path is less than 80 inches, a barrier is provided with its leading edge at most 27 inches above the floor: protruding objects aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1003_3_1_headroom"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1003_3_2_post_mounted_objects",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): An object on a post or pylon overhangs it at most 4 inches where its leading edge's lowest point is more than 27 and less than 80 inches above the floor; a sign or other obstruction between posts or pylons more than 12 inches apart has its lowest edge at most 27 or at least 80 inches above the floor or ground (the sloping handrails of stairs and ramps aside): such objects aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1003_3_2_post_mounted_objects"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1003_3_3_horizontal_projections",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Objects with leading edges more than 27 and not more than 80 inches above the floor project at most 4 inches into the circulation path (handrails up to 4 1/2 inches from the wall or guard): wall-mounted objects aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1003_3_3_horizontal_projections"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1003_3_4_clear_width",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Protruding objects don't reduce the minimum clear width of an accessible route: protruding objects and accessible routes aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1003_3_4_clear_width"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1003_4_slip_resistant_surface",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The circulation paths of the means of egress have a slip-resistant surface, securely attached: floor finishes aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1003_4_slip_resistant_surface"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1003_5_elevation_change",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A change in elevation of less than 12 inches in the means of egress is made by a sloped surface, a ramp complying with 1012 where steeper than 1 in 20 (5 percent), with handrails or a contrasting floor finish where 6 inches or less; the exceptions are steps at exterior doors per 1010.1.4, a stair of one riser or of two risers and a tread where Chapter 11 doesn't require access (risers and treads per 1011.5, treads at least 13 inches deep, a handrail per 1014 within 30 inches of the centerline of the path), and a step under 12 inches in aisles serving seating where Chapter 11 doesn't require access (risers and treads per 1030.14, a handrail per 1030.16); throughout a story in Group I-2, any change in elevation in the means of egress serving nonambulatory persons is a ramp or sloped walkway: the routes read each story as one level, so changes in floor level within it aren't in the model, a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1003_5_elevation_change"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1003_6_means_of_egress_continuity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The path of egress travel isn't interrupted by any building element other than a means of egress component; nothing but the projections this chapter permits obstructs a component's minimum width or required capacity; and the minimum width or required capacity of the means of egress system isn't diminished along the path of egress travel: the routes measure the corridors' clear width between the walls and what is drawn (Table 1020.3's rule), not every component's width or capacity along the path, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1003_6_means_of_egress_continuity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1003_7_elevators_escalators_moving_walks",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Elevators, escalators and moving walks are not used as a component of a required means of egress from any other part of the building, except elevators used as an accessible means of egress per 1009.4: which ways out the architect counts on beyond the doors and stairs the routes read isn't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1003_7_elevators_escalators_moving_walks"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_2_slope",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian ramp no steeper than 1 in 8 (12.5 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_2_slope"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_3_cross_slope",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp's slope measured perpendicular to the direction of travel is no steeper than 1 in 48 (2 percent): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_3_cross_slope"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_4_vertical_rise",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): The rise of any ramp run is 30 inches at most: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_4_vertical_rise"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_5_1_width_and_capacity",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A means of egress ramp is at least as wide, and of at least the capacity, as 1020.3 requires of corridors, and at least 36 inches clear between handrails, if provided, or other permitted projections: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_5_1_width_and_capacity"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_5_2_headroom",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): At least 80 inches of headroom above the finished floor of the ramp run and any intermediate landings, over the full width of the ramp and landing: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_5_2_headroom"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_5_3_restrictions",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A means of egress ramp doesn't narrow in the direction of egress travel, nothing projects into the required ramp and landing width, and a door opening onto a landing leaves at least 42 inches clear: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_5_3_restrictions"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_6_landings",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp has landings at the bottom and top of each ramp, at points of turning, at entrances, at exits and at doors (ICC A117.1's maneuvering clearances at an adjoining doorway may overlap the landing, 1012.6.5): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_6_landings"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_6_1_landing_slope",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp landing is no steeper than 1 in 48 (2 percent) in any direction, with no changes in level: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_6_1_landing_slope"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_6_2_landing_width",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp landing is at least as wide as the widest ramp run adjoining it: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_6_2_landing_width"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_6_3_landing_length",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp landing is at least 60 inches long; 36 inches within Group R-2 and R-3 dwelling and sleeping units not required to be Accessible, Type A or Type B units (1108), and not more than 48 inches is required in the direction of travel where the ramp isn't part of an accessible route: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_6_3_landing_length"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_6_4_change_in_direction",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Where the direction of travel changes at a landing between ramp runs, the landing is at least 60 by 60 inches (36 by 36 inches within Group R-2 and R-3 dwelling or sleeping units not required to be Accessible, Type A or Type B units, 1108): ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_6_4_change_in_direction"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_7_ramp_construction",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp is built of materials the building's type of construction permits (wood handrails allowed in every type): construction types and materials aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_7_ramp_construction"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_7_1_ramp_surface",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp's surface is of slip-resistant materials, securely attached: finishes aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_7_1_ramp_surface"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_7_2_outdoor_conditions",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Outdoor ramps and their outdoor approaches are designed so water doesn't accumulate on walking surfaces: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_7_2_outdoor_conditions"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_8_handrails",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_8_handrails"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "reason:egress.general.bc_1012_10_edge_protection",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required on a ramp that needs no handrails and has flared sides per ICC A117.1's curb ramp provisions, on a landing's sides serving an adjoining ramp run or stairway, or on a landing's sides with a dropoff of at most 1/2 inch within 10 inches of the required landing area: ramps aren't measured for the Building Code yet, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_1012_10_edge_protection"
        ],
        "rules": 1
       }
@@ -79063,7 +81462,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "107 to review · 30 comply"
+     "summary": "132 to review · 30 comply"
     }
    ],
    "contents": [
@@ -91330,7 +93729,7 @@
          "coverage": "not_for_checking",
          "whole": false,
          "counts": {
-          "not_for_checking": 196
+          "not_for_checking": 199
          },
          "pieces": [
           {
@@ -91348,6 +93747,12 @@
           {
            "id": "202:accessible",
            "title": "ACCESSIBLE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:accessible_means_of_egress",
+           "title": "ACCESSIBLE MEANS OF EGRESS",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -91528,6 +93933,12 @@
           {
            "id": "202:care_suite",
            "title": "CARE SUITE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:circulation_path",
+           "title": "CIRCULATION PATH",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -91900,6 +94311,12 @@
           {
            "id": "202:grade_plane_story_above",
            "title": "GRADE PLANE, STORY ABOVE",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "202:guard",
+           "title": "GUARD",
            "coverage": "not_for_checking",
            "rules": []
           },
@@ -93674,10 +96091,104 @@
          "number": "1003",
          "title": "General Means of Egress",
          "book_page": 289,
-         "coverage": "not_brought_in",
-         "whole": false,
-         "counts": {},
-         "pieces": []
+         "coverage": "flag",
+         "whole": true,
+         "counts": {
+          "flag": 9,
+          "not_for_checking": 3
+         },
+         "pieces": [
+          {
+           "id": "1003.2",
+           "title": "Ceiling height",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1003_2_ceiling_height"
+           ]
+          },
+          {
+           "id": "1003.3.1",
+           "title": "Headroom",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1003_3_1_headroom"
+           ]
+          },
+          {
+           "id": "1003.3.2",
+           "title": "Post-mounted objects",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1003_3_2_post_mounted_objects"
+           ]
+          },
+          {
+           "id": "1003.3.3",
+           "title": "Horizontal projections",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1003_3_3_horizontal_projections"
+           ]
+          },
+          {
+           "id": "1003.3.4",
+           "title": "Clear width",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1003_3_4_clear_width"
+           ]
+          },
+          {
+           "id": "1003.4",
+           "title": "Slip-resistant surface",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1003_4_slip_resistant_surface"
+           ]
+          },
+          {
+           "id": "1003.5",
+           "title": "Elevation change",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1003_5_elevation_change"
+           ]
+          },
+          {
+           "id": "1003.6",
+           "title": "Means of egress continuity",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1003_6_means_of_egress_continuity"
+           ]
+          },
+          {
+           "id": "1003.7",
+           "title": "Elevators, escalators and moving walks",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1003_7_elevators_escalators_moving_walks"
+           ]
+          },
+          {
+           "id": "1003",
+           "title": "GENERAL MEANS OF EGRESS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1003.1",
+           "title": "Applicability",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1003.3",
+           "title": "Protruding objects",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "1004",
@@ -94416,10 +96927,184 @@
          "number": "1012",
          "title": "Ramps",
          "book_page": 314,
-         "coverage": "not_brought_in",
-         "whole": false,
-         "counts": {},
-         "pieces": []
+         "coverage": "flag",
+         "whole": true,
+         "counts": {
+          "flag": 16,
+          "not_for_checking": 7
+         },
+         "pieces": [
+          {
+           "id": "1012.2",
+           "title": "Slope",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_2_slope"
+           ]
+          },
+          {
+           "id": "1012.3",
+           "title": "Cross slope",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_3_cross_slope"
+           ]
+          },
+          {
+           "id": "1012.4",
+           "title": "Vertical rise",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_4_vertical_rise"
+           ]
+          },
+          {
+           "id": "1012.5.1",
+           "title": "Width and capacity",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_5_1_width_and_capacity"
+           ]
+          },
+          {
+           "id": "1012.5.2",
+           "title": "Headroom",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_5_2_headroom"
+           ]
+          },
+          {
+           "id": "1012.5.3",
+           "title": "Restrictions",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_5_3_restrictions"
+           ]
+          },
+          {
+           "id": "1012.6",
+           "title": "Landings",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_6_landings"
+           ]
+          },
+          {
+           "id": "1012.6.1",
+           "title": "Slope",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_6_1_landing_slope"
+           ]
+          },
+          {
+           "id": "1012.6.2",
+           "title": "Width",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_6_2_landing_width"
+           ]
+          },
+          {
+           "id": "1012.6.3",
+           "title": "Length",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_6_3_landing_length"
+           ]
+          },
+          {
+           "id": "1012.6.4",
+           "title": "Change in direction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_6_4_change_in_direction"
+           ]
+          },
+          {
+           "id": "1012.7",
+           "title": "Ramp construction",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_7_ramp_construction"
+           ]
+          },
+          {
+           "id": "1012.7.1",
+           "title": "Ramp surface",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_7_1_ramp_surface"
+           ]
+          },
+          {
+           "id": "1012.7.2",
+           "title": "Outdoor conditions",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_7_2_outdoor_conditions"
+           ]
+          },
+          {
+           "id": "1012.8",
+           "title": "Handrails",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_8_handrails"
+           ]
+          },
+          {
+           "id": "1012.10",
+           "title": "Edge protection",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_1012_10_edge_protection"
+           ]
+          },
+          {
+           "id": "1012",
+           "title": "RAMPS",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1012.1",
+           "title": "Scope",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1012.5",
+           "title": "Minimum dimensions",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1012.6.5",
+           "title": "Doorways",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1012.9",
+           "title": "Guards",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1012.10.1",
+           "title": "Curb, rail, wall or barrier",
+           "coverage": "not_for_checking",
+           "rules": []
+          },
+          {
+           "id": "1012.10.2",
+           "title": "Extended floor or ground surface",
+           "coverage": "not_for_checking",
+           "rules": []
+          }
+         ]
         },
         {
          "number": "1013",
@@ -94980,8 +97665,8 @@
        "coverage": "rules",
        "counts": {
         "rules": 8,
-        "flag": 3,
-        "not_brought_in": 20
+        "flag": 5,
+        "not_brought_in": 18
        }
       },
       {
@@ -98907,6 +101592,31 @@
    "egress.general.bc_1031_2_1_operational_constraints": "needs_review",
    "egress.general.bc_1031_5_3_area_well_drainage": "needs_review",
    "egress.general.bc_1031_6_bars_grilles_covers_screens": "needs_review",
+   "egress.general.bc_1003_2_ceiling_height": "needs_review",
+   "egress.general.bc_1003_3_1_headroom": "needs_review",
+   "egress.general.bc_1003_3_2_post_mounted_objects": "needs_review",
+   "egress.general.bc_1003_3_3_horizontal_projections": "needs_review",
+   "egress.general.bc_1003_3_4_clear_width": "needs_review",
+   "egress.general.bc_1003_4_slip_resistant_surface": "needs_review",
+   "egress.general.bc_1003_5_elevation_change": "needs_review",
+   "egress.general.bc_1003_6_means_of_egress_continuity": "needs_review",
+   "egress.general.bc_1003_7_elevators_escalators_moving_walks": "needs_review",
+   "egress.general.bc_1012_2_slope": "needs_review",
+   "egress.general.bc_1012_3_cross_slope": "needs_review",
+   "egress.general.bc_1012_4_vertical_rise": "needs_review",
+   "egress.general.bc_1012_5_1_width_and_capacity": "needs_review",
+   "egress.general.bc_1012_5_2_headroom": "needs_review",
+   "egress.general.bc_1012_5_3_restrictions": "needs_review",
+   "egress.general.bc_1012_6_landings": "needs_review",
+   "egress.general.bc_1012_6_1_landing_slope": "needs_review",
+   "egress.general.bc_1012_6_2_landing_width": "needs_review",
+   "egress.general.bc_1012_6_3_landing_length": "needs_review",
+   "egress.general.bc_1012_6_4_change_in_direction": "needs_review",
+   "egress.general.bc_1012_7_ramp_construction": "needs_review",
+   "egress.general.bc_1012_7_1_ramp_surface": "needs_review",
+   "egress.general.bc_1012_7_2_outdoor_conditions": "needs_review",
+   "egress.general.bc_1012_8_handrails": "needs_review",
+   "egress.general.bc_1012_10_edge_protection": "needs_review",
    "egress.interior#1": "needs_review",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7cf": "complies",
    "general.bc_1006_2_1_1_three_or_more_exits@-/462e4f8b-65b0-401f-9d57-049536f7f2dc-0005b7d3": "complies",
@@ -98952,7 +101662,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "107 to review · 30 comply"
+    "summary": "132 to review · 30 comply"
    }
   ],
   "egress": {
@@ -104295,7 +107005,32 @@
     "general.bc_1031_2_openings_to_public_way": "needs_review",
     "general.bc_1031_2_1_operational_constraints": "needs_review",
     "general.bc_1031_5_3_area_well_drainage": "needs_review",
-    "general.bc_1031_6_bars_grilles_covers_screens": "needs_review"
+    "general.bc_1031_6_bars_grilles_covers_screens": "needs_review",
+    "general.bc_1003_2_ceiling_height": "needs_review",
+    "general.bc_1003_3_1_headroom": "needs_review",
+    "general.bc_1003_3_2_post_mounted_objects": "needs_review",
+    "general.bc_1003_3_3_horizontal_projections": "needs_review",
+    "general.bc_1003_3_4_clear_width": "needs_review",
+    "general.bc_1003_4_slip_resistant_surface": "needs_review",
+    "general.bc_1003_5_elevation_change": "needs_review",
+    "general.bc_1003_6_means_of_egress_continuity": "needs_review",
+    "general.bc_1003_7_elevators_escalators_moving_walks": "needs_review",
+    "general.bc_1012_2_slope": "needs_review",
+    "general.bc_1012_3_cross_slope": "needs_review",
+    "general.bc_1012_4_vertical_rise": "needs_review",
+    "general.bc_1012_5_1_width_and_capacity": "needs_review",
+    "general.bc_1012_5_2_headroom": "needs_review",
+    "general.bc_1012_5_3_restrictions": "needs_review",
+    "general.bc_1012_6_landings": "needs_review",
+    "general.bc_1012_6_1_landing_slope": "needs_review",
+    "general.bc_1012_6_2_landing_width": "needs_review",
+    "general.bc_1012_6_3_landing_length": "needs_review",
+    "general.bc_1012_6_4_change_in_direction": "needs_review",
+    "general.bc_1012_7_ramp_construction": "needs_review",
+    "general.bc_1012_7_1_ramp_surface": "needs_review",
+    "general.bc_1012_7_2_outdoor_conditions": "needs_review",
+    "general.bc_1012_8_handrails": "needs_review",
+    "general.bc_1012_10_edge_protection": "needs_review"
    },
    "interior": {
     "parts": {
@@ -108225,7 +110960,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "3064d58e393b65f0a9ea0d2cb4f8f07c6e4b9bc4848af6a7a561b5b0379cbbc4",
   "rulebook": {
-   "new_york/ithaca_city": "f12e85a4a5f27eeaa540956947a5ded11e66d758dfb95fd7a05895a1ae8c3a41"
+   "new_york/ithaca_city": "666c35ec00979f95408f12a527723a5bc641aa69b2ac89cb24bb276003563835"
   }
  }
 }

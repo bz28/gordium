@@ -55,6 +55,51 @@ pieces:
     heading: Accessory occupancies › Separation of occupancies
     rules:
     - general.bc_508_2_4_separation
+  '1003.2':
+    label: flag
+    heading: General means of egress › Ceiling height
+    rules:
+    - general.bc_1003_2_ceiling_height
+  1003.3.1:
+    label: flag
+    heading: Protruding objects › Headroom
+    rules:
+    - general.bc_1003_3_1_headroom
+  1003.3.2:
+    label: flag
+    heading: Protruding objects › Post-mounted objects
+    rules:
+    - general.bc_1003_3_2_post_mounted_objects
+  1003.3.3:
+    label: flag
+    heading: Protruding objects › Horizontal projections
+    rules:
+    - general.bc_1003_3_3_horizontal_projections
+  1003.3.4:
+    label: flag
+    heading: Protruding objects › Clear width
+    rules:
+    - general.bc_1003_3_4_clear_width
+  '1003.4':
+    label: flag
+    heading: General means of egress › Slip-resistant surface
+    rules:
+    - general.bc_1003_4_slip_resistant_surface
+  '1003.5':
+    label: flag
+    heading: General means of egress › Elevation change
+    rules:
+    - general.bc_1003_5_elevation_change
+  '1003.6':
+    label: flag
+    heading: General means of egress › Means of egress continuity
+    rules:
+    - general.bc_1003_6_means_of_egress_continuity
+  '1003.7':
+    label: flag
+    heading: General means of egress › Elevators, escalators and moving walks
+    rules:
+    - general.bc_1003_7_elevators_escalators_moving_walks
   '1004.7':
     label: flag
     heading: Occupant load › Outdoor areas
@@ -375,6 +420,86 @@ pieces:
     heading: Door operations › Locking arrangements in buildings within correctional facilities
     rules:
     - general.bc_1010_2_15_correctional_facilities
+  '1012.2':
+    label: flag
+    heading: Ramps › Slope
+    rules:
+    - general.bc_1012_2_slope
+  '1012.3':
+    label: flag
+    heading: Ramps › Cross slope
+    rules:
+    - general.bc_1012_3_cross_slope
+  '1012.4':
+    label: flag
+    heading: Ramps › Vertical rise
+    rules:
+    - general.bc_1012_4_vertical_rise
+  1012.5.1:
+    label: flag
+    heading: Minimum dimensions › Width and capacity
+    rules:
+    - general.bc_1012_5_1_width_and_capacity
+  1012.5.2:
+    label: flag
+    heading: Minimum dimensions › Headroom
+    rules:
+    - general.bc_1012_5_2_headroom
+  1012.5.3:
+    label: flag
+    heading: Minimum dimensions › Restrictions
+    rules:
+    - general.bc_1012_5_3_restrictions
+  '1012.6':
+    label: flag
+    heading: Ramps › Landings
+    rules:
+    - general.bc_1012_6_landings
+  1012.6.1:
+    label: flag
+    heading: Landings › Slope
+    rules:
+    - general.bc_1012_6_1_landing_slope
+  1012.6.2:
+    label: flag
+    heading: Landings › Width
+    rules:
+    - general.bc_1012_6_2_landing_width
+  1012.6.3:
+    label: flag
+    heading: Landings › Length
+    rules:
+    - general.bc_1012_6_3_landing_length
+  1012.6.4:
+    label: flag
+    heading: Landings › Change in direction
+    rules:
+    - general.bc_1012_6_4_change_in_direction
+  '1012.7':
+    label: flag
+    heading: Ramps › Ramp construction
+    rules:
+    - general.bc_1012_7_ramp_construction
+  1012.7.1:
+    label: flag
+    heading: Ramp construction › Ramp surface
+    rules:
+    - general.bc_1012_7_1_ramp_surface
+  1012.7.2:
+    label: flag
+    heading: Ramp construction › Outdoor conditions
+    rules:
+    - general.bc_1012_7_2_outdoor_conditions
+  '1012.8':
+    label: flag
+    heading: Ramps › Handrails
+    rules:
+    - general.bc_1012_8_handrails
+  '1012.10':
+    label: flag
+    heading: Ramps › Edge protection
+    rules:
+    - general.bc_1012_10_edge_protection
   '1016.2':
     label: rule
     heading: Egress through intervening spaces

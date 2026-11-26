@@ -13191,9 +13191,9 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Protruding objects meet 1003.3 (not brought in): a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 5c. 1003.3's protruding-object limits (not brought
-    in) aren't measured.
+    note: 'Protruding objects meet 1003.3 (brought in by section group 9a, each of 1003.3.1 to 1003.3.4 its own flag): a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-25), section group 5c. 1003.3's protruding-object limits aren't
+    measured.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1010_1_doors_general
@@ -19950,5 +19950,704 @@ rules:
     expect: not_applicable
     note: Not Group R-2, R-3 or R-4.
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 8c.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1003_2_ceiling_height
+  kind: flag
+  topic: means_of_egress
+  title: Ceiling height of the means of egress (BCNYS 1003.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 310
+    lines:
+    - 35
+    - 46
+    quote: '1003.2 Ceiling height. The means of egress shall have a ceiling height of not less than 7 feet 6 inches (2286
+      mm) above the finished floor. Exceptions: 1. Sloped ceilings in accordance with Section 1208.2. 2. Ceilings of dwelling
+      units and sleeping units within residential occupancies in accordance with Section 1208.2. 3. Allowable projections
+      in accordance with Section 1003.3. 4. Stair headroom in accordance with Section 1011.3. 5. Door height in accordance
+      with Section 1010.1.1. 6. Ramp headroom in accordance with Section 1012.5.2. 7. The clear height of floor levels in
+      vehicular and pedestrian traffic areas of public and private parking garages in accor- dance with Section 406.2.2. 8.
+      Areas above and below mezzanine floors in accordance with Section 505.2.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The means of egress has a ceiling at least 7 feet 6 inches above the finished floor, except sloped ceilings and
+      the ceilings of dwelling and sleeping units in residential occupancies (each per 1208.2), projections 1003.3 allows,
+      stair headroom (1011.3), door height (1010.1.1), ramp headroom (1012.5.2), the clear height of parking garages'' traffic
+      areas (406.2.2) and areas above and below mezzanines (505.2): ceiling heights along the means of egress aren''t measured,
+      so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. The routes measure plan lengths and widths
+    only; a room''s ceiling height is read for the house code''s sleeping rooms, never along a building''s means of egress.
+    1208.2, 406.2.2 and 505.2 aren''t brought in: each exception only loosens the 7 ft 6 in, and the flag never passes.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1003_3_1_headroom
+  kind: flag
+  topic: means_of_egress
+  title: Headroom under protruding objects (BCNYS 1003.3.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 310
+    lines:
+    - 47
+    - 48
+    quote: 1003.3 Protruding objects. Protruding objects on circulation paths shall comply with the requirements of Sections
+      1003.3.1 through 1003.3.4.
+  - file: gov.ny.building.2025.pdf
+    page: 310
+    lines:
+    - 49
+    - 53
+    quote: '1003.3.1 Headroom. Protruding objects are permitted to extend below the minimum ceiling height required by Section
+      1003.2 where a minimum headroom of 80 inches (2032 mm) is provided over any circulation paths, including walks, corridors,
+      aisles and passageways. Not more than 50 percent of the ceiling area of a means of egress shall be reduced in height
+      by protruding objects. Exception: Door closers, overhead doorstops, frame stops, power door operators and electromagnetic
+      door locks shall be permitted to project into the door opening height not lower than 78 inches (1980 mm) above the floor.'
+  - file: gov.ny.building.2025.pdf
+    page: 311
+    lines:
+    - 3
+    - 4
+    quote: A barrier shall be provided where the vertical clearance above a circulation path is less than 80 inches (2032
+      mm) high above the finished floor. The leading edge of such a barrier shall be located 27 inches (686 mm) maximum above
+      the finished floor.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Protruding objects on circulation paths may hang below 1003.2''s ceiling height only where at least 80 inches of
+      headroom is kept over every circulation path (walks, corridors, aisles and passageways), and they lower not more than
+      half the ceiling area of a means of egress; door closers, overhead doorstops, frame stops, power door operators and
+      electromagnetic locks may reach down to 78 inches in a door opening; where the clearance over a circulation path is
+      less than 80 inches, a barrier is provided with its leading edge at most 27 inches above the floor: protruding objects
+      aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9a. 1003.3 (the pointer to 1003.3.1 to 1003.3.4)
+    is quoted here; 1003.3.2 to 1003.3.4 are their own flags.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1003_3_2_post_mounted_objects
+  kind: flag
+  topic: means_of_egress
+  title: Post-mounted objects (BCNYS 1003.3.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 311
+    lines:
+    - 5
+    - 11
+    quote: '1003.3.2 Post-mounted objects. A free-standing object mounted on a post or pylon shall not overhang that post
+      or pylon more than 4 inches (102 mm) where the lowest point of the leading edge is more than 27 inches (686 mm) and
+      less than 80 inches (2032 mm) above the finished floor. Where a sign or other obstruction is mounted between posts or
+      pylons and the clear distance between the posts or pylons is greater than 12 inches (305 mm), the lowest edge of such
+      sign or obstruction shall be 27 inches (686 mm) maximum or 80 inches (2032 mm) minimum above the finished floor or ground.
+      Exception: These requirements shall not apply to sloping portions of handrails between the top and bottom riser of stairs
+      and above the ramp run.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'An object on a post or pylon overhangs it at most 4 inches where its leading edge''s lowest point is more than
+      27 and less than 80 inches above the floor; a sign or other obstruction between posts or pylons more than 12 inches
+      apart has its lowest edge at most 27 or at least 80 inches above the floor or ground (the sloping handrails of stairs
+      and ramps aside): such objects aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1003_3_3_horizontal_projections
+  kind: flag
+  topic: means_of_egress
+  title: Horizontal projections into circulation paths (BCNYS 1003.3.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 311
+    lines:
+    - 12
+    - 14
+    quote: '1003.3.3 Horizontal projections. Objects with leading edges more than 27 inches (685 mm) and not more than 80
+      inches (2030 mm) above the finished floor shall not project horizontally more than 4 inches (102 mm) into the circulation
+      path. Exception: Handrails are permitted to protrude 4 1/2 inches (114 mm) from the wall or guard.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Objects with leading edges more than 27 and not more than 80 inches above the floor project at most 4 inches into
+      the circulation path (handrails up to 4 1/2 inches from the wall or guard): wall-mounted objects aren''t in the model,
+      so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1003_3_4_clear_width
+  kind: flag
+  topic: means_of_egress
+  title: Protruding objects and accessible routes' width (BCNYS 1003.3.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 311
+    lines:
+    - 15
+    - 15
+    quote: 1003.3.4 Clear width. Protruding objects shall not reduce the minimum clear width of accessible routes.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Protruding objects don''t reduce the minimum clear width of an accessible route: protruding objects and accessible
+      routes aren''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1003_4_slip_resistant_surface
+  kind: flag
+  topic: means_of_egress
+  title: Slip-resistant walking surfaces (BCNYS 1003.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 311
+    lines:
+    - 16
+    - 16
+    quote: 1003.4 Slip-resistant surface. Circulation paths of the means of egress shall have a slip-resistant surface and
+      be securely attached.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The circulation paths of the means of egress have a slip-resistant surface, securely attached: floor finishes aren''t
+      in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1003_5_elevation_change
+  kind: flag
+  topic: means_of_egress
+  title: Changes in floor elevation (BCNYS 1003.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 311
+    lines:
+    - 17
+    - 31
+    quote: '1003.5 Elevation change. Where changes in elevation of less than 12 inches (305 mm) exist in the means of egress,
+      sloped surfaces shall be used. Where the slope is greater than one unit vertical in 20 units horizontal (5-percent slope),
+      ramps complying with Section 1012 shall be used. Where the difference in elevation is 6 inches (152 mm) or less, the
+      ramp shall be equipped with either handrails or floor finish materials that contrast with adjacent floor finish materials.
+      Exceptions: 1. Steps at exterior doors complying with Section 1010.1.4. 2. A stair with a single riser or with two risers
+      and a tread is permitted at locations not required to be accessible by Chapter 11 where the risers and treads comply
+      with Section 1011.5, the minimum depth of the tread is 13 inches (330 mm) and not less than one handrail complying with
+      Section 1014 is provided within 30 inches (762 mm) of the centerline of the normal path of egress travel on the stair.
+      3. A step is permitted in aisles serving seating that has a difference in elevation less than 12 inches (305 mm) at
+      locations not required to be accessible by Chapter 11, provided that the risers and treads comply with Section 1030.14
+      and the aisle is provided with a handrail complying with Section 1030.16. Throughout a story in a Group I-2 occupancy,
+      any change in elevation in portions of the means of egress that serve nonambulatory persons shall be by means of a ramp
+      or sloped walkway.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A change in elevation of less than 12 inches in the means of egress is made by a sloped surface, a ramp complying
+      with 1012 where steeper than 1 in 20 (5 percent), with handrails or a contrasting floor finish where 6 inches or less;
+      the exceptions are steps at exterior doors per 1010.1.4, a stair of one riser or of two risers and a tread where Chapter
+      11 doesn''t require access (risers and treads per 1011.5, treads at least 13 inches deep, a handrail per 1014 within
+      30 inches of the centerline of the path), and a step under 12 inches in aisles serving seating where Chapter 11 doesn''t
+      require access (risers and treads per 1030.14, a handrail per 1030.16); throughout a story in Group I-2, any change
+      in elevation in the means of egress serving nonambulatory persons is a ramp or sloped walkway: the routes read each
+      story as one level, so changes in floor level within it aren''t in the model, a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Chapter 11, 1011.5, 1014, 1030.14 and 1030.16
+    aren''t brought in here (1011 and 1014 are section group 7''s): the exceptions only loosen, and the flag never passes.
+    Its Group I-2 sentence is part of the same check.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1003_6_means_of_egress_continuity
+  kind: flag
+  topic: means_of_egress
+  title: Means of egress continuity (BCNYS 1003.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 311
+    lines:
+    - 32
+    - 35
+    quote: 1003.6 Means of egress continuity. The path of egress travel along a means of egress shall not be interrupted by
+      a building element other than a means of egress component as specified in this chapter. Obstructions shall not be placed
+      in the minimum width or required capacity of a means of egress component except projections permitted by this chapter.
+      The minimum width or required capacity of a means of egress system shall not be diminished along the path of egress
+      travel.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The path of egress travel isn''t interrupted by any building element other than a means of egress component; nothing
+      but the projections this chapter permits obstructs a component''s minimum width or required capacity; and the minimum
+      width or required capacity of the means of egress system isn''t diminished along the path of egress travel: the routes
+      measure the corridors'' clear width between the walls and what is drawn (Table 1020.3''s rule), not every component''s
+      width or capacity along the path, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9a.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1003_7_elevators_escalators_moving_walks
+  kind: flag
+  topic: means_of_egress
+  title: Elevators and escalators not a required means of egress (BCNYS 1003.7)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 311
+    lines:
+    - 36
+    - 38
+    quote: '1003.7 Elevators, escalators and moving walks. Elevators, escalators and moving walks shall not be used as a component
+      of a required means of egress from any other part of the building. Exception: Elevators used as an accessible means
+      of egress in accordance with Section 1009.4.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Elevators, escalators and moving walks are not used as a component of a required means of egress from any other
+      part of the building, except elevators used as an accessible means of egress per 1009.4: which ways out the architect
+      counts on beyond the doors and stairs the routes read isn''t in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9a. 1009.4 is section group 9b's (accessible means
+    of egress).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_2_slope
+  kind: flag
+  topic: means_of_egress
+  title: Ramp slope (BCNYS 1012.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 30
+    - 32
+    quote: 1012.2 Slope. Ramps used as part of a means of egress shall have a running slope not steeper than 1 unit vertical
+      in 12 units horizon- tal (8.3-percent slope). The slope of other pedestrian ramps shall not be steeper than 1 unit vertical
+      in 8 units horizontal (12.5- percent slope).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A ramp used as part of a means of egress has a running slope no steeper than 1 in 12 (8.3 percent), any other pedestrian
+      ramp no steeper than 1 in 8 (12.5 percent): ramps aren''t measured for the Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_3_cross_slope
+  kind: flag
+  topic: means_of_egress
+  title: Ramp cross slope (BCNYS 1012.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 33
+    - 34
+    quote: 1012.3 Cross slope. The slope measured perpendicular to the direction of travel of a ramp shall not be steeper
+      than one unit vertical in 48 units horizontal (2-percent slope).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A ramp''s slope measured perpendicular to the direction of travel is no steeper than 1 in 48 (2 percent): ramps
+      aren''t measured for the Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_4_vertical_rise
+  kind: flag
+  topic: means_of_egress
+  title: Ramp run's rise (BCNYS 1012.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 35
+    - 35
+    quote: 1012.4 Vertical rise. The rise for any ramp run shall be 30 inches (762 mm) maximum.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The rise of any ramp run is 30 inches at most: ramps aren''t measured for the Building Code yet, so a person''s
+      check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_5_1_width_and_capacity
+  kind: flag
+  topic: means_of_egress
+  title: Ramp width and capacity (BCNYS 1012.5.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 36
+    - 37
+    quote: 1012.5 Minimum dimensions. The minimum dimensions of means of egress ramps shall comply with Sections 1012.5.1
+      through 1012.5.3.
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 38
+    - 40
+    quote: 1012.5.1 Width and capacity. The minimum width and required capacity of a means of egress ramp shall be not less
+      than that required for corridors by Section 1020.3. The clear width of a ramp between handrails, if provided, or other
+      permissible projections shall be 36 inches (914 mm) minimum.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A means of egress ramp is at least as wide, and of at least the capacity, as 1020.3 requires of corridors, and
+      at least 36 inches clear between handrails, if provided, or other permitted projections: ramps aren''t measured for
+      the Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_5_2_headroom
+  kind: flag
+  topic: means_of_egress
+  title: Ramp headroom (BCNYS 1012.5.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 41
+    - 43
+    quote: 1012.5.2 Headroom. The minimum headroom in all parts of the means of egress ramp shall be not less than 80 inches
+      (2032 mm) above the finished floor of the ramp run and any intermediate landings. The minimum clearance shall be maintained
+      for the full width of the ramp and landing.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'At least 80 inches of headroom above the finished floor of the ramp run and any intermediate landings, over the
+      full width of the ramp and landing: ramps aren''t measured for the Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_5_3_restrictions
+  kind: flag
+  topic: means_of_egress
+  title: Ramp width kept clear (BCNYS 1012.5.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 44
+    - 46
+    quote: 1012.5.3 Restrictions. Means of egress ramps shall not reduce in width in the direction of egress travel. Projections
+      into the required ramp and landing width are prohibited. Doors opening onto a landing shall not reduce the clear width
+      to less than 42 inches (1067 mm).
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A means of egress ramp doesn''t narrow in the direction of egress travel, nothing projects into the required ramp
+      and landing width, and a door opening onto a landing leaves at least 42 inches clear: ramps aren''t measured for the
+      Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_6_landings
+  kind: flag
+  topic: means_of_egress
+  title: Ramp landings where required (BCNYS 1012.6)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 47
+    - 48
+    quote: 1012.6 Landings. Ramps shall have landings at the bottom and top of each ramp, points of turning, entrance, exits
+      and at doors. Landings shall comply with Sections 1012.6.1 through 1012.6.5.
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 7
+    - 8
+    quote: 1012.6.5 Doorways. Where doorways are located adjacent to a ramp landing, maneuvering clearances required by ICC
+      A117.1 are permitted to overlap the required landing area.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A ramp has landings at the bottom and top of each ramp, at points of turning, at entrances, at exits and at doors
+      (ICC A117.1''s maneuvering clearances at an adjoining doorway may overlap the landing, 1012.6.5): ramps aren''t measured
+      for the Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_6_1_landing_slope
+  kind: flag
+  topic: means_of_egress
+  title: Ramp landing slope (BCNYS 1012.6.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 49
+    - 50
+    quote: 1012.6.1 Slope. Landings shall have a slope not steeper than one unit vertical in 48 units horizontal (2-percent
+      slope) in any direc- tion. Changes in level are not permitted.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A ramp landing is no steeper than 1 in 48 (2 percent) in any direction, with no changes in level: ramps aren''t
+      measured for the Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_6_2_landing_width
+  kind: flag
+  topic: means_of_egress
+  title: Ramp landing width (BCNYS 1012.6.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 51
+    - 51
+    quote: 1012.6.2 Width. The landing width shall be not less than the width of the widest ramp run adjoining the landing.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A ramp landing is at least as wide as the widest ramp run adjoining it: ramps aren''t measured for the Building
+      Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_6_3_landing_length
+  kind: flag
+  topic: means_of_egress
+  title: Ramp landing length (BCNYS 1012.6.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 335
+    lines:
+    - 52
+    - 57
+    quote: '1012.6.3 Length. The landing length shall be 60 inches (1525 mm) minimum. Exceptions: 1. In Group R-2 and R-3
+      individual dwelling and sleeping units that are not required to be Accessible units, Type A units or Type B units in
+      accordance with Section 1108, landings are permitted to be 36 inches (914 mm) minimum. 2. Where the ramp is not a part
+      of an accessible route, the length of the landing shall not be required to be more than 48 inches (1219 mm) in the direction
+      of travel.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A ramp landing is at least 60 inches long; 36 inches within Group R-2 and R-3 dwelling and sleeping units not required
+      to be Accessible, Type A or Type B units (1108), and not more than 48 inches is required in the direction of travel
+      where the ramp isn''t part of an accessible route: ramps aren''t measured for the Building Code yet, so a person''s
+      check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_6_4_change_in_direction
+  kind: flag
+  topic: means_of_egress
+  title: Ramp landings at a change in direction (BCNYS 1012.6.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 3
+    - 6
+    quote: '1012.6.4 Change in direction. Where changes in direction of travel occur at landings provided between ramp runs,
+      the landing shall be 60 inches by 60 inches (1524 mm by 1524 mm) minimum. Exception: In Group R-2 and R-3 individual
+      dwelling or sleeping units that are not required to be Accessible units, Type A units or Type B units in accordance
+      with Section 1108, landings are permitted to be 36 inches by 36 inches (914 mm by 914 mm) minimum.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where the direction of travel changes at a landing between ramp runs, the landing is at least 60 by 60 inches (36
+      by 36 inches within Group R-2 and R-3 dwelling or sleeping units not required to be Accessible, Type A or Type B units,
+      1108): ramps aren''t measured for the Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_7_ramp_construction
+  kind: flag
+  topic: means_of_egress
+  title: Ramp construction materials (BCNYS 1012.7)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 9
+    - 10
+    quote: 1012.7 Ramp construction. Ramps shall be built of materials consistent with the types permitted for the type of
+      construction of the building, except that wood handrails shall be permitted for all types of construction.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A ramp is built of materials the building''s type of construction permits (wood handrails allowed in every type):
+      construction types and materials aren''t in the model, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_7_1_ramp_surface
+  kind: flag
+  topic: means_of_egress
+  title: Ramp surface (BCNYS 1012.7.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 11
+    - 11
+    quote: 1012.7.1 Ramp surface. The surface of ramps shall be of slip-resistant materials that are securely attached.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A ramp''s surface is of slip-resistant materials, securely attached: finishes aren''t in the model, so a person''s
+      check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_7_2_outdoor_conditions
+  kind: flag
+  topic: means_of_egress
+  title: Outdoor ramps shed water (BCNYS 1012.7.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 12
+    - 13
+    quote: 1012.7.2 Outdoor conditions. Outdoor ramps and outdoor approaches to ramps shall be designed so that water will
+      not accu- mulate on walking surfaces.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Outdoor ramps and their outdoor approaches are designed so water doesn''t accumulate on walking surfaces: ramps
+      aren''t measured for the Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_8_handrails
+  kind: flag
+  topic: means_of_egress
+  title: Ramp handrails (BCNYS 1012.8)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 14
+    - 15
+    quote: 1012.8 Handrails. Ramps with a rise greater than 6 inches (152 mm) shall have handrails on both sides. Handrails
+      shall comply with Section 1014.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A ramp rising more than 6 inches has handrails on both sides, complying with 1014: ramps aren''t measured for the
+      Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1012_10_edge_protection
+  kind: flag
+  topic: means_of_egress
+  title: Ramp edge protection (BCNYS 1012.10)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 17
+    - 24
+    quote: '1012.10 Edge protection. Edge protection complying with Section 1012.10.1 or 1012.10.2 shall be provided on each
+      side of ramp runs and at each side of ramp landings. Exceptions: 1. Edge protection is not required on ramps that are
+      not required to have handrails, provided they have flared sides that comply with the ICC A117.1 curb ramp provisions.
+      2. Edge protection is not required on the sides of ramp landings serving an adjoining ramp run or stairway. 3. Edge
+      protection is not required on the sides of ramp landings having a vertical dropoff of not more than 1/2 inch (12.7 mm)
+      within 10 inches (254 mm) horizontally of the required landing area.'
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 25
+    - 27
+    quote: 1012.10.1 Curb, rail, wall or barrier. A curb, rail, wall or barrier shall be provided to serve as edge protection.
+      A curb shall be not less than 4 inches (102 mm) in height. Barriers shall be constructed so that the barrier prevents
+      the passage of a 4-inch-diameter (102 mm) sphere, where any portion of the sphere is within 4 inches (102 mm) of the
+      floor or ground surface.
+  - file: gov.ny.building.2025.pdf
+    page: 336
+    lines:
+    - 28
+    - 29
+    quote: 1012.10.2 Extended floor or ground surface. The floor or ground surface of the ramp run or landing shall extend
+      12 inches (305 mm) minimum beyond the inside face of a handrail complying with Section 1014.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Each side of a ramp run and of a ramp landing has edge protection: a curb at least 4 inches high, or a rail, wall
+      or barrier that stops a 4-inch sphere passing anywhere within 4 inches of the floor or ground (1012.10.1), or the floor
+      or ground extending at least 12 inches beyond the inside face of a handrail complying with 1014 (1012.10.2); not required
+      on a ramp that needs no handrails and has flared sides per ICC A117.1''s curb ramp provisions, on a landing''s sides
+      serving an adjoining ramp run or stairway, or on a landing''s sides with a dropoff of at most 1/2 inch within 10 inches
+      of the required landing area: ramps aren''t measured for the Building Code yet, so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9a. Ramps are read by the house measuring only
+    (the ramp part, parts.yaml); the Building Code check measures no ramp yet, and whether a building has one isn''t a fact
+    it is given, so every ramp flag shows for every building. 1012.1 (scope, labeled reference) sends ramped aisles in assembly
+    spaces to 1030 and curb ramps to ICC A117.1, and spares parking-garage vehicle ramps used for pedestrian exit access from
+    1012.3 to 1012.10 unless they are an accessible route or part of an accessible means of egress: each only loosens, and
+    the flags never pass.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

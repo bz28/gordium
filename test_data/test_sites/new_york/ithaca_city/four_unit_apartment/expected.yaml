@@ -197,6 +197,32 @@ results:
   general.bc_1031_5_2_2_area_well_steps: needs_review
   general.bc_1031_5_3_area_well_drainage: needs_review
   general.bc_1031_6_bars_grilles_covers_screens: needs_review
+  # section group 9a: 1003's general means of egress and 1012's ramps, each a person's check (ceiling heights, protruding objects, floor surfaces and levels, and ramps aren't in the model)
+  general.bc_1003_2_ceiling_height: needs_review
+  general.bc_1003_3_1_headroom: needs_review
+  general.bc_1003_3_2_post_mounted_objects: needs_review
+  general.bc_1003_3_3_horizontal_projections: needs_review
+  general.bc_1003_3_4_clear_width: needs_review
+  general.bc_1003_4_slip_resistant_surface: needs_review
+  general.bc_1003_5_elevation_change: needs_review
+  general.bc_1003_6_means_of_egress_continuity: needs_review
+  general.bc_1003_7_elevators_escalators_moving_walks: needs_review
+  general.bc_1012_2_slope: needs_review
+  general.bc_1012_3_cross_slope: needs_review
+  general.bc_1012_4_vertical_rise: needs_review
+  general.bc_1012_5_1_width_and_capacity: needs_review
+  general.bc_1012_5_2_headroom: needs_review
+  general.bc_1012_5_3_restrictions: needs_review
+  general.bc_1012_6_landings: needs_review
+  general.bc_1012_6_1_landing_slope: needs_review
+  general.bc_1012_6_2_landing_width: needs_review
+  general.bc_1012_6_3_landing_length: needs_review
+  general.bc_1012_6_4_change_in_direction: needs_review
+  general.bc_1012_7_ramp_construction: needs_review
+  general.bc_1012_7_1_ramp_surface: needs_review
+  general.bc_1012_7_2_outdoor_conditions: needs_review
+  general.bc_1012_8_handrails: needs_review
+  general.bc_1012_10_edge_protection: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review
