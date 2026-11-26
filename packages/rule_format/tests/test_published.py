@@ -340,7 +340,7 @@ def test_stale_refuses_an_unknown_format_and_unreadable_certificates(tmp_path, m
     path = tmp_path / "general.published.json"
     monkeypatch.setattr(published, "certificate_path", lambda f, b: path)
     for data, said in ((b"{", "isn't readable JSON"), (b'{"format": "gordium.published_law/0"}', "isn't a gordium"),
-                       (b'{"format": "gordium.published_law/1"}', "can't be read as")):
+                       (b'{"format": "gordium.published_law/1"}', "isn't a gordium"), (b'{"format": "gordium.published_law/2"}', "can't be read as")):
         path.write_bytes(data)
         (why,) = published.stale(folder, book)
         assert said in why and "python -m rule_format publish" in why
@@ -401,3 +401,17 @@ def test_a_certificate_keeps_the_repo_names_its_rules_mention_not_the_whole_repo
         for p, data in kept.items():
             p.write_bytes(data)
     assert published.stale(copy / MAINE, repo=copy) == []
+
+
+def test_one_compile_works_out_what_its_certificates_share_once(monkeypatch):
+    """Review round 1 of PR 4 (F1): a place has a certificate per district (21 for Ithaca), and each worked out the
+    same inputs, listings and validator again (about 22 s of a 37 s publish). They are worked out once per folder."""
+    from rule_format.rulebook import building_code_rulebook
+    calls = []
+    real = published._shared
+    monkeypatch.setattr(published, "_shared", lambda *a: calls.append(1) or real(*a))
+    books = [building_code_rulebook(REPO / MAINE)] * 3
+    monkeypatch.setattr(published, "books_of", lambda folder: books)
+    monkeypatch.setattr(published, "compiled", lambda f, b: {"problems": [], "kinds": {}, "documents": {}})
+    out = json.loads(published._child(str(REPO / MAINE), str(REPO), [], [True]))
+    assert calls == [1] and len(out) == 1

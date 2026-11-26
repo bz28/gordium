@@ -72,8 +72,8 @@ def test_a_missing_stale_unknown_or_unusable_certificate_gives_that_law_a_proble
     stale_code = dict(real, validator={**real["validator"], "packages/rule_format/rule_format/rulebook.py": "0" * 64})
     refused = dict(real, result={**real["result"], "problems": ["a quote isn't at its lines"]})
     no_kinds = dict(real, result={k: v for k, v in real["result"].items() if k != "kinds"})
-    cases = {None: "no certificate at", b"{": "isn't readable JSON", b"[]": "isn't a gordium.published_law/1",
-             json.dumps(dict(real, format="gordium.published_law/2")).encode(): "isn't a gordium.published_law/1",
+    cases = {None: "no certificate at", b"{": "isn't readable JSON", b"[]": "isn't a gordium.published_law/2",
+             json.dumps(dict(real, format="gordium.published_law/1")).encode(): "isn't a gordium.published_law/2",
              json.dumps(stale_book).encode(): "the rulebook changed",
              json.dumps(stale_input).encode(): "input changed:",
              json.dumps(new_file).encode(): "new file:",
@@ -160,3 +160,19 @@ def test_writing_goldens_publishes_stale_certificates_first_and_checking_only_mi
     monkeypatch.setattr(goldens, "write", lambda texts: wrote.append("goldens written"))
     monkeypatch.setattr(sheets_main.goldens, "write", lambda name: wrote.append("sheets written"))
     assert goldens.main(["--write"]) == 1 and sheets_main.main(["--write"]) == 1 and wrote == []
+
+
+def test_the_odyssey_answer_is_not_written_while_maines_law_cant_be_published(monkeypatch, tmp_path):
+    """Review round 3 of PR 3: the Odyssey answer maker's refusal had no test. With a law that can't be published, no
+    answer is worked out and no file is written (every Maine row would be needs review)."""
+    import pytest
+    sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
+    import make_odyssey_answer as maker
+    worked = []
+    monkeypatch.setattr(published, "ensure", lambda missing_only=False: ["x: refused"])
+    monkeypatch.setattr(maker, "answer", lambda interior: worked.append(interior) or {})
+    src = tmp_path / "interior.json"
+    src.write_text("{}", encoding="utf-8")
+    with pytest.raises(SystemExit, match="not written: x: refused"):
+        maker.main(src, tmp_path / "out.json")
+    assert worked == [] and not (tmp_path / "out.json").exists()
