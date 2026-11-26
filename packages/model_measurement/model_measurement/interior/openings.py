@@ -431,14 +431,15 @@ def stated_well(o: dict, reader, more: dict, bottoms=()) -> tuple[dict, dict]:
     elif reach is None:
         why = missing("ladder_encroachment", "how far its ladder or steps reach into the well's required "
                       "dimensions (0 for nothing)", s.get("ladder_encroachment"))
-    elif reach != 0 and ladder is False:
-        # a blocked ladder or steps (none can't reach): 1031.5.2 doesn't accept them, so no reach is allowed them;
-        # what settles it is the ladder itself (round 4: the card named the reach)
-        why = Stop("well_size_ladder_not_accepted", name=name, got=Words(f"{reach:g} in"),
-                   mark=Words(REACH_MARKS["ladder"])).reason
     elif reach != 0 and (reach > 6 or (depth is not None and depth <= 44)):
         why = Stop("well_size_reach_over", name=name, which=Words("its ladder or steps"), got=Words(f"{reach:g} in"),
                    law=law, mark=Words(REACH_MARKS["ladder_encroachment"])).reason
+    elif reach != 0 and ladder is False:
+        # a blocked ladder or steps (none can't reach) reaching what a required one may: 1031.5.2 doesn't accept
+        # them, so what settles it is the ladder itself (round 4: the card named the reach); a reach past what
+        # any ladder may (above) is the reach's own, whatever the ladder (round 5)
+        why = Stop("well_size_ladder_not_accepted", name=name, got=Words(f"{reach:g} in"),
+                   mark=Words(REACH_MARKS["ladder"])).reason
     elif reach != 0 and ladder is None:
         # a reach of 6 in or less waits on whether it is a ladder or steps the well accepts (round 3: the card named
         # the reach, which setting wouldn't settle)

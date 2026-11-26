@@ -102,9 +102,9 @@ def test_a_wells_size_is_held_back_while_anything_but_the_required_ladder_may_re
         assert k not in m and "isn't handed to the rules" in stopped[k], (word, reach, k)
     # review round 2: the card opens the reach's mark that settles it, never the size's (already set)
     from design_checker import panel_data
-    assert panel_data.field_of_why("area_well_width", stopped["area_well_width"]) in (
-        "openings[].stated_well.other_encroachment", "openings[].stated_well.ladder_encroachment",
-        "openings[].stated_well.ladder")
+    # exactly the mark that settles it: anything else's reach, else the ladder's reach (8 in: past what any ladder may)
+    want = "ladder_encroachment" if well.get("other_encroachment") == 0 else "other_encroachment"
+    assert panel_data.field_of_why("area_well_width", stopped["area_well_width"]) == f"openings[].stated_well.{want}"
     assert (m["area_well_ladder"], m["area_well_steps"]) == LADDER_WORDS[word]
     got = _house_outcomes({**well, "depth": 30, "width": 36, "projection": 36, "area": 36 * 36})
     assert "pass" not in {got[r] for r in HOUSE_SIZE_RULES}, got
@@ -321,8 +321,11 @@ def test_not_below_grade_cant_stand_beside_a_ground_where_no_clear_bottom_is_kno
     ({"depth": None}, "depth", "doesn't state the well's depth"),
     ({"ladder": None}, "ladder", "doesn't state what it has to climb out by"),
     ({"other_encroachment": "abc"}, "other_encroachment", "states of how far anything else reaches into its well isn't read"),
-    ({"ladder": "ladder_blocked"}, "ladder", "that the open window or door blocks, so no reach is allowed them"),
-    ({"ladder": "steps_blocked"}, "ladder", "that the open window or door blocks, so no reach is allowed them"),
+    ({"ladder": "ladder_blocked"}, "ladder", "that the open window or door blocks, reaching 4 in"),
+    ({"ladder": "steps_blocked"}, "ladder", "that the open window or door blocks, reaching 4 in"),
+    # round 5: past what any ladder may (over 6 in, or a well 44 in deep or less), the reach settles it, whatever the ladder
+    ({"ladder": "ladder_blocked", "ladder_encroachment": 8}, "ladder_encroachment", "reaching 8 in"),
+    ({"ladder": "ladder_blocked", "depth": 44, "ladder_encroachment": 3}, "ladder_encroachment", "reaching 3 in"),
     ({"other_encroachment": None}, "other_encroachment", "doesn't state how far anything other"),
     ({"ladder_encroachment": None}, "ladder_encroachment", "doesn't state how far its ladder or steps reach")])
 def test_a_held_back_size_names_what_settles_it(left, field, words):
