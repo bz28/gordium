@@ -124,20 +124,38 @@ def laws(jurisdiction) -> dict:
         if book is None:
             law["problems"] = [NO_RULES.format(folder=law["key"])]
         else:
-            try:          # never a crash (zoning's answer goes with it), never a rule used unchecked
-                ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
-                law["problems"] = ctx.problems + state_settings_problems(folder, ctx) + rulebook_file_problems(book, ctx)
-                law["documents"] = ctx.sources
-                law["kinds"] = {k: v for k, v in ctx.allowed().items() if k not in ("use", "district")}
-                if not law["problems"]:
+            law.update(compile_law(folder, book))
+            if not law["problems"]:
+                try:      # never a crash (zoning's answer goes with it)
                     law["rules"] = load(book)["rules"]
                     law["section_of"] = _sections(folder)
-            except Exception as e:
-                law["problems"], law["rules"], law["section_of"] = \
-                    [f"its sources can't be read ({type(e).__name__}: {e})"], [], None
+                except Exception as e:
+                    law["problems"], law["rules"], law["section_of"] = [_unreadable(e)], [], None
         law["not_checked_yet"], law["coverage_problem"] = _not_checked_yet(folder, law["rules"])
         out.append(law)
     return {"place": p.name, "folder": p.folder, "laws": out}
+
+
+def compile_law(folder: Path, book: Path) -> dict:
+    """The costly part of reading one state law, and the part that will be frozen ("compile, then freeze",
+    docs/decisions/2026-11-23_laws_validation_speed.md): {"problems": everything wrong with its sources, its settings
+    and its rulebook (empty: the rules pass every rule check), "documents": its sources.yaml entries, "kinds": the
+    measures its rules may name beyond use and district}. Never raises: sources that can't be read are a problem,
+    so the law gives no rules (needs review, never a row). Reads nothing from the code cache (use_cache=False), so the
+    same files give the same answer on every machine."""
+    out = {"problems": [], "documents": {}, "kinds": {}}
+    try:          # never a crash (zoning's answer goes with it), never a rule used unchecked
+        ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
+        out["problems"] = ctx.problems + state_settings_problems(folder, ctx) + rulebook_file_problems(book, ctx)
+        out["documents"] = ctx.sources
+        out["kinds"] = {k: v for k, v in ctx.allowed().items() if k not in ("use", "district")}
+    except Exception as e:
+        out["problems"] = [_unreadable(e)]
+    return out
+
+
+def _unreadable(e: Exception) -> str:
+    return f"its sources can't be read ({type(e).__name__}: {e})"
 
 
 def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]:
