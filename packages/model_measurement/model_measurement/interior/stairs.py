@@ -297,6 +297,34 @@ def headroom(st: dict, flight: Flight, reader) -> float:
     return least_gap(framed, pieces, "what is overhead", "flight")
 
 
+def headroom_past_bottom(st: dict, flight: Flight, reader) -> float:
+    """The 2025 Building Code of New York State's 1011.3 headroom past the foot of the flight: "Such headroom shall be
+    continuous above the stairway to the point where the line intersects the landing below, one tread depth beyond
+    the bottom riser." The least height from the line connecting the nosings, carried on down at its first slope, to
+    anything overhead, over the first nosing's width from the first nosing back one tread depth (the deepest tread
+    of the flight, so the stretch is never short). Needs two nosings (the flight placed in plan). Used by the
+    Building Code check only (model_measurement/routes/stair_rooms.py): the house code's R318.7.2 has no such
+    stretch."""
+    given = st.get("overhead")
+    if given is None:
+        raise Stop("missing", what="what is above the flight")
+    if not isinstance(given, list):
+        raise Stop("not_a_list", key="overhead")
+    if not given:
+        raise Stop("nothing_overhead")
+    surfaces = [Surface(reader.points(p, 3, f"overhead surface {n}", 3), f"overhead surface {n}")
+                for n, p in enumerate(given, 1)]
+    (s1, z1), (s2, z2) = flight.line()[:2]
+    slope = (z2 - z1) / (s2 - s1)
+    back = max(flight.treads_most)
+    right, left = flight.ends[0]
+    with shapes("what is overhead"):
+        stretch = Polygon([(s1 - back, right), (s1, right), (s1, left), (s1 - back, left)])
+        framed = [InFrame(f, flight) for f in surfaces]
+    return least_gap(framed, [(stretch, lambda s, a: z1 - (s1 - s) * slope)], "what is overhead",
+                     "stretch one tread depth past the flight's bottom riser")
+
+
 class InFrame:
     """A surface seen in a flight's own frame (s, a): its plan turned into it, its height read back in plan."""
 

@@ -29,6 +29,12 @@ def _law(*rules):
 STAIR_RULE = {"id": "t.stair", "for_each": "stair"}
 GUARD_RULE = {"id": "t.guard", "for_each": "open_side"}
 STORY_RULE = {"id": "t.story", "for_each": "story"}
+BUILDING_OWN = ("stair_in_exit_enclosure", "stair_riser_count", "stair_headroom_past_bottom", "stair_handrail_each_side")
+
+
+def _without_own(stairs):
+    return [{**p, "measures": {k: v for k, v in p["measures"].items() if k not in BUILDING_OWN},
+             "not_measured": {k: v for k, v in p["not_measured"].items() if k not in BUILDING_OWN}} for p in stairs]
 
 
 def test_a_building_code_law_reading_stairs_gets_the_stairs_and_guards_measured_as_the_house_code_does():
@@ -36,7 +42,13 @@ def test_a_building_code_law_reading_stairs_gets_the_stairs_and_guards_measured_
     house = egress.measure_interior(d)
     for rule in (STAIR_RULE, GUARD_RULE):
         got = egress._measured(_law(STORY_RULE, rule), d, {})
-        assert got["parts"]["stair"] == house["parts"]["stair"]
+        # but for the Building Code's own values of each flight (section group 7c: model_measurement/routes/
+        # stair_rooms.py), each one either worked out or given its reason, and every other value as the house's
+        assert _without_own(got["parts"]["stair"]) == _without_own(house["parts"]["stair"])
+        for p in got["parts"]["stair"]:
+            assert all((k in p["measures"]) != (k in p["not_measured"]) for k in BUILDING_OWN), p["id"]
+        assert got["parts"]["stair"][0]["measures"]["stair_riser_count"] == \
+            house["parts"]["stair"][0]["more"]["stair_risers"]
         assert got["parts"]["guard"] == house["parts"]["guard"]
         assert "story" in got["parts"]                      # the routes' parts are still there
 

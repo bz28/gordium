@@ -9,6 +9,12 @@ design: docs/decisions/2026-11-20_route_measurement.md.
 """
 
 STOPS = {
+    # the room a flight of stairs stands in (stair_rooms.py: the Building Code's stair rules, section group 7c)
+    "stair_no_nosings": "the flight gives no nosings, so where it stands isn't known",
+    "stair_room_unread": "the floor of room {room} can't be read, and it may be the floor under the flight",
+    "stair_over_no_room": "nosing {n} of the flight stands over no room's floor",
+    "stair_room_exit_unknown": "whether room {room}, under nosing {n} of the flight, is an exit enclosure isn't worked "
+                               "out",
     # the description as a whole (every story's route measures need review)
     "description": "the model can't be read for escape routes: {reason}",
     "no_levels": "the model gives no levels: which story each room and door is on isn't known",
