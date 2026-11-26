@@ -20728,7 +20728,7 @@ rules:
     expect: needs_review
     note: 'The occupancy isn''t stated: a person checks.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. Not shown for a building stated Group U alone
-    (exception 1 spares the whole building); its other exceptions spare parts of a building only. 1008.1 (the pointer to 1008.2
+    (exception 1 spares the whole building); its other exceptions turn on facts Gordium isn't given (which rooms need one exit, which units are what), so the flag shows. 1008.1 (the pointer to 1008.2
     and 1008.3) is quoted here.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -20761,7 +20761,7 @@ rules:
       materials (1025.2.1, 1025.2.2 and 1025.2.4, systems listed to UL 1994): lighting isn''t in the model, so a person''s
       check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9b. 1025.2.1, 1025.2.2 and 1025.2.4 (luminous egress
-    path markings) aren''t brought in: the exception only loosens, and the flag never passes.'
+    path markings) aren''t brought in: the exception only loosens, and the flag never passes. UL 1994 isn''t brought in.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1008_2_2_group_i2_exterior_landings
@@ -20896,7 +20896,7 @@ rules:
     note: 'The emergency power system powers the lighting for at least 90 minutes, from storage batteries, unit equipment
       or an on-site generator, installed per 2702: the electrical design isn''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. 2702 (emergency and standby power systems) isn't
-    brought in.
+    brought in, nor Chapter 27 (electrical).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1008_3_2_emergency_illumination_level
@@ -20959,7 +20959,7 @@ rules:
       viewing distance if less, from the nearest visible sign; not required in rooms or areas needing only one exit or exit
       access, at main exterior exit doors or gates obviously identifiable as exits where the building official approves, in
       Group U, within Group R-1, R-2 or R-3 sleeping or dwelling units, in Group I-3''s dayrooms, sleeping rooms and dormitories,
-      or on the seating side of Group A-4 and A-5 vomitories with signs in the concourse: exit signs aren''t in the model,
+      or on the seating side of Group A-4 and A-5 vomitories where signs in the concourse are readily apparent from the vomitories and egress lighting identifies each vomitory or opening in an emergency: exit signs aren''t in the model,
       so a person''s check.'
   - given:
       occupancy_group: U
@@ -20969,7 +20969,7 @@ rules:
     expect: needs_review
     note: 'The occupancy isn''t stated: a person checks.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. Not shown for a building stated Group U alone
-    (exception 3 spares it); its other exceptions spare parts of a building only.
+    (exception 3 spares it); its other exceptions turn on facts Gordium isn't given (which rooms need one exit, which units are what), so the flag shows.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1013_2_low_level_exit_signs_group_r1
@@ -21022,6 +21022,15 @@ rules:
       occupancy_group: R-1
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      sprinklered_903_3_1_1: true
+    expect: not_applicable
+    note: 'Sprinklered throughout per 903.3.1.1, the group not stated: the exception spares any building so sprinklered.'
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: false
+    expect: needs_review
+    note: 'Group R-1, not per 903.3.1.1, and whether per 903.3.1.2 isn''t stated: a person checks.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -21088,7 +21097,8 @@ rules:
     expect: needs_review
     note: 'Electrically powered, self-luminous and photoluminescent exit signs are listed and labeled to UL 924, installed
       to the maker''s instructions and Chapter 27, and lit at all times: exit signs aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. Chapter 27 (electrical) and UL 924 aren't brought
+    in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1013_5_1_photoluminescent_exit_signs
@@ -21187,10 +21197,10 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Exit signs are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an
+    note: 'Externally lit exit signs (1013.6) are lit at all times, connected to an emergency power system (storage batteries, unit equipment or an
       on-site generator, installed per Chapter 27) that keeps them lit at least 90 minutes after primary power is lost, not
       by unit equipment batteries alone in Group I-2 Condition 2; approved types lit continuously for 90 minutes independently
       of external power need no connection: exit signs aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b.
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. Chapter 27 (electrical) isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
