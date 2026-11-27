@@ -188,6 +188,22 @@ labels:
       italics.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:anchor_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines ANCHOR BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 33
+      - 34
+      quote: '[BG] ANCHOR BUILDING. An exterior perimeter building of a group other than H having direct access to a covered
+        or open mall building but having required means of egress independent of the mall.'
+    piece_sha256: 16de02476496d378dd7a66f3846f77350102056e3320ebcfb8fd1d8c0e9a7121
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:approved:
     label: reference
     topic: definitions
@@ -531,6 +547,33 @@ labels:
         walls or other'
     piece_sha256: 630e2e8b75ef5ce1f7a85b29abe33c3ef3404133ba7277f7d4223b80b68f9b83
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:covered_mall_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines COVERED MALL BUILDING (with mall, open mall and open mall building under it), words the brought-in sections
+      use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 29
+      - 39
+      quote: '[BG] COVERED MALL BUILDING. A single building enclosing a number of tenants and occupants, such as retail stores,
+        drinking and dining establishments, entertainment and amusement facilities, passenger transportation terminals, offices
+        and other similar uses wherein two or more tenants have a main entrance into one or more malls. Anchor buildings shall
+        not be considered as a part of the covered mall building. The term “covered mall building” shall include open mall
+        buildings as defined below. Mall. A roofed or covered common pedestrian area within a covered mall building that serves
+        as access for two or more tenants and not to exceed three levels that are open to each other. The term “mall” shall
+        include open malls as defined below. Open mall. An unroofed common pedestrian way serving a number of tenants not
+        exceeding three levels. Circulation at levels above grade shall be permitted to include open exterior balconies leading
+        to exits discharging at grade. Open mall building. Several structures housing a number of tenants, such as retail
+        stores, drinking and dining establishments, entertainment and amusement facilities, offices, and other similar uses,
+        wherein two or more tenants have a main entrance into one or more open malls. Anchor buildings are not considered
+        as a part of the open mall building.'
+    piece_sha256: 8f6ccfb2b77b1b2886d37e90f1e88369514f714e7ebc13b59cc5b85a41a607b9
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:cryogenic_fluid:
@@ -974,6 +1017,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:fire_barrier:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE BARRIER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 6
+      - 7
+      quote: '[BF] FIRE BARRIER. A fire-resistance-rated wall assembly of materials designed to restrict the spread of fire
+        in which continuity is maintained.'
+    piece_sha256: 0fdf51e0e90fb73c5088b18d8fea6b28c41e3d12f5ce5da5db4fa9121343d10b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:fire_door:
     label: reference
     topic: definitions
@@ -1058,6 +1117,23 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
       4b (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor rating sections use, by
       the book''s italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_protection_rating:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE PROTECTION RATING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 25
+      - 26
+      quote: '[BF] FIRE PROTECTION RATING. The period of time that an opening protective prevents or retards the passage of
+        excessive flames to confine a fire as determined by tests specified in Section 716. Ratings are stated in hours or
+        minutes.'
+    piece_sha256: 391aeee61c9f4c5d3f39243d93a9752da2fc697865cf0d666a18d3910c38d441
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_wall:
@@ -1172,6 +1248,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:food_court:
+    label: reference
+    topic: definitions
+    reason: 'Defines FOOD COURT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 47
+      lines:
+      - 38
+      - 38
+      quote: '[BG] FOOD COURT. A public seating area located in the mall that serves adjacent food preparation tenant spaces.'
+    piece_sha256: a935c81f8ca098c59a736fb28243df7ead3448e8534d008206a138b79847ec07
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:gaming:
     label: reference
     topic: definitions
@@ -1235,6 +1326,23 @@ labels:
       quote: GRADE PLANE, STORY ABOVE. See “Story above grade plane.”
     piece_sha256: 964adf4b35d5ce5f34695a25cce9967a521fd36ed4b7c32245094866f3af161d
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:gross_leasable_area:
+    label: reference
+    topic: definitions
+    reason: 'Defines GROSS LEASABLE AREA, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 44
+      - 46
+      quote: '[BG] GROSS LEASABLE AREA. The total floor area designed for tenant occupancy and exclusive use. The area of
+        tenant occupancy is measured from the centerlines of joint partitions to the outside of the tenant walls. All tenant
+        areas, including areas used for storage, shall be included in calculating gross leasable area.'
+    piece_sha256: 4eac69af6a413f407e8e21cb13595bddaf47016dcc1d5750487d0d11ed4615e5
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:handling:
@@ -1314,6 +1422,22 @@ labels:
       quote: '[BG] HEIGHT, BUILDING. The vertical distance from grade plane to the average height of the highest roof surface.'
     piece_sha256: 1edfc2f24ab1b41fbaba521427a50871fcd94945c4be4c4eb46c3d26ac844ae2
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:horizontal_assembly:
+    label: reference
+    topic: definitions
+    reason: 'Defines HORIZONTAL ASSEMBLY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 11
+      - 12
+      quote: '[BF] HORIZONTAL ASSEMBLY. A fire-resistance-rated floor or roof assembly of materials designed to restrict the
+        spread of fire in which continuity is maintained.'
+    piece_sha256: cceab85c133ff9e85ddb883279e03c330ced56f29f2a99c1b30d1c055244ad50
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:horizontal_exit:
@@ -2780,6 +2904,429 @@ labels:
         comply with the Residential Code of New York State.
     piece_sha256: 76778ee93e69c35f48c823ddc26813a8f267a92142356f9534322fc99821c796
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '402.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'Where Section 402 applies: a covered or open mall building of up to three floor levels and three stories above
+      grade plane, with its two exceptions; whether the building is one is the architect''s statement, so a person''s check
+      (general.bc_402_1_mall_buildings).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 84
+      lines:
+      - 14
+      - 20
+      quote: '402.1 Applicability. The provisions of this section shall apply to buildings or structures defined herein as
+        covered or open mall build- ings not exceeding three floor levels at any point nor more than three stories above grade
+        plane. Except as specifically required by this section, covered and open mall buildings shall meet applicable provisions
+        of this code. Exceptions: 1. Foyers and lobbies of Group B, R-1 and R-2 occupancies are not required to comply with
+        this section. 2. Buildings need not comply with the provisions of this section where they totally comply with other
+        applicable provisions of this code.'
+    piece_sha256: 78e6e0f62fefe8560e886f8829e7f25e8a875107ecb2ed88f26f9639639f17c6
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.1.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Sets the open mall building''s perimeter line, its extent (anchor buildings and parking structures outside it),
+      which 402.8.5 and 402.8.6 measure to: what the words mean, no requirement of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 84
+      lines:
+      - 21
+      - 25
+      quote: 402.1.1 Open mall building perimeter line. For the purpose of this code, a perimeter line shall be established.
+        The perimeter line shall encircle all buildings and structures that comprise the open mall building and shall encompass
+        any open-air interior walkways, open-air courtyards or similar open-air spaces. The perimeter line shall define the
+        extent of the open mall building. Anchor buildings and parking structures shall be outside of the perimeter line and
+        are not considered as part of the open mall building.
+    piece_sha256: 9a86ad033d0b32adfbf48a062de11446999bd7def084302ce5228323c432e948
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '402.8':
+    label: flag
+    topic: means_of_egress
+    reason: 'A mall building''s means of egress, 402.8.1 to 402.8.8 governing where they conflict with the code: a person''s
+      check (general.bc_402_8_means_of_egress), and Chapter 10''s rules never pass on a figure 402.8 changes where a mall
+      is stated or not ruled out.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 86
+      lines:
+      - 48
+      - 50
+      quote: '[BE] 402.8 Means of egress. Covered mall buildings, open mall buildings and each tenant space within a mall
+        building shall be provided with means of egress as required by this section and this code. Where there is a conflict
+        between the requirements of this code and the requirements of Sections 402.8.1 through 402.8.8, the requirements of
+        Sections 402.8.1 through 402.8.8 shall apply.'
+    piece_sha256: af92adc853d2c6df94bcc645f96fac9059d719e79db41833046da0bd9613aabe
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A mall may be taken as a corridor: which room is a mall isn''t in the model, so a person''s check (general.bc_402_8_1_mall_width).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 86
+      lines:
+      - 51
+      - 52
+      quote: '[BE] 402.8.1 Mall width. For the purpose of providing required egress, malls are permitted to be considered
+        as corridors but need not comply with the requirements of Section 1005.1 of this code where the width of the mall
+        is as specified in this section.'
+    piece_sha256: c8a5788aca1bb03fc32d0c8871d83c6583f0ea5eb0df5d7a489eeca8c843e20e
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.1.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A mall''s 20 ft aggregate width and 10 ft clear to obstructions: the mall and what stands in it aren''t in the
+      model, so a person''s check (general.bc_402_8_1_1_mall_minimum_width).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 86
+      lines:
+      - 53
+      - 57
+      quote: '[BE] 402.8.1.1 Minimum width. The aggregate clear egress width of the mall in either a covered or open mall
+        building shall be not less than 20 feet (6096 mm). The mall width shall be sufficient to accommodate the occupant
+        load served. Any portion of the minimum required aggregate egress width shall be not less than 10 feet (3048 mm) measured
+        to a height of 8 feet (2438 mm) between any projection of a tenant space bordering the mall and the nearest kiosk,
+        vending machine, bench, display opening, food court or other obstruction to means of egress travel.'
+    piece_sha256: 6eb4e2dd18d1bb937c9f59bf05a2c26557e62ec53565dd4e4c3099d08c8da11c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A tenant space''s occupant load by the code: which rooms are tenant spaces isn''t in the model, so a person''s
+      check (general.bc_402_8_2_tenant_occupant_load).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 3
+      - 5
+      quote: '[BE] 402.8.2 Determination of occupant load. The occupant load permitted in any individual tenant space in a
+        covered or open mall building shall be determined as required by this code. Means of egress requirements for individual
+        tenant spaces shall be based on the occupant load thus determined.'
+    piece_sha256: e127df7ddb71ee92defbbe7fa94183034b4eead1db77b5be30da942402eec083
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'The mall''s occupant load from its gross leasable area (Equation 4-1): the area isn''t in the model, so a person''s
+      check (general.bc_402_8_2_1_mall_occupant_formula).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 6
+      - 15
+      quote: '[BE] 402.8.2.1 Occupant formula. In determining required means of egress of the mall, the number of occupants
+        for whom means of egress are to be provided shall be based on gross leasable area of the covered or open mall building
+        (excluding anchor buildings) and the occupant load factor as determined by Equation 4-1. Equation 4-1 OLF = (0.00007)(GLA)
+        + 25 where: OLF = The occupant load factor (square feet per person). GLA = The gross leasable area (square feet).
+        Exception: Tenant spaces attached to a covered or open mall building but with a means of egress system that is totally
+        inde- pendent of the open mall of an open mall building or of a covered mall building shall not be considered as gross
+        leasable area for determining the required means of egress for the mall building.'
+    piece_sha256: 46d3f2749bea05958aa71a4f8930186d4d9b0632d52d1ed53f251f90a30c8405
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Equation 4-1''s factor between 30 and 50 sq ft a person: part of the person''s check of the mall''s load (general.bc_402_8_2_2_olf_range).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 16
+      - 16
+      quote: '[BE] 402.8.2.2 OLF range. The occupant load factor (OLF) is not required to be less than 30 and shall not exceed
+        50.'
+    piece_sha256: c9962b80b811c05d8c7c7e36bf291ccfde56e29bdd2c130ad19c81afbde878ec
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Anchor buildings'' occupants left out of the mall''s: a person''s check (general.bc_402_8_2_3_anchor_buildings).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 17
+      - 18
+      quote: '[BE] 402.8.2.3 Anchor buildings. The occupant load of anchor buildings opening into the mall shall not be included
+        in computing the total number of occupants for the mall.'
+    piece_sha256: 7db1555b21f44bb33d7bb251943179576eab5a67dc3cae4cb650a0bb549c396b
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.2.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'A food court''s occupants added to the mall''s: a person''s check (general.bc_402_8_2_4_food_courts).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 19
+      - 21
+      quote: '[BE] 402.8.2.4 Food courts. The occupant load of a food court shall be determined in accordance with Section
+        1004. For the purposes of determining the means of egress requirements for the mall, the food court occupant load
+        shall be added to the occupant load of the covered or open mall building as calculated in Section 402.8.2.1.'
+    piece_sha256: 131a5c8b9f298ad315bd5315acb728fa4559095141364997ca8261cc249689d7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A tenant space''s second means of egress past 75 ft to the mall or at 50 occupants: tenant spaces and the mall
+      aren''t in the model, so a person''s check (general.bc_402_8_3_tenant_two_means_of_egress).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 22
+      - 24
+      quote: '[BE] 402.8.3 Number of means of egress. Wherever the distance of travel to the mall from any location within
+        a tenant space used by persons other than employees is greater than 75 feet (22 860 mm) or the tenant space has an
+        occupant load of 50 or more, not fewer than two means of egress shall be provided.'
+    piece_sha256: dd5bb5cb4a2adbc622c8aa0b3ffbdc6e42e12475f3076d9789b9b6c09080e381
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'An assembly occupancy of 500 or more in a covered mall building, beside a principal entrance with half its exits
+      outside: a person''s check (general.bc_402_8_4_assembly_in_a_mall).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 25
+      - 29
+      quote: '[BE] 402.8.4 Arrangements of means of egress. Assembly occupancies with an occupant load of 500 or more located
+        within a covered mall building shall be so located such that their entrance will be immediately adjacent to a principal
+        entrance to the mall and shall have not less than one-half of their required means of egress opening directly to the
+        exterior of the covered mall building. Assembly occupancies located within the perimeter line of an open mall building
+        shall be permitted to have their main exit open to the open mall.'
+    piece_sha256: 4137df8d67d5a10cd031274306bd740698f1a2149214f329ef5e0579aa22afc4
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Anchor buildings'' means of egress independent of the mall''s: a person''s check (general.bc_402_8_4_1_anchor_building_egress).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 30
+      - 34
+      quote: '[BE] 402.8.4.1 Anchor building means of egress. Required means of egress for anchor buildings shall be provided
+        inde- pendently from the mall means of egress system. The occupant load of anchor buildings opening into the mall
+        shall not be included in determining means of egress requirements for the mall. The path of egress travel of malls
+        shall not exit through anchor buildings. Malls terminating at an anchor building where other means of egress has not
+        been provided shall be consid- ered as a dead-end mall.'
+    piece_sha256: 06231b50f76249613bc80e468405d3a69a85e1c4a6d1495cbae862fc9f55b7cf
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'Travel at most 200 ft in a tenant space and in the mall: a person''s check (general.bc_402_8_5_distance_to_exits),
+      and every travel row needs review where a mall is stated or not ruled out.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 35
+      - 39
+      quote: '[BE] 402.8.5 Distance to exits. Within each individual tenant space in a covered or open mall building, the
+        distance of travel from any point to an exit or entrance to the mall shall be not greater than 200 feet (60 960 mm).
+        The distance of travel from any point within a mall of a covered mall building to an exit shall be not greater than
+        200 feet (60 960 mm). The maximum distance of travel from any point within an open mall to an exit or to the perimeter
+        line of the open mall build- ing shall be not greater than 200 feet (60 960 mm).'
+    piece_sha256: 77829da59d8bcc593efe0dad5baff24633c635702640952dc100feeae4c21ce2
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'Two ways to separate exits from a mall, its passageways 66 in, a dead-end mall at most twice its width: a person''s
+      check (general.bc_402_8_6_access_to_exits).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 40
+      - 45
+      quote: '[BE] 402.8.6 Access to exits. Where more than one exit is required, they shall be so arranged that it is possible
+        to travel in either direction from any point in a mall of a covered mall building to separate exits or from any point
+        in an open mall of an open mall building to two separate locations on the perimeter line, provided that neither location
+        is an exterior wall of an anchor building or parking garage. The width of an exit passageway or corridor from a mall
+        shall be not less than 66 inches (1676 mm). Exception: Access to exits is permitted by way of a dead-end mall that
+        does not exceed a length equal to twice the width of the mall measured at the narrowest location within the dead-end
+        portion of the mall.'
+    piece_sha256: af4c7f1899d3a1b421aadd65e0ca6426607a7247493f2afe8926c16b9dd9ed9c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.6.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Exit passageways from a tenant space built per Section 1024: a person''s check (general.bc_402_8_6_1_exit_passageways).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 46
+      - 47
+      quote: '[BE] 402.8.6.1 Exit passageways. Where exit passageways provide a secondary means of egress from a tenant space,
+        the exit passageways shall be constructed in accordance with Section 1024.'
+    piece_sha256: 4fc417eb8df027a4c007023a4e3276bace1c591e74b095446bc0c0df2ae06419
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'Service areas opening into exit passageways behind 1-hour fire barriers: ratings aren''t in the model, so a person''s
+      check (general.bc_402_8_7_service_areas_on_exit_passageways).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 48
+      - 51
+      quote: '[BE] 402.8.7 Service areas fronting on exit passageways. Mechanical rooms, electrical rooms, building service
+        areas and service elevators are permitted to open directly into exit passageways, provided that the exit passageway
+        is separated from such rooms with not less than 1-hour fire barriers constructed in accordance with Section 707 or
+        horizontal assemblies constructed in accordance with Section 711, or both. The fire protection rating of openings
+        in the fire barriers shall be not less than 1 hour.'
+    piece_sha256: 4fab813068513331560e0b701307a17c587b084aee4be8727cf812ba9241b6f8
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  402.8.8:
+    label: flag
+    topic: means_of_egress
+    reason: 'Security grilles and doors in a required means of egress: a person''s check (general.bc_402_8_8_security_grilles_and_doors).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 87
+      lines:
+      - 52
+      - 58
+      quote: '[BE] 402.8.8 Security grilles and doors. Horizontal sliding or vertical security grilles or doors that are a
+        part of a required means of egress shall conform to the following: 1. Doors and grilles shall remain in the full open
+        position during the period of occupancy by the general public. 2. Doors or grilles shall not be brought to the closed
+        position when there are 10 or more persons occupying spaces served by a single exit or 50 or more persons occupying
+        spaces served by more than one exit. 3. The doors or grilles shall be openable from within without the use of any
+        special knowledge or effort where the space is occupied.'
+    - file: gov.ny.building.2025.pdf
+      page: 88
+      lines:
+      - 3
+      - 4
+      quote: 4. Where two or more exits are required, not more than one-half of the exits shall be permitted to include either
+        a horizontal sliding or vertical rolling grille or door.
+    piece_sha256: 52f61079f8f69abc90864069b30e1596007007ceaa7a4a91e19e2590dcc5bc4a
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '404.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'Buildings with an atrium, and none in Group H (but the exception''s vertical openings, not shown): a person''s
+      check where an atrium is stated or not ruled out (general.bc_404_1_atriums).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 91
+      lines:
+      - 25
+      - 27
+      quote: '404.1 General. The provisions of Sections 404.1 through 404.11 shall apply to buildings containing atriums.
+        Atriums are not permit- ted in buildings or structures classified as Group H. Exception: Vertical openings that comply
+        with Sections 712.1.1 through 712.1.3, and Sections 712.1.9 through 712.1.14.'
+    piece_sha256: e1eb40dbdfb1c9a9425f9f4d27b4cc72443fb3972f341f6c30367c00a6cdb03f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '404.9':
+    label: flag
+    topic: means_of_egress
+    reason: 'Travel from areas open to an atrium per Section 1017: the part within the atrium isn''t measured, so a person''s
+      check (general.bc_404_9_atrium_travel_distance).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 92
+      lines:
+      - 23
+      - 24
+      quote: '[BE] 404.9 Exit access travel distance. Exit access travel distance for areas open to an atrium shall comply
+        with the requirements of Section 1017.'
+    piece_sha256: 3e7df53b62546c30ef22e5ac80eea486e6283ebaef4922f16d3b082ed81876e3
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '404.10':
+    label: flag
+    topic: means_of_egress
+    reason: 'An exit stairway in an atrium (its entry at the closest riser, two directions, separation, at most half the exit
+      stairways): a person''s check (general.bc_404_10_exit_stairways_in_an_atrium).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 92
+      lines:
+      - 25
+      - 32
+      quote: '[BE] 404.10 Exit stairways in an atrium. Where an atrium contains an interior exit stairway all the following
+        shall be met: 1. The entry to the exit stairway is the edge of the closest riser of the exit stairway. 2. The entry
+        of the exit stairway shall have access from a minimum of two directions. 3. The distance between the entry to an exit
+        stairway in an atrium and the entrance to a minimum of one exit stairway enclosed in accordance with Section 1023.2
+        shall comply with the separation required by Section 1007.1.1. 4. Exit access travel distance shall be measured to
+        the closest riser of the exit stairway. 5. Not more than 50 percent of the exit stairways shall be located in the
+        same atrium. 6. The discharge from the exit stairway at the level of exit discharge shall comply with Section 1028.1.'
+    piece_sha256: 214c4c47077ec0ca6ee23bd49255a6af36ce58261979415fc8b3758557d89e1c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '404.11':
+    label: flag
+    topic: means_of_egress
+    reason: 'Interior exit stairways discharging through an atrium per Section 1028: a person''s check (general.bc_404_11_stairway_discharge_through_an_atrium).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 92
+      lines:
+      - 33
+      - 34
+      quote: '[BE] 404.11 Interior exit stairway discharge. Discharge of interior exit stairways through an atrium shall be
+        in accordance with Section 1028.'
+    piece_sha256: 2561bb4078d8d587fec920e2312288b0cae932f60d00ffefcdedcb7d39c2cae7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   407.4.2:
