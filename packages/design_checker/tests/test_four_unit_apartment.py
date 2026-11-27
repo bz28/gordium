@@ -202,13 +202,57 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     1010.1.6 and 1010.1.7 (42; 1010.1.3.2's is a door's row, not a building line); section group 6d 1010.2 to
     1010.2.6 and Table 1010.2.4 (50; 1010.2.7's is for Groups E, B and I-4); section group 6e 1010.2.8.1 to
     1010.2.12.1, 1010.2.14 and 1010.2.15 (61; 1010.2.13's is for Groups I-1 and I-2); section group 8a 1031.2's basements and public way and
-    1031.2.1 (64); section group 8c 1031.5.3's drainage and 1031.6's bars (66); section group 9a 1003.2 to 1003.7's nine and 1012's seventeen ramp flags (a building's ramps aren't a fact Gordium is given, so they show for every building) (92); section group 9b 1008's eight and 1013's nine lighting and exit-sign flags but 1008.2.2's (Group I-2) and 1013.2's (Group R-1) (107); section group 9c 1009's twenty-seven accessible-egress flags but 1009.3.3's (the building is Group R-2, exception 5) (133); section group 9d 1018.1's, 1018.5's and 1019.3's flags (1018.3's is for Groups B and M, 1019.4's for I-2 and I-3) (136); section group 9e 1021's four, 1022's three and 1023's nineteen flags, each shown for every building (162); section group 9f 1024's nine flags (1025's fifteen are for Groups A, B, E, I-1, M and R-1) (171). Chapter 7 (2026-11-26) adds 104 more: part a's 28
-    fire-barrier and shaft-enclosure flags, each shown for every building; part b its 23 building-wide
+    1031.2.1 (64); section group 8c 1031.5.3's drainage and 1031.6's bars (66); section group 9a 1003.2 to 1003.7's nine and 1012's seventeen ramp flags (a building's ramps aren't a fact Gordium is given, so they show for every building) (92); section group 9b 1008's eight and 1013's nine lighting and exit-sign flags but 1008.2.2's (Group I-2) and 1013.2's (Group R-1) (107); section group 9c 1009's twenty-seven accessible-egress flags but 1009.3.3's (the building is Group R-2, exception 5) (133); section group 9d 1018.1's, 1018.5's and 1019.3's flags (1018.3's is for Groups B and M, 1019.4's for I-2 and I-3) (136); section group 9e 1021's four, 1022's three and 1023's nineteen flags, each shown for every building (162); section group 9f 1024's nine flags (1025's fifteen are for Groups A, B, E, I-1, M and R-1) (171); section group 9g 1026's seven, 1027's five, 1028's four and 1029's two flags (18), each shown for every building but 1029.3's not for Group R-3 alone (189); section group 9h Section 1030's twenty-four
+    assembly flags but 1030.4's (Group A-1 only): the rooms are residential, but a description may hold only some floors,
+    so a room used for assembly purposes isn't ruled out until the building states none (213); section group 9i its
+    thirty-seven more, 1030.10 to 1030.17 and Table 1030.13.2.1, the same way (250). Chapter 7 (2026-11-26) adds 104
+    more: part a's 28 fire-barrier and shaft-enclosure flags, each shown for every building; part b its 23 building-wide
     opening-protective flags (Table 716.1(2)'s corridor doors are each corridor's row); part c 30 of its 31 fire
     partition, smoke barrier and smoke partition flags (710.5.3 is Group I-2's, not the stated R-2's); part d its 23
-    floor, vertical opening and penetration flags (275)."""
+    floor, vertical opening and penetration flags (354)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 275 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 354 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    # review round 4 of section group 9g: the docstring's per-section counts for 9g, pinned
+    from collections import Counter
+    assert Counter(i["code"]["section"].split(".")[0] for i in flags
+                   if i["code"]["section"][:4] in ("1026", "1027", "1028", "1029")) == {
+        "1026": 7, "1027": 5, "1028": 4, "1029": 2}
+    # section groups 9h and 9i: Section 1030's (Tables 1030.6.2's and 1030.13.2.1's among them), 1030.8's of
+    # 2026-11-23 counted with them
+    assert sum(i["code"]["section"].removeprefix("Table ").startswith("1030") for i in flags) == 24 + 1 + 37
+
+
+
+def _flags_1030(results):
+    return {k: v for k, v in results.items() if k.startswith(("general.bc_1030_", "general.bc_table_1030_"))}
+
+
+def test_section_1030s_flags_show_on_residential_rooms_alone_and_hide_only_on_a_stated_no(got, laws):
+    """Section group 9h: Section 1030 applies to any room or space used for assembly purposes, whatever the group
+    (303.1.1, 303.1.2). The apartment's rooms are all residential and its group R-2, yet its description may hold only
+    some floors, so with the fact unstated every 1030 flag shows but 1030.4's (Group A-1 only). Stated no (and no fixed
+    seating) they are not applicable, and nothing else moves. A room stating a Table 1004.5 Assembly function brings
+    them back whatever is stated; a room that may be an assembly use (a courtroom) keeps a stated no from standing."""
+    shown = _flags_1030(got["results"])
+    assert len(shown) == 26 + 37                    # section group 9i's thirty-seven too
+    assert shown.pop("general.bc_1030_4_foyers_and_lobbies") == "not_applicable"
+    assert set(shown.values()) == {"needs_review"}
+    interior = build.interior_of()
+    interior["building"] = {**interior["building"], "assembly_spaces": False, "assembly_fixed_seating": False}
+    now = egress.check(laws, interior, VALUES, ALLOWED)["results"]
+    moved = {k for k in got["results"] if got["results"][k] != now[k]}
+    assert moved == set(shown) and {now[k] for k in moved} == {"not_applicable"}
+    for fn, want in (("assembly_unconcentrated", "needs_review"), ("courtroom", "needs_review"),
+                     ("business", "not_applicable"), ("assembly_fixed_seats", "needs_review")):
+        again = copy.deepcopy(interior)
+        again["rooms"][0]["function"] = fn
+        now = _flags_1030(egress.check(laws, again, VALUES, ALLOWED)["results"])
+        now.pop("general.bc_1030_4_foyers_and_lobbies")
+        # 1030.8 and 1030.8.1 read the fixed seating alone: stated no here, but a room stating fixed seats has it
+        # (review round 1: the room's yes wins over the stated no)
+        fixed = "needs_review" if fn == "assembly_fixed_seats" else "not_applicable"
+        assert {k: v for k, v in now.items() if "1030_8" not in k} == {k: want for k in shown if "1030_8" not in k}, fn
+        assert {v for k, v in now.items() if "1030_8" in k} == {fixed}, fn
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -275,7 +319,8 @@ def test_the_five_chapter_10_marks_stated_move_only_the_rules_that_read_them(got
                          "bc_1010_2_8_1_refrigeration_machinery_rooms",
                          "bc_1006_2_2_3_refrigerated_rooms", "bc_1006_2_2_4_electrical_rooms",
                          "bc_1006_2_2_5_vehicular_ramps", "bc_table_1017_2_note_a", "bc_1017_2_1_balcony_increase",
-                         "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path")}}
+                         "bc_1017_3_2_3_atrium", "bc_1030_8_fixed_seating_common_path",
+                         "bc_1030_8_1_path_through_adjacent_row")}}
 
 
 def test_group_2s_marks_stated_choose_the_r2_table_and_pass_only_on_two_exits(got, laws):

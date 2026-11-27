@@ -30,7 +30,8 @@ def test_a_building_measure_is_answered_by_the_fact_it_is_worked_out_from():
                                           "occupied_outdoor_areas": False,                   # group 3's
                                           "ambulatory_care_facility": False,                 # group 4's
                                           "corridors_within_dwelling_units": False,
-                                          "emergency_voice_alarm_system": False})            # group 5a's
+                                          "emergency_voice_alarm_system": False,             # group 5a's
+                                          "assembly_spaces": False})                         # group 9h's
     assert set(given) == set(code_scope.DERIVED)
     assert given["occupancy_group_i4"] is False and given["other_occupancy_present"] is True
     assert given["sprinklered_903_3_1_1"] is True and given["sprinklered_903_3_1_2"] is False
@@ -290,10 +291,10 @@ def test_the_contents_list_every_chapter_and_never_hide_a_rows_section(apartment
     chapters = [c for c in bc["chapters"] if c["kind"] == "chapter"]
     assert [c["number"] for c in chapters] == [str(n) for n in range(1, 36)]
     egress = next(c for c in chapters if c["number"] == "10")
-    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 9   # section group 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1019 (1018 left the count with 1018.4, round 1 of 2026-11-23); 9e: 1021, 1022 and 1023; 9f: 1024 and 1025
+    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 5   # section group 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1019 (1018 left the count with 1018.4, round 1 of 2026-11-23); 9e: 1021, 1022 and 1023; 9f: 1024 and 1025; 9g: 1026 to 1029
     sections = {s["number"]: s for s in egress["sections"]}
     assert sections["1018"]["whole"] is True and sections["1019"]["whole"] is True   # group 9d review round 1
-    assert all(sections[s]["whole"] is True for s in ("1021", "1022", "1023", "1024", "1025"))   # groups 9e and 9f
+    assert all(sections[s]["whole"] is True for s in ("1021", "1022", "1023", "1024", "1025", "1026", "1027", "1028", "1029"))   # groups 9e to 9g
     assert sections["1006"]["coverage"] == "rules" and sections["1006"]["whole"] is False
     assert sections["1017"]["whole"] is True and sections["1011"]["coverage"] == "not_brought_in"
     assert sections["1010"]["coverage"] == "rules" and sections["1010"]["whole"] is False   # group 6a: 1010.1, 1010.1.1
@@ -579,9 +580,12 @@ def test_every_fact_the_code_choice_reads_has_the_mark_revit_shows_for_it():
     # Revit-fields work. Groups 2 and 3's facts have theirs (PR #194).
     # and this branch's own: corridors_within_dwelling_units (their marks follow in the Revit-fields work)
     # and this branch's own: emergency_voice_alarm_system (their marks follow in the Revit-fields work)
-    # (groups 4 and 5's four have theirs too, the Revit-fields PR for them: the set is empty)
+    # (groups 4 and 5's four have theirs too, the Revit-fields PR for them)
     # (the occupant-load ceiling's mezzanines and loads not by area, 2026-11-26, came with their own)
-    assert keys - set(revit) == set()
+    # section group 9h's assembly_spaces has none yet (asked for by name, never by a mark: the Section 1030 flags
+    # that read it are a person's check whatever it is; its Project Information Yes/No follows in the Revit-fields work)
+    assert keys - set(revit) == {"assembly_spaces"}
+    assert "assembly_spaces" not in code_scope.MARK and code_scope.field_of("assembly_spaces") == "building.assembly_spaces"
     assert code_scope.MARK["mezzanines"] == revit["mezzanines"] == "Gordium: Mezzanines"
     assert code_scope.MARK["loads_not_by_area"] == revit["loads_not_by_area"] == "Gordium: Loads not by area"
     for k in ("r2_sleeping_units", "emergency_escape_openings_1031", "occupied_outdoor_areas", "occupant_load_increased",

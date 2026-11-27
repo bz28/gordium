@@ -65,6 +65,7 @@ FIELD_HEADLINES = {
     "building.ambulatory_care_facility": "Say whether the building is or holds an ambulatory care facility (Table 1020.3)",
     "building.corridors_within_dwelling_units": "Say whether any corridor is inside a dwelling or sleeping unit",
     "building.emergency_voice_alarm_system": "Say whether the whole building has an emergency voice/alarm communication system (907.5.2.2)",
+    "building.assembly_spaces": "Say whether any room or space is used for assembly purposes, whatever the building's group (1030.1)",
     "building.other_level_egress_into_corridors": "Say whether another level's occupants reach the corridors",
     "building.mezzanines": "Say whether the building has a mezzanine (505.2)",
     "building.loads_not_by_area": "Say whether any area is counted by seats, lanes or actual load (fixed seats, bowling, call centers)",

@@ -328,6 +328,89 @@ results:
   general.bc_1025_3_uniformity: not_applicable   # Group R-2
   general.bc_1025_4_self_luminous_photoluminescent: not_applicable   # Group R-2
   general.bc_1025_5_illumination: not_applicable   # Group R-2
+  # section group 9g: 1026's horizontal exits, 1027's exterior exit stairways and ramps, 1028's exit discharge and 1029's egress courts, each a person's check (1029.3's not for a building stated Group R-3 alone)
+  general.bc_1026_1_horizontal_exits_general: needs_review
+  general.bc_1026_2_horizontal_exit_separation: needs_review
+  general.bc_1026_3_horizontal_exit_opening_protectives: needs_review
+  general.bc_1026_4_refuge_area: needs_review
+  general.bc_1026_4_1_refuge_area_capacity: needs_review
+  general.bc_1026_4_2_refuge_area_exits: needs_review
+  general.bc_1026_5_horizontal_exit_standpipes: needs_review
+  general.bc_1027_2_exterior_exit_stairways_use: needs_review
+  general.bc_1027_3_open_side: needs_review
+  general.bc_1027_4_side_yards: needs_review
+  general.bc_1027_5_location: needs_review
+  general.bc_1027_6_protection: needs_review
+  general.bc_1028_2_exit_discharge: needs_review
+  general.bc_1028_3_exit_discharge_width: needs_review
+  general.bc_1028_4_exit_discharge_components: needs_review
+  general.bc_1028_5_access_to_public_way: needs_review
+  general.bc_1029_2_egress_court_width: needs_review
+  general.bc_1029_3_egress_court_construction: needs_review
+  # section group 9h: Section 1030's assembly flags (1030.1 to 1030.9 and Table 1030.6.2), each a person's check: the rooms are residential, but a description may hold only some floors, so a room used for assembly purposes isn't ruled out until the building states none (1030.4's is for Group A-1 only)
+  general.bc_1030_1_1_bleachers: needs_review
+  general.bc_1030_1_1_1_spaces_under_grandstands: needs_review
+  general.bc_1030_2_assembly_main_exit: needs_review
+  general.bc_1030_3_assembly_other_exits: needs_review
+  general.bc_1030_4_foyers_and_lobbies: not_applicable   # Group R-2, not A-1
+  general.bc_1030_5_balcony_and_gallery_egress: needs_review
+  general.bc_1030_6_1_aisle_capacity_without_smoke_protection: needs_review
+  general.bc_1030_6_2_smoke_protected_aisle_capacity: needs_review
+  general.bc_table_1030_6_2_smoke_protected_aisle_factors: needs_review
+  general.bc_1030_6_2_1_smoke_control: needs_review
+  general.bc_1030_6_2_2_roof_height: needs_review
+  general.bc_1030_6_2_3_smoke_protected_sprinklers: needs_review
+  general.bc_1030_6_3_open_air_aisle_capacity: needs_review
+  general.bc_1030_6_3_1_open_air_sprinklers: needs_review
+  general.bc_1030_8_1_path_through_adjacent_row: needs_review
+  general.bc_1030_9_assembly_aisles_required: needs_review
+  general.bc_1030_9_1_minimum_aisle_width: needs_review
+  general.bc_1030_9_2_aisle_catchment_area: needs_review
+  general.bc_1030_9_3_converging_aisles: needs_review
+  general.bc_1030_9_4_uniform_width_and_capacity: needs_review
+  general.bc_1030_9_5_dead_end_aisles: needs_review
+  general.bc_1030_9_6_aisle_measurement: needs_review
+  general.bc_1030_9_6_1_assembly_aisle_obstructions: needs_review
+  general.bc_1030_9_7_stairways_connecting_to_stepped_aisles: needs_review
+  general.bc_1030_9_8_stairways_connecting_to_vomitories: needs_review
+  # section group 9i: Section 1030's transitions, vomitories, aisle construction, aisle accessways, ramped and stepped aisles, seat stability, handrails and guards (1030.10 to 1030.17 and Table 1030.13.2.1), each a person's check where a room used for assembly purposes isn't ruled out
+  general.bc_1030_10_1_transitions_keeping_stepped_aisle_dimensions: needs_review
+  general.bc_1030_10_2_1_straight_run_transitions: needs_review
+  general.bc_1030_10_2_2_transitions_changing_direction: needs_review
+  general.bc_1030_10_3_transition_marking: needs_review
+  general.bc_1030_11_1_stepped_aisles_changing_direction_at_vomitories: needs_review
+  general.bc_1030_11_2_transitions_at_top_of_vomitories: needs_review
+  general.bc_1030_12_construction: needs_review
+  general.bc_1030_12_1_walking_surface: needs_review
+  general.bc_1030_12_2_outdoor_conditions: needs_review
+  general.bc_1030_13_1_seating_at_tables: needs_review
+  general.bc_1030_13_1_1_table_aisle_accessway_width: needs_review
+  general.bc_1030_13_1_2_table_aisle_accessway_length: needs_review
+  general.bc_1030_13_2_rows_of_seats: needs_review
+  general.bc_1030_13_2_1_dual_access: needs_review
+  general.bc_table_1030_13_2_1_smoke_protected_row_lengths: needs_review
+  general.bc_1030_13_2_2_single_access: needs_review
+  general.bc_1030_14_1_ramped_aisles: needs_review
+  general.bc_1030_14_1_1_cross_slope: needs_review
+  general.bc_1030_14_1_2_ramped_aisle_landings: needs_review
+  general.bc_1030_14_1_3_ramped_aisle_edge_protection: needs_review
+  general.bc_1030_14_2_stepped_aisles: needs_review
+  general.bc_1030_14_2_1_stepped_aisle_treads: needs_review
+  general.bc_1030_14_2_2_stepped_aisle_risers: needs_review
+  general.bc_1030_14_2_2_1_construction_tolerances: needs_review
+  general.bc_1030_14_2_3_tread_contrasting_marking_stripe: needs_review
+  general.bc_1030_14_2_4_nosing_and_profile: needs_review
+  general.bc_1030_15_seat_stability: needs_review
+  general.bc_1030_16_handrails: needs_review
+  general.bc_1030_16_1_discontinuous_mid_aisle_handrails: needs_review
+  general.bc_1030_16_2_handrail_termination: needs_review
+  general.bc_1030_16_3_mid_aisle_termination: needs_review
+  general.bc_1030_16_4_rails: needs_review
+  general.bc_1030_17_assembly_guards: needs_review
+  general.bc_1030_17_1_perimeter_guards: needs_review
+  general.bc_1030_17_2_cross_aisle_guards: needs_review
+  general.bc_1030_17_3_sightline_constrained_guard_heights: needs_review
+  general.bc_1030_17_4_guards_at_end_of_aisles: needs_review
   # Chapter 7 part a (2026-11-26, 28 flags): the fire barriers and shaft enclosures that build exit stairway and passageway
   # enclosures (703.2.1.1, 703.5, 707, 713): nothing they ask is in the model (an enclosure's rating, the stories it
   # connects, its walls' construction, penetrations, joints), so each is a person's check for every building

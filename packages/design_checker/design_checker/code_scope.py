@@ -45,7 +45,8 @@ FACTS = {
     "sprinkler_system": "sprinkler",          # none, nfpa_13 (903.3.1.1), nfpa_13r (903.3.1.2), nfpa_13d (903.3.1.3)
     "egress_balcony_increase_taken": "yes_no",
     "building_has_atrium": "yes_no",
-    "assembly_fixed_seating": "yes_no",       # rooms used for assembly with fixed seating (Table 1006.2.1 note c)
+    "assembly_fixed_seating": "yes_no",       # rooms used for assembly with fixed seating (Table 1006.2.1 note c);
+                                              # also true where a room states assembly_fixed_seats (building_measures)
     "r2_sleeping_units": "yes_no",            # Group R-2 of sleeping units, not dwelling units (Table 1006.3.4(1) note b)
     "emergency_escape_openings_1031": "yes_no",   # emergency escape and rescue openings per 1031 (Table 1006.3.4 note a)
     "special_egress_spaces": "yes_no",        # a space with its own exits or travel limit (1006.2.2, Table 1017.2 note a)
@@ -69,6 +70,11 @@ FACTS = {
     # section group 5a: an emergency voice/alarm communication system per 907.5.2.2 (1005.3.1 and 1005.3.2's
     # exception 1: the smaller capacity factors, with a sprinkler system per 903.3.1.1 or 903.3.1.2)
     "emergency_voice_alarm_system": "yes_no",
+    # section group 9h: a room or space used for assembly purposes, whatever the building's group (303.1.1 and 303.1.2
+    # put small assembly rooms in Group B or the main occupancy, so the group alone doesn't settle it): Section 1030's
+    # flags show where it is true or not stated. True also from a room's Table 1004.5 Assembly function
+    # (assembly_spaces_from_rooms); false only as stated (a model may hold only some floors)
+    "assembly_spaces": "yes_no",
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -300,13 +306,69 @@ def _given(building) -> tuple[dict, list[str]]:
     return out, bad
 
 
-def building_measures(building: dict | None) -> dict:
+def building_measures(building: dict | None, interior=None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the eleven stated yes/no facts. A fact
-    not stated is left out (its rules need review)."""
+    groups, the three sprinkler systems the limits name from the system, and the twelve stated yes/no facts. A fact
+    not stated is left out (its rules need review). `interior`, the interior description, settles one more:
+    assembly_spaces is true wherever a room states a Table 1004.5 Assembly function, whatever the block says, and a
+    stated false is left out (not stated) where a room states a function that may be an assembly use
+    (assembly_spaces_from_rooms); and assembly_fixed_seating is true wherever a room states Table 1004.5's "Assembly
+    with fixed seats" (review round 1 of section group 9h)."""
     facts, _ = _given(building)
-    return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
+    out = {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
+    seen = assembly_spaces_from_rooms(interior)
+    if FIXED_SEATS in room_functions(interior):     # the rooms show fixed seating: never a stated no over them
+        out["assembly_fixed_seating"] = True
+    if seen == ASSEMBLY_YES:
+        out["assembly_spaces"] = True
+    elif seen == ASSEMBLY_MAYBE and out.get("assembly_spaces") is False:
+        del out["assembly_spaces"]
+    return out
+
+
+# Table 1004.5's rows under its "Assembly" heading (p.312, lines 19-27, to "Business areas" on line 28), by their
+# function ids (docs/interior/interior_description_format.md, rooms[].function): a room stating one is used for
+# assembly purposes (1030.1), whatever the building's group, so the building has assembly spaces. The one list:
+# occupant_load's assembly seating (1030.7) imports this and ASSEMBLY_LIKE_FUNCTIONS
+ASSEMBLY_FUNCTIONS = ("gaming_floor", "exhibit_gallery_museum", "assembly_fixed_seats", "assembly_concentrated",
+                      "assembly_standing", "assembly_unconcentrated", "bowling_center")
+# the table's other rows a room used for assembly purposes may state (Table 1004.5's courtrooms, library reading rooms,
+# exercise rooms, rinks, pools and their decks, stages and platforms, airport waiting areas): 303.1 counts "awaiting
+# transportation" as assembly (p.68, lines 36-38), 303.4 lists courtrooms, gymnasiums, indoor swimming pools,
+# libraries and waiting areas in transportation terminals in Group A-3 (p.69, lines 13-32), 303.5 skating rinks and
+# swimming pools with spectator seating in Group A-4 (p.69, lines 33-38), and 303.2's theaters have their stages
+# (p.68, line 51). Each may be an assembly use or not, so it is never a yes, and never lets a stated no stand
+ASSEMBLY_LIKE_FUNCTIONS = ("courtroom", "library_reading_room", "exercise_room", "rink_pool", "pool_deck",
+                           "stage_platform", "airport_waiting")
+ASSEMBLY_YES, ASSEMBLY_MAYBE = "yes", "maybe"
+
+
+def room_functions(interior) -> set:
+    """The Table 1004.5 functions the description's rooms state (a function of another kind is occupant_load's to
+    say, unread here)."""
+    rooms = interior.get("rooms") if isinstance(interior, dict) else None
+    if not isinstance(rooms, list):
+        return set()
+    return {r["function"] for r in rooms if isinstance(r, dict) and isinstance(r.get("function"), str)}
+
+
+# Table 1004.5's "Assembly with fixed seats" (p.312, line 22): a room stating it has fixed seating (Table 1006.2.1 note
+# c, 1030.7, 1030.8), whatever the building block says (review round 1 of section group 9h)
+FIXED_SEATS = "assembly_fixed_seats"
+
+
+def assembly_spaces_from_rooms(interior) -> str | None:
+    """What the rooms' stated functions say of assembly_spaces: ASSEMBLY_YES where a room states one of
+    ASSEMBLY_FUNCTIONS, else ASSEMBLY_MAYBE where one states one of ASSEMBLY_LIKE_FUNCTIONS, else None. Never a no:
+    a description may hold only some of the building's floors (review round 6 of section group 6b), so rooms with no
+    assembly function don't rule one out; only the architect's stated `assembly_spaces: false` does."""
+    functions = room_functions(interior)
+    if functions & set(ASSEMBLY_FUNCTIONS):
+        return ASSEMBLY_YES
+    if functions & set(ASSEMBLY_LIKE_FUNCTIONS):
+        return ASSEMBLY_MAYBE
+    return None
 
 
 # Each building measure the BCNYS rulebook reads: the `building` fact it is worked out from, and how
@@ -332,6 +394,7 @@ DERIVED = {
     "ambulatory_care_facility": ("ambulatory_care_facility", lambda v: v),
     "corridors_within_dwelling_units": ("corridors_within_dwelling_units", lambda v: v),
     "emergency_voice_alarm_system": ("emergency_voice_alarm_system", lambda v: v),
+    "assembly_spaces": ("assembly_spaces", lambda v: v),
 }
 
 
