@@ -4037,8 +4037,8 @@ rules:
       counted from grade plane where built per 510.2 or 510.4), the roof assembly less than 45 feet (Group R-2) or the highest
       floor 30 feet or less (other Group R) above the lowest level of fire department vehicle access, and the lowest floor 30
       feet or less below it. Chapter 10''s sprinklered allowances count a stated 13R system only in a building stated Group
-      R, taking its stories and heights on the architect''s statement (903.2.8''s rule fails one above four stated stories):
-      whether these limits are met is a person''s check.'
+      R, and not where it states more than four stories above grade plane (903.2.8''s rule fails it there), taking its heights
+      on the architect''s statement: whether these limits are met is a person''s check.'
   - given: {}
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
@@ -4049,8 +4049,9 @@ rules:
   notes: '903.3.1.2: an NFPA 13R system only in Group R, four stories or fewer above grade plane, within its heights of the
     lowest level of fire department vehicle access (not in the model). Chapter 10''s rules count a stated 13R system only in
     a building stated Group R (Chapter 10 plan, group 5a''s round 1; Chapter 9 part a''s review round 1 brought 1007.1.1,
-    1007.1.2 and Group I-4''s two exits in line), its stories and heights taken on the architect''s statement, as the Chapter
-    10 plan decided (group 4b); 903.2.8''s rule fails a 13R system above four stated stories. Hand-drafted in a Claude Code
+    1007.1.2 and Group I-4''s two exits in line), and not in a building stated Group R alone with more than four stories
+    above grade plane (review round 3: the stated stories make the sprinkler fact no), its heights taken on the architect''s
+    statement, as the Chapter 10 plan decided (group 4b); 903.2.8''s rule fails a 13R system above four stated stories. Hand-drafted in a Claude Code
     session (2026-11-27, Chapter 9 part a).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

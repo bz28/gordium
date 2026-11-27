@@ -443,7 +443,8 @@ R_RULE = "general.bc_903_2_8_group_r_sprinklers"
 def test_903_2_8_fails_the_apartment_as_stated_and_follows_each_sprinkler_system(got, routes):
     """The apartment, Group R-2 with no sprinkler system: 903.2.8 asks a system throughout every building with a
     Group R fire area, so it fails on each story, whatever its size. Stated NFPA 13 it passes; NFPA 13R needs review
-    at its two stories (903.3.1.2's heights aren't in the model) and fails at five; NFPA 13D fails in an R-2 of
+    at its two stories (903.3.1.2's heights aren't in the model) and fails at five, where it is no
+    903.3.1.2 system (its flag then set aside); NFPA 13D fails in an R-2 of
     dwelling units, not townhouses (903.3.1.3), and needs review while either isn't stated. 903.3.1.2's two flags show
     only with a 13R system, 903.3.1.3's only with a 13D one; nothing outside Chapter 9 is compared here."""
     rows = [r for r in got["rows"] if r["rule"] == R_RULE]
@@ -460,7 +461,8 @@ def test_903_2_8_fails_the_apartment_as_stated_and_follows_each_sprinkler_system
         now = _check(interior, routes)["results"]
         assert now[R_RULE] == want, stated
         system = stated["sprinkler_system"]
-        assert now["general.bc_903_3_1_2_nfpa_13r_limits"] == ("needs_review" if system == "nfpa_13r"
+        counts = system == "nfpa_13r" and stated.get("stories_above_grade_plane", 0) <= 4   # review round 3: above
+        assert now["general.bc_903_3_1_2_nfpa_13r_limits"] == ("needs_review" if counts      # four it's no 13R system
                                                                 else "not_applicable"), stated
         assert now["general.bc_903_3_1_3_nfpa_13d_scope"] == ("needs_review" if system == "nfpa_13d"
                                                                else "not_applicable"), stated

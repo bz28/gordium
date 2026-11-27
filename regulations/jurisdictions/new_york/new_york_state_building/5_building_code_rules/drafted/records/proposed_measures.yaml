@@ -68,8 +68,10 @@ sprinklered_903_3_1_1:
   - general.bc_table_1020_2_i4
   - general.bc_table_1020_2_r
 sprinklered_903_3_1_2:
-  meaning: The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.2
-    (NFPA 13R, permitted in some Group R occupancies), as the architect states it
+  meaning: 'The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.2
+    (NFPA 13R, permitted in some Group R occupancies), as the architect states it; no where the building states more than
+    four stories above grade plane (903.3.1.2 item 1: "Four stories or fewer above grade plane"), its heights above fire
+    department vehicle access taken on the architect''s statement'
   unit: yes_no
   needed_by:
   - general.bc_1006_2_1_two_exits
