@@ -294,8 +294,9 @@ def test_the_rooms_figure_is_its_worst_doors():
 
 def test_an_outline_a_few_inches_short_of_the_walls_never_shows_exits_apart():
     """Confirming review: with the east exit moved onto the south wall the exits are 0.484 of the true diagonal apart
-    (under 1007.1.1's half); an outer outline drawn 5 in short of the outer faces would make it 0.515. The outline must
-    hold every room and exit door to within half an inch, so it is refused: not two."""
+    (under 1007.1.1's half); an outer outline drawn about 5 in short of the rooms (11 in inside the walls' outer faces,
+    so the exit doors' openings stick out) would make it 0.515. The outline must hold every room and exit door to
+    within half an inch, so it is refused: not two."""
     d = corridor()
     next(x for x in d["doors"] if x["id"] == "dy")["plan"].update(centre=[23.0, -6.75], along=[1, 0])
     assert all(g["remoteness_ratio"] < 0.5 for g in reached(d).values() if g is not None)
