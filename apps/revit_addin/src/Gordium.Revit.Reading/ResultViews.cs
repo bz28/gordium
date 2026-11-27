@@ -29,7 +29,16 @@ public enum FixKind { Fails, Answer, Mark, FixModel, Survey, Measure, Decide, Op
 /// <param name="Elements">The elements it names (UniqueIds), each once.</param>
 /// <param name="Rows">The rows waiting on it, each once, in the answer's order.</param>
 public sealed record FixCard(string Key, FixKind Kind, string Headline, string? Why, string? Field,
-                             IReadOnlyList<string> Elements, IReadOnlyList<ResultRow> Rows);
+                             IReadOnlyList<string> Elements, IReadOnlyList<ResultRow> Rows)
+{
+    private readonly string? _title;
+
+    /// <summary>The card's one line in the list: its <see cref="Headline"/>, or, where the same words head other cards
+    /// of its group, the rule its results are about ("Corridor width kept clear (BCNYS 1020.4)"), so the cards can be
+    /// told apart (egress UI audit, finding 3: 29 cards read "Check this by hand: a person decides it"). The checker's
+    /// words stay the headline: the detail page's steps and the card's tooltip say them.</summary>
+    public string Title { get => _title ?? Headline; init => _title = value; }
+}
 
 /// <summary>One group of "What to fix": its kind, title, the cards in it and every row it holds (each once).</summary>
 public sealed record FixGroup(FixKind Kind, string Title, string? Sub, IReadOnlyList<FixCard> Cards, IReadOnlyList<ResultRow> Rows)
@@ -109,9 +118,15 @@ public static class ResultViews
         ArgumentNullException.ThrowIfNull(result);
         var rows = result.Items.Select(i => (Item: i, Row: ResultRows.Row(i))).ToList();
         var scoped = rows.Where(r => DraftedForOneGroup(r.Item.Raw)).ToList();
+        var fix = FixGroups(rows);
+        // the results in review that wait on a question of the questions card (never more than there are)
+        var answers = fix.Where(g => g.Kind == FixKind.Answer).ToList();
+        var onQuestions = answers.SelectMany(g => g.Rows)
+                                 .Where(r => r.Verdict == Verdict.NeedsReview).Select(r => r.Id).Distinct(StringComparer.Ordinal).Count();
         return new ResultViewsModel(Summary(rows.Select(r => r.Row.Verdict)),
-                                    Headline(rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id))),
-                                    FixGroups(rows), CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
+                                    Headline(rows.Select(r => (r.Row.Verdict, Str(r.Item.Raw, "rule") ?? r.Row.Id)), onQuestions,
+                                             answers.Sum(g => g.Cards.Count)),
+                                    fix, CodeTree(result, rows, scoped.Select(r => r.Row).ToHashSet()))
         {
             Scope = scoped.Count == 0 ? null : ScopeWords(scoped.Count),
             Scoped = scoped.Select(r => r.Row.Id).ToHashSet(StringComparer.Ordinal),
@@ -184,8 +199,11 @@ public static class ResultViews
 
     /// <summary>The headline sentence (change 19): what fails first; else that nothing fails yet and how many results
     /// wait on the architect; never that the design complies (a check where everything Gordium checked complies still
-    /// says Gordium doesn't check everything).</summary>
-    public static string Headline(IEnumerable<(Verdict Verdict, string Rule)> rows)
+    /// says Gordium doesn't check everything). <paramref name="onQuestions"/>: how many of the results in review wait on
+    /// a question of the questions card (null: all of them, as the approved words say). Only those are said to wait on
+    /// the questions (egress UI audit: "80 results can't be decided until the questions below are answered" with 2
+    /// waiting on the one question left, the rest on marks and checks by hand).</summary>
+    public static string Headline(IEnumerable<(Verdict Verdict, string Rule)> rows, int? onQuestions = null, int? questions = null)
     {
         var list = rows.ToList();
         var all = list.Select(r => r.Verdict).ToList();
@@ -196,7 +214,14 @@ public static class ResultViews
             return (fails == 1 ? "1 rule fails. Fix it first" : $"{fails} rules fail. Fix them first")
                    + (review == 0 ? "." : $"; {Results(review)} also need{(review == 1 ? "s" : "")} review.");
         if (review > 0)
-            return $"Nothing fails yet. {Results(review)} can't be decided until the questions below are answered.";
+        {
+            var asked = Math.Min(onQuestions ?? review, review);
+            // the card's own count: "the question below" when it asks one (review round 1)
+            var below = questions == 1 ? "the question below" : "the questions below";
+            return asked == review ? $"Nothing fails yet. {Results(review)} can't be decided until {below} {(questions == 1 ? "is" : "are")} answered."
+                : asked == 0 ? $"Nothing fails yet. {Results(review)} need{(review == 1 ? "s" : "")} review: {(review == 1 ? "it" : "each")} says below what it needs."
+                : $"Nothing fails yet. {Results(review)} need{(review == 1 ? "s" : "")} review; {asked} of them wait{(asked == 1 ? "s" : "")} on {below}.";
+        }
         if (notChecked > 0)
             return $"Nothing fails and nothing needs review, but {Results(notChecked)} {(notChecked == 1 ? "is" : "are")} not checked yet by Gordium: check {(notChecked == 1 ? "it" : "them")} by hand.";
         return all.Count == 0
@@ -270,10 +295,38 @@ public static class ResultViews
             var list = g.Select(k => (k, c: cards[k]))
                         .Select(x => new FixCard(x.k.Item2, x.k.Item1, x.c.Headline, x.c.Why, x.c.Field, x.c.Elements, x.c.Rows))
                         .OrderByDescending(c => c.Rows.Count).ToList();   // stable: ties keep the answer's order
+            // cards of the group headed by the same words: each named by the rule its results are about, or, where two
+            // would share that name (one rule on two elements), by its one result's whole name; else the words stay
+            list = Named(list);
             var all = rows.Select(r => r.Row).Where(r => list.Any(c => c.Rows.Contains(r))).ToList();
             var (title, sub) = GroupWords(g.Key, list, all.Count);
             return new FixGroup(g.Key, title, sub, list, all);
         }).ToList();
+    }
+
+    /// <summary>The cards of one group, those headed by the same words named apart (<see cref="FixCard.Title"/>): by
+    /// the rule their results are about; where that still leaves two alike, a one-result card by its result's whole name
+    /// ("Level 1 › CORRIDOR L1 (3) · …"); a card that can't be told apart so keeps the checker's words (review round 1).</summary>
+    public static List<FixCard> Named(IReadOnlyList<FixCard> cards)
+    {
+        ArgumentNullException.ThrowIfNull(cards);
+        var repeated = cards.GroupBy(c => c.Headline, StringComparer.Ordinal).Where(x => x.Count() > 1).Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+        var byRule = cards.Select(c => repeated.Contains(c.Headline) ? RuleOf(c.Rows) : null).ToList();
+        var twice = byRule.OfType<string>().GroupBy(t => t, StringComparer.Ordinal).Where(x => x.Count() > 1).Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+        var titles = cards.Select((c, i) => byRule[i] is not { } t ? null : !twice.Contains(t) ? t : c.Rows.Count == 1 ? c.Rows[0].Name : null).ToList();
+        // a whole name shared too (or a card left with its words beside one renamed alike): those keep the checker's words
+        var shared = titles.OfType<string>().GroupBy(t => t, StringComparer.Ordinal).Where(x => x.Count() > 1).Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+        return [.. cards.Select((c, i) => titles[i] is { } t && !shared.Contains(t) ? c with { Title = t } : c)];
+    }
+
+    /// <summary>The rule a card's results are about, as their names end ("Egress · Corridor width kept clear (BCNYS
+    /// 1020.4)" → "Corridor width kept clear (BCNYS 1020.4)"), when they are all about one; else null.</summary>
+    public static string? RuleOf(IReadOnlyList<ResultRow> rows)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+        var rules = rows.Select(r => r.Name[(r.Name.LastIndexOf(" \u00B7 ", StringComparison.Ordinal) is var i and >= 0 ? i + 3 : 0)..].Trim())
+                        .Distinct(StringComparer.Ordinal).ToList();
+        return rules.Count == 1 && rules[0].Length > 0 ? rules[0] : null;
     }
 
     /// <summary>A group's title and its one sub line (strings.md, "What to fix": action groups).</summary>

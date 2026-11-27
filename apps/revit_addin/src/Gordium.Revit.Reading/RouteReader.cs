@@ -491,6 +491,13 @@ public static class RouteReader
             {
                 door["sides"] = new JsonArray(joins.Select(s => (JsonNode)s).ToArray());
                 sides[id] = joins;
+                var operation = door["operation"] is JsonValue op && op.TryGetValue<string>(out var o) ? o : null;
+                if (place is null)
+                    Out("swings_into", "its place in its wall isn't read, so which side it swings into isn't read");
+                else if (SwingsInto(model, rec, place, joins, plans, Math.Max(rec.TypeWidth ?? 0, width ?? 0), operation, out var swingWhy) is { } into)
+                    door["swings_into"] = into;
+                else
+                    Out("swings_into", swingWhy!);
             }
             else
                 Out("sides", whyNot! + ": its story's escape routes aren't measured");
@@ -512,6 +519,211 @@ public static class RouteReader
             else
                 notes.Add(new(id, "doors.exit_id", why! + ": the door isn't read, so its story's escape routes aren't measured"));
         }
+    }
+
+    // ---- which side a door swings into ------------------------------------------------------------------------
+
+    /// <summary>How far a swing arc's centre (its hinge) may stand off the wall's middle beyond half the wall's
+    /// thickness, and off a jamb along the wall; how far its middle must stand clear of the wall's face.</summary>
+    internal const double HingeOff = 2.0 / 12, JambOff = 6.0 / 12, ClearOfFace = 1.0 / 12;
+
+    /// <summary>The shortest arc read as a leaf's swing: 9 in, whatever the door's width, under the narrowest leaf a
+    /// pair is made with (12 in, or 300 mm, which is 11.8 in, drawn to its panel a little less), so a pair's narrow
+    /// leaf is always counted and a pair hung opposite ways is seen to swing both ways; a lever's arc is shorter (about
+    /// 5 in). An arc counted that isn't a leaf's (a closer's arm, drawn rarely, on the push side) can only add a side
+    /// beside the leaf's own, which leaves the swing unstated.</summary>
+    internal const double LeastLeaf = 9.0 / 12;
+
+    /// <summary>The side of its wall a door's plan symbol draws its swing on, as the sign along the wall's normal
+    /// (<see cref="DoorPlace.Normal"/>): see <see cref="SwingsInto"/>; null with why where the drawing doesn't settle
+    /// it. Also what the Revit trial's swing check (SwingCheck) holds against the side the model was built to.</summary>
+    internal static int? SwingSide(RevitModel model, OpeningRecord rec, DoorPlace p, double width, out string? why) =>
+        SwingRead(model, rec, p, width, out why, out _);
+
+    /// <summary><see cref="SwingSide"/>, and the jambs its counted arcs are hinged at (each the sign along the wall,
+    /// <see cref="DoorPlace.Along"/>, of its centre from the door's).</summary>
+    internal static int? SwingRead(RevitModel model, OpeningRecord rec, DoorPlace p, double width, out string? why, out HashSet<int> jambs)
+    {
+        why = null;
+        jambs = [];
+        if (rec.Swing is not { } drawn)
+        {
+            why = "its plan symbol wasn't read, so which side it swings into isn't read";
+            return null;
+        }
+        if (drawn.NotRead is { } notRead)
+        {
+            why = notRead + ", so which side it swings into isn't read";
+            return null;
+        }
+        if (width <= 0)
+        {
+            why = "its width isn't read, so its swing can't be told from other arcs it draws";
+            return null;
+        }
+        var t = model.InternalToShared;
+        var half = p.Thickness / 2;
+        var found = new HashSet<int>();
+        foreach (var arc in drawn.Arcs)
+        {
+            var c3 = t.Apply(arc.Centre);
+            var m3 = t.Apply(arc.Mid);
+            var c = new P2(c3.X, c3.Y) - p.Centre;
+            var m = new P2(m3.X, m3.Y) - p.Centre;
+            double uC = P2Dot(c, p.Along), nC = P2Dot(c, p.Normal), nM = P2Dot(m, p.Normal);
+            var hinge = Math.Abs(nC) <= half + HingeOff && Math.Abs(Math.Abs(uC) - width / 2) <= JambOff;
+            var leaf = arc.Radius >= LeastLeaf && arc.Radius <= width + JambOff;
+            if (!hinge || !leaf)
+                continue;
+            if (Math.Abs(nM) <= half + ClearOfFace)
+            {
+                why = "its plan symbol draws a swing that ends within its wall, so which side it swings into isn't read";
+                return null;
+            }
+            found.Add(Math.Sign(nM));
+            jambs.Add(Math.Sign(uC));
+        }
+        if (found.Count == 0)
+        {
+            why = drawn.Arcs.Count == 0
+                ? "its plan symbol draws no swing at Fine detail (none drawn, or drawn some other way), so which side it swings into isn't read (never read as a door that doesn't swing)"
+                : I($"none of the {drawn.Arcs.Count} arcs its plan symbol draws is a leaf's swing from a jamb, so which side it swings into isn't read (never read as a door that doesn't swing)");
+            return null;
+        }
+        if (found.Count > 1)
+        {
+            why = "its plan symbol draws swings on both sides of its wall (a double-acting door, or a pair hung opposite ways), so which side it swings into isn't read";
+            return null;
+        }
+        return found.Single();
+    }
+
+    /// <summary>One door of the Revit trial's swing check: the side its plan symbol's swing is read on (+1 or -1 along
+    /// its wall's normal, or null with why) beside the side the model was built to swing it (the build data's
+    /// <c>swing_dir</c>, internal, along the same normal).</summary>
+    public sealed record SwingCheckRow(string Id, int? Read, int? Built, string? Why);
+
+    /// <summary>The Revit trial's swing check (SwingCheck.cs): each door given a built swing direction (internal plan
+    /// vector, by <c>UniqueId</c>), its read side beside its built one. Plain reading code: the same
+    /// <see cref="SwingSide"/> the check uses, with the door's type width only (the check's own reading also takes a
+    /// stamped clear width): the side alone. SwingCheck's room rows are the whole reading's own (InteriorReader.Read),
+    /// held against Revit's room on the built side.</summary>
+    public static List<SwingCheckRow> CheckSwings(RevitModel model, IReadOnlyDictionary<string, Xyz> built)
+    {
+        var rows = new List<SwingCheckRow>();
+        foreach (var rec in model.Interior?.Openings ?? [])
+        {
+            if (!built.TryGetValue(rec.UniqueId, out var dir))
+                continue;
+            if (Place(model, rec, out var why) is not { } place)
+            {
+                rows.Add(new(rec.UniqueId, null, null, why));
+                continue;
+            }
+            var d = InteriorReader.Turned(model, dir);
+            var b = Math.Sign(P2Dot(new P2(d.X, d.Y), place.Normal));
+            rows.Add(new(rec.UniqueId, SwingSide(model, rec, place, rec.TypeWidth ?? 0, out why), b == 0 ? null : b, why));
+        }
+        return rows;
+    }
+
+    /// <summary>One door as the model build reads it back (ModelBuild: flipped until what Revit draws is what the data
+    /// says, never by a family's facing or hand convention): the side its plan symbol swings to and the jamb its single
+    /// leaf is hinged at (each a sign along the wall's normal and along the wall, from what is drawn; null when not
+    /// read: the hinge of a pair, or of a swing not read), and the same for the data (null where it gives none).</summary>
+    public sealed record BuildSwing(string Id, int? Side, int? Hinge, int? DataSide, int? DataHinge, string? Why)
+    {
+        /// <summary>The flips that bring what is read to the data: facing when both sides are known and differ; hand
+        /// when both hinges are known and differ. Nothing is flipped on what isn't read.</summary>
+        public bool FlipFacing => Side is { } s && DataSide is { } d && s != d;
+
+        public bool FlipHand => Hinge is { } h && DataHinge is { } d && d != 0 && h != d;
+
+        /// <summary>Read as the data says: the side read and equal to the data's, and the hinge too where the data
+        /// gives one (a data hinge at the door's centre, 0, is never matched: build review round 1).</summary>
+        public bool AsTheData => Side is { } s && s == DataSide && (DataHinge is null || DataHinge != 0 && Hinge == DataHinge);
+    }
+
+    /// <summary>Each door the build gives a swing (by <c>UniqueId</c>: its <c>swing_dir</c>, its centre and, for a single
+    /// door, its hinge point, all internal), read back from its plan symbol (<see cref="SwingSide"/>, the door's type
+    /// width). The data's side is the sign of its swing across the wall, none within 1e-6 of along it; its hinge, the
+    /// sign along the wall of the hinge from the data's own centre, 0 within 1/16 in (so a turned model's rounding never
+    /// makes a side or a jamb the data didn't give: build review round 3). A door whose place in its wall isn't read has
+    /// nothing read.</summary>
+    public static List<BuildSwing> ReadBuildSwings(RevitModel model, IReadOnlyDictionary<string, (Xyz Dir, Xyz? Hinge, Xyz Centre)> data)
+    {
+        var rows = new List<BuildSwing>();
+        var t = model.InternalToShared;
+        foreach (var rec in model.Interior?.Openings ?? [])
+        {
+            if (!data.TryGetValue(rec.UniqueId, out var d))
+                continue;
+            if (Place(model, rec, out var why) is not { } place)
+            {
+                rows.Add(new(rec.UniqueId, null, null, null, null, why));
+                continue;
+            }
+            var dir = InteriorReader.Turned(model, d.Dir);
+            var size = Math.Sqrt(dir.X * dir.X + dir.Y * dir.Y);
+            var across = size > 0 ? P2Dot(new P2(dir.X / size, dir.Y / size), place.Normal) : 0;
+            var dataSide = Math.Abs(across) <= 1e-6 ? 0 : Math.Sign(across);
+            int? dataHinge = null;
+            if (d.Hinge is { } h)
+            {
+                var h3 = t.Apply(h);
+                var c3 = t.Apply(d.Centre);
+                var off = P2Dot(new P2(h3.X - c3.X, h3.Y - c3.Y), place.Along);
+                dataHinge = Math.Abs(off) <= S ? 0 : Math.Sign(off);
+            }
+            var side = SwingRead(model, rec, place, rec.TypeWidth ?? 0, out why, out var jambs);
+            int? hinge = side is not null && jambs.Count == 1 ? jambs.Single() : null;
+            // the data's own side or hinge that says neither way (a swing along the wall, a hinge at the door's centre):
+            // kept so the door is never matched on it, and said (build review round 1)
+            var dataWhy = dataSide == 0 ? "the data's swing runs along its wall, so which side it should swing to isn't told"
+                : dataHinge == 0 ? "the data's hinge is at the door's centre along its wall, so which jamb it should hang at isn't told"
+                : null;
+            if (dataWhy is not null)
+                why = why is null ? dataWhy : $"{why}; {dataWhy}";      // both said (build review round 2)
+            rows.Add(new(rec.UniqueId, side, hinge, dataSide == 0 ? null : dataSide, dataHinge, why));
+        }
+        return rows;
+    }
+
+    /// <summary>The side a door swings into (BCNYS 1010.1.2.1), read only from the swing its own plan symbol draws
+    /// (<see cref="OpeningRecord.Swing"/>), never from its facing or hand (which side a family swings to from them is
+    /// the family's own convention): one of <paramref name="joins"/> (a room's id, or <see cref="Outside"/>), or null
+    /// with why. A swing arc is one hinged at a jamb (its centre within <see cref="HingeOff"/> of the wall's middle
+    /// band and within <see cref="JambOff"/> of half the door's width from its centre along the wall), as long as a
+    /// leaf (<see cref="LeastLeaf"/> to the door's width and <see cref="JambOff"/>), and its middle beyond a face of
+    /// the wall. Not read: no arc drawn, or none that is a swing (never read as a door that doesn't swing), arcs on
+    /// both sides (a double-acting door, or a pair hung opposite ways), an arc whose middle is within the wall, a
+    /// stated operation that doesn't swing, or a side whose room isn't found where the arcs are.</summary>
+    internal static string? SwingsInto(RevitModel model, OpeningRecord rec, DoorPlace p, string[] joins,
+                                       Dictionary<string, InteriorReader.RoomPlan> plans, double width, string? operation, out string? why)
+    {
+        why = null;
+        if (operation is "sliding" or "folding" or "pocket")
+        {
+            why = $"its operation is {operation}: it has no swing to read";
+            return null;
+        }
+        if (SwingSide(model, rec, p, width, out why) is not { } side)
+            return null;
+        var reach = p.Thickness / 2 + ClearOfFace;
+        P2 Probe(int s) => new(p.Centre.X + s * reach * p.Normal.X, p.Centre.Y + s * reach * p.Normal.Y);
+        bool In(string room, P2 q) => plans.TryGetValue(room, out var r) && StrictlyInside(q, r.Outer) && !r.Holes.Any(h => StrictlyInside(q, h));
+        string? Room(int s)
+        {
+            var hits = joins.Where(j => j != Outside && In(j, Probe(s))).ToList();
+            if (hits.Count == 1)
+                return hits[0];
+            // outside: no room of the door's on that side, and its one room on the other
+            return hits.Count == 0 && joins.Contains(Outside) && joins.Any(j => j != Outside && In(j, Probe(-s))) ? Outside : null;
+        }
+        if (Room(side) is { } into && Room(-side) is { } other && other != into)
+            return into;
+        why = "the rooms on its two sides aren't found one on each side of its wall where it swings, so which side it swings into isn't read";
+        return null;
     }
 
     /// <summary>A door's place in its wall, in shared plan coordinates: its clear opening's centre in the middle of the
