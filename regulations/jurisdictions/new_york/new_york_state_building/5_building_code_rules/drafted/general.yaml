@@ -1724,10 +1724,11 @@ rules:
       open parking garage complying with 406.4 also complies with 406.5 (p.95, line 17): a person checks.'
   notes: Shown where the building may be Group S-2 (public parking garages, 311.3) or Group U (a private garage may
     comply with 406.4, 406.3, and an open one then with 406.5, p.95, line 17). Who is permitted in the garage isn't in
-    the model. Chapter 10's rules check the garage as any Group S-2 building;
-    where only attendants are permitted, the two exit stairways are a person's check, and a story with fewer exits than Table
-    1006.3.3 gives never passes in Group S-2 (Table 1006.3.4(2)'s S row needs review there). Hand-drafted in a Claude Code
-    session (2026-11-27, Chapter 4 part f).
+    the model. Chapter 10's rules check the garage as any building of its stated group. In Group S-2, where only
+    attendants are permitted, the two exit stairways are a person's check, and a story with fewer exits than Table
+    1006.3.3 gives never passes (Table 1006.3.4(2)'s S row needs review there). A private garage (Group U) stores the
+    vehicles of the building's owners or tenants (202, p.58, lines 8-9), so persons other than attendants are permitted
+    and Chapter 10 applies to it. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_407_1_group_i2
@@ -4451,9 +4452,11 @@ rules:
       service_corridors: false
     expect: not_applicable
     note: 'The architect states the building has no service corridor: not applicable.'
-  notes: Which corridors are service corridors isn't in the model, so in a building stated Group H-5 Table 1017.2's H-5 row
-    never passes over 75 ft, 1020.5's dead end rule over 4 ft, and Table 1006.3.4(2)'s rule a story with one exit; where each
-    passage leads and the doors' closers aren't in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4
+  notes: Which corridors are service corridors isn't in the model, so in a building stated Group H-5 where one may be
+    (stated, or not ruled out) Table 1017.2's H-5 row never passes over 75 ft, 1020.5's dead end rule over 4 ft, and Table
+    1006.3.4(2)'s rule a story with one exit. A service corridor is a passage (202), drawn as a corridor, where one with
+    one way out is a dead end the 4 ft band holds; a room of another use isn't one, so Table 1006.2.1's rooms keep their
+    row (review round 2). Where each passage leads and the doors' closers aren't in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4
     part f).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -4489,9 +4492,10 @@ rules:
       service_corridors: false
     expect: not_applicable
     note: 'The architect states the building has no service corridor: not applicable.'
-  notes: Which corridors are service corridors and the carts used in them aren't in the model, so in a building stated Group
-    H-5 Table 1020.3's width rule never passes a corridor (no width is known to be 33 in wider than the widest cart). Hand-drafted
-    in a Claude Code session (2026-11-27, Chapter 4 part f).
+  notes: Which corridors are service corridors and the carts used in them aren't in the model, so where a service corridor
+    may be (stated, or not ruled out) Table 1020.3's width rule never passes a corridor in a building stated Group H-5, nor
+    1020.3's capacity rule in one stated Group H-5 or two or more groups (no width is known to be 33 in wider than the
+    widest cart). Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_415_11_6_6_hpm_room_exits

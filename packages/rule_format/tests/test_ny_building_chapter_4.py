@@ -947,3 +947,19 @@ def test_410_5_3_2s_note_gives_table_1017_2s_largest_cells():
     notes = " ".join(_rules_by_id()["general.bc_410_5_3_2_exit_access_travel_distance"]["notes"].split())
     assert "largest cells are 300 ft without a sprinkler system and 400 ft with one, p.341, line 31" in notes
     assert not re.search(r"\b(200|250) ft to", notes)
+
+
+def test_the_service_corridor_facts_words_name_every_rule_it_holds():
+    """Review round 2 of part f: 1020.3's capacity band reads the service corridor fact in Group H-5 and in two or more
+    groups, but the fact's meaning, the interior format and 415.11.3.4's notes named only Table 1020.3's width in
+    Group H-5; and 406.5.7's notes said Chapter 10 checks the garage as Group S-2 though its flag shows for Group U."""
+    meaning = " ".join(load(NY / "5_building_code_rules/drafted/records/proposed_measures.yaml")
+                       ["service_corridors"]["meaning"].split())
+    doc = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
+    block = " ".join(doc[doc.index("  service_corridors: "):].split("\n  facts_not_sent:", 1)[0].replace("#", " ").split())
+    rules = _rules_by_id()
+    notes = " ".join(rules["general.bc_415_11_3_4_service_corridor_width"]["notes"].split())
+    for words in (meaning, block, notes):
+        assert "1020.3's capacity" in words and "two or more groups" in words, words[:100]
+    garage = " ".join(rules["general.bc_406_5_7_open_parking_garage_egress"]["notes"].split())
+    assert "as any Group S-2 building" not in garage and "p.58, lines 8-9" in garage

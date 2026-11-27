@@ -575,7 +575,8 @@ service_corridors:
   meaning: 'The building has a service corridor (2025 BCNYS 202: a fully enclosed passage used for transporting HPM and
     purposes other than required means of egress), as the architect states it: in Group H-5, 415.11.3''s flags show, and
     Table 1017.2''s H-5 row can''t pass over 75 feet, a story with one exit, a dead end over 4 feet or any corridor width
-    (415.11.3.3, 415.11.3.4); left unstated, the same'
+    (415.11.3.3, 415.11.3.4), and 1020.3''s capacity no corridor in Group H-5 or two or more groups; left unstated, the
+    same'
   unit: yes_no
   needed_by:
   - general.bc_1020_3_corridor_capacity
