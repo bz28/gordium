@@ -248,6 +248,7 @@ occupancy_group:
   - general.bc_907_2_11_8_portable_smoke_alarms
   - general.bc_907_2_11_smoke_alarms
   - general.bc_907_2_1_1_group_a_voice_alarm
+  - general.bc_907_2_1_1_mixed_voice_alarm
   - general.bc_907_2_1_2_captions
   - general.bc_907_2_1_3_group_a_smoke_detection
   - general.bc_907_2_1_group_a_fire_alarm
@@ -485,6 +486,7 @@ emergency_voice_alarm_system:
   needed_by:
   - general.bc_1020_3_corridor_capacity
   - general.bc_907_2_1_1_group_a_voice_alarm
+  - general.bc_907_2_1_1_mixed_voice_alarm
   - general.bc_907_2_3_group_e_voice_alarm
   - general.bc_907_5_2_2_1_voice_alarm_override
   - general.bc_907_5_2_2_2_voice_alarm_live_messages

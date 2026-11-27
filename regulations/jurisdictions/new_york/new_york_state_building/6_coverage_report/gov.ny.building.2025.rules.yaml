@@ -828,6 +828,7 @@ pieces:
     heading: Group A › System initiation in Group A occupancies with an occupant load of 1,000 or more
     rules:
     - general.bc_907_2_1_1_group_a_voice_alarm
+    - general.bc_907_2_1_1_mixed_voice_alarm
   907.2.1.2:
     label: flag
     heading: Group A › Emergency voice/alarm communication captions

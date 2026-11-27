@@ -19,7 +19,7 @@ second_reading:
     the 4 pieces of section group 5a (1005.1, 1005.2, 1005.3, 1005.3.1, 2026-11-25), a thirteenth for the 3 of section
     group 5b (1005.4, 1005.5, 1005.6), a fourteenth for the 6 of section group 5c (1005.7 to 1005.7.3 and 2
     definitions), a fifteenth for the 9 of section group 6a (1010.1, 1010.1.1, 1010.1.1.1 and 6 definitions,
-    2026-11-25), a sixteenth for the 11 of section group 6b (1010.1.2, 1010.1.2.1 and 9 definitions), one for the 52 of Chapter 7 part a (703.2.1.1, 703.5, 707, 713 and 20 definitions, 2026-11-26), one for the 42 of Chapter 7 part b (716.1, Tables 716.1(1) to 716.1(3), 716.2 to 716.2.4 and 14 definitions), one for the 39 of Chapter 7 part c (708, 709, 710 and 3 definitions), one for the 38 of Chapter 7 part d (711, 712, 714.1 to 714.4 and 15 definitions) and one for its 12 more (714.5 and 5 definitions), one for the 29 of Chapter 9 part a (903.1, 903.2, 903.2.5, 903.2.6, 903.2.8, 903.3, 903.3.1, 903.3.1.2.2, 903.3.1.3 and 12 definitions, 2026-11-27), one for the 44 of Chapter 9 part b (903.2.1 to 903.2.4, 903.2.7, 903.2.9, 903.2.10 and 15 definitions), one for the 67 of Chapter 9 part c (903.2.11, Table 903.2.11.6, 903.2.12, 907.1, 907.2, 907.2.1 to 907.2.5 and 38 definitions), and a helper for the comparison words)
+    2026-11-25), a sixteenth for the 11 of section group 6b (1010.1.2, 1010.1.2.1 and 9 definitions), one for the 52 of Chapter 7 part a (703.2.1.1, 703.5, 707, 713 and 20 definitions, 2026-11-26), one for the 42 of Chapter 7 part b (716.1, Tables 716.1(1) to 716.1(3), 716.2 to 716.2.4 and 14 definitions), one for the 39 of Chapter 7 part c (708, 709, 710 and 3 definitions), one for the 38 of Chapter 7 part d (711, 712, 714.1 to 714.4 and 15 definitions) and one for its 12 more (714.5 and 5 definitions), one for the 29 of Chapter 9 part a (903.1, 903.2, 903.2.5, 903.2.6, 903.2.8, 903.3, 903.3.1, 903.3.1.2.2, 903.3.1.3 and 12 definitions, 2026-11-27), one for the 44 of Chapter 9 part b (903.2.1 to 903.2.4, 903.2.7, 903.2.9, 903.2.10 and 15 definitions), one for the 67 of Chapter 9 part c (903.2.11, Table 903.2.11.6, 903.2.12, 907.1, 907.2, 907.2.1 to 907.2.5 and 39 definitions), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
     labeled by its id (48 pages, 159 boxes, p.317''s Table 1006.3.4(1) on 2026-11-23 as step_4, 14 pages, 24 boxes
@@ -6420,7 +6420,7 @@ pieces:
     - none
     - <
     flags:
-    - '''300'' (>=): ''the occupant load due to the assembly occupancy is 300 or more''; ''10 percent'' (<=) and ''1,000 square
+    - '''300'' (>=): exception 2''s ''having an occupant load of greater than or equal to 300''; ''10 percent'' (<=) and ''1,000 square
       foot'' (<=): ''a maximum of 10 percent ... or 1,000 square feet, whichever is less''; the recorded words miss it (numbers.py
       reads comparison words only directly before a number or after its unit). The second reading is right. A flag.'
   907.2.1.1:

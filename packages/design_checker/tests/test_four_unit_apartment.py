@@ -205,7 +205,7 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     and penetration flags (141). Chapter 9 part a (2026-11-27) adds 903.1.1's alternative systems and 903.2.5.3's
     pyroxylin plastics (143); its other flags are Group H-5's or a 13R or 13D system's, not this building's. Part b
     adds 903.2.1.6's occupiable roofs, 903.2.2.1's ambulatory care floors (neither fact stated) and 903.2.9.2's bulk tire
-    storage (146); its other flags are other groups'. Part c adds 903.2.11's ten specific areas and 903.2.12's
+    storage (146); its other flags are other groups'. Part c adds 903.2.11's nine specific areas and 903.2.12's
     construction (no NFPA 13 system stated), 907.1.3's listed equipment, 907.2's fire alarm system and 907.2.2.1's
     ambulatory care detection (159)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
