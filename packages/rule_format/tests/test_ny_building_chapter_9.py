@@ -366,3 +366,14 @@ def test_the_13r_flag_says_what_chapter_10_counts(book, ctx):
     assert story(4, 0.4) == "pass" and story(None, 0.4) == "pass"        # the stories stated within, or not stated
     assert code_scope.building_measures({"occupancy_groups": ["M", "R-2"], "sprinkler_system": "nfpa_13r",
                                          "stories_above_grade_plane": 6})["sprinklered_903_3_1_2"] is True
+
+def test_the_townhouse_unit_is_quoted_as_the_book_prints_it():
+    """The merge review of Chapter 9 part e (round 3, P3): BCNYS 202 TOWNHOUSE UNIT reads "a yard or public way on not
+    fewer than two sides, and has a separate means of egress" (p.65, lines 5-6); the townhouse fact's meaning and the
+    definition's second-reading flag had "not less than", the house code's (R202) words."""
+    import yaml
+    measures = yaml.safe_load((NY / "5_building_code_rules/drafted/records/proposed_measures.yaml").read_text(encoding="utf-8"))
+    meaning = " ".join(measures["townhouse_units"]["meaning"].split())
+    assert "not fewer than two sides" in meaning and "separate means of egress" in meaning
+    tv = yaml.safe_load((NY / "text_verification.yaml").read_text(encoding="utf-8"))["pieces"]["202:townhouse_unit"]
+    assert "not fewer than two sides" in " ".join(tv["flags"]) and "not less than" not in " ".join(tv["flags"])
