@@ -875,6 +875,181 @@ pieces:
     heading: Where required—new buildings and structures › Group H
     rules:
     - general.bc_907_2_5_group_h_fire_alarm
+  907.2.6:
+    label: flag
+    heading: Where required—new buildings and structures › Group I
+    rules:
+    - general.bc_907_2_6_group_i_fire_alarm
+  907.2.6.1:
+    label: flag
+    heading: Group I › Group I-1
+    rules:
+    - general.bc_907_2_6_1_group_i1_smoke_detection
+  907.2.6.1.1:
+    label: flag
+    heading: Group I-1 › Smoke alarms
+    rules:
+    - general.bc_907_2_6_1_1_group_i1_smoke_alarms
+  907.2.6.2:
+    label: flag
+    heading: Group I › Group I-2
+    rules:
+    - general.bc_907_2_6_2_group_i2_smoke_detection
+  907.2.6.3:
+    label: flag
+    heading: Group I › Group I-3 occupancies
+    rules:
+    - general.bc_907_2_6_3_group_i3_fire_alarm
+  907.2.6.3.1:
+    label: flag
+    heading: Group I-3 occupancies › System initiation
+    rules:
+    - general.bc_907_2_6_3_1_group_i3_initiation
+  907.2.6.3.2:
+    label: flag
+    heading: Group I-3 occupancies › Manual fire alarm boxes
+    rules:
+    - general.bc_907_2_6_3_2_group_i3_alarm_boxes
+  907.2.6.3.2.1:
+    label: flag
+    heading: Manual fire alarm boxes › Manual fire alarm boxes in areas occupied by detained individuals
+    rules:
+    - general.bc_907_2_6_3_2_1_group_i3_locked_boxes
+  907.2.6.3.3:
+    label: flag
+    heading: Group I-3 occupancies › Automatic smoke detection system
+    rules:
+    - general.bc_907_2_6_3_3_group_i3_smoke_detection
+  907.2.7.1:
+    label: flag
+    heading: Group M › Occupant load
+    rules:
+    - general.bc_907_2_7_1_group_m_fire_alarm
+  907.2.7.1.1:
+    label: flag
+    heading: Occupant load › Occupant notification
+    rules:
+    - general.bc_907_2_7_1_1_group_m_notification
+  907.2.7.2:
+    label: flag
+    heading: Group M › Storage of lithium-ion or lithium metal batteries
+    rules:
+    - general.bc_907_2_7_2_group_m_battery_storage
+  907.2.8.1:
+    label: flag
+    heading: Group R-1 › Manual fire alarm system
+    rules:
+    - general.bc_907_2_8_1_group_r1_fire_alarm
+  907.2.8.2:
+    label: flag
+    heading: Group R-1 › Automatic smoke detection system
+    rules:
+    - general.bc_907_2_8_2_group_r1_corridor_detection
+  907.2.8.3:
+    label: flag
+    heading: Group R-1 › Smoke alarms
+    rules:
+    - general.bc_907_2_8_3_group_r1_smoke_alarms
+  907.2.9.1:
+    label: flag
+    heading: Group R-2 › Manual fire alarm system
+    rules:
+    - general.bc_907_2_9_1_group_r2_fire_alarm
+  907.2.9.2:
+    label: flag
+    heading: Group R-2 › Smoke alarms
+    rules:
+    - general.bc_907_2_9_2_group_r2_smoke_alarms
+  907.2.9.3:
+    label: flag
+    heading: Group R-2 › Group R-2 college and university buildings
+    rules:
+    - general.bc_907_2_9_3_group_r2_college_detection
+  907.2.10.1:
+    label: flag
+    heading: Group S › Public- and self-storage occupancies
+    rules:
+    - general.bc_907_2_10_1_storage_fire_alarm
+  907.2.10.2:
+    label: flag
+    heading: Group S › Storage of lithium-ion or lithium metal batteries
+    rules:
+    - general.bc_907_2_10_2_battery_storage_detection
+  907.2.11:
+    label: flag
+    heading: Where required—new buildings and structures › Single- and multiple-station smoke alarms
+    rules:
+    - general.bc_907_2_11_smoke_alarms
+  907.2.11.1:
+    label: flag
+    heading: Single- and multiple-station smoke alarms › Group R-1
+    rules:
+    - general.bc_907_2_11_1_group_r1_smoke_alarm_locations
+  907.2.11.2:
+    label: flag
+    heading: Single- and multiple-station smoke alarms › Groups R-2, R-3, R-4 and I-1
+    rules:
+    - general.bc_907_2_11_2_group_r_smoke_alarm_locations
+  907.2.11.3:
+    label: flag
+    heading: Single- and multiple-station smoke alarms › Installation near cooking appliances
+    rules:
+    - general.bc_907_2_11_3_smoke_alarms_near_cooking
+  907.2.11.4:
+    label: flag
+    heading: Single- and multiple-station smoke alarms › Installation near bathrooms
+    rules:
+    - general.bc_907_2_11_4_smoke_alarms_near_bathrooms
+  907.2.11.5:
+    label: flag
+    heading: Single- and multiple-station smoke alarms › Interconnection
+    rules:
+    - general.bc_907_2_11_5_smoke_alarm_interconnection
+  907.2.11.6:
+    label: flag
+    heading: Single- and multiple-station smoke alarms › Power source
+    rules:
+    - general.bc_907_2_11_6_smoke_alarm_power
+  907.2.11.7:
+    label: flag
+    heading: Single- and multiple-station smoke alarms › Smoke detection system
+    rules:
+    - general.bc_907_2_11_7_smoke_detection_instead
+  907.2.11.8:
+    label: flag
+    heading: Single- and multiple-station smoke alarms › Portable smoke alarms in hotels, motels, and lodging houses
+    rules:
+    - general.bc_907_2_11_8_portable_smoke_alarms
+  907.5.2.2:
+    label: flag
+    heading: Emergency voice/alarm communication systems
+    rules:
+    - general.bc_907_5_2_2_voice_alarm_design
+  907.5.2.2.1:
+    label: flag
+    heading: Emergency voice/alarm communication systems › Manual override
+    rules:
+    - general.bc_907_5_2_2_1_voice_alarm_override
+  907.5.2.2.2:
+    label: flag
+    heading: Emergency voice/alarm communication systems › Live voice messages
+    rules:
+    - general.bc_907_5_2_2_2_voice_alarm_live_messages
+  907.5.2.2.3:
+    label: flag
+    heading: Emergency voice/alarm communication systems › Alternative uses
+    rules:
+    - general.bc_907_5_2_2_3_voice_alarm_other_uses
+  907.5.2.2.4:
+    label: flag
+    heading: Emergency voice/alarm communication systems › Emergency voice/alarm communication captions
+    rules:
+    - general.bc_907_5_2_2_4_voice_alarm_captions
+  907.5.2.2.5:
+    label: flag
+    heading: Emergency voice/alarm communication systems › Standby power
+    rules:
+    - general.bc_907_5_2_2_5_voice_alarm_standby_power
   '1004.7':
     label: flag
     heading: Occupant load › Outdoor areas

@@ -306,7 +306,8 @@ documents:
           emergency voice/alarm communication system: 'The book prints "emergency voice/alarm communication system" in
             italics (p.314, exception 1); Section 202 defines EMERGENCY VOICE/ALARM COMMUNICATIONS (p.42), which the
             phrase doesn''t name whole, so it isn''t brought in by it. Whether the building has such a system per
-            907.5.2.2 (not brought in) is the architect''s statement (the fact emergency_voice_alarm_system).'
+            907.5.2.2 (its design brought in by Chapter 9 part d) is the architect''s statement (the fact
+            emergency_voice_alarm_system).'
         202:power_assisted_door:
           low-energy poweroperated door: 'The book prints "Low-energy power-operated door" in italics broken across
             two lines (p.57, lines 45-46: "power-" / "operated"), which the text joins as "poweroperated"; the term

@@ -207,9 +207,11 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     adds 903.2.1.6's occupiable roofs, 903.2.2.1's ambulatory care floors (neither fact stated) and 903.2.9.2's bulk tire
     storage (146); its other flags are other groups'. Part c adds 903.2.11's nine specific areas and 903.2.12's
     construction (no NFPA 13 system stated), 907.1.3's listed equipment, 907.2's fire alarm system and 907.2.2.1's
-    ambulatory care detection (159)."""
+    ambulatory care detection (159). Part d adds Group R-2's three fire alarm and smoke alarm sections,
+    907.2.11 and its six for Groups R and I-1, 907.2.10.2's battery storage and 907.5.2.2's five while the voice/alarm
+    system isn't stated (175)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 159 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 175 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -339,6 +341,11 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
         "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable"),
         "general.bc_903_2_2_1_ambulatory_care": ("needs_review", "not_applicable"),      # Chapter 9 part b
         "general.bc_907_2_2_1_ambulatory_care_detection": ("needs_review", "not_applicable")}   # and part c
+    # Chapter 9 part d: no voice/alarm system stated sets aside 907.5.2.2's design flags (captions are Group A's)
+    assert moved.pop(("emergency_voice_alarm_system", False)) == {
+        f"general.bc_907_5_2_2_{k}": ("needs_review", "not_applicable")
+        for k in ("voice_alarm_design", "1_voice_alarm_override", "2_voice_alarm_live_messages", "3_voice_alarm_other_uses",
+                  "5_voice_alarm_standby_power")}
     assert all(m == {} for m in moved.values()), moved
 
 
