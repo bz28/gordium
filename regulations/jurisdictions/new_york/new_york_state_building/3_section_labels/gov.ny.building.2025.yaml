@@ -152,6 +152,22 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:alarm_signal:
+    label: reference
+    topic: definitions
+    reason: 'Defines ALARM SIGNAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 20
+      - 20
+      quote: '[F] ALARM SIGNAL. A signal indicating an emergency requiring immediate action, such as a signal indicative of
+        fire.'
+    piece_sha256: 95591167dcd24bc03267be2968375c3b1e8931db1834fea47e2ac1e0a463048c
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:alternating_tread_device:
     label: reference
     topic: definitions
@@ -346,6 +362,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:bleachers:
+    label: reference
+    topic: definitions
+    reason: 'Defines BLEACHERS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 35
+      lines:
+      - 9
+      - 10
+      quote: '[BE] BLEACHERS. Tiered seating supported on a dedicated structural system and two or more rows high and is not
+        a building element (see “Grandstand”).'
+    piece_sha256: 08b8040959649ad045232a4699f24ddbf1671a31734fa2a6c89ce30d536dba20
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:boiling_point:
     label: reference
     topic: definitions
@@ -516,6 +548,35 @@ labels:
       quote: '[F] COMPRESSED GAS. A material or mixture of materials that meets both of the following:'
     piece_sha256: 5cf836c15a38a41c19c77481c0d1ccdc5ecd00c985d20d8531ee5a879c42e9be
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:concrete:
+    label: reference
+    topic: definitions
+    reason: 'Defines CONCRETE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 38
+      lines:
+      - 23
+      - 41
+      quote: '[BS] CONCRETE. Carbonate aggregate. Concrete made with aggregates consisting mainly of calcium or magnesium
+        carbonate, such as limestone or dolomite, and containing 40 percent or less quartz, chert or flint. Cellular. A lightweight
+        insulating concrete made by mixing a preformed foam with Portland cement slurry and having a dry unit weight of approximately
+        30 pcf (480 kg/m[fn3]). Lightweight aggregate. Concrete made with aggregates of expanded clay, shale, slag or slate
+        or sintered fly ash or any natural lightweight aggregate meeting ASTM C330 and possessing equivalent fire-resistance
+        properties and weighing 85 to 115 pcf (1360 to 1840 kg/m[fn3]). Perlite. A lightweight insulating concrete having
+        a dry unit weight of approximately 30 pcf (480 kg/m[fn3]) made with perlite concrete aggregate. Perlite aggregate
+        is produced from a volcanic rock which, when heated, expands to form a glass-like material of cellular structure.
+        Sand-lightweight. Concrete made with a combination of expanded clay, shale, slag, slate, sintered fly ash, or any
+        natural light- weight aggregate meeting ASTM C330 and possessing equivalent fire-resistance properties and natural
+        sand. Its unit weight is generally between 105 and 120 pcf (1680 and 1920 kg/m[fn3]). Siliceous aggregate. Concrete
+        made with normal-weight aggregates consisting mainly of silica or compounds other than calcium or magnesium carbonate,
+        which contains more than 40-percent quartz, chert or flint. Vermiculite. A light weight insulating concrete made with
+        vermiculite concrete aggregate which is laminated micaceous material produced by expanding the ore at high temperatures.
+        When added to a Portland cement slurry the resulting concrete has a dry unit weight of approximately 30 pcf (480 kg/m[fn3]).'
+    piece_sha256: 3b9379468e6cb3600d52f2ff4c1e611576d75d54eb33d0076c3de068bcf79cef
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:corridor:
@@ -1017,6 +1078,38 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:fire_alarm_box_manual:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE ALARM BOX, MANUAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 52
+      - 52
+      quote: FIRE ALARM BOX, MANUAL. See “Manual fire alarm box.”
+    piece_sha256: 86eb8c6a06170095bbe1aaa68657cf2101f6212837fa0e4432c80254f11c970d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_alarm_signal:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE ALARM SIGNAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 56
+      - 57
+      quote: '[F] FIRE ALARM SIGNAL. A signal initiated by a fire alarm-initiating device such as a manual fire alarm box,
+        automatic fire detector, waterflow switch or other device whose activation is indicative of the presence of a fire
+        or fire signature.'
+    piece_sha256: 4e0e1ac4569062cadaabf7445efe4a87311446bd0603337ec3e33c46dd44e5f4
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:fire_barrier:
     label: reference
     topic: definitions
@@ -1031,6 +1124,37 @@ labels:
         in which continuity is maintained.'
     piece_sha256: 0fdf51e0e90fb73c5088b18d8fea6b28c41e3d12f5ce5da5db4fa9121343d10b
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_command_center:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE COMMAND CENTER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 10
+      - 11
+      quote: '[F] FIRE COMMAND CENTER. The principal attended or unattended location where the status of detection, alarm
+        communications and control systems is displayed, and from which the systems can be manually controlled.'
+    piece_sha256: 5c6af425e103a36ddcd19bcc03ac123db6dc7b9109b5ee76c18f67d31231ff1d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_detector_automatic:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE DETECTOR, AUTOMATIC, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 16
+      - 16
+      quote: '[F] FIRE DETECTOR, AUTOMATIC. A device designed to detect the presence of a fire signature and to initiate action.'
+    piece_sha256: 56399eeb88bc608dba2e29d9dc18fb3d35c48dd4a9b2215857bb69e2c3e0ddf5
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_door:
@@ -1328,6 +1452,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:grandstand:
+    label: reference
+    topic: definitions
+    reason: 'Defines GRANDSTAND, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 40
+      - 41
+      quote: '[BE] GRANDSTAND. Tiered seating supported on a dedicated structural system and two or more rows high and is
+        not a building element (see “Bleachers”).'
+    piece_sha256: fec287c678a0fab47e2ca75d547adc21eadcfcd8ecdc630f1d884d5bdb893c27
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:gross_leasable_area:
     label: reference
     topic: definitions
@@ -1422,6 +1562,22 @@ labels:
       quote: '[BG] HEIGHT, BUILDING. The vertical distance from grade plane to the average height of the highest roof surface.'
     piece_sha256: 1edfc2f24ab1b41fbaba521427a50871fcd94945c4be4c4eb46c3d26ac844ae2
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:high_rise_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines HIGH-RISE BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 3
+      - 4
+      quote: '[BG] HIGH-RISE BUILDING. A building with an occupied floor or occupiable roof located more than 75 feet (22
+        860 mm) above the lowest level of fire department vehicle access.'
+    piece_sha256: 2c9ef8382ec9fe199f1c24477190a8ec25ff7ff8eb1a001e4082a7060454b079
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:horizontal_assembly:
@@ -1683,6 +1839,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Section group 6b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:manual_fire_alarm_box:
+    label: reference
+    topic: definitions
+    reason: 'Defines MANUAL FIRE ALARM BOX, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 13
+      - 13
+      quote: '[F] MANUAL FIRE ALARM BOX. A manually operated device used to initiate an alarm signal.'
+    piece_sha256: 80f811ad2e2cfb6de1214be42ac372f93ab2d10db0e9044cbba3e0b82ca9fbdc
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:masonry:
     label: reference
     topic: definitions
@@ -1913,6 +2084,22 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:other_structures:
+    label: reference
+    topic: definitions
+    reason: 'Defines OTHER STRUCTURES, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 3
+      - 4
+      quote: '[BS] OTHER STRUCTURES. This definition applies only to Chapters 16 through 23. Structures, other than buildings,
+        for which loads are specified in Chapter 16.'
+    piece_sha256: 49cd2ed061db5730079218748eb981813139ed4433fa12a4989af096de9912d0
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:overhead_doorstop:
     label: reference
     topic: definitions
@@ -1946,6 +2133,22 @@ labels:
     piece_sha256: 70386dd0eeb1c09bcd4e38930757ca37adcd8c68813729a467af9805052e4a11
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
       3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:panel_part_of_a_structure:
+    label: reference
+    topic: definitions
+    reason: 'Defines PANEL (PART OF A STRUCTURE), a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 21
+      - 22
+      quote: '[BS] PANEL (PART OF A STRUCTURE). The section of a floor, wall or roof comprised between the supporting frame
+        of two adjacent rows of columns and girders or column bands of floor or roof construction.'
+    piece_sha256: ba287de10b6a1cc2c4e6fec7076e983deae293a3758148b3a552f6ffa04fcb50
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:panic_hardware:
@@ -2179,6 +2382,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:risk_category:
+    label: reference
+    topic: definitions
+    reason: 'Defines RISK CATEGORY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 59
+      lines:
+      - 16
+      - 17
+      quote: '[BS] RISK CATEGORY. A categorization of buildings and other structures for determination of flood, wind, tornado,
+        snow, ice and earthquake loads based on the risk associated with unacceptable performance.'
+    piece_sha256: a7667dec8793491f7b4b46baefc3b14fe45b107dbfaf03a27ff32c8e60a06dee
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:roof_assembly_for_application_to_chapter_15_only:
     label: reference
     topic: definitions
@@ -2359,6 +2578,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:smoke_barrier:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKE BARRIER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 3
+      - 4
+      quote: '[BF] SMOKE BARRIER. A continuous membrane, either vertical or horizontal, such as a wall, floor or ceiling assembly,
+        that is designed and constructed to restrict the movement of smoke.'
+    piece_sha256: 2362bf8f9765ea07a0781a2aa97a6e85dcd42105b1868731ffc1abb41c737ea4
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:smoke_detector:
     label: reference
     topic: definitions
@@ -2373,6 +2608,22 @@ labels:
     piece_sha256: 522da15a335b767701eedf42bdfb4c346aca491af705eb998bf698ea50e567df
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
       4c (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term 1020.6.1 uses, by the book''s italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:smokeproof_enclosure:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKEPROOF ENCLOSURE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 17
+      - 18
+      quote: '[BF] SMOKEPROOF ENCLOSURE. An exit stairway or ramp designed and constructed so that the movement of the products
+        of combustion produced by a fire occurring in any part of the building into the enclosure is limited.'
+    piece_sha256: 60842050c2e0685bc0f261f4c58e1d9111e3b9edb353871267404accd305cb06
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:smoke_protected_assembly_seating:
@@ -3256,6 +3507,298 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '403.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'High-rise buildings, where Section 403 applies: not in the model, so a person''s check (general.bc_403_1_high_rise_buildings).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 88
+      lines:
+      - 6
+      - 15
+      quote: '403.1 Applicability. High-rise buildings shall comply with Sections 403.2 through 403.6. Exceptions: The provisions
+        of Sections 403.2 through 403.6 shall not apply to the following buildings and structures: 1. Airport traffic control
+        towers in accordance with Section 412.2. 2. Open parking garages in accordance with Section 406.5. 3. The portion
+        of a building containing a Group A-5 occupancy in accordance with Section 303.6. 4. Special industrial occupancies
+        in accordance with Section 503.1.1. 5. Buildings containing any one of the following: 5.1. A Group H-1 occupancy.
+        5.2. A Group H-2 occupancy in accordance with Section 415.8, 415.9.2, 415.9.3 or 426.1. 5.3. A Group H-3 occupancy
+        in accordance with Section 415.8.'
+    piece_sha256: 00c9310fe25825f2af2774548680cfad169abb9a74bf685ae3b07d67de7c8ee8
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Exit stairway and hoistway enclosures'' structural integrity: not in the model, so a person''s check (general.bc_403_2_2_exit_stairway_enclosure_strength).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 88
+      lines:
+      - 33
+      - 35
+      quote: '[BS] 403.2.2 Structural integrity of interior exit stairways and elevator hoistway enclosures. For high-rise
+        buildings of Risk Category III or IV in accordance with Section 1604.5, and for all buildings that are more than 420
+        feet (128 m) in building height, enclosures for interior exit stairways and elevator hoistway enclosures shall comply
+        with Sections 403.2.2.1 through 403.2.2.4.'
+    piece_sha256: 7081bcd504915cac66478609ba59a0606fdce9e037980c1f5a6c4e2524f89a43
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.2.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Impact-resistant panels on an interior enclosure wall: not in the model, so a person''s check (general.bc_403_2_2_1_enclosure_wall_panels).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 88
+      lines:
+      - 36
+      - 47
+      quote: '[BS] 403.2.2.1 Wall assembly materials Where an interior exit stairway enclosure or an elevator hoistway enclosure
+        is constructed as an interior wall of the building, the panels applied to the exterior of the enclosure shall be in
+        accordance with one of the following: 1. The wall assembly shall incorporate not fewer than two layers of impact-resistant
+        panels, each of which meets or exceeds Soft Body Impact Classification Level 2 and Hard Body Impact Classification
+        Level 2 as measured by the test method described in ASTM C1629/C1629M. 2. The wall assembly shall incorporate not
+        fewer than one layer of impact-resistant panels that meet or exceed Soft Body Impact Classification Level 2 and Hard
+        Body Impact Classification Level 3 as measured by the test method described in ASTM C1629/C1629M. 3. The wall assembly
+        incorporates multiple layers of any material, tested in tandem, that meets or exceeds Soft Body Impact Classification
+        Level 2 and Hard Body Impact Classification Level 3 as measured by the test method described in ASTM C1629/C1629M.'
+    piece_sha256: 68c8915c0bc26881330c37e6e07389347a0b06354a6fb370e9e811e945adf0bb
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.2.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Concrete or masonry enclosure walls deemed to comply: not in the model, so a person''s check (general.bc_403_2_2_2_concrete_and_masonry_walls).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 88
+      lines:
+      - 48
+      - 49
+      quote: '[BS] 403.2.2.2 Concrete and masonry walls. Concrete or masonry walls shall be deemed to satisfy the requirements
+        of Section 403.2.2.1.'
+    piece_sha256: 8f94aa6c3c8be0ea65371519cc8d871136feeda8a559ab8098d3403ebbf79401
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.2.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Other enclosure wall assemblies of equal impact resistance: not in the model, so a person''s check (general.bc_403_2_2_3_other_wall_assemblies).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 88
+      lines:
+      - 50
+      - 52
+      quote: '[BS] 403.2.2.3 Other wall assemblies. Any other wall assembly that provides impact resistance equivalent to
+        that required by Section 403.2.2.1 for Soft Body Impact Classification Level 2 and for Hard Body Impact Classification
+        Level 3, as measured by the test method described in ASTM C1629/C1629M, shall be permitted.'
+    piece_sha256: 2c70b8471181a18262dd082a11655311c6f77ea1a0fb144bb4f510c4225bdc9a
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.2.2.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Glass enclosure walls deemed to comply: not in the model, so a person''s check (general.bc_403_2_2_4_glass_walls).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 88
+      lines:
+      - 53
+      - 54
+      quote: '[BS] 403.2.2.4 Glass walls. Glass walls complying with the safety glazing impact requirements of CPSC 16 CFR
+        1201, Cat. II or ANSI Z97.1, Class A shall be deemed to satisfy the requirements of Section 403.2.2.1.'
+    piece_sha256: 864f1e9755343e84295868529098255bc71e511f8c4a113f00e97b10e9f55a0a
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '403.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'A high-rise''s means of egress and evacuation: not in the model, so a person''s check (general.bc_403_5_means_of_egress_and_evacuation).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 90
+      lines:
+      - 41
+      - 42
+      quote: '[BE] 403.5 Means of egress and evacuation. The means of egress in high-rise buildings shall comply with Sections
+        403.5.1 through 403.5.5.'
+    piece_sha256: 989e313478a5335f04ee849dd1eea1835d9d7869f0cf36600b825c5f328cf924
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.5.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Interior exit stairways at least 30 ft or a quarter diagonal apart: not in the model, so a person''s check (general.bc_403_5_1_remoteness_of_exit_stairways).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 90
+      lines:
+      - 43
+      - 47
+      quote: '[BE] 403.5.1 Remoteness of interior exit stairways. Required interior exit stairways shall be separated by a
+        distance not less than 30 feet (9144 mm) or not less than one-fourth of the length of the maximum overall diagonal
+        dimension of the building or area to be served, whichever is less. The distance shall be measured in a straight line
+        between the nearest points of the enclosure surrounding the interior exit stairways. In buildings with three or more
+        interior exit stairways, not fewer than two of the interior exit stairways shall comply with this section. Interlocking
+        or scissor stairways shall be counted as one interior exit stairway.'
+    piece_sha256: 5617d02e83ae2da10f149f179d139756d0565b6c738ee063d74d58980000450e
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.5.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'An additional interior exit stairway above 420 ft (other than Group R-2): the building''s height isn''t in the
+      model, so a person''s check (general.bc_403_5_2_additional_exit_stairway), and the story exit rules need review where
+      they pass on 1006.3''s count alone and a high-rise isn''t ruled out.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 90
+      lines:
+      - 48
+      - 57
+      quote: '[BE] 403.5.2 Additional interior exit stairway. For buildings other than Group R-2 and their ancillary spaces
+        that are more than 420 feet (128 m) in building height, one additional interior exit stairway meeting the requirements
+        of Sections 1011 and 1023 shall be provided in addition to the minimum number of exits required by Section 1006.3.
+        The total capacity of any combination of remaining interior exit stairways with one interior exit stairway removed
+        shall be not less than the total capacity required by Section 1005.1. Scissor stairways shall not be considered the
+        additional interior exit stairway required by this section. Exceptions: 1. An additional interior exit stairway shall
+        not be required to be installed in buildings having elevators used for occupant self-evacuation in accordance with
+        Section 3008. 2. An additional interior exit stairway shall not be required for other portions of the building where
+        the highest occupia- ble floor level in those areas is less than 420 feet (128 m) in building height.'
+    piece_sha256: 1a271620e82a7205bb8f78ac89023847950356ce4104ae6b79b0d62f0ef416f0
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.5.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Stairway doors locked from the stairway side: not in the model, so a person''s check (general.bc_403_5_3_stairway_door_operation).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 91
+      lines:
+      - 3
+      - 8
+      quote: '[BE] 403.5.3 Stairway door operation. Stairway doors other than the exit discharge doors shall be permitted
+        to be locked from the stairway side. Stairway doors that are locked from the stairway side shall be capable of being
+        unlocked without unlatching where all of the following conditions occur: 1. Individually or simultaneously upon a
+        signal from the fire command center. 2. Simultaneously upon activation of a fire alarm signal in an area served by
+        the stairway. 3. Upon failure of the power supply to the lock or the locking system.'
+    piece_sha256: 928364a031e4480dba6e6196075cf53d7fb1a81925b3e358718101c44c8fd6a7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.5.3.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A stairway communication system where stairway doors lock: not in the model, so a person''s check (general.bc_403_5_3_1_stairway_communication_system).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 91
+      lines:
+      - 9
+      - 11
+      quote: '[BE] 403.5.3.1 Stairway communication system. A telephone or other two-way communications system connected to
+        an approved constantly attended station shall be provided at not less than every fifth floor in each stairway where
+        the doors to the stairway are locked. Systems shall be listed in accordance with UL 2525 and installed in accordance
+        with NFPA 72.'
+    piece_sha256: 773d744fe14cffc932ac1805dc8ac2c054fb7fbbd7827a4d1ed71292d18a74c7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.5.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Smokeproof enclosures for stairways serving floors over 75 ft: not in the model, so a person''s check (general.bc_403_5_4_smokeproof_enclosures).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 91
+      lines:
+      - 12
+      - 13
+      quote: '[BE] 403.5.4 Smokeproof enclosures. Every required interior exit stairway serving floors more than 75 feet (22
+        860 mm) above the lowest level of fire department vehicle access shall be a smokeproof enclosure in accordance with
+        Sections 909.20 and 1023.12.'
+    piece_sha256: 3b1a2ee8c5533df41f2b13c53eed38278ad39248586db10bfafac0a001caf9ac
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.5.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'Luminous egress path markings: not in the model, so a person''s check (general.bc_403_5_5_luminous_egress_path_markings).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 91
+      lines:
+      - 14
+      - 15
+      quote: '[BE] 403.5.5 Luminous egress path markings. Luminous egress path markings shall be provided in accordance with
+        Section 1025.'
+    piece_sha256: 432e794051167648b2a306082ab3b634dfdbfcc89e3f5fbdc59638b10b943b5a
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '403.6':
+    label: flag
+    topic: means_of_egress
+    reason: 'Elevators in a high-rise: not in the model, so a person''s check (general.bc_403_6_elevators).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 91
+      lines:
+      - 16
+      - 17
+      quote: 403.6 Elevators. Elevator installation and operation in high-rise buildings shall comply with Chapter 30 and
+        Sections 403.6.1 and 403.6.2.
+    piece_sha256: f1e96941772093a5c16e94f2e1a2af32dcf444413fd4794ed1e060851998eedf
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.6.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Fire service access elevators above 120 ft: not in the model, so a person''s check (general.bc_403_6_1_fire_service_access_elevators).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 91
+      lines:
+      - 18
+      - 21
+      quote: 403.6.1 Fire service access elevator. In buildings with an occupied floor more than 120 feet (36 576 mm) above
+        the lowest level of fire department vehicle access, not fewer than two fire service access elevators, or all elevators,
+        whichever is less, shall be provided in accordance with Section 3007. Each fire service access elevator shall have
+        a capacity of not less than 3,500 pounds (1588 kg) and shall comply with Section 3002.4.
+    piece_sha256: eae168ccac9c30b7737f929e158794ea87ede44687e51e7d329e026b3672025e
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  403.6.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Occupant evacuation elevators: not in the model, so a person''s check (general.bc_403_6_2_occupant_evacuation_elevators).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 91
+      lines:
+      - 22
+      - 23
+      quote: 403.6.2 Occupant evacuation elevators. Where installed in accordance with Section 3008, passenger elevators for
+        general public use shall be permitted to be used for occupant self-evacuation.
+    piece_sha256: b82bef0953fc35964c941f6ab070b0cd0bb788f00b907bf852178a5ddce9ba71
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   '404.1':
     label: flag
     topic: means_of_egress
@@ -3327,6 +3870,154 @@ labels:
         in accordance with Section 1028.'
     piece_sha256: 2561bb4078d8d587fec920e2312288b0cae932f60d00ffefcdedcb7d39c2cae7
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '405.1':
+    label: flag
+    topic: means_of_egress
+    reason: 'Underground buildings, where Section 405 applies: not in the model, so a person''s check (general.bc_405_1_underground_buildings).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 92
+      lines:
+      - 36
+      - 46
+      quote: '405.1 General. The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level
+        used for human occu- pancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.
+        Exceptions: The provisions of Section 405 are not applicable to the following buildings or portions of buildings:
+        1. One- and two-family dwellings, sprinklered in accordance with Section 903.3.1.3. 2. Parking garages provided with
+        automatic sprinkler systems in compliance with Section 405.3. 3. Fixed guideway transit systems. 4. Grandstands, bleachers,
+        stadiums, arenas and similar facilities. 5. Where the lowest story is the only story that would qualify the building
+        as an underground building and has an area not greater than 1,500 square feet (139 m[fn2]) and has an occupant load
+        less than 10. 6. Pumping stations and other similar mechanical spaces intended only for limited periodic use by service
+        or maintenance personnel.'
+    piece_sha256: 60f7ee0a4949217cf703ab46880c8e5f8613926ac212859b59d06854d93221f4
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '405.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'An underground building''s compartments: not in the model, so a person''s check (general.bc_405_4_compartmentation).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 92
+      lines:
+      - 51
+      - 51
+      quote: 405.4 Compartmentation. Compartmentation shall be in accordance with Sections 405.4.1 through 405.4.3.
+    piece_sha256: 34add3f9c23d9a4a92614c5a35ede7895af2156bd6e1af5a42497892bdb875c7
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  405.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Two compartments below 60 ft: not in the model, so a person''s check (general.bc_405_4_1_number_of_compartments).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 92
+      lines:
+      - 52
+      - 57
+      quote: '405.4.1 Number of compartments. A building having a floor level more than 60 feet (18 288 mm) below the finished
+        floor of the lowest level of exit discharge shall be divided into not fewer than two compartments of approximately
+        equal size. Such compart- mentation shall extend through the highest level of exit discharge serving the underground
+        portions of the building and all levels below. Exception: The lowest story need not be compartmented where the area
+        is not greater than 1,500 square feet (139 m[fn2]) and has an occupant load of less than 10.'
+    piece_sha256: 96cd6f6ad5ea57989600aedec24026bd488d33bb856009b9a30a10930be2032f
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  405.4.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Smoke barriers and their doors between compartments: not in the model, so a person''s check (general.bc_405_4_2_smoke_barrier_between_compartments).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 93
+      lines:
+      - 3
+      - 8
+      quote: 405.4.2 Smoke barrier penetration. The compartments shall be separated from each other by a smoke barrier in
+        accordance with Section 709. Penetrations between the two compartments shall be limited to plumbing and electrical
+        piping and conduit that are firestopped in accordance with Section 714. Doorways shall be protected by fire door assemblies
+        that comply with Section 716, automatic-closing by smoke detection in accordance with Section 716.2.6.6 and installed
+        in accordance with NFPA 105 and Section 716.2.2.1. Where provided, each compartment shall have an air supply and an
+        exhaust system independent of the other compartments.
+    piece_sha256: 6b14b60dcd159fab8c94384cffeb0386495febbfa7d89dffd554564617543c84
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  405.4.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Elevator access from each compartment: not in the model, so a person''s check (general.bc_405_4_3_compartment_elevators).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 93
+      lines:
+      - 9
+      - 14
+      quote: 405.4.3 Elevators. Where elevators are provided, each compartment shall have direct access to an elevator. Where
+        an elevator serves more than one compartment, an enclosed elevator lobby shall be provided and shall be separated
+        from each compartment by a smoke barrier in accordance with Section 709. Doorways in the smoke barrier shall be protected
+        by fire door assemblies that comply with Section 716, shall comply with the smoke and draft control assembly requirements
+        of Section 716.2.2.1 with the UL 1784 test conducted without an artificial bottom seal, and shall be automatic-closing
+        by smoke detection in accordance with Section 716.2.6.6.
+    piece_sha256: 22cbab43e01603383d10bbd5db0f82953f3c6af03a36b7d2772d3e9e726bbd86
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '405.7':
+    label: flag
+    topic: means_of_egress
+    reason: 'An underground building''s means of egress: not in the model, so a person''s check (general.bc_405_7_means_of_egress).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 93
+      lines:
+      - 23
+      - 23
+      quote: '[BE] 405.7 Means of egress. Means of egress shall be in accordance with Sections 405.7.1 and 405.7.2.'
+    piece_sha256: 9494f73f6ce56a6738854c5cabdcba3863c7d05ef57436be17b307cc0fbc023d
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  405.7.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Two exits on each floor level of an underground building: which floor levels and the compartments aren''t in
+      the model, so a person''s check (general.bc_405_7_1_two_exits_on_each_floor_level), and the story exit rules need review
+      where they pass a story with one exit and an underground building isn''t ruled out.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 93
+      lines:
+      - 24
+      - 26
+      quote: '[BE] 405.7.1 Number of exits. Each floor level shall be provided with not fewer than two exits. Where compartmentation
+        is required by Section 405.4, each compartment shall have not fewer than one exit and not fewer than one exit access
+        doorway into the adjoining compartment.'
+    piece_sha256: e19caf0120dceeef518566793b266cdf9dce43fb4f6f894c9f7cd8e8a9fff9fa
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  405.7.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Smokeproof enclosures for stairways below 30 ft: not in the model, so a person''s check (general.bc_405_7_2_smokeproof_enclosures).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 93
+      lines:
+      - 27
+      - 28
+      quote: '[BE] 405.7.2 Smokeproof enclosure. Every required stairway serving floor levels more than 30 feet (9144 mm)
+        below the finished floor of its level of exit discharge shall comply with the requirements for a smokeproof enclosure
+        as provided in Section 1023.12.'
+    piece_sha256: a1727b36fc5547e37dbb2d17e47b14a56b36b6e369ccf3a894a0eaf192c75deb
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   407.4.2:

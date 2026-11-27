@@ -23,7 +23,9 @@ GROUPS = ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2
           "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U"]
 # the stated fact each part a section's flags turn on: a mall is a space the code gives its own exits or travel limit
 # (the fact's own words name "a covered or open mall (402.8)"); an atrium is its own fact
-SHOWN_WHERE = {"402": "special_egress_spaces", "404": "building_has_atrium"}
+SHOWN_WHERE = {"402": "special_egress_spaces", "404": "building_has_atrium",
+               # part b: a high-rise (202) or a building over 420 ft (403.2.2, 403.5.2); an underground building (405.1)
+               "403": "high_rise_building", "405": "underground_building"}
 
 
 @pytest.fixture(scope="module")
@@ -190,3 +192,64 @@ def test_no_rule_passes_on_a_figure_402_8_changes_where_a_mall_isnt_ruled_out(ct
     assert not bad, (by_rule, bad[:3])
     # each walked rule still passes somewhere once a mall is ruled out (the walk isn't vacuous): checked by the
     # rules' own examples (python -m rule_format)
+
+
+# ---- part b: 403.5.2's additional stairway and 405.7.1's two exits on each floor level -------------------------------
+# From the law's words (pp.90, 93), never from the rules: a building other than Group R-2 more than 420 ft in building
+# height has one interior exit stairway more than 1006.3 asks (403.5.2); each floor level of an underground building has
+# at least two exits (405.7.1). Neither the height nor which floors are underground is in the model, so with the stated
+# fact yes or not stated a story exit rule passes only past both.
+def _required(load_):
+    """Table 1006.3.3 (p.316): 2 exits for 1 to 500 occupants, 3 for 501 to 1,000, 4 for more."""
+    return 2 if load_ <= 500 else 3 if load_ <= 1000 else 4
+
+
+@pytest.mark.parametrize("seed", range(2))
+def test_no_story_passes_short_of_403_5_2_or_405_7_1_where_they_may_apply(ctx, rules, seed):
+    """Property over every drafted rule reading a story's exit count (found from the formulas): every group, a
+    building of two or more and one not stated, every sprinkler setting, every other fact yes, no or not stated, the
+    story's measures from a grid: where a high-rise isn't ruled out and the building isn't stated Group R-2, a pass has
+    one exit more than Table 1006.3.3 asks; where an underground building isn't ruled out, a pass has two exits."""
+    walked = sorted(rid for rid, r in rules.items() if r.get("kind") == "rule" and r.get("for_each") == "story"
+                    and "story_exit_count" in parts.formula_names(r))
+    assert len(walked) >= 5, walked
+    allowed = ctx.allowed()
+    rng = random.Random(seed)
+    own = parts.measure_kinds("story")
+    bad = []
+    for rid in walked:
+        rule = rules[rid]
+        names = parts.formula_names(rule)
+        for _ in range(1500):
+            given = {}
+            group = rng.choice(GROUPS + ["mixed", None])
+            if group is not None:
+                given.update(occupancy_group=group, occupancy_group_i4=group == "I-4",
+                             other_occupancy_present=group != "I-4")
+            sprinkler = rng.choice([(True, False, False), (False, True, False), (False, False, True),
+                                    (False, False, False), None])
+            if sprinkler:
+                given.update(zip(("sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3"), sprinkler))
+            for n in names:
+                if n not in own and n not in given and allowed.get(n) == "boolean":
+                    v = rng.choice([True, False, None])
+                    if v is not None:
+                        given[n] = v
+            m = {}
+            for n in names & set(own):
+                if own[n] == "boolean":
+                    v = rng.choice([True, False, None])
+                    if v is not None:
+                        m[n] = v
+                else:
+                    m[n] = rng.choice(GRID.get(n, NUMBERS))
+            [row] = parts.rows(rule, {"story": [{"id": "p1", "measures": m}]}, given, allowed)
+            if row["outcome"] != "pass":
+                continue
+            count, load_ = m.get("story_exit_count"), m.get("story_occupant_load")
+            if given.get("high_rise_building", None) is not False and group != "R-2" and \
+                    not (count is not None and load_ is not None and count >= _required(load_) + 1):
+                bad.append((rid, "403.5.2", given, m))
+            if given.get("underground_building", None) is not False and not (count is not None and count >= 2):
+                bad.append((rid, "405.7.1", given, m))
+    assert not bad, (sorted({(b[0], b[1]) for b in bad}), bad[:3])

@@ -67,6 +67,35 @@ results:
   general.bc_404_9_atrium_travel_distance: needs_review
   general.bc_404_10_exit_stairways_in_an_atrium: needs_review
   general.bc_404_11_stairway_discharge_through_an_atrium: needs_review
+  # Chapter 4 part b: one flag per piece of 403.1, 403.2.2, 403.5 and 403.6 (high-rise buildings), shown while the
+  # building doesn't rule out a high-rise or one over 420 ft (no Revit mark yet), and of 405.1, 405.4 and 405.7
+  # (underground buildings), shown while that isn't ruled out (no mark yet): each a person's check. 403.5.2's and
+  # 405.7.1's review bands change nothing here: the story rows already wait on other facts, and each story has two
+  # exits for a load under 500 (403.5.2 doesn't hold Group R-2)
+  general.bc_403_1_high_rise_buildings: needs_review
+  general.bc_403_2_2_exit_stairway_enclosure_strength: needs_review
+  general.bc_403_2_2_1_enclosure_wall_panels: needs_review
+  general.bc_403_2_2_2_concrete_and_masonry_walls: needs_review
+  general.bc_403_2_2_3_other_wall_assemblies: needs_review
+  general.bc_403_2_2_4_glass_walls: needs_review
+  general.bc_403_5_means_of_egress_and_evacuation: needs_review
+  general.bc_403_5_1_remoteness_of_exit_stairways: needs_review
+  general.bc_403_5_2_additional_exit_stairway: needs_review
+  general.bc_403_5_3_stairway_door_operation: needs_review
+  general.bc_403_5_3_1_stairway_communication_system: needs_review
+  general.bc_403_5_4_smokeproof_enclosures: needs_review
+  general.bc_403_5_5_luminous_egress_path_markings: needs_review
+  general.bc_403_6_elevators: needs_review
+  general.bc_403_6_1_fire_service_access_elevators: needs_review
+  general.bc_403_6_2_occupant_evacuation_elevators: needs_review
+  general.bc_405_1_underground_buildings: needs_review
+  general.bc_405_4_compartmentation: needs_review
+  general.bc_405_4_1_number_of_compartments: needs_review
+  general.bc_405_4_2_smoke_barrier_between_compartments: needs_review
+  general.bc_405_4_3_compartment_elevators: needs_review
+  general.bc_405_7_means_of_egress: needs_review
+  general.bc_405_7_1_two_exits_on_each_floor_level: needs_review
+  general.bc_405_7_2_smokeproof_enclosures: needs_review
   general.bc_1007_1_1_remoteness: pass                 # 0.5992 >= 1/2 on both stories (above)
   general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
   general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three

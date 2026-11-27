@@ -950,7 +950,7 @@ rules:
 - id: general.bc_403_5_1_remoteness_of_exit_stairways
   kind: flag
   topic: means_of_egress
-  title: Interior exit stairways at least 30 ft or a quarter diagonal apart (BCNYS 403.5.1)
+  title: Interior exit stairways 30 ft or a quarter diagonal apart (BCNYS 403.5.1)
   applies_when: high_rise_building
   sources:
   - file: gov.ny.building.2025.pdf

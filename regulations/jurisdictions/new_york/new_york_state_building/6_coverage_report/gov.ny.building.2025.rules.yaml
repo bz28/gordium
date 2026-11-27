@@ -114,6 +114,86 @@ pieces:
     heading: Means of egress › Security grilles and doors
     rules:
     - general.bc_402_8_8_security_grilles_and_doors
+  '403.1':
+    label: flag
+    heading: Applicability
+    rules:
+    - general.bc_403_1_high_rise_buildings
+  403.2.2:
+    label: flag
+    heading: Structural integrity of interior exit stairways and elevator hoistway enclosures
+    rules:
+    - general.bc_403_2_2_exit_stairway_enclosure_strength
+  403.2.2.1:
+    label: flag
+    heading: Structural integrity of interior exit stairways and elevator hoistway enclosures › Wall assembly materials
+    rules:
+    - general.bc_403_2_2_1_enclosure_wall_panels
+  403.2.2.2:
+    label: flag
+    heading: Structural integrity of interior exit stairways and elevator hoistway enclosures › Concrete and masonry walls
+    rules:
+    - general.bc_403_2_2_2_concrete_and_masonry_walls
+  403.2.2.3:
+    label: flag
+    heading: Structural integrity of interior exit stairways and elevator hoistway enclosures › Other wall assemblies
+    rules:
+    - general.bc_403_2_2_3_other_wall_assemblies
+  403.2.2.4:
+    label: flag
+    heading: Structural integrity of interior exit stairways and elevator hoistway enclosures › Glass walls
+    rules:
+    - general.bc_403_2_2_4_glass_walls
+  '403.5':
+    label: flag
+    heading: Means of egress and evacuation
+    rules:
+    - general.bc_403_5_means_of_egress_and_evacuation
+  403.5.1:
+    label: flag
+    heading: Means of egress and evacuation › Remoteness of interior exit stairways
+    rules:
+    - general.bc_403_5_1_remoteness_of_exit_stairways
+  403.5.2:
+    label: flag
+    heading: Means of egress and evacuation › Additional interior exit stairway
+    rules:
+    - general.bc_403_5_2_additional_exit_stairway
+  403.5.3:
+    label: flag
+    heading: Means of egress and evacuation › Stairway door operation
+    rules:
+    - general.bc_403_5_3_stairway_door_operation
+  403.5.3.1:
+    label: flag
+    heading: Stairway door operation › Stairway communication system
+    rules:
+    - general.bc_403_5_3_1_stairway_communication_system
+  403.5.4:
+    label: flag
+    heading: Means of egress and evacuation › Smokeproof enclosures
+    rules:
+    - general.bc_403_5_4_smokeproof_enclosures
+  403.5.5:
+    label: flag
+    heading: Means of egress and evacuation › Luminous egress path markings
+    rules:
+    - general.bc_403_5_5_luminous_egress_path_markings
+  '403.6':
+    label: flag
+    heading: Elevators
+    rules:
+    - general.bc_403_6_elevators
+  403.6.1:
+    label: flag
+    heading: Elevators › Fire service access elevator
+    rules:
+    - general.bc_403_6_1_fire_service_access_elevators
+  403.6.2:
+    label: flag
+    heading: Elevators › Occupant evacuation elevators
+    rules:
+    - general.bc_403_6_2_occupant_evacuation_elevators
   '404.1':
     label: flag
     heading: General
@@ -134,6 +214,46 @@ pieces:
     heading: Interior exit stairway discharge
     rules:
     - general.bc_404_11_stairway_discharge_through_an_atrium
+  '405.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_405_1_underground_buildings
+  '405.4':
+    label: flag
+    heading: Compartmentation
+    rules:
+    - general.bc_405_4_compartmentation
+  405.4.1:
+    label: flag
+    heading: Compartmentation › Number of compartments
+    rules:
+    - general.bc_405_4_1_number_of_compartments
+  405.4.2:
+    label: flag
+    heading: Compartmentation › Smoke barrier penetration
+    rules:
+    - general.bc_405_4_2_smoke_barrier_between_compartments
+  405.4.3:
+    label: flag
+    heading: Compartmentation › Elevators
+    rules:
+    - general.bc_405_4_3_compartment_elevators
+  '405.7':
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_405_7_means_of_egress
+  405.7.1:
+    label: flag
+    heading: Means of egress › Number of exits
+    rules:
+    - general.bc_405_7_1_two_exits_on_each_floor_level
+  405.7.2:
+    label: flag
+    heading: Means of egress › Smokeproof enclosure
+    rules:
+    - general.bc_405_7_2_smokeproof_enclosures
   407.4.2:
     label: rule
     heading: Distance of travel
