@@ -552,6 +552,9 @@ HANDLERS = {
     "1013": ("general.bc_1023_8_barrier_at_exit_discharge", "Section 1013"),
     "1025": ("general.bc_1023_9_1_stairway_sign_requirements", "Section 1025"),
     "1028": ("general.bc_1023_12_1_smokeproof_termination", "Section 1028"),
+    # merging #268 into group 7c: 1027.6 names Sections 1020 and 1027 alone, the same way
+    "1020": ("general.bc_1027_6_protection", "Section 1020"),
+    "1027": ("general.bc_1027_6_protection", "Section 1027"),
 }
 NO_LIMIT = {"1006.2.1", "1017.2", "1020.5", "1020.2", "1020.3", "1020.4", "1020.6", "1020.7", "1020.6.1", "1005.3.1", "1005.3.2", "1005.4", "1005.5", "1005.6", "1005.7",
             "1005.7.1", "1005.7.2", "1005.7.3", "1010.1", "1010.1.1", "1010.1.1.1", "1010.1.2",
