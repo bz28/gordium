@@ -35,6 +35,13 @@ internal static class Program
         var fix = Path.Combine(here, "fixtures");
         var answers = Path.Combine(here, "answers");
         var options = Options(Path.Combine(fix, "setup_options.json"));
+        // the egress audit: each answer given, as text and pictures (Audit.cs)
+        if (args.Length > 1 && args[1] == "--audit")
+        {
+            var (_, auditModel, auditSides) = Fixture(Path.Combine(fix, "setup_apartment.json"));
+            return Audit.Run(_out, args[2..], Labels, (pane, name, height, act) => Step(pane, name, height, false, act),
+                             SetupScreen.Build(auditModel, auditSides, options).Fields);
+        }
         var house = Load(Path.Combine(answers, "ithaca_106_house_check_answer.json"));
         var houseAfter = Load(Path.Combine(answers, "ithaca_106_house_after_check_answer.json"));
         var childcare = Load(Path.Combine(answers, "children_odyssey_check_answer.json"));
