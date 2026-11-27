@@ -578,11 +578,17 @@ def test_a_close_pair_on_a_story_follows_each_table_row_exactly_where_one_exit_c
 
 def test_the_readme_counts_the_pieces_and_numbers_the_second_reading_holds():
     """Review round 2 (P3): the folder's README states how many pieces are brought in and how many numbers were
-    read twice; both must be the second reading's own counts, so a piece brought in can't leave them stale."""
+    read twice; both must be the second reading's own counts, so a piece brought in can't leave them stale. Where a
+    piece's two readings differ (its flag says which is right: Chapter 7 part b's Table 716.1(2), whose extracted text
+    loses its stacked fractions), the README says how many, never "all agree"."""
     pieces = load(NY / "text_verification.yaml")["pieces"]
     numbers = sum(len(e["numbers"]) for e in pieces.values())
+    differ = [p for p, e in pieces.items() if e["second_reading"] == "differs"]
     readme = (NY / "README.md").read_text(encoding="utf-8")
-    assert f"{len(pieces)} pieces." in readme and f"(all {len(pieces)} pieces, {numbers} numbers, agree)" in readme
+    said = (f"(all {len(pieces)} pieces, {numbers} numbers, agree)" if not differ else
+            f"({len(pieces)} pieces, {numbers} numbers; all agree but {len(differ)}, whose flag says which reading is "
+            f"right: {', '.join(differ)})")
+    assert f"{len(pieces)} pieces." in readme and said in readme
 
 
 def test_needed_by_is_checked_against_the_rules_that_read_each_fact(tmp_path):
