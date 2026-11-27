@@ -174,6 +174,7 @@ def test_a_stair_entered_on_the_level_it_discharges_is_no_second_exit_unless_its
     isn't marked an exterior exit door; marked, it is one (`_egress_sides`' own test)."""
     desc = corridor(exits=("x",))
     desc["rooms"].append(room("S", rect(36, -6.5, 44, -0.5), use="other", lockable=True))
+    desc["story_outlines"] = [outline(-0.5, -7, 45, 18.5)]   # the stair inside the story's outline
     desc["doors"].append(door("dS", (35.75, -3.5), (0, 1), ("c", "S"), exit_id="S", kind="exit_enclosure"))
     if how != "no_door_out":
         desc["doors"].append(door("So", (44.25, -3.5), (0, 1), ("S", "outside"),
@@ -249,3 +250,43 @@ def test_two_exit_stair_rooms_joined_to_each_other_are_one_exit(join):
         if got is None:
             continue
         assert got["two"] is False and "one exit" in got["why"], (b, got)
+
+
+def test_a_scissor_stair_and_a_third_exit_are_measured_from_the_stairs_nearest_door():
+    """Fix review (a false pass): two adjoining stair rooms S1|S2 are one exit (1007.1.1), so with a third exit X the
+    pair is X and that one stair, measured from its door nearest X (S1's, 3 ft), never from S2's far door: about a
+    twentieth of the diagonal, not the half 1007.1.1 asks."""
+    d = corridor(exits=())                                   # an upper story, no door to outside
+    d["rooms"] += [room("S1", rect(0, -15, 17.5, -7), use="other", lockable=True),
+                   room("S2", rect(17.7, -15, 35.5, -7), use="other", lockable=True),
+                   room("X", rect(-9, -4, -0.5, 5), use="other", lockable=True)]
+    d["doors"] += [door("d1", (2, -6.75), (1, 0), ("c", "S1"), exit_id="S1", kind="exit_enclosure", width=2.5),
+                   door("d2", (33, -6.75), (1, 0), ("c", "S2"), exit_id="S2", kind="exit_enclosure", width=2.5),
+                   door("dX", (-0.25, -2), (0, 1), ("c", "X"), exit_id="X", kind="exit_enclosure", width=2.5)]
+    d["story_outlines"] = [outline(-9.5, -15.5, 36, 18.5)]
+    for got in (g for g in reached(d).values() if g is not None):
+        assert got["two"] is True and got["remoteness_ratio"] < 0.1, got
+
+
+def test_an_outline_that_doesnt_hold_the_story_never_shows_exits_apart():
+    """Fix review: an outer outline smaller than the story (a wing, a slip) would shrink the diagonal and make close
+    exits look apart: not two."""
+    d = side_by_side()
+    d["story_outlines"] = [outline(0, -7, 10, 0)]
+    for got in (g for g in reached(d).values() if g is not None):
+        assert got["two"] is False and "doesn't hold all its rooms" in got["why"], got
+
+
+def test_the_rooms_figure_is_its_worst_doors():
+    """Every way out of the room must reach two exits placed apart: with one door reaching the corridor's far exits
+    and another reaching only a close pair, the room's ratio is the close pair's."""
+    from model_measurement.routes import _apart, _is_exit
+    from routes_layouts import story
+    d = side_by_side()
+    d["doors"].append(door("dy", (35.75, -3.5), (0, 1), ("c", "outside"), exit_id="y"))
+    s = story(d)
+    exits = {r for r in s.rooms if _is_exit(s, r)}
+    links = [tuple(x.sides) for x in s.doors.values()]
+    _, far = _apart(s, exits, links, {"e0": ["x", "y"]})
+    _, both = _apart(s, exits, links, {"e0": ["x", "y"], "e1": ["x", "x2"]})
+    assert far > 0.75 and both < 0.1, (far, both)

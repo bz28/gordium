@@ -40,6 +40,8 @@ import copy
 import itertools
 import math
 
+from shapely.ops import unary_union
+
 from model_measurement.interior.read import Reader, name_of
 from model_measurement.routes import areas, dead_ends, story_place, straight
 from model_measurement.routes.common_path import _TravelOnly, at_point, story_figure
@@ -704,14 +706,21 @@ def _apart(story, exits, links, reached) -> tuple:
         return ("the story's diagonal isn't measured, so how far apart the exits it reaches are (BCNYS 1007.1.1) "
                 f"isn't known ({s.reason})"), None
     doors_of = straight._exits(story)
+    shapes = [r.outline for r in story.rooms.values() if r is not None] +         [straight.opening(d) for ds in doors_of.values() for d in ds]
+    if not story.outer.buffer(ADJOINING).covers(unary_union(shapes)):
+        return ("the story's outer outline doesn't hold all its rooms and exit doors, so its diagonal (BCNYS 1007.1.1's "
+                "measure) isn't known"), None              # a smaller outline would make close exits look apart
+    members = {}                                         # each exit, or group of joined exit rooms, and its doors
+    for e, ds in doors_of.items():
+        members.setdefault(one(e), []).extend(ds)
     least = None
     for did, got in sorted(reached.items()):
-        best = 0.0
-        for a, b in itertools.combinations(sorted(got), 2):
-            if one(a) != one(b) and a in doors_of and b in doors_of:
+        best = 0.0                                       # one exit entered by several doors: its closest door counts
+        for a, b in itertools.combinations(sorted({one(e) for e in got}), 2):
+            if a in members and b in members:
                 best = max(best, min(straight.opening(x).distance(straight.opening(y))
-                                     for x in doors_of[a] for y in doors_of[b]))
-        least = best if least is None else min(least, best)
+                                     for x in members[a] for y in members[b]))
+        least = best if least is None else min(least, best)   # every door of the room must reach two apart
     return None, (least or 0.0) / across
 
 
