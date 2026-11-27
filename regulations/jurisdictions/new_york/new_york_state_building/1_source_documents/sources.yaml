@@ -389,7 +389,7 @@ documents:
         202:factored_load:
           nominal load: 'The book prints "nominal load" in italics (p.44, line 34); Section 202 defines NOMINAL LOADS (p.55,
             line 3), plural, which the italic singular doesn''t name; a structural term no rule reads, reached through
-            STRENGTH, which 1030.16.4 prints in italics. Used by no rule (section group 9i).'
+            STRENGTH, a word 1030.16.4 prints in roman. Used by no rule (section group 9i).'
         202:resistance_factor:
           nominal: 'The book prints "nominal strength" in italics (p.59, line 8); Section 202 has no NOMINAL STRENGTH entry of
             its own, STRENGTH (brought in, 202:strength) defining it within its entry; a structural term no rule reads.

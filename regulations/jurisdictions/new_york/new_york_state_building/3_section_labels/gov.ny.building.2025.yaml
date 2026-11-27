@@ -2188,7 +2188,8 @@ labels:
   202:limit_state:
     label: reference
     topic: definitions
-    reason: 'Defines LIMIT STATE, a term STRENGTH prints in italics: a definition, no requirement.'
+    reason: 'Defines LIMIT STATE, a term LOAD AND RESISTANCE FACTOR DESIGN (LRFD) prints in italics: a definition, no
+      requirement.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 52
@@ -3057,7 +3058,8 @@ labels:
   202:resistance_factor:
     label: reference
     topic: definitions
-    reason: 'Defines RESISTANCE FACTOR, a term STRENGTH prints in italics: a definition, no requirement.'
+    reason: 'Defines RESISTANCE FACTOR, a term LOAD AND RESISTANCE FACTOR DESIGN (LRFD) prints in italics: a definition,
+      no requirement.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 59
@@ -3570,7 +3572,8 @@ labels:
   202:strength:
     label: reference
     topic: definitions
-    reason: 'Defines STRENGTH, a term 1030.16.4 prints in italics: a definition, no requirement.'
+    reason: 'Defines STRENGTH, a word 1030.16.4 prints in roman ("adequate in strength"), brought in so the reader sees it:
+      a definition, no requirement.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 63

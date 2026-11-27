@@ -1920,3 +1920,44 @@ def test_each_section_1030_flag_hides_only_where_no_room_used_for_assembly_can_b
                         values |= {} if spaces is None else {"assembly_spaces": spaces}
                         want = "not_applicable" if hidden(g, s, seats, spaces) else "needs_review"
                         assert outcome(rules[rid], values, ctx.allowed()) == want, (rid, g, s, seats, spaces)
+
+
+def test_each_definitions_label_names_a_piece_that_prints_it_as_it_says():
+    """Review round 1 of section group 9i (P3): STRENGTH's label said 1030.16.4 prints it in italics (it is roman
+    there), and LIMIT STATE's and RESISTANCE FACTOR's said STRENGTH does (LRFD does). A definition's label naming the
+    piece that prints it "in italics" names one whose italics use it (the sections file's `uses`); "in roman", one
+    that prints it in roman (`defined_terms_in_roman`)."""
+    import json as _json
+    labels = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]
+    rows = [_json.loads(l) for l in (NY / "2_extracted_text/gov.ny.building.2025.sections.jsonl").read_text(
+        encoding="utf-8").splitlines()[1:]]
+    ids = {r["id"]: r for r in rows}
+    by_name = {r["title"].upper(): r["id"] for r in rows if r["id"].startswith("202:")}
+    bad, n = [], 0
+    for pid, lab in labels.items():
+        if not pid.startswith("202:"):
+            continue
+        why = " ".join(lab["reason"].split())
+        m = re.search(r"(?:a term|a word) (.+?) prints in (italics|roman)", why)
+        if not m:
+            continue
+        who = m[1].strip()
+        piece = ids.get(who) or ids.get(by_name.get(who, "")) or ids.get(by_name.get(re.sub(r" \(.*\)$", "", who), ""))
+        if piece is None:
+            continue
+        key = "uses" if m[2] == "italics" else "defined_terms_in_roman"
+        n += 1
+        if pid not in (piece.get(key) or []):
+            bad.append((pid, who, m[2]))
+    assert n >= 25 and not bad, (n, bad)
+
+
+def test_no_notes_say_section_1030_isnt_brought_in_now_it_is_whole():
+    """Review round 1 of section group 9i (P3): 1012.2's notes still said 1030 wasn't brought in once sources.yaml
+    brought it in whole."""
+    brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]["sections"]
+    assert "1030" in brought
+    bad = [r["id"] for r in load(RULEBOOK)["rules"]
+           if re.search(r"(?<![\d.])1030(?![\d.])[^.;]*(?:aren't|isn't|not) brought in", r.get("notes") or "")]
+    assert not bad, bad
+
