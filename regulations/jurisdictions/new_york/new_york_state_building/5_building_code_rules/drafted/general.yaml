@@ -3429,7 +3429,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -3780,7 +3780,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -4318,7 +4318,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -4692,7 +4692,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -5054,7 +5054,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -5378,7 +5378,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -5716,7 +5716,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -6090,7 +6090,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -6428,7 +6428,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -6759,7 +6759,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -7116,7 +7116,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -7480,7 +7480,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -7841,7 +7841,7 @@ rules:
       accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks.
       It is settled only where every room on the story but its corridors, closets, toilets and exits, which state none, states
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
-      and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
+      and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
@@ -8523,7 +8523,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
@@ -8696,7 +8696,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or (story_exit_count
@@ -9038,7 +9038,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
@@ -9408,7 +9408,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
@@ -9655,7 +9655,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
@@ -9911,7 +9911,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
@@ -11545,7 +11545,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
@@ -11642,7 +11642,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
@@ -12117,7 +12117,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
@@ -12347,7 +12347,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
@@ -12609,7 +12609,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
@@ -12851,7 +12851,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
@@ -13059,7 +13059,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
@@ -13267,7 +13267,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
@@ -13475,7 +13475,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
@@ -13686,7 +13686,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
@@ -13925,7 +13925,7 @@ rules:
       displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so the routes
       measure across them: a person checks. It is settled only where every room on the story but its corridors, closets, toilets
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
-      every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
+      every room and enclosed space is read, and, in a building stated Group A or stated to have assembly spaces, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
