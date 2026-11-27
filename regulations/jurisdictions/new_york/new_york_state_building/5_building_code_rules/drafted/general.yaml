@@ -1247,7 +1247,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Buildings with an atrium, Section 404, and none in Group H (BCNYS 404.1)
-  applies_when: building_has_atrium
+  applies_when: building_has_atrium or occupancy_group in ["H-1", "H-2", "H-3", "H-4", "H-5", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 91
@@ -1260,6 +1260,7 @@ rules:
   examples:
   - given:
       building_has_atrium: true
+      occupancy_group: B
     expect: needs_review
     note: 'The building states it has an atrium: Sections 404.1 to 404.11 apply, and an atrium isn''t permitted in a Group
       H building; a vertical opening complying with 712.1.1 to 712.1.3 or 712.1.9 to 712.1.14 is excepted. A person checks.'
@@ -1268,10 +1269,19 @@ rules:
     note: 'Not stated: a person checks.'
   - given:
       building_has_atrium: false
+      occupancy_group: H-2
+    expect: needs_review
+    note: 'Group H, though the building states it has no atrium: the stated fact covers an atrium egress passes through or areas
+      open to, and 404.1''s ban covers every atrium (202), a sealed glazed light well among them: a person checks.'
+  - given:
+      building_has_atrium: false
+      occupancy_group: R-2
     expect: not_applicable
-    note: 'The architect states the building has no atrium: not applicable.'
-  notes: 'Shown where the building states an atrium (202: an opening connecting two or more stories, closed at the top, not
-    a mall) or doesn''t rule one out. Not a rule: a stated atrium in Group H may be one of the exception''s vertical openings
+    note: 'The architect states the building has no atrium, and it is no Group H building: not applicable.'
+  notes: 'Shown where the building states an atrium, or doesn''t rule one out, and in a building that may be Group H whatever
+    the atrium fact says (review round 1: the fact covers an atrium a path of egress travel passes through or areas open to,
+    which 404.9 to 404.11 ask about, while 404.1''s ban covers every atrium, 202: an opening connecting two or more stories,
+    closed at the top, not a mall). Not a rule: a stated atrium in Group H may be one of the exception''s vertical openings
     (712.1), which the model doesn''t show, so it never fails on the group alone. Of Section 404, its scope (404.1) and its
     means of egress (404.9 to 404.11) are brought in. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part a).'
   drafted_by: claude_code/claude-opus-5-5
