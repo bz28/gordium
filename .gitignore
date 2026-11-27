@@ -27,3 +27,9 @@ build/
 # (python apps/revit_addin/tools/evals/make_apartment_answer.py; CI makes it before the C# tests)
 apps/revit_addin/tests/Gordium.Revit.Reading.Tests/answers/four_unit_apartment_check_answer.json
 apps/revit_addin/tests/Gordium.Revit.Reading.Tests/answers/four_unit_apartment_check_answer.json.*.tmp
+
+# Published law certificates: generated (python -m rule_format publish) while rules are draft, never committed
+# (docs/decisions/2026-11-23_laws_validation_speed.md, phase 1); the publish lock and its temporary files
+regulations/jurisdictions/*/*/7_published_rulebooks/*.published.json
+regulations/jurisdictions/*/*/7_published_rulebooks/.*.tmp
+regulations/jurisdictions/.publishing.lock
