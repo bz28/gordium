@@ -425,3 +425,22 @@ def test_a_door_to_outside_asks_whether_the_occupants_use_outdoor_areas(got):
         for i in items:
             asks = [ui_data._from_cause(c, "means_of_egress_door") for c in i.get("causes") or []]
             assert "building.occupied_outdoor_areas" in {a.get("field") for a in asks}, i["name"]
+
+
+def test_a_story_whose_room_may_seat_people_served_by_aisles_never_passes_on_travel(got, laws):
+    """BCNYS 1030.7 (p.354, lines 50-51): "Where aisles are provided for seating, the distance shall be measured along
+    the aisles and aisle accessways without travel over or on the seats", fixed seats or loose (1030.9, 1030.13.1). With
+    the five marks No, the apartment's travel passes Table 1017.2 (its rooms all state residential, its corridors and
+    exit stairs none: no seating). With one apartment's function left out, that room may be anything, a dining room or
+    a meeting room with chairs, so its story's travel, measured across where seats may be, needs review, and with it
+    stated a restaurant's (tables and chairs, assembly_unconcentrated) too; never a pass."""
+    def row(change):
+        interior = build.interior_of()
+        interior["building"] = {**interior["building"], **{k: False for k in CH10_BUILDING_MARKS}}
+        change(interior)
+        return egress.check(laws, interior, VALUES, ALLOWED)["results"]["general.bc_table_1017_2_a_e_f1_m_r_s1"]
+    assert row(lambda d: None) == "pass"
+    assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L2N").pop("function")) == "needs_review"
+    assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L1S").update(
+        function="assembly_unconcentrated")) == "needs_review"
+    assert row(lambda d: next(r for r in d["rooms"] if r["id"] == "L1S").update(function="courtroom")) == "needs_review"

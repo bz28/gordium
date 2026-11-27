@@ -510,6 +510,15 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_exit_count >= 2 or (space_occupant_load <= 10 and
+      (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and space_common_path <= 75))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -604,6 +613,7 @@ rules:
       - id: p1
         name: Classroom, 30 occupants, two doors
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 2
           space_occupant_load: 30
           space_common_path: 48.5
@@ -625,6 +635,7 @@ rules:
       - id: p6
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 2
           space_occupant_load: 30
           space_common_path: 80
@@ -646,6 +657,7 @@ rules:
       - id: p2
         name: Classroom, 30 occupants, one door
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_occupant_load: 30
           space_common_path: 40
@@ -666,6 +678,7 @@ rules:
       - id: p3
         name: Office, 4 occupants, one door
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_occupant_load: 4
           space_common_path: 30
@@ -685,6 +698,7 @@ rules:
       - id: p4
         name: Office, long common path
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_occupant_load: 4
           space_common_path: 80
@@ -705,6 +719,7 @@ rules:
       - id: p5
         name: Unsprinklered office
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_occupant_load: 4
           space_common_path: 30
@@ -840,6 +855,16 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 49 and space_common_path <= (75 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1",
+      "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30 else 75))))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -956,6 +981,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -977,6 +1003,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 49
@@ -998,6 +1025,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 50
@@ -1019,6 +1047,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -1040,6 +1069,7 @@ rules:
       - id: p1
         name: One door, unsprinklered, up to 30
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 30
@@ -1061,6 +1091,7 @@ rules:
       - id: p1
         name: One door, unsprinklered, over 30
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 31
@@ -1082,6 +1113,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -1103,6 +1135,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 54
@@ -1124,6 +1157,7 @@ rules:
       - id: p1
         name: Restaurant, fixed seating not stated
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 40
@@ -1145,6 +1179,7 @@ rules:
       - id: p1
         name: Restaurant, no fixed seating
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 40
@@ -1166,6 +1201,7 @@ rules:
       - id: p1
         name: Theatre, two exits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 300
@@ -1186,6 +1222,7 @@ rules:
       - id: p1
         name: Store, pads not stated
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 120
@@ -1207,6 +1244,7 @@ rules:
       - id: p1
         name: School auditorium, two exits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 300
@@ -1228,6 +1266,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -1325,6 +1364,16 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 49 and space_common_path <= (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1",
+      "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30 else 75))))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -1422,6 +1471,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -1442,6 +1492,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 49
@@ -1462,6 +1513,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 50
@@ -1482,6 +1534,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -1502,6 +1555,7 @@ rules:
       - id: p1
         name: One door, unsprinklered, up to 30
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 30
@@ -1522,6 +1576,7 @@ rules:
       - id: p1
         name: One door, unsprinklered, over 30
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 31
@@ -1542,6 +1597,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -1562,6 +1618,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 54
@@ -1583,6 +1640,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -1675,6 +1733,16 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 49 and space_common_path <= (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1",
+      "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30 else 75))))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -1772,6 +1840,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -1792,6 +1861,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 49
@@ -1812,6 +1882,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 50
@@ -1832,6 +1903,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -1852,6 +1924,7 @@ rules:
       - id: p1
         name: One door, unsprinklered, up to 30
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 30
@@ -1872,6 +1945,7 @@ rules:
       - id: p1
         name: One door, unsprinklered, over 30
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 31
@@ -1892,6 +1966,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -1912,6 +1987,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 54
@@ -1933,6 +2009,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -2014,6 +2091,15 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 3 and sprinklered_903_3_1_1 and space_common_path <= 25))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -2097,6 +2183,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -2117,6 +2204,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 3
@@ -2137,6 +2225,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 4
@@ -2157,6 +2246,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -2177,6 +2267,7 @@ rules:
       - id: p1
         name: One door, no sprinkler system
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -2197,6 +2288,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -2217,6 +2309,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 8
@@ -2238,6 +2331,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -2316,6 +2410,15 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 10 and sprinklered_903_3_1_1 and space_common_path <= 75))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -2399,6 +2502,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -2419,6 +2523,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 10
@@ -2439,6 +2544,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 11
@@ -2459,6 +2565,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -2479,6 +2586,7 @@ rules:
       - id: p1
         name: One door, no sprinkler system
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -2499,6 +2607,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -2519,6 +2628,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 15
@@ -2540,6 +2650,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -2631,6 +2742,16 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path
+      <= 75))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -2728,6 +2849,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -2748,6 +2870,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 10
@@ -2768,6 +2891,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 11
@@ -2788,6 +2912,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -2808,6 +2933,7 @@ rules:
       - id: p1
         name: One door, no sprinkler system
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -2828,6 +2954,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -2848,6 +2975,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 15
@@ -2869,6 +2997,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -2899,6 +3028,7 @@ rules:
       - id: p1
         name: Patient room, one door
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 4
@@ -2981,6 +3111,16 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path
+      <= 100))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -3072,6 +3212,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -3092,6 +3233,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 10
@@ -3112,6 +3254,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 11
@@ -3132,6 +3275,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -3152,6 +3296,7 @@ rules:
       - id: p1
         name: One door, no sprinkler system
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -3172,6 +3317,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -3192,6 +3338,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 15
@@ -3213,6 +3360,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -3296,6 +3444,16 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path
+      <= 75))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -3380,6 +3538,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -3400,6 +3559,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 10
@@ -3420,6 +3580,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 11
@@ -3440,6 +3601,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -3460,6 +3622,7 @@ rules:
       - id: p1
         name: One door, no sprinkler system
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -3480,6 +3643,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -3500,6 +3664,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 15
@@ -3521,6 +3686,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -3604,6 +3770,16 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 20 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path
+      <= 125))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -3688,6 +3864,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -3708,6 +3885,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 20
@@ -3728,6 +3906,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 21
@@ -3748,6 +3927,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -3768,6 +3948,7 @@ rules:
       - id: p1
         name: One door, no sprinkler system
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -3788,6 +3969,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -3808,6 +3990,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 25
@@ -3829,6 +4012,7 @@ rules:
       - id: p1
         name: Apartment, one door, no sprinkler system
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
     rows:
@@ -3848,6 +4032,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -3937,6 +4122,16 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 20 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path
+      <= 125))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -4041,6 +4236,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -4061,6 +4257,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 20
@@ -4081,6 +4278,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 21
@@ -4101,6 +4299,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -4122,6 +4321,7 @@ rules:
       - id: p1
         name: One door, no sprinkler system
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -4143,6 +4343,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -4163,6 +4364,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 25
@@ -4184,6 +4386,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -4278,6 +4481,16 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 29 and space_common_path <= (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1",
+      "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30 else 75))))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -4382,6 +4595,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -4402,6 +4616,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 29
@@ -4422,6 +4637,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 30
@@ -4442,6 +4658,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -4462,6 +4679,7 @@ rules:
       - id: p1
         name: One door, unsprinklered, up to 30
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 29
@@ -4482,6 +4700,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -4502,6 +4721,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 34
@@ -4523,6 +4743,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -4616,6 +4837,16 @@ rules:
       seat (75 ft under 50 occupants; 50 ft smoke-protected or open-air); the routes measure it straight across the seats,
       so the figure can''t be trusted at any length: a person checks. (Only where the row would otherwise pass: a measured
       fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_assembly_seating_possible and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 49 and space_common_path <= (75 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1",
+      "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30 else 75))))
+    reason: 'A room on this space''s story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function
+      that may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: the common
+      path is a portion of exit access travel (202 COMMON PATH OF EGRESS TRAVEL), which 1030.7 measures along the aisles and
+      aisle accessways wherever aisles are provided for seating, never over the seats, and every occupied portion with seats,
+      tables or displays has aisles (1030.9; aisle accessways for seating at tables, 1030.13.1); the seats aren''t drawn, so
+      the routes measure across them: a person checks. Setting each room''s function settles it. (Only where the row would otherwise
+      pass: a measured fail still fails, since the real path can only be longer.)'
   for_each: space
   when_none: needs_review
   sources:
@@ -4713,6 +4944,7 @@ rules:
       - id: p1
         name: Two doors, short common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 60
@@ -4733,6 +4965,7 @@ rules:
       - id: p1
         name: One door, at both limits
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 49
@@ -4753,6 +4986,7 @@ rules:
       - id: p1
         name: One door, one occupant too many
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 50
@@ -4773,6 +5007,7 @@ rules:
       - id: p1
         name: One door, common path just past
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 1
@@ -4793,6 +5028,7 @@ rules:
       - id: p1
         name: One door, unsprinklered, up to 30
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 30
@@ -4813,6 +5049,7 @@ rules:
       - id: p1
         name: One door, unsprinklered, over 30
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 1
           space_occupant_load: 31
@@ -4833,6 +5070,7 @@ rules:
       - id: p1
         name: Two doors, long common path
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: false
           space_exit_count: 2
           space_occupant_load: 1
@@ -4853,6 +5091,7 @@ rules:
       - id: p1
         name: Stair enclosure
         measures:
+          space_assembly_seating_possible: false
           space_is_exit: true
           space_exit_count: 1
           space_occupant_load: 54
@@ -4874,6 +5113,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          space_assembly_seating_possible: false
           space_exit_count: 1
           space_is_exit: false
     rows:
@@ -5163,6 +5403,7 @@ rules:
       - id: p1
         name: Group home floor
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 125
     rows:
     - part: p1
@@ -5182,6 +5423,7 @@ rules:
       - id: p1
         name: Group home floor
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 125.5
     rows:
     - part: p1
@@ -5201,6 +5443,7 @@ rules:
       - id: p1
         name: Assisted living floor
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 75
     rows:
     - part: p1
@@ -5220,6 +5463,7 @@ rules:
       - id: p1
         name: Assisted living floor
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 75.5
     rows:
     - part: p1
@@ -5239,6 +5483,7 @@ rules:
       - id: p1
         name: Sprinklered per NFPA 13
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 150
     rows:
     - part: p1
@@ -5272,6 +5517,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
@@ -5430,6 +5682,16 @@ rules:
       may have a room used for assembly purposes with fixed seating (stated or not ruled out): 1030.7 measures travel along
       the aisles, never over the seats the routes measure across, so the figure can''t be trusted: a person checks. (Only
       where the story would otherwise pass: a measured fail still fails.)'
+  - when: story_assembly_seating_possible and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load
+      <= 1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or (story_exit_count > 0 and occupancy_group_i4 and not other_occupancy_present and story_first_above_or_below_grade and
+      story_occupant_load <= 10 and egress_travel_distance <= 75))
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or (story_exit_count
       > 0 and occupancy_group_i4 and not other_occupancy_present and story_first_above_or_below_grade and story_occupant_load
@@ -5488,6 +5750,7 @@ rules:
       - id: p1
         name: First floor, 120
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 2
           story_occupant_load: 120
           story_first_above_or_below_grade: true
@@ -5510,6 +5773,7 @@ rules:
       - id: p2
         name: Second floor, one exit
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 1
           story_occupant_load: 120
           story_first_above_or_below_grade: false
@@ -5533,6 +5797,7 @@ rules:
       - id: p3
         name: Small first floor, one exit
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 1
           story_occupant_load: 8
           story_first_above_or_below_grade: true
@@ -5556,6 +5821,7 @@ rules:
       - id: p7
         name: Floor just over 500
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 2
           story_occupant_load: 500.5
           story_first_above_or_below_grade: true
@@ -5579,6 +5845,7 @@ rules:
       - id: p4
         name: Hall floor, 600
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 2
           story_occupant_load: 600
           story_first_above_or_below_grade: true
@@ -5600,6 +5867,7 @@ rules:
       - id: p6
         name: Upper floor at grade on a slope
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 1
           story_occupant_load: 40
           story_first_above_or_below_grade: false
@@ -5622,6 +5890,7 @@ rules:
       - id: p5
         name: Group B floor, one exit
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 1
           story_occupant_load: 30
           story_first_above_or_below_grade: true
@@ -5749,6 +6018,17 @@ rules:
       may have a room used for assembly purposes with fixed seating (stated or not ruled out): 1030.7 measures travel along
       the aisles, never over the seats the routes measure across, so the figure can''t be trusted: a person checks. (Only
       where the story would otherwise pass: a measured fail still fails.)'
+  - when: story_assembly_seating_possible and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load
+      <= 1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or story_exit_count > 0 and (story_first_above_or_below_grade and story_occupant_load <= 49 and egress_travel_distance
+      <= (100 if occupancy_group in ["B", "F-1", "F-2"] and sprinklered_903_3_1_1 else 75) or story_second_above_grade_plane
+      and occupancy_group in ["B", "F-1", "F-2", "M"] and story_occupant_load <= 29 and egress_travel_distance <= 75))
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
       > 0 and (story_first_above_or_below_grade and story_occupant_load <= 49 and egress_travel_distance <= (100 if occupancy_group
@@ -5828,6 +6108,7 @@ rules:
       - id: p1
         name: Office floor, two exits
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 2
           story_occupant_load: 120
@@ -5848,6 +6129,7 @@ rules:
       - id: p1
         name: Office floor of 600, two exits
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 2
           story_occupant_load: 600
@@ -5869,6 +6151,7 @@ rules:
       - id: p1
         name: Small office, one exit, NFPA 13
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 49
@@ -5893,6 +6176,7 @@ rules:
       - id: p1
         name: Small office, one exit, no sprinkler system
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 49
@@ -5917,6 +6201,7 @@ rules:
       - id: p1
         name: Shop, one exit, 50 occupants
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 50
@@ -5941,6 +6226,7 @@ rules:
       - id: p1
         name: Shop upstairs, one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 29
@@ -5965,6 +6251,7 @@ rules:
       - id: p1
         name: Restaurant upstairs, one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 20
@@ -5989,6 +6276,7 @@ rules:
       - id: p1
         name: Classroom floor, third story, one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 10
@@ -6022,6 +6310,7 @@ rules:
       - id: p1
         name: Day care floor
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 1
           story_occupant_load: 5
           egress_travel_distance: 10
@@ -6093,6 +6382,18 @@ rules:
       may have a room used for assembly purposes with fixed seating (stated or not ruled out): 1030.7 measures travel along
       the aisles, never over the seats the routes measure across, so the figure can''t be trusted: a person checks. (Only
       where the story would otherwise pass: a measured fail still fails.)'
+  - when: story_assembly_seating_possible and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load
+      <= 1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or story_exit_count > 0 and (occupancy_group in ["R-3", "R-4"] or story_first_above_or_below_grade and (occupancy_group
+      in ["H-2", "H-3"] and story_occupant_load <= 3 and egress_travel_distance <= 25 or occupancy_group in ["H-4", "H-5", "I-1",
+      "I-2", "I-3", "R-1", "R-2"] and story_occupant_load <= 10 and egress_travel_distance <= 75) and (occupancy_group != "R-2"
+      or (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)))
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
       > 0 and (occupancy_group in ["R-3", "R-4"] or story_first_above_or_below_grade and (occupancy_group in ["H-2", "H-3"]
@@ -6183,6 +6484,7 @@ rules:
       - id: p1
         name: Group R-3 floor, one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 40
@@ -6204,6 +6506,7 @@ rules:
       - id: p1
         name: Dormitory floor (sleeping units), one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 10
@@ -6229,6 +6532,7 @@ rules:
       - id: p1
         name: Dormitory floor without escape openings
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 10
@@ -6251,6 +6555,7 @@ rules:
       - id: p1
         name: Day care floor
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 1
           story_occupant_load: 5
           egress_travel_distance: 10
@@ -6321,6 +6626,16 @@ rules:
       may have a room used for assembly purposes with fixed seating (stated or not ruled out): 1030.7 measures travel along
       the aisles, never over the seats the routes measure across, so the figure can''t be trusted: a person checks. (Only
       where the story would otherwise pass: a measured fail still fails.)'
+  - when: story_assembly_seating_possible and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load
+      <= 1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or story_exit_count > 0 and ((story_first_above_or_below_grade and egress_travel_distance <= (100 if sprinklered_903_3_1_1
+      else 75) or story_second_above_grade_plane and egress_travel_distance <= 75) and story_occupant_load <= 29))
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
       > 0 and ((story_first_above_or_below_grade and egress_travel_distance <= (100 if sprinklered_903_3_1_1 else 75) or story_second_above_grade_plane
@@ -6397,6 +6712,7 @@ rules:
       - id: p1
         name: Parking floor, one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 20
@@ -6421,6 +6737,7 @@ rules:
       - id: p1
         name: Warehouse floor, one exit, NFPA 13
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 29
@@ -6445,6 +6762,7 @@ rules:
       - id: p1
         name: Warehouse floor, one exit, unsprinklered
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 29
@@ -6469,6 +6787,7 @@ rules:
       - id: p1
         name: Warehouse floor, 30 occupants, one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 30
@@ -6491,6 +6810,7 @@ rules:
       - id: p1
         name: Day care floor
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 1
           story_occupant_load: 5
           egress_travel_distance: 10
@@ -6557,6 +6877,16 @@ rules:
       may have a room used for assembly purposes with fixed seating (stated or not ruled out): 1030.7 measures travel along
       the aisles, never over the seats the routes measure across, so the figure can''t be trusted: a person checks. (Only
       where the story would otherwise pass: a measured fail still fails.)'
+  - when: story_assembly_seating_possible and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load
+      <= 1000 else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4)
+      or story_exit_count > 0 and not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance
+      <= 125 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. (Only where the row would otherwise pass: a measured fail still fails, since the real path can only be longer.)'
   - when: special_egress_spaces and story_exit_count < (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000
       else 4) and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <= 1000 else 4) or story_exit_count
       > 0 and not story_fourth_or_higher_above_grade_plane and story_dwelling_units <= 4 and egress_travel_distance <= 125
@@ -6632,6 +6962,7 @@ rules:
       - id: p1
         name: Apartment floor, two exits
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 2
           story_occupant_load: 9
@@ -6653,6 +6984,7 @@ rules:
       - id: p1
         name: Four apartments, one exit, at the limits
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 18
@@ -6677,6 +7009,7 @@ rules:
       - id: p1
         name: Five apartments, one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 20
@@ -6701,6 +7034,7 @@ rules:
       - id: p1
         name: Four apartments, one exit, 126 ft
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 18
@@ -6725,6 +7059,7 @@ rules:
       - id: p1
         name: Fourth story, one exit
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 8
@@ -6749,6 +7084,7 @@ rules:
       - id: p1
         name: Four apartments, one exit, no sprinkler system
         measures:
+          story_assembly_seating_possible: false
           story_rooms_exit_directly_outside: false
           story_exit_count: 1
           story_occupant_load: 18
@@ -6771,6 +7107,7 @@ rules:
       - id: p1
         name: Dormitory floor
         measures:
+          story_assembly_seating_possible: false
           story_exit_count: 1
           story_occupant_load: 5
           egress_travel_distance: 10
@@ -8077,6 +8414,7 @@ rules:
       - id: p1
         name: First floor (the sheet)
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 130.667
     rows:
     - part: p1
@@ -8096,6 +8434,7 @@ rules:
       - id: p2
         name: Long travel
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 210
     rows:
     - part: p2
@@ -8114,6 +8453,7 @@ rules:
       - id: p1
         name: Unsprinklered
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 130.667
     rows:
     - part: p1
@@ -8132,6 +8472,7 @@ rules:
       - id: p3
         name: NFPA 13R only
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 180
     rows:
     - part: p3
@@ -8168,6 +8509,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
@@ -8253,6 +8601,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -8363,6 +8718,7 @@ rules:
       - id: p1
         name: At the unsprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 200
     rows:
     - part: p1
@@ -8382,6 +8738,7 @@ rules:
       - id: p1
         name: Just past it
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 200.5
     rows:
     - part: p1
@@ -8401,6 +8758,7 @@ rules:
       - id: p1
         name: At the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 250
     rows:
     - part: p1
@@ -8420,6 +8778,7 @@ rules:
       - id: p1
         name: Just past the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 250.5
     rows:
     - part: p1
@@ -8439,6 +8798,7 @@ rules:
       - id: p1
         name: Apartment floor, NFPA 13R
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 240
     rows:
     - part: p1
@@ -8458,6 +8818,7 @@ rules:
       - id: p1
         name: Shop, NFPA 13R stated
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 240
     rows:
     - part: p1
@@ -8477,6 +8838,7 @@ rules:
       - id: p1
         name: Factory floor, long run
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 300
     rows:
     - part: p1
@@ -8496,6 +8858,7 @@ rules:
       - id: p1
         name: Hall, fixed seating not stated
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 260
     rows:
     - part: p1
@@ -8516,6 +8879,7 @@ rules:
       - id: p1
         name: Hall, no fixed seating
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 260
     rows:
     - part: p1
@@ -8534,6 +8898,7 @@ rules:
       - id: p1
         name: Balcony increase not stated
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 210
     rows:
     - part: p1
@@ -8554,6 +8919,7 @@ rules:
       - id: p1
         name: Balcony increase not taken
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 210
     rows:
     - part: p1
@@ -8572,6 +8938,7 @@ rules:
       - id: p1
         name: At the unsprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 200
     rows:
     - part: p1
@@ -8592,6 +8959,7 @@ rules:
       - id: p1
         name: Group home floor, NFPA 13D
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 125.5
     rows:
     - part: p1
@@ -8612,6 +8980,7 @@ rules:
       - id: p1
         name: Assisted living floor, NFPA 13D
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 75
     rows:
     - part: p1
@@ -8631,6 +9000,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 10
     rows:
     - part: p1
@@ -8701,6 +9071,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -8780,6 +9157,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -8799,6 +9177,7 @@ rules:
       - id: p1
         name: At the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 250
     rows:
     - part: p1
@@ -8818,6 +9197,7 @@ rules:
       - id: p1
         name: Just past the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 250.5
     rows:
     - part: p1
@@ -8836,6 +9216,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -8855,6 +9236,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 10
     rows:
     - part: p1
@@ -8914,6 +9296,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -8985,6 +9374,7 @@ rules:
       - id: p1
         name: At the unsprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 200
     rows:
     - part: p1
@@ -9004,6 +9394,7 @@ rules:
       - id: p1
         name: Just past it
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 200.5
     rows:
     - part: p1
@@ -9023,6 +9414,7 @@ rules:
       - id: p1
         name: At the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 300
     rows:
     - part: p1
@@ -9042,6 +9434,7 @@ rules:
       - id: p1
         name: Just past the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 300.5
     rows:
     - part: p1
@@ -9060,6 +9453,7 @@ rules:
       - id: p1
         name: At the unsprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 200
     rows:
     - part: p1
@@ -9079,6 +9473,7 @@ rules:
       - id: p1
         name: Office floor with a lecture hall
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 90
     rows:
     - part: p1
@@ -9098,6 +9493,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 10
     rows:
     - part: p1
@@ -9157,6 +9553,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -9235,6 +9638,7 @@ rules:
       - id: p1
         name: At the unsprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 300
     rows:
     - part: p1
@@ -9254,6 +9658,7 @@ rules:
       - id: p1
         name: Just past it
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 300.5
     rows:
     - part: p1
@@ -9273,6 +9678,7 @@ rules:
       - id: p1
         name: At the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 400
     rows:
     - part: p1
@@ -9292,6 +9698,7 @@ rules:
       - id: p1
         name: Just past the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 400.5
     rows:
     - part: p1
@@ -9310,6 +9717,7 @@ rules:
       - id: p1
         name: At the unsprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 300
     rows:
     - part: p1
@@ -9329,6 +9737,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 10
     rows:
     - part: p1
@@ -9381,6 +9790,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -9444,6 +9860,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -9463,6 +9880,7 @@ rules:
       - id: p1
         name: At the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 75
     rows:
     - part: p1
@@ -9483,6 +9901,7 @@ rules:
       - id: p1
         name: Just past the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 75.5
     rows:
     - part: p1
@@ -9501,6 +9920,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -9520,6 +9940,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 10
     rows:
     - part: p1
@@ -9572,6 +9993,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -9635,6 +10063,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -9654,6 +10083,7 @@ rules:
       - id: p1
         name: At the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 100
     rows:
     - part: p1
@@ -9674,6 +10104,7 @@ rules:
       - id: p1
         name: Just past the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 100.5
     rows:
     - part: p1
@@ -9692,6 +10123,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -9711,6 +10143,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 10
     rows:
     - part: p1
@@ -9763,6 +10196,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -9826,6 +10266,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -9845,6 +10286,7 @@ rules:
       - id: p1
         name: At the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 150
     rows:
     - part: p1
@@ -9865,6 +10307,7 @@ rules:
       - id: p1
         name: Just past the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 150.5
     rows:
     - part: p1
@@ -9883,6 +10326,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -9902,6 +10346,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 10
     rows:
     - part: p1
@@ -9954,6 +10399,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -10017,6 +10469,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -10036,6 +10489,7 @@ rules:
       - id: p1
         name: At the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 175
     rows:
     - part: p1
@@ -10056,6 +10510,7 @@ rules:
       - id: p1
         name: Just past the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 175.5
     rows:
     - part: p1
@@ -10074,6 +10529,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -10093,6 +10549,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 10
     rows:
     - part: p1
@@ -10148,6 +10605,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -10218,6 +10682,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -10237,6 +10702,7 @@ rules:
       - id: p1
         name: At the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 200
     rows:
     - part: p1
@@ -10256,6 +10722,7 @@ rules:
       - id: p1
         name: Just past the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 300.5
     rows:
     - part: p1
@@ -10275,6 +10742,7 @@ rules:
       - id: p1
         name: Fabrication area, long run
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 250
     rows:
     - part: p1
@@ -10293,6 +10761,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
     rows:
     - part: p1
@@ -10312,6 +10781,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 10
     rows:
     - part: p1
@@ -10369,6 +10839,13 @@ rules:
       1030.7 measures its travel along the aisles and aisle accessways, never over or on the seats, which the routes don''t
       see, and its exceptions allow more for smoke-protected and open-air seating; a person checks. Over the row, too: 1030.7''s
       exceptions allow more for smoke-protected and open-air seating.'
+  - when: story_assembly_seating_possible
+    reason: 'A room on this story may seat people served by aisles (it states a Table 1004.5 Assembly function, a function that
+      may be an assembly use, such as a courtroom, a reading room or a stage, or none), fixed seats or not: wherever aisles
+      are provided for seating, 1030.7 measures travel along the aisles and aisle accessways without travel over or on the seats,
+      and every occupied portion with seats, tables or displays has aisles (1030.9; aisle accessways for seating at tables,
+      1030.13.1); the seats aren''t drawn, so the routes measure across them: a person checks. Setting each room''s function
+      settles it. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
   for_each: story
   when_none: needs_review
   sources:
@@ -10446,6 +10923,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
           egress_travel_in_sleeping_room: 0
     rows:
@@ -10466,6 +10944,7 @@ rules:
       - id: p1
         name: At the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 200
           egress_travel_in_sleeping_room: 40
     rows:
@@ -10486,6 +10965,7 @@ rules:
       - id: p1
         name: Just past the sprinklered limit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 200.5
           egress_travel_in_sleeping_room: 0
     rows:
@@ -10506,6 +10986,7 @@ rules:
       - id: p1
         name: Ward, a long bedroom
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 120
           egress_travel_in_sleeping_room: 55
     rows:
@@ -10526,6 +11007,7 @@ rules:
       - id: p1
         name: Housing unit
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 120
           egress_travel_in_sleeping_room: 0
     rows:
@@ -10545,6 +11027,7 @@ rules:
       - id: p1
         name: No sprinkler system
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 20
           egress_travel_in_sleeping_room: 0
     rows:
@@ -10565,6 +11048,7 @@ rules:
       - id: p1
         name: Another group's
         measures:
+          story_assembly_seating_possible: false
           egress_travel_distance: 10
           egress_travel_in_sleeping_room: 0
     rows:

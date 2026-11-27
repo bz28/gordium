@@ -123,7 +123,75 @@ def readable_rooms(description) -> tuple[dict, bool]:
     return rooms, len(rooms) == len(given)
 
 
+# Seating served by aisles (BCNYS 1030.7, p.354, lines 50-51: "Where aisles are provided for seating, the distance shall
+# be measured along the aisles and aisle accessways without travel over or on the seats"), fixed seats or loose ones
+# alike (1030.9: every occupied portion of a room or space used for assembly purposes that contains seats, tables,
+# displays, similar fixtures or equipment has aisles; 1030.13.1: aisle accessways for seating at tables). The seats
+# aren't drawn, so the routes measure a story's travel and a space's common path straight across them. Table 1004.5's
+# rows under its "Assembly" heading (p.312, lines 20-27) name a room used for assembly purposes; its other rows a room
+# may be one of (303.1 "awaiting transportation", 303.4's courtrooms, gymnasiums, indoor swimming pools, libraries and
+# terminal waiting areas, 303.5's rinks and pools with spectator seating, 303.2's theaters' stages) may or may not be.
+ASSEMBLY_FUNCTIONS = ("gaming_floor", "exhibit_gallery_museum", "assembly_fixed_seats", "assembly_concentrated",
+                      "assembly_standing", "assembly_unconcentrated", "bowling_center")
+ASSEMBLY_LIKE_FUNCTIONS = ("courtroom", "library_reading_room", "exercise_room", "rink_pool", "pool_deck",
+                           "stage_platform", "airport_waiting")
+SEATING_STORY, SEATING_SPACE = "story_assembly_seating_possible", "space_assembly_seating_possible"
+
+
+def _may_seat(room: dict, functions: dict, is_exit=None) -> bool:
+    """Whether a room may hold seating served by aisles: a function under Table 1004.5's Assembly heading or one that may
+    be an assembly use, no function stated (but a corridor, closet or toilet with none, or a room that is itself an
+    exit), or a function that is none of the table's. Only a room stating another of the table's functions is ruled
+    out (a residential, business or mercantile room)."""
+    if is_exit is True:
+        return False
+    fn = room.get("function")
+    if fn is None:
+        return room.get("use") not in SUPPORT_USES
+    if not isinstance(fn, str) or fn not in functions:
+        return True
+    return fn in ASSEMBLY_FUNCTIONS or fn in ASSEMBLY_LIKE_FUNCTIONS
+
+
+def assembly_seating(parts: dict, description: dict, factors: dict) -> dict:
+    """story_assembly_seating_possible on each story, and space_assembly_seating_possible (its story's) on each of the
+    story's spaces: true where a room on the story may hold seating served by aisles (_may_seat), so the travel and
+    common-path rows need review there (1030.7: measured along the aisles, never over the seats the routes measure
+    across); false only where every room on the story states one of Table 1004.5's other functions (or is an exit, or a
+    corridor, closet or toilet with none). True on every story where a room can't be read or placed on a story, or the
+    description lists an enclosed space with no room drawn in it (its use isn't known): never false on a room unseen.
+    The story knows its rooms (it is in the model), so a floor the model leaves out doesn't matter here."""
+    rooms, every = readable_rooms(description)
+    unknown = description.get("unknown_spaces") if isinstance(description, dict) else None
+    spaces = [p for p in parts.get("space") or [] if isinstance(p, dict)]
+    corridors = [c for c in parts.get("corridor") or [] if isinstance(c, dict)]
+    placed = {p.get("id") for p in spaces + corridors}
+    unseen = not every or bool(unknown) or any(r not in placed for r in rooms)
+    functions = factors["functions"]
+    for story in parts.get("story") or []:
+        mine = [p for p in spaces if p.get("within") == story["id"]]
+        possible = unseen or any(_may_seat(rooms.get(p.get("id")) or {}, functions, p["measures"].get("space_is_exit"))
+                                 for p in mine) or             any((rooms.get(c.get("id")) or {}).get("function") is not None and
+                _may_seat(rooms.get(c.get("id")) or {}, functions) for c in corridors if c.get("within") == story["id"])
+        _set(story, SEATING_STORY, possible)
+        for p in mine:
+            _set(p, SEATING_SPACE, possible)
+    stories = {s.get("id") for s in parts.get("story") or []}
+    for p in spaces:                                # a space no story holds: its story's rooms aren't known
+        if p.get("within") not in stories:
+            _set(p, SEATING_SPACE, True)
+    return parts
+
+
+def _set(part: dict, name: str, value: bool) -> None:
+    """The value, and the routes' "not measured yet" for it taken away (a measure with a reason is never read)."""
+    part.setdefault("measures", {})[name] = value
+    if isinstance(part.get("not_measured"), dict):
+        part["not_measured"].pop(name, None)
+
+
 def apply(parts: dict, description: dict, factors: dict, building: dict | None) -> dict:
+    assembly_seating(parts, description, factors)
     rooms, every = readable_rooms(description)
     increase_ruled_out = isinstance(building, dict) and building.get("occupant_load_increased") is False
     cap = factors["increase_cap"]
