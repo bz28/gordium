@@ -86,6 +86,15 @@ def test_each_piece_has_its_flag_shown_only_where_the_building_may_be_that_use(c
             assert outcome(rule, given, ctx.allowed()) == want, (pid, value)
 
 
+def test_each_flags_shown_words_hold_wherever_it_needs_review(rules):
+    """Review round 2: a flag's needs-review line shows its first needs-review example's note (design_checker egress
+    _flag_item), whatever the building states; so that note never says the architect stated something (404.1's once
+    said "The building states it has an atrium" where it showed for a Group H building stating none)."""
+    for rid in _block_ids():
+        shown = next(e["note"] for e in rules[rid]["examples"] if e.get("expect") == "needs_review" and e.get("note"))
+        assert not re.search(r"states (it|the|that)|is stated(?! or not)", shown), (rid, shown)
+
+
 def test_the_block_holds_chapter_4_only_in_book_order(rules):
     block = _block_ids()
     assert block and all(re.match(r"general\.bc_4\d\d_", r) for r in block)
