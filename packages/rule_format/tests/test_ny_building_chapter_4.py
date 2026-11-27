@@ -350,9 +350,12 @@ def _said_not_brought_in(text):
     each has its own distance, not brought in"; "Covered malls (402.8); atriums are not brought in") and a clause
     after them doesn't ("1014.9 (not brought in) is a person's check; Group I-2 ... per 407.4.3 (a flag) too")."""
     for sentence in re.split(r"(?<=\.)\s", text):
-        for clause in re.finditer(r"[^;:]+(?:[;:]|$)", sentence):
+        clauses = list(re.finditer(r"[^;:]+(?:[;:]|$)", sentence))
+        for n, clause in enumerate(clauses):
             if re.search(r"(?:not|n't) brought in", clause.group()):
-                yield sentence[:clause.end()]
+                # a list the words open with a colon is theirs too ("not brought in: covered malls (402.8) and ...")
+                end = clauses[n + 1].end() if clause.group().endswith(":") and n + 1 < len(clauses) else clause.end()
+                yield sentence[:end]
 
 
 def test_a_stretch_said_not_brought_in_runs_from_its_sentence_start_to_its_clause_end():
@@ -360,6 +363,9 @@ def test_a_stretch_said_not_brought_in_runs_from_its_sentence_start_to_its_claus
         "Covered malls (402.8); atriums are not brought in."]
     [got] = _said_not_brought_in("Handrails as 1014.9 allows (not brought in) are a check; Group I-2 per 407.4.3 too.")
     assert "407.4.3" not in got and "Group I-2" not in got and "1014.9" in got
+    # review round 5: the list a colon opens after the words
+    [got] = _said_not_brought_in("Two uses are not brought in: covered malls (402.8) and Group I-2 occupancies.")
+    assert "402.8" in got and _named_uses(got) == {"402.8", "407.4"}
 
 
 def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rules):
