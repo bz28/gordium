@@ -239,6 +239,33 @@ def test_an_opening_set_aside_on_its_rooms_reading_is_never_a_pass():
             assert reading in row["reason"]
 
 
+@pytest.mark.parametrize("bad", [["x"], "s", None])
+def test_a_room_whose_confirm_or_more_isnt_a_mapping_is_never_a_crash(bad):
+    """Merge review: a hand-built sleeping room arriving with a `confirm` or `more` that isn't a mapping, its reach
+    standing on a reading: never a crash, the reading said."""
+    for key in ("confirm", "more"):
+        parts, desc = _parts()
+        parts["sleeping_room"][0][key] = bad
+        parts["space"] = [{"id": "b", "within": "L1", "measures": {}, "not_measured": {},
+                           "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}}},
+                           "confirm": {"space_exit_count": "Gordium's reading"}}]
+        escape_openings.link(parts, desc)
+        room = parts["sleeping_room"][0]
+        assert room["confirm"]["sleeping_room_story_one_exit"] == "Gordium's reading", key
+        assert room["more"]["exits_reached"] == {"d": ["x", "y"]}, key
+
+
+def test_a_reading_a_room_arrives_with_for_a_linked_fact_is_never_kept():
+    """Merge review: like its values, a reading a sleeping room arrives with for one of the link's facts is the
+    link's to give: dropped where the link gives none (and so never copied onto its openings); its other readings
+    stay."""
+    parts, desc = _parts()
+    parts["sleeping_room"][0]["confirm"] = {"sleeping_room_story_one_exit": "stale", "other": "kept"}
+    escape_openings.link(parts, desc)
+    assert parts["sleeping_room"][0]["confirm"] == {"other": "kept"}
+    assert "opening_room_one_exit" not in (parts["emergency_escape_opening"][0].get("confirm") or {})
+
+
 def test_the_rooms_reach_decides_the_one_exit_question_only():
     """Review round 2 (PR 3): the reach fallback ran for every linked measure; a story's fourth-or-higher given as null
     would have taken the room's reach as its value. Now only the one-exit question reads the reach, and a null story

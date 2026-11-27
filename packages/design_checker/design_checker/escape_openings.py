@@ -119,6 +119,8 @@ def link(parts: dict, description) -> None:
         for k in NEW_MEASURES:           # the house measuring's "not measured yet" for these, and any value a part
             why.pop(k, None)             # arrives with: this link decides them, never a stale one beside its reason
             m.pop(k, None)
+            if isinstance(part.get("confirm"), dict):      # nor a reading it arrives with for one (merge review)
+                part["confirm"].pop(k, None)
         name = part.get("name") or part.get("id")
         pid = part.get("id")
         more = part.get("more") if isinstance(part.get("more"), dict) else {}
@@ -159,10 +161,10 @@ def link(parts: dict, description) -> None:
                         why[mine] = WHY["two_exits"].format(name=name, why=said)
                     else:
                         m[mine] = value
-                        part.setdefault("more", {})["exits_reached"] = said
+                        _own_map(part, "more")["exits_reached"] = said
                         confirm = _map(spaces[(rid, level)][0].get("confirm")).get("space_exit_count")
                         if confirm:                      # its routes run through the room it serves: the reading
-                            part.setdefault("confirm", {})[mine] = confirm
+                            _own_map(part, "confirm")[mine] = confirm
                 elif value is None:                      # a story value that settles nothing (null): never a value
                     why[mine] = WHY["story_not_measured"].format(name=name, reason=f"its {theirs} is not given")
                 else:
@@ -241,6 +243,14 @@ def _to_openings(rooms: list, openings) -> None:
 def _map(x) -> dict:
     """A part's field as a mapping, or none where it isn't one (parts built by hand: never a crash)."""
     return x if isinstance(x, dict) else {}
+
+
+def _own_map(part: dict, key: str) -> dict:
+    """The part's own mapping under `key`, made one where it is missing or isn't one (parts built by hand: never a
+    crash; merge review of the R-2 reach)."""
+    if not isinstance(part.get(key), dict):
+        part[key] = {}
+    return part[key]
 
 
 def _list(x) -> list:
