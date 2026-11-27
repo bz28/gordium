@@ -202,9 +202,13 @@ def test_each_flag_is_its_own_line_with_its_section(got):
     1010.1.6 and 1010.1.7 (42; 1010.1.3.2's is a door's row, not a building line); section group 6d 1010.2 to
     1010.2.6 and Table 1010.2.4 (50; 1010.2.7's is for Groups E, B and I-4); section group 6e 1010.2.8.1 to
     1010.2.12.1, 1010.2.14 and 1010.2.15 (61; 1010.2.13's is for Groups I-1 and I-2); section group 8a 1031.2's basements and public way and
-    1031.2.1 (64); section group 8c 1031.5.3's drainage and 1031.6's bars (66); section group 9a 1003.2 to 1003.7's nine and 1012's seventeen ramp flags (a building's ramps aren't a fact Gordium is given, so they show for every building) (92); section group 9b 1008's eight and 1013's nine lighting and exit-sign flags but 1008.2.2's (Group I-2) and 1013.2's (Group R-1) (107); section group 9c 1009's twenty-seven accessible-egress flags but 1009.3.3's (the building is Group R-2, exception 5) (133); section group 9d 1018.1's, 1018.5's and 1019.3's flags (1018.3's is for Groups B and M, 1019.4's for I-2 and I-3) (136); section group 9e 1021's four, 1022's three and 1023's nineteen flags, each shown for every building (162); section group 9f 1024's nine flags (1025's fifteen are for Groups A, B, E, I-1, M and R-1) (171)."""
+    1031.2.1 (64); section group 8c 1031.5.3's drainage and 1031.6's bars (66); section group 9a 1003.2 to 1003.7's nine and 1012's seventeen ramp flags (a building's ramps aren't a fact Gordium is given, so they show for every building) (92); section group 9b 1008's eight and 1013's nine lighting and exit-sign flags but 1008.2.2's (Group I-2) and 1013.2's (Group R-1) (107); section group 9c 1009's twenty-seven accessible-egress flags but 1009.3.3's (the building is Group R-2, exception 5) (133); section group 9d 1018.1's, 1018.5's and 1019.3's flags (1018.3's is for Groups B and M, 1019.4's for I-2 and I-3) (136); section group 9e 1021's four, 1022's three and 1023's nineteen flags, each shown for every building (162); section group 9f 1024's nine flags (1025's fifteen are for Groups A, B, E, I-1, M and R-1) (171). Chapter 7 (2026-11-26) adds 104 more: part a's 28
+    fire-barrier and shaft-enclosure flags, each shown for every building; part b its 23 building-wide
+    opening-protective flags (Table 716.1(2)'s corridor doors are each corridor's row); part c 30 of its 31 fire
+    partition, smoke barrier and smoke partition flags (710.5.3 is Group I-2's, not the stated R-2's); part d its 23
+    floor, vertical opening and penetration flags (275)."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 171 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 275 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
 
 
 def test_its_groups_rows_give_real_verdicts(got, expected):
@@ -314,7 +318,8 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
     No (its stairs are enclosed exits discharging outside) bounds each corridor's load by its story's, so the corridor
     width and capacity rows pass at the whole story's load (two readings, none and the story's: a pass only if the
     story's passes); Yes leaves them by hand; the other three, either way, move nothing here (Group R-2, no sprinkler
-    system, no ambulatory care, the corridors already within Table 1020.3's widths)."""
+    system, no ambulatory care, the corridors already within Table 1020.3's widths), but Gordium: Ambulatory care
+    facility No, which sets aside 709.5.1's smoke barrier doors (Chapter 7 part c: Group R-2 with none stated)."""
     moved = {}
     for fact, value in (("other_level_egress_into_corridors", False), ("other_level_egress_into_corridors", True),
                         ("ambulatory_care_facility", False), ("corridors_within_dwelling_units", False),
@@ -327,6 +332,8 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
     assert moved.pop(("other_level_egress_into_corridors", False)) == {
         "general.bc_1020_3_corridor_capacity": ("needs_review", "pass"),
         "general.bc_table_1020_3_corridor_width": ("needs_review", "pass")}
+    assert moved.pop(("ambulatory_care_facility", False)) == {
+        "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable")}
     assert all(m == {} for m in moved.values()), moved
 
 
