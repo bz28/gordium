@@ -27,7 +27,7 @@ GROUPS = ["A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2
 SHOWN_WHERE = {"402": "special_egress_spaces", "404": "building_has_atrium",
                # part b: a high-rise (202) or a building over 420 ft (403.2.2, 403.5.2); an underground building (405.1)
                "403": "high_rise_building", "405": "underground_building",
-               # part e: an ambulatory care facility, the fact Table 1020.3's width rule reads
+               # part e: an ambulatory care facility, the fact Section 422, Table 1020.2 and 1020.3 read
                "422": "ambulatory_care_facility"}
 
 
@@ -690,5 +690,11 @@ def test_the_ambulatory_care_fact_says_what_it_decides():
     doc = (REPO / "docs/interior/interior_description_format.md").read_text(encoding="utf-8")
     block = doc[doc.index("  ambulatory_care_facility: "):].split("\n  corridors_within_dwelling_units:", 1)[0]
     summary = marks[:marks.index("AmbulatoryCareFacility = new(")].rsplit("/// <summary>", 1)[1]
-    for words in (name, meaning, mark, block, summary):
+    scope = (REPO / "packages/design_checker/design_checker/code_scope.py").read_text(encoding="utf-8")
+    comment = scope[scope.index("# section group 4 (corridors)"):scope.index('"ambulatory_care_facility": "yes_no"')]
+    tests = (REPO / "apps/revit_addin/tests/Gordium.Revit.Reading.Tests/CorridorFactsTests.cs").read_text(encoding="utf-8")
+    test_summary = tests[:tests.index("public sealed class")]
+    notes = {r["id"]: r for r in load(RULEBOOK)["rules"]}["general.bc_422_1_ambulatory_care_facilities"]["notes"]
+    assert "1020.2" in notes and "1020.3" in notes                    # part e review round 4
+    for words in (name, meaning, mark, block, summary, comment, test_summary):
         assert "422" in words and "1020.2" in words and "1020.3" in words, words[:120]

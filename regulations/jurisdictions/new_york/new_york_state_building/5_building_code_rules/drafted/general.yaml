@@ -3932,7 +3932,8 @@ rules:
     expect: not_applicable
     note: 'The architect states the building neither is nor holds an ambulatory care facility: not applicable.'
   notes: Shown where the building states, or doesn't rule out, an ambulatory care facility (the fact Table 1020.3's width
-    rule already reads). Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+    rule and Table 1020.2's Group B corridor rating also read). Hand-drafted in a Claude Code session (2026-11-26, Chapter
+    4 part e).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_422_2_separation
