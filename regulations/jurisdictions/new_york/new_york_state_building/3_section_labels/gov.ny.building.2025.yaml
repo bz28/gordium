@@ -3569,10 +3569,10 @@ labels:
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '713.1':
-    label: reference
+    label: flag
     topic: means_of_egress
-    reason: 'Scope only: Section 713 applies to shafts through floors and roofs, and interior exit stairways and ramps are
-      enclosed per Section 1023 (707.3.2''s flag): no requirement of its own.'
+    reason: 'Section 713 applies to shafts through floors and roofs, and interior exit stairways and ramps are enclosed per
+      Section 1023 (not brought in): a requirement no other Chapter 7 flag carries, a person''s check (general.bc_713_1_shafts_and_exit_stairways).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 178

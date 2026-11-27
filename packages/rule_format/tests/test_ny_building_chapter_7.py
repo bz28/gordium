@@ -89,18 +89,34 @@ def _refs(text: str) -> set[str]:
     return out
 
 
+TOKEN = re.compile(r"(?<![\d.])\d{3,4}(?:\.\d+)*(?:\(\d\))?(?![\d.]*\d)|Chapter \d+|ASTM [A-Z]\d+|UL \d+[A-Z]?|NFPA \d+")
+
+
+def _named(note: str) -> set[str]:
+    """The sections, tables, chapters and standards a note names, each a whole token: "713.7" names 713.7, never
+    713 (review round 1: a substring match let a note drop "Section 713" and still pass)."""
+    return {m.group(0).rstrip(".") for m in TOKEN.finditer(note)}
+
+
 def test_every_section_a_chapter_7_piece_names_is_named_in_its_flags_words(labels, book):
     """Review class (2026-11-26): every section, table or other code a flagged piece sends to is named in what the
-    architect reads on its flag (the example's note or the notes), so a person's check never leaves out a section
-    the law joins to it; the piece's own number aside."""
+    architect reads on its flag (the examples' notes: the result shows them, never the rule's own notes), each as a
+    whole token, so a person's check never leaves out a section the law joins to it; the piece's own number aside."""
     for pid, v in labels.items():
         if v["label"] not in ("flag", "rule"):
             continue
         for r in _flags(book, pid):
             quote = " ".join(s["quote"] for s in r["sources"])
-            words = " ".join([r.get("notes", "")] + [e.get("note", "") for e in r.get("examples", [])])
-            missing = sorted(x for x in _refs(quote) - {pid} if x not in words)
+            shown = set().union(*(_named(e.get("note", "")) for e in r.get("examples", [])))
+            missing = sorted(x for x in _refs(quote) - {pid} if x not in shown)
             assert not missing, (r["id"], missing)
+
+
+def test_a_note_naming_only_a_longer_section_doesnt_name_the_shorter():
+    """The pin for the whole-token match: "713.7" and "716.2.6.6" don't name 713 or 716."""
+    assert _named("Openings per 713.7 and 716.2.6.6 (Chapter 30, ASTM E119).") == \
+        {"713.7", "716.2.6.6", "Chapter 30", "ASTM E119"}
+    assert "713" not in _named("per 713.7") and "713" in _named("per 713 and 713.7")
 
 
 def test_every_chapter_7_flag_is_a_persons_check_for_every_building(labels, book, ctx):
@@ -127,3 +143,28 @@ def test_chapter_7_rules_sit_in_book_order_before_chapter_10(book):
     assert seven == list(range(seven[0], seven[-1] + 1))
     assert ids[seven[-1] + 1] == "general.bc_1004_7_outdoor_areas"
     assert ids[seven[0] - 1].startswith("general.bc_508_")
+
+
+def _note(book, rid):
+    [r] = [r for r in book if r["id"] == rid]
+    return " ".join(e.get("note", "") for e in r["examples"])
+
+
+def test_review_round_1s_notes_say_what_the_law_says(book, labels):
+    """Review round 1 (2026-11-26), each confirmed: a note told an architect less than the law asks. 707.3.2's names
+    1023.2's floor-assembly minimum, mezzanines and three exceptions; a cap is "need not be more than", never "never
+    more than" (a ban the law doesn't make); 707.3.5's gives the rating from 1026.2, not 1026.1 (which has none);
+    713.11's exceptions each lift what they lift (a chute shaft used for nothing else); 707.5.1's exception 2 keeps
+    its "unless"; 713.1's "shall be enclosed in accordance with Section 1023" is a flag of its own."""
+    stair = _note(book, "general.bc_707_3_2_exit_stairway_fire_barriers")
+    for word in ("floor assembly", "mezzanines", "408.3.8", "404.6", "510.2", "need not be more than 2 hours"):
+        assert word in stair, word
+    for r in book:
+        if re.match(r"general\.bc_7\d\d_", r["id"]):
+            assert "never more than" not in _note(book, r["id"]), r["id"]
+    horizontal = _note(book, "general.bc_707_3_5_horizontal_exit_separation")
+    assert "1026.2" in horizontal and "at least 2 hours" in horizontal
+    bottom = _note(book, "general.bc_713_11_shaft_bottom")
+    assert "used for nothing else" in bottom and "needs no rated separation" in bottom
+    assert "unless another section" in _note(book, "general.bc_707_5_1_supporting_construction")
+    assert labels["713.1"]["label"] == "flag" and _flags(book, "713.1")

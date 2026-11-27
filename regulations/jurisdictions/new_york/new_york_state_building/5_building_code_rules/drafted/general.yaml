@@ -403,10 +403,13 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the
-      book''s words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where
-      fewer, counting basements, never more than 2 hours): an enclosure''s rating isn''t in the model, so a person''s check.'
-  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1023.1 and 1023.2 aren''t brought in (Chapter
-    10''s interior exit stairways). Shown for every building: whether it has an interior exit stairway or ramp isn''t ruled
+      book''s words name 1023.1; its 1023.2 gives at least 2 hours where the stairway or ramp connects four stories or more
+      and at least 1 hour where fewer, counting basements but not mezzanines, and at least the rating of the floor assembly
+      it passes through, though it need not be more than 2 hours; except as 1023.2 allows for Group I-3 per 408.3.8, exit
+      stairways within an atrium enclosed per 404.6, and exit stairways per 510.2): an enclosure''s rating isn''t in the model,
+      so a person''s check.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1023.1, 1023.2, 408.3.8, 404.6 and 510.2
+    aren''t brought in (1023 is Chapter 10''s interior exit stairways). Shown for every building: whether it has an interior exit stairway or ramp isn''t ruled
     out by the model (a stair''s door not marked as an exit''s leaves it unseen).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -446,10 +449,14 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are
-      horizontal exits, and the separation''s rating, a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1026.1 isn't brought in (Chapter 10's horizontal
-    exits). Shown for every building.
+    note: 'The separation between the building areas a horizontal exit connects has the rating Section 1026 asks (the book''s
+      words name 1026.1, which says how many exits may be horizontal exits; its 1026.2 gives the rating: at least 2 hours,
+      a fire wall per 706 or fire barriers per 707 or horizontal assemblies per 711, running through every level unless the
+      floors are rated at least 2 hours with no unprotected openings; none where the horizontal exit leads to a pedestrian
+      walkway per 3104 more than 20 feet between the buildings): which doors are horizontal exits, and the separation''s rating,
+      a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1026.1, 1026.2, 706, 711 and 3104 aren't
+    brought in (1026 is Chapter 10's horizontal exits). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_707_4_exterior_walls
@@ -536,7 +543,8 @@ rules:
     note: 'The construction supporting a fire barrier is protected to the fire barrier''s required rating, and hollow vertical
       spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2:
       at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers
-      that Table 509.1 asks: the structure isn''t in the model, so a person''s check.'
+      that Table 509.1 asks, unless another section of the code requires it rated: the structure isn''t in the model, so a
+      person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 718.2, 415.9.1.2, Table 601 and Table 509.1
     aren't brought in. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
@@ -687,6 +695,30 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 717 isn't brought in. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_713_1_shafts_and_exit_stairways
+  kind: flag
+  topic: means_of_egress
+  title: Shafts through floors, and exit stairways enclosed per 1023 (BCNYS 713.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 178
+    lines:
+    - 25
+    - 26
+    quote: 713.1 General. The provisions of this section shall apply to shafts required to protect openings and penetrations
+      through floor/ceil- ing and roof/ceiling assemblies. Interior exit stairways and ramps shall be enclosed in accordance
+      with Section 1023.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Section 713 applies to the shafts that protect openings and penetrations through floors and roofs, and interior
+      exit stairways and ramps are enclosed as Section 1023 says (rated per 1023.2, their openings, penetrations, ventilation
+      and exterior walls per 1023.4 to 1023.7): which stairways are interior exit stairways, and their enclosures, aren''t
+      in the model, so a person''s check.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1023 isn't brought in (Chapter 10's interior
+    exit stairways). Shown for every building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_713_2_shaft_construction
   kind: flag
   topic: means_of_egress
@@ -729,9 +761,10 @@ rules:
   - given: {}
     expect: needs_review
     note: 'A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it
-      connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never
-      more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building''s shafts may be reduced
-      per 403.2.1.2: neither the shafts'' ratings nor the stories each connects are in the model, so a person''s check.'
+      connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, though
+      it need not be more than 2 hours; its walls meet 703.2.1.1 (nonsymmetrical walls); a high-rise building''s shafts may
+      be reduced per 403.2.1.2: neither the shafts'' ratings nor the stories each connects are in the model, so a person''s
+      check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 403.2.1.2 isn't brought in; 703.2.1.1 is (its
     own flag). An exit access stairway or ramp enclosure (707.3.3, 1019) is rated by this section; an interior exit stairway's
     by 1023.2. Shown for every building.
@@ -753,8 +786,8 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not
-      in the model, so a person''s check.'
+    note: 'A shaft enclosure, built as fire barriers per 707 or horizontal assemblies per 711 or both, is continuous as 707.5
+      asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 711.2.2 isn't brought in; 707.5 is (its own
     flag). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
@@ -941,10 +974,12 @@ rules:
     expect: needs_review
     note: 'A shaft that doesn''t reach the bottom of the building is closed at its lowest level with construction of the lowest
       floor''s rating (at least the shaft''s), or ends in a room for its own purpose separated by fire barriers per 707 or
-      horizontal assemblies per 711 with the shaft''s rating and opening protectives, or has fire dampers at its lowest floor;
-      except where its only openings are at its bottom (closed off around what passes through with draftstop materials per
-      718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with
-      nothing combustible and no openings or penetrations into the building: a person''s check.'
+      horizontal assemblies per 711 with the shaft''s rating and opening protectives, or has fire dampers at its lowest floor.
+      The room needs no rated separation where the shaft''s only openings or penetrations into the building are at its bottom,
+      closed off around what passes through with draftstop materials per 718.3.1 or the room sprinklered; a shaft holding
+      a waste or linen chute is used for nothing else and discharges into a room per 713.13.4; and a shaft with nothing combustible
+      in it and no openings or penetrations into the building needs neither the room''s separation nor the protection at its
+      bottom: a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 711, 718.3.1 and 713.13.4 aren't brought in.
     Shown for every building.
   drafted_by: claude_code/claude-opus-5-5

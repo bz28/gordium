@@ -125,6 +125,11 @@ pieces:
     heading: Ducts and air transfer openings
     rules:
     - general.bc_707_10_ducts
+  '713.1':
+    label: flag
+    heading: General
+    rules:
+    - general.bc_713_1_shafts_and_exit_stairways
   '713.2':
     label: flag
     heading: Construction

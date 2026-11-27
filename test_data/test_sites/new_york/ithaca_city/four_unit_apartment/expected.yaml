@@ -137,7 +137,7 @@ results:
   # stated (no Revit mark yet), and how many people each door serves isn't worked out (50 or more can't be ruled out)
   general.bc_1010_1_2_door_types: not_applicable
   general.bc_1010_1_2_1_direction_of_swing: needs_review
-  # Chapter 7 part a (2026-11-26): the fire barriers and shaft enclosures that build exit stairway and passageway
+  # Chapter 7 part a (2026-11-26, 28 flags): the fire barriers and shaft enclosures that build exit stairway and passageway
   # enclosures (703.2.1.1, 703.5, 707, 713): nothing they ask is in the model (an enclosure's rating, the stories it
   # connects, its walls' construction, penetrations, joints), so each is a person's check for every building
   general.bc_703_2_1_1_nonsymmetrical_walls: needs_review
@@ -154,6 +154,7 @@ results:
   general.bc_707_8_joints: needs_review
   general.bc_707_9_voids: needs_review
   general.bc_707_10_ducts: needs_review
+  general.bc_713_1_shafts_and_exit_stairways: needs_review
   general.bc_713_2_shaft_construction: needs_review
   general.bc_713_4_shaft_rating: needs_review
   general.bc_713_5_shaft_continuity: needs_review

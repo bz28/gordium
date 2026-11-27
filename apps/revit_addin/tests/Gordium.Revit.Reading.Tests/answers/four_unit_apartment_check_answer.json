@@ -1118,7 +1118,7 @@
   ],
   "summary": {
    "state": "review",
-   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 100 to review · 30 comply",
+   "text": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 101 to review · 30 comply",
    "lines": [
     "Lot size by units and rooms let: enter the dwelling units, the rooms let for profit, and whether it is a conversion; the lot outline isn't from a survey: the lot area needs one (an open question for the architects)",
     "Each further primary building needs its own lot area: the lot outline isn't from a survey: the lot area needs one (an open question for the architects); a building isn't a closed solid: LS New 6\"",
@@ -1366,21 +1366,22 @@
     "Egress · No separation from the main occupancy: A person checks this (Gordium doesn't decide it): Whether exception 1 (Group H-2 to H-5) or 2 (dwelling and sleeping units of I-1, R-1, R-2, R-3) applies is the architect's statement; 508.4 and Section 420 are not brought in.",
     "Egress · Nonsymmetrical rated walls tested from both faces: A person checks this (Gordium doesn't decide it): An interior wall or partition built differently on its two faces (a shaft or exit enclosure wall with its layers on one side only, as 713.4 names) takes the shorter of its two fire tests, one from each face (ASTM E119 or UL 263), unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5 instead: which walls are built so, and how they were tested, isn't in the model, so a person's check.",
     "Egress · Rated walls identified in concealed spaces: A person checks this (Gordium doesn't decide it): Where a floor, floor-ceiling or attic space is concealed but can be reached, each fire wall, fire barrier, fire partition, smoke barrier, smoke partition or other wall with protected openings or penetrations carries signs or stenciling there: within 15 feet of each end of the wall and at most every 30 feet along it, lettered at least 3 inches high with a stroke of at least 3/8 inch in a contrasting colour, with wording such as \"FIRE AND/OR SMOKE BARRIER - PROTECT ALL OPENINGS\": signs aren't in the model, so a person's check.",
-    "Egress · Rating of the fire barriers around exit stairways and ramps: A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+    "Egress · Rating of the fire barriers around exit stairways and ramps: A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives at least 2 hours where the stairway or ramp connects four stories or more and at least 1 hour where fewer, counting basements but not mezzanines, and at least the rating of the floor assembly it passes through, though it need not be more than 2 hours; except as 1023.2 allows for Group I-3 per 408.3.8, exit stairways within an atrium enclosed per 404.6, and exit stairways per 510.2): an enclosure's rating isn't in the model, so a person's check.",
     "Egress · Rating of the fire barriers around exit passageways: A person checks this (Gordium doesn't decide it): The fire barrier between the building and an exit passageway has the rating 1024.3 asks: the passageway's rating isn't in the model, so a person's check.",
-    "Egress · Fire-resistance rating of a horizontal exit's separation: A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+    "Egress · Fire-resistance rating of a horizontal exit's separation: A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating Section 1026 asks (the book's words name 1026.1, which says how many exits may be horizontal exits; its 1026.2 gives the rating: at least 2 hours, a fire wall per 706 or fire barriers per 707 or horizontal assemblies per 711, running through every level unless the floors are rated at least 2 hours with no unprotected openings; none where the horizontal exit leads to a pedestrian walkway per 3104 more than 20 feet between the buildings): which doors are horizontal exits, and the separation's rating, a person's check.",
     "Egress · Exterior walls that are part of a rated enclosure: A person checks this (Gordium doesn't decide it): Where an exterior wall is part of a required rated shaft, or of a stairway, ramp or exit passageway's separation or enclosure, it follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021 (exterior egress balconies), 1023.7 (interior exit stairways and ramps), 1024.8 (exit passageways), 1027.6 (exterior exit stairways and ramps) or 1207 of the Fire Code of New York State (energy storage systems) asks the exterior wall itself to be rated: which enclosure walls are exterior walls, and their ratings, a person's check.",
     "Egress · Fire barriers run from floor to the deck above: A person checks this (Gordium doesn't decide it): A fire barrier runs from the top of the foundation or the floor/ceiling assembly below to the underside of the floor or roof sheathing, slab or deck above, fastened to both, and continues through concealed spaces such as above a suspended ceiling, its joints and voids per 707.8 and 707.9; except that a shaft enclosure, an interior exit stairway or ramp enclosure (1023) or an exit access stairway or ramp enclosure (1019) may end at a top enclosure per 713.12, and an exit passageway enclosure (1024.3) that stops short is closed at the top with construction of the passageway's rating: walls' heights above the ceiling aren't in the model, so a person's check.",
-    "Egress · What holds up a fire barrier has its rating: A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+    "Egress · What holds up a fire barrier has its rating: A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks, unless another section of the code requires it rated: the structure isn't in the model, so a person's check.",
     "Egress · Openings in fire barriers: A person checks this (Gordium doesn't decide it): Openings in a fire barrier are protected per Section 716, at most 25 percent of the wall's length in all and at most 156 square feet each; openings in shaft, interior exit stairway and ramp, and exit passageway enclosures also meet 713.7, 1023.4 and 1024.5. The limits are lifted for a sprinklered building (903.3.1.1: the 156 square feet), fire doors serving exit access or interior exit stairway and ramp enclosures, protectives tested to ASTM E119 or UL 263 at the wall's own rating, atrium fire windows (the 25 percent), the fire door between an exit stairway and its exit passageway (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms (713, 713.13.3, 713.13.4; the 25 percent): which walls are fire barriers and their openings' sizes aren't in the model, so a person's check.",
     "Egress · Penetrations of fire barriers: A person checks this (Gordium doesn't decide it): Penetrations of a fire barrier (pipes, conduits, cables, ducts) meet Section 714: they aren't in the model, so a person's check.",
     "Egress · Penetrations into shaft and exit enclosures only where allowed: A person checks this (Gordium doesn't decide it): Penetrations into shaft, interior exit stairway and ramp, and exit passageway enclosures are allowed only where 713.8.1, 1023.5 and 1024.6 permit them: penetrations aren't in the model, so a person's check.",
     "Egress · Joints in and at fire barriers: A person checks this (Gordium doesn't decide it): Joints in or between fire barriers, and where a fire barrier meets a rated floor or roof above or another rated wall, meet Section 715: joints aren't in the model, so a person's check.",
     "Egress · Voids where a fire barrier meets an unrated roof or exterior wall: A person checks this (Gordium doesn't decide it): The voids where a fire barrier meets a roof or exterior wall that isn't rated meet Section 715: not in the model, so a person's check.",
     "Egress · Ducts and air transfer openings through fire barriers: A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a fire barrier meet Section 717 (dampers): the ductwork isn't in the model, so a person's check.",
+    "Egress · Shafts through floors: A person checks this (Gordium doesn't decide it): Section 713 applies to the shafts that protect openings and penetrations through floors and roofs, and interior exit stairways and ramps are enclosed as Section 1023 says (rated per 1023.2, their openings, penetrations, ventilation and exterior walls per 1023.4 to 1023.7): which stairways are interior exit stairways, and their enclosures, aren't in the model, so a person's check.",
     "Egress · Shaft enclosures built as fire barriers or horizontal assemblies: A person checks this (Gordium doesn't decide it): A shaft enclosure (an elevator hoistway, an exit access stairway or ramp enclosure, a duct or chute shaft) is built as fire barriers per 707, horizontal assemblies per 711, or both: the shafts and their walls aren't in the model, so a person's check.",
-    "Egress · Fire-resistance rating of shaft enclosures: A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
-    "Egress · Shaft enclosures continuous: A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+    "Egress · Fire-resistance rating of shaft enclosures: A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, though it need not be more than 2 hours; its walls meet 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+    "Egress · Shaft enclosures continuous: A person checks this (Gordium doesn't decide it): A shaft enclosure, built as fire barriers per 707 or horizontal assemblies per 711 or both, is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
     "Egress · Exterior walls that are part of a shaft enclosure: A person checks this (Gordium doesn't decide it): An exterior wall that is part of a required shaft enclosure follows Section 705 for exterior walls instead of the enclosure's rating, except where 1021.2 (exterior egress balconies), 1023.7 (interior exit stairways and ramps) or 1027.6 (exterior exit stairways and ramps) asks the exterior wall itself to be rated: a person's check.",
     "Egress · Openings in shaft enclosures: A person checks this (Gordium doesn't decide it): Openings in a shaft enclosure are protected per Section 716 as for fire barriers, and its doors are self-closing or close automatically on smoke detection per 716.2.6.6: the doors' ratings and closers aren't in the model, so a person's check.",
     "Egress · No openings in a shaft enclosure but those its purpose needs: A person checks this (Gordium doesn't decide it): A shaft enclosure has no openings other than those its purpose needs: a person's check.",
@@ -1388,7 +1389,7 @@
     "Egress · No penetrations of a shaft enclosure but those its purpose needs: A person checks this (Gordium doesn't decide it): A shaft enclosure has no penetrations other than those its purpose needs, except membrane penetrations on its outside, protected per 714.4.2: a person's check.",
     "Egress · Joints in shaft enclosures: A person checks this (Gordium doesn't decide it): Joints in a shaft enclosure meet Section 715: not in the model, so a person's check.",
     "Egress · Ducts and air transfer openings through shaft enclosures: A person checks this (Gordium doesn't decide it): Ducts and air transfer openings through a shaft enclosure meet Section 717: the ductwork isn't in the model, so a person's check.",
-    "Egress · A shaft not reaching the building's bottom closed at its foot: A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+    "Egress · A shaft not reaching the building's bottom closed at its foot: A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor. The room needs no rated separation where the shaft's only openings or penetrations into the building are at its bottom, closed off around what passes through with draftstop materials per 718.3.1 or the room sprinklered; a shaft holding a waste or linen chute is used for nothing else and discharges into a room per 713.13.4; and a shaft with nothing combustible in it and no openings or penetrations into the building needs neither the room's separation nor the protection at its bottom: a person's check.",
     "Egress · The top of a shaft enclosure: A person checks this (Gordium doesn't decide it): A shaft enclosure reaches the underside of the roof (the roof built for its type of construction, Table 601), or ends below it with a top of the topmost floor's rating (at least the shaft's), or rises through the roof per 1511: a person's check. An interior exit stairway's or exit access stairway's enclosure may end at such a top (707.5).",
     "Egress · Elevator and other hoistways: A person checks this (Gordium doesn't decide it): An elevator, dumbwaiter or other hoistway meets Section 712, and where it must be enclosed it is a shaft enclosure per Section 713 and Chapter 30: the elevators aren't in the model, so a person's check.",
     "Egress · Outdoor areas: means of egress and occupant load: A person checks this (Gordium doesn't decide it): Yards, patios, occupiable roofs or courts the occupants use: their means of egress and the occupant load the building official assigns are a person's check.",
@@ -61882,11 +61883,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives at least 2 hours where the stairway or ramp connects four stories or more and at least 1 hour where fewer, counting basements but not mezzanines, and at least the rating of the floor assembly it passes through, though it need not be more than 2 hours; except as 1023.2 allows for Group I-3 per 408.3.8, exit stairways within an atrium enclosed per 404.6, and exit stairways per 510.2): an enclosure's rating isn't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives at least 2 hours where the stairway or ramp connects four stories or more and at least 1 hour where fewer, counting basements but not mezzanines, and at least the rating of the floor assembly it passes through, though it need not be more than 2 hours; except as 1023.2 allows for Group I-3 per 408.3.8, exit stairways within an atrium enclosed per 404.6, and exit stairways per 510.2): an enclosure's rating isn't in the model, so a person's check.",
       "quotes": [
        {
         "text": "707.3.2 Interior exit stairway and ramp construction. The fire-resistance rating of the fire barrier separating building areas from an interior exit stairway or ramp shall comply with Section 1023.1.",
@@ -61911,14 +61912,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_707_3_2_exit_stairway_fire_barriers",
-       "words": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives at least 2 hours where the stairway or ramp connects four stories or more and at least 1 hour where fewer, counting basements but not mezzanines, and at least the rating of the floor assembly it passes through, though it need not be more than 2 hours; except as 1023.2 allows for Group I-3 per 408.3.8, exit stairways within an atrium enclosed per 404.6, and exit stairways per 510.2): an enclosure's rating isn't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_707_3_2_exit_stairway_fire_barriers",
-       "why": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives at least 2 hours where the stairway or ramp connects four stories or more and at least 1 hour where fewer, counting basements but not mezzanines, and at least the rating of the floor assembly it passes through, though it need not be more than 2 hours; except as 1023.2 allows for Group I-3 per 408.3.8, exit stairways within an atrium enclosed per 404.6, and exit stairways per 510.2): an enclosure's rating isn't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -62022,11 +62023,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating Section 1026 asks (the book's words name 1026.1, which says how many exits may be horizontal exits; its 1026.2 gives the rating: at least 2 hours, a fire wall per 706 or fire barriers per 707 or horizontal assemblies per 711, running through every level unless the floors are rated at least 2 hours with no unprotected openings; none where the horizontal exit leads to a pedestrian walkway per 3104 more than 20 feet between the buildings): which doors are horizontal exits, and the separation's rating, a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating Section 1026 asks (the book's words name 1026.1, which says how many exits may be horizontal exits; its 1026.2 gives the rating: at least 2 hours, a fire wall per 706 or fire barriers per 707 or horizontal assemblies per 711, running through every level unless the floors are rated at least 2 hours with no unprotected openings; none where the horizontal exit leads to a pedestrian walkway per 3104 more than 20 feet between the buildings): which doors are horizontal exits, and the separation's rating, a person's check.",
       "quotes": [
        {
         "text": "707.3.5 Horizontal exit. The fire-resistance rating of the separation between building areas connected by a horizontal exit shall comply with Section 1026.1.",
@@ -62051,14 +62052,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_707_3_5_horizontal_exit_separation",
-       "words": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating Section 1026 asks (the book's words name 1026.1, which says how many exits may be horizontal exits; its 1026.2 gives the rating: at least 2 hours, a fire wall per 706 or fire barriers per 707 or horizontal assemblies per 711, running through every level unless the floors are rated at least 2 hours with no unprotected openings; none where the horizontal exit leads to a pedestrian walkway per 3104 more than 20 feet between the buildings): which doors are horizontal exits, and the separation's rating, a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_707_3_5_horizontal_exit_separation",
-       "why": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating Section 1026 asks (the book's words name 1026.1, which says how many exits may be horizontal exits; its 1026.2 gives the rating: at least 2 hours, a fire wall per 706 or fire barriers per 707 or horizontal assemblies per 711, running through every level unless the floors are rated at least 2 hours with no unprotected openings; none where the horizontal exit leads to a pedestrian walkway per 3104 more than 20 feet between the buildings): which doors are horizontal exits, and the separation's rating, a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -62232,11 +62233,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks, unless another section of the code requires it rated: the structure isn't in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks, unless another section of the code requires it rated: the structure isn't in the model, so a person's check.",
       "quotes": [
        {
         "text": "707.5.1 Supporting construction. The supporting construction for a fire barrier shall be protected to afford the required fire- resistance rating of the fire barrier supported. Hollow vertical spaces within a fire barrier shall be fireblocked in accordance with Section 718.2 at every floor level. Exceptions: 1. The maximum required fire-resistance rating for assemblies supporting fire barriers separating tank storage as provided for in Section 415.9.1.2 shall be 2 hours, but not less than required by Table 601 for the building construction type. 2. Supporting construction for 1-hour fire barriers required by Table 509.1 in buildings of Types IIB, IIIB and VB construc- tion is not required to be fire-resistance rated unless required by other sections of this code.",
@@ -62261,14 +62262,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_707_5_1_supporting_construction",
-       "words": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks, unless another section of the code requires it rated: the structure isn't in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_707_5_1_supporting_construction",
-       "why": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks, unless another section of the code requires it rated: the structure isn't in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -62707,6 +62708,76 @@
      }
     },
     {
+     "id": "egress.general.bc_713_1_shafts_and_exit_stairways",
+     "rule": "general.bc_713_1_shafts_and_exit_stairways",
+     "name": "Egress · Shafts through floors, and exit stairways enclosed per 1023 (BCNYS 713.1)",
+     "group": "law",
+     "status": "needs_review",
+     "mark": "?",
+     "proposed": "",
+     "required": "",
+     "margin": "",
+     "sign": "",
+     "zoom": null,
+     "measure": null,
+     "objects": [],
+     "points": null,
+     "hint": null,
+     "reason": "A person checks this (Gordium doesn't decide it): Section 713 applies to the shafts that protect openings and penetrations through floors and roofs, and interior exit stairways and ramps are enclosed as Section 1023 says (rated per 1023.2, their openings, penetrations, ventilation and exterior walls per 1023.4 to 1023.7): which stairways are interior exit stairways, and their enclosures, aren't in the model, so a person's check.",
+     "use_detail": false,
+     "part": null,
+     "detail": {
+      "line": "A person checks this (Gordium doesn't decide it): Section 713 applies to the shafts that protect openings and penetrations through floors and roofs, and interior exit stairways and ramps are enclosed as Section 1023 says (rated per 1023.2, their openings, penetrations, ventilation and exterior walls per 1023.4 to 1023.7): which stairways are interior exit stairways, and their enclosures, aren't in the model, so a person's check.",
+      "quotes": [
+       {
+        "text": "713.1 General. The provisions of this section shall apply to shafts required to protect openings and penetrations through floor/ceil- ing and roof/ceiling assemblies. Interior exit stairways and ramps shall be enclosed in accordance with Section 1023.",
+        "where": "713.1, 2025 Building Code of New York State (BCNYS), PDF p.178"
+       }
+      ],
+      "citation": "713.1, 2025 Building Code of New York State (BCNYS), PDF p.178",
+      "links": [],
+      "calc": null,
+      "scope": "",
+      "precision": "",
+      "at_limit": null
+     },
+     "law": "Egress (NY State Building Code 2025)",
+     "law_short": "Egress",
+     "law_key": "new_york/new_york_state_building",
+     "code": {
+      "section": "713.1",
+      "quote": "713.1 General. The provisions of this section shall apply to shafts required to protect openings and penetrations through floor/ceil- ing and roof/ceiling assemblies. Interior exit stairways and ramps shall be enclosed in accordance with Section 1023."
+     },
+     "causes": [
+      {
+       "kind": "decide",
+       "key": "reason:egress.general.bc_713_1_shafts_and_exit_stairways",
+       "words": "A person checks this (Gordium doesn't decide it): Section 713 applies to the shafts that protect openings and penetrations through floors and roofs, and interior exit stairways and ramps are enclosed as Section 1023 says (rated per 1023.2, their openings, penetrations, ventilation and exterior walls per 1023.4 to 1023.7): which stairways are interior exit stairways, and their enclosures, aren't in the model, so a person's check.",
+       "elements": []
+      }
+     ],
+     "asks": [
+      {
+       "key": "reason:egress.general.bc_713_1_shafts_and_exit_stairways",
+       "why": "A person checks this (Gordium doesn't decide it): Section 713 applies to the shafts that protect openings and penetrations through floors and roofs, and interior exit stairways and ramps are enclosed as Section 1023 says (rated per 1023.2, their openings, penetrations, ventilation and exterior walls per 1023.4 to 1023.7): which stairways are interior exit stairways, and their enclosures, aren't in the model, so a person's check.",
+       "elements": [],
+       "kind": "decide",
+       "headline": "Check this by hand: a person decides it"
+      }
+     ],
+     "rule_name": "Shafts through floors, and exit stairways enclosed per 1023",
+     "in_code": {
+      "document": "2025 Building Code of New York State (BCNYS)",
+      "file": "gov.ny.building.2025.pdf",
+      "chapter": "7",
+      "chapter_title": "FIRE AND SMOKE PROTECTION FEATURES",
+      "section": "713",
+      "section_title": "Shaft Enclosures",
+      "piece": "713.1",
+      "piece_title": "General"
+     }
+    },
+    {
      "id": "egress.general.bc_713_2_shaft_construction",
      "rule": "general.bc_713_2_shaft_construction",
      "name": "Egress · Shaft enclosures built as fire barriers or horizontal assemblies (BCNYS 713.2)",
@@ -62792,11 +62863,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, though it need not be more than 2 hours; its walls meet 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, though it need not be more than 2 hours; its walls meet 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
       "quotes": [
        {
         "text": "713.4 Fire-resistance rating. Shaft enclosures shall have a fire-resistance rating of not less than 2 hours where connecting four stories or more, and not less than 1 hour where connecting less than four stories. The number of stories connected by the shaft enclo- sure shall include any basements but not any mezzanines. Shaft enclosures shall have a fire-resistance rating not less than the floor assembly penetrated, but need not exceed 2 hours. Shaft enclosures shall meet the requirements of Section 703.2.1.1. Exception: Shafts having a reduced fire-resistance rating in high-rise buildings in accordance with Section 403.2.1.2.",
@@ -62821,14 +62892,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_713_4_shaft_rating",
-       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, though it need not be more than 2 hours; its walls meet 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_713_4_shaft_rating",
-       "why": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, though it need not be more than 2 hours; its walls meet 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -62862,11 +62933,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): A shaft enclosure, built as fire barriers per 707 or horizontal assemblies per 711 or both, is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): A shaft enclosure, built as fire barriers per 707 or horizontal assemblies per 711 or both, is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
       "quotes": [
        {
         "text": "713.5 Continuity. Shaft enclosures shall be constructed as fire barriers in accordance with Section 707 or horizontal assemblies constructed in accordance with Section 711, or both, and shall have continuity in accordance with Section 707.5 for fire barriers or Section 711.2.2 for horizontal assemblies, as applicable.",
@@ -62891,14 +62962,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_713_5_shaft_continuity",
-       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure, built as fire barriers per 707 or horizontal assemblies per 711 or both, is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_713_5_shaft_continuity",
-       "why": "A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): A shaft enclosure, built as fire barriers per 707 or horizontal assemblies per 711 or both, is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -63422,11 +63493,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor. The room needs no rated separation where the shaft's only openings or penetrations into the building are at its bottom, closed off around what passes through with draftstop materials per 718.3.1 or the room sprinklered; a shaft holding a waste or linen chute is used for nothing else and discharges into a room per 713.13.4; and a shaft with nothing combustible in it and no openings or penetrations into the building needs neither the room's separation nor the protection at its bottom: a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor. The room needs no rated separation where the shaft's only openings or penetrations into the building are at its bottom, closed off around what passes through with draftstop materials per 718.3.1 or the room sprinklered; a shaft holding a waste or linen chute is used for nothing else and discharges into a room per 713.13.4; and a shaft with nothing combustible in it and no openings or penetrations into the building needs neither the room's separation nor the protection at its bottom: a person's check.",
       "quotes": [
        {
         "text": "713.11 Enclosure at the bottom. Shafts that do not extend to the bottom of the building or structure shall comply with one of the following:",
@@ -63455,14 +63526,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_713_11_shaft_bottom",
-       "words": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor. The room needs no rated separation where the shaft's only openings or penetrations into the building are at its bottom, closed off around what passes through with draftstop materials per 718.3.1 or the room sprinklered; a shaft holding a waste or linen chute is used for nothing else and discharges into a room per 713.13.4; and a shaft with nothing combustible in it and no openings or penetrations into the building needs neither the room's separation nor the protection at its bottom: a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_713_11_shaft_bottom",
-       "why": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor. The room needs no rated separation where the shaft's only openings or penetrations into the building are at its bottom, closed off around what passes through with draftstop materials per 718.3.1 or the room sprinklered; a shaft holding a waste or linen chute is used for nothing else and discharges into a room per 713.13.4; and a shaft with nothing combustible in it and no openings or penetrations into the building needs neither the room's separation nor the protection at its bottom: a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -71012,7 +71083,7 @@
      }
     }
    ],
-   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 100 to review · 30 comply",
+   "summary": "Zoning: 23 need review · 1 complies · 1 not checked in this release · 2 use details to answer · Egress: 101 to review · 30 comply",
    "state": "needs_review",
    "header": {
     "place": "R-3a · Multiple family dwelling",
@@ -71542,6 +71613,7 @@
       "egress.general.bc_707_8_joints",
       "egress.general.bc_707_9_voids",
       "egress.general.bc_707_10_ducts",
+      "egress.general.bc_713_1_shafts_and_exit_stairways",
       "egress.general.bc_713_2_shaft_construction",
       "egress.general.bc_713_4_shaft_rating",
       "egress.general.bc_713_5_shaft_continuity",
@@ -72225,7 +72297,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Rating of the fire barriers around exit stairways and ramps (BCNYS 707.3.2): A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+       "title": "Egress · Rating of the fire barriers around exit stairways and ramps (BCNYS 707.3.2): A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives at least 2 hours where the stairway or ramp connects four stories or more and at least 1 hour where fewer, counting basements but not mezzanines, and at least the rating of the floor assembly it passes through, though it need not be more than 2 hours; except as 1023.2 allows for Group I-3 per 408.3.8, exit stairways within an atrium enclosed per 404.6, and exit stairways per 510.2): an enclosure's rating isn't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Rating of the fire barriers around exit stairways and ramps (BCNYS 707.3.2)"
       },
@@ -72251,7 +72323,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Fire-resistance rating of a horizontal exit's separation (BCNYS 707.3.5): A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+       "title": "Egress · Fire-resistance rating of a horizontal exit's separation (BCNYS 707.3.5): A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating Section 1026 asks (the book's words name 1026.1, which says how many exits may be horizontal exits; its 1026.2 gives the rating: at least 2 hours, a fire wall per 706 or fire barriers per 707 or horizontal assemblies per 711, running through every level unless the floors are rated at least 2 hours with no unprotected openings; none where the horizontal exit leads to a pedestrian walkway per 3104 more than 20 feet between the buildings): which doors are horizontal exits, and the separation's rating, a person's check.",
        "mark": "?",
        "name": "Egress · Fire-resistance rating of a horizontal exit's separation (BCNYS 707.3.5)"
       },
@@ -72290,7 +72362,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · What holds up a fire barrier has its rating (BCNYS 707.5.1): A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+       "title": "Egress · What holds up a fire barrier has its rating (BCNYS 707.5.1): A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks, unless another section of the code requires it rated: the structure isn't in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · What holds up a fire barrier has its rating (BCNYS 707.5.1)"
       },
@@ -72373,6 +72445,19 @@
        "name": "Egress · Ducts and air transfer openings through fire barriers (BCNYS 707.10)"
       },
       {
+       "key": "review#6ee686858d",
+       "tier": "review",
+       "items": [
+        "egress.general.bc_713_1_shafts_and_exit_stairways"
+       ],
+       "folded": true,
+       "status": "needs_review",
+       "rules": 1,
+       "title": "Egress · Shafts through floors, and exit stairways enclosed per 1023 (BCNYS 713.1): A person checks this (Gordium doesn't decide it): Section 713 applies to the shafts that protect openings and penetrations through floors and roofs, and interior exit stairways and ramps are enclosed as Section 1023 says (rated per 1023.2, their openings, penetrations, ventilation and exterior walls per 1023.4 to 1023.7): which stairways are interior exit stairways, and their enclosures, aren't in the model, so a person's check.",
+       "mark": "?",
+       "name": "Egress · Shafts through floors, and exit stairways enclosed per 1023 (BCNYS 713.1)"
+      },
+      {
        "key": "review#99341c8583",
        "tier": "review",
        "items": [
@@ -72394,7 +72479,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Fire-resistance rating of shaft enclosures, 1 or 2 hours (BCNYS 713.4): A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+       "title": "Egress · Fire-resistance rating of shaft enclosures, 1 or 2 hours (BCNYS 713.4): A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, though it need not be more than 2 hours; its walls meet 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Fire-resistance rating of shaft enclosures, 1 or 2 hours (BCNYS 713.4)"
       },
@@ -72407,7 +72492,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Shaft enclosures continuous (BCNYS 713.5): A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+       "title": "Egress · Shaft enclosures continuous (BCNYS 713.5): A person checks this (Gordium doesn't decide it): A shaft enclosure, built as fire barriers per 707 or horizontal assemblies per 711 or both, is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
        "mark": "?",
        "name": "Egress · Shaft enclosures continuous (BCNYS 713.5)"
       },
@@ -72511,7 +72596,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · A shaft not reaching the building's bottom closed at its foot (BCNYS 713.11): A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+       "title": "Egress · A shaft not reaching the building's bottom closed at its foot (BCNYS 713.11): A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor. The room needs no rated separation where the shaft's only openings or penetrations into the building are at its bottom, closed off around what passes through with draftstop materials per 718.3.1 or the room sprinklered; a shaft holding a waste or linen chute is used for nothing else and discharges into a room per 713.13.4; and a shaft with nothing combustible in it and no openings or penetrations into the building needs neither the room's separation nor the protection at its bottom: a person's check.",
        "mark": "?",
        "name": "Egress · A shaft not reaching the building's bottom closed at its foot (BCNYS 713.11)"
       },
@@ -73088,7 +73173,7 @@
        "name": "Egress · Nothing projects into a door's clear opening (BCNYS 1010.1.1.1)"
       }
      ],
-     "count": 100,
+     "count": 101,
      "folded": false,
      "law": "Egress (NY State Building Code 2025)",
      "name": "Egress",
@@ -73525,7 +73610,7 @@
       {
        "key": "reason:egress.general.bc_707_3_2_exit_stairway_fire_barriers",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives 2 hours where the stairway connects four stories or more and 1 hour where fewer, counting basements, never more than 2 hours): an enclosure's rating isn't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The fire barrier between the building and an interior exit stairway or ramp has the rating Section 1023 asks (the book's words name 1023.1; its 1023.2 gives at least 2 hours where the stairway or ramp connects four stories or more and at least 1 hour where fewer, counting basements but not mezzanines, and at least the rating of the floor assembly it passes through, though it need not be more than 2 hours; except as 1023.2 allows for Group I-3 per 408.3.8, exit stairways within an atrium enclosed per 404.6, and exit stairways per 510.2): an enclosure's rating isn't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_707_3_2_exit_stairway_fire_barriers"
@@ -73545,7 +73630,7 @@
       {
        "key": "reason:egress.general.bc_707_3_5_horizontal_exit_separation",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating 1026.1 asks: which doors are horizontal exits, and the separation's rating, a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The separation between the building areas a horizontal exit connects has the rating Section 1026 asks (the book's words name 1026.1, which says how many exits may be horizontal exits; its 1026.2 gives the rating: at least 2 hours, a fire wall per 706 or fire barriers per 707 or horizontal assemblies per 711, running through every level unless the floors are rated at least 2 hours with no unprotected openings; none where the horizontal exit leads to a pedestrian walkway per 3104 more than 20 feet between the buildings): which doors are horizontal exits, and the separation's rating, a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_707_3_5_horizontal_exit_separation"
@@ -73575,7 +73660,7 @@
       {
        "key": "reason:egress.general.bc_707_5_1_supporting_construction",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks: the structure isn't in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): The construction supporting a fire barrier is protected to the fire barrier's required rating, and hollow vertical spaces within a fire barrier are fireblocked per 718.2 at every floor level; except tank storage barriers (415.9.1.2: at most 2 hours, but not less than Table 601 asks) and, in Types IIB, IIIB and VB, the support of 1-hour fire barriers that Table 509.1 asks, unless another section of the code requires it rated: the structure isn't in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_707_5_1_supporting_construction"
@@ -73643,6 +73728,16 @@
        "rules": 1
       },
       {
+       "key": "reason:egress.general.bc_713_1_shafts_and_exit_stairways",
+       "kind": "decide",
+       "words": "A person checks this (Gordium doesn't decide it): Section 713 applies to the shafts that protect openings and penetrations through floors and roofs, and interior exit stairways and ramps are enclosed as Section 1023 says (rated per 1023.2, their openings, penetrations, ventilation and exterior walls per 1023.4 to 1023.7): which stairways are interior exit stairways, and their enclosures, aren't in the model, so a person's check.",
+       "elements": [],
+       "items": [
+        "egress.general.bc_713_1_shafts_and_exit_stairways"
+       ],
+       "rules": 1
+      },
+      {
        "key": "reason:egress.general.bc_713_2_shaft_construction",
        "kind": "decide",
        "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure (an elevator hoistway, an exit access stairway or ramp enclosure, a duct or chute shaft) is built as fire barriers per 707, horizontal assemblies per 711, or both: the shafts and their walls aren't in the model, so a person's check.",
@@ -73655,7 +73750,7 @@
       {
        "key": "reason:egress.general.bc_713_4_shaft_rating",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, but never more than 2 hours, its walls meeting 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure is rated at least 2 hours where it connects four stories or more and at least 1 hour where it connects fewer, counting basements but not mezzanines, and at least the rating of the floor it passes through, though it need not be more than 2 hours; its walls meet 703.2.1.1 (nonsymmetrical walls); a high-rise building's shafts may be reduced per 403.2.1.2: neither the shafts' ratings nor the stories each connects are in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_713_4_shaft_rating"
@@ -73665,7 +73760,7 @@
       {
        "key": "reason:egress.general.bc_713_5_shaft_continuity",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft enclosure, built as fire barriers per 707 or horizontal assemblies per 711 or both, is continuous as 707.5 asks of fire barriers, or as 711.2.2 asks of horizontal assemblies: not in the model, so a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_713_5_shaft_continuity"
@@ -73745,7 +73840,7 @@
       {
        "key": "reason:egress.general.bc_713_11_shaft_bottom",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor; except where its only openings are at its bottom (closed off around what passes through with draftstop materials per 718.3.1, or the room sprinklered), a waste or linen chute shaft (discharging into a room per 713.13.4), or a shaft with nothing combustible and no openings or penetrations into the building: a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A shaft that doesn't reach the bottom of the building is closed at its lowest level with construction of the lowest floor's rating (at least the shaft's), or ends in a room for its own purpose separated by fire barriers per 707 or horizontal assemblies per 711 with the shaft's rating and opening protectives, or has fire dampers at its lowest floor. The room needs no rated separation where the shaft's only openings or penetrations into the building are at its bottom, closed off around what passes through with draftstop materials per 718.3.1 or the room sprinklered; a shaft holding a waste or linen chute is used for nothing else and discharges into a room per 713.13.4; and a shaft with nothing combustible in it and no openings or penetrations into the building needs neither the room's separation nor the protection at its bottom: a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_713_11_shaft_bottom"
@@ -74544,7 +74639,7 @@
      "key": "new_york/new_york_state_building",
      "title": "Egress (NY State Building Code 2025)",
      "state": "needs_review",
-     "summary": "100 to review · 30 comply"
+     "summary": "101 to review · 30 comply"
     }
    ],
    "contents": [
@@ -88853,10 +88948,17 @@
          "coverage": "flag",
          "whole": false,
          "counts": {
-          "flag": 13,
-          "not_for_checking": 1
+          "flag": 14
          },
          "pieces": [
+          {
+           "id": "713.1",
+           "title": "General",
+           "coverage": "flag",
+           "rules": [
+            "general.bc_713_1_shafts_and_exit_stairways"
+           ]
+          },
           {
            "id": "713.2",
            "title": "Construction",
@@ -88960,12 +89062,6 @@
            "rules": [
             "general.bc_713_14_hoistways"
            ]
-          },
-          {
-           "id": "713.1",
-           "title": "General",
-           "coverage": "not_for_checking",
-           "rules": []
           }
          ]
         },
@@ -94153,6 +94249,7 @@
    "egress.general.bc_707_8_joints": "needs_review",
    "egress.general.bc_707_9_voids": "needs_review",
    "egress.general.bc_707_10_ducts": "needs_review",
+   "egress.general.bc_713_1_shafts_and_exit_stairways": "needs_review",
    "egress.general.bc_713_2_shaft_construction": "needs_review",
    "egress.general.bc_713_4_shaft_rating": "needs_review",
    "egress.general.bc_713_5_shaft_continuity": "needs_review",
@@ -94252,7 +94349,7 @@
     "key": "new_york/new_york_state_building",
     "title": "Egress (NY State Building Code 2025)",
     "state": "needs_review",
-    "summary": "100 to review · 30 comply"
+    "summary": "101 to review · 30 comply"
    }
   ],
   "egress": {
@@ -98983,6 +99080,7 @@
     "general.bc_707_8_joints": "needs_review",
     "general.bc_707_9_voids": "needs_review",
     "general.bc_707_10_ducts": "needs_review",
+    "general.bc_713_1_shafts_and_exit_stairways": "needs_review",
     "general.bc_713_2_shaft_construction": "needs_review",
     "general.bc_713_4_shaft_rating": "needs_review",
     "general.bc_713_5_shaft_continuity": "needs_review",
@@ -102953,7 +103051,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "8d2321657d8408ab261707daa58643ef65049c5193114ac2f8cc5f0b31bc1d3f",
   "rulebook": {
-   "new_york/ithaca_city": "aac2c7624fcf3305c2c56338f302a95c1eb51ff843fd4eeac79cd970f08da84b"
+   "new_york/ithaca_city": "517c893b5bcdd0e2f24a1527c8180208c6c1a535eb5641f42fbe157a0cb3d1e6"
   }
  }
 }
