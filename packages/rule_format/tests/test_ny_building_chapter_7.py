@@ -182,6 +182,7 @@ def test_review_round_1s_notes_say_what_the_law_says(book, labels):
     assert "used for nothing else" in bottom and "needs no rated separation" in bottom
     assert "unless another section" in _note(book, "general.bc_707_5_1_supporting_construction")
     assert "permanently" in _note(book, "general.bc_703_5_marking")                  # review round 3
+    assert "adjoining floor areas" in _note(book, "general.bc_707_6_openings")         # review round 5
     assert "need not exceed 2 hours" in labels["713.4"]["reason"] and "403.2.1.2" in labels["713.4"]["reason"]
     assert labels["713.1"]["label"] == "flag" and _flags(book, "713.1")
 

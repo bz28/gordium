@@ -351,7 +351,7 @@ rules:
   - given: {}
     expect: needs_review
     note: 'An interior wall or partition built differently on its two faces (a shaft or exit enclosure wall with its layers
-      on one side only, as 713.4 names) takes the shorter of its two fire tests, one from each face (ASTM E119 or UL 263),
+      on one side only; 713.4 sends shaft enclosures here) takes the shorter of its two fire tests, one from each face (ASTM E119 or UL 263),
       unless the building official accepts that it was tested with its weaker face to the fire; exterior walls go by 705.5
       instead: which walls are built so, and how they were tested, isn''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. Brought in alone because 713.4 says shaft enclosures
@@ -586,7 +586,7 @@ rules:
     expect: needs_review
     note: 'Openings in a fire barrier are protected per Section 716, at most 25 percent of the wall''s length in all and at
       most 156 square feet each; openings in shaft, interior exit stairway and ramp, and exit passageway enclosures also meet
-      713.7, 1023.4 and 1024.5. The limits are lifted for a sprinklered building (903.3.1.1: the 156 square feet), fire doors
+      713.7, 1023.4 and 1024.5. The limits are lifted where the adjoining floor areas are sprinklered throughout (903.3.1.1: the 156 square feet), fire doors
       serving exit access or interior exit stairway and ramp enclosures, protectives tested to ASTM E119 or UL 263 at the
       wall''s own rating, atrium fire windows (the 25 percent), the fire door between an exit stairway and its exit passageway
       (1023.3.1), elevator car entrances in a hoistway enclosure, and shaft and chute rooms (713, 713.13.3, 713.13.4; the
