@@ -17,8 +17,6 @@ RULEBOOK = NY / "5_building_code_rules/drafted/general.yaml"
 SECTIONS = NY / "2_extracted_text/gov.ny.building.2025.sections.jsonl"
 LABELS = NY / "3_section_labels/gov.ny.building.2025.yaml"
 CHAPTER_7 = re.compile(r"7\d\d(\.\d+)*$")
-# lines inside a flagged piece that name no section and set nothing: each piece's 'Exceptions:' or 'Exception:' alone
-HEADINGS = re.compile(r"^Exceptions?:$")
 
 
 @pytest.fixture(scope="module")
@@ -77,7 +75,6 @@ def test_every_chapter_7_flag_quotes_every_line_of_its_piece(pieces, labels, boo
                 assert False, (pid, page, n, text[:80])
 
 
-SECTION_REF = re.compile(r"(?:Sections?|Tables?|and|or|,)\s+(\d{3,4}(?:\.\d+)*(?:\(\d\))?)")
 
 
 def _refs(text: str) -> set[str]:
@@ -98,16 +95,30 @@ def _named(note: str) -> set[str]:
     return {m.group(0).rstrip(".") for m in TOKEN.finditer(note)}
 
 
+def _shown_note(rule: dict) -> str:
+    """The note a flag's result shows, as design_checker/egress.py's _flag_item picks it: the first example with a
+    note that needs review."""
+    return next((e["note"] for e in rule.get("examples") or [] if e.get("note") and e.get("expect") == "needs_review"),
+                "")
+
+
+def test_the_note_shown_is_the_first_that_needs_review():
+    """Review round 2's pin: a second example's note never stands in for the one shown."""
+    rule = {"examples": [{"expect": "needs_review", "note": "per 713.7"}, {"expect": "needs_review", "note": "per 716"}]}
+    assert _named(_shown_note(rule)) == {"713.7"}
+
+
 def test_every_section_a_chapter_7_piece_names_is_named_in_its_flags_words(labels, book):
     """Review class (2026-11-26): every section, table or other code a flagged piece sends to is named in what the
-    architect reads on its flag (the examples' notes: the result shows them, never the rule's own notes), each as a
+    architect reads on its flag (the note the checker shows: the first example's that needs review, egress._flag_item;
+    never the rule's own notes, nor a second example's), each as a
     whole token, so a person's check never leaves out a section the law joins to it; the piece's own number aside."""
     for pid, v in labels.items():
         if v["label"] not in ("flag", "rule"):
             continue
         for r in _flags(book, pid):
             quote = " ".join(s["quote"] for s in r["sources"])
-            shown = set().union(*(_named(e.get("note", "")) for e in r.get("examples", [])))
+            shown = _named(_shown_note(r))
             missing = sorted(x for x in _refs(quote) - {pid} if x not in shown)
             assert not missing, (r["id"], missing)
 
@@ -163,7 +174,10 @@ def test_review_round_1s_notes_say_what_the_law_says(book, labels):
         if re.match(r"general\.bc_7\d\d_", r["id"]):
             assert "never more than" not in _note(book, r["id"]), r["id"]
     horizontal = _note(book, "general.bc_707_3_5_horizontal_exit_separation")
-    assert "1026.2" in horizontal and "at least 2 hours" in horizontal
+    assert "1026.2" in horizontal and "at least 2 hours" in horizontal and "above-grade pedestrian walkway" in horizontal
+    enclosed = _note(book, "general.bc_713_1_shafts_and_exit_stairways")
+    assert all(s in enclosed for s in ("1023.2", "1023.3.1", "1023.8", "1023.12", "among other things"))
+    assert "rating 1026.1 asks" not in labels["707.3.5"]["reason"]
     bottom = _note(book, "general.bc_713_11_shaft_bottom")
     assert "used for nothing else" in bottom and "needs no rated separation" in bottom
     assert "unless another section" in _note(book, "general.bc_707_5_1_supporting_construction")

@@ -452,9 +452,10 @@ rules:
     note: 'The separation between the building areas a horizontal exit connects has the rating Section 1026 asks (the book''s
       words name 1026.1, which says how many exits may be horizontal exits; its 1026.2 gives the rating: at least 2 hours,
       a fire wall per 706 or fire barriers per 707 or horizontal assemblies per 711, running through every level unless the
-      floors are rated at least 2 hours with no unprotected openings; none where the horizontal exit leads to a pedestrian
-      walkway per 3104 more than 20 feet between the buildings): which doors are horizontal exits, and the separation''s rating,
-      a person''s check.'
+      floors are rated at least 2 hours with no unprotected openings, and, built as fire barriers, from exterior wall to exterior
+      wall so as to divide the floor completely; none where the horizontal exit is between a building area and an above-grade
+      pedestrian walkway per 3104, the connected buildings more than 20 feet apart): which doors are horizontal exits, and
+      the separation''s rating, a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1026.1, 1026.2, 706, 711 and 3104 aren't
     brought in (1026 is Chapter 10's horizontal exits). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
@@ -712,9 +713,11 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Section 713 applies to the shafts that protect openings and penetrations through floors and roofs, and interior
-      exit stairways and ramps are enclosed as Section 1023 says (rated per 1023.2, their openings, penetrations, ventilation
-      and exterior walls per 1023.4 to 1023.7): which stairways are interior exit stairways, and their enclosures, aren''t
-      in the model, so a person''s check.'
+      exit stairways and ramps are enclosed as Section 1023 says, among other things: rated per 1023.2, separated from an
+      exit passageway that extends them per 1023.3.1, their openings, penetrations, ventilation and exterior walls per 1023.4
+      to 1023.7, a barrier at the level of exit discharge per 1023.8, and smokeproof enclosures per 1023.12 where 403.5.4,
+      405.7.2 or 412.2.2.1 require them: which stairways are interior exit stairways, and their enclosures, aren''t in the
+      model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part a. 1023 isn't brought in (Chapter 10's interior
     exit stairways). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
