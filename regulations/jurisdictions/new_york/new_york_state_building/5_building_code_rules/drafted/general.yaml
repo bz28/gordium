@@ -24483,7 +24483,7 @@ rules:
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered
-    throughout per 903.3.1.1 or 903.3.1.2 (exception 2). 712 (shafts) is brought in only in part (Chapter 7's flags); 1030.6.2
+    throughout per 903.3.1.1 or 903.3.1.2 (exception 2). 712 (shafts) isn't brought in whole (only Chapter 7's flags); 1030.6.2
     and 1030.6.3 aren't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -24634,7 +24634,7 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Chapter 11 (which spaces, routes and units
     must be accessible) and ICC A117.1 aren't brought in; how Gordium will read A117.1 isn't settled yet. Accessible means
     of egress, areas of refuge, elevators and two-way communication aren't in the model, so each requirement of 1009 is a
-    person's check, never a pass or a fail. 709 (smoke barriers) is brought in only in part (709.1 and 709.3 to 709.8, Chapter
+    person's check, never a pass or a fail. 709 (smoke barriers) isn't brought in whole (only 709.1 and 709.3 to 709.8, Chapter
     7 part c's flags) and 1026 isn't brought in; 1023 is section group 9e's flags.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -24753,7 +24753,7 @@ rules:
   notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered
     throughout per 903.3.1.1 or 903.3.1.2: its exception removes the rating and the opening protectives, and the horizontal,
     perpendicular and vertical extents are of that rated construction, so nothing is left to check. 716 (opening protectives)
-    is brought in only in part (716.1 to 716.2.4, Chapter 7 part b''s flags).'
+    isn''t brought in whole (only 716.1 to 716.2.4, Chapter 7 part b''s flags).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1009_7_3_assisted_rescue_openness
@@ -25167,7 +25167,7 @@ rules:
     expect: needs_review
     note: 'The occupancy isn''t stated: a person checks.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9d. 1019.1 (scope) and 1019.2 (floor levels within
-    one story), labeled reference, are quoted here. 713 is brought in only in part (Chapter 7's flags) and 712.1.9 is brought
+    one story), labeled reference, are quoted here. 713 isn't brought in whole (only Chapter 7's flags) and 712.1.9 is brought
     in (Chapter 7 part d's flag); 404, NFPA 13 and 1030 aren't brought in (1030.7 is, alone). Not shown for a building stated
     Group I-2 or I-3 alone (1019.4 covers them).
   drafted_by: claude_code/claude-opus-5-5
@@ -25221,7 +25221,7 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The occupancy isn''t stated: a person checks.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9d. 713 is brought in only in part (Chapter 7's
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9d. 713 isn't brought in whole (only Chapter 7's
     flags) and 408 isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -25448,9 +25448,9 @@ rules:
       allow, exit stairways and ramps in Group I-3 per 408.3.8, exit stairways (not ramps) within an atrium enclosed per 404.6,
       and exit stairways (not ramps) per 510.2 (a horizontal building separation): the enclosure''s rating isn''t in the model,
       so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 707 and 711 are brought in only in part (Chapter
-    7's flags); 408.3.8, 404.6 and 510.2 aren't brought in. Each exception only loosens; none spares a whole building, so
-    this shows for every building.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 707 and 711 aren''t brought in whole (only
+    parts: Chapter 7''s flags); 408.3.8, 404.6 and 510.2 aren''t brought in. Each exception only loosens; none spares a whole
+    building, so this shows for every building.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_3_termination
@@ -25504,8 +25504,8 @@ rules:
       per 711 rated at least as the stairway separates them, with a fire door assembly per 716 the only opening and no penetrations;
       but penetrations per 1023.5 are allowed, and no separation is needed where the extension has no openings or where the
       stairway and extension are pressurized per 909.20.4: the enclosures aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 707, 711 and 716 are brought in only in part
-    (Chapter 7's flags); 909.20.4 isn't brought in.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 707, 711 and 716 aren''t brought in whole
+    (only parts: Chapter 7''s flags); 909.20.4 isn''t brought in.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_4_openings
@@ -25528,7 +25528,7 @@ rules:
     note: 'Opening protectives of an interior exit stairway or ramp meet 716; its openings, other than unprotected exterior
       openings, are only those needed to enter it from normally occupied spaces and to leave it; and no elevator opens into
       it: the enclosure''s openings aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 716 is brought in only in part (716.1 to 716.2.4,
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 716 isn't brought in whole (only 716.1 to 716.2.4,
     Chapter 7 part b's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -25560,8 +25560,8 @@ rules:
       box of at most 16 square inches), and structural elements supporting it or a roof at its top, each protected per 714;
       no penetration or opening joins two adjacent exit stairways or ramps; membrane penetrations on the outside are allowed
       per 714.4.2: penetrations aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 714.1 to 714.5 are brought in (Chapter 7 part
-    d's flags); 714.6 isn't.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 714 isn''t brought in whole (only 714.1 to
+    714.5: Chapter 7 part d''s flags).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_6_ventilation
@@ -25593,7 +25593,7 @@ rules:
       shafts), or within the building separated as shafts; openings into the rated construction are only those needed for
       maintenance and operation, protected per 716 for shaft enclosures; and the system is independent of the building''s
       other ventilation: ventilation isn''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 716 is brought in only in part (716.1 to 716.2.4,
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 716 isn't brought in whole (only 716.1 to 716.2.4,
     Chapter 7 part b's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -25867,8 +25867,8 @@ rules:
       and the passageway isn''t needed where the passageway is protected and pressurized as the enclosure is, and the enclosure
       may egress through areas on the level of exit discharge or vestibules as 1028 allows (1028.2: no more than half of the
       exit stairways and ramps, under its conditions): smokeproof enclosures aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 707 and 711 are brought in only in part (Chapter
-    7's flags) and 1028 isn't brought in (1028 is its own section group).
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9e. 707 and 711 aren''t brought in whole (only
+    parts: Chapter 7''s flags) and 1028 isn''t brought in (1028 is its own section group).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1023_12_2_smokeproof_access
@@ -25980,8 +25980,8 @@ rules:
     note: 'An exit passageway''s walls, floors and ceilings are rated at least 1 hour and at least as any interior exit stairway
       or ramp it connects to, built as fire barriers per 707 or horizontal assemblies per 711: ratings aren''t in the model,
       so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 707 and 711 are brought in only in part (Chapter
-    7's flags).
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 707 and 711 aren''t brought in whole (only
+    parts: Chapter 7''s flags).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1024_4_exit_passageway_termination
@@ -26026,7 +26026,7 @@ rules:
       exterior openings, are only those needed to enter it from normally occupied spaces and to leave it; one extending an
       interior exit stairway or ramp meets 1023.3.1; and no elevator opens into it: the openings aren''t in the model, so
       a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 716 is brought in only in part (716.1 to 716.2.4,
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 716 isn't brought in whole (only 716.1 to 716.2.4,
     Chapter 7 part b's flags) and 402.8.7 isn't brought in.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -26056,8 +26056,8 @@ rules:
       most 16 square inches), and structural elements supporting a floor or roof at its top, each protected per 714; no penetration
       or opening joins two adjacent exit passageways; membrane penetrations on the outside are allowed per 714.4.2: penetrations
       aren''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 714.1 to 714.5 are brought in (Chapter 7 part
-    d's flags); 714.6 isn't.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 714 isn''t brought in whole (only 714.1 to
+    714.5: Chapter 7 part d''s flags).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1024_7_exit_passageway_ventilation
@@ -26088,7 +26088,7 @@ rules:
       within the building separated as shafts; openings into the rated construction are only those needed for maintenance
       and operation, protected per 716 for shaft enclosures; and the system is independent of the building''s other ventilation:
       ventilation isn''t in the model, so a person''s check.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 716 is brought in only in part (716.1 to 716.2.4,
+  notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9f. 716 isn't brought in whole (only 716.1 to 716.2.4,
     Chapter 7 part b's flags).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
