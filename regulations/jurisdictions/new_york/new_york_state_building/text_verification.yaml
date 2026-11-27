@@ -1638,7 +1638,7 @@ pieces:
     - '''50'', ''200'' and ''2'' (<=): ''of 50 milligrams or less'', ''200 milligrams or less'', ''2 milligrams per liter
       or less''; the recorded words miss it (numbers.py reads comparison words only directly before a number or after its
       unit). ''within 24'' and ''within 1'' (none): ''within 24 hours'', ''within 1 hour'', a test''s exposure, no limit on
-      a building, so the second reading (none) is right. A Fire Code hazard class (Group H), used by no rule.'
+      a building, so the second reading (none) is right. TOXIC''s reading (step g9c) records the same two as ''<='', and its subscripts on lines of their own; the two readings differ only there, in a Fire Code hazard class (Group H) used by no rule.'
   202:high_rise_building:
     piece_sha256: 2c9ef8382ec9fe199f1c24477190a8ec25ff7ff8eb1a001e4082a7060454b079
     numbers:

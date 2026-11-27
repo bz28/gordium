@@ -341,7 +341,6 @@ occupancy_group:
   - general.bc_905_3_3_mall_standpipes
   - general.bc_905_3_4_underground_standpipes
   - general.bc_905_3_5_helistop_standpipes
-  - general.bc_905_3_6_marina_standpipes
   - general.bc_905_3_standpipes_required
   - general.bc_907_2_10_1_storage_fire_alarm
   - general.bc_907_2_11_1_group_r1_smoke_alarm_locations
@@ -636,7 +635,8 @@ stories_above_grade_plane:
 townhouse_units:
   meaning: 'Every dwelling unit of the building is a townhouse unit (2025 BCNYS 202 TOWNHOUSE UNIT: a single-family dwelling
     unit in a townhouse that extends from the foundation to the roof, that has a yard or public way on not fewer than two sides and a separate means of egress),
-    as the architect states it: 903.3.1.3 permits an NFPA 13D system in townhouses'
+    as the architect states it: 903.3.1.3 permits an NFPA 13D system in townhouses, and 905.3''s exception needs no standpipe
+    system in Group R-2 townhouses (read with separate_means_of_egress)'
   unit: yes_no
   needed_by:
   - general.bc_903_2_8_group_r_sprinklers
@@ -644,7 +644,6 @@ townhouse_units:
   - general.bc_905_3_3_mall_standpipes
   - general.bc_905_3_4_underground_standpipes
   - general.bc_905_3_5_helistop_standpipes
-  - general.bc_905_3_6_marina_standpipes
   - general.bc_905_3_standpipes_required
 separate_means_of_egress:
   meaning: 'Every dwelling unit of the building has a separate means of egress, as the architect states it (2025 BCNYS 202
@@ -656,7 +655,6 @@ separate_means_of_egress:
   - general.bc_905_3_3_mall_standpipes
   - general.bc_905_3_4_underground_standpipes
   - general.bc_905_3_5_helistop_standpipes
-  - general.bc_905_3_6_marina_standpipes
   - general.bc_905_3_standpipes_required
 nfpa_13r_stated:
   meaning: 'The architect states an NFPA 13R sprinkler system, whether or not it counts as one per 2025 BCNYS 903.3.1.2

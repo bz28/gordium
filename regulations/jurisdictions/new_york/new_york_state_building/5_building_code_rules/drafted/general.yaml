@@ -6338,9 +6338,9 @@ rules:
     note: 'Class III standpipes throughout a building with four or more stories above or below grade plane, or its highest
       story''s floor more than 30 feet above the lowest level of fire department vehicle access, or its lowest story''s more
       than 30 feet below the highest (Class I allowed in a building sprinklered throughout with a 903.3.1.1 or 903.3.1.2 system,
-      in Groups B and E, parking garages, sprinklered basements, or where occupant-use hose lines won''t be used by trained
-      personnel or the fire department; recessed loading docks for four vehicles or less and impractical topography left out
-      in finding the lowest level of access): a person''s check.'
+      in Groups B and E, parking garages, basements sprinklered throughout, or where occupant-use hose lines won''t be used
+      by trained personnel or the fire department; recessed loading docks for four vehicles or less and impractical topography
+      left out in finding the lowest level of access): a person''s check.'
   - given:
       occupancy_group: R-3
     expect: not_applicable
@@ -6369,8 +6369,8 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Class I automatic wet standpipes in a nonsprinklered Group A building with an occupant load over 1,000 (not open-air
-      seating without enclosed spaces; dry, semiautomatic dry or manual wet ones outside high-rise buildings): a person''s
-      check.'
+      seating without enclosed spaces; Class I automatic dry, semiautomatic dry or manual wet ones outside high-rise buildings):
+      a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -6408,8 +6408,9 @@ rules:
     note: 'A covered or open mall building has a standpipe system throughout where 905.3.1 requires one, else Class I hose
       connections on the sprinkler system delivering 250 gallons per minute at the hydraulically most remote one while also
       supplying the sprinkler system''s demand, with at most a 50 psi residual pressure loss at that flow from the fire department
-      connection, at each exit passageway or corridor entrance, each landing of interior exit stairways opening on the mall,
-      the public entrances, and so that no part of a tenant space is more than 200 feet from one: a person''s check.'
+      connection to the hydraulically most remote hose connection, at each exit passageway or corridor entrance, each landing
+      of interior exit stairways opening on the mall, the public entrances, and so that no part of a tenant space is more
+      than 200 feet from one: a person''s check.'
   - given:
       occupancy_group: R-3
     expect: not_applicable
@@ -6477,7 +6478,6 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Standpipes in marinas and boatyards (BCNYS 905.3.6)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6489,14 +6489,11 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Standpipes in marinas and boatyards comply with Chapter 36 of the Fire Code of New York State: a person''s check.'
-  - given:
-      occupancy_group: R-3
-    expect: not_applicable
-    note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
-    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
-    Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
+    note: 'Any standpipes in marinas and boatyards, required or not (901.2), comply with Chapter 36 of the Fire Code of New York State: a person''s
+      check.'
+  notes: Worded for whatever standpipes a marina or boatyard has, required or not (901.2), so 905.3's exceptions for Group
+    R-2 townhouses and Group R-3 don't set it aside (review round 3). Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part e).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_905_3_7_roof_garden_standpipes
@@ -6556,13 +6553,14 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Class I hose connections in every required interior or exterior exit stairway, one for each story above and below
-      grade plane at the main floor landing (one in the open corridor or breezeway between open stairs 75 feet or less apart),
-      on each side of a horizontal exit''s wall, in every exit passageway at its entrance from other areas (not where a 30-foot
-      hose stream on 100 feet of hose from a stairway''s connection reaches those areas), at a mall''s public entrances and
-      its exit passageway and corridor entrances, at the roof or the highest landing with roof access per 1011.12 where the
-      roof''s slope is under 4 in 12, and more where the fire code official asks (a floor''s most remote point over 150 feet
-      from one, 200 feet sprinklered), any standpipe system provided (901.2): a person''s check.'
+    note: 'Where a Class I standpipe system is installed, required or not (901.2), Class I hose connections in every required
+      interior or exterior exit stairway, one for each story above and below grade plane at the main floor landing unless
+      the fire code official approves otherwise (one in the open corridor or breezeway between open stairs 75 feet or less
+      apart), on each side of a horizontal exit''s wall and in every exit passageway at its entrance from other areas (neither
+      where a 30-foot hose stream on 100 feet of hose from a stairway''s connection reaches the floor areas next to it), at
+      a mall''s public entrances and its exit passageway and corridor entrances, at the roof or the highest landing with roof
+      access per 1011.12 where the roof''s slope is under 4 in 12, and more where the fire code official asks (a floor''s
+      most remote point over 150 feet from one, 200 feet sprinklered): a person''s check.'
   notes: 'They bind any standpipe system provided, required or not (901.2: a system not required may be installed where it
     meets this code), so 905.3''s exceptions for Group R-2 townhouses and Group R-3 don''t set them aside (review round 2).
     Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
@@ -6585,9 +6583,9 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Class I standpipe risers and laterals not in an interior exit stairway have the fire resistance the building''s
-      vertical enclosures need (laterals left unenclosed in a building sprinklered throughout), any standpipe system provided
-      (901.2): a person''s check.'
+    note: 'Where a Class I standpipe system is installed, required or not (901.2), its risers and laterals not in an interior
+      exit stairway have the fire resistance the building''s vertical enclosures need (laterals left unenclosed in a building
+      sprinklered throughout): a person''s check.'
   notes: 'They bind any standpipe system provided, required or not (901.2: a system not required may be installed where it
     meets this code), so 905.3''s exceptions for Group R-2 townhouses and Group R-3 don''t set them aside (review round 2).
     Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
@@ -8604,8 +8602,8 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Where an open exterior balcony leads to the stairway or ramp, the door into the enclosure is a fire door assembly
-      per 716: a person''s check.'
+    note: 'In a smokeproof enclosure ventilated by natural means (909.20.3), where an open exterior balcony leads to the stairway
+      or ramp, the door into the enclosure is a fire door assembly per 716: a person''s check.'
   notes: '909.20.3.1: the doors'' ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
     9 part e).'
   drafted_by: claude_code/claude-opus-5-5
@@ -8626,8 +8624,9 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Where a vestibule leads to it, the door into the vestibule is a fire door assembly per 716, the door from the vestibule
-      to the stairway at least 20 minutes per 716: a person''s check.'
+    note: 'In a smokeproof enclosure ventilated by natural means (909.20.3), where a vestibule leads to the stairway, the
+      door into the vestibule is a fire door assembly per 716, the door from the vestibule to the stairway at least 20 minutes
+      per 716: a person''s check.'
   notes: '909.20.3.2: the doors'' ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
     9 part e).'
   drafted_by: claude_code/claude-opus-5-5
@@ -8695,8 +8694,9 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'The door into the vestibule is a fire door assembly per 716.2.2.1; the door from the vestibule to the stairway
-      at least 20 minutes and a smoke door assembly per 716.2.2.1, installed per NFPA 105: a person''s check.'
+    note: 'In a pressurized stair and vestibule (909.20.5), the door into the vestibule is a fire door assembly per 716.2.2.1;
+      the door from the vestibule to the stairway at least 20 minutes and a smoke door assembly per 716.2.2.1, installed per
+      NFPA 105: a person''s check.'
   notes: '909.20.5.1: the doors'' ratings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
     9 part e).'
   drafted_by: claude_code/claude-opus-5-5
@@ -8719,8 +8719,9 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'The stair is at least 0.05 inch of water above the vestibule, and the vestibule at least 0.05 inch above the fire
-      floor, doors closed, at most 30 pounds of force to begin opening a door: a person''s check.'
+    note: 'In a pressurized stair and vestibule (909.20.5), the stair is at least 0.05 inch of water above the vestibule with
+      all stairway doors closed under the maximum anticipated stack pressures, and the vestibule at least 0.05 inch above
+      the fire floor with all doors closed, at most 30 pounds of force to begin opening a door: a person''s check.'
   notes: '909.20.5.2: pressures aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -8783,9 +8784,9 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Smoke detectors at each floor at the enclosure''s entrance, per 907.3, start the ventilating equipment 909.20.4
-      and 909.20.5 require, which runs at its required performance when the doors'' closers act on smoke or power failure:
-      a person''s check.'
+    note: 'Smoke detectors at each floor, at an approved location at the enclosure''s entrance, per 907.3, start the ventilating
+      equipment 909.20.4 and 909.20.5 require, which runs at its required performance when the doors'' closers act on smoke
+      or power failure: a person''s check.'
   notes: '909.20.6: the equipment isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -30311,7 +30312,8 @@ rules:
     note: 'Where 1013.1 requires exit signs in Group R-1, low-level exit signs complying with 1013.5 are added in every area
       serving guest rooms, their bottom at least 10 and at most 18 inches above the floor, flush on the door or wall, a wall
       sign''s edge within 4 inches of the door frame on the latch side; not required in a building sprinklered throughout
-      per 903.3.1.1 or 903.3.1.2: exit signs aren''t in the model, so a person''s check.'
+      per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories): exit signs aren''t
+      in the model, so a person''s check.'
   - given:
       occupancy_group: R-1
       sprinklered_903_3_1_1: true
@@ -30343,6 +30345,19 @@ rules:
       sprinklered_903_3_1_1: false
     expect: needs_review
     note: 'Group R-1, not per 903.3.1.1, and whether per 903.3.1.2 isn''t stated: a person checks.'
+  - given:
+      occupancy_group: mixed
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    expect: needs_review
+    note: 'A 13R system stated outside Group R: 903.3.1.2 permits one only in Group R, so the exception doesn''t set this
+      aside: a person''s check.'
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    expect: not_applicable
+    note: 'A 13R system stated in Group R, where 903.3.1.2 permits one: set aside by the exception.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9b. A 13R system sets it aside only in a building
     stated Group R, where 903.3.1.2 permits one (the merge of Chapter 9, 2026-11-27).
   drafted_by: claude_code/claude-opus-5-5
@@ -30712,9 +30727,9 @@ rules:
       sprinklered_903_3_1_2: false
     expect: needs_review
     note: 'A stairway in an accessible means of egress has at least 48 inches clear between handrails; not required in a building
-      sprinklered throughout per 903.3.1.1 or 903.3.1.2, or for stairways reached from a refuge area with a horizontal exit:
-      which stairways serve as an accessible means of egress, and their width between handrails, aren''t measured, so a person''s
-      check.'
+      sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within 903.3.1.2''s four stories),
+      or for stairways reached from a refuge area with a horizontal exit: which stairways serve as an accessible means of
+      egress, and their width between handrails, aren''t measured, so a person''s check.'
   - given:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -30723,6 +30738,19 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    expect: needs_review
+    note: 'A 13R system stated outside Group R: 903.3.1.2 permits one only in Group R, so the exception doesn''t set this
+      aside: a person''s check.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    expect: not_applicable
+    note: 'A 13R system stated in Group R, where 903.3.1.2 permits one: set aside by the exception.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered
     throughout per 903.3.1.1 or 903.3.1.2 (exception 1 spares every stairway). The stair measuring gives a flight's clear
     width, but not whether it is part of an accessible means of egress (Chapter 11). A 13R system sets it aside only in a
@@ -30757,9 +30785,10 @@ rules:
     expect: needs_review
     note: 'A stairway in an accessible means of egress has an area of refuge within an enlarged floor-level landing or is
       reached from one complying with 1009.6; not required at exit access stairways with two-way communication at the elevator
-      landing (1009.8), in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2, at open parking garages'' stairways,
-      for smoke-protected or open-air assembly seating (1030.6.2 and 1030.6.3), in Group R-2, or for stairways reached from
-      a refuge area with a horizontal exit: areas of refuge aren''t in the model, so a person''s check.'
+      landing (1009.8), in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group
+      R, within 903.3.1.2''s four stories), at open parking garages'' stairways, for smoke-protected or open-air assembly
+      seating (1030.6.2 and 1030.6.3), in Group R-2, or for stairways reached from a refuge area with a horizontal exit: areas
+      of refuge aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
@@ -30784,6 +30813,12 @@ rules:
       sprinklered_903_3_1_1: true
     expect: not_applicable
     note: 'Sprinklered throughout per 903.3.1.1, the group not stated: exception 2 spares it whatever the group.'
+  - given:
+      occupancy_group: R-1
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    expect: not_applicable
+    note: 'A 13R system stated in Group R, where 903.3.1.2 permits one: set aside by the exception.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered
     throughout per 903.3.1.1 or 903.3.1.2 (exception 2), or stated Group R-2 alone (exception 5). 1030.6.2 and 1030.6.3 (smoke-protected
     and open-air seating) aren't brought in. A 13R system sets it aside only in a building stated Group R, where 903.3.1.2
@@ -30845,10 +30880,10 @@ rules:
       sprinklered_903_3_1_2: false
     expect: needs_review
     note: 'An elevator in an accessible means of egress is reached from an area of refuge complying with 1009.6; not required
-      in open parking garages, in buildings and facilities sprinklered throughout per 903.3.1.1 or 903.3.1.2, at elevators
-      712 doesn''t require in a shaft, for smoke-protected or open-air assembly seating (1030.6.2 and 1030.6.3), or for elevators
-      reached from a refuge area with a horizontal exit: elevators and areas of refuge aren''t in the model, so a person''s
-      check.'
+      in open parking garages, in buildings and facilities sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system
+      counts only in Group R, within 903.3.1.2''s four stories), at elevators 712 doesn''t require in a shaft, for smoke-protected
+      or open-air assembly seating (1030.6.2 and 1030.6.3), or for elevators reached from a refuge area with a horizontal
+      exit: elevators and areas of refuge aren''t in the model, so a person''s check.'
   - given:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -30857,6 +30892,19 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    expect: needs_review
+    note: 'A 13R system stated outside Group R: 903.3.1.2 permits one only in Group R, so the exception doesn''t set this
+      aside: a person''s check.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    expect: not_applicable
+    note: 'A 13R system stated in Group R, where 903.3.1.2 permits one: set aside by the exception.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered
     throughout per 903.3.1.1 or 903.3.1.2 (exception 2). 712 (shafts) isn't brought in whole (only Chapter 7's flags); 1030.6.2
     and 1030.6.3 aren't brought in. A 13R system sets it aside only in a building stated Group R, where 903.3.1.2 permits
@@ -31116,8 +31164,8 @@ rules:
       1 hour from the inside, extending at least 10 feet beyond the landing on either side (or equivalent rated construction
       at least 4 feet out from the wall beside the landing) and from the ground to at least 10 feet above the area''s floor
       or the roof line, whichever is lower, openings protected per 716; neither the rating nor the opening protectives is
-      required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: such areas and wall ratings aren''t in the
-      model, so a person''s check.'
+      required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in Group R, within
+      903.3.1.2''s four stories): such areas and wall ratings aren''t in the model, so a person''s check.'
   - given:
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: true
@@ -31127,6 +31175,13 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    expect: needs_review
+    note: 'A 13R system stated outside Group R: 903.3.1.2 permits one only in Group R, so the exception doesn''t set this
+      aside: a person''s check.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered
     throughout per 903.3.1.1 or 903.3.1.2: its exception removes the rating and the opening protectives, and the horizontal,
     perpendicular and vertical extents are of that rated construction, so nothing is left to check. 716 (opening protectives)
@@ -31180,8 +31235,8 @@ rules:
       sprinklered_903_3_1_2: false
     expect: needs_review
     note: 'Stairways in the means of egress from an exterior area for assisted rescue have at least 48 inches clear between
-      handrails; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2: such areas aren''t in the model,
-      so a person''s check.'
+      handrails; not required in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (a 13R system counts only in
+      Group R, within 903.3.1.2''s four stories): such areas aren''t in the model, so a person''s check.'
   - given:
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -31190,6 +31245,19 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: B
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    expect: needs_review
+    note: 'A 13R system stated outside Group R: 903.3.1.2 permits one only in Group R, so the exception doesn''t set this
+      aside: a person''s check.'
+  - given:
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    expect: not_applicable
+    note: 'A 13R system stated in Group R, where 903.3.1.2 permits one: set aside by the exception.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), section group 9c. Not shown in a building stated sprinklered
     throughout per 903.3.1.1 or 903.3.1.2 (its exception). A 13R system sets it aside only in a building stated Group R, where
     903.3.1.2 permits one (the merge of Chapter 9, 2026-11-27).

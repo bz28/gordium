@@ -619,7 +619,7 @@ def test_part_ds_review_round_1(book, ctx):
     assert "prevent a required alarm" in _shown_note(_rule(book, "general.bc_907_2_11_1_group_r1_smoke_alarm_locations"))
 
 
-ANY_STANDPIPE = {"general.bc_905_3_7_roof_garden_standpipes", "general.bc_905_4_class_i_hose_connections",
+ANY_STANDPIPE = {"general.bc_905_3_6_marina_standpipes", "general.bc_905_3_7_roof_garden_standpipes", "general.bc_905_4_class_i_hose_connections",
                  "general.bc_905_4_1_standpipe_protection", "general.bc_905_4_2_standpipe_interconnection"}
 
 
@@ -631,7 +631,7 @@ def test_part_es_standpipe_flags_follow_905_3s_exceptions(book, ctx):
     allowed = ctx.allowed()
     standpipes = [r for r in book if r["id"].startswith("general.bc_905_") and r["id"] != "general.bc_905_3_2_group_a_standpipes"
                   and r["id"] not in ANY_STANDPIPE]
-    assert len(standpipes) == 6
+    assert len(standpipes) == 5
     for r in standpipes:
         def got(b):
             return outcome(r, code_scope.building_measures(b), allowed)
@@ -801,3 +801,44 @@ def test_the_townhouse_unit_is_quoted_as_the_book_prints_it():
     assert "not fewer than two sides" in meaning and "separate means of egress" in meaning
     tv = yaml.safe_load((NY / "text_verification.yaml").read_text(encoding="utf-8"))["pieces"]["202:townhouse_unit"]
     assert "not fewer than two sides" in " ".join(tv["flags"]) and "not less than" not in " ".join(tv["flags"])
+
+
+def test_part_es_review_round_3(book, ctx):
+    """Part e review round 3: each note keeps its piece's conditions (905.3.2's dry standpipes are automatic or
+    semiautomatic; 905.3.1's basements and 905.3.3's pressure loss in full; 909.20.5.2's stack pressures; 909.20.6's
+    approved location; 905.4's fire code official and its hose-reach exception for horizontal exits too); the doors of
+    909.20.3 and 909.20.5 say which of the two ways they belong to; the flags binding any standpipe say so first; and
+    905.3.6's marinas bind whatever standpipes are there (901.2)."""
+    def n(rid):
+        return _shown_note(_rule(book, rid))
+    assert "Class I automatic dry, semiautomatic dry or manual wet" in n("general.bc_905_3_2_group_a_standpipes")
+    assert "basements sprinklered throughout" in n("general.bc_905_3_1_class_iii_by_height")
+    assert "to the hydraulically most remote hose connection" in n("general.bc_905_3_3_mall_standpipes")
+    assert "maximum anticipated stack pressures" in n("general.bc_909_20_5_2_pressure_difference")
+    assert "at an approved location" in n("general.bc_909_20_6_ventilating_equipment")
+    h = n("general.bc_905_4_class_i_hose_connections")
+    assert "unless the fire code official approves otherwise" in h and "horizontal exit's wall and in every exit passageway" in h
+    for rid in ("general.bc_909_20_3_1_smokeproof_balcony_doors", "general.bc_909_20_3_2_smokeproof_vestibule_doors"):
+        assert n(rid).startswith("In a smokeproof enclosure ventilated by natural means (909.20.3)"), rid
+    for rid in ("general.bc_909_20_5_1_pressurized_vestibule_doors", "general.bc_909_20_5_2_pressure_difference"):
+        assert n(rid).startswith("In a pressurized stair and vestibule (909.20.5)"), rid
+    for rid in ("general.bc_905_4_class_i_hose_connections", "general.bc_905_4_1_standpipe_protection"):
+        assert n(rid).startswith("Where a Class I standpipe system is installed, required or not (901.2)"), rid
+    assert outcome(_rule(book, "general.bc_905_3_6_marina_standpipes"),
+                   code_scope.building_measures({"occupancy_groups": ["R-3"]}), ctx.allowed()) == "needs_review"
+
+
+def test_a_line_a_13r_system_doesnt_spare_says_why(book):
+    """The merge review (2026-11-27): a flag set aside by a 903.3.1.1 or 903.3.1.2 system shows where a stated 13R
+    system doesn't count (outside Group R, or above 903.3.1.2's four stories), so its words must say why, as 716.2.2.3's
+    do; each has worked examples for 13R in and outside Group R."""
+    guarded = [r for r in book if r["kind"] == "flag" and "sprinklered_903_3_1_2 and occupancy_group in" in
+               " ".join(str(r.get("applies_when", "")).split())]
+    assert len(guarded) >= 7
+    for r in guarded:
+        if r["id"] == "general.bc_716_2_2_3_exit_enclosure_door_temperature_rise":
+            continue
+        assert "a 13R system counts only in Group R, within 903.3.1.2's four stories" in _shown_note(r), r["id"]
+        kinds = {(str(e["given"].get("occupancy_group", "")).startswith("R-"), e["expect"]) for e in r["examples"]
+                 if e["given"].get("sprinklered_903_3_1_2") is True and not e["given"].get("sprinklered_903_3_1_1")}
+        assert (True, "not_applicable") in kinds and (False, "needs_review") in kinds, r["id"]
