@@ -1106,11 +1106,11 @@ rules:
     note: 'Table 716.1(2): a fire door in the enclosure of a shaft, an interior exit stairway or an interior exit ramp rated
       2 hours is rated at least 1 1/2 hours; in such an enclosure rated 1 hour, or an exit access stairway or ramp enclosure,
       or an exit passageway''s walls rated 1 hour, at least 1 hour. A vision panel in such a door is at most 100 square inches
-      (note b) unless its glazing is marked D-H-T-W-90 (2 hours) or D-H-T-W-60 (1 hour), and D-H-90 or D-H-60 up to 100 square
-      inches; sidelights and transoms are fire-resistance-rated glazing only (W-120 or W-60), fire-protection-rated glazing
-      is not permitted; note a allows fire-resistance-rated glazing tested to ASTM E119 per 716.1.2.3 in the maximum size
-      tested, note c the markings of 716.1.2.2.1 and Table 716.1(1). The enclosures'' ratings and the doors'' ratings and
-      glazing aren''t in the model, so a person''s check.'
+      (note b; note b: a marking''s W is the glazing''s fire-resistance rating, not the frame''s) unless its glazing is marked
+      D-H-T-W-90 (2 hours) or D-H-T-W-60 (1 hour), and D-H-90 or D-H-60 up to 100 square inches; sidelights and transoms are
+      fire-resistance-rated glazing only (W-120 or W-60), fire-protection-rated glazing is not permitted; note a allows fire-resistance-rated
+      glazing tested to ASTM E119 per 716.1.2.3 in the maximum size tested, note c the markings of 716.1.2.2.1 and Table 716.1(1).
+      The enclosures'' ratings and the doors'' ratings and glazing aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. The rows that egress's enclosures use; the
     table's other rows are another flag. A rule waits on a door's stated rating and its enclosure's (the Chapter 7 plan's
     Revit-fields list). Shown for every building.
@@ -1153,7 +1153,7 @@ rules:
     note: 'Table 716.1(2), fire partitions, corridor walls: a door in a corridor wall rated 1 hour or 1/2 hour is a fire door
       rated at least 1/3 hour (20 minutes), its vision panel glazing marked D-20 to the maximum size tested, and a sidelight
       or transom rated 3/4 hour (D-H-OH-45) in a 1-hour wall or 1/3 hour (D-H-OH-20) in a 1/2-hour wall; note a allows fire-resistance-rated
-      glazing tested to ASTM E119 per 716.1.2.3 in the maximum size tested. The doors'' ratings aren''t in the model, so a person''s check.'
+      glazing tested to ASTM E119 per 716.1.2.3 in the maximum size tested, note c the markings of 716.1.2.2.1 and Table 716.1(1), note b: a marking''s W is the glazing''s fire-resistance rating, not the frame''s. The doors'' ratings aren''t in the model, so a person''s check.'
   - given: {}
     parts:
       corridor:
@@ -1205,9 +1205,12 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Table 716.1(2), smoke barriers rated 1 hour: a door is a fire door rated at least 1/3 hour (20 minutes), its vision
-      panel glazing marked D-20 to the maximum size tested, and a sidelight or transom rated 3/4 hour (D-H-OH-45). Smoke barriers
-      enclose areas of refuge (1009.6.4) and elevator lobbies, and divide Group I-1, I-2 and I-3 buildings and ambulatory
-      care facilities into smoke compartments: which walls are smoke barriers isn''t in the model, so a person''s check.'
+      panel glazing marked D-20 to the maximum size tested, and a sidelight or transom rated 3/4 hour (D-H-OH-45); note a
+      allows fire-resistance-rated glazing tested to ASTM E119 per 716.1.2.3 in the maximum size tested, note c the markings
+      of 716.1.2.2.1 and Table 716.1(1), note b: a marking''s W is the glazing''s fire-resistance rating, not the frame''s.
+      Smoke barriers enclose areas of refuge (1009.6.4) and elevator lobbies, and divide Group I-1, I-2 and I-3 buildings
+      and ambulatory care facilities into smoke compartments: which walls are smoke barriers isn''t in the model, so a person''s
+      check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 1009.6.4 and Section 709 aren't brought in
     (709 is Chapter 7 part c). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
@@ -1299,12 +1302,13 @@ rules:
       walls rated 2 hours, a door rated 1 1/2 hours, vision panel D-H-90 or D-H-W-90 to the maximum size tested, sidelights
       fire-protection-rated 1 1/2 hours (D-H-OH-90, note h) or fire-resistance-rated 2 hours (W-120); exterior walls rated
       1 hour, a door rated 3/4 hour, vision panel D-H-45 to the maximum size tested, sidelights rated 3/4 hour (D-H-45, note
-      h). Note a: fire-resistance-rated glazing tested to ASTM E119 per 716.1.2.3, in the maximum size tested. Where sidelights
-      are fire-resistance-rated only, fire-protection-rated glazing is not permitted. Note h: fire-protection-rated glazing
-      is not permitted where the Fire Code of New York State''s 1207 encloses energy storage systems, fire-resistance-rated
-      glazing tested to ASTM E119 or UL 263 per 716.1.2.3 allowed instead. A horizontal exit''s door, a unit''s door in a
-      rated separation and an exit door in an exterior wall are among them: the walls'' and doors'' ratings aren''t in the
-      model, so a person''s check.'
+      h). Note a: fire-resistance-rated glazing tested to ASTM E119 per 716.1.2.3, in the maximum size tested. Note b: a vision
+      panel marking''s W is the glazing''s fire-resistance rating, not the frame''s; note c: the markings of 716.1.2.2.1 and
+      Table 716.1(1) are permitted too. Where sidelights are fire-resistance-rated only, fire-protection-rated glazing is
+      not permitted. Note h: fire-protection-rated glazing is not permitted where the Fire Code of New York State''s 1207
+      encloses energy storage systems, fire-resistance-rated glazing tested to ASTM E119 or UL 263 per 716.1.2.3 allowed instead.
+      A horizontal exit''s door, a unit''s door in a rated separation and an exit door in an exterior wall are among them:
+      the walls'' and doors'' ratings aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 706.4, 716.2.5.1.2, NFPA 221 and the Fire Code's
     1207 aren't brought in. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
