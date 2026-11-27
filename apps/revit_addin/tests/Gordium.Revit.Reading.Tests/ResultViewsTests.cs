@@ -124,7 +124,7 @@ public sealed class ResultViewsTests
         Assert.Equal("building.occupancy_groups", answer.Cards[0].Field);
         Assert.Equal(198, answer.Cards[0].Rows.Count);                 // group 2's story-exit rules read it too; group 4a's corridor width (2); group 4b's Table 1020.2 rows (7 x 2); group 5a's corridor capacity rule (2); group 6a's door width (10 doors: Group I-2's 41 1/2 in); group 6b's door swing (10 doors: Group H)
         Assert.Equal(60, answer.Cards.Single(c => c.Field == "building.sprinkler_system").Rows.Count);   // group 4b: Table 1020.2 rows whose answer turns on the system (8)
-        Assert.Equal(82, answer.Cards.Single(c => c.Field == "building.special_egress_spaces").Rows.Count);
+        Assert.Equal(92, answer.Cards.Single(c => c.Field == "building.special_egress_spaces").Rows.Count);   // Chapter 4 part a: 402.8's bands on the corridor width, capacity and three Table 1020.2 rows (5 x 2 corridors): +10
         Assert.Equal(84, answer.Cards.Single(c => c.Field == "building.assembly_fixed_seating").Rows.Count);   // group 5a: the corridor capacity rule (2)
         Assert.Equal($"Answer {answer.Cards.Count} questions about the project", answer.Title);
         Assert.DoesNotContain(m.Fix.Where(g => g.Kind != FixKind.Answer).SelectMany(g => g.Cards),

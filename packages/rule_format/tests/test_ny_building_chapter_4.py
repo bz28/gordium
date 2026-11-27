@@ -188,5 +188,7 @@ def test_no_rule_passes_on_a_figure_402_8_changes_where_a_mall_isnt_ruled_out(ct
     for rid, _, _, why in bad:
         by_rule.setdefault(rid, set()).update(why)
     assert not bad, (by_rule, bad[:3])
-    # each walked rule still passes somewhere once a mall is ruled out (the walk isn't vacuous): checked by the
-    # rules' own examples (python -m rule_format)
+    # the walk isn't vacuous: every walked rule passes somewhere with a mall not ruled out (four exits or more, a
+    # corridor of 240 in or more, no dead end, a rated or sprinklered corridor...), but the corridor's capacity, which
+    # no width passes at every load (review round 1)
+    assert {rid for rid, n in passes.items() if n == 0} <= {"general.bc_1020_3_corridor_capacity"}, passes
