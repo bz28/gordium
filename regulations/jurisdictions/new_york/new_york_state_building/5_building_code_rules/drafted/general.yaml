@@ -1108,9 +1108,9 @@ rules:
       or an exit passageway''s walls rated 1 hour, at least 1 hour. A vision panel in such a door is at most 100 square inches
       (note b) unless its glazing is marked D-H-T-W-90 (2 hours) or D-H-T-W-60 (1 hour), and D-H-90 or D-H-60 up to 100 square
       inches; sidelights and transoms are fire-resistance-rated glazing only (W-120 or W-60), fire-protection-rated glazing
-      is not permitted; note a allows fire-resistance-rated glazing tested to ASTM E119 per 716.1.2.3, note c the markings
-      of 716.1.2.2.1 and Table 716.1(1). The enclosures'' ratings and the doors'' ratings and glazing aren''t in the model,
-      so a person''s check.'
+      is not permitted; note a allows fire-resistance-rated glazing tested to ASTM E119 per 716.1.2.3 in the maximum size
+      tested, note c the markings of 716.1.2.2.1 and Table 716.1(1). The enclosures'' ratings and the doors'' ratings and
+      glazing aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. The rows that egress's enclosures use; the
     table's other rows are another flag. A rule waits on a door's stated rating and its enclosure's (the Chapter 7 plan's
     Revit-fields list). Shown for every building.
@@ -1153,7 +1153,7 @@ rules:
     note: 'Table 716.1(2), fire partitions, corridor walls: a door in a corridor wall rated 1 hour or 1/2 hour is a fire door
       rated at least 1/3 hour (20 minutes), its vision panel glazing marked D-20 to the maximum size tested, and a sidelight
       or transom rated 3/4 hour (D-H-OH-45) in a 1-hour wall or 1/3 hour (D-H-OH-20) in a 1/2-hour wall; note a allows fire-resistance-rated
-      glazing tested to ASTM E119 per 716.1.2.3. The doors'' ratings aren''t in the model, so a person''s check.'
+      glazing tested to ASTM E119 per 716.1.2.3 in the maximum size tested. The doors'' ratings aren''t in the model, so a person''s check.'
   - given: {}
     parts:
       corridor:
@@ -1292,17 +1292,19 @@ rules:
       horizontal exits in fire walls rated 3 hours, a door rated 3 hours (note d), vision panel D-H-180 up to 100 square inches
       or D-H-W-180 over, sidelights W-180 only; other fire barriers rated 1 hour, a door rated 3/4 hour, vision panel D-H-45
       to the maximum size tested, sidelights rated 3/4 hour (D-H-45, note h); other fire partitions rated 1 hour, a door rated
-      3/4 hour (two 20-minute doors on opposite sides of one opening count as one 45-minute door, note i), vision panel D-H-45,
-      sidelights rated 3/4 hour (D-H-45); other fire partitions rated 1/2 hour, a door rated 1/3 hour, vision panel D-H-20,
-      sidelights rated 1/3 hour (D-H-20); exterior walls rated 3 hours, a door rated 1 1/2 hours, vision panel D-H-90 up to
-      100 square inches or D-H-W-90 over, sidelights W-180 only; exterior walls rated 2 hours, a door rated 1 1/2 hours, vision
-      panel D-H-90 or D-H-W-90 to the maximum size tested, sidelights fire-protection-rated 1 1/2 hours (D-H-OH-90, note h)
-      or fire-resistance-rated 2 hours (W-120); exterior walls rated 1 hour, a door rated 3/4 hour, vision panel D-H-45, sidelights
-      rated 3/4 hour (D-H-45, note h). Where sidelights are fire-resistance-rated only, fire-protection-rated glazing is not
-      permitted. Note h: fire-protection-rated glazing is not permitted where the Fire Code of New York State''s 1207 encloses
-      energy storage systems, fire-resistance-rated glazing tested to ASTM E119 or UL 263 per 716.1.2.3 allowed instead. A
-      horizontal exit''s door, a unit''s door in a rated separation and an exit door in an exterior wall are among them: the
-      walls'' and doors'' ratings aren''t in the model, so a person''s check.'
+      3/4 hour (two 20-minute doors on opposite sides of one opening count as one 45-minute door, note i), vision panel D-H-45
+      to the maximum size tested, sidelights rated 3/4 hour (D-H-45); other fire partitions rated 1/2 hour, a door rated 1/3
+      hour, vision panel D-H-20 to the maximum size tested, sidelights rated 1/3 hour (D-H-20); exterior walls rated 3 hours,
+      a door rated 1 1/2 hours, vision panel D-H-90 up to 100 square inches or D-H-W-90 over, sidelights W-180 only; exterior
+      walls rated 2 hours, a door rated 1 1/2 hours, vision panel D-H-90 or D-H-W-90 to the maximum size tested, sidelights
+      fire-protection-rated 1 1/2 hours (D-H-OH-90, note h) or fire-resistance-rated 2 hours (W-120); exterior walls rated
+      1 hour, a door rated 3/4 hour, vision panel D-H-45 to the maximum size tested, sidelights rated 3/4 hour (D-H-45, note
+      h). Note a: fire-resistance-rated glazing tested to ASTM E119 per 716.1.2.3, in the maximum size tested. Where sidelights
+      are fire-resistance-rated only, fire-protection-rated glazing is not permitted. Note h: fire-protection-rated glazing
+      is not permitted where the Fire Code of New York State''s 1207 encloses energy storage systems, fire-resistance-rated
+      glazing tested to ASTM E119 or UL 263 per 716.1.2.3 allowed instead. A horizontal exit''s door, a unit''s door in a
+      rated separation and an exit door in an exterior wall are among them: the walls'' and doors'' ratings aren''t in the
+      model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 706.4, 716.2.5.1.2, NFPA 221 and the Fire Code's
     1207 aren't brought in. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
@@ -1334,10 +1336,11 @@ rules:
     note: 'Table 716.1(3): a fire window in a fire wall or a fire barrier is not permitted, but fire-resistance-rated glazing
       tested to ASTM E119 or UL 263 per 716.1.2.3, marked W with the wall''s own rating in minutes (notes a, b); in atrium
       separations (707.3.6), incidental use areas (707.3.7) and mixed occupancy separations (707.3.9) rated 1 hour, 3/4 hour
-      (OH-45, not where the Fire Code''s 1207 encloses energy storage systems, note c, or W-60); in fire partitions rated 1
-      hour, 3/4 hour (OH-45 or W-60), and rated 1/2 hour, 1/3 hour (OH-20 or W-30); in smoke barriers rated 1 hour, 3/4 hour (OH-45 or W-60); in exterior walls, 1 1/2 hours
-      where rated over 1 hour, 3/4 hour where 1 hour, 1/3 hour where 1/2 hour; never in a party wall. Windows into an exit
-      enclosure or a rated corridor are among them: not in the model, so a person''s check.'
+      (OH-45, not where the Fire Code''s 1207 encloses energy storage systems, note c, or W-60); in fire partitions rated
+      1 hour, 3/4 hour (OH-45 or W-60), and rated 1/2 hour, 1/3 hour (OH-20 or W-30); in smoke barriers rated 1 hour, 3/4
+      hour (OH-45 or W-60); in exterior walls, 1 1/2 hours (OH-90, or W with the wall''s rating) where rated over 1 hour,
+      3/4 hour (OH-45 or W-60) where 1 hour, 1/3 hour (OH-20 or W-30) where 1/2 hour; never in a party wall. Windows into
+      an exit enclosure or a rated corridor are among them: not in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 707.3.6, 707.3.7 and 707.3.9 and the Fire Code's
     1207 aren't brought in. Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
