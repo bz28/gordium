@@ -488,6 +488,8 @@ MEASURE_NAMES = {
     "ambulatory_care_facility": "ambulatory care facility (whether the building is or holds one, per Table 1020.3)",
     "corridors_within_dwelling_units": "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit)",
     "emergency_voice_alarm_system": "emergency voice/alarm system (whether the whole building has one per 907.5.2.2)",
+    "high_rise_building": "high-rise (whether the building is one, or more than 420 ft high, per 403)",
+    "underground_building": "underground building (whether a floor used for human occupancy is more than 30 ft below the lowest level of exit discharge, per 405.1)",
     "space_is_exit": "exit status (whether the space is itself an exit)",
     "space_occupant_load": "occupant load",
     "story_first_above_or_below_grade": "whether the story is the first above or below grade",

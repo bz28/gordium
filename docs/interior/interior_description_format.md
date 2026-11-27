@@ -223,6 +223,13 @@ building:
                                        # exception 2: no rating there in Groups I-1 and R; Table 1020.3: 36 in)
   emergency_voice_alarm_system: false  # an emergency voice/alarm communication system per BCNYS 907.5.2.2 (with a
                                        # 903.3.1.1 or 903.3.1.2 sprinkler system: 1005.3's smaller capacity factors)
+  high_rise_building: false            # a high-rise (BCNYS 202: an occupied floor or occupiable roof more than 75 ft
+                                       # above the lowest level of fire department vehicle access) or more than 420 ft
+                                       # in building height (403.2.2, 403.5.2): Section 403's flags and the story exit
+                                       # rules' additional stairway (403.5.2)
+  underground_building: false          # a floor level used for human occupancy more than 30 ft below the finished
+                                       # floor of the lowest level of exit discharge (BCNYS 405.1): Section 405's flags
+                                       # and each floor level's two exits (405.7.1)
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 

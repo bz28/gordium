@@ -351,6 +351,21 @@ building_has_atrium:
   - general.bc_table_1017_2_b
   - general.bc_table_1017_2_f2_s2_u
   - general.bc_table_1017_2_i1
+high_rise_building:
+  meaning: 'The building is a high-rise building (2025 BCNYS 202: an occupied floor or occupiable roof more than 75 feet above
+    the lowest level of fire department vehicle access) or more than 420 feet in building height, as the architect states
+    it: Section 403''s flags show, and the story exit rules can''t pass on 1006.3''s count alone where 403.5.2''s additional
+    interior exit stairway may be needed (other than Group R-2); left unstated, the same'
+  unit: yes_no
+  needed_by:
+  - general.bc_403_1_high_rise_buildings
+underground_building:
+  meaning: 'The building has a floor level used for human occupancy more than 30 feet below the finished floor of the lowest
+    level of exit discharge (2025 BCNYS 405.1), as the architect states it: Section 405''s flags show, and a story with one
+    exit can''t pass the story exit rules (405.7.1: two exits on each floor level); left unstated, the same'
+  unit: yes_no
+  needed_by:
+  - general.bc_405_1_underground_buildings
 r2_sleeping_units:
   meaning: 'The building''s Group R-2 consists of sleeping units, not dwelling units (2025 BCNYS Table 1006.3.4(1) note b:
     dwelling units use Table 1006.3.4(1), sleeping units Table 1006.3.4(2)), as the architect states it'

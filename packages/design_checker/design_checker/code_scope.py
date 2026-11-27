@@ -63,6 +63,11 @@ FACTS = {
     # section group 5a: an emergency voice/alarm communication system per 907.5.2.2 (1005.3.1 and 1005.3.2's
     # exception 1: the smaller capacity factors, with a sprinkler system per 903.3.1.1 or 903.3.1.2)
     "emergency_voice_alarm_system": "yes_no",
+    # Chapter 4 part b: the building is a high-rise (202: an occupied floor or occupiable roof more than 75 ft above the
+    # lowest level of fire department vehicle access) or more than 420 ft in building height (403.2.2, 403.5.2); and it
+    # has a floor level used for human occupancy more than 30 ft below the lowest level of exit discharge (405.1)
+    "high_rise_building": "yes_no",
+    "underground_building": "yes_no",
     # the lot facts a host had but couldn't send (the Revit add-in's Check now anyway: a count under its least), so
     # the decision reads each as stated and unread, never as not stated (review round 5)
     "facts_not_sent": "names",
@@ -295,7 +300,7 @@ def _given(building) -> tuple[dict, list[str]]:
 def building_measures(building: dict | None) -> dict:
     """The BCNYS rulebook's building measures (its drafted/records/proposed_measures.yaml) the `building` block
     states: occupancy_group_i4, other_occupancy_present and occupancy_group (the one group, or "mixed") from the
-    groups, the three sprinkler systems the limits name from the system, and the eleven stated yes/no facts. A fact
+    groups, the three sprinkler systems the limits name from the system, and the thirteen stated yes/no facts. A fact
     not stated is left out (its rules need review)."""
     facts, _ = _given(building)
     return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
@@ -324,6 +329,8 @@ DERIVED = {
     "ambulatory_care_facility": ("ambulatory_care_facility", lambda v: v),
     "corridors_within_dwelling_units": ("corridors_within_dwelling_units", lambda v: v),
     "emergency_voice_alarm_system": ("emergency_voice_alarm_system", lambda v: v),
+    "high_rise_building": ("high_rise_building", lambda v: v),
+    "underground_building": ("underground_building", lambda v: v),
 }
 
 

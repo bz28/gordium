@@ -195,6 +195,32 @@ documents:
         p.342 line 16: 1017.2.3 item 4 prints a ventilation rate in cubic metres per minute per square metre, "(0.556
           m3/min/m2)", the 3 and the 2 raised as powers of the unit; the slashes divide units, not a fraction.
       italic_not_defined:    # by piece: italic words Section 202 doesn't define, each with why (any other is a problem)
+        202:concrete:
+          perlite: 'One of CONCRETE''s own sub-entries (p.38, lines 24-41: carbonate aggregate, cellular, lightweight
+            aggregate, perlite, sand-lightweight, siliceous aggregate, vermiculite), printed in italics; no term of
+            its own. A construction term, brought in by 403.2.2.2''s "Concrete", read by no rule (Chapter 4 part b).'
+          vermiculite: 'One of CONCRETE''s own sub-entries (p.38, lines 24-41: carbonate aggregate, cellular,
+            lightweight aggregate, perlite, sand-lightweight, siliceous aggregate, vermiculite), printed in italics;
+            no term of its own. A construction term, brought in by 403.2.2.2''s "Concrete", read by no rule (Chapter
+            4 part b).'
+        202:fire_alarm_signal:
+          fire alarm-initiating device: 'The book prints "fire alarm-initiating device" in italics (p.44, line 56);
+            Section 202 defines INITIATING DEVICE (p.50, line 54), which the phrase doesn''t name whole. A fire alarm
+            term, read by no rule (Chapter 4 part b).'
+        202:risk_category:
+          flood: '"flood" among the loads RISK CATEGORY is for (flood, wind, tornado, snow, ice and earthquake);
+            FLOOD LOADS is no Section 202 term here. A structural term, read by no rule (Chapter 4 part b: 403.2.2''s
+            Risk Category).'
+        '403.5.3.1':
+          attended: 'The book prints "constantly attended station" in italics (p.91, line 10), which the italics
+            reader takes word by word; Section 202 defines CONSTANTLY ATTENDED LOCATION (p.38, line 47), which the
+            phrase doesn''t name whole. A flag''s words (Chapter 4 part b), read by no rule.'
+          constantly: 'The book prints "constantly attended station" in italics (p.91, line 10), which the italics
+            reader takes word by word; Section 202 defines CONSTANTLY ATTENDED LOCATION (p.38, line 47), which the
+            phrase doesn''t name whole. A flag''s words (Chapter 4 part b), read by no rule.'
+          station: 'The book prints "constantly attended station" in italics (p.91, line 10), which the italics
+            reader takes word by word; Section 202 defines CONSTANTLY ATTENDED LOCATION (p.38, line 47), which the
+            phrase doesn''t name whole. A flag''s words (Chapter 4 part b), read by no rule.'
         202:anchor_building:
           covered: 'The book prints "covered or open mall building" (or "mall", "malls", "open mall") in italics; the
             words are COVERED MALL BUILDING''s (brought in, 202:covered_mall_building), whose entry defines, under
