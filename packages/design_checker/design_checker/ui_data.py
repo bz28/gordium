@@ -500,7 +500,8 @@ def add(view: dict, *, rules_by_id: dict, laws: list[dict], site: dict | None, v
             if high_rise_hint:
                 for a in got:
                     if a.get("field") == HIGH_RISE_FIELD:
-                        a["why"] = (str(a.get("why") or "") + " " + high_rise_hint).strip()
+                        why = str(a.get("why") or "").rstrip()      # a sentence of its own (marks PR round 2)
+                        a["why"] = (why + ("" if not why or why[-1] in ".?!" else ".") + " " + high_rise_hint).strip()
                         a["hint"] = high_rise_hint
             item["asks"] = got
         try:

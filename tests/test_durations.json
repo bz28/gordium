@@ -374,6 +374,7 @@
 "packages/design_checker/tests/test_flood_lookup_age.py::test_the_report_says_the_age_when_cleared_and_the_reason_when_too_old": 6.4,
 "packages/design_checker/tests/test_flood_lookup_age.py::test_the_worker_passes_the_hosts_day_and_still_answers_without_one": 5.3,
 "packages/design_checker/tests/test_flood_lookup_age.py::test_without_a_day_from_the_host_no_lookup_counts_as_recent": 1.8,
+"packages/design_checker/tests/test_high_rise_hint.py::test_a_real_check_hands_the_hint_to_the_cards_and_decides_nothing": 16.0,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_a_door_with_no_stated_clear_opening_is_never_sized_from_its_leaf": 11.7,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_a_stair_that_may_discharge_through_the_corridor_never_passes_on_its_door_swinging_in": 15.0,
 "packages/design_checker/tests/test_four_unit_apartment.py::test_an_exit_stair_is_never_held_to_the_exits_of_the_spaces_it_serves[nfpa_13]": 5.7,

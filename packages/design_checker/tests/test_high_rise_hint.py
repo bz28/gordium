@@ -60,6 +60,7 @@ def test_the_hint_goes_on_the_high_rise_card_and_decides_nothing():
     [item] = view["items"]
     [ask] = item["asks"]
     assert ask["field"] == ui_data.HIGH_RISE_FIELD and ask["hint"] == hint and ask["why"].endswith(hint)
+    assert "not stated. From the model:" in ask["why"]                # a sentence of its own (marks PR round 2)
     assert item["status"] == present.REVIEW                         # the row still needs review: nothing decided
     # no hint, no change to the card's words
     plain = {"items": [_row()]}
@@ -85,3 +86,46 @@ def test_the_plan_says_both_facts_have_their_marks_now():
     assert "Revit mark yet" not in doc and "likely isn't one" in doc
     for fact in ("high_rise_building", "underground_building"):
         assert code_scope.MARK[fact] in doc, fact
+
+
+def test_the_figure_rounds_down_past_float_noise_and_never_reads_75():
+    # review round 2 of the marks PR: 9.999999999998 ft (Revit's) read 10.9 over ground -1, not 11.0
+    for feet, shown in ((70.3, "70.3 ft"), (0.7, "0.7 ft"), (11 - 1.6e-12, "11.0 ft")):
+        assert shown + " above" in high_rise_hint.words({"height_in": feet * 12, "level": "L", "ground_in": 0})
+    near = high_rise_hint.words({"height_in": 74.999999999998 * 12, "level": "L", "ground_in": 0})
+    assert "75.0" not in near and "74.9 ft above" in near
+
+
+def test_a_room_floor_above_the_highest_level_is_the_figure():
+    # review round 2 of the marks PR: a roof terrace drawn on the top level with a base offset is higher still
+    levels = [{"id": "L1", "name": "Level 1", "elevation": 0}, {"id": "L4", "name": "Level 4", "elevation": 60}]
+    terrace = {"units": "ft", "all_levels": levels, "openings": [],
+               "rooms": [{"id": "r1", "name": "Roof terrace", "level": "L4", "floor_elevation": 70}]}
+    fig = high_rise_hint.figure(terrace, {"flat": 0})
+    assert fig["level"] == "Roof terrace" and "(Roof terrace) is 70.0 ft above" in high_rise_hint.words(fig)
+    terrace["rooms"][0]["floor_elevation"] = 78
+    assert high_rise_hint.words(high_rise_hint.figure(terrace, {"flat": 0})) is None     # 75 ft or more: no hint
+    terrace["rooms"][0]["floor_elevation"] = "up"
+    assert high_rise_hint.figure(terrace, {"flat": 0}) is None
+
+
+def test_a_real_check_hands_the_hint_to_the_cards_and_decides_nothing(monkeypatch):
+    """Review round 2 of the marks PR: the four-unit apartment's Revit request, every level sent and flat finished
+    ground stated 1 ft under Level 1, through the worker's answer: the check works the figure out from the request's
+    own interior and lot facts (Level 2, 9.999999999998 ft, so 11.0 ft) and hands the words to the cards, and the
+    answer states no high-rise value."""
+    import json
+    from pathlib import Path
+    from design_checker.__main__ import answer
+    folder = Path(__file__).resolve().parents[3] / "test_data/test_sites/new_york/ithaca_city/four_unit_apartment"
+    request = json.loads((folder / "revit_check_site_request.json").read_text(encoding="utf-8"))
+    request["interior"]["all_levels"] = list(request["interior"]["levels"])
+    request["facts"].update({"ground_is_flat": True, "grade_elevation": -1})
+    handed, add = [], ui_data.add
+    monkeypatch.setattr(ui_data, "add", lambda *a, **k: (handed.append(k.get("high_rise_hint")), add(*a, **k))[1])
+    reply = answer(request)
+    assert reply["ok"], reply.get("error")
+    [hint] = handed
+    assert hint and "(Level 2) is 11.0 ft above" in hint and "more than 64.0 ft below" in hint
+    text = json.dumps(reply["result"])
+    assert '"high_rise_building": false' not in text and '"high_rise_building": true' not in text
