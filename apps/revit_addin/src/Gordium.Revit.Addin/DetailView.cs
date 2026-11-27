@@ -190,7 +190,7 @@ internal static class DetailView
         foot.Children.Add(keys);
         if (d.Tickable)
         {
-            var tick = CauseCardsView.Tick(new CauseCardsView.TickTag(false, d.Id), host.DetailLooked, host.TickDetail, "Mark as looked at");
+            var tick = CauseCardsView.Tick(new CauseCardsView.TickTag(false, d.Id), host.DetailLooked, host.TickDetail, DetailPages.LookedLabel);
             tick.HorizontalAlignment = W.HorizontalAlignment.Left;
             foot.Children.Add(tick);
         }

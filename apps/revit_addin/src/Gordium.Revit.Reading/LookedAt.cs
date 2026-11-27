@@ -113,6 +113,6 @@ public sealed class LookedAt
     }
 
     /// <summary>The tooltip of every "Looked at" tick: what it is, and what it is not.</summary>
-    public const string Tip = "Your own note that you've looked at this. It changes no verdict: only Check again does. " +
+    public const string Tip = "Your own note that you've looked at this. It changes no verdict: only a check does. " +
                               "Kept for this project's check; carried to the next check only where nothing changed.";
 }
