@@ -1869,6 +1869,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:life_safety_systems:
+    label: reference
+    topic: definitions
+    reason: 'Defines LIFE SAFETY SYSTEMS, a word the brought-in sections use (201.2: the singular includes the plural): a
+      definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 53
+      - 54
+      quote: '[F] LIFE SAFETY SYSTEMS. Systems, devices and equipment that enhance or facilitate evacuation, smoke control,
+        compartmentation and isolation.'
+    piece_sha256: 3a0a9f98d28757e913e2785beee8f90da8fd0dd025e71af1e90ff2d6db96e096
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:limited_verbal_or_physical_assistance:
     label: reference
     topic: definitions
@@ -2159,6 +2176,23 @@ labels:
       quote: '[BE] NOSING. The leading edge of treads of stairs and of landings at the top of stairway flights.'
     piece_sha256: 1f05d4bcf46c58cdc238a7105cb64f06b0f9dceef3865d9f3f2a2332175052cf
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:nursing_homes:
+    label: reference
+    topic: definitions
+    reason: 'Defines NURSING HOMES, a word the brought-in sections use (201.2: the singular includes the plural): a definition,
+      no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 20
+      - 21
+      quote: '[BG] NURSING HOMES. Facilities that provide care, including both intermediate care facilities and skilled nursing
+        facilities where any of the persons are incapable of self-preservation.'
+    piece_sha256: 35f92d5cb37c8d93d5872aa36fca24929302734420403e96302667e12d28073a
+    notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:occupant_load:

@@ -1835,7 +1835,9 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'The building is stated one group, not Group I-2: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  notes: 'The book prints "500 square feet (455 m2)" (p.98, line 38), but 500 sq ft is 46.45 m2: the metric figure is
+    misprinted, and the 500 sq ft, as printed, is the limit (review round 2). Hand-drafted in a Claude Code session
+    (2026-11-26, Chapter 4 part c).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_407_2_5_nursing_home_housing_units
@@ -2048,7 +2050,9 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'The building is stated one group, not Group I-2: not applicable.'
-  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
+  notes: 'The book prints the undercut as "2/3 inch (19.1 mm)" (p.99, line 32, a stacked fraction, checked on the page
+    image), but 19.1 mm is 3/4 inch (2/3 inch is 16.9 mm): as printed, at most 2/3 inch; which the State means is a
+    person''s check (review rounds 1 and 2). Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_407_4_means_of_egress
@@ -15321,9 +15325,9 @@ rules:
   notes: 'Table 1017.2''s I-2, I-3 row: Not Permitted without an automatic sprinkler system, 200 ft with one (note c: 903.3.1.1
     only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says . 1017.2.1''s balcony increase is a
     person''s check where taken or not stated and the distance is within it; the other sections note a lists are the rule
-    “Table 1017.2 note a: sections that change the distance (BCNYS)”. Note a''s 407.4 (I-2) and 408.6.1, 408.8.1 (I-3) change
-    travel further and aren''t brought in: the rule “Table 1017.2 note a: sections that change the distance (BCNYS)” shows
-    for a person to check them. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note
+    “Table 1017.2 note a: sections that change the distance (BCNYS)”. Note a''s 407.4 (I-2: 407.4.2''s rule and the flags
+    of Chapter 4 part c) and 408.6.1, 408.8.1 (I-3) change travel further: the I-3 row never passes for them,
+    and a sleeping room over 407.4.2''s 50 ft needs review. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note
     a sends elsewhere (as the architect states it), stated or not ruled out, needs review; Group I-2 holds a sleeping room
     to 407.4.2''s 50 ft (over it, a care suite''s 100 ft may apply: review), and Group I-3 never passes (408.6.1''s smoke-barrier
     distances aren''t measured). Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review
@@ -15354,7 +15358,7 @@ rules:
     expect: needs_review
     note: 'A person checks whether the building has a mall, a Group I-2 or I-3 occupancy, a special amusement area, an aircraft
       manufacturing facility, a refrigeration machinery room or a refrigerated room, assembly seating, a temporary structure
-      or a pedestrian walkway: each has its own distance (note a), not brought in.'
+      or a pedestrian walkway: each has its own distance (note a), a person''s check.'
   - given: {}
     expect: needs_review
     note: 'Not stated: a person checks (note a).'
