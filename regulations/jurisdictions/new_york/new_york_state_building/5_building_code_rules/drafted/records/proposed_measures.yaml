@@ -164,11 +164,13 @@ occupancy_group:
   - mixed
   needed_by:
   - general.bc_1004_9_posting
+  - general.bc_1006_2_1_two_exits
   - general.bc_1006_2_2_6_r3_r4_nfpa_13d
   - general.bc_1006_3_3_story_exits
   - general.bc_1006_3_4_1_mixed_occupancies
   - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
+  - general.bc_1007_1_2_space_three_or_more
   - general.bc_1010_1_1_door_width
   - general.bc_1010_1_2_1_direction_of_swing
   - general.bc_1016_2_intervening_spaces_other_groups
