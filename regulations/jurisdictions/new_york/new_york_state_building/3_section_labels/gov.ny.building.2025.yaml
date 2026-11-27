@@ -9554,10 +9554,10 @@ labels:
     topic: means_of_egress
     reason: 'Class III standpipes throughout a building with four or more stories above or below grade plane, or its highest
       story''s floor more than 30 feet above the lowest level of fire department vehicle access, or its lowest story''s more
-      than 30 feet below the highest (Class I allowed with a 903.3.1.1 or 903.3.1.2 system, in Groups B and E, parking garages,
-      sprinklered basements, or where occupant-use hose lines won''t be used by trained personnel or the fire department;
-      recessed loading docks for four vehicles or less and impractical topography left out in finding the lowest level of
-      access): a person''s check (general.bc_905_3_1_class_iii_by_height).'
+      than 30 feet below the highest (Class I allowed in a building sprinklered throughout with a 903.3.1.1 or 903.3.1.2 system,
+      in Groups B and E, parking garages, sprinklered basements, or where occupant-use hose lines won''t be used by trained
+      personnel or the fire department; recessed loading docks for four vehicles or less and impractical topography left out
+      in finding the lowest level of access): a person''s check (general.bc_905_3_1_class_iii_by_height).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 279
@@ -9685,8 +9685,8 @@ labels:
   905.3.7:
     label: flag
     topic: means_of_egress
-    reason: 'A building with a landscaped or vegetative roof and a standpipe system has it extended to that roof: a person''s
-      check (general.bc_905_3_7_roof_garden_standpipes).'
+    reason: 'A building with a landscaped or vegetative roof and a standpipe system has it extended to that roof, any standpipe
+      system provided (901.2): a person''s check (general.bc_905_3_7_roof_garden_standpipes).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 280
@@ -9709,7 +9709,7 @@ labels:
       hose stream on 100 feet of hose from a stairway''s connection reaches those areas), at a mall''s public entrances and
       its exit passageway and corridor entrances, at the roof or the highest landing with roof access per 1011.12 where the
       roof''s slope is under 4 in 12, and more where the fire code official asks (a floor''s most remote point over 150 feet
-      from one, 200 feet sprinklered): a person''s check (general.bc_905_4_class_i_hose_connections).'
+      from one, 200 feet sprinklered), any standpipe system provided (901.2): a person''s check (general.bc_905_4_class_i_hose_connections).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 280
@@ -9745,7 +9745,8 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Class I standpipe risers and laterals not in an interior exit stairway have the fire resistance the building''s
-      vertical enclosures need (laterals left unenclosed in a building sprinklered throughout): a person''s check (general.bc_905_4_1_standpipe_protection).'
+      vertical enclosures need (laterals left unenclosed in a building sprinklered throughout), any standpipe system provided
+      (901.2): a person''s check (general.bc_905_4_1_standpipe_protection).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 280
@@ -9764,7 +9765,8 @@ labels:
   905.4.2:
     label: flag
     topic: means_of_egress
-    reason: 'Where a building has more than one standpipe, they are interconnected per NFPA 14: a person''s check (general.bc_905_4_2_standpipe_interconnection).'
+    reason: 'Where a building has more than one standpipe, they are interconnected per NFPA 14, any standpipe system provided
+      (901.2): a person''s check (general.bc_905_4_2_standpipe_interconnection).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 280
@@ -11326,10 +11328,12 @@ labels:
   909.20.6.1:
     label: flag
     topic: means_of_egress
-    reason: 'The enclosure''s ventilation is independent of other systems, its equipment, wiring and ductwork outside the
-      building, within the enclosure, or within the building behind 2-hour fire barriers per 707 or horizontal assemblies
-      per 711 (wiring outside them protected by 2-hour UL 2196 cables, 2 inches of concrete, or 2-hour electrical circuit
-      protective systems installed per their listing): a person''s check (general.bc_909_20_6_1_ventilation_systems).'
+    reason: 'The enclosure''s ventilation is independent of other systems, its equipment, control and power wiring and ductwork
+      outside the building and connected to the enclosure directly or by ductwork enclosed by 2-hour fire barriers per 707
+      or horizontal assemblies per 711; or within the enclosure, its intake or exhaust directly from and to the outside or
+      through ductwork so enclosed; or within the building, separated from the rest of it, other mechanical equipment included,
+      by 2-hour fire barriers or horizontal assemblies (wiring outside them protected by 2-hour UL 2196 cables, 2 inches of
+      concrete, or 2-hour electrical circuit protective systems installed per their listing): a person''s check (general.bc_909_20_6_1_ventilation_systems).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 302

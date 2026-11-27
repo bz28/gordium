@@ -6337,10 +6337,10 @@ rules:
     expect: needs_review
     note: 'Class III standpipes throughout a building with four or more stories above or below grade plane, or its highest
       story''s floor more than 30 feet above the lowest level of fire department vehicle access, or its lowest story''s more
-      than 30 feet below the highest (Class I allowed with a 903.3.1.1 or 903.3.1.2 system, in Groups B and E, parking garages,
-      sprinklered basements, or where occupant-use hose lines won''t be used by trained personnel or the fire department;
-      recessed loading docks for four vehicles or less and impractical topography left out in finding the lowest level of
-      access): a person''s check.'
+      than 30 feet below the highest (Class I allowed in a building sprinklered throughout with a 903.3.1.1 or 903.3.1.2 system,
+      in Groups B and E, parking garages, sprinklered basements, or where occupant-use hose lines won''t be used by trained
+      personnel or the fire department; recessed loading docks for four vehicles or less and impractical topography left out
+      in finding the lowest level of access): a person''s check.'
   - given:
       occupancy_group: R-3
     expect: not_applicable
@@ -6503,7 +6503,6 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Standpipes to vegetative and landscaped roofs (BCNYS 905.3.7)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6516,14 +6515,10 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'A building with a landscaped or vegetative roof and a standpipe system has it extended to that roof: a person''s
-      check.'
-  - given:
-      occupancy_group: R-3
-    expect: not_applicable
-    note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
-    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    note: 'A building with a landscaped or vegetative roof and a standpipe system has it extended to that roof, any standpipe
+      system provided (901.2): a person''s check.'
+  notes: 'They bind any standpipe system provided, required or not (901.2: a system not required may be installed where it
+    meets this code), so 905.3''s exceptions for Group R-2 townhouses and Group R-3 don''t set them aside (review round 2).
     Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6531,7 +6526,6 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Class I hose connections in exit stairways and passageways (BCNYS 905.4)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6568,13 +6562,9 @@ rules:
       hose stream on 100 feet of hose from a stairway''s connection reaches those areas), at a mall''s public entrances and
       its exit passageway and corridor entrances, at the roof or the highest landing with roof access per 1011.12 where the
       roof''s slope is under 4 in 12, and more where the fire code official asks (a floor''s most remote point over 150 feet
-      from one, 200 feet sprinklered): a person''s check.'
-  - given:
-      occupancy_group: R-3
-    expect: not_applicable
-    note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
-    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+      from one, 200 feet sprinklered), any standpipe system provided (901.2): a person''s check.'
+  notes: 'They bind any standpipe system provided, required or not (901.2: a system not required may be installed where it
+    meets this code), so 905.3''s exceptions for Group R-2 townhouses and Group R-3 don''t set them aside (review round 2).
     Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6582,7 +6572,6 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Protection of standpipe risers and laterals (BCNYS 905.4.1)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6597,13 +6586,10 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Class I standpipe risers and laterals not in an interior exit stairway have the fire resistance the building''s
-      vertical enclosures need (laterals left unenclosed in a building sprinklered throughout): a person''s check.'
-  - given:
-      occupancy_group: R-3
-    expect: not_applicable
-    note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
-    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+      vertical enclosures need (laterals left unenclosed in a building sprinklered throughout), any standpipe system provided
+      (901.2): a person''s check.'
+  notes: 'They bind any standpipe system provided, required or not (901.2: a system not required may be installed where it
+    meets this code), so 905.3''s exceptions for Group R-2 townhouses and Group R-3 don''t set them aside (review round 2).
     Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6611,7 +6597,6 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Standpipes interconnected (BCNYS 905.4.2)
-  applies_when: not occupancy_group in ["R-3"] and not (occupancy_group in ["R-2"] and townhouse_units and separate_means_of_egress)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 280
@@ -6623,13 +6608,10 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Where a building has more than one standpipe, they are interconnected per NFPA 14: a person''s check.'
-  - given:
-      occupancy_group: R-3
-    expect: not_applicable
-    note: 'Set aside by what the building states: not applicable.'
-  notes: '905.3''s exceptions: no standpipe system in Group R-2 townhouses or Group R-3; set aside where the building is stated
-    so, a Group R-2 building''s every unit stated a townhouse unit with a separate means of egress (BCNYS 202 TOWNHOUSE UNIT).
+    note: 'Where a building has more than one standpipe, they are interconnected per NFPA 14, any standpipe system provided
+      (901.2): a person''s check.'
+  notes: 'They bind any standpipe system provided, required or not (901.2: a system not required may be installed where it
+    meets this code), so 905.3''s exceptions for Group R-2 townhouses and Group R-3 don''t set them aside (review round 2).
     Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part e).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -8842,10 +8824,12 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'The enclosure''s ventilation is independent of other systems, its equipment, wiring and ductwork outside the building,
-      within the enclosure, or within the building behind 2-hour fire barriers per 707 or horizontal assemblies per 711 (wiring
-      outside them protected by 2-hour UL 2196 cables, 2 inches of concrete, or 2-hour electrical circuit protective systems
-      installed per their listing): a person''s check.'
+    note: 'The enclosure''s ventilation is independent of other systems, its equipment, control and power wiring and ductwork
+      outside the building and connected to the enclosure directly or by ductwork enclosed by 2-hour fire barriers per 707
+      or horizontal assemblies per 711; or within the enclosure, its intake or exhaust directly from and to the outside or
+      through ductwork so enclosed; or within the building, separated from the rest of it, other mechanical equipment included,
+      by 2-hour fire barriers or horizontal assemblies (wiring outside them protected by 2-hour UL 2196 cables, 2 inches of
+      concrete, or 2-hour electrical circuit protective systems installed per their listing): a person''s check.'
   notes: '909.20.6.1: the systems aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
     e).'
   drafted_by: claude_code/claude-opus-5-5

@@ -619,14 +619,19 @@ def test_part_ds_review_round_1(book, ctx):
     assert "prevent a required alarm" in _shown_note(_rule(book, "general.bc_907_2_11_1_group_r1_smoke_alarm_locations"))
 
 
+ANY_STANDPIPE = {"general.bc_905_3_7_roof_garden_standpipes", "general.bc_905_4_class_i_hose_connections",
+                 "general.bc_905_4_1_standpipe_protection", "general.bc_905_4_2_standpipe_interconnection"}
+
+
 def test_part_es_standpipe_flags_follow_905_3s_exceptions(book, ctx):
     """Part e: 905.3's exceptions leave standpipe systems out of Group R-3 and Group R-2 townhouses only; every other
     building, a Group R-2 whose units aren't stated townhouse units among them, sees the standpipe flags; 909.20's
     smokeproof enclosures and 911.1's fire command center are a person's check for every building (their triggers are
     heights above the fire department's access the model doesn't show)."""
     allowed = ctx.allowed()
-    standpipes = [r for r in book if r["id"].startswith("general.bc_905_") and r["id"] != "general.bc_905_3_2_group_a_standpipes"]
-    assert len(standpipes) == 10
+    standpipes = [r for r in book if r["id"].startswith("general.bc_905_") and r["id"] != "general.bc_905_3_2_group_a_standpipes"
+                  and r["id"] not in ANY_STANDPIPE]
+    assert len(standpipes) == 6
     for r in standpipes:
         def got(b):
             return outcome(r, code_scope.building_measures(b), allowed)
@@ -676,7 +681,7 @@ def test_part_es_review_round_1(book, ctx):
     sections."""
     allowed = ctx.allowed()
     for r in book:
-        if r["id"].startswith("general.bc_905_") and r["id"] != "general.bc_905_3_2_group_a_standpipes":
+        if r["id"].startswith("general.bc_905_") and r["id"] not in ANY_STANDPIPE | {"general.bc_905_3_2_group_a_standpipes"}:
             def got(b):
                 return outcome(r, code_scope.building_measures(b), allowed)
             assert got({"occupancy_groups": ["R-2"], "townhouse_units": True, "separate_means_of_egress": True}) == \
@@ -765,3 +770,22 @@ def test_no_line_is_set_aside_by_a_13r_system_outside_group_r(book, ctx):
             if got("nfpa_13r") == "not_applicable" and got("none") != "not_applicable":
                 wrong.append((r["id"], groups))
     assert walked > 100 and not wrong, wrong[:8]
+
+
+def test_part_es_review_round_2(book, ctx):
+    """Part e review round 2: 905.3's exceptions say only where standpipes "are not required"; a system not required
+    may still be installed and must meet the code (901.2's exception), so the flags that bind any standpipe provided
+    (905.3.7's roof gardens, 905.4's hose connections, 905.4.1's protection, 905.4.2's interconnection) show in Group
+    R-3 and Group R-2 townhouses too; 909.20.6.1's three ways keep their conditions; 905.3.1's exception 1 is a
+    building sprinklered throughout."""
+    allowed = ctx.allowed()
+    for rid in ANY_STANDPIPE:
+        r = _rule(book, rid)
+        assert "applies_when" not in r and "901.2" in _shown_note(r), rid
+        for b in ({"occupancy_groups": ["R-3"]}, {"occupancy_groups": ["R-2"], "townhouse_units": True,
+                                                  "separate_means_of_egress": True}, {}):
+            assert outcome(r, code_scope.building_measures(b), allowed) == "needs_review", (rid, b)
+    n = _shown_note(_rule(book, "general.bc_909_20_6_1_ventilation_systems"))
+    assert "connected to the enclosure directly or by ductwork enclosed by 2-hour" in n
+    assert "its intake or exhaust directly from and to the outside" in n and "other mechanical equipment included" in n
+    assert "sprinklered throughout with a 903.3.1.1" in _shown_note(_rule(book, "general.bc_905_3_1_class_iii_by_height"))

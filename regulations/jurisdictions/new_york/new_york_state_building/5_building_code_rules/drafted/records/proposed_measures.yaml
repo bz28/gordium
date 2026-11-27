@@ -342,11 +342,7 @@ occupancy_group:
   - general.bc_905_3_4_underground_standpipes
   - general.bc_905_3_5_helistop_standpipes
   - general.bc_905_3_6_marina_standpipes
-  - general.bc_905_3_7_roof_garden_standpipes
   - general.bc_905_3_standpipes_required
-  - general.bc_905_4_1_standpipe_protection
-  - general.bc_905_4_2_standpipe_interconnection
-  - general.bc_905_4_class_i_hose_connections
   - general.bc_907_2_10_1_storage_fire_alarm
   - general.bc_907_2_11_1_group_r1_smoke_alarm_locations
   - general.bc_907_2_11_2_group_r_smoke_alarm_locations
@@ -649,11 +645,7 @@ townhouse_units:
   - general.bc_905_3_4_underground_standpipes
   - general.bc_905_3_5_helistop_standpipes
   - general.bc_905_3_6_marina_standpipes
-  - general.bc_905_3_7_roof_garden_standpipes
   - general.bc_905_3_standpipes_required
-  - general.bc_905_4_1_standpipe_protection
-  - general.bc_905_4_2_standpipe_interconnection
-  - general.bc_905_4_class_i_hose_connections
 separate_means_of_egress:
   meaning: 'Every dwelling unit of the building has a separate means of egress, as the architect states it (2025 BCNYS 202
     TOWNHOUSE UNIT: "has a separate means of egress"): read with townhouse_units, as 905.3''s exception leaves standpipes
@@ -665,11 +657,7 @@ separate_means_of_egress:
   - general.bc_905_3_4_underground_standpipes
   - general.bc_905_3_5_helistop_standpipes
   - general.bc_905_3_6_marina_standpipes
-  - general.bc_905_3_7_roof_garden_standpipes
   - general.bc_905_3_standpipes_required
-  - general.bc_905_4_1_standpipe_protection
-  - general.bc_905_4_2_standpipe_interconnection
-  - general.bc_905_4_class_i_hose_connections
 nfpa_13r_stated:
   meaning: 'The architect states an NFPA 13R sprinkler system, whether or not it counts as one per 2025 BCNYS 903.3.1.2
     (sprinklered_903_3_1_2 is no in a building stated Group R alone above four stories): 903.3.1.2''s own flags show wherever
