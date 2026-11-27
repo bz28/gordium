@@ -551,18 +551,24 @@ def test_the_architects_typed_story_count_reaches_egress_whether_or_not_the_plac
         assert code_scope.STORIES_TYPED not in _with_stories_bound({}, {}, odd), odd
 
 
-def test_the_building_codes_stated_stories_reach_its_stairs_through_the_check():
-    """Review round 2 (skeptic A's test gap): the Building Code path passes the check's stated stories to its stairs'
-    measuring (egress._measured), shown among the interior's problems; pinned through egress.check, not the helper."""
+def test_the_building_codes_stated_stories_reach_its_stairs_through_its_reading():
+    """Review rounds 2 and 3 (skeptic A's test gap): the Building Code's reading (egress._measured, for a law with a
+    rule over stairs: the drafted rulebook has none yet, so a law that has one stands in) passes the check's stated
+    stories to its stairs' measuring: the stairs aren't read, its `refused` says why, and so do its problems."""
     sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
     import make_ny_build_data as build
+    from design_checker import code_scope
     desc = build.interior_of()
     desc["stairs"] = []
     for r in desc["rooms"] + (desc.get("unknown_spaces") or []):
-        r["level"] = desc["rooms"][0]["level"]                     # every room on one level: only the count tells
-    allowed = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/ithaca_city").allowed()
-    laws = egress.laws("regulations/jurisdictions/new_york/ithaca_city")
-    values = {"use": "multi_family", "stories_above_grade_plane": 2}
-    got = egress.check(laws, desc, values, allowed)
-    assert any("the architect states 2 stories above grade plane" in p for p in got["interior"]["problems"]), \
-        got["interior"]["problems"]
+        r["level"] = desc["rooms"][0]["level"]                     # every room on one level, one floor height:
+        r.pop("floor_elevation", None)                             # only the count tells
+    law = {"scope": code_scope.BUILDING, "folder": str(REPO / "regulations/jurisdictions/new_york/new_york_state_building"),
+           "rules": [{"id": "x", "for_each": "stair"}]}
+    assert egress._reads_interior(law)
+    for stated, refused in ((2, True), (1, False)):
+        readings = {}
+        got = egress._measured(law, desc, readings, None, {"stories_above_grade_plane": stated})
+        assert (got["parts"].get("stair") is None) is refused, stated
+        assert bool(got.get("refused")) is refused, stated
+        assert any("the architect states 2 stories above grade plane" in p for p in got["problems"]) is refused

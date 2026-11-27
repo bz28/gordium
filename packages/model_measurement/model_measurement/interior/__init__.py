@@ -120,6 +120,10 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
     rooms = [r for r in whole.get("rooms") if isinstance(r, dict)] if isinstance(whole.get("rooms"), list) else []
     spaces = [u for u in whole.get("unknown_spaces") if isinstance(u, dict)] \
         if isinstance(whole.get("unknown_spaces"), list) else []
+    odd = next((p for p in rooms + spaces if p.get("level") is not None and _level_id(p["level"]) is None), None)
+    if odd is not None:                    # a level given that can't be read may be another floor (round 3)
+        return Stop("stairs_none_several_floors", what=f"{name_of(odd)}'s level can't be read, so it may be on "
+                                                       "another floor").reason
     on_rooms = {_level_id(r.get("level")) for r in rooms} - {None}
     levels = on_rooms | ({_level_id(u.get("level")) for u in spaces} - {None})
     if len(levels) > 1:
@@ -138,6 +142,16 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
         who = "its rooms are" if levels == on_rooms else "its rooms, and enclosed spaces with no room drawn, are"
         return Stop("stairs_none_several_floors", what=f"{who} on {len(order)} levels ({shown})").reason
     floors = []
+    heights = {}                       # a level's height, where `levels` gives one that can be read
+    for lv in whole.get("levels") if isinstance(whole.get("levels"), list) else []:
+        if isinstance(lv, dict) and _level_id(lv.get("id")) is not None and lv.get("elevation") is not None:
+            try:
+                heights[lv["id"]] = reader.length(lv["elevation"], "a level's elevation")
+            except Stop:
+                continue
+    for u in spaces:                   # round 3: an enclosed space on a level above the rooms' floors
+        if _level_id(u.get("level")) in heights:
+            floors.append((heights[u["level"]], name_of(u)))
     for r in rooms:
         if r.get("floor_elevation") is None:
             continue
@@ -161,8 +175,10 @@ def _stairs_against_floors(whole, reader, stated_stories=None) -> str | None:
 
 
 def _highest_ground(whole: dict, reader):
-    """The highest ground given outside any opening (`ground_outside`, one value or a list), in inches; None where
-    none is given or any given can't be read (then nothing is compared: the openings' own rules say so)."""
+    """The highest ground given outside any opening that can be read (`ground_outside`, one value or a list), in
+    inches; None where none can. One that can't be read is left out (round 3: never all of them dropped for it):
+    leaving out a ground can only make a floor look higher above the rest, so "no stairs" is refused more, never
+    less; the opening's own rules say its ground isn't read."""
     got = []
     for o in whole.get("openings") if isinstance(whole.get("openings"), list) else []:
         if not isinstance(o, dict) or o.get("ground_outside") is None:
@@ -171,7 +187,7 @@ def _highest_ground(whole: dict, reader):
             try:
                 got.append(reader.length(g, "the ground outside an opening"))
             except Stop:
-                return None
+                continue
     return max(got) if got else None
 
 

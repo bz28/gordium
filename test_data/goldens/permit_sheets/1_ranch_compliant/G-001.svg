@@ -85,9 +85,9 @@
 <text x="605.49" y="286.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
 <text x="687.2" y="286.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="745.07" y="286.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">The interior drawing: the model says there are no stairs, yet the architect gives</text>
-<text x="745.07" y="295.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">the building 2 stories: a stair or a ramp joins its floors, or each floor has its own</text>
-<text x="745.07" y="304.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">way out at grade, which the model doesn't show, so 'no stairs' isn't taken and</text>
-<text x="745.07" y="313.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">the stair rules need review</text>
+<text x="745.07" y="295.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">the building 2 stories: a stair or a ramp joins its floors or leads down to the</text>
+<text x="745.07" y="304.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">ground, unless each floor has its own way out at grade, which the model</text>
+<text x="745.07" y="313.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">doesn't show, so 'no stairs' isn't taken and the stair rules need review</text>
 <line x1="68" y1="317.1" x2="994" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <line x1="91.83" y1="277.1" x2="91.83" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <line x1="207.58" y1="277.1" x2="207.58" y2="317.1" stroke="#8c8c8c" stroke-width="0.3"/>

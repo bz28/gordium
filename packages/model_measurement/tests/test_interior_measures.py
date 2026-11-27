@@ -2341,18 +2341,32 @@ def test_no_stairs_beside_floors_a_landings_step_cant_reach_the_ground_from():
     assert "(at most 3 in)" in _refused(measure(at(12, [0, 3])))
     assert measure(at(120, None))["parts"]["stair"] == []                    # no ground given: nothing compared
     assert measure(at(120, "x"))["parts"]["stair"] == []                     # unreadable: the opening's rules say so
+    d2 = at(120, 0)                                   # round 3: one ground unreadable never drops the others
+    d2["openings"].append(dict(d2["openings"][0], id="w9", ground_outside="abc"))
+    d2["openings"].append(dict(d2["openings"][0], id="w8", ground_outside=[0, None]))
+    assert "(at most 0 in)" in _refused(measure(d2))
 
 
 def test_no_stairs_beside_rooms_on_two_levels_as_the_building_code_places_them():
     """A description that places its rooms (or enclosed spaces with no room drawn) on levels: two levels refuse
     "no stairs", named from `levels` in height order where it names them (skeptic A: never Revit's ids); rooms all
-    on one level, or with no level or one that isn't text, show nothing against it. The floors can be read from the
+    on one level, or with no level, show nothing against it, and a level given that can't be read refuses it (round
+    3: it may be another floor). The floors can be read from the
     whole description apart from the one measured (the Building Code's stairs are measured with its rooms left out)."""
     d = base()
     d.update(stairs=[], guards=[], rooms=[])
     whole = lambda *levels, **more: {"rooms": [{"id": f"r{n}", "level": lv} for n, lv in enumerate(levels)], **more}
     assert measure(d, whole=whole("L1", "L1"))["parts"]["stair"] == []
-    assert measure(d, whole=whole("L1", None, True, ["L2"], " "))["parts"]["stair"] == []
+    assert measure(d, whole=whole("L1", None))["parts"]["stair"] == []
+    # round 3 (skeptic B): rooms with no level, an enclosed space on a level `levels` puts 10 ft above their floors
+    lone = {"rooms": [{"id": "r", "name": "Room", "floor_elevation": 0}],
+            "unknown_spaces": [{"id": "a2", "name": "Area", "level": "L2"}],
+            "levels": [{"id": "L2", "name": "Level 2", "elevation": 120}]}
+    assert "(Room's at 0 in, Area's at 120 in)" in _refused(measure(d, whole=lone))
+    lone["levels"][0]["elevation"] = 0.25
+    assert measure(d, whole=lone)["parts"]["stair"] == []
+    for odd in (True, ["L2"], 2.0, {"id": "L2"}, " "):           # round 3: a level given that can't be read
+        assert "r1's level can't be read" in _refused(measure(d, whole=whole("L1", odd))), odd
     assert "(1 and 2)" in _refused(measure(d, whole=whole(1, 2)))            # skeptic B: number ids are levels too
     assert "its rooms are on 2 levels (L1 and L2)" in _refused(measure(d, whole=whole("L2", "L1")))
     named = [{"id": "u2", "name": "Level 2", "elevation": 120}, {"id": "u1", "name": "Level 1", "elevation": 0}]

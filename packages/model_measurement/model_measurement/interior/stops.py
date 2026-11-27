@@ -52,8 +52,9 @@ STOPS = {
                              "list: which is right is unclear, so their rules need review",
     # "no stairs" (an empty list of stairs) against rooms on more than one floor (_stairs_against_floors)
     "stairs_none_several_floors": "the model says there are no stairs, yet {what}: a stair or a ramp joins its "
-                                  "floors, or each floor has its own way out at grade, which the model doesn't "
-                                  "show, so 'no stairs' isn't taken and the stair rules need review",
+                                  "floors or leads down to the ground, unless each floor has its own way out at "
+                                  "grade, which the model doesn't show, so 'no stairs' isn't taken and the stair "
+                                  "rules need review",
     # values
     "missing": "{what} isn't given",
     "not_a_length": "{what} isn't a length (a number)",
