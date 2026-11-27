@@ -1106,10 +1106,10 @@ rules:
     note: 'Table 716.1(2): a fire door in the enclosure of a shaft, an interior exit stairway or an interior exit ramp rated
       2 hours is rated at least 1 1/2 hours; in such an enclosure rated 1 hour, or an exit access stairway or ramp enclosure,
       or an exit passageway''s walls rated 1 hour, at least 1 hour. A vision panel in such a door is at most 100 square inches
-      (note b; note b: a marking''s W is the glazing''s fire-resistance rating, not the frame''s) unless its glazing is marked
-      D-H-T-W-90 (2 hours) or D-H-T-W-60 (1 hour), and D-H-90 or D-H-60 up to 100 square inches; sidelights and transoms are
-      fire-resistance-rated glazing only (W-120 or W-60), fire-protection-rated glazing is not permitted; note a allows fire-resistance-rated
-      glazing tested to ASTM E119 per 716.1.2.3 in the maximum size tested, note c the markings of 716.1.2.2.1 and Table 716.1(1).
+      (note b: a marking''s W is the glazing''s fire-resistance rating, not the frame''s) unless its glazing is marked D-H-T-W-90
+      (2 hours) or D-H-T-W-60 (1 hour), and D-H-90 or D-H-60 up to 100 square inches; sidelights and transoms are fire-resistance-rated
+      glazing only (W-120 or W-60), fire-protection-rated glazing is not permitted; note a allows fire-resistance-rated glazing
+      tested to ASTM E119 per 716.1.2.3 in the maximum size tested, note c the markings of 716.1.2.2.1 and Table 716.1(1).
       The enclosures'' ratings and the doors'' ratings and glazing aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. The rows that egress's enclosures use; the
     table's other rows are another flag. A rule waits on a door's stated rating and its enclosure's (the Chapter 7 plan's
@@ -1134,10 +1134,12 @@ rules:
   - file: gov.ny.building.2025.pdf
     page: 186
     lines:
-    - 18
-    - 18
-    quote: a.Fire-resistance-rated glazing tested to ASTM E119 in accordance with Section 716.1.2.3 shall be permitted, in
-      the maximum size tested.
+    - 17
+    - 20
+    quote: 'For SI: 1 square inch = 645.2 mm. a.Fire-resistance-rated glazing tested to ASTM E119 in accordance with Section
+      716.1.2.3 shall be permitted, in the maximum size tested. b.Under the column heading “Fire-rated glazing marking door
+      vision panel,” W refers to the fire-resistance rating of the glazing, not the frame. c. See Section 716.1.2.2.1 and
+      Table 716.1(1) for additional permitted markings.'
   examples:
   - given: {}
     parts:
@@ -1201,6 +1203,15 @@ rules:
     - 83
     - 86
     quote: Fire protection Smoke barriers Maximum 1 [fn1]/ D-20 [fn3]/ D-H-OH-45 [fn3] size tested [fn4]
+  - file: gov.ny.building.2025.pdf
+    page: 186
+    lines:
+    - 17
+    - 20
+    quote: 'For SI: 1 square inch = 645.2 mm. a.Fire-resistance-rated glazing tested to ASTM E119 in accordance with Section
+      716.1.2.3 shall be permitted, in the maximum size tested. b.Under the column heading “Fire-rated glazing marking door
+      vision panel,” W refers to the fire-resistance rating of the glazing, not the frame. c. See Section 716.1.2.2.1 and
+      Table 716.1(1) for additional permitted markings.'
   examples:
   - given: {}
     expect: needs_review
@@ -1276,6 +1287,15 @@ rules:
       rated glazing assemblies tested to ASTM E119 or UL 263, as specified in Section 716.1.2.3, shall be permitted. i. Two
       doors, each with a fire rating of 20 minutes, installed on opposite sides of the same opening in a fire partition, shall
       be deemed equivalent in fire protection rating to one 45-minute fire door.
+  - file: gov.ny.building.2025.pdf
+    page: 186
+    lines:
+    - 17
+    - 20
+    quote: 'For SI: 1 square inch = 645.2 mm. a.Fire-resistance-rated glazing tested to ASTM E119 in accordance with Section
+      716.1.2.3 shall be permitted, in the maximum size tested. b.Under the column heading “Fire-rated glazing marking door
+      vision panel,” W refers to the fire-resistance rating of the glazing, not the frame. c. See Section 716.1.2.2.1 and
+      Table 716.1(1) for additional permitted markings.'
   examples:
   - given: {}
     expect: needs_review
