@@ -1052,7 +1052,7 @@ rules:
   - given: {}
     expect: needs_review
     note: 'The fire doors, fire shutters and fire windows other sections require (in exit enclosures 1023.4, exit passageways
-      1024.5, shafts 713.7, rated corridors 1020.2.1 and 708.6, smoke barriers 709.5) meet Section 716 and are installed per
+      1024.5, shafts 713.7, rated corridors 708.6, elevator hoistway doors 1020.2.1, smoke barriers 709.5) meet Section 716 and are installed per
       NFPA 80: which openings are protected, and how they are installed, aren''t in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 1020.2.1, 1023.4, 1024.5, 708.6 and 709.5 send
     here; 713.7 is brought in (its own flag). Shown for every building.
@@ -1278,12 +1278,18 @@ rules:
     expect: needs_review
     note: 'Table 716.1(2)''s other rows: in fire walls and fire barriers rated over 1 hour, a door rated 3 hours in a 4-hour
       or 3-hour wall (two 1 1/2-hour doors on opposite sides of one opening in a fire wall count as one 3-hour door, note
-      d) and 1 1/2 hours in a 2-hour or 1 1/2-hour wall; in double fire walls per NFPA 221, 3, 2 and 1 hours in walls of 4,
-      3 and 2 hours (each wall''s rating, notes e and f: 706.4, NFPA 221''s 4.6); horizontal exits in fire walls (note g,
+      d) and 1 1/2 hours in a 2-hour or 1 1/2-hour wall; in double fire walls per NFPA 221 (a single-wall rating of 4, 3 or
+      2 hours, note e, 706.4; each wall 3, 2 or 1 hours, note f, NFPA 221''s 4.6), a door rated 3, 1 1/2 and 1 hours; horizontal exits in fire walls (note g,
       716.2.5.1.2), 3 hours; other fire barriers rated 1 hour, 3/4 hour; other fire partitions, 3/4 hour in a 1-hour wall
       (two 20-minute doors on opposite sides of one opening count as one 45-minute door, note i) and 1/3 hour in a 1/2-hour
-      wall; exterior walls, 1 1/2 hours in a 3-hour or 2-hour wall and 3/4 hour in a 1-hour wall; each with its vision panel
-      and sidelight glazing as marked, fire-protection-rated glazing not permitted where the Fire Code of New York State''s
+      wall; exterior walls, 1 1/2 hours in a 3-hour or 2-hour wall and 3/4 hour in a 1-hour wall; in a wall rated over 1 hour (fire walls and
+      fire barriers, double fire walls, horizontal exits, a 3-hour exterior wall), sidelights and transoms are
+      fire-resistance-rated glazing only (W with the wall''s rating), and a door''s vision panel of fire-protection-rated glazing
+      is at most 100 square inches (D-H-90, D-H-60 or D-H-180), a larger one fire-resistance-rated (D-H-W), and in a 4-hour or
+      3-hour fire wall or fire barrier fire-resistance-rated only (note a); in a 2-hour exterior wall, sidelights
+      fire-protection-rated 1 1/2 hours (D-H-OH-90) or fire-resistance-rated 2 hours (W-120); in other fire barriers and
+      fire partitions rated 1 hour and in 1-hour exterior walls, vision panels and sidelights D-H-45 (3/4 hour), in 1/2-hour
+      fire partitions D-H-20 (1/3 hour); fire-protection-rated glazing not permitted where the Fire Code of New York State''s
       1207 encloses energy storage systems, fire-resistance-rated glazing tested to ASTM E119 or UL 263 per 716.1.2.3 allowed
       instead (note h). A horizontal exit''s door, a unit''s door in a rated separation and an
       exit door in an exterior wall are among them: the walls'' and doors'' ratings aren''t in the model, so a person''s check.'
@@ -1318,8 +1324,8 @@ rules:
     note: 'Table 716.1(3): a fire window in a fire wall or a fire barrier is not permitted, but fire-resistance-rated glazing
       tested to ASTM E119 or UL 263 per 716.1.2.3, marked W with the wall''s own rating in minutes (notes a, b); in atrium
       separations (707.3.6), incidental use areas (707.3.7) and mixed occupancy separations (707.3.9) rated 1 hour, 3/4 hour
-      (OH-45 or W-60; not where the Fire Code''s 1207 encloses energy storage systems, note c); in fire partitions rated 1/2
-      hour, 1/3 hour (OH-20 or W-30); in smoke barriers rated 1 hour, 3/4 hour (OH-45 or W-60); in exterior walls, 1 1/2 hours
+      (OH-45, not where the Fire Code''s 1207 encloses energy storage systems, note c, or W-60); in fire partitions rated 1
+      hour, 3/4 hour (OH-45 or W-60), and rated 1/2 hour, 1/3 hour (OH-20 or W-30); in smoke barriers rated 1 hour, 3/4 hour (OH-45 or W-60); in exterior walls, 1 1/2 hours
       where rated over 1 hour, 3/4 hour where 1 hour, 1/3 hour where 1/2 hour; never in a party wall. Windows into an exit
       enclosure or a rated corridor are among them: not in the model, so a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 707.3.6, 707.3.7 and 707.3.9 and the Fire Code's
@@ -1504,7 +1510,7 @@ rules:
 - id: general.bc_716_2_1_3_transom_sidelight_glazing
   kind: flag
   topic: means_of_egress
-  title: Transom and sidelight glazing in fire doors tested (BCNYS 716.2.1.3)
+  title: Sidelights and transoms in corridor and smoke barrier doors (BCNYS 716.2.1.3)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 187
@@ -1517,8 +1523,9 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Glazing elsewhere in a fire door assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL
-      9 with the hose stream test, per 716.3.1.1: a person''s check.'
+    note: 'In a fire door assembly in a corridor or a smoke barrier (the section''s heading), glazing elsewhere in the assembly,
+      transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1 (elsewhere
+      Table 716.1(2) and 716.2.5.4 decide where fire-protection-rated sidelights are allowed at all): a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 716.3.1.1 isn't brought in (Chapter 7 part
     b3). Shown for every building.
   drafted_by: claude_code/claude-opus-5-5
@@ -1538,8 +1545,8 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'A fire door assembly that serves as a smoke and draft control assembly (in a rated corridor or a smoke barrier,
-      716.2.2.1) is tested per UL 1784: a person''s check.'
+    note: 'A fire door assembly that serves as a smoke and draft control assembly (for one, a 20-minute door in a rated corridor
+      or a smoke barrier, 716.2.2.1, or an elevator lobby door, 3006.3) is tested per UL 1784: a person''s check.'
   notes: Hand-drafted in a Claude Code session (2026-11-26), Chapter 7 part b. 716.2.2.1 is brought in (its own flag). Shown
     for every building.
   drafted_by: claude_code/claude-opus-5-5
