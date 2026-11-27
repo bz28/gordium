@@ -277,7 +277,9 @@ def test_each_escape_opening_carries_its_rooms_four_facts():
     assert set(escape_openings.FROM_ROOM) <= set(x["not_measured"])
     parts, desc = _parts()                                   # two exits: not measured on the room, nor on its opening
     escape_openings.link(parts, desc)
-    assert parts["emergency_escape_opening"][0]["not_measured"]["opening_room_one_exit"].endswith("isn't worked out")
+    # the room's reason, which this PR goes on to give the routes' why (here: no space part for the room)
+    assert parts["emergency_escape_opening"][0]["not_measured"]["opening_room_one_exit"].endswith(
+        "isn't worked out: the routes give no space part(s) for Bedroom")
 
 
 def test_an_opening_knows_its_room_has_another_marked_one():
