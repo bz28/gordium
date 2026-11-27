@@ -1407,8 +1407,8 @@
     "Egress · Fire doors and shutters tested and rated as Table 716.1(2) says: A person checks this (Gordium doesn't decide it): Fire door and fire shutter assemblies meet the tests of 716.2.1.1 to 716.2.1.4 and the rating Table 716.1(2) gives, except labeled assemblies meeting this section or UL 10A, UL 14B and UL 14C (tin-clad doors) and floor fire doors per 712.1.13.1: a person's check.",
     "Egress · Swinging fire doors tested under positive pressure: A person checks this (Gordium doesn't decide it): Side-hinged and pivoted swinging fire doors are tested per NFPA 252 (by its positive pressure method) or UL 10C: a person's check.",
     "Egress · Other fire doors and shutters tested per NFPA 252 or UL 10B: A person checks this (Gordium doesn't decide it): Other fire doors (swinging elevator doors, horizontal sliding, rolling steel, shutters, chute doors) are tested per NFPA 252 (its neutral pressure plane near the top of the door) or UL 10B: a person's check.",
-    "Egress · Transom and sidelight glazing in fire doors tested: A person checks this (Gordium doesn't decide it): Glazing elsewhere in a fire door assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1: a person's check.",
-    "Egress · Smoke and draft control doors tested per UL 1784: A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (in a rated corridor or a smoke barrier, 716.2.2.1) is tested per UL 1784: a person's check.",
+    "Egress · Sidelights and transoms in corridor and smoke barrier doors: A person checks this (Gordium doesn't decide it): In a fire door assembly in a corridor or a smoke barrier (the section's heading), glazing elsewhere in the assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1 (elsewhere Table 716.1(2) and 716.2.5.4 decide where fire-protection-rated sidelights are allowed at all): a person's check.",
+    "Egress · Smoke and draft control doors tested per UL 1784: A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (for one, a 20-minute door in a rated corridor or a smoke barrier, 716.2.2.1, or an elevator lobby door, 3006.3) is tested per UL 1784: a person's check.",
     "Egress · Fire doors installed where Table 716.1(2) says: A person checks this (Gordium doesn't decide it): A fire door assembly is installed in the assemblies Table 716.1(2) names and has the fire protection rating it gives: the doors' ratings aren't in the model, so a person's check (the table's own flags give the ratings).",
     "Egress · 20-minute doors in corridors and smoke barriers: A person checks this (Gordium doesn't decide it): A fire door required by Table 716.1(2) to be rated 20 minutes in a rated corridor wall or a smoke barrier is tested per NFPA 252 or UL 10C without the hose stream test; except viewports (a hole at most 1 inch across, a glass disc at least 0.25 inch thick, a metal holder that won't melt at 1,700 degrees F), Group I-2 corridor doors per 407.3.1, unprotected openings in multitheater complexes whose auditoriums each have at least half their required exits or exit access doorways opening directly outside or into an exit passageway, and Group I-3 horizontal sliding doors in smoke barriers per 408.6 and 408.8.4: a person's check.",
     "Egress · Smoke and draft control doors: A person checks this (Gordium doesn't decide it): A smoke and draft control door assembly (a 20-minute door in a rated corridor or smoke barrier, 716.2.2.1) leaks at most 3.0 cubic feet per minute per square foot of opening at 0.10 inch of water, in both the ambient and the elevated temperature tests; it has no louvers, and no terminated stops where 405.4.3, item 3 of 3006.3, 3007.6.3 or 3008.6.3 sends a door to this section; elevator hoistway doors protected per 3006.3 aside: a person's check.",
@@ -64963,7 +64963,7 @@
     {
      "id": "egress.general.bc_716_2_1_3_transom_sidelight_glazing",
      "rule": "general.bc_716_2_1_3_transom_sidelight_glazing",
-     "name": "Egress · Transom and sidelight glazing in fire doors tested (BCNYS 716.2.1.3)",
+     "name": "Egress · Sidelights and transoms in corridor and smoke barrier doors (BCNYS 716.2.1.3)",
      "group": "law",
      "status": "needs_review",
      "mark": "?",
@@ -64976,11 +64976,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): Glazing elsewhere in a fire door assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1: a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): In a fire door assembly in a corridor or a smoke barrier (the section's heading), glazing elsewhere in the assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1 (elsewhere Table 716.1(2) and 716.2.5.4 decide where fire-protection-rated sidelights are allowed at all): a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): Glazing elsewhere in a fire door assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1: a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): In a fire door assembly in a corridor or a smoke barrier (the section's heading), glazing elsewhere in the assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1 (elsewhere Table 716.1(2) and 716.2.5.4 decide where fire-protection-rated sidelights are allowed at all): a person's check.",
       "quotes": [
        {
         "text": "716.2.1.3 Glazing in transoms lights and sidelights in corridors and smoke barriers. Glazing material in any other part of the door assembly, including transom lights and sidelights, shall be tested in accordance with NFPA 257 or UL 9, including the hose stream test, in accordance with Section 716.3.1.1.",
@@ -65005,20 +65005,20 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_716_2_1_3_transom_sidelight_glazing",
-       "words": "A person checks this (Gordium doesn't decide it): Glazing elsewhere in a fire door assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1: a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In a fire door assembly in a corridor or a smoke barrier (the section's heading), glazing elsewhere in the assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1 (elsewhere Table 716.1(2) and 716.2.5.4 decide where fire-protection-rated sidelights are allowed at all): a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_716_2_1_3_transom_sidelight_glazing",
-       "why": "A person checks this (Gordium doesn't decide it): Glazing elsewhere in a fire door assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1: a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): In a fire door assembly in a corridor or a smoke barrier (the section's heading), glazing elsewhere in the assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1 (elsewhere Table 716.1(2) and 716.2.5.4 decide where fire-protection-rated sidelights are allowed at all): a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
       }
      ],
-     "rule_name": "Transom and sidelight glazing in fire doors tested",
+     "rule_name": "Sidelights and transoms in corridor and smoke barrier doors",
      "in_code": {
       "document": "2025 Building Code of New York State (BCNYS)",
       "file": "gov.ny.building.2025.pdf",
@@ -65046,11 +65046,11 @@
      "objects": [],
      "points": null,
      "hint": null,
-     "reason": "A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (in a rated corridor or a smoke barrier, 716.2.2.1) is tested per UL 1784: a person's check.",
+     "reason": "A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (for one, a 20-minute door in a rated corridor or a smoke barrier, 716.2.2.1, or an elevator lobby door, 3006.3) is tested per UL 1784: a person's check.",
      "use_detail": false,
      "part": null,
      "detail": {
-      "line": "A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (in a rated corridor or a smoke barrier, 716.2.2.1) is tested per UL 1784: a person's check.",
+      "line": "A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (for one, a 20-minute door in a rated corridor or a smoke barrier, 716.2.2.1, or an elevator lobby door, 3006.3) is tested per UL 1784: a person's check.",
       "quotes": [
        {
         "text": "716.2.1.4 Smoke and draft control. Fire door assemblies that serve as smoke and draft control assemblies shall be tested in accordance with UL 1784.",
@@ -65075,14 +65075,14 @@
       {
        "kind": "decide",
        "key": "reason:egress.general.bc_716_2_1_4_smoke_draft_control_test",
-       "words": "A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (in a rated corridor or a smoke barrier, 716.2.2.1) is tested per UL 1784: a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (for one, a 20-minute door in a rated corridor or a smoke barrier, 716.2.2.1, or an elevator lobby door, 3006.3) is tested per UL 1784: a person's check.",
        "elements": []
       }
      ],
      "asks": [
       {
        "key": "reason:egress.general.bc_716_2_1_4_smoke_draft_control_test",
-       "why": "A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (in a rated corridor or a smoke barrier, 716.2.2.1) is tested per UL 1784: a person's check.",
+       "why": "A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (for one, a 20-minute door in a rated corridor or a smoke barrier, 716.2.2.1, or an elevator lobby door, 3006.3) is tested per UL 1784: a person's check.",
        "elements": [],
        "kind": "decide",
        "headline": "Check this by hand: a person decides it"
@@ -74800,9 +74800,9 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Transom and sidelight glazing in fire doors tested (BCNYS 716.2.1.3): A person checks this (Gordium doesn't decide it): Glazing elsewhere in a fire door assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1: a person's check.",
+       "title": "Egress · Sidelights and transoms in corridor and smoke barrier doors (BCNYS 716.2.1.3): A person checks this (Gordium doesn't decide it): In a fire door assembly in a corridor or a smoke barrier (the section's heading), glazing elsewhere in the assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1 (elsewhere Table 716.1(2) and 716.2.5.4 decide where fire-protection-rated sidelights are allowed at all): a person's check.",
        "mark": "?",
-       "name": "Egress · Transom and sidelight glazing in fire doors tested (BCNYS 716.2.1.3)"
+       "name": "Egress · Sidelights and transoms in corridor and smoke barrier doors (BCNYS 716.2.1.3)"
       },
       {
        "key": "review#b3890723bf",
@@ -74813,7 +74813,7 @@
        "folded": true,
        "status": "needs_review",
        "rules": 1,
-       "title": "Egress · Smoke and draft control doors tested per UL 1784 (BCNYS 716.2.1.4): A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (in a rated corridor or a smoke barrier, 716.2.2.1) is tested per UL 1784: a person's check.",
+       "title": "Egress · Smoke and draft control doors tested per UL 1784 (BCNYS 716.2.1.4): A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (for one, a 20-minute door in a rated corridor or a smoke barrier, 716.2.2.1, or an elevator lobby door, 3006.3) is tested per UL 1784: a person's check.",
        "mark": "?",
        "name": "Egress · Smoke and draft control doors tested per UL 1784 (BCNYS 716.2.1.4)"
       },
@@ -76297,7 +76297,7 @@
       {
        "key": "reason:egress.general.bc_716_2_1_3_transom_sidelight_glazing",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): Glazing elsewhere in a fire door assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1: a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): In a fire door assembly in a corridor or a smoke barrier (the section's heading), glazing elsewhere in the assembly, transom lights and sidelights among it, is tested per NFPA 257 or UL 9 with the hose stream test, per 716.3.1.1 (elsewhere Table 716.1(2) and 716.2.5.4 decide where fire-protection-rated sidelights are allowed at all): a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_716_2_1_3_transom_sidelight_glazing"
@@ -76307,7 +76307,7 @@
       {
        "key": "reason:egress.general.bc_716_2_1_4_smoke_draft_control_test",
        "kind": "decide",
-       "words": "A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (in a rated corridor or a smoke barrier, 716.2.2.1) is tested per UL 1784: a person's check.",
+       "words": "A person checks this (Gordium doesn't decide it): A fire door assembly that serves as a smoke and draft control assembly (for one, a 20-minute door in a rated corridor or a smoke barrier, 716.2.2.1, or an elevator lobby door, 3006.3) is tested per UL 1784: a person's check.",
        "elements": [],
        "items": [
         "egress.general.bc_716_2_1_4_smoke_draft_control_test"
@@ -105960,7 +105960,7 @@
   "site_schema": "gordium.site/1",
   "worker_fingerprint": "8d2321657d8408ab261707daa58643ef65049c5193114ac2f8cc5f0b31bc1d3f",
   "rulebook": {
-   "new_york/ithaca_city": "afe90a33a195d6c1e99ebf7872bc00887b7d7e565c6948cb41adb9effd6ca710"
+   "new_york/ithaca_city": "bd7cab2ed099e79c10b651584c56abecf961f4be7bb5cccbe8dc79828101dc7d"
   }
  }
 }

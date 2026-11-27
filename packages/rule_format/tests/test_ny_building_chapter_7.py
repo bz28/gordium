@@ -282,31 +282,95 @@ def test_part_b_review_round_1s_notes_say_what_the_tables_say(book):
     assert "elevator hoistway doors 1020.2.1" in general and "rated corridors 1020.2.1" not in general
 
 
-# Table 716.1(2) and 716.1(3), typed row by row from the page images (PDF pp.184-186; never from the rules or the
-# extracted text, which loses the stacked fractions): the words each flag's note must hold for each row
+# Tables 716.1(2) and 716.1(3), typed row by row from the page images (PDF pp.184-186; never from the rules or the
+# extracted text, which loses the stacked fractions): for each flag, each row's own words in the note (an anchor that
+# starts the row's clause) and what the page prints for that row, each looked for only inside the row's own clause
+# (up to the next ";" or sentence end outside brackets), so one row's numbers can't stand in for another's
 CHART_716 = {
     "general.bc_table_716_1_2__exit_enclosures": [
-        "rated 2 hours is rated at least 1 1/2 hours", "rated 1 hour, or an exit access stairway or ramp enclosure, or an "
-        "exit passageway's walls rated 1 hour, at least 1 hour", "at most 100 square inches"],
-    "general.bc_table_716_1_2__corridors": ["rated 1 hour or 1/2 hour is a fire door rated at least 1/3 hour (20 minutes)",
-                                            "3/4 hour (D-H-OH-45) in a 1-hour wall or 1/3 hour (D-H-OH-20)"],
-    "general.bc_table_716_1_2__smoke_barriers": ["rated at least 1/3 hour (20 minutes)", "rated 3/4 hour (D-H-OH-45)"],
+        ("an interior exit ramp rated 2 hours", ["at least 1 1/2 hours"]),
+        ("in such an enclosure rated 1 hour", ["exit access stairway or ramp enclosure", "exit passageway", "at least 1 hour"]),
+        ("A vision panel", ["100 square inches", "D-H-T-W-90", "D-H-T-W-60", "D-H-90", "D-H-60"]),
+        ("sidelights and transoms", ["W-120", "W-60", "fire-protection-rated glazing is not permitted"])],
+    "general.bc_table_716_1_2__corridors": [
+        ("a door in a corridor wall rated 1 hour or 1/2 hour", ["at least 1/3 hour", "D-20", "3/4 hour (D-H-OH-45) in a 1-hour wall",
+                                                               "1/3 hour (D-H-OH-20) in a 1/2-hour wall"])],
+    "general.bc_table_716_1_2__smoke_barriers": [
+        ("smoke barriers rated 1 hour", ["at least 1/3 hour", "D-20", "3/4 hour (D-H-OH-45)"])],
     "general.bc_table_716_1_2__other_assemblies": [
-        "a door rated 3 hours in a 4-hour or 3-hour wall", "1 1/2 hours in a 2-hour or 1 1/2-hour wall",
-        "a door rated 3, 1 1/2 and 1 hours", "horizontal exits in fire walls", "3 hours; other fire barriers rated 1 hour, "
-        "3/4 hour", "3/4 hour in a 1-hour wall", "1/3 hour in a 1/2-hour wall",
-        "1 1/2 hours in a 3-hour or 2-hour wall and 3/4 hour in a 1-hour wall"],
+        ("in fire walls and fire barriers rated over 1 hour", ["a door rated 3 hours in a 4-hour or 3-hour wall",
+                                                               "1 1/2 hours in a 2-hour or 1 1/2-hour wall"]),
+        ("in double fire walls per NFPA 221", ["a single-wall rating of 4, 3 or 2 hours", "each wall 3, 2 or 1 hours",
+                                               "a door rated 3, 1 1/2 and 1 hours"]),
+        ("horizontal exits in fire walls", ["3 hours"]),
+        ("other fire barriers rated 1 hour", ["3/4 hour"]),
+        ("other fire partitions", ["3/4 hour in a 1-hour wall", "1/3 hour in a 1/2-hour wall"]),
+        ("exterior walls", ["1 1/2 hours in a 3-hour or 2-hour wall", "3/4 hour in a 1-hour wall"])],
     "general.bc_table_716_1_3__fire_windows": [
-        "rated 1 hour, 3/4 hour (OH-45 or W-60", "fire partitions rated 1 hour, 3/4 hour (OH-45 or W-60)",
-        "rated 1/2 hour, 1/3 hour (OH-20 or W-30)", "in smoke barriers rated 1 hour, 3/4 hour (OH-45 or W-60)",
-        "1 1/2 hours where rated over 1 hour, 3/4 hour where 1 hour, 1/3 hour where 1/2 hour", "never in a party wall"],
+        ("a fire window in a fire wall or a fire barrier", ["is not permitted", "W with the wall's own rating"]),
+        ("in atrium separations", ["(707.3.6)", "(707.3.7)", "(707.3.9) rated 1 hour, 3/4 hour (OH-45 or W-60"]),
+        ("in fire partitions", ["rated 1 hour, 3/4 hour (OH-45 or W-60)", "rated 1/2 hour, 1/3 hour (OH-20 or W-30)"]),
+        ("in smoke barriers", ["rated 1 hour, 3/4 hour (OH-45 or W-60)"]),
+        ("in exterior walls", ["1 1/2 hours where rated over 1 hour", "3/4 hour where 1 hour", "1/3 hour where 1/2 hour"]),
+        ("never in a party wall", [])],
 }
 
 
+def _clause(note: str, anchor: str) -> str:
+    """The note's words from `anchor` to the end of its clause: the next ";" or ". " outside brackets."""
+    i = note.index(anchor)
+    depth = 0
+    for j in range(i, len(note)):
+        c = note[j]
+        depth += (c == "(") - (c == ")")
+        if depth == 0 and (c == ";" or note.startswith(". ", j)):
+            return note[i:j]
+    return note[i:]
+
+
+def _chart_misses(notes: dict) -> list:
+    out = []
+    for rid, rows in CHART_716.items():
+        note = " ".join(notes[rid].split())
+        for anchor, values in rows:
+            if anchor not in note:
+                out.append((rid, anchor))
+                continue
+            clause = _clause(note, anchor)
+            out += [(rid, anchor, v) for v in values if v not in clause]
+    return out
+
+
 def test_table_716s_flags_chart_match_the_page(book):
-    """Part b review round 1's class: each row of Tables 716.1(2) and 716.1(3), typed from the page image, is in its
-    flag's shown note with the rating the page prints (two rows had been read off the jumbled extracted text)."""
-    for rid, phrases in CHART_716.items():
-        note = " ".join(_shown_note([r for r in book if r["id"] == rid][0]).split())
-        for phrase in phrases:
-            assert phrase in note, (rid, phrase)
+    """Part b review rounds 1 and 2's class: each row of Tables 716.1(2) and 716.1(3), typed from the page image, is in
+    its flag's shown note with the rating and markings the page prints, inside that row's own clause (two rows had been
+    read off the jumbled extracted text, and a first chart let one row's numbers stand in for another's)."""
+    notes = {rid: _shown_note([r for r in book if r["id"] == rid][0]) for rid in CHART_716}
+    assert _chart_misses(notes) == []
+
+
+def test_the_chart_catches_a_row_changed(book):
+    """The pin: each change review round 2 tried, made to a copy of the notes, is caught."""
+    notes = {rid: " ".join(_shown_note([r for r in book if r["id"] == rid][0]).split()) for rid in CHART_716}
+    other, windows, exits = ("general.bc_table_716_1_2__other_assemblies", "general.bc_table_716_1_3__fire_windows",
+                             "general.bc_table_716_1_2__exit_enclosures")
+    changes = [(other, "other fire partitions, 3/4 hour in a 1-hour wall", "other fire partitions, 1/3 hour in a 1-hour wall"),
+               (windows, "(707.3.9) rated 1 hour, 3/4 hour", "(707.3.9) rated 1 hour, 1/3 hour"),
+               (windows, "fire barrier is not permitted", "fire barrier is permitted"),
+               (other, "single-wall rating of 4, 3 or 2 hours", "single-wall rating of 4, 3 or 1 hours"),
+               (exits, "D-H-T-W-90", "D-H-W-90"),
+               (other, "4-hour or 3-hour wall", "4-hour wall")]
+    for rid, a, b in changes:
+        assert a in notes[rid], a
+        assert _chart_misses({**notes, rid: notes[rid].replace(a, b)}), (rid, a)
+
+
+
+
+def test_part_b_review_round_2s_notes_keep_their_sections_scope(book):
+    """Part b review round 2: 716.2.1.3 is about corridor and smoke barrier door assemblies (its heading), and
+    716.2.1.4's corridor and smoke barrier doors are examples, not the whole list (elevator lobby doors, 3006.3)."""
+    glazing = _shown_note([r for r in book if r["id"] == "general.bc_716_2_1_3_transom_sidelight_glazing"][0])
+    assert "in a corridor or a smoke barrier" in glazing
+    smoke = _shown_note([r for r in book if r["id"] == "general.bc_716_2_1_4_smoke_draft_control_test"][0])
+    assert "for one" in smoke and "3006.3" in smoke
