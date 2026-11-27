@@ -2546,6 +2546,791 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part c).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_407_5_smoke_barriers
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2 stories divided into two smoke compartments (BCNYS 407.5)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 44
+    - 46
+    quote: '[BE] 407.5 Smoke barriers. Smoke barriers shall be provided to subdivide every story used by persons receiving
+      care, treatment or sleeping into not fewer than two smoke compartments. Smoke barriers shall be provided to subdivide
+      other stories with an occupant load of 50 or more persons, into not fewer than two smoke compartments. The smoke barrier
+      shall be in accordance with Section 709.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Every story used for care, treatment or sleeping, and any other story of 50 or more occupants, is divided by smoke
+      barriers (709) into at least two smoke compartments: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Smoke barriers aren't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_5_1_smoke_compartment_size
+  kind: flag
+  topic: means_of_egress
+  title: Group I-2 smoke compartments at most 22,500 sq ft (BCNYS 407.5.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 47
+    - 54
+    quote: '[BE] 407.5.1 Smoke compartment size. Stories shall be divided into smoke compartments with an area of not more
+      than 22,500 square feet (2092 m[fn2]) in Group I-2 occupancies. Exceptions: 1. A smoke compartment in Group I-2, Condition
+      2 is permitted to have an area of not more than 40,000 square feet (3716 m[fn2]) provided that all patient sleeping
+      rooms within that smoke compartment are configured for single patient occu- pancy and any suite within the smoke compartment
+      complies with Section 407.4.4. 2. A smoke compartment in Group I-2, Condition 2 without patient sleeping rooms is permitted
+      to have an area of not more than 40,000 square feet (3716 m[fn2]).'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Each smoke compartment is at most 22,500 sq ft (40,000 sq ft in Condition 2 with single-patient sleeping rooms
+      and suites per 407.4.4, or without patient sleeping rooms): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_5_2_travel_to_a_smoke_barrier_door
+  kind: flag
+  topic: means_of_egress
+  title: At most 200 ft to a smoke barrier door (BCNYS 407.5.2)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 55
+    - 56
+    quote: '[BE] 407.5.2 Exit access travel distance. The distance of travel from any point in a smoke compartment to a smoke
+      barrier door shall be not greater than 200 feet (60 960 mm).'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'From any point in a smoke compartment, at most 200 ft of travel to a smoke barrier door: a person''s check, the
+      smoke barriers and their doors not being in the model.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: A distance to a smoke barrier door, not to an exit, so Table 1017.2's travel rule says nothing of it. Hand-drafted
+    in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_5_3_refuge_area
+  kind: flag
+  topic: means_of_egress
+  title: A refuge area in each Group I-2 smoke compartment (BCNYS 407.5.3)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 100
+    lines:
+    - 57
+    - 58
+    quote: '[BE] 407.5.3 Refuge area. Refuge areas shall be provided within each smoke compartment. The size of the refuge
+      area shall accommodate the occupants and care recipients from the adjoining smoke compartment. Where a smoke compartment
+      is'
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 3
+    - 9
+    quote: 'adjoined by two or more smoke compartments, the minimum area of the refuge area shall accommodate the largest
+      occupant load of the adjoining compartments. The size of the refuge area shall provide the following: 1. Not less than
+      30 net square feet (2.8 m[fn2]) for each care recipient confined to bed or stretcher. 2. Not less than 6 square feet
+      (0.56 m[fn2]) for each ambulatory care recipient not confined to bed or stretcher and for other occupants. Areas or
+      spaces permitted to be included in the calculation of refuge area are corridors, sleeping areas, treatment rooms, lounge
+      or dining areas and other low-hazard areas.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Each smoke compartment holds a refuge area for the occupants and care recipients of the adjoining compartment (the
+      largest, where two or more adjoin): at least 30 net sq ft for each care recipient in a bed or stretcher and 6 sq ft
+      for each other occupant: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_5_4_independent_egress
+  kind: flag
+  topic: means_of_egress
+  title: Egress from each smoke compartment without going back (BCNYS 407.5.4)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 10
+    - 12
+    quote: '[BE] 407.5.4 Independent egress. A means of egress shall be provided from each smoke compartment created by smoke
+      barriers without having to return through the smoke compartment from which means of egress originated. Smoke compartments
+      that do not contain an exit shall be provided with direct access to not less than two adjacent smoke compartments.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Each smoke compartment has a means of egress that never returns through the compartment it started in; one with
+      no exit reaches at least two adjacent compartments directly: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_5_5_horizontal_assemblies
+  kind: flag
+  topic: means_of_egress
+  title: Horizontal assemblies supporting smoke barriers (BCNYS 407.5.5)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 13
+    - 14
+    quote: '[BE] 407.5.5 Horizontal assemblies. Horizontal assemblies supporting smoke barriers required by this section shall
+      be designed to resist the movement of smoke. Elevator lobbies shall be in accordance with Section 3006.2.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Horizontal assemblies supporting smoke barriers resist the movement of smoke; elevator lobbies per 3006.2: a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_6_automatic_closing_doors
+  kind: flag
+  topic: means_of_egress
+  title: Automatic-closing doors with hold-open devices (BCNYS 407.6)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 15
+    - 15
+    quote: 407.6 Automatic-closing doors. Automatic-closing doors with hold-open devices shall comply with Sections 709.5
+      and 716.2.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Automatic-closing doors with hold-open devices meet 709.5 and 716.2: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_6_1_activation_of_automatic_closing_doors
+  kind: flag
+  topic: means_of_egress
+  title: Automatic-closing doors closing on fire alarm or sprinklers (BCNYS 407.6.1)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 16
+    - 18
+    quote: 407.6.1 Activation of automatic-closing doors. Automatic-closing doors on hold-open devices in accordance with
+      Section 716.2.6.6 shall also close upon activation of a fire alarm system, an automatic sprinkler system, or both. The
+      automatic release of the hold-open device on one door shall release all such doors within the same smoke compartment.
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Hold-open doors (716.2.6.6) also close when the fire alarm or sprinkler system activates, and releasing one releases
+      all in the smoke compartment: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_407_10_secured_yards
+  kind: flag
+  topic: means_of_egress
+  title: Secured yards with safe dispersal areas 50 ft away (BCNYS 407.10)
+  applies_when: occupancy_group in ["I-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 32
+    - 35
+    quote: '[BE] 407.10 Secured yards. Grounds are permitted to be fenced and gates therein are permitted to be equipped with
+      locks, provided that safe dispersal areas having 30 net square feet (2.8 m[fn2]) for bed and stretcher care recipients
+      and 6 net square feet (0.56 m[fn2]) for ambulatory care recipients and other occupants are located between the building
+      and the fence. Such provided safe dispersal areas shall be located not less than 50 feet (15 240 mm) from the building
+      they serve.'
+  examples:
+  - given:
+      occupancy_group: I-2
+    expect: needs_review
+    note: 'Fenced grounds with locked gates only where safe dispersal areas between the building and the fence give 30 net
+      sq ft per bed or stretcher care recipient and 6 net sq ft per other occupant, at least 50 ft from the building: a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-2: not applicable.'
+  notes: The grounds aren't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_1_group_i3
+  kind: flag
+  topic: means_of_egress
+  title: Group I-3, Sections 408.1 to 408.11 (BCNYS 408.1)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 39
+    - 40
+    quote: 408.1 General. Occupancies in Group I-3 shall comply with the provisions of Sections 408.1 through 408.11 and other
+      applicable provisions of this code (see Section 308.5).
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'The building may be Group I-3 (detention and correctional): Sections 408.1 to 408.11 apply besides the rest of
+      the code: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Shown where the building is stated Group I-3, of two or more groups, or its group isn't stated. Of Section 408, its
+    means of egress and locks (408.3, 408.4) are brought in here, its smoke barriers and housing subdivisions in Chapter 4
+    part e. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_2_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Portions of a Group I-3 building classified otherwise (BCNYS 408.2)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 41
+    - 49
+    quote: '408.2 Other occupancies. Buildings or portions of buildings in Group I-3 occupancies where security operations
+      necessitate the locking of required means of egress shall be permitted to be classified as a different occupancy. Occupancies
+      classified as other than Group I-3 shall meet the applicable requirements of this code for that occupancy where provisions
+      are made for the release of occu- pants at all times. Means of egress from detention and correctional occupancies that
+      traverse other use areas shall, as a minimum, conform to requirements for detention and correctional occupancies. Exception:
+      It is permissible to exit through a horizontal exit into other contiguous occupancies that do not conform to detention
+      and correctional occupancy egress provisions but that do comply with requirements set forth in the appropriate occupancy,
+      as long as the occupancy is not a Group H use.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Portions where security locks required egress may be classified another group only with occupants released at all
+      times; egress from detention areas through other use areas meets detention requirements at least (a horizontal exit
+      into another, non-H occupancy excepted): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: A portion classified another group makes the building one of two or more groups, where the flag shows too. Hand-drafted
+    in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_3_means_of_egress
+  kind: flag
+  topic: means_of_egress
+  title: Group I-3 means of egress per Chapter 10, as 408.3 modifies (BCNYS 408.3)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 50
+    - 51
+    quote: '[BE] 408.3 Means of egress. Except as modified or as provided for in this section, the means of egress provisions
+      of Chapter 10 shall apply.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Chapter 10''s means of egress apply except as 408.3 modifies: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_3_1_door_width
+  kind: flag
+  topic: means_of_egress
+  title: Resident sleeping unit doors at least 28 in clear (BCNYS 408.3.1)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 52
+    - 52
+    quote: '[BE] 408.3.1 Door width. Doors to resident sleeping units shall have a clear width of not less than 28 inches
+      (711 mm).'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Doors to resident sleeping units have a clear width of at least 28 in: a person''s check of which doors they are.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: 1010.1.1's door width rule already takes 28 in for these doors as its exception 2, a review between 28 and 32 in
+    where they aren't ruled out; which doors serve resident sleeping units isn't in the model. Hand-drafted in a Claude Code
+    session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_3_2_sliding_doors
+  kind: flag
+  topic: means_of_egress
+  title: Sliding doors opening with at most 50 pounds (BCNYS 408.3.2)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 53
+    - 54
+    quote: '[BE] 408.3.2 Sliding doors. Where doors in a means of egress are of the horizontal-sliding type, the force to
+      slide the door to its fully open position shall be not greater than 50 pounds (220 N) with a perpendicular force against
+      the door of 50 pounds (220 N).'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'A horizontal sliding egress door slides fully open with at most 50 pounds of force (with 50 pounds against it):
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_3_3_guard_tower_doors
+  kind: flag
+  topic: means_of_egress
+  title: A guard tower's hatch in the means of egress (BCNYS 408.3.3)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 101
+    lines:
+    - 55
+    - 57
+    quote: '[BE] 408.3.3 Guard tower doors. A hatch or trap door not less than 16 square feet (610 m[fn2]) in area through
+      the floor and having dimensions of not less than 2 feet (610 mm) in any direction shall be permitted to be used as a
+      portion of the means of egress from guard towers.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'A floor hatch of at least 16 sq ft, at least 2 ft each way, may be part of a guard tower''s means of egress: a
+      person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_3_4_spiral_stairways
+  kind: flag
+  topic: means_of_egress
+  title: Spiral stairways for staff locations (BCNYS 408.3.4)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 102
+    lines:
+    - 3
+    - 4
+    quote: '[BE] 408.3.4 Spiral stairways. Spiral stairways that conform to the requirements of Section 1011.10 are permitted
+      for access to and between staff locations.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Spiral stairways per 1011.10 are permitted to and between staff locations: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_3_5_ships_ladders
+  kind: flag
+  topic: means_of_egress
+  title: Ship's ladders from control and observation rooms (BCNYS 408.3.5)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 102
+    lines:
+    - 5
+    - 6
+    quote: '[BE] 408.3.5 Ship’s ladders. Ship’s ladders shall be permitted for egress from control rooms or elevated facility
+      observation rooms in accordance with Section 1011.15.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Ship''s ladders per 1011.15 are permitted for egress from control rooms or elevated observation rooms: a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_3_6_exit_discharge_to_a_courtyard
+  kind: flag
+  topic: means_of_egress
+  title: Exits discharging into a fenced or walled courtyard (BCNYS 408.3.6)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 102
+    lines:
+    - 7
+    - 9
+    quote: '[BE] 408.3.6 Exit discharge. Exits are permitted to discharge into a fenced or walled courtyard. Enclosed yards
+      or courts shall be of a size to accommodate all occupants, be located not less than 50 feet (15 240 mm) from the building
+      and have an area of not less than 15 square feet (1.4 m[fn2]) per person.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Exits may discharge into a fenced or walled courtyard large enough for all occupants, at least 50 ft from the building,
+      with at least 15 sq ft per person: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_3_7_sallyports
+  kind: flag
+  topic: means_of_egress
+  title: Sallyports in a means of egress (BCNYS 408.3.7)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 102
+    lines:
+    - 10
+    - 11
+    quote: '[BE] 408.3.7 Sallyports. A sallyport shall be permitted in a means of egress where there are provisions for continuous
+      and unob- structed passage through the sallyport during an emergency egress condition.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'A sallyport may be in a means of egress where passage through it is continuous and unobstructed in an emergency:
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_3_8_glazed_exit_stairway
+  kind: flag
+  topic: means_of_egress
+  title: One interior exit stairway with glazing at its landings (BCNYS 408.3.8)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 102
+    lines:
+    - 12
+    - 24
+    quote: '[BE] 408.3.8 Interior exit stairway and ramp construction. One interior exit stairway or ramp in each building
+      shall be permit- ted to have glazing installed in doors and interior walls at each landing level providing access to
+      the interior exit stairway or ramp, provided that the following conditions are met: 1. The interior exit stairway or
+      ramp shall not serve more than four floor levels. 2. Exit doors shall be not less than 3/4-hour fire door assemblies
+      complying with Section 716. 3. The total area of glazing at each floor level shall not exceed 5,000 square inches (3.2
+      m[fn2]) and individual panels of glazing shall not exceed 1,296 square inches (0.84 m[fn2]). 4. The glazing shall be
+      protected on both sides by an automatic sprinkler system. The sprinkler system shall be designed to wet completely the
+      entire surface of any glazing affected by fire when actuated. 5. The glazing shall be in a gasketed frame and installed
+      in such a manner that the framing system will deflect without breaking (loading) the glass before the sprinkler system
+      operates. 6. Obstructions, such as curtain rods, drapery traverse rods, curtains, drapes or similar materials shall
+      not be installed between the automatic sprinklers and the glazing.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'One interior exit stairway or ramp a building may have glazed doors and walls at each landing, serving at most
+      four floor levels, with 3/4-hour fire doors, glazing at most 5,000 sq in a floor and 1,296 sq in a panel, sprinklered
+      on both sides, gasketed, nothing between the sprinklers and the glass: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_4_locks
+  kind: flag
+  topic: means_of_egress
+  title: Group I-3 egress doors locked per the use condition (BCNYS 408.4)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 102
+    lines:
+    - 25
+    - 27
+    quote: '[BE] 408.4 Locks. Egress doors are permitted to be locked in accordance with the applicable use condition. Doors
+      from a refuge area to the outside are permitted to be locked with a key in lieu of locking methods described in Section
+      408.4.1. The keys to unlock the exterior doors shall be available at all times and the locks shall be operable from
+      both sides of the door.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Egress doors may be locked as the use condition allows; doors from a refuge area to the outside may be key-locked,
+      the keys available at all times and the locks operable from both sides: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Locks and the use condition aren't in the model. Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part
+    d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_4_1_remote_release
+  kind: flag
+  topic: means_of_egress
+  title: Remote release of egress door locks (BCNYS 408.4.1)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 102
+    lines:
+    - 28
+    - 34
+    quote: '[BE] 408.4.1 Remote release. Remote release of locks on doors in a means of egress shall be provided with reliable
+      means of operation, remote from the resident living areas, to release locks on all required doors. In Occupancy Condition
+      3 or 4, the arrangement, accessibility and security of the release mechanisms required for egress shall be such that
+      with the minimum avail- able staff at any time, the lock mechanisms are capable of being released within 2 minutes.
+      Exception: Provisions for remote locking and unlocking of occupied rooms in Occupancy Condition 4 are not required provided
+      that not more than 10 locks are necessary to be unlocked in order to move occupants from one smoke compartment to a
+      refuge area within 3 minutes. The opening of necessary locks shall be accomplished with not more than two separate keys.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Locks on means of egress doors have a reliable remote release away from resident areas; in Occupancy Conditions
+      3 and 4 the minimum staff release them within 2 minutes (Condition 4: up to 10 locks with at most two keys within 3
+      minutes instead): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_4_2_power_operated_doors_and_locks
+  kind: flag
+  topic: means_of_egress
+  title: Power-operated doors and locks, manual release, emergency power (BCNYS 408.4.2)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 102
+    lines:
+    - 35
+    - 40
+    quote: '[BE] 408.4.2 Power-operated doors and locks. Power-operated sliding doors or power-operated locks for swinging
+      doors shall be operable by a manual release mechanism at the door. Emergency power shall be provided for the doors and
+      locks in accor- dance with Section 2702. Exceptions: 1. Emergency power is not required in facilities with 10 or fewer
+      locks complying with the exception to Section 408.4.1. 2. Emergency power is not required where remote mechanical operating
+      releases are provided.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Power-operated sliding doors and locks have a manual release at the door and emergency power (2702), but with 10
+      or fewer locks per 408.4.1''s exception or remote mechanical releases: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_4_3_redundant_operation
+  kind: flag
+  topic: means_of_egress
+  title: A redundant release for remote-release doors and locks (BCNYS 408.4.3)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 102
+    lines:
+    - 41
+    - 43
+    quote: '[BE] 408.4.3 Redundant operation. Remote release, mechanically operated sliding doors or remote release, mechanically
+      oper- ated locks shall be provided with a mechanically operated release mechanism at each door, or shall be provided
+      with a redundant remote release control.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Remote-release, mechanically operated doors or locks have a mechanical release at each door or a redundant remote
+      release: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_408_4_4_relock_capability
+  kind: flag
+  topic: means_of_egress
+  title: Doors unlocked in an emergency not relocking by themselves (BCNYS 408.4.4)
+  applies_when: occupancy_group in ["I-3", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 102
+    lines:
+    - 44
+    - 45
+    quote: '[BE] 408.4.4 Relock capability. Doors remotely unlocked under emergency conditions shall not automatically relock
+      when closed unless specific action is taken at the remote location to enable doors to relock.'
+  examples:
+  - given:
+      occupancy_group: I-3
+    expect: needs_review
+    note: 'Doors remotely unlocked in an emergency don''t relock on closing unless enabled at the remote location: a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group I-3: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part d).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 # ---- end of Chapter 4 ----
 - id: general.bc_508_2_1_classification
   kind: flag
