@@ -488,6 +488,7 @@ MEASURE_NAMES = {
     "ambulatory_care_facility": "ambulatory care facility (whether the building is or holds one, per Table 1020.3)",
     "corridors_within_dwelling_units": "corridors within dwelling units (whether any corridor is inside a dwelling or sleeping unit)",
     "emergency_voice_alarm_system": "emergency voice/alarm system (whether the whole building has one per 907.5.2.2)",
+    "nfpa_13r_stated": "sprinkler system (whether NFPA 13R is stated, counted or not)",
     "group_r_present": "occupancy group (whether any group is R-1 to R-4)",
     "group_h_present": "occupancy group (whether any group is H-1 to H-5)",
     "group_i1_i2_i3_present": "occupancy group (whether any group is I-1, I-2 or I-3)",

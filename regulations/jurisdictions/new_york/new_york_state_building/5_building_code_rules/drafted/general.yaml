@@ -1718,8 +1718,8 @@ rules:
     expect: needs_review
     note: 'A fire door in an interior exit stairway or ramp or an exit passageway transmits a temperature rise of at most
       450 degrees F above ambient at the end of 30 minutes of the standard fire test, unless the building is equipped throughout
-      with an automatic sprinkler system per 903.3.1.1 or 903.3.1.2: with no sprinkler system stated, a person''s check (the
-      doors'' test results aren''t in the model).'
+      with an automatic sprinkler system per 903.3.1.1 or 903.3.1.2: with neither stated (a 13R system counts only in
+      Group R, within 903.3.1.2''s four stories), a person''s check (the doors'' test results aren''t in the model).'
   - given:
       sprinklered_903_3_1_1: true
       occupancy_group: B
@@ -4175,8 +4175,9 @@ rules:
   - when: not sprinklered_903_3_1_1 and not space_floor_area > 12000 and not space_occupant_load >= 300
     reason: 'No NFPA 13 system stated, and this room settles none of 903.2.3''s conditions (its own floor area is 12,000 square
       feet or less, its occupant load under 300 or not worked out); its fire area, which the model doesn''t show, may be larger
-      than the room and hold more people, or may be on a floor other than a level of exit discharge serving it (where not
-      every classroom has an exterior exit door at ground level, the exception): a person checks.'
+      than the room and hold more people, or may be on a floor other than a level of exit discharge serving it (an area
+      below the lowest level of exit discharge serving it needs none where every classroom has an exterior exit door at
+      ground level, the exception): a person checks.'
   for_each: space
   when_none: needs_review
   sources:
@@ -5831,7 +5832,6 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Storage of commercial motor vehicles (BCNYS 903.2.10.1)
-  applies_when: occupancy_group in ["S-1", "S-2", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 272
@@ -5845,11 +5845,8 @@ rules:
     expect: needs_review
     note: 'A building storing commercial motor vehicles is sprinklered throughout where the fire area exceeds 5,000 square
       feet: a person''s check.'
-  - given:
-      occupancy_group: R-2
-    expect: not_applicable
-    note: 'Not this building''s group or fact, as stated: not applicable.'
-  notes: '903.2.10.1: the vehicles aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+  notes: '903.2.10.1: the vehicles aren''t in the model, in a building of any group: the storage of vehicles accessory to another occupancy is part
+    of it (311.1.1), so a Group B office''s or F-1 plant''s truck bay is its own (review round 2). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
     b).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -5857,7 +5854,6 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Mechanical-access enclosed parking garages (BCNYS 903.2.10.2)
-  applies_when: occupancy_group in ["S-1", "S-2", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 272
@@ -5873,11 +5869,8 @@ rules:
     expect: needs_review
     note: 'A building storing motor vehicles in a mechanical-access enclosed parking garage has an approved sprinkler system
       throughout, the garage''s portion a specially engineered one: a person''s check.'
-  - given:
-      occupancy_group: R-2
-    expect: not_applicable
-    note: 'Not this building''s group or fact, as stated: not applicable.'
-  notes: '903.2.10.2: the garage''s kind isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9
+  notes: '903.2.10.2: the garage''s kind isn''t in the model, in a building of any group: the storage of vehicles accessory to another occupancy is part
+    of it (311.1.1), so a Group B office''s or F-1 plant''s truck bay is its own (review round 2). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9
     part b).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6175,7 +6168,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Where an NFPA 13R system is permitted (BCNYS 903.3.1.2)
-  applies_when: sprinklered_903_3_1_2
+  applies_when: nfpa_13r_stated
   sources:
   - file: gov.ny.building.2025.pdf
     page: 274
@@ -6195,26 +6188,28 @@ rules:
       plane.'
   examples:
   - given:
-      sprinklered_903_3_1_2: true
+      nfpa_13r_stated: true
     expect: needs_review
     note: 'An NFPA 13R system is permitted only in Group R occupancies four stories or fewer above grade plane (stories
       counted from grade plane where built per 510.2 or 510.4), the roof assembly less than 45 feet (Group R-2) or the highest
       floor 30 feet or less (other Group R) above the lowest level of fire department vehicle access, and the lowest floor 30
       feet or less below it. Chapter 10''s sprinklered allowances count a stated 13R system only in a building stated Group
-      R, taking its stories and heights on the architect''s statement (903.2.8''s rule fails one above four stated stories):
-      whether these limits are met is a person''s check.'
+      R, and not in a building stated Group R alone with more than four stories above grade plane (there it is no 903.3.1.2
+      system, and 903.2.8''s rule fails it), taking its heights on the architect''s statement: whether these limits are met is
+      a person''s check.'
   - given: {}
     expect: needs_review
     note: 'The sprinkler system isn''t stated: a person checks.'
   - given:
-      sprinklered_903_3_1_2: false
+      nfpa_13r_stated: false
     expect: not_applicable
     note: 'No NFPA 13R system: not applicable.'
   notes: '903.3.1.2: an NFPA 13R system only in Group R, four stories or fewer above grade plane, within its heights of the
     lowest level of fire department vehicle access (not in the model). Chapter 10''s rules count a stated 13R system only in
     a building stated Group R (Chapter 10 plan, group 5a''s round 1; Chapter 9 part a''s review round 1 brought 1007.1.1,
-    1007.1.2 and Group I-4''s two exits in line), its stories and heights taken on the architect''s statement, as the Chapter
-    10 plan decided (group 4b); 903.2.8''s rule fails a 13R system above four stated stories. Hand-drafted in a Claude Code
+    1007.1.2 and Group I-4''s two exits in line), and not in a building stated Group R alone with more than four stories
+    above grade plane (review round 3: the stated stories make the sprinkler fact no), its heights taken on the architect''s
+    statement, as the Chapter 10 plan decided (group 4b); 903.2.8''s rule fails a 13R system above four stated stories. Hand-drafted in a Claude Code
     session (2026-11-27, Chapter 9 part a).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6222,7 +6217,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: NFPA 13R's corridors and balconies in the means of egress (BCNYS 903.3.1.2.2)
-  applies_when: sprinklered_903_3_1_2
+  applies_when: nfpa_13r_stated
   sources:
   - file: gov.ny.building.2025.pdf
     page: 274
@@ -6237,14 +6232,14 @@ rules:
       and 1021.3.'
   examples:
   - given:
-      sprinklered_903_3_1_2: true
+      nfpa_13r_stated: true
     expect: needs_review
     note: 'With an NFPA 13R system, corridors and balconies in the means of egress are sprinklered where a corridor has a
       combustible floor or walls, turns more than 45 degrees inside, is less than 50 percent open to the outside at its ends,
       or is open-ended with exterior stairways and ramps per 1027.6 exception 3, and egress balconies not complying with 1021.2
       and 1021.3: a person''s check.'
   - given:
-      sprinklered_903_3_1_2: false
+      nfpa_13r_stated: false
     expect: not_applicable
     note: 'No NFPA 13R system: not applicable.'
   notes: '903.3.1.2.2: NFPA 13R may leave some corridors and balconies unsprinklered; this section asks them sprinklered on
@@ -6766,7 +6761,8 @@ rules:
       less; exception 2: no voice/alarm system at 100 or less where the manual system initiates an approved notification
       signal per 907.5; exceptions 3 and 4: boxes left out with smoke detectors in corridors, heat detectors in assembly areas and shops
       and manual activation from a normally occupied location, or with a 903.3.1.1 system activating the voice/alarm system
-      on water flow): a person''s check. Whether the voice/alarm system is required is the rule of its own.'
+      on water flow): a person''s check. In a building stated Group E alone, whether the voice/alarm system is required
+      is the rule beside it; in a building of two or more groups it is this check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
