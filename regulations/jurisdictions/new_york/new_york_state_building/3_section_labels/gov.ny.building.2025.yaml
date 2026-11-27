@@ -9824,10 +9824,11 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Group I has a manual fire alarm system activating occupant notification per 907.5, and automatic smoke detection
-      per 907.2.6.1, 907.2.6.2 and 907.2.6.3.3 (exception 1: Group I-1 and I-2 sleeping units'' boxes at constantly attended
-      staff locations, visible, with ready access, within 907.4.2.1''s travel distances; exception 2: private mode signaling
-      the fire code official approves, staff evacuation in the plan per Section 404 of the Fire Code of New York State): a
-      person''s check (general.bc_907_2_6_group_i_fire_alarm).'
+      per 907.2.6.1, 907.2.6.2 and 907.2.6.3.3 (exception 1: Group I-1 and I-2 sleeping units'' boxes not required at exits
+      where they are at all care providers'' control stations or other constantly attended staff locations, visible, with
+      ready access, within 907.4.2.1''s travel distances; exception 2: occupant notification needn''t be activated where the
+      fire code official approves private mode signaling per NFPA 72 and the fire safety and evacuation plan per Section 404
+      of the Fire Code of New York State includes staff evacuation): a person''s check (general.bc_907_2_6_group_i_fire_alarm).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 286
@@ -9890,8 +9891,9 @@ labels:
     topic: means_of_egress
     reason: 'Group I-2 Condition 1 has automatic smoke detection in corridors and the spaces 407.2 lets open to them, activated
       per 907.4; Condition 2 as Section 407 requires (corridor detection not needed in smoke compartments whose sleeping units
-      have UL 268 detectors displaying in the corridor and alarming at the care providers'' station, or door-closers with
-      integral smoke detectors): a person''s check (general.bc_907_2_6_2_group_i2_smoke_detection).'
+      have UL 268 detectors with a visual display on the corridor side and an audible and visual alarm at the care providers''
+      station, or door-closing devices with integral smoke detectors on the unit sides installed per their listing that perform
+      the required alerting function): a person''s check (general.bc_907_2_6_2_group_i2_smoke_detection).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 286
@@ -9986,10 +9988,11 @@ labels:
   907.2.6.3.3:
     label: flag
     topic: means_of_egress
-    reason: 'Group I-3 has automatic smoke detection throughout resident housing areas, sleeping units, day rooms, group activity
-      and common spaces open to residents (other approved arrangements against damage or tampering; not in Use Conditions
-      2 and 3 sleeping units per Section 308; not in sleeping units of four or fewer in smoke compartments with a 903.3.1.1
-      system): a person''s check (general.bc_907_2_6_3_3_group_i3_smoke_detection).'
+    reason: 'Group I-3 has automatic smoke detection throughout resident housing areas, sleeping units and contiguous day
+      rooms, group activity spaces and other common spaces normally open to residents (other approved arrangements giving
+      equivalent protection where needed to prevent damage or tampering; not in Use Conditions 2 and 3 sleeping units per
+      Section 308; not in sleeping units with four or fewer occupants in smoke compartments with a 903.3.1.1 system): a person''s
+      check (general.bc_907_2_6_3_3_group_i3_smoke_detection).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 287
@@ -10109,9 +10112,10 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'Group R-1 has a manual fire alarm system activating occupant notification per 907.5 (exception 1: not in a building
-      of two stories or less whose units are separated by 1-hour fire partitions and each have an exit directly to a public
-      way, egress court or yard; exception 2: boxes left out with a 903.3.1.1 or 903.3.1.2 system, notification on water flow
-      and at least one box at an approved location): a person''s check (general.bc_907_2_8_1_group_r1_fire_alarm).'
+      of two stories or less whose units and their contiguous attic and crawl spaces are separated from each other and from
+      public or common areas by 1-hour fire partitions and each have an exit directly to a public way, egress court or yard;
+      exception 2: boxes left out with a 903.3.1.1 or 903.3.1.2 system, notification on water flow and at least one box at
+      an approved location): a person''s check (general.bc_907_2_8_1_group_r1_fire_alarm).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 287
@@ -10191,10 +10195,11 @@ labels:
     reason: 'Group R-2 has a manual fire alarm system activating occupant notification per 907.5 where any unit is three or
       more stories above the lowest level of exit discharge, more than one story below the highest level of exit discharge
       of the exits serving it, or the building has more than 16 dwelling or sleeping units (exception 1: not in a building
-      of two stories or less whose units are separated by 1-hour fire partitions and each have an exit directly to a public
-      way, egress court or yard; exception 2: boxes left out with a 903.3.1.1 or 903.3.1.2 system and notification on water
-      flow; exception 3: none with a 903.3.1.1 or 903.3.1.2 system where there are no interior corridors serving units and
-      each unit''s egress door opens to an exterior exit access, or open-ended corridors per 1027.6 exception 3 serve them):
+      of two stories or less whose units and their contiguous attic and crawl spaces are separated from each other and from
+      public or common areas by 1-hour fire partitions and each have an exit directly to a public way, egress court or yard;
+      exception 2: boxes left out with a 903.3.1.1 or 903.3.1.2 system and notification on water flow; exception 3: none with
+      a 903.3.1.1 or 903.3.1.2 system where there are no interior corridors serving units and each unit''s egress door opens
+      to an exterior exit access leading directly to the exits, or open-ended corridors per 1027.6 exception 3 serve them):
       a person''s check (general.bc_907_2_9_1_group_r2_fire_alarm).'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -10249,8 +10254,8 @@ labels:
     reason: 'Group R-2 a college or university runs for student or staff housing has automatic smoke detection activating
       notification per 907.5 in common spaces outside units, laundry, mechanical equipment and storage rooms, and interior
       corridors serving units (not where there are no interior corridors and each unit''s egress door opens to an exterior
-      exit access or an exit), its units'' smoke alarms interconnected with the fire alarm system per NFPA 72: a person''s
-      check (general.bc_907_2_9_3_group_r2_college_detection).'
+      exit access leading directly to an exit, or directly to an exit), its units'' smoke alarms interconnected with the fire
+      alarm system per NFPA 72: a person''s check (general.bc_907_2_9_3_group_r2_college_detection).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 288
@@ -10351,11 +10356,13 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'New York places Group R-1''s smoke alarms in sleeping areas, in every room on the path of egress from them to
-      the unit''s door, on each story within a unit (a split level''s upper alarm serving a lower level less than a full story
-      below with no door between), at least 3 feet from a bath or shower room''s door, in a hallway and the room open to it
-      where that room''s ceiling is 24 inches or more above the hallway''s, by a sleeping loft, in each common space shared
-      by three or more units, and, on a level over 1000 square feet, within 30 feet of travel of every ceiling point or one
-      per 500 square feet (upper-floor alarms may serve great rooms and vaulted ceilings): a person''s check (general.bc_907_2_11_1_group_r1_smoke_alarm_locations).'
+      the unit''s door, on each story within a unit, including basements (a split level''s upper alarm serving a lower level
+      less than a full story below with no door between), at least 3 feet horizontally from the door or opening of a bathroom
+      with a tub or shower unless that would prevent a required alarm, in a hallway serving bedrooms and the room open to
+      it where that room''s ceiling is 24 inches or more above the hallway''s, in the room a sleeping loft opens to, near
+      the loft, in each common space shared by three or more units, clearly audible there, and, on a level of a unit over
+      1000 square feet of interior floor area, garages excluded, within 30 feet of travel of every ceiling point or one per
+      500 square feet (upper-floor alarms may serve great rooms and vaulted ceilings): a person''s check (general.bc_907_2_11_1_group_r1_smoke_alarm_locations).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 288
@@ -10393,11 +10400,14 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'New York places smoke alarms in Groups R-2, R-3, R-4 and I-1 outside each separate sleeping area near the bedrooms,
-      in each room used for sleeping, on each story within a unit including basements (a split level''s upper alarm serving
-      a lower level less than a full story below with no door between), at least 3 feet from a bath or shower room''s door,
-      in a hallway and the room open to it where that room''s ceiling is 24 inches or more above the hallway''s, by a sleeping
-      loft, in each common space shared by three or more units, and, on a level over 1000 square feet, within 30 feet of travel
-      of every ceiling point or one per 500 square feet: a person''s check (general.bc_907_2_11_2_group_r_smoke_alarm_locations).'
+      in each room used for sleeping, on each story within a unit including basements (not crawl spaces or uninhabitable attics)
+      (a split level''s upper alarm serving a lower level less than a full story below with no door between), at least 3 feet
+      horizontally from the door or opening of a bathroom with a tub or shower unless that would prevent a required alarm,
+      in a hallway serving bedrooms and the room open to it where that room''s ceiling is 24 inches or more above the hallway''s,
+      in the room a sleeping loft opens to, near the loft, in each common space shared by three or more units, clearly audible
+      there, and, on a level of a unit over 1000 square feet of interior floor area, garages excluded, within 30 feet of travel
+      of every ceiling point or one per 500 square feet (upper-floor alarms may serve great rooms and vaulted ceilings): a
+      person''s check (general.bc_907_2_11_2_group_r_smoke_alarm_locations).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 289
@@ -10488,9 +10498,10 @@ labels:
   907.2.11.6:
     label: flag
     topic: means_of_egress
-    reason: 'In new construction, smoke alarms take their primary power from building wiring with battery backup, those with
-      strobes and no battery on an emergency electrical system per 2702 (no battery where on one), signal low batteries, and
-      are wired permanently without a disconnecting switch other than for overcurrent protection: a person''s check (general.bc_907_2_11_6_smoke_alarm_power).'
+    reason: 'In new construction, smoke alarms take their primary power from building wiring where it is served from a commercial
+      source, with battery backup, those with strobes and no battery on an emergency electrical system per 2702 (no battery
+      where on one), signal low batteries, and are wired permanently without a disconnecting switch other than for overcurrent
+      protection: a person''s check (general.bc_907_2_11_6_smoke_alarm_power).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 289
@@ -10535,9 +10546,9 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'New York asks hotels, motels and lodging houses for portable audible and visual smoke alarms, 3 percent of the
-      sleeping units (at least one per building) per NFPA 72, with a sign at least 3 inches high at the main desk saying they
-      are available (not where audible/visual alarms are hard wired, or part of a fire alarm system that activates visual
-      notification): a person''s check (general.bc_907_2_11_8_portable_smoke_alarms).'
+      sleeping units (at least one per building) per NFPA 72, with a sign posted conspicuously at the main desk or a similar
+      station, its letters at least 3 inches high, saying they are available (not where audible/visual alarms are hard wired,
+      or part of a fire alarm system that activates visual notification): a person''s check (general.bc_907_2_11_8_portable_smoke_alarms).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 289
