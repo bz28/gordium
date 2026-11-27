@@ -48,10 +48,14 @@ def figure(description, ground) -> dict | None:
         if top is None or z > top:
             top, name = z, item.get("name") if isinstance(item.get("name"), str) else item.get("id")
     # a room's floor above its level (a base offset: a roof terrace, a raised room) is higher still (marks PR, review
-    # round 2: the model shows it, so it counts); a room's floor that can't be read gives no figure
+    # round 2: the model shows it, so it counts); a room's floor that can't be read gives no figure, and the Revit
+    # reader leaves an unread one out (a slab not found under it, a linked model over it: round 3), so a room with no
+    # floor_elevation is one not read
     for item in description.get("rooms") or []:
-        if not isinstance(item, dict) or item.get("floor_elevation") is None:
-            continue
+        if not isinstance(item, dict):
+            return None
+        if item.get("floor_elevation") is None:
+            return None
         try:
             z = reader.length(item.get("floor_elevation"), "its floor's elevation")
         except (InteriorStop, TypeError, ValueError):
@@ -79,7 +83,7 @@ def figure(description, ground) -> dict | None:
 def _tenths_down(feet: float, cap) -> float:
     """Feet in tenths, rounded down past a model's float noise (Revit's 9.999999999998 ft is 10.0), never below 0 and
     at most `cap` (a figure under 75 ft never reads 75.0: review rounds 1 and 2 of the marks PR)."""
-    tenths = max(math.floor(feet * 10 + 1e-6) / 10, 0.0)
+    tenths = max(math.floor(feet * 10 + 1e-6) / 10, 0.0)        # 1e-6 of a tenth: float noise only, never a round-up
     return min(tenths, cap) if cap is not None else tenths
 
 
@@ -87,11 +91,11 @@ def words(fig: dict | None) -> str | None:
     """The card's hint, only where the figure is under 75 ft; None otherwise. It says what the model shows and what
     would still make the building a high-rise, never that it likely isn't one (review round 1 of the marks PR): the
     figure is rounded down, so a figure under 75 ft never reads 75.0."""
-    if not fig or not fig["height_in"] < LIMIT_IN:
+    if not fig or not 0 <= fig["height_in"] < LIMIT_IN:      # below the ground it states: no figure to give (round 3)
         return None
     ft = _tenths_down(fig["height_in"] / 12.0, 74.9)
     margin = _tenths_down((LIMIT_IN - fig["height_in"]) / 12.0, None)
-    return (f"From the model: its highest level or room floor ({fig['level']}) is {ft:.1f} ft above the lowest finished ground it "
-            f"states. The building is still a high-rise if fire department vehicles reach it more than {margin:.1f} ft "
+    return (f"From the model: its highest level or room floor ({fig['level']}) is {ft:.1f} ft above the lowest finished "
+            f"ground it states. The building is still a high-rise if fire department vehicles reach it more than {margin:.1f} ft "
             "below that ground, or if an occupied floor or occupiable roof is higher than that level or in a linked "
             "model. Gordium's reading only: decided by your answer.")

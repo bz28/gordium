@@ -129,3 +129,19 @@ def test_a_real_check_hands_the_hint_to_the_cards_and_decides_nothing(monkeypatc
     assert hint and "(Level 2) is 11.0 ft above" in hint and "more than 64.0 ft below" in hint
     text = json.dumps(reply["result"])
     assert '"high_rise_building": false' not in text and '"high_rise_building": true' not in text
+
+
+def test_an_unread_room_floor_or_a_top_below_the_ground_gives_no_hint():
+    # review round 3 of the marks PR: the Revit reader leaves an unread floor out (a slab not found under a terrace);
+    # a model whose top is below the ground it states has no figure to give
+    levels = [{"id": "L1", "name": "Level 1", "elevation": 0}, {"id": "L4", "name": "Level 4", "elevation": 60}]
+    unread = {"units": "ft", "all_levels": levels, "openings": [], "rooms": [{"id": "r1", "name": "Terrace", "level": "L4"}]}
+    assert high_rise_hint.figure(unread, {"flat": 0}) is None
+    assert high_rise_hint.words({"height_in": -120, "level": "B1", "ground_in": 0}) is None
+
+
+def test_the_tolerance_is_float_noise_only_never_a_round_up():
+    # review round 3 of the marks PR: any tolerance of 0.05 ft or more would round the margin up
+    words = high_rise_hint.words({"height_in": 70.26 * 12, "level": "L", "ground_in": 0})
+    assert "70.2 ft above" in words and "more than 4.7 ft below" in words
+    assert "70.2 ft above" in high_rise_hint.words({"height_in": 70.2999 * 12, "level": "L", "ground_in": 0})
