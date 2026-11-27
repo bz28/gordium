@@ -9261,7 +9261,7 @@ labels:
     label: reference
     topic: means_of_egress
     reason: 'Which doors carry the markings of 1025.2.6.1 to 1025.2.6.3 (those occupants pass through to complete the exit
-      path): quoted by 1025.2.6.1''s flag.'
+      path): quoted by 1025.2.6.1''s, 1025.2.6.2''s and 1025.2.6.3''s flags.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 349
@@ -9299,9 +9299,10 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A,
-      B, E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind,
-      beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar
-      or touchpad: markings aren''t in the model, so a person''s check.'
+      B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), its
+      hardware is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon,
+      and a panic bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren''t in the
+      model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 350
@@ -9320,9 +9321,9 @@ labels:
     label: flag
     topic: means_of_egress
     reason: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A,
-      B, E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches
-      wide, on the surrounding wall where the molding has too little flat surface: markings aren''t in the model, so a person''s
-      check.'
+      B, E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), the
+      top and sides of its frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding
+      has too little flat surface: markings aren''t in the model, so a person''s check.'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 350

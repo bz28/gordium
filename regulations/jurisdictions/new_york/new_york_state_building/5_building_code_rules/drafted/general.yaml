@@ -23614,14 +23614,22 @@ rules:
       of luminous material. This marking shall be located behind, immediately adjacent to, or on the door handle or escutcheon.
       Where a panic bar is installed, such material shall be not less than 1 inch (25 mm) wide for the entire length of the
       actuating bar or touchpad.
+  - file: gov.ny.building.2025.pdf
+    page: 349
+    lines:
+    - 53
+    - 54
+    quote: 1025.2.6 Doors within the exit path. Doors through which occupants must pass in order to complete the exit path
+      shall be provided with markings complying with Sections 1025.2.6.1 through 1025.2.6.3.
   examples:
   - given:
       occupancy_group: B
     expect: needs_review
     note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
-      E, I-1, M or R-1 (1025.1, 1025.2): door hardware is marked with at least 16 square inches of luminous material behind,
-      beside or on the handle or escutcheon, and a panic bar with a strip at least 1 inch wide along its whole actuating bar
-      or touchpad: markings aren''t in the model, so a person''s check.'
+      E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), its hardware
+      is marked with at least 16 square inches of luminous material behind, beside or on the handle or escutcheon, and a panic
+      bar with a strip at least 1 inch wide along its whole actuating bar or touchpad: markings aren''t in the model, so a
+      person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -23651,14 +23659,21 @@ rules:
     quote: 1025.2.6.3 Door frame markings. The top and sides of the door frame shall be marked with a solid and continuous
       1-inch- to 2-inch-wide (25 mm to 51 mm) stripe. Where the door molding does not provide sufficient flat surface on which
       to locate the stripe, the stripe shall be permitted to be located on the wall surrounding the frame.
+  - file: gov.ny.building.2025.pdf
+    page: 349
+    lines:
+    - 53
+    - 54
+    quote: 1025.2.6 Doors within the exit path. Doors through which occupants must pass in order to complete the exit path
+      shall be provided with markings complying with Sections 1025.2.6.1 through 1025.2.6.3.
   examples:
   - given:
       occupancy_group: B
     expect: needs_review
     note: 'In the interior exit stairways, interior exit ramps and exit passageways of a high-rise building of Group A, B,
-      E, I-1, M or R-1 (1025.1, 1025.2): the top and sides of the door frame carry a solid, continuous stripe 1 to 2 inches
-      wide, on the surrounding wall where the molding has too little flat surface: markings aren''t in the model, so a person''s
-      check.'
+      E, I-1, M or R-1 (1025.1, 1025.2): on each door occupants pass through to complete the exit path (1025.2.6), the top
+      and sides of its frame carry a solid, continuous stripe 1 to 2 inches wide, on the surrounding wall where the molding
+      has too little flat surface: markings aren''t in the model, so a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
