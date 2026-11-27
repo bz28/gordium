@@ -7381,9 +7381,10 @@ rules:
   - given: {}
     expect: needs_review
     note: 'Group R-1 has a manual fire alarm system activating occupant notification per 907.5 (exception 1: not in a building
-      of two stories or less whose units are separated by 1-hour fire partitions and each have an exit directly to a public
-      way, egress court or yard; exception 2: boxes left out with a 903.3.1.1 or 903.3.1.2 system, notification on water flow
-      and at least one box at an approved location): a person''s check.'
+      of two stories or less whose units and their contiguous attic and crawl spaces are separated from each other and from
+      public or common areas by 1-hour fire partitions and each have an exit directly to a public way, egress court or yard;
+      exception 2: boxes left out with a 903.3.1.1 or 903.3.1.2 system, notification on water flow and at least one box at
+      an approved location): a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -7485,10 +7486,11 @@ rules:
     note: 'Group R-2 has a manual fire alarm system activating occupant notification per 907.5 where any unit is three or
       more stories above the lowest level of exit discharge, more than one story below the highest level of exit discharge
       of the exits serving it, or the building has more than 16 dwelling or sleeping units (exception 1: not in a building
-      of two stories or less whose units are separated by 1-hour fire partitions and each have an exit directly to a public
-      way, egress court or yard; exception 2: boxes left out with a 903.3.1.1 or 903.3.1.2 system and notification on water
-      flow; exception 3: none with a 903.3.1.1 or 903.3.1.2 system where there are no interior corridors serving units and
-      each unit''s egress door opens to an exterior exit access, or open-ended corridors per 1027.6 exception 3 serve them):
+      of two stories or less whose units and their contiguous attic and crawl spaces are separated from each other and from
+      public or common areas by 1-hour fire partitions and each have an exit directly to a public way, egress court or yard;
+      exception 2: boxes left out with a 903.3.1.1 or 903.3.1.2 system and notification on water flow; exception 3: none with
+      a 903.3.1.1 or 903.3.1.2 system where there are no interior corridors serving units and each unit''s egress door opens
+      to an exterior exit access leading directly to the exits, or open-ended corridors per 1027.6 exception 3 serve them):
       a person''s check.'
   - given:
       occupancy_group: R-3
@@ -7549,8 +7551,9 @@ rules:
     expect: needs_review
     note: 'Group R-2 a college or university runs for student or staff housing has automatic smoke detection activating notification
       per 907.5 in common spaces outside units, laundry, mechanical equipment and storage rooms, and interior corridors serving
-      units (not where there are no interior corridors and each unit''s egress door opens to an exterior exit access or an
-      exit), its units'' smoke alarms interconnected with the fire alarm system per NFPA 72: a person''s check.'
+      units (not where there are no interior corridors and each unit''s egress door opens to an exterior exit access leading
+      directly to an exit, or directly to an exit), its units'' smoke alarms interconnected with the fire alarm system per
+      NFPA 72: a person''s check.'
   - given:
       occupancy_group: R-3
     expect: not_applicable
@@ -7680,16 +7683,18 @@ rules:
     expect: needs_review
     note: 'New York places Group R-1''s smoke alarms in sleeping areas, in every room on the path of egress from them to the
       unit''s door, on each story within a unit (a split level''s upper alarm serving a lower level less than a full story
-      below with no door between), at least 3 feet from a bath or shower room''s door, in a hallway and the room open to it
-      where that room''s ceiling is 24 inches or more above the hallway''s, by a sleeping loft, in each common space shared
-      by three or more units, and, on a level over 1000 square feet, within 30 feet of travel of every ceiling point or one
-      per 500 square feet (upper-floor alarms may serve great rooms and vaulted ceilings): a person''s check.'
+      below with no door between), at least 3 feet from a bath or shower room''s door unless that would prevent a required
+      alarm, in a hallway and the room open to it where that room''s ceiling is 24 inches or more above the hallway''s, by
+      a sleeping loft, in each common space shared by three or more units, and, on a level over 1000 square feet, within 30
+      feet of travel of every ceiling point or one per 500 square feet (upper-floor alarms may serve great rooms and vaulted
+      ceilings): a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '907.2.11.1: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
-    d).'
+  notes: '907.2.11.1: smoke alarms aren''t in the model; its second quote runs on to 907.2.11.2''s first line (p.289 line
+    8), since lines 3-7 print the same words as 907.2.11.2''s items 8.1 and 8.2 (lines 25-29) and a quote must be unique on
+    its page. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_907_2_11_2_group_r_smoke_alarm_locations
@@ -7725,11 +7730,12 @@ rules:
   - given: {}
     expect: needs_review
     note: 'New York places smoke alarms in Groups R-2, R-3, R-4 and I-1 outside each separate sleeping area near the bedrooms,
-      in each room used for sleeping, on each story within a unit including basements (a split level''s upper alarm serving
-      a lower level less than a full story below with no door between), at least 3 feet from a bath or shower room''s door,
-      in a hallway and the room open to it where that room''s ceiling is 24 inches or more above the hallway''s, by a sleeping
-      loft, in each common space shared by three or more units, and, on a level over 1000 square feet, within 30 feet of travel
-      of every ceiling point or one per 500 square feet: a person''s check.'
+      in each room used for sleeping, on each story within a unit including basements (not crawl spaces or uninhabitable attics)
+      (a split level''s upper alarm serving a lower level less than a full story below with no door between), at least 3 feet
+      from a bath or shower room''s door unless that would prevent a required alarm, in a hallway and the room open to it
+      where that room''s ceiling is 24 inches or more above the hallway''s, by a sleeping loft, in each common space shared
+      by three or more units, and, on a level over 1000 square feet, within 30 feet of travel of every ceiling point or one
+      per 500 square feet (upper-floor alarms may serve great rooms and vaulted ceilings): a person''s check.'
   - given:
       occupancy_group: B
     expect: not_applicable
@@ -7892,7 +7898,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Portable smoke alarms in hotels and lodging houses (BCNYS 907.2.11.8)
-  applies_when: occupancy_group in ["R-1", "R-3", "mixed"]
+  applies_when: occupancy_group in ["R-1", "R-2", "R-3", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 289
@@ -7921,18 +7927,19 @@ rules:
       are available (not where audible/visual alarms are hard wired, or part of a fire alarm system that activates visual
       notification): a person''s check.'
   - given:
-      occupancy_group: R-2
+      occupancy_group: B
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '907.2.11.8: smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
-    d).'
+  notes: '907.2.11.8: hotels and motels are Group R-1 (transient) or R-2 (nontransient, more than five guest rooms: 310.3),
+    lodging houses Group R-3 (310.4); smoke alarms aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part d).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_907_5_2_2_voice_alarm_design
   kind: flag
   topic: means_of_egress
   title: The emergency voice/alarm communication system's design (BCNYS 907.5.2.2)
-  applies_when: emergency_voice_alarm_system
+  applies_when: emergency_voice_alarm_system or occupancy_group in ["mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 293
@@ -7960,17 +7967,19 @@ rules:
       over the overhead page): a person''s check.'
   - given:
       emergency_voice_alarm_system: false
+      occupancy_group: R-2
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '907.5.2.2: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part d).'
+  notes: '907.5.2.2: the system''s design isn''t in the model; shown wherever a voice/alarm system is stated or isn''t, and
+    in a building of two or more groups, where one may be required for part of it (907.2.1.1) though the whole building states
+    none (review round 1). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_907_5_2_2_1_voice_alarm_override
   kind: flag
   topic: means_of_egress
   title: The voice/alarm system's manual override (BCNYS 907.5.2.2.1)
-  applies_when: emergency_voice_alarm_system
+  applies_when: emergency_voice_alarm_system or occupancy_group in ["mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 293
@@ -7985,17 +7994,19 @@ rules:
     note: 'A manual override for voice communication on a selective and all-call basis for all paging zones: a person''s check.'
   - given:
       emergency_voice_alarm_system: false
+      occupancy_group: R-2
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '907.5.2.2.1: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part d).'
+  notes: '907.5.2.2.1: the system''s design isn''t in the model; shown wherever a voice/alarm system is stated or isn''t,
+    and in a building of two or more groups, where one may be required for part of it (907.2.1.1) though the whole building
+    states none (review round 1). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_907_5_2_2_2_voice_alarm_live_messages
   kind: flag
   topic: means_of_egress
   title: The voice/alarm system's live voice messages (BCNYS 907.5.2.2.2)
-  applies_when: emergency_voice_alarm_system
+  applies_when: emergency_voice_alarm_system or occupancy_group in ["mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 293
@@ -8010,17 +8021,19 @@ rules:
     note: 'The system can broadcast live voice messages by paging zones, selective and all-call: a person''s check.'
   - given:
       emergency_voice_alarm_system: false
+      occupancy_group: R-2
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '907.5.2.2.2: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part d).'
+  notes: '907.5.2.2.2: the system''s design isn''t in the model; shown wherever a voice/alarm system is stated or isn''t,
+    and in a building of two or more groups, where one may be required for part of it (907.2.1.1) though the whole building
+    states none (review round 1). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_907_5_2_2_3_voice_alarm_other_uses
   kind: flag
   topic: means_of_egress
   title: The voice/alarm system's other uses (BCNYS 907.5.2.2.3)
-  applies_when: emergency_voice_alarm_system
+  applies_when: emergency_voice_alarm_system or occupancy_group in ["mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 293
@@ -8035,17 +8048,20 @@ rules:
     note: 'The system may carry other announcements where the manual fire alarm use takes precedence: a person''s check.'
   - given:
       emergency_voice_alarm_system: false
+      occupancy_group: R-2
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '907.5.2.2.3: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part d).'
+  notes: '907.5.2.2.3: the system''s design isn''t in the model; shown wherever a voice/alarm system is stated or isn''t,
+    and in a building of two or more groups, where one may be required for part of it (907.2.1.1) though the whole building
+    states none (review round 1). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_907_5_2_2_4_voice_alarm_captions
   kind: flag
   topic: means_of_egress
   title: Captions in stadiums, arenas and grandstands (BCNYS 907.5.2.2.4)
-  applies_when: emergency_voice_alarm_system and occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"]
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"] and (emergency_voice_alarm_system or occupancy_group
+    in ["mixed"])
   sources:
   - file: gov.ny.building.2025.pdf
     page: 293
@@ -8064,6 +8080,7 @@ rules:
       check.'
   - given:
       emergency_voice_alarm_system: false
+      occupancy_group: A-4
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
   notes: '907.5.2.2.4: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
@@ -8074,7 +8091,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: The voice/alarm system's standby power (BCNYS 907.5.2.2.5)
-  applies_when: emergency_voice_alarm_system
+  applies_when: emergency_voice_alarm_system or occupancy_group in ["mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 293
@@ -8089,10 +8106,12 @@ rules:
     note: 'The system has standby power per Section 2702: a person''s check.'
   - given:
       emergency_voice_alarm_system: false
+      occupancy_group: R-2
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '907.5.2.2.5: the system''s design isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
-    9 part d).'
+  notes: '907.5.2.2.5: the system''s design isn''t in the model; shown wherever a voice/alarm system is stated or isn''t,
+    and in a building of two or more groups, where one may be required for part of it (907.2.1.1) though the whole building
+    states none (review round 1). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part d).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1004_7_outdoor_areas

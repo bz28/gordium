@@ -328,11 +328,11 @@ results:
   general.bc_907_2_4_1_battery_manufacturing: not_applicable
   general.bc_907_2_5_group_h_fire_alarm: not_applicable
   # Chapter 9 part d (2026-11-27): Group R-2's fire alarm, smoke alarms and college housing detection (907.2.9.1 to
-  # 907.2.9.3), the smoke alarm sections for Groups R and I-1 (907.2.11, 907.2.11.2 to 907.2.11.7; 907.2.11.1 and
-  # 907.2.11.8 are Group R-1's and lodging houses'), lithium battery storage in any building (907.2.10.2), and the
-  # voice/alarm system's design while the building doesn't state it has none (907.5.2.2 and its parts; captions are
-  # Group A's): a person's check, no fire alarm or smoke alarm fact stated yet; Groups I, M, R-1 and S's sections not
-  # this building's
+  # 907.2.9.3), the smoke alarm sections for Groups R and I-1 (907.2.11, 907.2.11.2 to 907.2.11.7; 907.2.11.1 is Group
+  # R-1's), 907.2.11.8's portable alarms for hotels, motels and lodging houses (a nontransient hotel is Group R-2,
+  # 310.3), lithium battery storage in any building (907.2.10.2), and the voice/alarm system's design while the
+  # building doesn't state it has none (907.5.2.2 and its parts; captions are Group A's): a person's check, no fire
+  # alarm or smoke alarm fact stated yet; Groups I, M, R-1 and S's sections not this building's
   general.bc_907_2_6_group_i_fire_alarm: not_applicable
   general.bc_907_2_6_1_group_i1_smoke_detection: not_applicable
   general.bc_907_2_6_1_1_group_i1_smoke_alarms: not_applicable
@@ -361,7 +361,7 @@ results:
   general.bc_907_2_11_5_smoke_alarm_interconnection: needs_review
   general.bc_907_2_11_6_smoke_alarm_power: needs_review
   general.bc_907_2_11_7_smoke_detection_instead: needs_review
-  general.bc_907_2_11_8_portable_smoke_alarms: not_applicable
+  general.bc_907_2_11_8_portable_smoke_alarms: needs_review
   general.bc_907_5_2_2_voice_alarm_design: needs_review
   general.bc_907_5_2_2_1_voice_alarm_override: needs_review
   general.bc_907_5_2_2_2_voice_alarm_live_messages: needs_review

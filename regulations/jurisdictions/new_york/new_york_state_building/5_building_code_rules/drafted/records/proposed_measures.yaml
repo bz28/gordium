@@ -275,7 +275,12 @@ occupancy_group:
   - general.bc_907_2_9_1_group_r2_fire_alarm
   - general.bc_907_2_9_2_group_r2_smoke_alarms
   - general.bc_907_2_9_3_group_r2_college_detection
+  - general.bc_907_5_2_2_1_voice_alarm_override
+  - general.bc_907_5_2_2_2_voice_alarm_live_messages
+  - general.bc_907_5_2_2_3_voice_alarm_other_uses
   - general.bc_907_5_2_2_4_voice_alarm_captions
+  - general.bc_907_5_2_2_5_voice_alarm_standby_power
+  - general.bc_907_5_2_2_voice_alarm_design
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f

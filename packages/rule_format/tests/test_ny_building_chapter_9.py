@@ -595,3 +595,24 @@ def test_the_group_e_rules_reason_keeps_its_exception_to_areas_below_exit_discha
     for a Group E fire area on a floor above it; the review reason says so."""
     reason = _rule(book, "general.bc_903_2_3_group_e_sprinklers")["review_when"][0]["reason"]
     assert "below the lowest level of exit discharge" in reason
+
+
+def test_part_ds_review_round_1(book, ctx):
+    """Part d review round 1: 907.2.11.8's portable alarms are for every hotel, motel and lodging house, and a
+    nontransient hotel or motel is Group R-2 (310.3); 907.5.2.2's design flags show in a building of two or more groups
+    though the whole building states no voice/alarm system (907.2.1.1 may require one for a part); the fire alarm and
+    smoke alarm notes keep every condition their exceptions carry."""
+    allowed = ctx.allowed()
+    hotel = _rule(book, "general.bc_907_2_11_8_portable_smoke_alarms")
+    assert outcome(hotel, code_scope.building_measures({"occupancy_groups": ["R-2"]}), allowed) == "needs_review"
+    mixed = code_scope.building_measures({"occupancy_groups": ["A-2", "B"], "emergency_voice_alarm_system": False})
+    for k in ("voice_alarm_design", "1_voice_alarm_override", "2_voice_alarm_live_messages", "3_voice_alarm_other_uses",
+              "4_voice_alarm_captions", "5_voice_alarm_standby_power"):
+        assert outcome(_rule(book, f"general.bc_907_5_2_2_{k}"), mixed, allowed) == "needs_review", k
+    for rid in ("general.bc_907_2_8_1_group_r1_fire_alarm", "general.bc_907_2_9_1_group_r2_fire_alarm"):
+        assert "attic and crawl spaces" in _shown_note(_rule(book, rid)) and "common areas" in _shown_note(_rule(book, rid))
+    assert "leading directly to the exits" in _shown_note(_rule(book, "general.bc_907_2_9_1_group_r2_fire_alarm"))
+    assert "leading directly to an exit" in _shown_note(_rule(book, "general.bc_907_2_9_3_group_r2_college_detection"))
+    two = _shown_note(_rule(book, "general.bc_907_2_11_2_group_r_smoke_alarm_locations"))
+    assert "crawl spaces" in two and "upper-floor" in two and "prevent a required alarm" in two
+    assert "prevent a required alarm" in _shown_note(_rule(book, "general.bc_907_2_11_1_group_r1_smoke_alarm_locations"))

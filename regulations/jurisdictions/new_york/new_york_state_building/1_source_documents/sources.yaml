@@ -149,6 +149,7 @@ documents:
         Table 716.1(3): p.186 lines 30-54
         Table 903.2.5.2: p.271 lines 3-9
         Table 903.2.11.6: p.273 lines 14-36
+        Table 907.5.2.3.2: p.294 lines 24-36
         Table 1004.5: p.312 lines 9-50; p.313 lines 3-14
         Table 1006.2.1: p.315 lines 14-44
         Table 1030.6.2: p.354 lines 10-22
@@ -232,6 +233,9 @@ documents:
             with the subscript g(asd) (line 49, the subscript on line 50), checked on the page image; the text holds
             neither subscript, so both read "GROUND SNOW LOAD, p". A snow-load term, used by no brought-in piece.
       not_fractions:     # lines that look like a fraction left apart, each checked on the page image: none is one
+        p.290 line 33: 907.2.13.1.2, a high-rise section on a page read but no piece of it, prints an airflow in SI units, "(0.94 m3/s)", the 3 raised as the
+          power of the unit; the slash divides units, not a fraction.
+        p.290 line 37: As line 33 ("(2.4 m3/s)" in 907.2.13.1.2's table of airflows).
         p.35 line 55: The subscript 2 of CO2 in CARBON DIOXIDE EXTINGUISHING SYSTEMS, printed under line 54.
         p.49 line 42: The subscript 50 of LD50 (median lethal dose) in HIGHLY TOXIC, printed under line 41.
         p.49 line 45: As line 42 (LD50, under line 44).
