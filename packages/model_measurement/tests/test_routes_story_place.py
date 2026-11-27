@@ -33,7 +33,7 @@ PLACE_KEYS = {"no_ground", "ground_existing", "ground_assumed", "ground_spots_no
               "place_level_not_read", "place_split_level", "place_either", "place_either_levels",
               "place_too_many_levels", "ground_buildings_apart", "place_levels_not_all", "place_description",
               "ground_spots_not_finished", "ground_disagrees", "ground_openings_not_read", "ground_disagrees_spots",
-              "place_story_spread", "place_level_inside_story", "place_under_lowest",
+              "place_story_spread", "place_level_inside_story", "place_under_lowest", "place_levels_disagree",
               "place_not_a_story_not_read", "place_not_a_story_has_rooms"}    # the level mark: tests at the end
 
 
@@ -331,6 +331,9 @@ def test_each_reason_a_place_isnt_measured():
     desc["rooms"] = []
     said("place_no_rooms", _reason(places(desc, Reader("ft"), {"L0": "Level 0"}, stories, {"flat": 0})))
     seen |= {"place_not_a_story_not_read", "place_not_a_story_has_rooms"}    # the level mark's tests at the end
+    desc, stories = building([[-20], [1]])
+    desc["levels"][1]["elevation"] = -1                # the stories' levels say -1 ft, every level's list 1 ft
+    said("place_levels_disagree", _reason(places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})))
     assert seen == PLACE_KEYS
 
 
@@ -722,3 +725,28 @@ def test_a_level_marked_not_a_story_with_rooms_or_a_space_on_it_places_nothing(w
     got = places(desc, Reader("ft"), {k: s.name for k, s in stories.items()}, stories, {"flat": 0})
     assert not got["L0"]["measures"] and not got["L1"]["measures"]
     assert _reason(got).startswith(STOPS["place_not_a_story_has_rooms"].split("{")[0]), what
+
+
+@pytest.mark.parametrize("openings", [5, True, {"w": {"id": "w", "ground_outside": 2}}, [[{"id": "w", "ground_outside": 2}]],
+                                      [{"id": "w", "ground_outside": 2}, "x"]])
+def test_openings_that_arent_a_list_of_openings_leave_the_place_not_known(openings):
+    """Cold review of the room-id fix: openings given as a number, a mapping, or with an entry that isn't an opening
+    can't be read for the ground beside them: the stories' places are not measured, never measured past a ground
+    stated higher at an opening, and never a crash."""
+    desc, stories = building([[0], [10]])
+    desc["openings"] = openings
+    got = places(desc, Reader("ft"), {"L0": "", "L1": ""}, stories, {"flat": 0})
+    assert FIRST not in got["L0"]["measures"]
+    assert _reason(got).startswith(STOPS["ground_openings_not_read"].split("{")[0])
+
+
+@pytest.mark.parametrize("well", [5, "deep", [-2], {}, {"floor_elevation": None}, {"width": 40}])
+def test_an_area_well_whose_floor_cant_be_read_leaves_the_place_not_known(well):
+    """Cold round 2 of the room-id fix: an area well given at an opening is the lowest ground there; one whose floor
+    can't be read leaves the stories' places not measured, never placed as if there were no well."""
+    desc, stories = building([[5]])
+    desc["openings"] = [{"id": "w", "area_well": well}]
+    got = places(desc, Reader("ft"), {"L0": ""}, stories, {"flat": 0})
+    assert FIRST not in got["L0"]["measures"]
+    assert _reason(got).startswith(STOPS["ground_openings_not_read"].split("{")[0])
+

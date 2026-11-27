@@ -400,7 +400,8 @@ def _rooms_together(cards: list[dict]) -> list[dict]:
     from design_checker import panel_data
     first = {}
     for m in merged:
-        found = {r["id"]: r for c in m["parts"] for r in c.get("rooms") or [] if isinstance(r, dict) and r.get("id")}
+        found = {r["id"]: r for c in m["parts"] for r in c.get("rooms") or []
+                 if isinstance(r, dict) and isinstance(r.get("id"), str) and r["id"]}
         items = [x for c in m["parts"] for x in c["items"]]
         card = {"key": "rooms:" + ",".join(m["elements"]), "kind": m["parts"][0]["kind"],
                 "words": m["parts"][0]["words"], "elements": m["elements"], "items": list(dict.fromkeys(items)),
