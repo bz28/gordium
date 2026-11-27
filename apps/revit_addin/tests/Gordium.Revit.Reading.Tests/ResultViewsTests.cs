@@ -327,7 +327,10 @@ public sealed class ResultViewsTests
         }
         // the card most results wait on comes first
         Assert.Equal(answer.Cards.Max(c => c.Rows.Count), answer.Cards[0].Rows.Count);
-        Assert.Equal($"Answer {answer.Cards.Count} questions about the project", answer.Title);
+        // the title counts the questions shown: the six ADU follow-ups (three on "Is there an ADU?", three on "Is the
+        // ADU detached?") wait until their parent is answered
+        Assert.Equal(6, answer.Cards.Count(c => c.DependsOn is not null));
+        Assert.Equal($"Answer {answer.Cards.Count - 6} questions about the project", answer.Title);
         Assert.DoesNotContain(m.Fix.Where(g => g.Kind != FixKind.Answer).SelectMany(g => g.Cards),
                               c => c.Field is { } f && (f.StartsWith("facts.", StringComparison.Ordinal) || f.StartsWith("building.", StringComparison.Ordinal)));
         var notChecked = m.Fix.SingleOrDefault(g => g.Kind == FixKind.NotChecked);

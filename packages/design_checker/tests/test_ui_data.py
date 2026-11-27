@@ -147,7 +147,7 @@ def test_a_row_not_in_review_has_no_asks():
     ({"kind": "mark", "key": "mark:space:space_occupant_load", "measure": "space_occupant_load",
       "words": "occupant load: stated by the architect (the space's occupant load), and Gordium has no mark for it "
                "in the model yet"}, ui_data.MEASURE,
-     "Work out the occupant load by hand: Gordium has no field for it yet"),
+     "Work out the occupant load by hand (a person's check)"),
     ({"kind": "measure_by_hand", "key": "gap:space:space_egress_through_locked_room",
       "words": "egress through locked room: Gordium doesn't measure this yet: measure it by hand"}, ui_data.MEASURE,
      "Check by hand: does the path pass through a room that can be locked?"),
@@ -290,8 +290,10 @@ def test_the_contents_list_every_chapter_and_never_hide_a_rows_section(apartment
     chapters = [c for c in bc["chapters"] if c["kind"] == "chapter"]
     assert [c["number"] for c in chapters] == [str(n) for n in range(1, 36)]
     egress = next(c for c in chapters if c["number"] == "10")
-    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] >= 20
+    assert egress["coverage"] == "rules" and egress["counts"]["not_brought_in"] == 9   # section group 9a: 1003 and 1012 brought in (20 before); 9b: 1008 and 1013; 9c: 1009; 9d: 1019 (1018 left the count with 1018.4, round 1 of 2026-11-23); 9e: 1021, 1022 and 1023; 9f: 1024 and 1025
     sections = {s["number"]: s for s in egress["sections"]}
+    assert sections["1018"]["whole"] is True and sections["1019"]["whole"] is True   # group 9d review round 1
+    assert all(sections[s]["whole"] is True for s in ("1021", "1022", "1023", "1024", "1025"))   # groups 9e and 9f
     assert sections["1006"]["coverage"] == "rules" and sections["1006"]["whole"] is False
     assert sections["1017"]["whole"] is True and sections["1011"]["coverage"] == "not_brought_in"
     assert sections["1010"]["coverage"] == "rules" and sections["1010"]["whole"] is False   # group 6a: 1010.1, 1010.1.1
@@ -664,6 +666,18 @@ def test_the_plan_never_says_a_marked_facts_revit_mark_is_still_to_come():
         if re.search(r"Revit mark\S* (is|are) a follow-up|marks? join group", sentence):
             named = [k for k in code_scope.MARK if k in sentence]
             assert not named, (named, sentence[:200])
+
+
+def test_the_corridor_rating_card_names_the_unit_its_revit_mark_takes():
+    # corridor asks review round 1 (P2): the card said "in hours" while the Revit mark it opens takes minutes, so an
+    # architect typing 1 for one hour sent 1/60 hour; the card and the mark both say minutes
+    import re
+    text = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    m = re.search(r'new\(\s*"(Gordium: [^"]+)", new\("[^"]+"\), MarkValueKind\.(\w+),\s*MarkBinding\.\w+, \[Rooms\], '
+                  r'"rooms\[\]\.fire_rating_hours"', text)
+    assert m and m.group(2) == "Integer" and "minutes" in m.group(1), m
+    headline = ui_data.FIELD_HEADLINES["rooms[].fire_rating_hours"]
+    assert "minutes" in headline and "in hours" not in headline
 
 
 def test_a_door_whose_leaves_arent_given_is_asked_for_by_the_field_its_type_mark_answers():

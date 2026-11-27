@@ -96,6 +96,9 @@ STOPS = {
     "outline_needed": "the story's outline isn't read, so its diagonal and areas aren't measured: {reason}",
     # the parts handed to the rules (__init__.py)
     "stated_not_given": "stated by the architect ({what}), and Gordium has no mark for it in the model yet",
+    # a corridor's fact the architect states on its room (CORRIDOR_STATED): left out, or not of its kind
+    "corridor_fact_not_stated": "not stated for this corridor: {what} (the room's {mark} mark)",
+    "corridor_fact_not_read": "{what} is given as {got}, not {kind}",
     "not_measured_yet": "Gordium doesn't measure this yet",
     "readings": "given as two readings for open question {question} of the route note ({words}): a rule reading it "
                 "complies only if it complies under both, fails only if it fails under both, else needs review",
@@ -186,6 +189,13 @@ STOPS = {
                             "(swinging) or another kind isn't known",
     "door_side_room_not_read": "a side of the door {name} is the room {room}, which isn't read: its floor area isn't "
                                "known",
+    # section group 6e (1010.2.8): what latches or locks each door
+    "door_hardware_not_given": "the door {name} doesn't say what latches or locks it (panic or fire exit hardware, "
+                               "with or without an electric lock it releases, another latch or lock, or none), and "
+                               "Gordium has no mark for it in the model yet",
+    "door_hardware_not_read": "the door {name} gives its hardware as {got}, not panic, panic_electric, latch or none",
+    "door_electric_lock_not_asked": "the door {name} is latched by something other than panic hardware: whether it "
+                                    "is electrically locked isn't asked",
 }
 
 

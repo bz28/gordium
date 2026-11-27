@@ -98,6 +98,17 @@ public static class RouteReader
             room["function"] = typed;
             notes.Add(new(r.Id, "function", $"{Marks.RoomFunction.Name} is \"{typed}\", not one of Table 1004.5's functions Gordium lists: sent as typed, so its occupant load and its story's need review"));
         }
+        // a corridor's walls as the architect states them (the egress UI audit's finding 5): the rating in minutes, sent
+        // in hours; a negative count is no rating Gordium reads (left out, and said); blank is left out (not stated)
+        if (r.FireRatingMinutes is { } minutes)
+        {
+            if (minutes >= 0)
+                room["fire_rating_hours"] = minutes / 60.0;
+            else
+                notes.Add(new(r.Id, "fire_rating_hours", $"{Marks.CorridorFireRating.Name} is {minutes}, not a rating in minutes: left out"));
+        }
+        if (r.SmokePartitions is { } smoke)
+            room["walls_smoke_partitions"] = smoke;
     }
 
     // ---- everything else, once the rooms and doors are read ----------------------------------------------------
