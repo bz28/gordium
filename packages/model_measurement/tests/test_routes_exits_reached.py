@@ -290,3 +290,15 @@ def test_the_rooms_figure_is_its_worst_doors():
     _, far = _apart(s, exits, links, {"e0": ["x", "y"]})
     _, both = _apart(s, exits, links, {"e0": ["x", "y"], "e1": ["x", "x2"]})
     assert far > 0.75 and both < 0.1, (far, both)
+
+
+def test_an_outline_a_few_inches_short_of_the_walls_never_shows_exits_apart():
+    """Confirming review: with the east exit moved onto the south wall the exits are 0.484 of the true diagonal apart
+    (under 1007.1.1's half); an outer outline drawn 5 in short of the outer faces would make it 0.515. The outline must
+    hold every room and exit door to within half an inch, so it is refused: not two."""
+    d = corridor()
+    next(x for x in d["doors"] if x["id"] == "dy")["plan"].update(centre=[23.0, -6.75], along=[1, 0])
+    assert all(g["remoteness_ratio"] < 0.5 for g in reached(d).values() if g is not None)
+    d["story_outlines"] = [outline(0.45, -6.05, 35.05, 17.55)]
+    for got in (g for g in reached(d).values() if g is not None):
+        assert got["two"] is False and "doesn't hold all its rooms" in got["why"], got

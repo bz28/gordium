@@ -707,7 +707,7 @@ def _apart(story, exits, links, reached) -> tuple:
                 f"isn't known ({s.reason})"), None
     doors_of = straight._exits(story)
     shapes = [r.outline for r in story.rooms.values() if r is not None] +         [straight.opening(d) for ds in doors_of.values() for d in ds]
-    if not story.outer.buffer(ADJOINING).covers(unary_union(shapes)):
+    if not story.outer.buffer(OUTLINE_SLACK).covers(unary_union(shapes)):
         return ("the story's outer outline doesn't hold all its rooms and exit doors, so its diagonal (BCNYS 1007.1.1's "
                 "measure) isn't known"), None              # a smaller outline would make close exits look apart
     members = {}                                         # each exit, or group of joined exit rooms, and its doors
@@ -725,6 +725,8 @@ def _apart(story, exits, links, reached) -> tuple:
 
 
 ADJOINING = 12.0             # in: exit rooms this close (a wall between) are one stair drawn as two (1007.1.1)
+OUTLINE_SLACK = 0.5          # in: the outer outline holds every room and exit door to within this (rounding only:
+                             # an outline drawn short shrinks the diagonal and makes close exits look apart)
 
 
 HALLS = ("corridor",)        # shared circulation, where the building states no corridor is within a dwelling unit
