@@ -872,7 +872,9 @@ def test_more_than_one_reads_the_same_comparison_in_every_piece():
     pieces = load(NY / "text_verification.yaml")["pieces"]
     seen = []
     for pid, e in pieces.items():
-        for n, comp in zip(e["second_reading_numbers"], e["second_reading_comparisons"]):
+        # the comparisons are given for the recorded numbers (verif: one per number); where the two readings
+        # differ (Table 716.1(2), HIGHLY TOXIC, TOXIC: Chapter 9 part c) only those line up with them
+        for n, comp in zip(e["numbers"], e["second_reading_comparisons"]):
             if str(n).startswith("more than "):
                 seen.append((pid, n, comp))
     assert seen and all(comp == ">" for _, _, comp in seen), [x for x in seen if x[2] != ">"]

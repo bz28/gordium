@@ -6146,7 +6146,7 @@ rules:
       occupancy_group: U
     expect: not_applicable
     note: 'Set aside by what the building states: not applicable.'
-  notes: '903.2.11.6 and Table 903.2.11.6: sections outside this chapter, not brought in, each a person''s check. Hand-drafted
+  notes: '903.2.11.6 and Table 903.2.11.6 and Table 903.2.11.6: each section the table names lies outside Chapter 9 and is a person''s check. Hand-drafted
     in a Claude Code session (2026-11-27, Chapter 9 part c).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft

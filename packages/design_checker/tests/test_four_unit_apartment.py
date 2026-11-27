@@ -337,7 +337,8 @@ def test_groups_4_and_5s_marks_stated_on_the_apartment(got, laws):
         "general.bc_table_1020_3_corridor_width": ("needs_review", "pass")}
     assert moved.pop(("ambulatory_care_facility", False)) == {
         "general.bc_709_5_1_i2_smoke_barrier_doors": ("needs_review", "not_applicable"),
-        "general.bc_903_2_2_1_ambulatory_care": ("needs_review", "not_applicable")}      # Chapter 9 part b
+        "general.bc_903_2_2_1_ambulatory_care": ("needs_review", "not_applicable"),      # Chapter 9 part b
+        "general.bc_907_2_2_1_ambulatory_care_detection": ("needs_review", "not_applicable")}   # and part c
     assert all(m == {} for m in moved.values()), moved
 
 
