@@ -201,6 +201,10 @@ documents:
         p.342 line 16: 1017.2.3 item 4 prints a ventilation rate in cubic metres per minute per square metre, "(0.556
           m3/min/m2)", the 3 and the 2 raised as powers of the unit; the slashes divide units, not a fraction.
       italic_not_defined:    # by piece: italic words Section 202 doesn't define, each with why (any other is a problem)
+        '408.4.2':
+          power-operated: 'The book prints "Power-operated sliding doors or power-operated locks" in italics (p.102,
+            line 35); the defined term is POWER-OPERATED DOOR (brought in, 202:power_operated_door), which the
+            adjective doesn''t name whole. A flag''s words (Chapter 4 part d).'
         202:cell_masonry:
           cross-sectional: 'The book prints "gross cross-sectional area" in italics (p.36, line 31); the words are
             AREA (for masonry)''s sub-entry "Gross cross-sectional" (p.33, line 47), which the italics reader
