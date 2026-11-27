@@ -112,6 +112,41 @@ def test_leaves_stated_or_not():
         assert _why(_parts(_office(leaves=bad))["d"], "moe_door_leaves").startswith("the door d gives its leaves as")
 
 
+def test_the_leaves_meaning_gives_the_mullioned_pair_reading():
+    """A pair with a mullion is two openings, each needing the 32 in: 1 only at the narrower leaf's own clear width.
+    The part's meanings (what the rulebook and spreadsheet show), this module's own account and the width rule's
+    reason and notes (the notes recording it as Gordium's reading of 1010.1.1's "each door opening") all say so; a
+    "no mullion" reading alone would let a mullioned pair be stated 1 at the pair's whole width."""
+    import yaml
+
+    import model_measurement.routes.doors as doors
+    root = Path(__file__).resolve().parents[3]
+    kinds = yaml.safe_load((root / "packages/rule_format/rule_format/parts.yaml").read_text(encoding="utf-8"))
+    meaning = kinds["means_of_egress_door"]["measures"]["moe_door_leaves"]["meaning"]
+    for words in (meaning, " ".join(doors.__doc__.split())):
+        assert "a pair with a mullion is two openings, each needing the 32 in" in words
+        assert "narrower leaf's own opening" in words
+    width = kinds["means_of_egress_door"]["measures"]["moe_door_clear_width"]["meaning"]
+    assert "for a pair with no mullion, the whole opening's" in width and "narrower leaf's own opening" in width
+    rules = (root / "regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/general.yaml")
+    rule = next(r for r in yaml.safe_load(rules.read_text(encoding="utf-8"))["rules"]
+                if r["id"] == "general.bc_1010_1_1_door_width")
+    assert "a mullioned pair not stated at its narrower leaf's own opening" in rule["review_when"][0]["reason"]
+    assert "Gordium's reading" in rule["notes"] and "a pair with a mullion between its leaves is two door openings" in " ".join(
+        rule["notes"].split())
+    assert "else 2 (needs review at 32 in or more)" in " ".join(rule["notes"].split())   # under 32 in it fails
+
+
+def test_a_swing_not_given_never_says_why_it_is_missing():
+    # door swing review round 1: the Revit reader leaves swings_into out for many reasons where a swing is drawn (both
+    # sides, an arc in the wall, rooms not found, a read-only model), and a description from another host has no plan
+    # symbol at all: the reason never claims the model draws none
+    words = STOPS["door_swing_not_given"].format(name="d")
+    assert "draws no swing" not in words and "no mark" not in words
+    assert "notes" not in words              # round 2: the reading's notes aren't shown to the architect
+    assert _why(_parts(_office())["d"], "moe_door_swings_with_egress") == words
+
+
 def test_an_exit_kind_not_read_is_not_measured():
     d = _office()
     d["doors"][0]["exit_kind"] = "fire_escape"

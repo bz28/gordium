@@ -42,9 +42,9 @@ internal static class RevitInterior
         List<RailingRecord>? railings;
         List<GroundRecord>? grounds;
         // each element's geometry worked out once for the rooms, openings, stairs and railings (the same element over
-        // many rooms was read again for each): kept only until the enclosed areas below, the first step that changes
-        // the model (a Room placed for the moment, rolled back); nothing before it changes anything, so what is kept
-        // is what would be read again
+        // many rooms was read again for each): kept only until the door swings and the enclosed areas below, the
+        // first steps that change the model (a plan view, a Room placed for the moment, each rolled back); nothing
+        // before them changes anything, so what is kept is what would be read again
         using (FacesKept.Open(Hits("inside.cache.faces")))
         using (BandPiecesKept.Open(Hits("inside.cache.band_pieces")))
         using (NearKept.Open(Hits("inside.cache.near")))
@@ -82,6 +82,10 @@ internal static class RevitInterior
             diagnostics.Add($"coordination models couldn't be listed ({x.GetType().Name}: {x.Message}): counted as one");
             coordination = 1;                                         // what can't be listed could hold a stair
         }
+        // each door's swing as its plan symbol draws it: in plan views made for the read, rolled back (after the kept
+        // geometry is let go: this changes the model for the moment)
+        var swings = ReadSteps.Time("inside.door_swings", () => SwingsOf(doc, diagnostics));
+        openings = openings.Select(o => swings.TryGetValue(o.UniqueId, out var sw) ? o with { Swing = sw } : o).ToList();
         return new InteriorRecords
         {
             Rooms = rooms,
@@ -168,6 +172,146 @@ internal static class RevitInterior
             }
         }
         return result;
+    }
+
+    /// <summary>Each door's swing as its own plan symbol draws it (<see cref="SwingDrawing"/>), by <c>UniqueId</c>:
+    /// for each level with a door, a floor plan made for the read inside a transaction always rolled back (the model
+    /// unchanged), at Fine detail, with no view template and no filters, the Doors category and every subcategory
+    /// (Plan Swing among them) and every user workset shown, so neither a coarse or filtered view nor a hidden
+    /// subcategory drops the arcs; each door's geometry in that view (<c>Options.View</c>), its arcs in a horizontal
+    /// plane kept, nested families' included. A door it couldn't read says why; none drawn is an empty list, never
+    /// read as a door that doesn't swing.</summary>
+    internal static Dictionary<string, SwingDrawing> SwingsOf(Document doc, List<string> diagnostics)
+    {
+        var result = new Dictionary<string, SwingDrawing>(StringComparer.Ordinal);
+        var doors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Doors).WhereElementIsNotElementType()
+            .OfType<FamilyInstance>().ToList();
+        if (doors.Count == 0)
+            return result;
+        void All(string why)
+        {
+            foreach (var d in doors)
+                result[d.UniqueId] = new SwingDrawing([], why);
+        }
+        if (doc.IsReadOnly || doc.IsModifiable)
+        {
+            All(doc.IsReadOnly ? "the model is read-only, so no plan view could be made to read its swing"
+                               : "the model was in the middle of a change, so no plan view could be made to read its swing");
+            return result;
+        }
+        var planType = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>()
+            .FirstOrDefault(v => v.ViewFamily == ViewFamily.FloorPlan);
+        if (planType is null)
+        {
+            All("the model has no floor plan view type, so no plan view could be made to read its swing");
+            return result;
+        }
+        var worksets = doc.IsWorkshared
+            ? new FilteredWorksetCollector(doc).OfKind(WorksetKind.UserWorkset).Select(w => w.Id).ToList()
+            : new List<WorksetId>();
+        using var t = new Transaction(doc, ResultRows.SwingsTransaction);
+        Quiet(t);
+        try
+        {
+            t.Start();
+            foreach (var level in doors.GroupBy(d => d.LevelId))
+            {
+                if (doc.GetElement(level.Key) is not Level)
+                {
+                    foreach (var d in level)
+                        result[d.UniqueId] = new SwingDrawing([], "it has no level, so no plan view could be made to read its swing");
+                    continue;
+                }
+                ViewPlan view;
+                try
+                {
+                    view = ViewPlan.Create(doc, planType.Id, level.Key);
+                    view.ViewTemplateId = ElementId.InvalidElementId;
+                    view.DetailLevel = ViewDetailLevel.Fine;
+                    view.CropBoxActive = false;
+                    foreach (var f in view.GetFilters().ToList())
+                        view.RemoveFilter(f);
+                    var category = Autodesk.Revit.DB.Category.GetCategory(doc, BuiltInCategory.OST_Doors);
+                    foreach (var c in new[] { category }.Concat(category.SubCategories.Cast<Autodesk.Revit.DB.Category>()))
+                        if (view.CanCategoryBeHidden(c.Id))
+                            view.SetCategoryHidden(c.Id, false);
+                    foreach (var w in worksets)
+                        view.SetWorksetVisibility(w, WorksetVisibility.Visible);
+                    doc.Regenerate();
+                }
+                catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                               or Autodesk.Revit.Exceptions.ArgumentException)
+                {
+                    foreach (var d in level)
+                        result[d.UniqueId] = new SwingDrawing([], $"no plan view could be made on its level to read its swing ({x.GetType().Name}: {x.Message})");
+                    continue;
+                }
+                var options = new Options { View = view, IncludeNonVisibleObjects = false };
+                foreach (var d in level)
+                    result[d.UniqueId] = ArcsOf(d, options);
+            }
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            diagnostics.Add($"door swings couldn't be read ({x.GetType().Name}: {x.Message})");
+            All($"its plan symbol couldn't be read ({x.GetType().Name}: {x.Message})");
+        }
+        finally
+        {
+            if (t.HasStarted() && !t.HasEnded())
+                t.RollBack();                                // the views made for the read taken back: the model as it was
+        }
+        diagnostics.Add($"door swings: {result.Values.Count(r => r.NotRead is null && r.Arcs.Count > 0)} of {doors.Count} doors draw an arc in plan");
+        return result;
+    }
+
+    /// <summary>The arcs in a horizontal plane a door's geometry gives in a view (<see cref="SwingsOf"/>), nested
+    /// families' included, internal.</summary>
+    private static SwingDrawing ArcsOf(FamilyInstance door, Options options)
+    {
+        var arcs = new List<SwingArc>();
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+                switch (o)
+                {
+                    case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
+                        Walk(inner);
+                        break;
+                    case Arc { IsBound: true } a when Math.Abs(Math.Abs(a.Normal.Z) - 1) < 1e-6:
+                        arcs.Add(new SwingArc(P(a.Center), a.Radius, P(a.Evaluate(0.5, true))));
+                        break;
+                }
+        }
+        try
+        {
+            if (door.get_Geometry(options) is not { } g)
+                return new SwingDrawing([], "Revit gave no plan geometry for it");
+            Walk(g);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return new SwingDrawing([], $"its plan geometry couldn't be read ({x.GetType().Name}: {x.Message})");
+        }
+        return new SwingDrawing(arcs);
+    }
+
+    /// <summary>The model's doors alone, each with its swing as drawn (<see cref="SwingsOf"/>), for the model build's
+    /// read-back (ModelBuild): read as the check reads them, nothing else of the model.</summary>
+    internal static RevitModel DoorsModel(Document doc)
+    {
+        var phase = doc.Phases.Cast<Phase>().LastOrDefault();
+        var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
+        var doors = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Doors).WhereElementIsNotElementType()
+            .OfType<FamilyInstance>().Select(fi => OpeningOf(doc, fi, phase)).ToList();
+        var swings = SwingsOf(doc, []);
+        return new RevitModel
+        {
+            Document = doc.Title,
+            InternalToShared = RevitRead.InternalToShared(doc),
+            Interior = new InteriorRecords { Openings = doors.Select(o => swings.TryGetValue(o.UniqueId, out var sw) ? o with { Swing = sw } : o).ToList() },
+        };
     }
 
     /// <summary>A transaction whose warnings are dismissed (no dialog in a read), its errors rolling it back.</summary>
