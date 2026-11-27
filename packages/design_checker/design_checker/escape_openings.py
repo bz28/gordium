@@ -215,6 +215,9 @@ def _to_openings(rooms: list, openings) -> None:
         if room is not None and not (isinstance(room.get("measures"), dict)
                                      and isinstance(room.get("not_measured", {}), dict)):
             room = None                                    # a room that can't be read gives its openings nothing
+        if isinstance(o.get("confirm"), dict):             # a reading of the room's is only ever the room's
+            for mine in FROM_ROOM:
+                o["confirm"].pop(mine, None)
         for mine, theirs in FROM_ROOM.items():
             why.pop(mine, None)
             given, said = (room["measures"], room.get("not_measured") or {}) if room is not None else ({}, {})
@@ -223,6 +226,12 @@ def _to_openings(rooms: list, openings) -> None:
                     m[mine] = WORKED.get(mine, lambda v: v)(given[theirs])
                 except TypeError:                          # a value that isn't one (a count that isn't a number)
                     why[mine] = "its room's isn't known"
+                    continue
+                read = _map(room.get("confirm")).get(theirs)
+                if read:                                   # the room's value stands on a reading (its routes run
+                    if not isinstance(o.get("confirm"), dict):     # through a room it serves): said on the opening
+                        o["confirm"] = {}                  # too, so a size rule set aside on it is never a pass
+                    o["confirm"][mine] = read
             elif room is not None:
                 why[mine] = said.get(theirs, "its room's isn't known")
             else:

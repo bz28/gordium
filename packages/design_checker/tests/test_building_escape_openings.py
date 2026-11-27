@@ -208,6 +208,37 @@ def test_a_reach_through_a_room_the_routes_read_through_says_the_reading():
     assert p["confirm"]["sleeping_room_story_one_exit"] == "Gordium's reading: Bedroom through Closet"
 
 
+def test_an_opening_set_aside_on_its_rooms_reading_is_never_a_pass():
+    """Merge review (this PR with main's 8b): an opening copies its room's one-exit answer, so where that answer is
+    Gordium's reading (the routes run through a room it serves) the opening says the reading too, and its size rule,
+    set aside for Group R-2 on it, needs review with the reading said, never a pass; a reading an opening arrives
+    with for a room fact is never kept."""
+    from rule_format import parts as rows_of
+    from rule_format.rulebook import REPO as ROOT, Context, load
+    ny = ROOT / "regulations/jurisdictions/new_york/new_york_state_building"
+    rule = {r["id"]: r for r in load(ny / "5_building_code_rules/drafted/general.yaml")["rules"]}[
+        "general.bc_1031_3_1_escape_opening_min_area"]
+    allowed = Context.for_jurisdiction(ny).allowed()
+    reading = "Gordium's reading: Bedroom through Closet"
+    for confirm, outcome in ((reading, "needs_review"), (None, "pass")):
+        parts, desc = _parts(openings=[{"id": "w", "within": "b", "measures": {"opening_net_clear_area": 2.0},
+                                        "confirm": {"opening_room_one_exit": "stale"}}])
+        space = {"id": "b", "name": "Bedroom", "within": "L1", "measures": {}, "not_measured": {},
+                 "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}}}}
+        if confirm:
+            space["confirm"] = {"space_exit_count": confirm}
+        parts["space"] = [space]
+        escape_openings.link(parts, desc)
+        o = parts["emergency_escape_opening"][0]
+        assert o["measures"]["opening_room_one_exit"] is False
+        assert o["confirm"].get("opening_room_one_exit") == confirm
+        [row] = rows_of.rows(rule, {"sleeping_room": parts["sleeping_room"], "emergency_escape_opening": [o]},
+                             {"occupancy_group": "R-2"}, allowed)
+        assert row["outcome"] == outcome, row
+        if confirm:
+            assert reading in row["reason"]
+
+
 def test_the_rooms_reach_decides_the_one_exit_question_only():
     """Review round 2 (PR 3): the reach fallback ran for every linked measure; a story's fourth-or-higher given as null
     would have taken the room's reach as its value. Now only the one-exit question reads the reach, and a null story
