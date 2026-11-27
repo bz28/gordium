@@ -693,3 +693,57 @@ def test_an_opening_whose_room_isnt_text_is_never_a_crash():
         for o in parts["emergency_escape_opening"]:
             assert "opening_room_other_compliant" not in (o.get("measures") or {}), where
 
+
+
+def _reach_check(openings, reading=None):
+    """Merge review of #240 on 8d: a Group R-2 sleeping room on a story of two exits whose routes show every way out
+    reaching two (no escape opening asked by 1031.2 item 1), with the law's own rules, ids as the pipeline gives them
+    (the room's own id apart from the routes' space part). Returns 1031.2's outcome, each opening's outcomes over the
+    twelve opening rules, and the room's compliant count (or its reason)."""
+    from rule_format import parts as part_rules
+    from rule_format.rulebook import Context, load
+    ny = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+    rules = load(ny / "5_building_code_rules/drafted/general.yaml")["rules"]
+    room = {"id": "b (sleeping room)", "name": "Bedroom", "measures": {}, "not_measured": {}, "more": {"described_id": "b"}}
+    space = {"id": "b", "name": "Bedroom", "within": "L1", "measures": {}, "not_measured": {},
+             "more": {"exits_reached": {"two": True, "doors": {"d": ["x", "y"]}}}}
+    if reading:
+        space["confirm"] = {"space_exit_count": reading}
+    parts = {"sleeping_room": [room], "space": [space],
+             "story": [{"id": "L1", "measures": {"story_exit_count": 2, "story_fourth_or_higher_above_grade_plane": False}}],
+             "emergency_escape_opening": [dict(o, within="b (sleeping room)") for o in openings],
+             "means_of_egress_door": [{"id": "d", "more": {"sides": ["b", "c"]}}]}
+    escape_openings.link(parts, {"rooms": [{"id": "b", "level": "L1"}]}, rules)
+    given = {"occupancy_group": "R-2", **{f"sprinklered_903_3_1_{n}": False for n in (1, 2, 3)}}
+    allowed = Context.for_jurisdiction(ny).allowed()
+    by_id = {r["id"]: r for r in rules}
+    [where] = part_rules.rows(by_id["general.bc_1031_2_escape_opening_where_required"], parts, given, allowed)
+    rows = {}
+    for r in rules:
+        if r.get("for_each") == "emergency_escape_opening":
+            for row in part_rules.rows(r, parts, given, allowed):
+                if row["id"] is not None:                # with no opening, a rule's own row: doesn't apply
+                    rows.setdefault(row["id"], set()).add(row["outcome"])
+    m = parts["sleeping_room"][0]
+    return where["outcome"], rows, m["measures"].get("sleeping_room_compliant_openings",
+                                                     m["not_measured"].get("sleeping_room_compliant_openings"))
+
+
+def test_an_r2_room_reaching_two_exits_asks_no_opening_and_never_passes_on_a_reading():
+    """BCNYS 1031.2 item 1 asks Group R-2 only "in stories with only one exit or access to only one exit": a room whose
+    routes reach two separate exits is asked no escape opening, so 1031.2 passes with none, and a small one isn't held
+    to the size or well rules; where that reach stands on Gordium's reading, nothing passes on it (8d's count beside
+    it changes nothing)."""
+    assert _reach_check([])[0] == "pass"
+    where, rows, count = _reach_check([{"id": "w", "measures": dict(SMALL)}])
+    assert where == "pass" and rows == {"w": {"pass"}} and count == 0
+    for openings in ([], [{"id": "w", "measures": dict(SMALL)}], [{"id": "w", "measures": dict(GOOD)}]):
+        where, rows, _ = _reach_check(openings, reading="Gordium's reading: Bedroom through Closet")
+        assert where == "needs_review" and all(o == {"needs_review"} for o in rows.values()), (openings, rows)
+
+
+def test_an_opening_arriving_with_a_confirm_that_isnt_a_mapping_never_counts_compliant():
+    """Merge review of #240 on 8d: the opening's compliance is read on the opening as given (8d review round 2: a
+    `confirm` that isn't a mapping leaves it not known), before the room's reading is copied onto it."""
+    _, _, count = _reach_check([{"id": "w", "measures": dict(GOOD), "confirm": "junk"}], reading="Gordium's reading")
+    assert not isinstance(count, int), count

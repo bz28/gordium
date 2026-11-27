@@ -206,8 +206,10 @@ def link(parts: dict, description, rules=None) -> None:
                 why["sleeping_room_door_to_outside"] = WHY["door_sides_not_read"].format(name=name)
             continue
         m["sleeping_room_door_to_outside"] = any(rid in s and OUTSIDE in s for s in sides)
-    _to_openings(rooms, openings)
+    # which openings comply first, on the openings as given (a `confirm` an opening arrives with that isn't a mapping
+    # leaves it not known: 8d review round 2), then the room's facts and readings copied onto them (merge review)
     _compliance(parts, rooms, openings, rules)
+    _to_openings(rooms, openings)
 
 
 def _when(rule) -> str:
