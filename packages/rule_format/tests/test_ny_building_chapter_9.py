@@ -659,4 +659,5 @@ def test_part_ds_review_round_3(book):
     assert "occupant notification needn't be activated" in _shown_note(rules["general.bc_907_2_6_group_i_fire_alarm"])
     i3 = _shown_note(rules["general.bc_907_2_6_3_3_group_i3_smoke_detection"])
     assert "equivalent protection" in i3 and "contiguous day rooms" in i3 and "normally open" in i3
+    assert "four or fewer occupants" in i3   # round 4: what exception 3 counts
     assert "served from a commercial source" in _shown_note(rules["general.bc_907_2_11_6_smoke_alarm_power"])

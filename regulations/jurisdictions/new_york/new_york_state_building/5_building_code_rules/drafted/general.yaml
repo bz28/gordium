@@ -7259,7 +7259,7 @@ rules:
     note: 'Group I-3 has automatic smoke detection throughout resident housing areas, sleeping units and contiguous day rooms,
       group activity spaces and other common spaces normally open to residents (other approved arrangements giving equivalent
       protection where needed to prevent damage or tampering; not in Use Conditions 2 and 3 sleeping units per Section 308;
-      not in sleeping units of four or fewer in smoke compartments with a 903.3.1.1 system): a person''s check.'
+      not in sleeping units with four or fewer occupants in smoke compartments with a 903.3.1.1 system): a person''s check.'
   - given:
       occupancy_group: R-2
     expect: not_applicable

@@ -9468,8 +9468,8 @@ labels:
     reason: 'Group I-3 has automatic smoke detection throughout resident housing areas, sleeping units and contiguous day
       rooms, group activity spaces and other common spaces normally open to residents (other approved arrangements giving
       equivalent protection where needed to prevent damage or tampering; not in Use Conditions 2 and 3 sleeping units per
-      Section 308; not in sleeping units of four or fewer in smoke compartments with a 903.3.1.1 system): a person''s check
-      (general.bc_907_2_6_3_3_group_i3_smoke_detection).'
+      Section 308; not in sleeping units with four or fewer occupants in smoke compartments with a 903.3.1.1 system): a person''s
+      check (general.bc_907_2_6_3_3_group_i3_smoke_detection).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 287
