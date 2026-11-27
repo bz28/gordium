@@ -6893,11 +6893,11 @@ labels:
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '903.2':
-    label: reference
+    label: flag
     topic: means_of_egress
-    reason: 'Says sprinkler systems are required in new buildings where 903.2.1 to 903.2.12 say: read by each group''s rule
-      (903.2.5.1, 903.2.6, 903.2.8). Its exception leaves out spaces used only for telecommunications equipment in a telecommunications
-      building, never a Group R, H or I occupancy''s own (Chapter 9 part b reads it for the other groups).'
+    reason: Says sprinkler systems are required in new buildings where 903.2.1 to 903.2.12 say, each group's rule reading
+      it; in a building of two or more groups each portion's fire areas, and the exception for spaces used only for telecommunications
+      equipment, are a person's check (general.bc_903_2_mixed_occupancies).
     sources:
     - file: gov.ny.building.2025.pdf
       page: 269
@@ -6936,8 +6936,8 @@ labels:
   903.2.1.1:
     label: rule
     topic: means_of_egress
-    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
-      on the stated group and sprinkler system (general.bc_903_2_1_1_group_a1_sprinklers).'
+    reason: 'A sprinkler system where a Group A-1 fire area exceeds 12,000 square feet or has an occupant load of 300 or more,
+      among other conditions: a rule per room, on the stated group and sprinkler system (general.bc_903_2_1_1_group_a1_sprinklers).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 269
@@ -6956,8 +6956,8 @@ labels:
   903.2.1.2:
     label: rule
     topic: means_of_egress
-    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
-      on the stated group and sprinkler system (general.bc_903_2_1_2_group_a2_sprinklers).'
+    reason: 'A sprinkler system where a Group A-2 fire area exceeds 5,000 square feet or has an occupant load of 100 or more,
+      among other conditions: a rule per room, on the stated group and sprinkler system (general.bc_903_2_1_2_group_a2_sprinklers).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 269
@@ -6976,8 +6976,8 @@ labels:
   903.2.1.3:
     label: rule
     topic: means_of_egress
-    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
-      on the stated group and sprinkler system (general.bc_903_2_1_3_group_a3_sprinklers).'
+    reason: 'A sprinkler system where a Group A-3 fire area exceeds 12,000 square feet or has an occupant load of 300 or more,
+      among other conditions: a rule per room, on the stated group and sprinkler system (general.bc_903_2_1_3_group_a3_sprinklers).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 269
@@ -6996,8 +6996,8 @@ labels:
   903.2.1.4:
     label: rule
     topic: means_of_egress
-    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
-      on the stated group and sprinkler system (general.bc_903_2_1_4_group_a4_sprinklers).'
+    reason: 'A sprinkler system where a Group A-4 fire area exceeds 12,000 square feet or has an occupant load of 300 or more,
+      among other conditions: a rule per room, on the stated group and sprinkler system (general.bc_903_2_1_4_group_a4_sprinklers).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 269
@@ -7016,8 +7016,8 @@ labels:
   903.2.1.5:
     label: flag
     topic: means_of_egress
-    reason: 'Enclosed Group A-5 accessory use areas over 1,000 square feet are sprinklered: which enclosed areas are accessory
-      use areas is a person''s check.: not in the model, a person''s check (general.bc_903_2_1_5_a5_accessory_areas).'
+    reason: 'Enclosed Group A-5 accessory use areas over 1,000 square feet sprinklered: which enclosed areas are accessory
+      use areas isn''t in the model, a person''s check (general.bc_903_2_1_5_a5_accessory_areas).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 269
@@ -7078,9 +7078,8 @@ labels:
   903.2.1.7:
     label: flag
     topic: means_of_egress
-    reason: 'Where Group A-1, A-2, A-3 or A-4 fire areas share exit or exit access components and their occupant loads together
-      are 300 or more, a sprinkler system is provided: the fire areas aren''t in the model, a person''s check.: not in the
-      model, a person''s check (general.bc_903_2_1_7_multiple_a_fire_areas).'
+    reason: 'Where Group A-1 to A-4 fire areas share exit or exit access components and together hold 300 or more, a sprinkler
+      system: the fire areas aren''t in the model, a person''s check (general.bc_903_2_1_7_multiple_a_fire_areas).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 270
@@ -7156,8 +7155,8 @@ labels:
   903.2.3:
     label: rule
     topic: means_of_egress
-    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
-      on the stated group and sprinkler system (general.bc_903_2_3_group_e_sprinklers).'
+    reason: 'A sprinkler system where a Group E fire area is greater than 12,000 square feet or has an occupant load of 300
+      or more, among other conditions: a rule per room, on the stated group and sprinkler system (general.bc_903_2_3_group_e_sprinklers).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 270
@@ -7177,8 +7176,8 @@ labels:
   903.2.4:
     label: rule
     topic: means_of_egress
-    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
-      on the stated group and sprinkler system (general.bc_903_2_4_group_f1_sprinklers).'
+    reason: 'A sprinkler system where a Group F-1 fire area exceeds 12,000 square feet, among other conditions: a rule per
+      room, on the stated group and sprinkler system (general.bc_903_2_4_group_f1_sprinklers).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 270
@@ -7361,7 +7360,7 @@ labels:
   903.2.7:
     label: rule
     topic: means_of_egress
-    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
+    reason: 'A sprinkler system where a Group M fire area exceeds 12,000 square feet, among other conditions: a rule per room,
       on the stated group and sprinkler system (general.bc_903_2_7_group_m_sprinklers).'
     sources:
     - file: gov.ny.building.2025.pdf
@@ -7500,8 +7499,8 @@ labels:
   903.2.9:
     label: rule
     topic: means_of_egress
-    reason: 'A sprinkler system where a Group fire area passes the section''s area or occupant load limits: a rule per room,
-      on the stated group and sprinkler system (general.bc_903_2_9_group_s1_sprinklers).'
+    reason: 'A sprinkler system where a Group S-1 fire area exceeds 12,000 square feet, among other conditions: a rule per
+      room, on the stated group and sprinkler system (general.bc_903_2_9_group_s1_sprinklers).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 271

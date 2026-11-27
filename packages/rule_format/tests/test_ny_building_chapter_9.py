@@ -395,3 +395,50 @@ def test_no_rule_passes_on_a_13r_system_outside_group_r(book, ctx):
                     if with_13r == "pass" and without != "pass":
                         wrong.append((r["id"], groups, e.get("note", "")[:60]))
     assert walked > 500 and not wrong, wrong[:5]
+
+
+def test_part_bs_label_reasons_name_their_own_group_and_limits(labels, book):
+    """Part b review round 1: the eight per-room rules' labels shared one reason naming no group, and claimed an
+    occupant-load limit for F-1, M and S-1, which have none; two flag reasons said "a person's check" twice. Each
+    rule's reason now names the group its rule reads and an occupant load only where its rule reads one; no reason
+    repeats itself; and a piece labeled reference has no rule or flag of its own."""
+    for rid in ROOM_RULES:
+        r = _rule(book, rid)
+        pid = r["title"].split("(BCNYS ")[1].rstrip(")")
+        reason = labels[pid]["reason"]
+        assert f"Group {ROOM_RULES[rid][0]} fire area" in reason, pid
+        assert ("occupant load" in reason) == ("space_occupant_load" in formula.names(r["review_when"][0]["when"])), pid
+    for pid, v in labels.items():
+        assert "check.:" not in v["reason"] and v["reason"].count("a person's check") <= 1, pid
+        if v["label"] in ("reference", "not_for_checking"):
+            assert not _own(book, pid), pid
+
+
+def test_the_room_rules_fail_only_where_both_occupant_load_readings_reach_the_limit(book, ctx):
+    """Part b review round 1 (a test gap): most rooms' occupant loads come as two readings (occupant_load.py: a gross
+    factor, or 1004.5.1's increase not ruled out). A fail needs the lower reading at the limit; a split needs review;
+    NFPA 13 passes."""
+    allowed = ctx.allowed()
+    for rid, (group, limit, load_limit) in ROOM_RULES.items():
+        if load_limit is None:
+            continue
+        rule = _rule(book, rid)
+
+        def answer(lo, hi, system):
+            part = {"id": "p1", "name": "Room", "measures": {"space_floor_area": 100},
+                    "readings": {"space_occupant_load": [{"value": lo, "named": {"increase": "no"}},
+                                                         {"value": hi, "named": {"increase": "yes"}}]}}
+            [row] = parts.rows(rule, {"space": [part]}, code_scope.building_measures(
+                _building([group], system, None, None, None)), allowed)
+            return row["outcome"]
+        assert answer(load_limit - 1, load_limit + 50, "none") == "needs_review", rid
+        assert answer(load_limit, load_limit + 50, "none") == "fail", rid
+        assert answer(load_limit, load_limit + 50, "nfpa_13r") == "fail", rid
+        assert answer(load_limit - 1, load_limit + 50, "nfpa_13") == "pass", rid
+
+
+def test_the_grandstands_flag_shows_for_a_school(book, ctx):
+    """Part b review round 1: 903.2.1.5.1 is worded for any enclosed space under grandstands or bleachers, and an
+    assembly space associated with Group E is part of it (303.1.3, p.68), so a building stated Group E sees it."""
+    r = _rule(book, "general.bc_903_2_1_5_1_under_grandstands")
+    assert outcome(r, code_scope.building_measures({"occupancy_groups": ["E"]}), ctx.allowed()) == "needs_review"

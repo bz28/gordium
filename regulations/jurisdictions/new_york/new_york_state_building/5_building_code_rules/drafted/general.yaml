@@ -4017,7 +4017,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Enclosed spaces under grandstands or bleachers (BCNYS 903.2.1.5.1)
-  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"]
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "E", "mixed"]
   sources:
   - file: gov.ny.building.2025.pdf
     page: 269
@@ -4042,7 +4042,8 @@ rules:
       occupancy_group: R-2
     expect: not_applicable
     note: 'Not this building''s group or fact, as stated: not applicable.'
-  notes: '903.2.1.5.1: grandstands and bleachers aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27,
+  notes: '903.2.1.5.1: grandstands and bleachers aren''t in the model. Shown for Group E too: an assembly space associated
+    with Group E is part of it (303.1.3), so a school gym''s bleachers are Group E''s (review round 1). Hand-drafted in a Claude Code session (2026-11-27,
     Chapter 9 part b).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
