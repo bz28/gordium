@@ -901,6 +901,25 @@ def test_the_apartments_stories_seat_no_one_served_by_aisles(apartment):
     assert {s["id"]: s["measures"][occupant_load.SEATING_STORY] for s in parts["story"]} == {"L1": False, "L2": True}
 
 
+def test_a_building_stated_to_have_assembly_spaces_with_none_shown_may_seat_people_on_every_story():
+    """Merging main into section group 9i (review, two skeptics): 9h's stated fact assembly_spaces (a room or space used
+    for assembly purposes, whatever the group: 303.1.1, 303.1.2) says what a stated Group A says, that an assembly room
+    exists, so where no room shows one, any room may be it, as for Group A: a Group B or R-2 building stating it, its
+    rooms all business, never passes a travel or common-path row on travel measured across seats (1030.7). Stated
+    false or not stated, the business story seats no one; with the assembly room shown, its business story neither."""
+    for groups in (["B"], ["R-2"], None):
+        building = {"assembly_spaces": True, "assembly_fixed_seating": False,
+                    **({"occupancy_groups": groups} if groups else {})}
+        assert _seating_story("business", building=building) is True, groups
+        assert _seating_story("business", building={**building, "assembly_spaces": False}) is False, groups
+    building = {"occupancy_groups": ["B"], "assembly_spaces": True}
+    shown = copy.deepcopy(_SEATING_PARTS["r"])
+    desc = _seating_desc_with_extra({"id": "dining", "name": "dining", "function": "assembly_unconcentrated"})
+    shown["space"].append({"id": "dining", "within": "elsewhere", "measures": {}, "not_measured": {}})
+    occupant_load.assembly_seating(shown, desc, FACTORS, building)
+    assert shown["story"][0]["measures"][occupant_load.SEATING_STORY] is False      # the dining room is shown, elsewhere
+
+
 @pytest.mark.parametrize("groups", [["A-1"], ["A-2"], ["A-3"], ["A-4"], ["A-5"], ["B", "A-3"]])
 def test_a_building_stated_group_a_with_no_assembly_room_shown_may_seat_people_on_every_story(groups):
     """Review round 1 (P2): Group A is an assembly use (303.1 to 303.6), so a building stated Group A has a room used

@@ -390,7 +390,8 @@ HANDLERS = {
     "903.3.1.2": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "903.3.1.2"),
     "903.2.5.1": ("general.bc_table_1017_2_note_d_group_h", "903.2.5.1"),
     "903.3.1.3": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "sprinklered_903_3_1_3"),
-    "903.2.8": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "1006.2.2.6"),
+    # 903.2.8 twice, Table 1017.2's and Table 1020.2's (below): each under a key of its own, so both words are checked
+    "903.2.8 (Table 1017.2)": ("general.bc_table_1017_2_a_e_f1_m_r_s1", "1006.2.2.6"),
     # Table 1006.2.1's notes, and 1006.2.1's own
     "903.2.5": ("general.bc_table_1017_2_note_d_group_h", "903.2.5"),
     "1006.2.2.1": ("general.bc_table_1006_2_1_b", "1006.2.2"), "1006.2.2.6": ("general.bc_table_1006_2_1_r3_r4", "1006.2.2.6"),
@@ -574,6 +575,20 @@ def test_every_cross_reference_in_a_drafted_piece_has_a_handler(rules):
     for ref, (rids, word) in HANDLERS.items():
         for rid in [rids] if isinstance(rids, str) else rids:
             assert word in json.dumps(rules[rid]), (ref, rid, word)
+
+
+def test_no_handler_reference_is_written_twice():
+    """Merging main into section group 9i: seven HANDLERS keys were written twice (903.2.8, 1030.6.2, 1030.6.3, 909,
+    1030.8, 1014.9, 1030.14), and a dict keeps only a key's last value, so the earlier handler's word was never
+    checked. Each reference is written once (a list of rules where several handle it)."""
+    import ast
+    from pathlib import Path
+    tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    found = [n for n in ast.walk(tree) if isinstance(n, ast.Assign) and any(getattr(x, "id", None) == "HANDLERS"
+                                                                             for x in n.targets)]
+    assert len(found) == 1
+    keys = [k.value for k in found[0].value.keys if isinstance(k, ast.Constant)]
+    assert len(keys) == len(set(keys)), sorted({k for k in keys if keys.count(k) > 1})
 
 
 def test_a_fixed_seat_assembly_space_never_passes_on_the_tables_common_path(ctx, rules):

@@ -252,8 +252,10 @@ def assembly_seating(parts: dict, description: dict, factors: dict, building: di
     enclosed space with no room drawn in it (its use isn't known): never false on a room unseen. True on every story,
     too, where the building is stated Group A (an assembly use, 303.1 to 303.6) and no room but such a clashing one
     states an Assembly function or one that may be an assembly use: its assembly room isn't shown, so any room may be
-    it (review round 1). The story knows its rooms (it is in the model), so a floor the model leaves out doesn't matter
-    here."""
+    it (review round 1). The same where the building states it has assembly spaces (`assembly_spaces`, section group
+    9h: a room or space used for assembly purposes, whatever its group, 303.1.1 and 303.1.2) and none is shown (found
+    merging main into section group 9i). The story knows its rooms (it is in the model), so a floor the model leaves
+    out doesn't matter here."""
     rooms, every = readable_rooms(description)
     unknown = description.get("unknown_spaces") if isinstance(description, dict) else None
     spaces = [p for p in parts.get("space") or [] if isinstance(p, dict)]
@@ -267,7 +269,9 @@ def assembly_seating(parts: dict, description: dict, factors: dict, building: di
     groups = building.get("occupancy_groups") if isinstance(building, dict) else None
     shown = any(r.get("function") in ASSEMBLY_FUNCTIONS + ASSEMBLY_LIKE_FUNCTIONS for i, r in rooms.items()
                 if isinstance(r.get("function"), str) and i not in clash)
-    if isinstance(groups, list) and any(isinstance(g, str) and g.startswith("A-") for g in groups) and not shown:
+    group_a = isinstance(groups, list) and any(isinstance(g, str) and g.startswith("A-") for g in groups)
+    spaces_stated = isinstance(building, dict) and building.get("assembly_spaces") is True
+    if (group_a or spaces_stated) and not shown:
         unseen = True
     functions = factors["functions"]
     for story in parts.get("story") or []:
