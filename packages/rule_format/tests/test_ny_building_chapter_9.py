@@ -630,3 +630,33 @@ def test_part_ds_review_round_2(book):
     for rid in ("general.bc_907_2_11_1_group_r1_smoke_alarm_locations", "general.bc_907_2_11_2_group_r_smoke_alarm_locations"):
         n = _shown_note(_rule(book, rid))
         assert "serving bedrooms" in n and "garages excluded" in n and "clearly audible" in n, rid
+
+
+LABEL_COPIES_NOTE = ("907.2.6", "907.2.7", "907.2.8", "907.2.9", "907.2.10", "907.2.11", "907.5.2.2", "905.3", "905.4",
+                     "909.1", "909.20", "911.1")
+
+
+def test_part_ds_review_round_3(book):
+    """Part d review round 3: the label reasons of parts d and e are their flags' shown notes word for word (the
+    generated review file showed the wording rounds 1 and 2 had fixed in the notes only), and the notes keep every
+    condition: letters 3 inches high, not a sign; basements; a bathroom's door or opening; the room a sleeping loft opens
+    to; what Group I's exception 2 relieves; I-3's equivalent protection; a commercial source of power."""
+    import yaml
+    labels = yaml.safe_load(LABELS.read_text(encoding="utf-8"))["labels"]
+    rules = {r["id"]: r for r in book}
+    checked = 0
+    for pid, v in labels.items():
+        if v.get("label") != "flag" or not (pid in LABEL_COPIES_NOTE or pid.startswith(tuple(p + "." for p in LABEL_COPIES_NOTE))):
+            continue
+        rid = re.search(r"\((general\.bc_[a-z0-9_]+)\)\.$", v["reason"]).group(1)
+        assert v["reason"] == _shown_note(rules[rid])[:-1] + f" ({rid}).", pid
+        checked += 1
+    assert checked >= 35
+    assert "its letters at least 3 inches high" in _shown_note(rules["general.bc_907_2_11_8_portable_smoke_alarms"])
+    for rid in ("general.bc_907_2_11_1_group_r1_smoke_alarm_locations", "general.bc_907_2_11_2_group_r_smoke_alarm_locations"):
+        n = _shown_note(rules[rid])
+        assert "including basements" in n and "door or opening of a bathroom" in n and "a sleeping loft opens to" in n, rid
+    assert "occupant notification needn't be activated" in _shown_note(rules["general.bc_907_2_6_group_i_fire_alarm"])
+    i3 = _shown_note(rules["general.bc_907_2_6_3_3_group_i3_smoke_detection"])
+    assert "equivalent protection" in i3 and "contiguous day rooms" in i3 and "normally open" in i3
+    assert "served from a commercial source" in _shown_note(rules["general.bc_907_2_11_6_smoke_alarm_power"])
