@@ -343,3 +343,45 @@ def test_a_story_with_more_exits_than_any_reading_asks_passes_with_the_facts_not
         [row] = parts.rows(rules[rid], {"story": [{"id": "p1", "measures": story}]}, {**plain, **group}, ctx.allowed())
         assert row["outcome"] == "pass", (rid, row)
 
+
+def test_no_rule_text_says_a_brought_in_chapter_4_section_is_not_brought_in(rules):
+    """Review round 1 of part c: Chapter 10's words still said 407.4 "aren't brought in" (the shared stale-words test
+    reads only "not brought in" in a narrow pattern). No sentence of any rule's title, notes, review reasons or
+    example notes names a Chapter 4 section sources.yaml brings in (or a part under one) and calls it not brought in."""
+    brought = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]
+    ours = [str(s) for s in brought["sections"] + brought["alone"] if re.fullmatch(r"4\d\d(\.\d+)*", str(s))]
+    assert ours
+    bad = []
+    for r in rules.values():
+        texts = [r.get("title"), r.get("notes")] + [w.get("reason") for w in r.get("review_when") or []] +                 [e.get("note") for e in r.get("examples") or []]
+        for text in (x for x in texts if isinstance(x, str)):
+            for sentence in re.split(r"(?<=[.:;])\s", text):
+                if not re.search(r"(?:not|n't) brought in", sentence):
+                    continue
+                named = re.findall(r"\b(4\d\d(?:\.\d+)+)\b", sentence)
+                bad += [(r["id"], n) for n in named if any(n == s or n.startswith(s + ".") for s in ours)]
+    assert not bad, bad
+
+
+
+def test_a_plural_term_is_the_definition_of_its_singular():
+    """Review round 1 of part c: 201.2 makes the singular include the plural (p.32, lines 13-14), so "nursing home" in
+    italics is NURSING HOMES and "life safety system" LIFE SAFETY SYSTEMS: both brought in (by name, the italics
+    reader matching words only as printed), labeled, read a second time; and no reason given for an italic word left
+    undefined argues that a plural term doesn't name its singular."""
+    pieces, labels = _pieces(), load(LABELS)["labels"]
+    for pid in ("202:nursing_homes", "202:life_safety_systems"):
+        assert pid in pieces and labels[pid]["label"] == "reference", pid
+    why = load(NY / "1_source_documents/sources.yaml")["documents"][0]["brought_in"]["italic_not_defined"]
+    said = [(pid, w, t) for pid, words in why.items() for w, t in words.items()
+            if re.search(r"plural, which the singular|singular, which the plural", t)]
+    assert not said, said
+
+
+def test_a_printed_figure_that_disagrees_with_its_conversion_is_said(rules):
+    """Review round 1 of part c: 407.3.1.1 prints "2/3 inch (19.1 mm)", and 19.1 mm is 3/4 inch. The flag says both,
+    and the second reading's record names the difference, so a person checks which the State means."""
+    note = rules["general.bc_407_3_1_1_corridor_door_construction"]["notes"]
+    assert "2/3 inch" in note and "3/4 inch" in note
+    entry = load(NY / "text_verification.yaml")["pieces"]["407.3.1.1"]
+    assert any("19.1 mm" in f and "3/4 inch" in f for f in entry["flags"])
