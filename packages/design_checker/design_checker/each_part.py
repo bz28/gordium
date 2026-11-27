@@ -492,6 +492,8 @@ MEASURE_NAMES = {
     "loads_not_by_area": "loads not by area (whether any area is counted by its seats, lanes or actual load)",
     "high_rise_building": "high-rise (whether the building is one, or more than 420 ft high, per 403)",
     "underground_building": "underground building (whether a floor used for human occupancy is more than 30 ft below the lowest level of exit discharge, per 405.1)",
+    "stages_or_platforms": "stages or platforms (whether the building has a stage, a platform or a technical production area, per 410)",
+    "aircraft_related_occupancy": "aircraft-related occupancy (whether the building is or holds one, per 412)",
     "space_is_exit": "exit status (whether the space is itself an exit)",
     "story_assembly_seating_possible": "assembly seating on the story (whether a room on it may seat people served by aisles)",
     "space_assembly_seating_possible": "assembly seating on the space's story (whether a room on it may seat people served by aisles)",

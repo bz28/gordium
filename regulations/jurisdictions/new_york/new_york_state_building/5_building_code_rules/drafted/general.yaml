@@ -1647,6 +1647,74 @@ rules:
   notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part b).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_406_4_3_vehicle_ramps
+  kind: flag
+  topic: means_of_egress
+  title: Vehicle ramps not exits without pedestrian facilities (BCNYS 406.4.3)
+  applies_when: occupancy_group in ["S-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 95
+    lines:
+    - 25
+    - 27
+    quote: 406.4.3 Ramps. Vehicle ramps shall not be considered as required exits unless pedestrian facilities are provided.
+      Vehicle ramps that are utilized for vertical circulation as well as for parking shall not exceed a slope of 1 unit vertical
+      in 15 units horizontal (6.67- percent slope).
+  examples:
+  - given:
+      occupancy_group: S-2
+    expect: needs_review
+    note: 'In a public parking garage, a vehicle ramp counts as a required exit only where pedestrian facilities are provided,
+      and one used for parking as well as vertical circulation is at most 1 in 15 (6.67 percent): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group S-2 (public parking garages, 311.3): not applicable.'
+  notes: 'Public parking garages are Group S-2 (311.3, p.82, line 47). Exits are counted as the model marks them (a door''s
+    exit kind, never guessed): whether an exit marked an exterior ramp is a vehicle ramp, its pedestrian facilities and a
+    ramp''s slope aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_406_5_7_open_parking_garage_egress
+  kind: flag
+  topic: means_of_egress
+  title: An open parking garage's egress, or two exit stairways (BCNYS 406.5.7)
+  applies_when: occupancy_group in ["S-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 96
+    lines:
+    - 33
+    - 36
+    quote: '[BE] 406.5.7 Means of egress. Where persons other than parking attendants are permitted, open parking garages
+      shall meet the means of egress requirements of Chapter 10. Where persons other than parking attendants are not permitted,
+      there shall be not fewer than two exit stairways. Each exit stairway shall be not less than 36 inches (914 mm) in width.
+      Lifts shall be permitted to be installed for use of employees only, provided that they are completely enclosed by noncombustible
+      materials.'
+  examples:
+  - given:
+      occupancy_group: S-2
+    expect: needs_review
+    note: 'Where persons other than parking attendants are permitted, an open parking garage meets Chapter 10; where they
+      are not, it has at least two exit stairways, each at least 36 in wide, and lifts for employees only, completely enclosed
+      by noncombustible materials: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group S-2 (public parking garages, 311.3): not applicable.'
+  notes: Who is permitted in the garage isn't in the model. Chapter 10's rules check the garage as any Group S-2 building;
+    where only attendants are permitted, the two exit stairways are a person's check, and a story with fewer exits than Table
+    1006.3.3 gives never passes in Group S-2 (Table 1006.3.4(2)'s S row needs review there). Hand-drafted in a Claude Code
+    session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_407_1_group_i2
   kind: flag
   topic: means_of_egress
@@ -3622,6 +3690,845 @@ rules:
     expect: not_applicable
     note: 'The building is stated one group, not Group I-3: not applicable.'
   notes: Hand-drafted in a Claude Code session (2026-11-26, Chapter 4 part e).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_410_5_means_of_egress
+  kind: flag
+  topic: means_of_egress
+  title: Stage and platform egress, Chapter 10 as 410.5 modifies it (BCNYS 410.5)
+  applies_when: stages_or_platforms
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 105
+    lines:
+    - 45
+    - 45
+    quote: '[BE] 410.5 Means of egress. Except as modified or as provided for in this section, the provisions of Chapter 10
+      shall apply.'
+  examples:
+  - given:
+      stages_or_platforms: true
+    expect: needs_review
+    note: 'The building may have a stage, a platform or a technical production area: Chapter 10 applies to their means of
+      egress except as 410.5.1 to 410.5.3 modify it: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      stages_or_platforms: false
+    expect: not_applicable
+    note: 'The architect states the building has no stage, platform or technical production area: not applicable.'
+  notes: STAGE, PLATFORM and TECHNICAL PRODUCTION AREA (202) aren't marked in the model; the stated fact says whether the
+    building may have one. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_410_5_1_arrangement
+  kind: flag
+  topic: means_of_egress
+  title: An exit or exit access doorway on each side of a stage (BCNYS 410.5.1)
+  applies_when: stages_or_platforms
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 105
+    lines:
+    - 46
+    - 47
+    quote: '[BE] 410.5.1 Arrangement. Where two or more exits or exit access doorways from the stage are required in accordance
+      with Section 1006.2, not fewer than one exit or exit access doorway shall be provided on each side of a stage.'
+  examples:
+  - given:
+      stages_or_platforms: true
+    expect: needs_review
+    note: 'Where 1006.2 requires two or more exits or exit access doorways from a stage, at least one is on each side of the
+      stage: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      stages_or_platforms: false
+    expect: not_applicable
+    note: 'The architect states the building has no stage, platform or technical production area: not applicable.'
+  notes: Which side of a stage a door is on isn't in the model (as 403.5.1's remoteness, an arrangement no rule measures).
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_410_5_2_stairway_and_ramp_enclosure
+  kind: flag
+  topic: means_of_egress
+  title: Stairways and ramps serving a stage or platform unenclosed (BCNYS 410.5.2)
+  applies_when: stages_or_platforms
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 105
+    lines:
+    - 48
+    - 49
+    quote: '[BE] 410.5.2 Stairway and ramp enclosure. Exit access stairways and ramps serving a stage or platform are not
+      required to be enclosed. Exit access stairways and ramps serving technical production areas are not required to be enclosed.'
+  examples:
+  - given:
+      stages_or_platforms: true
+    expect: needs_review
+    note: 'Exit access stairways and ramps serving a stage, a platform or a technical production area need not be enclosed:
+      a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      stages_or_platforms: false
+    expect: not_applicable
+    note: 'The architect states the building has no stage, platform or technical production area: not applicable.'
+  notes: It only loosens what other sections ask of such a stairway or ramp, so a person checks any result that asks an enclosure
+    of one. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_410_5_3_technical_production_areas
+  kind: flag
+  topic: means_of_egress
+  title: Technical production areas' means of egress and escape (BCNYS 410.5.3)
+  applies_when: stages_or_platforms
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 105
+    lines:
+    - 50
+    - 51
+    quote: '[BE] 410.5.3 Technical production areas. Technical production areas shall be provided with means of egress and
+      means of escape in accordance with Sections 410.5.3.1 through 410.5.3.5.'
+  examples:
+  - given:
+      stages_or_platforms: true
+    expect: needs_review
+    note: 'Technical production areas have means of egress and means of escape per 410.5.3.1 to 410.5.3.5: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      stages_or_platforms: false
+    expect: not_applicable
+    note: 'The architect states the building has no stage, platform or technical production area: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_410_5_3_1_number_of_means_of_egress
+  kind: flag
+  topic: means_of_egress
+  title: At least one means of egress from a technical production area (BCNYS 410.5.3.1)
+  applies_when: stages_or_platforms
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 105
+    lines:
+    - 52
+    - 53
+    quote: '[BE] 410.5.3.1 Number of means of egress. Not fewer than one means of egress shall be provided from technical
+      production areas.'
+  examples:
+  - given:
+      stages_or_platforms: true
+    expect: needs_review
+    note: 'At least one means of egress from each technical production area: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      stages_or_platforms: false
+    expect: not_applicable
+    note: 'The architect states the building has no stage, platform or technical production area: not applicable.'
+  notes: 'It only loosens Table 1006.2.1''s second exit: a technical production area isn''t marked in the model, so Table
+    1006.2.1''s rows check it as any space, and a person checks one they fail where 410.5.3.1 allows a single means of egress.
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_410_5_3_2_exit_access_travel_distance
+  kind: flag
+  topic: means_of_egress
+  title: Technical production area travel, 300 ft, 400 ft with NFPA 13 (BCNYS 410.5.3.2)
+  applies_when: stages_or_platforms
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 105
+    lines:
+    - 54
+    - 56
+    quote: '[BE] 410.5.3.2 Exit access travel distance. The exit access travel distance shall be not greater than 300 feet
+      (91 440 mm) for buildings without an automatic sprinkler system and 400 feet (122 mm) for buildings equipped throughout
+      with an automatic sprinkler system in accordance with Section 903.3.1.1.'
+  examples:
+  - given:
+      stages_or_platforms: true
+    expect: needs_review
+    note: 'Exit access travel from a technical production area at most 300 ft without an automatic sprinkler system and 400
+      ft with NFPA 13 (903.3.1.1) throughout: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      stages_or_platforms: false
+    expect: not_applicable
+    note: 'The architect states the building has no stage, platform or technical production area: not applicable.'
+  notes: 'Never below a row of Table 1017.2 (200 ft to 300 ft without a sprinkler system, 250 ft to 400 ft with one), so it
+    only loosens them: a person checks a travel the row fails in a technical production area. The book prints "400 feet (122
+    mm)" (p.105, line 55): 400 ft is 121 920 mm, so the millimetres are not 400 ft''s conversion; the book prints the same
+    figure elsewhere (p.342, line 5, 1017.2.2: "400 feet (122 m)"), so Gordium reads 400 ft, a misprinted unit in the conversion;
+    which the State means is a person''s check. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_410_5_3_3_two_means_of_egress
+  kind: flag
+  topic: means_of_egress
+  title: Common path at most 100 ft where two are required (BCNYS 410.5.3.3)
+  applies_when: stages_or_platforms
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 105
+    lines:
+    - 57
+    - 59
+    quote: '[BE] 410.5.3.3 Two means of egress. Where two means of egress are required, the common path of travel shall be
+      not greater than 100 feet (30 480 mm). Exception: A means of escape to a roof in place of a second means of egress is
+      permitted.'
+  examples:
+  - given:
+      stages_or_platforms: true
+    expect: needs_review
+    note: 'Where two means of egress are required from a technical production area, its common path of egress travel is at
+      most 100 ft, a means of escape to a roof permitted in place of the second: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      stages_or_platforms: false
+    expect: not_applicable
+    note: 'The architect states the building has no stage, platform or technical production area: not applicable.'
+  notes: 'It tightens only Table 1006.2.1''s 125 ft rows (Groups R-2, R-3 and R-4 with a sprinkler system): their rules never
+    pass a space''s common path over 100 ft where a technical production area may be (stated, or not ruled out); every other
+    row is at most 100 ft. The roof escape only loosens. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part
+    f).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_410_5_3_4_path_of_egress_travel
+  kind: flag
+  topic: means_of_egress
+  title: Stairs, ladders and catwalks serving technical areas (BCNYS 410.5.3.4)
+  applies_when: stages_or_platforms
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 106
+    lines:
+    - 3
+    - 10
+    quote: '[BE] 410.5.3.4 Path of egress travel. The following exit access components are permitted where serving technical
+      production areas: 1. Stairways. 2. Ramps. 3. Spiral stairways. 4. Catwalks. 5. Alternating tread devices. 6. Permanent
+      ladders.'
+  examples:
+  - given:
+      stages_or_platforms: true
+    expect: needs_review
+    note: 'Stairways, ramps, spiral stairways, catwalks, alternating tread devices and permanent ladders are permitted exit
+      access components serving technical production areas: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      stages_or_platforms: false
+    expect: not_applicable
+    note: 'The architect states the building has no stage, platform or technical production area: not applicable.'
+  notes: It only loosens what Chapter 10 permits as exit access components; none of them is marked in the model. Hand-drafted
+    in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_410_5_3_5_width
+  kind: flag
+  topic: means_of_egress
+  title: At least 22 in of egress width in technical support areas (BCNYS 410.5.3.5)
+  applies_when: stages_or_platforms
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 106
+    lines:
+    - 11
+    - 12
+    quote: '[BE] 410.5.3.5 Width. The path of egress travel within and from technical support areas shall be not less than
+      22 inches (559 mm).'
+  examples:
+  - given:
+      stages_or_platforms: true
+    expect: needs_review
+    note: 'The path of egress travel within and from technical support areas is at least 22 in wide: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      stages_or_platforms: false
+    expect: not_applicable
+    note: 'The architect states the building has no stage, platform or technical production area: not applicable.'
+  notes: Below every width Chapter 10's rules ask (Table 1020.3's least is 24 in), so it only loosens them; the areas aren't
+    marked in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_411_4_exit_marking
+  kind: flag
+  topic: means_of_egress
+  title: Exit signs and directional markings in special amusement areas (BCNYS 411.4)
+  applies_when: special_egress_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 107
+    lines:
+    - 6
+    - 12
+    quote: '[BE] 411.4 Exit marking. Exit signs shall be installed at the required exit or exit access doorways serving special
+      amusement areas in accordance with this section and Section 1013. Approved directional exit markings shall be provided.
+      Where mirrors, mazes or other designs disguise the path of egress travel such that the path of egress travel is not
+      apparent, approved and listed low-level exit signs that comply with Section 1013.5, and directional path markings listed
+      in accordance with UL 1994, shall be provided and located not more than 8 inches (203 mm) above the walking surface
+      and on or near the path of egress travel. Such markings shall become visible in an emergency. The directional exit marking
+      shall be activated by the automatic smoke detection system and the automatic sprin- kler system in accordance with Section
+      411.3.2.'
+  examples:
+  - given:
+      special_egress_spaces: true
+    expect: needs_review
+    note: 'Exit signs at the required exit or exit access doorways serving a special amusement area (1013), approved directional
+      exit markings, and, where mirrors, mazes or other designs disguise the path of egress travel, listed low-level exit
+      signs (1013.5) and UL 1994 path markings not more than 8 in above the walking surface, activated by the smoke detection
+      and sprinkler systems (411.3.2): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      special_egress_spaces: false
+    expect: not_applicable
+    note: 'The architect states the building holds no space the code gives its own exits or travel limit, so no special amusement
+      area: not applicable.'
+  notes: Shown where the building may hold a space the code gives its own exits or travel limit (the stated fact's words name
+    a special amusement area, 411). Signs and markings aren't in the model. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_411_4_1_photoluminescent_exit_signs
+  kind: flag
+  topic: means_of_egress
+  title: Photoluminescent exit signs listed (BCNYS 411.4.1)
+  applies_when: special_egress_spaces
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 107
+    lines:
+    - 13
+    - 14
+    quote: '[BE] 411.4.1 Photoluminescent exit signs. Where photoluminescent exit signs are installed, such signs shall be
+      listed and the activating light source and viewing distance shall be in accordance with the listing and markings on
+      the signs.'
+  examples:
+  - given:
+      special_egress_spaces: true
+    expect: needs_review
+    note: 'Photoluminescent exit signs in a special amusement area are listed, their activating light source and viewing distance
+      per their listing and markings: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      special_egress_spaces: false
+    expect: not_applicable
+    note: 'The architect states the building holds no space the code gives its own exits or travel limit, so no special amusement
+      area: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_412_2_2_airport_traffic_control_towers
+  kind: flag
+  topic: means_of_egress
+  title: Airport traffic control tower egress per 412.2.2.1 to 412.2.2.3 (BCNYS 412.2.2)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 107
+    lines:
+    - 46
+    - 47
+    quote: '[BE] 412.2.2 Means of egress and evacuation. The means of egress in airport traffic control towers shall comply
+      with Sections 412.2.2.1 through 412.2.2.3.'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'The building may hold an aircraft-related occupancy: an airport traffic control tower''s means of egress follows
+      412.2.2.1 to 412.2.2.3: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: 'Section 412 (aircraft-related occupancies) is brought in for its means of egress only: 412.2.2 whole, 412.4.2, 412.6
+    whole with Table 412.6, and 412.7.3. An airport traffic control tower isn''t marked in the model; the stated fact says
+    whether the building may hold one. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_412_2_2_1_stairways
+  kind: flag
+  topic: means_of_egress
+  title: Tower stairways per 1011, exit stairways smokeproof (BCNYS 412.2.2.1)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 107
+    lines:
+    - 48
+    - 50
+    quote: '[BE] 412.2.2.1 Stairways. Stairways in airport traffic control towers shall be in accordance with Section 1011.
+      Exit stairways shall be smokeproof enclosures complying with one of the alternatives provided in Section 909.20. Exception:
+      Stairways in airport traffic control towers are not required to comply with Section 1011.12.'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'Stairways in an airport traffic control tower meet 1011, but for 1011.12 (roof access), and its exit stairways
+      are smokeproof enclosures per one of 909.20''s alternatives: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: Smokeproof enclosures aren't in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_412_2_2_2_exit_access
+  kind: flag
+  topic: means_of_egress
+  title: One means of exit access from a tower's observation levels (BCNYS 412.2.2.2)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 107
+    lines:
+    - 51
+    - 53
+    quote: '[BE] 412.2.2.2 Exit access. From observation levels, airport traffic control towers shall be permitted to have
+      a single means of exit access for a distance of travel not greater than 100 feet (30 480 mm). Exit access stairways
+      from the observation level need not be enclosed.'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'From an airport traffic control tower''s observation levels, a single means of exit access is permitted for at
+      most 100 ft of travel, and exit access stairways from the observation level need not be enclosed: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: 'It only loosens (a permission: "shall be permitted"): a tower''s levels aren''t marked, so the rules check them
+    as any story or space of the building''s group, and a person checks one they fail where 412.2.2.2 allows it. Hand-drafted
+    in a Claude Code session (2026-11-27, Chapter 4 part f).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_412_2_2_3_number_of_exits
+  kind: flag
+  topic: means_of_egress
+  title: One exit stairway for 15 occupants, 1,500 sq ft a floor (BCNYS 412.2.2.3)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 108
+    lines:
+    - 3
+    - 5
+    quote: '[BE] 412.2.2.3 Number of exits. Not less than one exit stairway shall be permitted for airport traffic control
+      towers of any height provided that the occupant load per floor is not greater than 15 and the area per floor does not
+      exceed 1,500 square feet (140 m[fn2]).'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'An airport traffic control tower of any height may have a single exit stairway where each floor has at most 15
+      occupants and at most 1,500 sq ft: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: 'Gordium''s reading: a permission ("shall be permitted ... provided that"), as 1006.3.4''s single exits are, so it
+    only loosens Table 1006.3.3''s two exits and takes away none of 1006.3.4''s; the story exit rules check a tower as any
+    building of its group, and a person checks a story they fail where 412.2.2.3 allows one stairway, and confirms the reading.
+    Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_412_2_2_3_1_interior_finish
+  kind: flag
+  topic: means_of_egress
+  title: Class A or B finishes in a tower with one exit stairway (BCNYS 412.2.2.3.1)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 108
+    lines:
+    - 6
+    - 7
+    quote: '[BE] 412.2.2.3.1 Interior finish. Where an airport traffic control tower is provided with only one exit stairway,
+      interior wall and ceiling finishes shall be either Class A or Class B.'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'Where an airport traffic control tower has only one exit stairway, its interior wall and ceiling finishes are Class
+      A or Class B: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: Finishes aren't in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_412_2_2_3_2_exit_separation
+  kind: flag
+  topic: means_of_egress
+  title: A sprinklered tower's exits a quarter of its length apart (BCNYS 412.2.2.3.2)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 108
+    lines:
+    - 8
+    - 10
+    quote: '[BE] 412.2.2.3.2 Exit separation. Where an airport traffic control tower is equipped throughout with an automatic
+      sprinkler system in accordance with Section 903.3.1.1 and two exits are required, the exit separation distance required
+      by Section 1007 shall be not less than one-fourth of the length of the maximum overall dimension of the area served.'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'Where an airport traffic control tower has NFPA 13 (903.3.1.1) throughout and two exits are required, they are
+      at least one-fourth of the maximum overall dimension of the area served apart (in place of 1007''s): a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: 'It only loosens 1007.1.1''s separation (one-third of the diagonal with a sprinkler system, its exception 2), whose
+    rule checks a tower as any building: a person checks a separation it fails where 412.2.2.3.2 allows it. Hand-drafted in
+    a Claude Code session (2026-11-27, Chapter 4 part f).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_412_4_2_residential_aircraft_hangar_egress
+  kind: flag
+  topic: means_of_egress
+  title: A residential aircraft hangar's two means of egress (BCNYS 412.4.2)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 109
+    lines:
+    - 53
+    - 54
+    quote: '[BE] 412.4.2 Egress. A hangar shall provide two means of egress. One of the doors into the dwelling shall be considered
+      as meet- ing only one of the two means of egress.'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'A residential aircraft hangar has two means of egress, a door into the dwelling counting as only one of them: a
+      person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: 'An aircraft hangar accessory to a one- or two-family residence is Group U (312.1, p.83, line 8): Table 1006.2.1''s
+    Group U rule never passes a space with one exit where an aircraft-related occupancy may be (stated, or not ruled out),
+    since which space is the hangar isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part
+    f).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_412_6_aircraft_manufacturing_facilities
+  kind: flag
+  topic: means_of_egress
+  title: Aircraft manufacturing travel increased per Table 412.6 (BCNYS 412.6)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 110
+    lines:
+    - 32
+    - 35
+    quote: '[BE] 412.6 Aircraft manufacturing facilities. In buildings used for the manufacturing of aircraft, exit access
+      travel distances indi- cated in Section 1017.1 shall be increased in accordance with the following: 1. The building
+      shall be of Type I or II construction. 2. Exit access travel distance shall not exceed the distances given in Table
+      412.6.'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'In a building used for manufacturing aircraft, of Type I or II construction, exit access travel may reach Table
+      412.6''s distances in place of Table 1017.2''s: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: It only loosens Table 1017.2's rows, which need review wherever a space with its own travel limit may be (the special
+    egress spaces fact names aircraft manufacturing, 412.6). Hand-drafted in a Claude Code session (2026-11-27, Chapter 4
+    part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_412_6_aircraft_manufacturing_travel
+  kind: flag
+  topic: means_of_egress
+  title: Aircraft manufacturing exit access travel distance (BCNYS Table 412.6)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 110
+    lines:
+    - 36
+    - 47
+    quote: '[BE] TABLE 412.6—AIRCRAFT MANUFACTURING EXIT ACCESS TRAVEL DISTANCE MANUFACTURING AREA HEIGHT (square feet)[fna]
+      (feet)[fnb] ≥ 150,000 ≥ 200,000 ≥ 250,000 ≥ 500,000 ≥ 750,000 ≥ 1,000,000 ≥ 25 400 450 500 500 500 500 ≥ 50 400 500
+      600 700 700 700 ≥ 75 400 500 700 850 1,000 1,000 ≥ 100 400 500 750 1,000 1,250 1,500 For SI: 1 foot = 304.8 mm. a.Contiguous
+      floor area of the aircraft manufacturing facility having the indicated height. b.Minimum height from finished floor
+      to bottom of ceiling or roof slab or deck.'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'Exit access travel in an aircraft manufacturing facility at most 400 ft to 1,500 ft, by the contiguous manufacturing
+      area of each height (150,000 sq ft or more) and the height from floor to ceiling or roof (25 ft or more): a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: The manufacturing area, its height and the building's construction type aren't in the model. Hand-drafted in a Claude
+    Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_412_6_1_ancillary_areas
+  kind: flag
+  topic: means_of_egress
+  title: Ancillary areas egressing through the manufacturing area (BCNYS 412.6.1)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 110
+    lines:
+    - 48
+    - 51
+    quote: '[BE] 412.6.1 Ancillary areas. Rooms, areas and spaces ancillary to the primary manufacturing area shall be permitted
+      to egress through such area having a minimum height as indicated in Table 412.6. Exit access travel distance within
+      the ancillary room, area or space shall not exceed that indicated in Table 1017.2 based on the occupancy classification
+      of that ancillary area. Total exit access travel distance shall not exceed that indicated in Table 412.6.'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'Rooms ancillary to the aircraft manufacturing area may egress through it where it has Table 412.6''s height; travel
+      within an ancillary room is at most Table 1017.2''s for its group, and the total at most Table 412.6''s: a person''s
+      check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_412_7_3_heliports_and_helistops
+  kind: flag
+  topic: means_of_egress
+  title: Two exits from a heliport or helistop landing area (BCNYS 412.7.3)
+  applies_when: aircraft_related_occupancy
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 111
+    lines:
+    - 7
+    - 10
+    quote: '[BE] 412.7.3 Means of egress. The means of egress from heliports and helistops shall comply with the provisions
+      of Chapter 10. Landing areas located on buildings or structures shall have two or more exits or access to exits. For
+      landing areas less than 60 feet (18 288 mm) in length or less than 2,000 square feet (186 m[fn2]) in area, the second
+      means of egress is permitted to be a fire escape, alternating tread device or ladder leading to the floor below.'
+  examples:
+  - given:
+      aircraft_related_occupancy: true
+    expect: needs_review
+    note: 'A heliport''s or helistop''s means of egress meets Chapter 10; a landing area on a building has two or more exits
+      or access to exits, the second, for a landing area under 60 ft long or 2,000 sq ft, permitted to be a fire escape, alternating
+      tread device or ladder to the floor below: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      aircraft_related_occupancy: false
+    expect: not_applicable
+    note: 'The architect states the building neither is nor holds an aircraft-related occupancy (no airport traffic control
+      tower, aircraft hangar, aircraft paint hangar, aircraft manufacturing facility, heliport or helistop): not applicable.'
+  notes: A landing area is on a roof, which no rule's parts include. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_415_11_3_3_service_corridor_egress
+  kind: flag
+  topic: means_of_egress
+  title: Service corridor travel, dead ends, exits and doors (BCNYS 415.11.3.3)
+  applies_when: occupancy_group in ["H-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 122
+    lines:
+    - 45
+    - 48
+    quote: '[F] 415.11.3.3 Means of egress. The distance of travel from any point in a service corridor to an exit, exit access
+      corridor or door into a fabrication area shall be not greater than 75 feet (22 860 mm). Dead ends shall be not greater
+      than 4 feet (1219 mm) in length. There shall be not less than two exits, and not more than one-half of the required
+      means of egress shall require travel into a fabrication area. Doors from service corridors shall swing in the direction
+      of egress travel and shall be self-closing.'
+  examples:
+  - given:
+      occupancy_group: H-5
+    expect: needs_review
+    note: 'In a Group H-5 service corridor: at most 75 ft from any point to an exit, an exit access corridor or a door into
+      a fabrication area; dead ends at most 4 ft; at least two exits, and at most half of the required means of egress through
+      a fabrication area; doors swinging in the direction of egress travel and self-closing: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group H-5: not applicable.'
+  notes: Which corridors are service corridors isn't in the model, so in a building stated Group H-5 Table 1017.2's H-5 row
+    never passes over 75 ft, 1020.5's dead end rule over 4 ft, and Table 1006.3.4(2)'s rule a story with one exit; where each
+    passage leads and the doors' closers aren't in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4
+    part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_415_11_3_4_service_corridor_width
+  kind: flag
+  topic: means_of_egress
+  title: Service corridor 5 ft wide, or 33 in past the widest cart (BCNYS 415.11.3.4)
+  applies_when: occupancy_group in ["H-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 122
+    lines:
+    - 49
+    - 50
+    quote: '[F] 415.11.3.4 Minimum width. The clear width of a service corridor shall be not less than 5 feet (1524 mm), or
+      33 inches (838 mm) wider than the widest cart or truck used in the service corridor, whichever is greater.'
+  examples:
+  - given:
+      occupancy_group: H-5
+    expect: needs_review
+    note: 'A Group H-5 service corridor is at least 5 ft wide, or 33 in wider than the widest cart or truck used in it, whichever
+      is greater: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, not Group H-5: not applicable.'
+  notes: Which corridors are service corridors and the carts used in them aren't in the model, so in a building stated Group
+    H-5 Table 1020.3's width rule never passes a corridor (no width is known to be 33 in wider than the widest cart). Hand-drafted
+    in a Claude Code session (2026-11-27, Chapter 4 part f).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_415_11_6_6_hpm_room_exits
+  kind: flag
+  topic: means_of_egress
+  title: An HPM, gas or liquid storage room's exit directly out (BCNYS 415.11.6.6)
+  applies_when: occupancy_group in ["H-2", "H-3", "H-4", "H-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 123
+    lines:
+    - 34
+    - 35
+    quote: '[F] 415.11.6.6 Exits. Where two exits are required from HPM rooms, liquid storage rooms and gas rooms, one shall
+      be directly to the outside of the building.'
+  examples:
+  - given:
+      occupancy_group: H-5
+    expect: needs_review
+    note: 'Where two exits are required from an HPM room, a liquid storage room or a gas room, one is directly to the outside
+      of the building: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, neither Group H-5 nor the H-2, H-3 or H-4 of an HPM, gas or liquid storage room:
+      not applicable.'
+  notes: 'HPM rooms are Group H-2, H-3 or H-4 serving a Group H-5 occupancy (202), liquid storage rooms Group H-3: shown where
+    the building may be any of them. Which rooms these are, and where their exits lead, aren''t in the model (Table 1006.2.1''s
+    rules count a room''s exits, never where they lead). Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part
+    f).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_415_11_6_7_hpm_room_doors
+  kind: flag
+  topic: means_of_egress
+  title: Self-closing 3/4-hour fire doors in their fire barrier walls (BCNYS 415.11.6.7)
+  applies_when: occupancy_group in ["H-2", "H-3", "H-4", "H-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 123
+    lines:
+    - 36
+    - 37
+    quote: '[F] 415.11.6.7 Doors. Doors in a fire barrier wall, including doors to corridors, shall be self-closing fire door
+      assemblies having a fire protection rating of not less than 3/4 hour.'
+  examples:
+  - given:
+      occupancy_group: H-5
+    expect: needs_review
+    note: 'Doors in the fire barrier walls of HPM rooms, gas rooms and liquid storage rooms, those to corridors too, are self-closing
+      fire door assemblies rated at least 3/4 hour: a person''s check.'
+  - given: {}
+    expect: needs_review
+    note: 'Not stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'The building is stated one group, neither Group H-5 nor the H-2, H-3 or H-4 of an HPM, gas or liquid storage room:
+      not applicable.'
+  notes: Doors' ratings and closers aren't in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 4 part
+    f).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_420_1_groups_i1_and_r
@@ -10751,6 +11658,13 @@ rules:
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
       and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_common_path > 100 and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 20 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and
+      space_common_path <= 125)) and stages_or_platforms
+    reason: 'A common path over 100 ft within the row''s 125 ft, in a building that may have a stage, a platform or a technical
+      production area (stated, or not ruled out): where two means of egress are required from a technical production area,
+      its common path is at most 100 ft (410.5.3.3), and which space is one isn''t in the model: a person checks (Chapter
+      4 part f).'
   for_each: space
   when_none: needs_review
   sources:
@@ -10823,8 +11737,17 @@ rules:
       paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
       travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
       egress travel shall not exceed 50 feet (15 240 mm).'
+  - file: gov.ny.building.2025.pdf
+    page: 105
+    lines:
+    - 57
+    - 59
+    quote: '[BE] 410.5.3.3 Two means of egress. Where two means of egress are required, the common path of travel shall be
+      not greater than 100 feet (30 480 mm). Exception: A means of escape to a roof in place of a second means of egress is
+      permitted.'
   examples:
   - given:
+      stages_or_platforms: false
       occupancy_group: R-2
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -10846,6 +11769,7 @@ rules:
     expect: pass
     note: Two exits or exit access doorways, the common path within the row's value.
   - given:
+      stages_or_platforms: false
       occupancy_group: R-2
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -10867,6 +11791,7 @@ rules:
     expect: pass
     note: 'Sprinklered (NFPA 13): 20 occupants and 125 ft, each at most.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-2
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -10888,6 +11813,7 @@ rules:
     expect: fail
     note: 'Over 20 occupants: two exits needed.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-2
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -10909,6 +11835,7 @@ rules:
     expect: fail
     note: 'Sprinklered: a common path over 125 ft needs two exits.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -10930,6 +11857,7 @@ rules:
     expect: fail
     note: 'Not Permitted (NP) without an automatic sprinkler system: two exits needed.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-2
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -10951,6 +11879,7 @@ rules:
     expect: needs_review
     note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-2
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -10973,6 +11902,7 @@ rules:
     note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
       it asks nothing of it.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-2
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -10993,6 +11923,7 @@ rules:
     note: 'A dwelling unit with one door in an unsprinklered Group R-2 building: Not Permitted, whatever its occupant load
       and common path (the four-unit eval building''s apartments).'
   - given:
+      stages_or_platforms: false
       occupancy_group: B
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11012,6 +11943,7 @@ rules:
     expect: not_applicable
     note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-2
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11023,6 +11955,30 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No space: with none, the rule needs review.'
+  - given:
+      stages_or_platforms: true
+      occupancy_group: R-2
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      special_egress_spaces: false
+      assembly_fixed_seating: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_assembly_seating_possible: false
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 20
+          space_common_path: 125
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'One exit and a common path over 100 ft within the row''s 125 ft, where the building may have a stage, a platform
+      or a technical production area: where two means of egress are required from a technical production area its common path
+      is at most 100 ft (410.5.3.3), and which space is one isn''t in the model: a person checks.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -11109,6 +12065,13 @@ rules:
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
       and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_common_path > 100 and (space_is_exit or space_exit_count >= 2 or (space_occupant_load
+      <= 20 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and
+      space_common_path <= 125)) and stages_or_platforms
+    reason: 'A common path over 100 ft within the row''s 125 ft, in a building that may have a stage, a platform or a technical
+      production area (stated, or not ruled out): where two means of egress are required from a technical production area,
+      its common path is at most 100 ft (410.5.3.3), and which space is one isn''t in the model: a person checks (Chapter
+      4 part f).'
   for_each: space
   when_none: needs_review
   sources:
@@ -11201,8 +12164,17 @@ rules:
       paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
       travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
       egress travel shall not exceed 50 feet (15 240 mm).'
+  - file: gov.ny.building.2025.pdf
+    page: 105
+    lines:
+    - 57
+    - 59
+    quote: '[BE] 410.5.3.3 Two means of egress. Where two means of egress are required, the common path of travel shall be
+      not greater than 100 feet (30 480 mm). Exception: A means of escape to a roof in place of a second means of egress is
+      permitted.'
   examples:
   - given:
+      stages_or_platforms: false
       occupancy_group: R-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11224,6 +12196,7 @@ rules:
     expect: pass
     note: Two exits or exit access doorways, the common path within the row's value.
   - given:
+      stages_or_platforms: false
       occupancy_group: R-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11245,6 +12218,7 @@ rules:
     expect: pass
     note: 'Sprinklered (NFPA 13): 20 occupants and 125 ft, each at most.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11266,6 +12240,7 @@ rules:
     expect: fail
     note: 'Over 20 occupants: two exits needed.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11288,6 +12263,7 @@ rules:
     note: 'One exit and at most 20 occupants, but the common path the columns wouldn''t allow: note e (one-group building)
       makes it a person''s check.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-3
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -11310,6 +12286,7 @@ rules:
     note: 'One exit and at most 20 occupants, but the common path the columns wouldn''t allow: note e (one-group building)
       makes it a person''s check.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11331,6 +12308,7 @@ rules:
     expect: needs_review
     note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11353,6 +12331,7 @@ rules:
     note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
       it asks nothing of it.'
   - given:
+      stages_or_platforms: false
       occupancy_group: B
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11372,6 +12351,7 @@ rules:
     expect: not_applicable
     note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
   - given:
+      stages_or_platforms: false
       occupancy_group: R-3
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11383,6 +12363,30 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No space: with none, the rule needs review.'
+  - given:
+      stages_or_platforms: true
+      occupancy_group: R-3
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      special_egress_spaces: false
+      assembly_fixed_seating: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_assembly_seating_possible: false
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 20
+          space_common_path: 125
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'One exit and a common path over 100 ft within the row''s 125 ft, where the building may have a stage, a platform
+      or a technical production area: where two means of egress are required from a technical production area its common path
+      is at most 100 ft (410.5.3.3), and which space is one isn''t in the model: a person checks.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -11836,6 +12840,12 @@ rules:
       another of the table''s functions (residential, business, mercantile and the like), every room and enclosed space is read,
       and, in a building stated Group A, a room elsewhere is shown to be its assembly room. (Only where the row would otherwise
       pass: a measured fail still fails, since the real path can only be longer.)'
+  - when: not space_is_exit and space_exit_count < 2 and (space_is_exit or space_exit_count >= 2 or (space_occupant_load <=
+      49 and space_common_path <= (75 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2",
+      "R-3", "R-4"])) else (100 if space_occupant_load <= 30 else 75)))) and aircraft_related_occupancy
+    reason: 'One exit within the row, in a building that may be or hold an aircraft-related occupancy (stated, or not ruled
+      out): a residential aircraft hangar, Group U (312.1), has two means of egress, a door into the dwelling counting as
+      only one (412.4.2), and which space is a hangar isn''t in the model: a person checks (Chapter 4 part f).'
   for_each: space
   when_none: needs_review
   sources:
@@ -11921,8 +12931,16 @@ rules:
       paths of egress travel to two exits. Exceptions: 1. For areas serving less than 50 occupants, the common path of egress
       travel shall not exceed 75 feet (22 860 mm). 2. For smoke-protected or open-air assembly seating, the common path of
       egress travel shall not exceed 50 feet (15 240 mm).'
+  - file: gov.ny.building.2025.pdf
+    page: 109
+    lines:
+    - 53
+    - 54
+    quote: '[BE] 412.4.2 Egress. A hangar shall provide two means of egress. One of the doors into the dwelling shall be considered
+      as meet- ing only one of the two means of egress.'
   examples:
   - given:
+      aircraft_related_occupancy: false
       occupancy_group: U
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11944,6 +12962,7 @@ rules:
     expect: pass
     note: Two exits or exit access doorways, the common path within the row's value.
   - given:
+      aircraft_related_occupancy: false
       occupancy_group: U
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11965,6 +12984,7 @@ rules:
     expect: pass
     note: 'Sprinklered (NFPA 13): 49 occupants and 75 ft, each at most.'
   - given:
+      aircraft_related_occupancy: false
       occupancy_group: U
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -11986,6 +13006,7 @@ rules:
     expect: fail
     note: 'Over 49 occupants: two exits needed.'
   - given:
+      aircraft_related_occupancy: false
       occupancy_group: U
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -12007,6 +13028,7 @@ rules:
     expect: fail
     note: 'Sprinklered: a common path over 75 ft needs two exits.'
   - given:
+      aircraft_related_occupancy: false
       occupancy_group: U
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -12028,6 +13050,7 @@ rules:
     expect: pass
     note: 'No sprinkler system, 30 occupants: 100 ft at most.'
   - given:
+      aircraft_related_occupancy: false
       occupancy_group: U
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
@@ -12049,6 +13072,7 @@ rules:
     expect: fail
     note: 'No sprinkler system, over 30 occupants: over 75 ft.'
   - given:
+      aircraft_related_occupancy: false
       occupancy_group: U
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -12070,6 +13094,7 @@ rules:
     expect: needs_review
     note: 'Two exits, common path over the row''s value: the open question (a cap, or only a trigger).'
   - given:
+      aircraft_related_occupancy: false
       occupancy_group: U
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -12092,6 +13117,7 @@ rules:
     note: 'The space is itself an exit (an exit stair enclosure): 1006.2 is for the rooms, areas and spaces exits serve, so
       it asks nothing of it.'
   - given:
+      aircraft_related_occupancy: false
       occupancy_group: B
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -12111,6 +13137,7 @@ rules:
     expect: not_applicable
     note: 'Group B is not in this row (a mixed building is general''s flag): not applicable.'
   - given:
+      aircraft_related_occupancy: false
       occupancy_group: U
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -12122,6 +13149,29 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No space: with none, the rule needs review.'
+  - given:
+      aircraft_related_occupancy: true
+      occupancy_group: U
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      special_egress_spaces: false
+      assembly_fixed_seating: false
+    parts:
+      space:
+      - id: p1
+        name: One door, at both limits
+        measures:
+          space_assembly_seating_possible: false
+          space_is_exit: false
+          space_exit_count: 1
+          space_occupant_load: 49
+          space_common_path: 75
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'One exit within the row, where the building may be or hold an aircraft-related occupancy: a residential aircraft
+      hangar (Group U, 312.1) has two means of egress (412.4.2), and which space is one isn''t in the model: a person checks.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -13796,6 +14846,14 @@ rules:
     reason: 'One exit, allowed by 1006.3.4, in a building that may be an underground building (stated, or not ruled out: a
       floor level used for human occupancy more than 30 ft below the lowest level of exit discharge): 405.7.1 asks two exits
       on each floor level, and which floor levels it holds isn''t in the model: a person checks.'
+  - when: story_exit_count < 2 and (story_exit_count >= (2 if story_occupant_load <= 500 else 3 if story_occupant_load <=
+      1000 else 4) or story_exit_count > 0 and (occupancy_group in ["R-3", "R-4"] or story_first_above_or_below_grade and
+      (occupancy_group in ["H-2", "H-3"] and story_occupant_load <= 3 and egress_travel_distance <= 25 or occupancy_group
+      in ["H-4", "H-5", "I-1", "I-2", "I-3", "R-1", "R-2"] and story_occupant_load <= 10 and egress_travel_distance <= 75)
+      and (occupancy_group != "R-2" or (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and emergency_escape_openings_1031)))
+      and occupancy_group in ["H-5"]
+    reason: 'One exit, allowed by 1006.3.4, in Group H-5: a service corridor has at least two exits (415.11.3.3), and which
+      rooms are service corridors isn''t in the model: a person checks (Chapter 4 part f).'
   for_each: story
   when_none: needs_review
   sources:
@@ -13900,6 +14958,16 @@ rules:
     quote: '[BE] 405.7.1 Number of exits. Each floor level shall be provided with not fewer than two exits. Where compartmentation
       is required by Section 405.4, each compartment shall have not fewer than one exit and not fewer than one exit access
       doorway into the adjoining compartment.'
+  - file: gov.ny.building.2025.pdf
+    page: 122
+    lines:
+    - 45
+    - 48
+    quote: '[F] 415.11.3.3 Means of egress. The distance of travel from any point in a service corridor to an exit, exit access
+      corridor or door into a fabrication area shall be not greater than 75 feet (22 860 mm). Dead ends shall be not greater
+      than 4 feet (1219 mm) in length. There shall be not less than two exits, and not more than one-half of the required
+      means of egress shall require travel into a fabrication area. Doors from service corridors shall swing in the direction
+      of egress travel and shall be self-closing.'
   examples:
   - given:
       occupancy_group: R-3
@@ -14092,6 +15160,35 @@ rules:
     expect: needs_review
     note: 'A story with one exit, a pass where the building states it isn''t underground, where it states it is: 405.7.1 asks
       two exits on each floor level, so a person checks.'
+  - given:
+      occupancy_group: H-5
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      emergency_escape_openings_1031: true
+      r2_sleeping_units: true
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      high_rise_building: false
+      underground_building: false
+    parts:
+      story:
+      - id: p1
+        name: Dormitory floor (sleeping units), one exit
+        measures:
+          story_assembly_seating_possible: false
+          story_rooms_exit_directly_outside: false
+          story_exit_count: 1
+          story_occupant_load: 10
+          egress_travel_distance: 75
+          story_first_above_or_below_grade: true
+          story_second_above_grade_plane: false
+          story_fourth_or_higher_above_grade_plane: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group H-5, one exit, 10 occupants, 75 ft on the first story: within 1006.3.4, but a service corridor has at least
+      two exits (415.11.3.3), and which rooms are service corridors isn''t in the model: a person checks.'
   notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4
     (the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling
     units (Table 1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with
@@ -18476,6 +19573,10 @@ rules:
       and exits, which state none, states another of the table''s functions (residential, business, mercantile and the like),
       every room and enclosed space is read, and, in a building stated Group A, a room elsewhere is shown to be its assembly
       room. Over the row, too: 1030.7''s exceptions allow more for smoke-protected and open-air seating.'
+  - when: sprinklered_903_3_1_1 and egress_travel_distance > 75 and egress_travel_distance <= 200
+    reason: 'Within the row''s 200 ft but over 75 ft: in Group H-5, travel from any point in a service corridor to an exit,
+      an exit access corridor or a door into a fabrication area is at most 75 ft (415.11.3.3), and which rooms are service
+      corridors isn''t in the model: a person checks (Chapter 4 part f).'
   for_each: story
   when_none: needs_review
   sources:
@@ -18532,6 +19633,16 @@ rules:
     - 51
     quote: 1030.7 Travel distance. The exit access travel distance shall comply with Section 1017. Where aisles are provided
       for seating, the distance shall be measured along the aisles and aisle accessways without travel over or on the seats.
+  - file: gov.ny.building.2025.pdf
+    page: 122
+    lines:
+    - 45
+    - 48
+    quote: '[F] 415.11.3.3 Means of egress. The distance of travel from any point in a service corridor to an exit, exit access
+      corridor or door into a fabrication area shall be not greater than 75 feet (22 860 mm). Dead ends shall be not greater
+      than 4 feet (1219 mm) in length. There shall be not less than two exits, and not more than one-half of the required
+      means of egress shall require travel into a fabrication area. Doors from service corridors shall swing in the direction
+      of egress travel and shall be self-closing.'
   examples:
   - given:
       occupancy_group: H-5
@@ -18564,15 +19675,16 @@ rules:
     parts:
       story:
       - id: p1
-        name: At the sprinklered limit
+        name: At 415.11.3.3's 75 ft
         measures:
           story_assembly_seating_possible: false
-          egress_travel_distance: 200
+          egress_travel_distance: 75
     rows:
     - part: p1
       outcome: pass
     expect: pass
-    note: 'NFPA 13 (903.3.1.1): 200 ft complies (at most).'
+    note: 'NFPA 13 (903.3.1.1): 75 ft complies (at most the row''s 200 ft, and at most 415.11.3.3''s 75 ft from a service
+      corridor).'
   - given:
       occupancy_group: H-5
       sprinklered_903_3_1_1: true
@@ -18666,6 +19778,27 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: with none, the rule needs review.'
+  - given:
+      occupancy_group: H-5
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      egress_balcony_increase_taken: false
+      assembly_fixed_seating: false
+      special_egress_spaces: false
+      building_has_atrium: false
+    parts:
+      story:
+      - id: p1
+        name: At 415.11.3.3's 75 ft
+        measures:
+          story_assembly_seating_possible: false
+          egress_travel_distance: 200
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'NFPA 13, 200 ft: within the row, but over 415.11.3.3''s 75 ft, which a point in a Group H-5 service corridor may
+      be from an exit, an exit access corridor or a door into a fabrication area: a person checks.'
   notes: 'Table 1017.2''s H-5 row: Not Permitted without an automatic sprinkler system, 200 ft with one (note c: 903.3.1.1
     only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says . 1017.2.1''s balcony increase is a
     person''s check where taken or not stated and the distance is within it; the other sections note a lists are the rule
@@ -19425,6 +20558,11 @@ rules:
       (stated, or not ruled out: a space the code gives its own exits or travel limit): a dead-end mall is at most twice the
       mall''s narrowest width within the dead end (402.8.6''s exception, 402.8 governing over Chapter 10), and which corridor
       is a mall isn''t in the model: a person checks.'
+  - when: occupancy_group in ["H-5"] and corridor_dead_end_length > 4 and (corridor_dead_end_length <= (50 if occupancy_group
+      in ["B", "E", "F-1", "F-2", "I-1", "M", "R-1", "R-2", "S-1", "S-2", "U"] and sprinklered_903_3_1_1 else 20) or corridor_dead_end_length
+      < 2.5 * corridor_dead_end_least_width)
+    reason: 'Within 1020.5''s limit but over 4 ft, in Group H-5: a dead end in a service corridor is at most 4 ft (415.11.3.3),
+      and which corridors are service corridors isn''t in the model: a person checks (Chapter 4 part f).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -19479,6 +20617,16 @@ rules:
       shall be not less than 66 inches (1676 mm). Exception: Access to exits is permitted by way of a dead-end mall that does
       not exceed a length equal to twice the width of the mall measured at the narrowest location within the dead-end portion
       of the mall.'
+  - file: gov.ny.building.2025.pdf
+    page: 122
+    lines:
+    - 45
+    - 48
+    quote: '[F] 415.11.3.3 Means of egress. The distance of travel from any point in a service corridor to an exit, exit access
+      corridor or door into a fabrication area shall be not greater than 75 feet (22 860 mm). Dead ends shall be not greater
+      than 4 feet (1219 mm) in length. There shall be not less than two exits, and not more than one-half of the required
+      means of egress shall require travel into a fabrication area. Doors from service corridors shall swing in the direction
+      of egress travel and shall be self-closing.'
   examples:
   - given:
       occupancy_group: B
@@ -19678,6 +20826,24 @@ rules:
     expect: needs_review
     note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
       ask more here, so a person checks.'
+  - given:
+      occupancy_group: H-5
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+      special_egress_spaces: false
+    parts:
+      corridor:
+      - id: p1
+        name: Apartment corridor, no sprinkler system
+        measures:
+          corridor_dead_end_length: 10
+          corridor_dead_end_least_width: 5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group H-5, a 10 ft dead end: within 1020.5''s 20 ft, but a dead end in a service corridor is at most 4 ft (415.11.3.3),
+      and which corridor is one isn''t in the model: a person checks.'
   notes: '1020.5 and its exceptions for every group but I-4 (the rule “Dead end at most 20 ft, or under 2.5 x its width, I-4
     (BCNYS 1020.5)”): 20 ft; 50 ft in Groups B, E, F, I-1, M, R-1, R-2, S and U with an NFPA 13 system (903.3.1.1: exception
     2; a 13R system does not meet it); any length under 2.5 times the least width (exception 3). Exceptions 1 (Group I-3,
@@ -21297,6 +22463,11 @@ rules:
       not ruled out: a space the code gives its own exits or travel limit): a mall taken as a corridor is at least 20 ft wide
       (402.8.1.1) and an exit passageway or corridor from it 66 in (402.8.6), and which corridor is which isn''t in the model:
       a person checks.'
+  - when: occupancy_group in ["H-5"] and (corridor_width >= (96 if occupancy_group == "I-2" else 72 if occupancy_group ==
+      "E" and corridor_occupant_load >= 100 else 36 if corridor_occupant_load < 50 else 44))
+    reason: 'Group H-5: a service corridor is at least 5 ft (60 in) wide, or 33 in wider than the widest cart or truck used
+      in it, whichever is greater (415.11.3.4); which corridors are service corridors, and the carts used in them, aren''t
+      in the model, so no width is known to be enough: a person checks (Chapter 4 part f).'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -21354,6 +22525,13 @@ rules:
       shall be not less than 66 inches (1676 mm). Exception: Access to exits is permitted by way of a dead-end mall that does
       not exceed a length equal to twice the width of the mall measured at the narrowest location within the dead-end portion
       of the mall.'
+  - file: gov.ny.building.2025.pdf
+    page: 122
+    lines:
+    - 49
+    - 50
+    quote: '[F] 415.11.3.4 Minimum width. The clear width of a service corridor shall be not less than 5 feet (1524 mm), or
+      33 inches (838 mm) wider than the widest cart or truck used in the service corridor, whichever is greater.'
   examples:
   - given:
       occupancy_group: R-2
@@ -21590,6 +22768,24 @@ rules:
     expect: needs_review
     note: 'The same pass where the building states it may hold a covered or open mall (special egress spaces yes): 402.8 may
       ask more here, so a person checks.'
+  - given:
+      occupancy_group: H-5
+      ambulatory_care_facility: false
+      special_egress_spaces: false
+    parts:
+      corridor:
+      - id: p1
+        name: Apartment corridor at 44 in, 60 occupants
+        measures:
+          corridor_width: 72
+          corridor_occupant_load: 60
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Group H-5, 72 in: more than Table 1020.3 asks, but a service corridor is at least 5 ft wide, or 33 in wider than
+      the widest cart or truck used in it (415.11.3.4), and neither which corridor is one nor the carts are in the model:
+      a person checks.'
   notes: 'Table 1020.3 for every group (section group 4 of the plan, docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md):
     44 in for any facility the table doesn''t list, 36 in with fewer than 50 occupants, 72 in in Group E with 100 or more,
     96 in in Group I-2 where beds are moved. Where the table loosens it for a corridor the model can''t tell apart (24 in

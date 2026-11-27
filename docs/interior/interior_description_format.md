@@ -239,6 +239,13 @@ building:
   underground_building: false          # a floor level used for human occupancy more than 30 ft below the finished
                                        # floor of the lowest level of exit discharge (BCNYS 405.1): Section 405's flags
                                        # and each floor level's two exits (405.7.1)
+  stages_or_platforms: false           # a stage, a platform or a technical production area (BCNYS 202): Section
+                                       # 410.5's flags, and Table 1006.2.1's 125 ft rows (Groups R-2, R-3 and R-4)
+                                       # held to 410.5.3.3's 100 ft common path
+  aircraft_related_occupancy: false    # an airport traffic control tower, an aircraft hangar (a residential one
+                                       # too), an aircraft paint hangar, an aircraft manufacturing facility, a
+                                       # heliport or a helistop (BCNYS Section 412): its flags, and Table
+                                       # 1006.2.1's Group U row held to 412.4.2's two means of egress
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 

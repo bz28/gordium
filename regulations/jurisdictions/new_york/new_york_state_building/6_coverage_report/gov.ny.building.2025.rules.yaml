@@ -254,6 +254,16 @@ pieces:
     heading: Means of egress › Smokeproof enclosure
     rules:
     - general.bc_405_7_2_smokeproof_enclosures
+  406.4.3:
+    label: flag
+    heading: Ramps
+    rules:
+    - general.bc_406_4_3_vehicle_ramps
+  406.5.7:
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_406_5_7_open_parking_garage_egress
   '407.1':
     label: flag
     heading: General
@@ -569,6 +579,136 @@ pieces:
     heading: Subdivision of resident housing areas › Smoke-tight doors
     rules:
     - general.bc_408_8_4_smoke_tight_doors
+  '410.5':
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_410_5_means_of_egress
+  410.5.1:
+    label: flag
+    heading: Means of egress › Arrangement
+    rules:
+    - general.bc_410_5_1_arrangement
+  410.5.2:
+    label: flag
+    heading: Means of egress › Stairway and ramp enclosure
+    rules:
+    - general.bc_410_5_2_stairway_and_ramp_enclosure
+  410.5.3:
+    label: flag
+    heading: Means of egress › Technical production areas
+    rules:
+    - general.bc_410_5_3_technical_production_areas
+  410.5.3.1:
+    label: flag
+    heading: Technical production areas › Number of means of egress
+    rules:
+    - general.bc_410_5_3_1_number_of_means_of_egress
+  410.5.3.2:
+    label: flag
+    heading: Technical production areas › Exit access travel distance
+    rules:
+    - general.bc_410_5_3_2_exit_access_travel_distance
+  410.5.3.3:
+    label: flag
+    heading: Technical production areas › Two means of egress
+    rules:
+    - general.bc_410_5_3_3_two_means_of_egress
+  410.5.3.4:
+    label: flag
+    heading: Technical production areas › Path of egress travel
+    rules:
+    - general.bc_410_5_3_4_path_of_egress_travel
+  410.5.3.5:
+    label: flag
+    heading: Technical production areas › Width
+    rules:
+    - general.bc_410_5_3_5_width
+  '411.4':
+    label: flag
+    heading: Exit marking
+    rules:
+    - general.bc_411_4_exit_marking
+  411.4.1:
+    label: flag
+    heading: Exit marking › Photoluminescent exit signs
+    rules:
+    - general.bc_411_4_1_photoluminescent_exit_signs
+  412.2.2:
+    label: flag
+    heading: Means of egress and evacuation
+    rules:
+    - general.bc_412_2_2_airport_traffic_control_towers
+  412.2.2.1:
+    label: flag
+    heading: Means of egress and evacuation › Stairways
+    rules:
+    - general.bc_412_2_2_1_stairways
+  412.2.2.2:
+    label: flag
+    heading: Means of egress and evacuation › Exit access
+    rules:
+    - general.bc_412_2_2_2_exit_access
+  412.2.2.3:
+    label: flag
+    heading: Means of egress and evacuation › Number of exits
+    rules:
+    - general.bc_412_2_2_3_number_of_exits
+  412.2.2.3.1:
+    label: flag
+    heading: Number of exits › Interior finish
+    rules:
+    - general.bc_412_2_2_3_1_interior_finish
+  412.2.2.3.2:
+    label: flag
+    heading: Number of exits › Exit separation
+    rules:
+    - general.bc_412_2_2_3_2_exit_separation
+  412.4.2:
+    label: flag
+    heading: Egress
+    rules:
+    - general.bc_412_4_2_residential_aircraft_hangar_egress
+  '412.6':
+    label: flag
+    heading: Aircraft manufacturing facilities
+    rules:
+    - general.bc_412_6_aircraft_manufacturing_facilities
+  Table 412.6:
+    label: flag
+    heading: Aircraft manufacturing exit access travel distance
+    rules:
+    - general.bc_table_412_6_aircraft_manufacturing_travel
+  412.6.1:
+    label: flag
+    heading: Aircraft manufacturing facilities › Ancillary areas
+    rules:
+    - general.bc_412_6_1_ancillary_areas
+  412.7.3:
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_412_7_3_heliports_and_helistops
+  415.11.3.3:
+    label: flag
+    heading: Means of egress
+    rules:
+    - general.bc_415_11_3_3_service_corridor_egress
+  415.11.3.4:
+    label: flag
+    heading: Minimum width
+    rules:
+    - general.bc_415_11_3_4_service_corridor_width
+  415.11.6.6:
+    label: flag
+    heading: Exits
+    rules:
+    - general.bc_415_11_6_6_hpm_room_exits
+  415.11.6.7:
+    label: flag
+    heading: Doors
+    rules:
+    - general.bc_415_11_6_7_hpm_room_doors
   '420.1':
     label: flag
     heading: General

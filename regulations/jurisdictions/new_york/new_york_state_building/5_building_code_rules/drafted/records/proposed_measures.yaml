@@ -167,6 +167,8 @@ occupancy_group:
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_1020_5_other_occupancies
   - general.bc_404_1_atriums
+  - general.bc_406_4_3_vehicle_ramps
+  - general.bc_406_5_7_open_parking_garage_egress
   - general.bc_407_10_secured_yards
   - general.bc_407_1_group_i2
   - general.bc_407_2_1_waiting_areas_open_to_a_corridor
@@ -230,6 +232,10 @@ occupancy_group:
   - general.bc_408_8_3_openings_in_room_face
   - general.bc_408_8_4_smoke_tight_doors
   - general.bc_408_8_subdivision_of_resident_housing_areas
+  - general.bc_415_11_3_3_service_corridor_egress
+  - general.bc_415_11_3_4_service_corridor_width
+  - general.bc_415_11_6_6_hpm_room_exits
+  - general.bc_415_11_6_7_hpm_room_doors
   - general.bc_420_1_groups_i1_and_r
   - general.bc_420_2_separation_walls
   - general.bc_420_3_horizontal_separation
@@ -358,6 +364,8 @@ special_egress_spaces:
   - general.bc_402_8_8_security_grilles_and_doors
   - general.bc_402_8_means_of_egress
   - general.bc_407_4_2_sleeping_room_travel
+  - general.bc_411_4_1_photoluminescent_exit_signs
+  - general.bc_411_4_exit_marking
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -526,3 +534,40 @@ emergency_voice_alarm_system:
   unit: yes_no
   needed_by:
   - general.bc_1020_3_corridor_capacity
+stages_or_platforms:
+  meaning: 'The building has a stage, a platform or a technical production area (2025 BCNYS 202), as the architect states
+    it: Section 410.5''s flags show, and a space''s common path over 100 feet can''t pass Table 1006.2.1''s 125 ft rows
+    (Groups R-2, R-3 and R-4; 410.5.3.3); left unstated, the same'
+  unit: yes_no
+  needed_by:
+  - general.bc_410_5_1_arrangement
+  - general.bc_410_5_2_stairway_and_ramp_enclosure
+  - general.bc_410_5_3_1_number_of_means_of_egress
+  - general.bc_410_5_3_2_exit_access_travel_distance
+  - general.bc_410_5_3_3_two_means_of_egress
+  - general.bc_410_5_3_4_path_of_egress_travel
+  - general.bc_410_5_3_5_width
+  - general.bc_410_5_3_technical_production_areas
+  - general.bc_410_5_means_of_egress
+  - general.bc_table_1006_2_1_r2
+  - general.bc_table_1006_2_1_r3_r4
+aircraft_related_occupancy:
+  meaning: 'The building is or holds an aircraft-related occupancy (2025 BCNYS Section 412: an airport traffic control
+    tower, an aircraft hangar or residential aircraft hangar, an aircraft paint hangar, an aircraft manufacturing
+    facility, a heliport or a helistop), as the architect states it: Section 412''s flags show, and a space with one exit
+    can''t pass Table 1006.2.1''s Group U row (412.4.2: a residential aircraft hangar''s two means of egress); left
+    unstated, the same'
+  unit: yes_no
+  needed_by:
+  - general.bc_412_2_2_1_stairways
+  - general.bc_412_2_2_2_exit_access
+  - general.bc_412_2_2_3_1_interior_finish
+  - general.bc_412_2_2_3_2_exit_separation
+  - general.bc_412_2_2_3_number_of_exits
+  - general.bc_412_2_2_airport_traffic_control_towers
+  - general.bc_412_4_2_residential_aircraft_hangar_egress
+  - general.bc_412_6_1_ancillary_areas
+  - general.bc_412_6_aircraft_manufacturing_facilities
+  - general.bc_412_7_3_heliports_and_helistops
+  - general.bc_table_1006_2_1_u
+  - general.bc_table_412_6_aircraft_manufacturing_travel

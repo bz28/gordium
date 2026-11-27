@@ -666,6 +666,24 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:certificate_of_occupancy:
+    label: reference
+    topic: definitions
+    reason: 'Defines CERTIFICATE OF OCCUPANCY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 36
+      lines:
+      - 39
+      - 41
+      quote: '[NY] CERTIFICATE OF OCCUPANCY. A document issued by the authority having jurisdiction certifying that the building
+        or structure, or portion thereof, complies with the approved construction documents that have been submitted to and
+        approved by the authority having jurisdiction, indicating that the building or structure, or portion thereof, to be
+        in a condition suitable for occupancy.'
+    piece_sha256: 5f8ce0dbf0b87bdfa4f27f1439b66e3a6cf7ce4082cc7ea76600d60ec0341616
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:circulation_path:
     label: reference
     topic: definitions
@@ -773,6 +791,22 @@ labels:
         When added to a Portland cement slurry the resulting concrete has a dry unit weight of approximately 30 pcf (480 kg/m[fn3]).'
     piece_sha256: 3b9379468e6cb3600d52f2ff4c1e611576d75d54eb33d0076c3de068bcf79cef
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:construction_documents:
+    label: reference
+    topic: definitions
+    reason: 'Defines CONSTRUCTION DOCUMENTS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 38
+      lines:
+      - 50
+      - 51
+      quote: '[A] CONSTRUCTION DOCUMENTS. Written, graphic and pictorial documents prepared or assembled for describing the
+        design, loca- tion and physical characteristics of the elements of a project necessary for obtaining a building permit.'
+    piece_sha256: 93910e4e57117f3b870091535e7bcab1b8ce034281d2b4936660f625847d940e
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:continuity_head_of_wall_system:
@@ -1135,6 +1169,23 @@ labels:
         for a'
     piece_sha256: 2e3b4be459c83e184ca9490e00d148447e710ffd44d5ad74cb43c97c1522cf0e
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:existing_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXISTING BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 46
+      - 47
+      quote: '[NY] EXISTING BUILDING. A building that is legally occupied and/or for which a certificate of occupancy authorizing
+        its use(s) has been issued, without regard to the date on which such legal occupancy began or the date on which such
+        certificate of occupancy was issued.'
+    piece_sha256: 3c30ce83d67f6cf1996b6b3a8be2daa3a71d2e8d3317e78987ac6ec5c34ae473
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:exit:
@@ -1893,6 +1944,22 @@ labels:
       3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:gas_room:
+    label: reference
+    topic: definitions
+    reason: 'Defines GAS ROOM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 20
+      - 21
+      quote: '[F] GAS ROOM. A separately ventilated, fully enclosed room in which only compressed gases and associated equipment
+        and supplies are stored or used.'
+    piece_sha256: f149c32fa087df4bee202e4679d31ea236db11b9d1e071e6b581058b0184f3ba
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:grade_lumber:
     label: reference
     topic: definitions
@@ -2084,6 +2151,24 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:hazardous_production_material_hpm:
+    label: reference
+    topic: definitions
+    reason: 'Defines HAZARDOUS PRODUCTION MATERIAL (HPM), a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 21
+      - 23
+      quote: '[F] HAZARDOUS PRODUCTION MATERIAL (HPM). A solid, liquid or gas associated with semiconductor manufacturing
+        that has a degree-of-hazard rating in health, flammability or instability of Class 3 or 4 as ranked by NFPA 704 and
+        which is used directly in research, laboratory or production processes which have as their end product materials that
+        are not hazardous.'
+    piece_sha256: 730f7a987c70f11997cbea16c3e8688cf608c9339a459ae0d47b2370fb663e11
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:head_joint:
     label: reference
     topic: definitions
@@ -2113,6 +2198,39 @@ labels:
       quote: '[BG] HEIGHT, BUILDING. The vertical distance from grade plane to the average height of the highest roof surface.'
     piece_sha256: 1edfc2f24ab1b41fbaba521427a50871fcd94945c4be4c4eb46c3d26ac844ae2
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:heliport:
+    label: reference
+    topic: definitions
+    reason: 'Defines HELIPORT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 34
+      - 35
+      quote: '[F] HELIPORT. An area of land or water or a structural surface that is used, or intended for use, for the landing
+        and taking off of heli- copters, and any appurtenant areas that are used, or intended for use, for heliport buildings
+        or other heliport facilities.'
+    piece_sha256: bb38ebf45f0cfa36cf6b7585bd74a8d291818202af1a2731bb468170c2c1c9ff
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:helistop:
+    label: reference
+    topic: definitions
+    reason: 'Defines HELISTOP, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 36
+      - 36
+      quote: '[F] HELISTOP. The same as “heliport,” except that no fueling, defueling, maintenance, repairs or storage of
+        helicopters is permitted.'
+    piece_sha256: b0e5d31daa9a879a7aa54a3625d48c405df86704732ed354def558beb11d296c
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:high_rise_building:
@@ -2176,6 +2294,37 @@ labels:
       quote: '[BG] HOUSING UNIT. A dormitory or a group of cells with a common dayroom in Group I-3.'
     piece_sha256: 4b17b1f002b97ae7209ac586ed02dc50d66894d7444b8ad145d168898b4af2c1
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:hpm:
+    label: reference
+    topic: definitions
+    reason: 'Defines HPM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 19
+      - 19
+      quote: HPM. See “Hazardous Production Material.”
+    piece_sha256: 4bc37934cc73650fd87facd433226c86cc83295480f8030c7f4ae3554d6de60a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:hpm_room:
+    label: reference
+    topic: definitions
+    reason: 'Defines HPM ROOM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 20
+      - 21
+      quote: '[F] HPM ROOM. A room used in conjunction with or serving a Group H-5 occupancy, where HPM is stored or used
+        and which is classi- fied as a Group H-2, H-3 or H-4 occupancy.'
+    piece_sha256: c8eb8dd890e22e689631beddcc5cb8d59638998f538f9f013ead28552a308ab9
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:incapable_of_self_preservation:
@@ -2260,6 +2409,70 @@ labels:
         such as'
     piece_sha256: 2be880b0a7eb99fd81ad1e230c4a51440430c6aa25844fd832849219058f1e6f
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:interior_finish:
+    label: reference
+    topic: definitions
+    reason: 'Defines INTERIOR FINISH, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 17
+      - 17
+      quote: '[BF] INTERIOR FINISH. Interior finish includes interior wall and ceiling finish and interior floor finish.'
+    piece_sha256: ed25f8480361fd8363667dd069a1d58498a52156b43ca014126bbcbb28706748
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:interior_floor_finish:
+    label: reference
+    topic: definitions
+    reason: 'Defines INTERIOR FLOOR FINISH, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 18
+      - 19
+      quote: '[BF] INTERIOR FLOOR FINISH. The exposed floor surfaces of buildings including coverings applied over a finished
+        floor or stair, including risers.'
+    piece_sha256: d736cc7d0f62aa16654049ee6708963db833a35fb0a5194e1ce683fba42fad2c
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:interior_surfaces:
+    label: reference
+    topic: definitions
+    reason: 'Defines INTERIOR SURFACES, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 22
+      - 22
+      quote: '[BF] INTERIOR SURFACES. Surfaces other than weather exposed surfaces.'
+    piece_sha256: 4a1ea606c08bff450b613d89f6ad3f4c610002ab857c7bd95a79e0cd1ecf80e6
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:interior_wall_and_ceiling_finish:
+    label: reference
+    topic: definitions
+    reason: 'Defines INTERIOR WALL AND CEILING FINISH, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 23
+      - 25
+      quote: '[BF] INTERIOR WALL AND CEILING FINISH. The exposed interior surfaces of buildings, including but not limited
+        to: fixed or movable walls and partitions; toilet room privacy partitions; columns; ceilings; and interior wainscoting,
+        paneling or other finish applied struc- turally or for decoration, acoustical correction, surface insulation, structural
+        fire resistance or similar purposes, but not including trim.'
+    piece_sha256: 601d1fdbe92683c57f9ccded95ca543d1909d33ea2b4a2d8d035ee4aadcb5e5b
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:joint:
@@ -2393,6 +2606,22 @@ labels:
         that is greater than 68°F'
     piece_sha256: 4952e6c4ac329cd0c85c4428937c2c646d14ed4d5f986ac209dcb301d4468a6a
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:liquid_storage_room:
+    label: reference
+    topic: definitions
+    reason: 'Defines LIQUID STORAGE ROOM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 20
+      - 21
+      quote: '[F] LIQUID STORAGE ROOM. A room classified as a Group H-3 occupancy used for the storage of flammable or combustible
+        liquids in a closed condition.'
+    piece_sha256: f59194619dc6aadca2101bfb1bae78f259ba9abad2102da56c65215b9954b38c
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:listed:
@@ -3053,6 +3282,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:photoluminescent:
+    label: reference
+    topic: definitions
+    reason: 'Defines PHOTOLUMINESCENT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 57
+      lines:
+      - 5
+      - 6
+      quote: '[BE] PHOTOLUMINESCENT. Having the property of emitting light that continues for a length of time after excitation
+        by visible or invis- ible light has been removed.'
+    piece_sha256: 31999a6fbe9ee162da05191a992082d5219cf8594b7cabf2cbfb54e4d31048df
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:place_of_religious_worship:
     label: reference
     topic: definitions
@@ -3248,6 +3493,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:repair:
+    label: reference
+    topic: definitions
+    reason: 'Defines REPAIR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 51
+      - 52
+      quote: '[A] REPAIR. The reconstruction, replacement or renewal of any part of an existing building for the purpose of
+        its maintenance or to correct damage.'
+    piece_sha256: 432404a49982c9b3e71227432f6b51fcdee0bfb93af92d60c15ab15bf19446b4
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:residential_code_of_new_york_state:
     label: reference
     topic: definitions
@@ -3408,6 +3669,22 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
       4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor sections use, by the book''s
       italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:service_corridor:
+    label: reference
+    topic: definitions
+    reason: 'Defines SERVICE CORRIDOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 8
+      - 8
+      quote: '[F] SERVICE CORRIDOR. A fully enclosed passage used for transporting HPM and purposes other than required means
+        of egress.'
+    piece_sha256: 76e77c5d12c0019e9d1f3e1ed0ef8a3b88059ec0030cee20635f0e1f0bf7bb88
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:shaft:
@@ -3876,6 +4153,23 @@ labels:
         penetration or void on the nonfire side.'
     piece_sha256: 7bbaad34862378b9b442d332ab8153374e6a089fef427af06567bef9b2810d10
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:technical_production_area:
+    label: reference
+    topic: definitions
+    reason: 'Defines TECHNICAL PRODUCTION AREA, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 64
+      lines:
+      - 28
+      - 30
+      quote: '[BG] TECHNICAL PRODUCTION AREA. Open elevated areas or spaces intended for entertainment technicians to walk
+        on and occupy for servicing and operating entertainment technology systems and equipment. Galleries, including fly
+        and lighting galleries, gridirons, catwalks, and similar areas are designed for these purposes.'
+    piece_sha256: f75a1bc6c39117521193c2b005c9e51a4809ab2913023b206226f163d7adc4ea
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:temporary_structure:
@@ -5102,6 +5396,44 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  406.4.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Vehicle ramps not exits without pedestrian facilities: not in the model, so a person''s check where the building
+      may be Group S-2, as public parking garages are (general.bc_406_4_3_vehicle_ramps).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 95
+      lines:
+      - 25
+      - 27
+      quote: 406.4.3 Ramps. Vehicle ramps shall not be considered as required exits unless pedestrian facilities are provided.
+        Vehicle ramps that are utilized for vertical circulation as well as for parking shall not exceed a slope of 1 unit
+        vertical in 15 units horizontal (6.67- percent slope).
+    piece_sha256: 50bf0104fc37e729955163b71115419e8b0aed20971e98a5e519fcf89fe98060
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  406.5.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'An open parking garage''s egress, or two exit stairways: not in the model, so a person''s check where the building
+      may be Group S-2, as public parking garages are (general.bc_406_5_7_open_parking_garage_egress).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 96
+      lines:
+      - 33
+      - 36
+      quote: '[BE] 406.5.7 Means of egress. Where persons other than parking attendants are permitted, open parking garages
+        shall meet the means of egress requirements of Chapter 10. Where persons other than parking attendants are not permitted,
+        there shall be not fewer than two exit stairways. Each exit stairway shall be not less than 36 inches (914 mm) in
+        width. Lifts shall be permitted to be installed for use of employees only, provided that they are completely enclosed
+        by noncombustible materials.'
+    piece_sha256: 962199314ae9549e9fe984f11b853f9cdda16091aa0d1d49df49c5bf14352d11
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   '407.1':
     label: flag
     topic: means_of_egress
@@ -6317,6 +6649,477 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part e.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  '410.5':
+    label: flag
+    topic: means_of_egress
+    reason: 'Stage and platform egress, Chapter 10 as 410.5 modifies it: not in the model, so a person''s check where the
+      building may have a stage, a platform or a technical production area (general.bc_410_5_means_of_egress).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 105
+      lines:
+      - 45
+      - 45
+      quote: '[BE] 410.5 Means of egress. Except as modified or as provided for in this section, the provisions of Chapter
+        10 shall apply.'
+    piece_sha256: af5747ff6dc6e8fe97755ca9fac865748b17e32a8c4ad2489bda7f663e182eec
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  410.5.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'An exit or exit access doorway on each side of a stage: not in the model, so a person''s check where the building
+      may have a stage, a platform or a technical production area (general.bc_410_5_1_arrangement).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 105
+      lines:
+      - 46
+      - 47
+      quote: '[BE] 410.5.1 Arrangement. Where two or more exits or exit access doorways from the stage are required in accordance
+        with Section 1006.2, not fewer than one exit or exit access doorway shall be provided on each side of a stage.'
+    piece_sha256: 6d94fa2c1a285db043b50567524a32c01a520edf2f7519c57210131fa1464390
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  410.5.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Stairways and ramps serving a stage or platform unenclosed: not in the model, so a person''s check where the
+      building may have a stage, a platform or a technical production area (general.bc_410_5_2_stairway_and_ramp_enclosure).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 105
+      lines:
+      - 48
+      - 49
+      quote: '[BE] 410.5.2 Stairway and ramp enclosure. Exit access stairways and ramps serving a stage or platform are not
+        required to be enclosed. Exit access stairways and ramps serving technical production areas are not required to be
+        enclosed.'
+    piece_sha256: e9946eebe3f3d6c6d1359356ba39d6f834336ca3c7455a7a5b19f798750417b8
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  410.5.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Technical production areas'' means of egress and escape: not in the model, so a person''s check where the building
+      may have a stage, a platform or a technical production area (general.bc_410_5_3_technical_production_areas).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 105
+      lines:
+      - 50
+      - 51
+      quote: '[BE] 410.5.3 Technical production areas. Technical production areas shall be provided with means of egress and
+        means of escape in accordance with Sections 410.5.3.1 through 410.5.3.5.'
+    piece_sha256: 01f1e9aac5151d651173860397d23a4da033f9b9205df4ff398325517b7b0837
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  410.5.3.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'At least one means of egress from a technical production area: not in the model, so a person''s check where the
+      building may have a stage, a platform or a technical production area (general.bc_410_5_3_1_number_of_means_of_egress).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 105
+      lines:
+      - 52
+      - 53
+      quote: '[BE] 410.5.3.1 Number of means of egress. Not fewer than one means of egress shall be provided from technical
+        production areas.'
+    piece_sha256: faa57982884c2c06c7caecf52540c71f4488bb397104d8881d2f4df054c39549
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  410.5.3.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Technical production area travel, 300 ft, 400 ft with NFPA 13: not in the model, so a person''s check where the
+      building may have a stage, a platform or a technical production area (general.bc_410_5_3_2_exit_access_travel_distance).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 105
+      lines:
+      - 54
+      - 56
+      quote: '[BE] 410.5.3.2 Exit access travel distance. The exit access travel distance shall be not greater than 300 feet
+        (91 440 mm) for buildings without an automatic sprinkler system and 400 feet (122 mm) for buildings equipped throughout
+        with an automatic sprinkler system in accordance with Section 903.3.1.1.'
+    piece_sha256: 6b5148d5d02b9bbfe100aa6e23d6381471cdc51bf48bb94e95a8b795bdaf6130
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  410.5.3.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Common path at most 100 ft where two are required: not in the model, so a person''s check where the building
+      may have a stage, a platform or a technical production area (general.bc_410_5_3_3_two_means_of_egress), and a review
+      band on the Chapter 10 rules it tightens.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 105
+      lines:
+      - 57
+      - 59
+      quote: '[BE] 410.5.3.3 Two means of egress. Where two means of egress are required, the common path of travel shall
+        be not greater than 100 feet (30 480 mm). Exception: A means of escape to a roof in place of a second means of egress
+        is permitted.'
+    piece_sha256: 28c3a275f0b2c4a49ee7c41ceb0e0f9d3c9d2aba2ad78c2332935ff56be84e5b
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  410.5.3.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Stairs, ladders and catwalks serving technical areas: not in the model, so a person''s check where the building
+      may have a stage, a platform or a technical production area (general.bc_410_5_3_4_path_of_egress_travel).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 106
+      lines:
+      - 3
+      - 10
+      quote: '[BE] 410.5.3.4 Path of egress travel. The following exit access components are permitted where serving technical
+        production areas: 1. Stairways. 2. Ramps. 3. Spiral stairways. 4. Catwalks. 5. Alternating tread devices. 6. Permanent
+        ladders.'
+    piece_sha256: deee6c931a63656a296a41c23f75adbd49a0065fcd860b50796488dc2bd19530
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  410.5.3.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'At least 22 in of egress width in technical support areas: not in the model, so a person''s check where the building
+      may have a stage, a platform or a technical production area (general.bc_410_5_3_5_width).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 106
+      lines:
+      - 11
+      - 12
+      quote: '[BE] 410.5.3.5 Width. The path of egress travel within and from technical support areas shall be not less than
+        22 inches (559 mm).'
+    piece_sha256: 8b68091379a19b4c4ffe870a9736d4f85e4397233a51c4e1da0a1a39c923eaa4
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '411.4':
+    label: flag
+    topic: means_of_egress
+    reason: 'Exit signs and directional markings in special amusement areas: not in the model, so a person''s check where
+      the building may hold a special amusement area, a space the code gives its own exits or travel limit (general.bc_411_4_exit_marking).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 107
+      lines:
+      - 6
+      - 12
+      quote: '[BE] 411.4 Exit marking. Exit signs shall be installed at the required exit or exit access doorways serving
+        special amusement areas in accordance with this section and Section 1013. Approved directional exit markings shall
+        be provided. Where mirrors, mazes or other designs disguise the path of egress travel such that the path of egress
+        travel is not apparent, approved and listed low-level exit signs that comply with Section 1013.5, and directional
+        path markings listed in accordance with UL 1994, shall be provided and located not more than 8 inches (203 mm) above
+        the walking surface and on or near the path of egress travel. Such markings shall become visible in an emergency.
+        The directional exit marking shall be activated by the automatic smoke detection system and the automatic sprin- kler
+        system in accordance with Section 411.3.2.'
+    piece_sha256: 870246262ad53e873c4f1d017bad5939177063f491c939f7fba33db343b58a6e
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  411.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Photoluminescent exit signs listed: not in the model, so a person''s check where the building may hold a special
+      amusement area, a space the code gives its own exits or travel limit (general.bc_411_4_1_photoluminescent_exit_signs).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 107
+      lines:
+      - 13
+      - 14
+      quote: '[BE] 411.4.1 Photoluminescent exit signs. Where photoluminescent exit signs are installed, such signs shall
+        be listed and the activating light source and viewing distance shall be in accordance with the listing and markings
+        on the signs.'
+    piece_sha256: e2450bc1e7eea50ab186dc28df44c61cac0cad8a7bca13ea6bc581a96ab22cd3
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  412.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Airport traffic control tower egress per 412.2.2.1 to 412.2.2.3: not in the model, so a person''s check where
+      the building may be or hold an aircraft-related occupancy (general.bc_412_2_2_airport_traffic_control_towers).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 107
+      lines:
+      - 46
+      - 47
+      quote: '[BE] 412.2.2 Means of egress and evacuation. The means of egress in airport traffic control towers shall comply
+        with Sections 412.2.2.1 through 412.2.2.3.'
+    piece_sha256: 090452cd7977d5973e7f93e00945ac9892725d080f250e3ff5587608e494f15a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  412.2.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Tower stairways per 1011, exit stairways smokeproof: not in the model, so a person''s check where the building
+      may be or hold an aircraft-related occupancy (general.bc_412_2_2_1_stairways).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 107
+      lines:
+      - 48
+      - 50
+      quote: '[BE] 412.2.2.1 Stairways. Stairways in airport traffic control towers shall be in accordance with Section 1011.
+        Exit stairways shall be smokeproof enclosures complying with one of the alternatives provided in Section 909.20. Exception:
+        Stairways in airport traffic control towers are not required to comply with Section 1011.12.'
+    piece_sha256: 9fdb48f8ccac4bd9efbd9f8aea7d28c7989b590a6c2b16da94dba3c31a651e53
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  412.2.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'One means of exit access from a tower''s observation levels: not in the model, so a person''s check where the
+      building may be or hold an aircraft-related occupancy (general.bc_412_2_2_2_exit_access).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 107
+      lines:
+      - 51
+      - 53
+      quote: '[BE] 412.2.2.2 Exit access. From observation levels, airport traffic control towers shall be permitted to have
+        a single means of exit access for a distance of travel not greater than 100 feet (30 480 mm). Exit access stairways
+        from the observation level need not be enclosed.'
+    piece_sha256: 0eb96ef41d4221fd7ecd501f5c6eddb02e5d84cf3c903a66b922c910fd88915c
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  412.2.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'One exit stairway for 15 occupants, 1,500 sq ft a floor: not in the model, so a person''s check where the building
+      may be or hold an aircraft-related occupancy (general.bc_412_2_2_3_number_of_exits).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 108
+      lines:
+      - 3
+      - 5
+      quote: '[BE] 412.2.2.3 Number of exits. Not less than one exit stairway shall be permitted for airport traffic control
+        towers of any height provided that the occupant load per floor is not greater than 15 and the area per floor does
+        not exceed 1,500 square feet (140 m[fn2]).'
+    piece_sha256: e11a1702c18e6229a78b5572ed37fcf258bff9a9ecad864864c26f65d1310ad7
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  412.2.2.3.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Class A or B finishes in a tower with one exit stairway: not in the model, so a person''s check where the building
+      may be or hold an aircraft-related occupancy (general.bc_412_2_2_3_1_interior_finish).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 108
+      lines:
+      - 6
+      - 7
+      quote: '[BE] 412.2.2.3.1 Interior finish. Where an airport traffic control tower is provided with only one exit stairway,
+        interior wall and ceiling finishes shall be either Class A or Class B.'
+    piece_sha256: 23b77386c741973ae72235ccfbd5d4614c5fed78134f12c12fe4de443414faf9
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  412.2.2.3.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A sprinklered tower''s exits a quarter of its length apart: not in the model, so a person''s check where the
+      building may be or hold an aircraft-related occupancy (general.bc_412_2_2_3_2_exit_separation).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 108
+      lines:
+      - 8
+      - 10
+      quote: '[BE] 412.2.2.3.2 Exit separation. Where an airport traffic control tower is equipped throughout with an automatic
+        sprinkler system in accordance with Section 903.3.1.1 and two exits are required, the exit separation distance required
+        by Section 1007 shall be not less than one-fourth of the length of the maximum overall dimension of the area served.'
+    piece_sha256: e784cd3440b4999e24ea106f46d34b9adc57ac7fa7ce72854d0588b0aa89d095
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  412.4.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A residential aircraft hangar''s two means of egress: not in the model, so a person''s check where the building
+      may be or hold an aircraft-related occupancy (general.bc_412_4_2_residential_aircraft_hangar_egress), and a review band
+      on the Chapter 10 rules it tightens.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 109
+      lines:
+      - 53
+      - 54
+      quote: '[BE] 412.4.2 Egress. A hangar shall provide two means of egress. One of the doors into the dwelling shall be
+        considered as meet- ing only one of the two means of egress.'
+    piece_sha256: 1abdab371030569e3005bf2992a1bf9ec91f61a2a6cd77babc9fe5e2b80a9100
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '412.6':
+    label: flag
+    topic: means_of_egress
+    reason: 'Aircraft manufacturing travel increased per Table 412.6: not in the model, so a person''s check where the building
+      may be or hold an aircraft-related occupancy (general.bc_412_6_aircraft_manufacturing_facilities).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 110
+      lines:
+      - 32
+      - 35
+      quote: '[BE] 412.6 Aircraft manufacturing facilities. In buildings used for the manufacturing of aircraft, exit access
+        travel distances indi- cated in Section 1017.1 shall be increased in accordance with the following: 1. The building
+        shall be of Type I or II construction. 2. Exit access travel distance shall not exceed the distances given in Table
+        412.6.'
+    piece_sha256: 56f4f88d91e16cbcf42910f5c50d48ba896b468fdacf6b8a57b8c8a2ef241723
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 412.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'Aircraft manufacturing exit access travel distance: not in the model, so a person''s check where the building
+      may be or hold an aircraft-related occupancy (general.bc_table_412_6_aircraft_manufacturing_travel).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 110
+      lines:
+      - 36
+      - 47
+      quote: '[BE] TABLE 412.6—AIRCRAFT MANUFACTURING EXIT ACCESS TRAVEL DISTANCE MANUFACTURING AREA HEIGHT (square feet)[fna]
+        (feet)[fnb] ≥ 150,000 ≥ 200,000 ≥ 250,000 ≥ 500,000 ≥ 750,000 ≥ 1,000,000 ≥ 25 400 450 500 500 500 500 ≥ 50 400 500
+        600 700 700 700 ≥ 75 400 500 700 850 1,000 1,000 ≥ 100 400 500 750 1,000 1,250 1,500 For SI: 1 foot = 304.8 mm. a.Contiguous
+        floor area of the aircraft manufacturing facility having the indicated height. b.Minimum height from finished floor
+        to bottom of ceiling or roof slab or deck.'
+    piece_sha256: 4ae77e5ca5a4f062c8e72de459689ede5ca0bacaee17f8411d100dbe9fde7e71
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  412.6.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Ancillary areas egressing through the manufacturing area: not in the model, so a person''s check where the building
+      may be or hold an aircraft-related occupancy (general.bc_412_6_1_ancillary_areas).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 110
+      lines:
+      - 48
+      - 51
+      quote: '[BE] 412.6.1 Ancillary areas. Rooms, areas and spaces ancillary to the primary manufacturing area shall be permitted
+        to egress through such area having a minimum height as indicated in Table 412.6. Exit access travel distance within
+        the ancillary room, area or space shall not exceed that indicated in Table 1017.2 based on the occupancy classification
+        of that ancillary area. Total exit access travel distance shall not exceed that indicated in Table 412.6.'
+    piece_sha256: c510d145379ec5d43e6b19bd2e5754388897091c4861a3dc40b7184396658518
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  412.7.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Two exits from a heliport or helistop landing area: not in the model, so a person''s check where the building
+      may be or hold an aircraft-related occupancy (general.bc_412_7_3_heliports_and_helistops).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 111
+      lines:
+      - 7
+      - 10
+      quote: '[BE] 412.7.3 Means of egress. The means of egress from heliports and helistops shall comply with the provisions
+        of Chapter 10. Landing areas located on buildings or structures shall have two or more exits or access to exits. For
+        landing areas less than 60 feet (18 288 mm) in length or less than 2,000 square feet (186 m[fn2]) in area, the second
+        means of egress is permitted to be a fire escape, alternating tread device or ladder leading to the floor below.'
+    piece_sha256: cd56e33a4a55ad46555dd7e61857504c343ac0c37e4555ce17f3b0928a44dc78
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  415.11.3.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Service corridor travel, dead ends, exits and doors: not in the model, so a person''s check where the building
+      may be Group H-5 (general.bc_415_11_3_3_service_corridor_egress), and a review band on the Chapter 10 rules it tightens.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 122
+      lines:
+      - 45
+      - 48
+      quote: '[F] 415.11.3.3 Means of egress. The distance of travel from any point in a service corridor to an exit, exit
+        access corridor or door into a fabrication area shall be not greater than 75 feet (22 860 mm). Dead ends shall be
+        not greater than 4 feet (1219 mm) in length. There shall be not less than two exits, and not more than one-half of
+        the required means of egress shall require travel into a fabrication area. Doors from service corridors shall swing
+        in the direction of egress travel and shall be self-closing.'
+    piece_sha256: ffb94ecbb486688846cdfd6c698982845cd676513516c5539ec76583ed234a9a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  415.11.3.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Service corridor 5 ft wide, or 33 in past the widest cart: not in the model, so a person''s check where the building
+      may be Group H-5 (general.bc_415_11_3_4_service_corridor_width), and a review band on the Chapter 10 rules it tightens.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 122
+      lines:
+      - 49
+      - 50
+      quote: '[F] 415.11.3.4 Minimum width. The clear width of a service corridor shall be not less than 5 feet (1524 mm),
+        or 33 inches (838 mm) wider than the widest cart or truck used in the service corridor, whichever is greater.'
+    piece_sha256: 141efaf0f8aac0f4c3e5d1f597176f3ba88db478e8433f407d8e7958f767199f
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  415.11.6.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'An HPM, gas or liquid storage room''s exit directly out: not in the model, so a person''s check where the building
+      may be Group H-5, or the H-2, H-3 or H-4 of an HPM, gas or liquid storage room (general.bc_415_11_6_6_hpm_room_exits).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 123
+      lines:
+      - 34
+      - 35
+      quote: '[F] 415.11.6.6 Exits. Where two exits are required from HPM rooms, liquid storage rooms and gas rooms, one shall
+        be directly to the outside of the building.'
+    piece_sha256: fdc632f17b1e6512651bb9feec6704283a84f77dcb080a716c3975ed3dfc4e24
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  415.11.6.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'Self-closing 3/4-hour fire doors in their fire barrier walls: not in the model, so a person''s check where the
+      building may be Group H-5, or the H-2, H-3 or H-4 of an HPM, gas or liquid storage room (general.bc_415_11_6_7_hpm_room_doors).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 123
+      lines:
+      - 36
+      - 37
+      quote: '[F] 415.11.6.7 Doors. Doors in a fire barrier wall, including doors to corridors, shall be self-closing fire
+        door assemblies having a fire protection rating of not less than 3/4 hour.'
+    piece_sha256: c73737cd6b2cee5b00f44693170f54415d5dc9c31993f8f46bac051f1fef0c8f
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   '420.1':
     label: flag
     topic: means_of_egress
@@ -6606,6 +7409,22 @@ labels:
         barriers with- out having to return through the smoke compartment from which means of egress originated.
     piece_sha256: a1d6475c92880ca81d801ce230453d5cd935abde020795f865acb645dfc3dba4
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 4 part e.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  428.3.5:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says a laboratory suite''s means of egress is Chapter 10''s, which the rules check as for any space of the building''s
+      group: it points to Chapter 10 and asks nothing of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 133
+      lines:
+      - 41
+      - 41
+      quote: '[BE] 428.3.5 Means of egress. Means of egress shall be in accordance with Chapter 10.'
+    piece_sha256: fa5582a59beb3b3114ab97e3e40fba0378be788ff4c27b98d2abd2ea708e525b
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 4 part f.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '508.2':
