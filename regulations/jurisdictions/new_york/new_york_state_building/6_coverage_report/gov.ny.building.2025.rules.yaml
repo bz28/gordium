@@ -578,6 +578,11 @@ pieces:
     heading: General › Alternative protection
     rules:
     - general.bc_903_1_1_alternative_protection
+  '903.2':
+    label: flag
+    heading: Where required
+    rules:
+    - general.bc_903_2_mixed_occupancies
   903.2.1.1:
     label: rule
     heading: Group A › Group A-1
