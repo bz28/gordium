@@ -152,6 +152,37 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:alarm_signal:
+    label: reference
+    topic: definitions
+    reason: 'Defines ALARM SIGNAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 20
+      - 20
+      quote: '[F] ALARM SIGNAL. A signal indicating an emergency requiring immediate action, such as a signal indicative of
+        fire.'
+    piece_sha256: 95591167dcd24bc03267be2968375c3b1e8931db1834fea47e2ac1e0a463048c
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:alteration:
+    label: reference
+    topic: definitions
+    reason: 'Defines ALTERATION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 26
+      - 26
+      quote: '[A] ALTERATION. Any construction or renovation to an existing structure other than repair or addition.'
+    piece_sha256: 63f57e0ec403213dbe465436a292aea8f16873286ce7331b97a15e6d3be2c3ab
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:alternating_tread_device:
     label: reference
     topic: definitions
@@ -752,6 +783,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:constantly_attended_location:
+    label: reference
+    topic: definitions
+    reason: 'Defines CONSTANTLY ATTENDED LOCATION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 38
+      lines:
+      - 47
+      - 49
+      quote: '[F] CONSTANTLY ATTENDED LOCATION. A designated location at a facility staffed by trained personnel on a continuous
+        basis where alarm or supervisory signals are monitored and facilities are provided for notification of the fire department
+        or other emergency services.'
+    piece_sha256: fe35ea3706ea1059b9d97f9928eb2d295dd20c506a4807af78fb0e2bd3f79a53
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:construction_documents:
     label: reference
     topic: definitions
@@ -830,6 +878,25 @@ labels:
         as required for the corridor walls.'
     piece_sha256: 27e1b04d24727cd892df4abab3d49cfdbdae36b143088f52300eb0f1868df57f
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:corrosive:
+    label: reference
+    topic: definitions
+    reason: 'Defines CORROSIVE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 23
+      - 26
+      quote: '[F] CORROSIVE. A chemical that causes visible destruction of, or irreversible alterations in, living tissue
+        by chemical action at the point of contact. A chemical shall be considered corrosive if, when tested on the intact
+        skin of albino rabbits by the method described in DOTn 49 CFR, Part 173.137, such chemical destroys or changes irreversibly
+        the structure of the tissue at the point of contact follow- ing an exposure period of 4 hours. This term does not
+        refer to action on inanimate surfaces.'
+    piece_sha256: 4d84fa4d7dd7bf61fc726ceafaee3bebe24d071772dda987158360656e78723f
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:court:
@@ -927,6 +994,56 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
       4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor sections use, by the book''s
       italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:deflagration:
+    label: reference
+    topic: definitions
+    reason: 'Defines DEFLAGRATION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 40
+      lines:
+      - 34
+      - 36
+      quote: '[F] DEFLAGRATION. An exothermic reaction, such as the extremely rapid oxidation of a flammable dust or vapor
+        in air, in which the reaction progresses through the unburned material at a rate less than the velocity of sound.
+        A deflagration can have an explosive effect.'
+    piece_sha256: 922eb60d6d35205d110b9244a5d0837e196b5823417d0ad099360eb2f0480b45
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:detector_heat:
+    label: reference
+    topic: definitions
+    reason: 'Defines DETECTOR, HEAT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 5
+      - 5
+      quote: '[F] DETECTOR, HEAT. A fire detector that senses heat—either abnormally high temperature or rate of rise, or
+        both.'
+    piece_sha256: f8f2f053e25d213a9c11c6d15c00eb81a46c181bcabcba092850fe0b47874de2
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:detonation:
+    label: reference
+    topic: definitions
+    reason: 'Defines DETONATION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 6
+      - 8
+      quote: '[F] DETONATION. An exothermic reaction characterized by the presence of a shock wave in the material which establishes
+        and main- tains the reaction. The reaction zone progresses through the material at a rate greater than the velocity
+        of sound. The principal heating mechanism is one of shock compression. Detonations have an explosive effect.'
+    piece_sha256: cac0f16373c749698480603a3855bd07abe7672f4c554ba4d87499373412e8e3
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:dimensions:
@@ -1134,6 +1251,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:emergency_voice_alarm_communications:
+    label: reference
+    topic: definitions
+    reason: 'Defines EMERGENCY VOICE/ALARM COMMUNICATIONS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 19
+      - 20
+      quote: '[F] EMERGENCY VOICE/ALARM COMMUNICATIONS. Dedicated manual or automatic facilities for originating and distributing
+        voice instructions, as well as alert and evacuation signals pertaining to a fire emergency, to the occupants of a
+        building.'
+    piece_sha256: 1cb2727fae4a878cad0cd0e957404b2695aef5d3dd6fb0def2900473e82af7ef
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:existing_building:
     label: reference
     topic: definitions
@@ -1149,6 +1283,23 @@ labels:
         certificate of occupancy was issued.'
     piece_sha256: 3c30ce83d67f6cf1996b6b3a8be2daa3a71d2e8d3317e78987ac6ec5c34ae473
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:existing_structure:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXISTING STRUCTURE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 50
+      - 52
+      quote: '[NY] EXISTING STRUCTURE. A structure that is legally occupied and/or for which a certificate of occupancy authorizing
+        its use(s) has been issued, without regard to the date on which such legal occupancy began or the date on which such
+        certificate of occupancy was issued.'
+    piece_sha256: a1767856882105090b0382ea9989c9a6da08205ac208c09b654de750dd4e456a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:exit:
@@ -1291,6 +1442,71 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:explosion:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXPLOSION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 43
+      lines:
+      - 16
+      - 21
+      quote: '[F] EXPLOSION. An effect produced by the sudden violent expansion of gases, which may be accompanied by a shock
+        wave or disrup- tion, or both, of enclosing materials or structures. An explosion could result from any of the following:
+        1. Chemical changes such as rapid oxidation, deflagration or detonation, decomposition of molecules and runaway polymer-
+        ization (usually detonations). 2. Physical changes such as pressure tank ruptures. 3. Atomic changes (nuclear fission
+        or fusion).'
+    piece_sha256: 25b97245462307aba60c5b8c102d291b54fb66e1015e47d029a05a5580a1153a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:explosive:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXPLOSIVE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 43
+      lines:
+      - 22
+      - 57
+      quote: '[F] EXPLOSIVE. A chemical compound, mixture or device, the primary or common purpose of which is to function
+        by explosion. The term includes, but is not limited to: dynamite, black powder, pellet powder, initiating explosives,
+        detonators, safety fuses, squibs, detonating cord, igniter cord, and igniters. The term “explosive” includes any material
+        determined to be within the scope of USC Title 18: Chapter 40 and also includes any material classified as an explosive
+        other than consumer fireworks, 1.4G by the hazardous materi- als regulations of DOTn 49 CFR Parts 100-185. High explosive.
+        Explosive material, such as dynamite, which can be caused to detonate by means of a No. 8 test blasting cap when unconfined.
+        Low explosive. Explosive material that will burn or deflagrate when ignited. It is characterized by a rate of reaction
+        that is less than the speed of sound. Examples of low explosives include, but are not limited to: black powder; safety
+        fuse; igniters; igniter cord; fuse lighters; fireworks; and propellants, 1.3C. Mass-detonating explosives. Division
+        1.1, 1.2 and 1.5 explosives alone or in combination, or loaded into various types of ammu- nition or containers, most
+        of which can be expected to explode virtually instantaneously when a small portion is subjected to fire, severe concussion,
+        impact, the impulse of an initiating agent or the effect of a considerable discharge of energy from without. Mate-
+        rials that react in this manner represent a mass explosion hazard. Such an explosive will normally cause severe structural
+        damage to adjacent objects. Explosive propagation could occur immediately to other items of ammunition and explosives
+        stored suffi- ciently close to and not adequately protected from the initially exploding pile with a time interval
+        short enough so that two or more quantities must be considered as one for quantity-distance purposes. UN/DOTn Class
+        1 explosives. The former classification system used by DOTn included the terms “high” and “low” explosives as defined
+        herein. The following terms further define explosives under the current system applied by DOTn for all explosive materials
+        defined as hazard Class 1 materials. Compatibility group letters are used in concert with the division to specify
+        further limitations on each division noted (i.e., the letter G identifies the material as a pyrotechnic substance
+        or article containing a pyrotechnic substance and similar materials). Division 1.1. Explosives that have a mass explosion
+        hazard. A mass explosion is one which affects almost the entire load instantaneously. Division 1.2. Explosives that
+        have a projection hazard but not a mass explosion hazard. Division 1.3. Explosives that have a fire hazard and either
+        a minor blast hazard or a minor projection hazard or both, but not a mass explosion hazard. Division 1.4. Explosives
+        that pose a minor explosion hazard. The explosive effects are largely confined to the package and no projection of
+        fragments of appreciable size or range is to be expected. An external fire must not cause virtually instantaneous
+        explosion of almost the entire contents of the package. Division 1.5. Very insensitive explosives. This division is
+        comprised of substances that have a mass explosion hazard, but that are so insensitive there is very little probability
+        of initiation or of transition from burning to detonation under normal condi- tions of transport. Division 1.6. Extremely
+        insensitive articles which do not have a mass explosion hazard. This division is comprised of articles that contain
+        only extremely insensitive detonating substances and which demonstrate a negligible probability of accidental initiation
+        or propagation.'
+    piece_sha256: 670a717174493f91754a711d5e042bceff24c7d8544ab84d148d41182df873ab
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:exterior_exit_stairway:
     label: reference
     topic: definitions
@@ -1386,6 +1602,38 @@ labels:
         routes located on a'
     piece_sha256: d3218b5b4796d1c3140a4374dece0a2c36cfffc347e0330d47c51983c7993e69
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_alarm_box_manual:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE ALARM BOX, MANUAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 52
+      - 52
+      quote: FIRE ALARM BOX, MANUAL. See “Manual fire alarm box.”
+    piece_sha256: 86eb8c6a06170095bbe1aaa68657cf2101f6212837fa0e4432c80254f11c970d
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_alarm_signal:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE ALARM SIGNAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 56
+      - 57
+      quote: '[F] FIRE ALARM SIGNAL. A signal initiated by a fire alarm-initiating device such as a manual fire alarm box,
+        automatic fire detector, waterflow switch or other device whose activation is indicative of the presence of a fire
+        or fire signature.'
+    piece_sha256: 4e0e1ac4569062cadaabf7445efe4a87311446bd0603337ec3e33c46dd44e5f4
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_alarm_system:
@@ -1486,6 +1734,21 @@ labels:
         fire. A dynamic fire damper is tested and rated for closure under elevated temperature airflow.'
     piece_sha256: 1c97f3b6b2b400c38b31aa927d541aa7921053f85b9752c8080f4a616191b016
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_detector_automatic:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE DETECTOR, AUTOMATIC, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 16
+      - 16
+      quote: '[F] FIRE DETECTOR, AUTOMATIC. A device designed to detect the presence of a fire signature and to initiate action.'
+    piece_sha256: 56399eeb88bc608dba2e29d9dc18fb3d35c48dd4a9b2215857bb69e2c3e0ddf5
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fire_door:
@@ -1637,6 +1900,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:fire_protection_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE PROTECTION SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 27
+      - 28
+      quote: '[F] FIRE PROTECTION SYSTEM. Approved devices, equipment and systems or combinations of systems used to detect
+        a fire, activate an alarm, extinguish or control a fire, control or manage smoke and products of a fire or any combination
+        thereof.'
+    piece_sha256: dc72ead165d3a75c59ef0524fa117d7a98d478d12d64e2c3900a142ec3ec7397
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:fire_resistance:
     label: reference
     topic: definitions
@@ -1729,6 +2009,31 @@ labels:
       quote: FIRESTOP SYSTEM, THROUGH-PENETRATION. See “Through-penetration firestop system.”
     piece_sha256: 1afdf4915fcb6832060187ad504879d9c48dbefb62d8b2b60b9689b410a071f3
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part d.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fireworks:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIREWORKS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 46
+      lines:
+      - 6
+      - 16
+      quote: '[F] FIREWORKS. Any composition or device for the purpose of producing a visible or audible effect for entertainment
+        purposes by combustion, deflagration or detonation that meets the definition of 1.4G fireworks or 1.3G fireworks.
+        Fireworks, 1.3G. Large fireworks devices, which are explosive materials, intended for use in fireworks displays and
+        designed to produce audible or visible effects by combustion, deflagration or detonation. Such 1.3G fireworks include,
+        but are not limited to, firecrackers containing more than 130 milligrams (2 grains) of explosive composition, aerial
+        shells containing more than 40 grams of pyrotechnic composition, and other display pieces which exceed the limits
+        for classification as 1.4G fireworks. Such 1.3G fire- works are also described as fireworks, UN0335 by the DOTn. Fireworks,
+        1.4G. Small fireworks devices containing restricted amounts of pyrotechnic composition designed primarily to produce
+        visible or audible effects by combustion or deflagration that complies with the construction, chemical composition
+        and labeling regulations of the DOTn for fireworks, UN0336, and the US Consumer Product Safety Commission (CPSC) as
+        set forth in CPSC 16 CFR: Parts 1500 and 1507.'
+    piece_sha256: e190964ec1c72ae9bc47dbd0802f642f883063ed487d53d5d3834f4cc09977a3
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:fixed_seating:
@@ -2003,6 +2308,22 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:hazardous_materials:
+    label: reference
+    topic: definitions
+    reason: 'Defines HAZARDOUS MATERIALS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 19
+      - 20
+      quote: '[F] HAZARDOUS MATERIALS. Those chemicals or substances that are physical hazards or health hazards as classified
+        in Section 307 and the Fire Code of New York State, whether the materials are in usable or waste condition.'
+    piece_sha256: adf413663d714d4c033e30e751e81dcee7fd4d4c1182291134506ce5153411a4
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:hazardous_production_material_hpm:
     label: reference
     topic: definitions
@@ -2037,6 +2358,38 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:health_hazard:
+    label: reference
+    topic: definitions
+    reason: 'Defines HEALTH HAZARD, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 25
+      - 27
+      quote: '[F] HEALTH HAZARD. A classification of a chemical for which there is statistically significant evidence that
+        acute or chronic health effects are capable of occurring in exposed persons. The term “health hazard” includes chemicals
+        that are toxic or highly toxic, and corrosive.'
+    piece_sha256: 2c1d2406817ddc5a94c0f4cbe1a2b98d14552a10e01df3e9485797ff61c04bdf
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:heat_detector:
+    label: reference
+    topic: definitions
+    reason: 'Defines HEAT DETECTOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 28
+      - 28
+      quote: HEAT DETECTOR. See “Detector, heat.”
+    piece_sha256: 995d840cbe7de8477a89c6ff05294f76a58425cc9dc4a2336a800cf599d384d7
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:height_building:
     label: reference
     topic: definitions
@@ -2050,6 +2403,31 @@ labels:
       quote: '[BG] HEIGHT, BUILDING. The vertical distance from grade plane to the average height of the highest roof surface.'
     piece_sha256: 1edfc2f24ab1b41fbaba521427a50871fcd94945c4be4c4eb46c3d26ac844ae2
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:highly_toxic:
+    label: reference
+    topic: definitions
+    reason: 'Defines HIGHLY TOXIC, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 40
+      - 54
+      quote: '[F] HIGHLY TOXIC. A material which produces a lethal dose or lethal concentration that falls within any of the
+        following categories: 1. A chemical that has a median lethal dose (LD ) of 50 milligrams or less per kilogram of body
+        weight when administered 50 orally to albino rats weighing between 200 and 300 grams each. 2. A chemical that has
+        a median lethal dose (LD ) of 200 milligrams or less per kilogram of body weight when administered by 50 continuous
+        contact for 24 hours (or less if death occurs within 24 hours) with the bare skin of albino rabbits weighing between
+        2 and 3 kilograms each. 3. A chemical that has a median lethal concentration (LC ) in air of 200 parts per million
+        by volume or less of gas or vapor, or 2 50 milligrams per liter or less of mist, fume or dust, when administered by
+        continuous inhalation for 1 hour (or less if death occurs within 1 hour) to albino rats weighing between 200 and 300
+        grams each. Mixtures of these materials with ordinary materials, such as water, might not warrant classification as
+        highly toxic. While this system is basically simple in application, any hazard evaluation that is required for the
+        precise categorization of this type of material shall be performed by experienced, technically competent persons.'
+    piece_sha256: a059a68f600d982c2edaafa4222cf9ec0dd282c37ddda9dce4a31ed895157c2c
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:high_rise_building:
@@ -2130,6 +2508,22 @@ labels:
     notes: 'Drafted by hand in a Claude Code session (2026-11-25); no recorded labeling run. Brought in by section group
       4 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): a term the corridor sections use, by the book''s
       italics.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:incompatible_materials:
+    label: reference
+    topic: definitions
+    reason: 'Defines INCOMPATIBLE MATERIALS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 44
+      - 45
+      quote: '[F] INCOMPATIBLE MATERIALS. Materials that, when mixed, have the potential to react in a manner that generates
+        heat, fumes, gases or byproducts which are hazardous to life or property.'
+    piece_sha256: 4bd4e89b5bb51db986d3ab0be389b40662b3ee5b2bc899155c5f0a31beccefab
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:information_technology_equipment_ite:
@@ -2268,6 +2662,23 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:laboratory_suite:
+    label: reference
+    topic: definitions
+    reason: 'Defines LABORATORY SUITE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 47
+      - 49
+      quote: '[F] LABORATORY SUITE. A fire-rated, enclosed laboratory area providing one or more laboratory spaces within
+        a Group B educational occupancy that includes ancillary uses such as offices, bathrooms and corridors that are contiguous
+        with the laboratory area, and are constructed in accordance with Section 428.'
+    piece_sha256: 1f0db3c2efafdea90d0858a60c0fd4858e20fce5fd44deefb25a4d0ff36966e7
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:level_of_exit_discharge:
     label: reference
     topic: definitions
@@ -2329,6 +2740,22 @@ labels:
         to the building offi-'
     piece_sha256: 3db02dfd97f3db0efc7185037d7e2ade74cfa5eeabb667cef3b693ac20a7575a
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:live_work_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines LIVE/WORK UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 38
+      - 39
+      quote: '[BG] LIVE/WORK UNIT. A dwelling unit or sleeping unit in which a significant portion of the space includes a
+        nonresidential use that is operated by the tenant.'
+    piece_sha256: 088271b43c22b4cbad6ffceb275a7873d0eeb9591a75997b76125391ba44c113
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:load_factor:
@@ -2427,6 +2854,21 @@ labels:
         such enclosure is not built so as to render the structure in violation of Section 1612.'
     piece_sha256: fc0159474cfc7d33ce040893bd54df86ebe8c1a4bbfe0a89f24f238f88299867
     notes: Drafted by hand in a Claude Code session (2026-11-26); no recorded labeling run. Chapter 7 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:manual_fire_alarm_box:
+    label: reference
+    topic: definitions
+    reason: 'Defines MANUAL FIRE ALARM BOX, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 13
+      - 13
+      quote: '[F] MANUAL FIRE ALARM BOX. A manually operated device used to initiate an alarm signal.'
+    piece_sha256: 80f811ad2e2cfb6de1214be42ac372f93ab2d10db0e9044cbba3e0b82ca9fbdc
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:manufacturer_s_designation:
@@ -2693,6 +3135,21 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:notification_zone:
+    label: reference
+    topic: definitions
+    reason: 'Defines NOTIFICATION ZONE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 17
+      - 17
+      quote: NOTIFICATION ZONE. See “Zone, notification.”
+    piece_sha256: bd5ea30e9ec9aed0afd9ec4485bcc6a4ed71bd70a09c2b130065d1685a238b83
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:occupant_load:
     label: reference
     topic: definitions
@@ -2791,6 +3248,30 @@ labels:
       table''s limit for some condition.'
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:organic_peroxide:
+    label: reference
+    topic: definitions
+    reason: 'Defines ORGANIC PEROXIDE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 45
+      - 56
+      quote: '[F] ORGANIC PEROXIDE. An organic compound that contains the bivalent -O-O- structure and which may be considered
+        to be a struc- tural derivative of hydrogen peroxide where one or both of the hydrogen atoms have been replaced by
+        an organic radical. Organic peroxides can pose an explosion hazard (detonation or deflagration) or they can be shock
+        sensitive. They can also decompose into vari- ous unstable compounds over an extended period of time. Class I. Those
+        formulations that are capable of deflagration but not detonation. Class II. Those formulations that burn very rapidly
+        and that pose a moderate reactivity hazard. Class III. Those formulations that burn rapidly and that pose a moderate
+        reactivity hazard. Class IV. Those formulations that burn in the same manner as ordinary combustibles and that pose
+        a minimal reactivity hazard. Class V. Those formulations that burn with less intensity than ordinary combustibles
+        or do not sustain combustion and that pose no reactivity hazard. Unclassified detonable. Organic peroxides that are
+        capable of detonation. These peroxides pose an extremely high explosion hazard through rapid explosive decomposition.'
+    piece_sha256: 5292bb6964f6f5349e65e921c5436f0854593fa66ba88d681947090edcf878a1
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:overhead_doorstop:
     label: reference
     topic: definitions
@@ -2824,6 +3305,44 @@ labels:
     piece_sha256: 70386dd0eeb1c09bcd4e38930757ca37adcd8c68813729a467af9805052e4a11
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
       3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:oxidizer:
+    label: reference
+    topic: definitions
+    reason: 'Defines OXIDIZER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 12
+      - 19
+      quote: '[F] OXIDIZER. A material that readily yields oxygen or other oxidizing gas, or that readily reacts to promote
+        or initiate combustion of combustible materials and, if heated or contaminated, can result in vigorous self-sustained
+        decomposition. Class 4. An oxidizer that can undergo an explosive reaction due to contamination or exposure to thermal
+        or physical shock and that causes a severe increase in the burning rate of combustible materials with which it comes
+        into contact. Additionally, the oxidizer causes a severe increase in the burning rate and can cause spontaneous ignition
+        of combustibles. Class 3. An oxidizer that causes a severe increase in the burning rate of combustible materials with
+        which it comes in contact. Class 2. An oxidizer that will cause a moderate increase in the burning rate of combustible
+        materials with which it comes in contact. Class 1. An oxidizer that does not moderately increase the burning rate
+        of combustible materials.'
+    piece_sha256: 3641f1cc3f66b9b60e5a7fb3552a2c376a33b4a6a6e17f55028e61c2bc10ab0d
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:oxidizing_gas:
+    label: reference
+    topic: definitions
+    reason: 'Defines OXIDIZING GAS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 20
+      - 20
+      quote: '[F] OXIDIZING GAS. A gas that can support and accelerate combustion of other materials more than air does.'
+    piece_sha256: 8ba02184334cc3a467183f722ac92d3bf34710daaf4cb513bac15a7427b97d25
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:panel_part_of_a_structure:
@@ -2958,6 +3477,24 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:physical_hazard:
+    label: reference
+    topic: definitions
+    reason: 'Defines PHYSICAL HAZARD, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 57
+      lines:
+      - 18
+      - 20
+      quote: '[F] PHYSICAL HAZARD. A chemical for which there is evidence that it is a combustible liquid, cryogenic fluid,
+        explosive, flammable (solid, liquid or gas), organic peroxide (solid or liquid), oxidizer (solid or liquid), oxidizing
+        gas, pyrophoric (solid, liquid or gas), unstable (reactive) material (solid, liquid or gas) or water-reactive material
+        (solid or liquid).'
+    piece_sha256: 6768fc30ce31d6a043f666280fd6d32b224a6588e1769443c6f4ff7422617bdd
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:place_of_religious_worship:
     label: reference
     topic: definitions
@@ -2990,6 +3527,21 @@ labels:
     piece_sha256: cba47445614836ec18b24c06d1f38091ad465872a996a4a8e81d0bcd4f1654b9
     notes: 'Drafted by hand in a Claude Code session (2026-11-23); no recorded labeling run. Brought in for section group
       3 (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md): occupant loads from each room''s function.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:play_structure:
+    label: reference
+    topic: definitions
+    reason: 'Defines PLAY STRUCTURE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 57
+      lines:
+      - 35
+      - 35
+      quote: '[BG] PLAY STRUCTURE. A structure composed of one or more components, where the user enters a play environment.'
+    piece_sha256: 0d00d05d450e6513b30be39f44999e29d584cfb04c7585eeeae35ff035619a32
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:plumbing_code_of_new_york_state:
@@ -3075,6 +3627,52 @@ labels:
         been deeded, dedicated or'
     piece_sha256: 9c30bb288f4686d66c6762dfcbf3145b9a1416cc78180b76405f8335b44d63f6
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:public_use_areas:
+    label: reference
+    topic: definitions
+    reason: 'Defines PUBLIC-USE AREAS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 20
+      - 20
+      quote: '[BE] PUBLIC-USE AREAS. Interior or exterior rooms or spaces that are made available to the general public.'
+    piece_sha256: 19c36bdb0406b95db8f60f226c748c7ed4de6264e7ab8b8036c78f7241c42b34
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:pyrophoric:
+    label: reference
+    topic: definitions
+    reason: 'Defines PYROPHORIC, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 23
+      - 23
+      quote: '[F] PYROPHORIC. A chemical with an auto-ignition temperature in air, at or below a temperature of 130°F (54.4°C).'
+    piece_sha256: 0153e311294d1019445b78db8a5e8d4d5d5a7062c5ca48d416b5b41e994ee45a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:pyrotechnic_composition:
+    label: reference
+    topic: definitions
+    reason: 'Defines PYROTECHNIC COMPOSITION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 24
+      - 25
+      quote: '[F] PYROTECHNIC COMPOSITION. A chemical mixture that produces visible light displays or sounds through a self-propagating,
+        heat-releasing chemical reaction which is initiated by ignition.'
+    piece_sha256: ce7144baf8a8d5cd6624f53bbc6de3a56cc25c342bfdc530580afb44803799a0
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:ramp:
@@ -3713,6 +4311,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:supervisory_service:
+    label: reference
+    topic: definitions
+    reason: 'Defines SUPERVISORY SERVICE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 64
+      lines:
+      - 9
+      - 10
+      quote: '[F] SUPERVISORY SERVICE. The service required to monitor performance of guard tours and the operative condition
+        of fixed suppres- sion systems or other systems for the protection of life and property.'
+    piece_sha256: 5ca7d5ab06a4289b3ef0294534e8fc891e2b93bf1e6fb86307cb5370327832be
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:supervisory_signal_initiating_device:
     label: reference
     topic: definitions
@@ -3881,6 +4495,30 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:toxic:
+    label: reference
+    topic: definitions
+    reason: 'Defines TOXIC, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 65
+      lines:
+      - 7
+      - 19
+      quote: '[F] TOXIC. A chemical falling within any of the following categories: 1. A chemical that has a median lethal
+        dose (LD ) of more than 50 milligrams per kilogram, but not more than 500 milligrams 50 per kilogram of body weight
+        when administered orally to albino rats weighing between 200 and 300 grams each. 2. A chemical that has a median lethal
+        dose (LD ) of more than 200 milligrams per kilogram, but not more than 1,000 milli- 50 grams per kilogram of body
+        weight when administered by continuous contact for 24 hours (or less if death occurs within 24 hours) with the bare
+        skin of albino rabbits weighing between 2 and 3 kilograms each. 3. A chemical that has a median lethal concentration
+        (LC ) in air of more than 200 parts per million, but not more than 2,000 50 parts per million by volume of gas or
+        vapor, or more than 2 milligrams per liter but not more than 20 milligrams per liter of mist, fume or dust, when administered
+        by continuous inhalation for 1 hour (or less if death occurs within 1 hour) to albino rats weighing between 200 and
+        300 grams each.'
+    piece_sha256: 9de644cc23aeec8fa18518c873b3349d8b892f0d485233d63848da54634770cb
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:trim:
     label: reference
     topic: definitions
@@ -3963,6 +4601,39 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:unstable_reactive_material:
+    label: reference
+    topic: definitions
+    reason: 'Defines UNSTABLE (REACTIVE) MATERIAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 65
+      lines:
+      - 49
+      - 59
+      quote: '[F] UNSTABLE (REACTIVE) MATERIAL. A material, other than an explosive, which in the pure state or as commercially
+        produced, will vigorously polymerize, decompose, condense or become self-reactive and undergo other violent chemical
+        changes, including explo- sion, when exposed to heat, friction or shock, or in the absence of an inhibitor, or in
+        the presence of contaminants, or in contact with incompatible materials. Unstable (reactive) materials are subdivided
+        as follows: Class 1. Materials that in themselves are normally stable but which can become unstable at elevated temperatures
+        and pressure. Class 2. Materials that in themselves are normally unstable and readily undergo violent chemical change
+        but do not detonate. This class includes materials that can undergo chemical change with rapid release of energy at
+        normal temperatures and pressures, and that can undergo violent chemical change at elevated temperatures and pressures.
+        Class 3. Materials that in themselves are capable of detonation or of explosive decomposition or explosive reaction
+        but which require a strong initiating source or which must be heated under confinement before initiation. This class
+        includes materials that are sensitive to thermal or mechanical shock at elevated temperatures and pressures.'
+    - file: gov.ny.building.2025.pdf
+      page: 66
+      lines:
+      - 3
+      - 5
+      quote: Class 4. Materials that in themselves are readily capable of detonation or explosive decomposition or explosive
+        reaction at normal temperatures and pressures. This class includes materials that are sensitive to mechanical or localized
+        thermal shock at normal temperatures and pressures.
+    piece_sha256: 8841c9193126ff007ffcaf2302914b4481f084882b3eb324f74c6257122a3e78
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:use_material:
     label: reference
     topic: definitions
@@ -4022,6 +4693,27 @@ labels:
       quote: '[BS] WALL. This definition applies only to Chapter 21.'
     piece_sha256: 73cc15edcea595ba0fe40c4b6515d8449a9ebd5109f400cd832d9e898e0ef17e
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:water_reactive_material:
+    label: reference
+    topic: definitions
+    reason: 'Defines WATER-REACTIVE MATERIAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 66
+      lines:
+      - 44
+      - 50
+      quote: '[F] WATER-REACTIVE MATERIAL. A material that explodes; violently reacts; produces flammable, toxic or other
+        hazardous gases; or evolves enough heat to cause autoignition or ignition of combustibles upon exposure to water or
+        moisture. Water-reactive materials are subdivided as follows: Class 3. Materials that react explosively with water
+        without requiring heat or confinement. Class 2. Materials that react violently with water or have the ability to boil
+        water. Materials that produce flammable, toxic or other hazardous gases or evolve enough heat to cause autoignition
+        or ignition of combustibles upon exposure to water or moisture. Class 1. Materials that react with water with some
+        release of energy, but not violently.'
+    piece_sha256: 12c96d5f91a779db0ddea367dacd956d01bc77b1dc4dc81f1293b3794b3e5abd
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   202:wheelchair_space:
@@ -4084,6 +4776,38 @@ labels:
         provided by this'
     piece_sha256: 4f1b03f56eebaaa50fa8feb21365fd7b2c16ab8f671c67a76d3b5e036490caaa
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:zone:
+    label: reference
+    topic: definitions
+    reason: 'Defines ZONE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 67
+      lines:
+      - 46
+      - 47
+      quote: '[F] ZONE. A defined area within the protected premises. A zone can define an area from which a signal can be
+        received, an area to which a signal can be sent or an area in which a form of control can be executed.'
+    piece_sha256: a30603abeeb845cb721ad8922c71e7bee92ea22ba577eb8dc0c3ed500a520dae
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:zone_notification:
+    label: reference
+    topic: definitions
+    reason: 'Defines ZONE, NOTIFICATION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 67
+      lines:
+      - 48
+      - 48
+      quote: '[F] ZONE, NOTIFICATION. An area within a building or facility covered by notification appliances which are activated
+        simultaneously.'
+    piece_sha256: 2986a71d6006c568dc2fa6392f703b05a9194f8229cf6b4d5d6331c74abcaf0c
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '308.5':
@@ -7663,6 +8387,239 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part b.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  903.2.11:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says every group but U is sprinklered where 903.2.11.1 to 903.2.11.6 say: a pointer, no requirement of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 32
+      - 33
+      quote: '[F] 903.2.11 Specific building areas and hazards. In all occupancies other than Group U, an automatic sprinkler
+        system shall be installed for building design or hazards in the locations set forth in Sections 903.2.11.1 through
+        903.2.11.6.'
+    piece_sha256: a6bf472eef3bb59bc918cd9d3e4423c20182ab12a067b0b10740d0032e445c45
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.11.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A story (basements included) over 1,500 square feet is sprinklered throughout unless, in each 50 feet of exterior
+      wall on at least one side, it has openings below grade reached by an exterior stairway per 1011 or a ramp ...: a person''s
+      check (general.bc_903_2_11_1_stories_without_openings).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 34
+      - 44
+      quote: '[F] 903.2.11.1 Stories without openings. An automatic sprinkler system shall be installed throughout all stories,
+        including basements, of all buildings where the floor area exceeds 1,500 square feet (139.4 m[fn2]) and where the
+        story does not comply with the following criteria for exterior wall openings: 1. Openings below grade that lead directly
+        to ground level by an exterior stairway complying with Section 1011 or an outside ramp complying with Section 1012.
+        Openings shall be located in each 50 linear feet (15 240 mm), or fraction thereof, of exterior wall in the story on
+        not fewer than one side. The required openings shall be distributed such that the lineal distance between adjacent
+        openings does not exceed 50 feet (15 240 mm). 2. Openings entirely above the adjoining ground level totaling not less
+        than 20 square feet (1.86 m[fn2]) in each 50 linear feet (15 240 mm), or fraction thereof, of exterior wall in the
+        story on not fewer than one side. The required openings shall be distributed such that the lineal distance between
+        adjacent openings does not exceed 50 feet (15 240 mm). The height of the bottom of the clear opening shall not exceed
+        44 inches (1118 mm) measured from the floor.'
+    piece_sha256: 1e8e3e4de79185e4bcf5365b58df8c7ba7500782d339bc804f8856cc3e29ee47
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.11.1.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'The openings 903.2.11.1 counts are at least 30 inches in each dimension, the fire department has access to them
+      from outside, unobstructed for firefighting or rescue: a person''s check (general.bc_903_2_11_1_1_opening_dimensions).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 45
+      - 47
+      quote: '[F] 903.2.11.1.1 Opening dimensions and access. Openings shall have a minimum dimension of not less than 30
+        inches (762 mm). Access to such openings shall be provided for the fire department from the exterior and shall not
+        be obstructed in a manner such that firefighting or rescue cannot be accomplished from the exterior.'
+    piece_sha256: 5319f306acc2fdda0cf5eaf90c8a11e5b70274d100083ed98093fda6baf64413
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.11.1.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where a story''s openings are on one side only and the opposite wall is more than 75 feet from them, the story
+      is sprinklered throughout, or has openings on at least two sides: a person''s check (general.bc_903_2_11_1_2_openings_on_one_side).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 48
+      - 50
+      quote: '[F] 903.2.11.1.2 Openings on one side only. Where openings in a story are provided on only one side and the
+        opposite wall of such story is more than 75 feet (22 860 mm) from such openings, the story shall be equipped throughout
+        with an approved automatic sprinkler system, or openings shall be provided on not fewer than two sides of the story.'
+    piece_sha256: c6e1dd49338274f6fb664c347a20583f2fd8615490a352a678e87936d155fe49
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.11.1.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where any part of a basement is more than 75 feet from the openings 903.2.11.1 requires, or walls, partitions
+      or other obstructions restrict hose streams, the basement is sprinklered throughout: a person''s check (general.bc_903_2_11_1_3_basements).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 51
+      - 53
+      quote: '[F] 903.2.11.1.3 Basements. Where any portion of a basement is located more than 75 feet (22 860 mm) from openings
+        required by Section 903.2.11.1, or where walls, partitions or other obstructions are installed that restrict the application
+        of water from hose streams, the basement shall be equipped throughout with an approved automatic sprinkler system.'
+    piece_sha256: e3def3e7cfc020e9e67e28648991957637b439f2c2d1bdfbbada8a4b1185d768
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.11.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Rubbish and linen chutes have sprinklers at the top, in their terminal rooms, at alternate floors and the lowest
+      intake, and a chute''s extension more than one floor below the lowest intake recessed, freeze-protected spri...: a person''s
+      check (general.bc_903_2_11_2_chutes).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 272
+      lines:
+      - 54
+      - 59
+      quote: '[F] 903.2.11.2 Rubbish and linen chutes. An automatic sprinkler system shall be installed at the top of rubbish
+        and linen chutes and in their terminal rooms. Chutes shall have additional sprinkler heads installed at alternate
+        floors and at the lowest intake. Where a rubbish chute extends through a building more than one floor below the lowest
+        intake, the extension shall have sprinklers installed that are recessed from the drop area of the chute and protected
+        from freezing in accordance with Section 903.3.1.1. Such sprinklers shall be installed at alternate floors, beginning
+        with the second level below the last intake and ending with the floor above the discharge. Access to sprinklers in
+        chutes shall be provided for servicing.'
+    piece_sha256: 0e316f05a91d962f6f02abad8cab72c18f05708c005d14977739c0a21199464a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.11.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'A building with a story whose occupant load is 30 or more and whose finished floor is 55 feet or more above the
+      lowest level of fire department vehicle access is sprinklered throughout (Group F-2 aside): the fire departm...: a person''s
+      check (general.bc_903_2_11_3_buildings_55_feet).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 273
+      lines:
+      - 3
+      - 6
+      quote: '[F] 903.2.11.3 Buildings 55 feet or more in height. An automatic sprinkler system shall be installed throughout
+        buildings that have one or more stories with an occupant load of 30 or more located 55 feet (16 764 mm) or more above
+        the lowest level of fire department vehicle access, measured to the finished floor. Exception: Occupancies in Group
+        F-2.'
+    piece_sha256: 2eb85e944c4d8fb10640d1950e54525e5abeba9da46d1f3de23c08ec284c777a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.11.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where the Mechanical Code of New York State requires it, ducts conveying hazardous exhaust or flammable or combustible
+      materials are sprinklered, ducts under 10 inches across aside: a person''s check (general.bc_903_2_11_4_hazardous_exhaust_ducts).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 273
+      lines:
+      - 7
+      - 9
+      quote: '[F] 903.2.11.4 Ducts conveying hazardous exhausts. Where required by the Mechanical Code of New York State,
+        automatic sprinklers shall be provided in ducts conveying hazardous exhaust or flammable or combustible materials.
+        Exception: Ducts where the largest cross-sectional diameter of the duct is less than 10 inches (254 mm).'
+    piece_sha256: 3e6db20695fd4d00747b5bc9e7ec85903ff1b22d9850df20c39e7de67d2372dd
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.11.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'Where a sprinkler system is used to comply with Section 904, commercial kitchen exhaust hood and duct systems
+      are sprinklered: a person''s check (general.bc_903_2_11_5_commercial_cooking).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 273
+      lines:
+      - 10
+      - 11
+      quote: '[F] 903.2.11.5 Commercial cooking operations. An automatic sprinkler system shall be installed in commercial
+        kitchen exhaust hood and duct systems where an automatic sprinkler system is used to comply with Section 904.'
+    piece_sha256: 6c17f561f317ee1dc0372dc6f442a6174bc18ce0e595a52f5e15ed895392f392
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.11.6:
+    label: flag
+    topic: means_of_egress
+    reason: 'Table 903.2.11.6''s sections require sprinklers for their buildings and areas: covered and open malls (402.5,
+      402.6.2), high-rise buildings (403.3), atriums (404.3), underground structures (405.3), Group I-2 (407.7), stag...:
+      a person''s check (general.bc_903_2_11_6_other_required_systems).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 273
+      lines:
+      - 12
+      - 13
+      quote: '[F] 903.2.11.6 Other required fire protection systems. In addition to the requirements of Section 903.2, the
+        provisions indi- cated in Table 903.2.11.6 require the installation of a fire protection system for certain buildings
+        and areas.'
+    piece_sha256: 1cf4b8d1d203cb6cc52a905c23524c5d203ba6870639a218bd3ac262ead6070a
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 903.2.11.6:
+    label: reference
+    topic: means_of_egress
+    reason: The sections 903.2.11.6 names, quoted by its flag (general.bc_903_2_11_6_other_required_systems).
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 273
+      lines:
+      - 14
+      - 36
+      quote: '[F] TABLE 903.2.11.6—ADDITIONAL REQUIRED PROTECTION SYSTEMS SECTION SUBJECT 402.5, 402.6.2 Covered and open
+        mall buildings 403.3 High-rise buildings 404.3 Atriums 405.3 Underground structures 407.7 Group I-2 410.6 Stages 411.3
+        Special amusement buildings 412.2.4 Airport traffic control towers 412.3.6, 412.3.6.1, 412.5.6 Aircraft hangars 415.11.11
+        Group H-5 HPM exhaust ducts 416.5 Flammable finishes 417.4 Drying rooms 424.3 Play structures 428 Buildings containing
+        laboratory suites 507 Unlimited area buildings 508.5.7 Live/work units 509.4 Incidental uses 1030.6.2.3 Smoke-protected
+        assembly seating Automatic sprinkler system requirements as set forth in Section 903.2.11.6 of the Fire Code of New
+        York FCNYS State'
+    piece_sha256: b65f59784a368a73e4341c3af857f1d35195583701b8cd64a44dc8e19c3523f2
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.2.12:
+    label: flag
+    topic: means_of_egress
+    reason: 'Sprinkler systems required during construction, alteration and demolition follow Chapter 33 of the Fire Code
+      of New York State: a person''s check (general.bc_903_2_12_during_construction).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 273
+      lines:
+      - 37
+      - 38
+      quote: '[F] 903.2.12 During construction. Automatic sprinkler systems required during construction, alteration and demolition
+        opera- tions shall be provided in accordance with Chapter 33 of the Fire Code of New York State.'
+    piece_sha256: b730e3f654747e141c85df21bbf63a0b1b82bd2315b5da866bd0e60ddae45212
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   '903.3':
     label: reference
     topic: means_of_egress
@@ -7772,6 +8729,365 @@ labels:
         NFPA 13D.'
     piece_sha256: 60aeadbc694319da9910359658b644832668fb3b17d31519789c3b2b3a620a68
     notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part a.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '907.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Says Section 907 covers fire alarm systems: a pointer, no requirement of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 284
+      lines:
+      - 17
+      - 18
+      quote: '[F] 907.1 General. This section covers the application, installation, performance and maintenance of fire alarm
+        systems and their components.'
+    piece_sha256: 355ca4fa597da7613eb3a109ef622d0fe0e4e9dd45d6ed922238602c9325c415
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.1.1:
+    label: not_for_checking
+    topic: procedures
+    reason: 'About construction documents for fire alarm systems: the permit process and the installer''s work, not the building''s
+      design.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 284
+      lines:
+      - 19
+      - 21
+      quote: '[F] 907.1.1 Construction documents. Construction documents for fire alarm systems shall be of sufficient clarity
+        to indicate the location, nature and extent of the work proposed and show in detail that it will conform to the provisions
+        of this code, the Fire Code of New York State; and relevant laws, ordinances, rules and regulations, as determined
+        by the fire code official.'
+    piece_sha256: 335c77aa754e9e0f7ff13e384ceae57dd4afc549c07f1497f18eb8e806e91001
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.1.2:
+    label: not_for_checking
+    topic: procedures
+    reason: 'About fire alarm shop drawings submitted before installation: the permit process and the installer''s work, not
+      the building''s design.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 284
+      lines:
+      - 22
+      - 23
+      quote: '[F] 907.1.2 Fire alarm shop drawings. Shop drawings for fire alarm systems shall be prepared in accordance with
+        NFPA 72 and submitted for review and approval prior to system installation.'
+    piece_sha256: b2716d5eefe7d5acac291e41b83b6541d5480ec5fb8fd3fea6306a266be804cb
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.1.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Fire alarm systems and components listed and approved for their purpose: the equipment isn''t in the model, a
+      person''s check (general.bc_907_1_3_listed_equipment).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 284
+      lines:
+      - 24
+      - 24
+      quote: '[F] 907.1.3 Equipment. Systems and components shall be listed and approved for the purpose for which they are
+        installed.'
+    piece_sha256: a94d2654f759d5dc74447b2dfc76b0869a2f4244ca52146617feac778b90938d
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '907.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'Where Sections 907.2.1 to 907.2.23 require a fire alarm system, it is approved, installed per this code and NFPA
+      72, and gives occupant notification per 907.5; one with automatic detectors or waterflow detection has at l...: a person''s
+      check (general.bc_907_2_where_required).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 284
+      lines:
+      - 25
+      - 37
+      quote: '[F] 907.2 Where required—new buildings and structures. An approved fire alarm system installed in accordance
+        with the provi- sions of this code and NFPA 72 shall be provided in new buildings and structures in accordance with
+        Sections 907.2.1 through 907.2.23 and provide occupant notification in accordance with Section 907.5, unless other
+        requirements are provided by another section of this code. Not fewer than one manual fire alarm box shall be provided
+        in an approved location to initiate a fire alarm signal for fire alarm systems employing automatic fire detectors
+        or waterflow detection devices. Where other sections of this code allow elimination of fire alarm boxes due to sprinklers,
+        a single fire alarm box shall be installed. Exceptions: 1. The manual fire alarm box is not required for fire alarm
+        systems dedicated to elevator recall control and supervisory service. 2. The manual fire alarm box is not required
+        for Group R-2 occupancies unless required by the fire code official to provide a means for fire watch personnel to
+        initiate an alarm during a sprinkler system impairment event. Where provided, the manual fire alarm box shall not
+        be located in an area that is open to the public.'
+    piece_sha256: 87c4aa2557db2e910068fea222e5ef8a7ddbf2fc3d30f5e5cd04b30a52b7cb44
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A manual fire alarm system activating occupant notification per 907.5 is installed where the assembly occupant
+      load is 300 or more, or the Group A occupant load is more than 100 above or below the lowest level of exit di...: a
+      person''s check (general.bc_907_2_1_group_a_fire_alarm).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 284
+      lines:
+      - 38
+      - 57
+      quote: '[F] 907.2.1 Group A. A manual fire alarm system that activates the occupant notification system in accordance
+        with Section 907.5 shall be installed in Group A occupancies where the occupant load due to the assembly occupancy
+        is 300 or more, or where the Group A occupant load is more than 100 persons above or below the lowest level of exit
+        discharge. Group A occupancies not sepa- rated from one another in accordance with Section 707.3.10 shall be considered
+        as a single occupancy for the purposes of applying this section. Portions of Group E occupancies occupied for assembly
+        purposes shall be provided with a fire alarm system as required for the Group E occupancy. Exceptions: 1. Manual fire
+        alarm boxes are not required where the building is equipped throughout with an automatic sprinkler system installed
+        in accordance with Section 903.3.1.1 and the occupant notification appliances will activate through- out the notification
+        zones upon sprinkler water flow. 2. Manual fire alarm boxes and the associated occupant notification system or emergency
+        voice/alarm communication system are not required for Group A-5 outdoor bleacher-type seating having an occupant load
+        of greater than or equal to 300 and less than 15,000 occupants, provided that all of the following are met: 2.1. A
+        public address system with standby power is provided. 2.2. Enclosed spaces attached to or within 5 feet (1524 mm)
+        of the outdoor bleacher-type seating compose, in the aggregate, a maximum of 10 percent of the overall area of the
+        outdoor bleacher-type seating or 1,000 square feet (92.9 m[fn2]), whichever is less. 2.3. Enclosed accessory spaces
+        under or attached to the outdoor bleacher-type seating shall be separated from the bleacher-type seating in accordance
+        with Section 1030.1.1.1. 2.4. All means of egress from the bleacher-type seating are open to the outside.'
+    - file: gov.ny.building.2025.pdf
+      page: 285
+      lines:
+      - 3
+      - 8
+      quote: '3. Manual fire alarm boxes and the associated occupant notification system or emergency voice/alarm communication
+        system are not required for temporary Group A-5 outdoor bleacher-type seating, provided that all of the following
+        are met: 3.1. There are no enclosed spaces under or attached to the outdoor bleacher-type seating. 3.2. The bleacher-type
+        seating is erected for a period of less than 180 days. 3.3. Evacuation of the bleacher-type seating is included in
+        an approved fire safety plan.'
+    piece_sha256: 1cf962d1775db01c66f38f936dbf3bafdd3f151b2bc4c9a0accbe9faedcf9049
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.1.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'An emergency voice/alarm communication system required by the occupancy''s occupant load: a rule per story on
+      the stated group and system (general.bc_907_2_1_1_group_a_voice_alarm).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 285
+      lines:
+      - 9
+      - 14
+      quote: '[F] 907.2.1.1 System initiation in Group A occupancies with an occupant load of 1,000 or more. Activation of
+        the fire alarm in Group A occupancies with an occupant load of 1,000 or more shall initiate a signal using an emergency
+        voice/alarm communi- cations system in accordance with Section 907.5.2.2. Exception: Where approved, the prerecorded
+        announcement is allowed to be manually deactivated for a period of time, not to exceed 3 minutes, for the sole purpose
+        of allowing a live voice announcement from an approved, constantly attended location.'
+    piece_sha256: be012e4d3738eeaeb6e740886f95605b4c269de2e12afa80da74fdf8edca0c48
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.1.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'Stadiums, arenas and grandstands required to caption audible public announcements do so per 907.5.2.2.4: a person''s
+      check (general.bc_907_2_1_2_captions).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 285
+      lines:
+      - 15
+      - 16
+      quote: '[F] 907.2.1.2 Emergency voice/alarm communication captions. Stadiums, arenas and grandstands required to caption
+        audible public announcements shall be in accordance with Section 907.5.2.2.4.'
+    piece_sha256: 68b5eec86732c0eaac65192083b1b280ac2a9bc868d36a684eba66988d9b2876
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.1.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'New York requires an automatic smoke detection system activating occupant notification per 907.5 in Group A,
+      unless the fire area has a 903.3.1.1 sprinkler system that activates the occupant notification system: a person''s check
+      (general.bc_907_2_1_3_group_a_smoke_detection).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 285
+      lines:
+      - 17
+      - 19
+      quote: '[NY] 907.2.1.3 Automatic smoke detection system. An automatic smoke detection system that activates the occupant
+        notifi- cation system in accordance with Section 907.5 shall be installed in Group A occupancies unless the fire area
+        is protected with an automatic sprinkler system, that activates the occupant notification system, installed in accordance
+        with Section 903.3.1.1.'
+    piece_sha256: 66c7a5bfbf6893328c0281335149c904d92f6e350053c46e4da87c6a4a929f61
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A manual fire alarm system activating occupant notification per 907.5 is installed in Group B where the Group
+      B occupant load of all floors together is 500 or more, more than 100 are above or below the lowest level of ex...: a
+      person''s check (general.bc_907_2_2_group_b_fire_alarm).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 285
+      lines:
+      - 20
+      - 27
+      quote: '[F] 907.2.2 Group B. A manual fire alarm system, which activates the occupant notification system in accordance
+        with Section 907.5, shall be installed in Group B occupancies where one of the following conditions exists: 1. The
+        combined Group B occupant load of all floors is 500 or more. 2. The Group B occupant load is more than 100 persons
+        above or below the lowest level of exit discharge. 3. The fire area contains an ambulatory care facility. Exception:
+        Manual fire alarm boxes are not required where the building is equipped throughout with an automatic sprinkler system
+        installed in accordance with Section 903.3.1.1 and the occupant notification appliances will activate throughout the
+        notification zones upon sprinkler water flow.'
+    piece_sha256: b2793d5194db2f435b1500221080644e966f2233f1b669efbefdd1a519e5bb65
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Fire areas holding an ambulatory care facility have an electronically supervised automatic smoke detection system
+      in the facility and in public use areas outside tenant spaces (public corridors, elevator lobbies), unless...: a person''s
+      check (general.bc_907_2_2_1_ambulatory_care_detection).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 285
+      lines:
+      - 28
+      - 32
+      quote: '[F] 907.2.2.1 Ambulatory care facilities. Fire areas containing ambulatory care facilities shall be provided
+        with an electroni- cally supervised automatic smoke detection system installed within the ambulatory care facility
+        and in public use areas outside of tenant spaces, including public corridors and elevator lobbies. Exception: Buildings
+        equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1, provided that the occupant
+        notification appliances will activate throughout the notification zones upon sprinkler water flow.'
+    piece_sha256: 858c4f7c58bc3d1306df6e9070e697098b16cc9741893b1157b13ca729dcdc14
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: 'A fire area used for research and development or testing of lithium-ion or lithium metal batteries has a fire
+      alarm system activated by air-sampling smoke detection or radiant-energy-sensing detection throughout: a person''s check
+      (general.bc_907_2_2_2_battery_laboratory_detection).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 285
+      lines:
+      - 33
+      - 35
+      quote: '[F] 907.2.2.2 Laboratories involving research and development or testing. A fire alarm system activated by an
+        air- sampling-type smoke detection system or a radiant-energy-sensing detection system shall be installed throughout
+        the entire fire area utilized for the research and development or testing of lithium-ion or lithium metal batteries.'
+    piece_sha256: b5ed9e3de4b8eb5841d1dd0a18513a7ef3f45bf3d23997ac266dbbd681ffdf75
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.3:
+    label: rule
+    topic: means_of_egress
+    reason: 'Group E has a manual fire alarm system initiating notification through an emergency voice/alarm communication
+      system per 907.5.2.2: the voice/alarm system, a stated fact, is a rule per story by the occupancy''s occupant load (general.bc_907_2_3_group_e_voice_alarm);
+      the manual fire alarm system and its exceptions are a person''s check (general.bc_907_2_3_group_e_manual_fire_alarm).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 285
+      lines:
+      - 36
+      - 57
+      quote: '[F] 907.2.3 Group E. A manual fire alarm system that initiates the occupant notification signal utilizing an
+        emergency voice/alarm communication system meeting the requirements of Section 907.5.2.2 and installed in accordance
+        with Section 907.6 shall be installed in Group E occupancies. Where automatic sprinkler systems or smoke detectors
+        are installed, such systems or detectors shall be connected to the building fire alarm system. Exceptions: 1. A manual
+        fire alarm system shall not be required in Group E occupancies with an occupant load of 50 or less. 2. Emergency voice/alarm
+        communication systems meeting the requirements of Section 907.5.2.2 and installed in accordance with Section 907.6
+        shall not be required in Group E occupancies with occupant loads of 100 or less, provided that activation of the manual
+        fire alarm system initiates an approved occupant notification signal in accor- dance with Section 907.5. 3. Manual
+        fire alarm boxes shall not be required in Group E occupancies where all of the following apply: 3.1. Interior corridors
+        are protected by smoke detectors. 3.2. Auditoriums, cafeterias, gymnasiums and similar areas are protected by heat
+        detectors or other approved detection devices. 3.3. Shops and laboratories involving dusts or vapors are protected
+        by heat detectors or other approved detec- tion devices. 3.4. Manual activation is provided from a normally occupied
+        location. 4. Manual fire alarm boxes shall not be required in Group E occupancies where all of the following apply:
+        4.1. The building is equipped throughout with an approved automatic sprinkler system installed in accordance with
+        Section 903.3.1.1. 4.2. The emergency voice/alarm communication system will activate on sprinkler waterflow. 4.3.
+        Manual activation is provided from a normally occupied location.'
+    piece_sha256: 94bfa6424f294d45984178c7377b8a5dbb3db928e57df6bb8dd1555e281251b1
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'A manual fire alarm system activating occupant notification per 907.5 is installed in Group F of two or more
+      stories with a combined occupant load of 500 or more above or below the lowest level of exit discharge; boxes m...:
+      a person''s check (general.bc_907_2_4_group_f_fire_alarm).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 285
+      lines:
+      - 58
+      - 59
+      quote: '[F] 907.2.4 Group F. A manual fire alarm system that activates the occupant notification system in accordance
+        with Section 907.5 shall be installed in Group F occupancies where both of the following conditions exist:'
+    - file: gov.ny.building.2025.pdf
+      page: 286
+      lines:
+      - 3
+      - 7
+      quote: '1. The Group F occupancy is two or more stories in height. 2. The Group F occupancy has a combined occupant
+        load of 500 or more above or below the lowest level of exit discharge. Exception: Manual fire alarm boxes are not
+        required where the building is equipped throughout with an automatic sprinkler system installed in accordance with
+        Section 903.3.1.1 and the occupant notification appliances will activate throughout the notification zones upon sprinkler
+        water flow.'
+    piece_sha256: 97edc916dad14d350a9e262d732cc29ffe7c79b4a2ca87f5c32ec23a0bbf158d
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'A fire area where lithium-ion or lithium metal batteries are made, or vehicles, energy storage systems or equipment
+      holding them, has a fire alarm system activated by air-sampling smoke detection or radiant-energy detect...: a person''s
+      check (general.bc_907_2_4_1_battery_manufacturing).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 286
+      lines:
+      - 8
+      - 12
+      quote: '[F] 907.2.4.1 Manufacturing involving lithium-ion or lithium metal batteries. A fire alarm system activated
+        by an air- sampling-type smoke detection system or a radiant-energy-sensing detection system shall be installed throughout
+        the entire fire area where lithium-ion or lithium metal batteries are manufactured; and where the manufacturer of
+        vehicles, energy stor- age systems or equipment containing lithium-ion or lithium metal batteries when the batteries
+        are installed as part of the manufacturing process.'
+    piece_sha256: 005913dbdf0fa9ed9c99679ce9d86402b40f0aa7afc3505cad475492291e1cf3
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  907.2.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'A manual fire alarm system activating occupant notification per 907.5 in Group H-5 and where organic coatings
+      are made, and automatic smoke detection for highly toxic gases, organic peroxides and oxidizers per Chapters 6...: a
+      person''s check (general.bc_907_2_5_group_h_fire_alarm).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 286
+      lines:
+      - 13
+      - 16
+      quote: '[F] 907.2.5 Group H. A manual fire alarm system that activates the occupant notification system in accordance
+        with Section 907.5 shall be installed in Group H-5 occupancies and in occupancies used for the manufacture of organic
+        coatings. An automatic smoke detection system shall be installed for highly toxic gases, organic peroxides and oxidizers
+        in accordance with Chapters 60, 62 and 63, respectively, of the Fire Code of New York State.'
+    piece_sha256: 705fe3345e05f84b3c402a9dc6e45d9fd22430b480d9c2e3fece977d27320ca3
+    notes: Drafted by hand in a Claude Code session (2026-11-27); no recorded labeling run. Chapter 9 part c.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
   '1004':

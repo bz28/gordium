@@ -31,6 +31,11 @@ sprinklered_903_3_1_1:
   - general.bc_1020_3_corridor_capacity
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_716_2_2_3_exit_enclosure_door_temperature_rise
+  - general.bc_903_2_11_1_1_opening_dimensions
+  - general.bc_903_2_11_1_2_openings_on_one_side
+  - general.bc_903_2_11_1_3_basements
+  - general.bc_903_2_11_1_stories_without_openings
+  - general.bc_903_2_11_3_buildings_55_feet
   - general.bc_903_2_1_1_group_a1_sprinklers
   - general.bc_903_2_1_2_group_a2_sprinklers
   - general.bc_903_2_1_3_group_a3_sprinklers
@@ -196,6 +201,15 @@ occupancy_group:
   - general.bc_903_2_10_1_commercial_parking
   - general.bc_903_2_10_2_mechanical_access_garages
   - general.bc_903_2_10_parking_garages
+  - general.bc_903_2_11_1_1_opening_dimensions
+  - general.bc_903_2_11_1_2_openings_on_one_side
+  - general.bc_903_2_11_1_3_basements
+  - general.bc_903_2_11_1_stories_without_openings
+  - general.bc_903_2_11_2_chutes
+  - general.bc_903_2_11_3_buildings_55_feet
+  - general.bc_903_2_11_4_hazardous_exhaust_ducts
+  - general.bc_903_2_11_5_commercial_cooking
+  - general.bc_903_2_11_6_other_required_systems
   - general.bc_903_2_1_1_group_a1_sprinklers
   - general.bc_903_2_1_2_group_a2_sprinklers
   - general.bc_903_2_1_3_group_a3_sprinklers
@@ -223,6 +237,17 @@ occupancy_group:
   - general.bc_903_2_9_group_s1_sprinklers
   - general.bc_903_2_mixed_occupancies
   - general.bc_903_3_1_3_nfpa_13d_scope
+  - general.bc_907_2_1_1_group_a_voice_alarm
+  - general.bc_907_2_1_2_captions
+  - general.bc_907_2_1_3_group_a_smoke_detection
+  - general.bc_907_2_1_group_a_fire_alarm
+  - general.bc_907_2_2_2_battery_laboratory_detection
+  - general.bc_907_2_2_group_b_fire_alarm
+  - general.bc_907_2_3_group_e_manual_fire_alarm
+  - general.bc_907_2_3_group_e_voice_alarm
+  - general.bc_907_2_4_1_battery_manufacturing
+  - general.bc_907_2_4_group_f_fire_alarm
+  - general.bc_907_2_5_group_h_fire_alarm
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -411,6 +436,7 @@ ambulatory_care_facility:
   needed_by:
   - general.bc_709_5_1_i2_smoke_barrier_doors
   - general.bc_903_2_2_1_ambulatory_care
+  - general.bc_907_2_2_1_ambulatory_care_detection
   - general.bc_table_1020_3_corridor_width
 corridors_within_dwelling_units:
   meaning: 'The building has corridors within a dwelling unit or sleeping unit (2025 BCNYS 1020.2 exception 2: no rating
@@ -429,6 +455,8 @@ emergency_voice_alarm_system:
   unit: yes_no
   needed_by:
   - general.bc_1020_3_corridor_capacity
+  - general.bc_907_2_1_1_group_a_voice_alarm
+  - general.bc_907_2_3_group_e_voice_alarm
 group_r_present:
   meaning: 'The building has a Group R occupancy (R-1 to R-4) among the groups the architect states, alone or with others
     (2025 BCNYS 903.2.8: a sprinkler system "throughout all buildings with a Group R fire area")'

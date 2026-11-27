@@ -738,6 +738,56 @@ pieces:
     heading: Group S-2 parking garages › Mechanical-access enclosed parking garages
     rules:
     - general.bc_903_2_10_2_mechanical_access_garages
+  903.2.11.1:
+    label: flag
+    heading: Specific building areas and hazards › Stories without openings
+    rules:
+    - general.bc_903_2_11_1_stories_without_openings
+  903.2.11.1.1:
+    label: flag
+    heading: Stories without openings › Opening dimensions and access
+    rules:
+    - general.bc_903_2_11_1_1_opening_dimensions
+  903.2.11.1.2:
+    label: flag
+    heading: Stories without openings › Openings on one side only
+    rules:
+    - general.bc_903_2_11_1_2_openings_on_one_side
+  903.2.11.1.3:
+    label: flag
+    heading: Stories without openings › Basements
+    rules:
+    - general.bc_903_2_11_1_3_basements
+  903.2.11.2:
+    label: flag
+    heading: Specific building areas and hazards › Rubbish and linen chutes
+    rules:
+    - general.bc_903_2_11_2_chutes
+  903.2.11.3:
+    label: flag
+    heading: Specific building areas and hazards › Buildings 55 feet or more in height
+    rules:
+    - general.bc_903_2_11_3_buildings_55_feet
+  903.2.11.4:
+    label: flag
+    heading: Specific building areas and hazards › Ducts conveying hazardous exhausts
+    rules:
+    - general.bc_903_2_11_4_hazardous_exhaust_ducts
+  903.2.11.5:
+    label: flag
+    heading: Specific building areas and hazards › Commercial cooking operations
+    rules:
+    - general.bc_903_2_11_5_commercial_cooking
+  903.2.11.6:
+    label: flag
+    heading: Specific building areas and hazards › Other required fire protection systems
+    rules:
+    - general.bc_903_2_11_6_other_required_systems
+  903.2.12:
+    label: flag
+    heading: Where required › During construction
+    rules:
+    - general.bc_903_2_12_during_construction
   903.3.1.2:
     label: flag
     heading: Standards › NFPA 13R sprinkler systems
@@ -753,6 +803,72 @@ pieces:
     heading: Standards › NFPA 13D sprinkler systems
     rules:
     - general.bc_903_3_1_3_nfpa_13d_scope
+  907.1.3:
+    label: flag
+    heading: General › Equipment
+    rules:
+    - general.bc_907_1_3_listed_equipment
+  '907.2':
+    label: flag
+    heading: Where required—new buildings and structures
+    rules:
+    - general.bc_907_2_where_required
+  907.2.1:
+    label: flag
+    heading: Where required—new buildings and structures › Group A
+    rules:
+    - general.bc_907_2_1_group_a_fire_alarm
+  907.2.1.1:
+    label: rule
+    heading: Group A › System initiation in Group A occupancies with an occupant load of 1,000 or more
+    rules:
+    - general.bc_907_2_1_1_group_a_voice_alarm
+  907.2.1.2:
+    label: flag
+    heading: Group A › Emergency voice/alarm communication captions
+    rules:
+    - general.bc_907_2_1_2_captions
+  907.2.1.3:
+    label: flag
+    heading: Group A › Automatic smoke detection system
+    rules:
+    - general.bc_907_2_1_3_group_a_smoke_detection
+  907.2.2:
+    label: flag
+    heading: Where required—new buildings and structures › Group B
+    rules:
+    - general.bc_907_2_2_group_b_fire_alarm
+  907.2.2.1:
+    label: flag
+    heading: Group B › Ambulatory care facilities
+    rules:
+    - general.bc_907_2_2_1_ambulatory_care_detection
+  907.2.2.2:
+    label: flag
+    heading: Group B › Laboratories involving research and development or testing
+    rules:
+    - general.bc_907_2_2_2_battery_laboratory_detection
+  907.2.3:
+    label: rule
+    heading: Where required—new buildings and structures › Group E
+    rules:
+    - general.bc_907_2_3_group_e_manual_fire_alarm
+    - general.bc_907_2_3_group_e_voice_alarm
+  907.2.4:
+    label: flag
+    heading: Where required—new buildings and structures › Group F
+    rules:
+    - general.bc_907_2_4_group_f_fire_alarm
+  907.2.4.1:
+    label: flag
+    heading: Group F › Manufacturing involving lithium-ion or lithium metal batteries
+    rules:
+    - general.bc_907_2_4_1_battery_manufacturing
+  907.2.5:
+    label: flag
+    heading: Where required—new buildings and structures › Group H
+    rules:
+    - general.bc_907_2_5_group_h_fire_alarm
   '1004.7':
     label: flag
     heading: Occupant load › Outdoor areas

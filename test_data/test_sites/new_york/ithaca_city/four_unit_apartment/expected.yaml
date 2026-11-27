@@ -300,6 +300,34 @@ results:
   general.bc_903_2_10_parking_garages: not_applicable
   general.bc_903_2_10_1_commercial_parking: not_applicable
   general.bc_903_2_10_2_mechanical_access_garages: not_applicable
+  # Chapter 9 part c (2026-11-27): 903.2.11's specific areas and 903.2.12 show for a building of any group but U with
+  # no NFPA 13 system stated (none here); the fire alarm sections: 907.1.3's listed equipment and 907.2's system and
+  # box show for every building, 907.2.2.1's ambulatory care detection while the building doesn't state none; the
+  # rest are Groups A, B, E, F and H's, not this building's
+  general.bc_903_2_11_1_stories_without_openings: needs_review
+  general.bc_903_2_11_1_1_opening_dimensions: needs_review
+  general.bc_903_2_11_1_2_openings_on_one_side: needs_review
+  general.bc_903_2_11_1_3_basements: needs_review
+  general.bc_903_2_11_2_chutes: needs_review
+  general.bc_903_2_11_3_buildings_55_feet: needs_review
+  general.bc_903_2_11_4_hazardous_exhaust_ducts: needs_review
+  general.bc_903_2_11_5_commercial_cooking: needs_review
+  general.bc_903_2_11_6_other_required_systems: needs_review
+  general.bc_903_2_12_during_construction: needs_review
+  general.bc_907_1_3_listed_equipment: needs_review
+  general.bc_907_2_where_required: needs_review
+  general.bc_907_2_1_group_a_fire_alarm: not_applicable
+  general.bc_907_2_1_2_captions: not_applicable
+  general.bc_907_2_1_3_group_a_smoke_detection: not_applicable
+  general.bc_907_2_2_group_b_fire_alarm: not_applicable
+  general.bc_907_2_2_1_ambulatory_care_detection: needs_review
+  general.bc_907_2_2_2_battery_laboratory_detection: not_applicable
+  general.bc_907_2_3_group_e_manual_fire_alarm: not_applicable
+  general.bc_907_2_4_group_f_fire_alarm: not_applicable
+  general.bc_907_2_4_1_battery_manufacturing: not_applicable
+  general.bc_907_2_5_group_h_fire_alarm: not_applicable
+  general.bc_907_2_1_1_group_a_voice_alarm: not_applicable
+  general.bc_907_2_3_group_e_voice_alarm: not_applicable
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

@@ -74,7 +74,9 @@ def test_every_chapter_9_piece_brought_in_is_labeled_and_every_rule_or_flag_has_
     for pid, v in labels.items():
         if v["label"] in ("flag", "rule"):
             mine = _own(book, pid)
-            assert mine and {r["kind"] for r in mine} == {v["label"]}, pid
+            kinds = {r["kind"] for r in mine}
+            # a flag piece has flags only; a rule piece a rule, and maybe a flag for what its rule can't read (907.2.3)
+            assert mine and (kinds == {"flag"} if v["label"] == "flag" else "rule" in kinds), pid
 
 
 def test_every_chapter_9_rule_and_flag_quotes_every_line_of_its_piece(pieces, labels, book):
@@ -111,9 +113,11 @@ def test_every_section_a_chapter_9_flag_names_is_named_in_its_words(labels, book
     """Every section or chapter a flagged piece sends to is named in what the architect reads on its flag, so a
     person's check never leaves out a section the law joins to it (the piece's own number aside)."""
     for pid, v in labels.items():
-        if v["label"] != "flag":
+        if v["label"] not in ("flag", "rule"):
             continue
         for r in _own(book, pid):
+            if r["kind"] != "flag":           # a rule piece's own flag too (907.2.3's manual fire alarm system)
+                continue
             quote = " ".join(s["quote"] for s in r["sources"])
             shown = {m.group(0) for m in TOKEN.finditer(_shown_note(r))}
             missing = sorted(x for x in _refs(quote) - {pid} if x not in shown)
@@ -125,7 +129,7 @@ def test_every_chapter_9_flag_is_a_persons_check_never_a_pass(labels, book, ctx)
     narrowed only by a fact the architect states (the groups, the sprinkler system) and needs review while that fact
     isn't stated."""
     allowed = ctx.allowed()
-    by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
+    by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
           "occupied_outdoor_areas", "ambulatory_care_facility"}            # part b: 903.2.1.6, 903.2.2.1
     for pid, v in labels.items():
         if v["label"] != "flag":
@@ -395,3 +399,45 @@ def test_no_rule_passes_on_a_13r_system_outside_group_r(book, ctx):
                     if with_13r == "pass" and without != "pass":
                         wrong.append((r["id"], groups, e.get("note", "")[:60]))
     assert walked > 500 and not wrong, wrong[:5]
+
+
+
+# ---- part c (2026-11-27): the emergency voice/alarm system by the occupancy's occupant load (907.2.1.1, 907.2.3) ----
+
+# each rule, its groups and its limit typed from the page (907.2.1.1, p.285 lines 9-11: "an occupant load of 1,000 or
+# more"; 907.2.3 exception 2, p.285 lines 42-43: not required "with occupant loads of 100 or less")
+VOICE_RULES = {"general.bc_907_2_1_1_group_a_voice_alarm": (["A-1", "A-2", "A-3", "A-4", "A-5"], 1000, ">="),
+               "general.bc_907_2_3_group_e_voice_alarm": (["E"], 100, ">")}
+
+
+def _voice_law(groups_of_rule, limit, op, groups, voice, load):
+    """The law's answer for one story, from 907.2.1.1 and 907.2.3 (never from the rules): the occupancy's load is at
+    least one story's, so a story at the limit settles that the system is required; less, the other floors may."""
+    if groups is None:
+        return {"needs_review"}
+    if len(set(groups)) != 1 or groups[0] not in groups_of_rule:
+        return {"not_applicable"}
+    if voice is None:
+        return {"needs_review"}
+    if voice:
+        return {"pass"}
+    settled = load is not None and (load >= limit if op == ">=" else load > limit)
+    return {"fail"} if settled else {"needs_review"}
+
+
+@pytest.mark.parametrize("rid", sorted(VOICE_RULES))
+def test_each_voice_alarm_rule_gives_the_laws_answer_for_every_story(book, ctx, rid):
+    groups_of_rule, limit, op = VOICE_RULES[rid]
+    rule, allowed, wrong = _rule(book, rid), ctx.allowed(), []
+    for groups in [None, ["M", "R-2"], [groups_of_rule[0], "B"]] + [[g] for g in GROUPS]:
+        for voice in (None, True, False):
+            for load in (None, 0, limit - 1, limit - 0.01, limit, limit + 0.01, limit + 1, 10 * limit):
+                b = {"occupancy_groups": groups} if groups else {}
+                if voice is not None:
+                    b["emergency_voice_alarm_system"] = voice
+                m = {} if load is None else {"story_occupant_load": load}
+                [row] = parts.rows(rule, {"story": [{"id": "p1", "name": "Level 1", "measures": m}]},
+                                   code_scope.building_measures(b), allowed)
+                if row["outcome"] not in _voice_law(groups_of_rule, limit, op, groups, voice, load):
+                    wrong.append((groups, voice, load, row["outcome"]))
+    assert not wrong, wrong[:5]

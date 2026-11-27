@@ -5880,6 +5880,296 @@ rules:
     part b).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_903_2_11_1_stories_without_openings
+  kind: flag
+  topic: means_of_egress
+  title: Stories without exterior wall openings (BCNYS 903.2.11.1)
+  applies_when: not sprinklered_903_3_1_1 and not occupancy_group in ["U"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 34
+    - 44
+    quote: '[F] 903.2.11.1 Stories without openings. An automatic sprinkler system shall be installed throughout all stories,
+      including basements, of all buildings where the floor area exceeds 1,500 square feet (139.4 m[fn2]) and where the story
+      does not comply with the following criteria for exterior wall openings: 1. Openings below grade that lead directly to
+      ground level by an exterior stairway complying with Section 1011 or an outside ramp complying with Section 1012. Openings
+      shall be located in each 50 linear feet (15 240 mm), or fraction thereof, of exterior wall in the story on not fewer
+      than one side. The required openings shall be distributed such that the lineal distance between adjacent openings does
+      not exceed 50 feet (15 240 mm). 2. Openings entirely above the adjoining ground level totaling not less than 20 square
+      feet (1.86 m[fn2]) in each 50 linear feet (15 240 mm), or fraction thereof, of exterior wall in the story on not fewer
+      than one side. The required openings shall be distributed such that the lineal distance between adjacent openings does
+      not exceed 50 feet (15 240 mm). The height of the bottom of the clear opening shall not exceed 44 inches (1118 mm) measured
+      from the floor.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A story (basements included) over 1,500 square feet is sprinklered throughout unless, in each 50 feet of exterior
+      wall on at least one side, it has openings below grade reached by an exterior stairway per 1011 or a ramp per 1012,
+      or openings entirely above the adjoining ground totaling 20 square feet, no two more than 50 feet apart, each opening''s
+      bottom at most 44 inches above the floor: the openings aren''t in the model, a person''s check.'
+  - given:
+      sprinklered_903_3_1_1: true
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '903.2.11.1: in every group but U; set aside in a building stated sprinklered throughout per 903.3.1.1, and in a
+    building stated Group U. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_11_1_1_opening_dimensions
+  kind: flag
+  topic: means_of_egress
+  title: Those openings' size and fire department access (BCNYS 903.2.11.1.1)
+  applies_when: not sprinklered_903_3_1_1 and not occupancy_group in ["U"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 45
+    - 47
+    quote: '[F] 903.2.11.1.1 Opening dimensions and access. Openings shall have a minimum dimension of not less than 30 inches
+      (762 mm). Access to such openings shall be provided for the fire department from the exterior and shall not be obstructed
+      in a manner such that firefighting or rescue cannot be accomplished from the exterior.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'The openings 903.2.11.1 counts are at least 30 inches in each dimension, the fire department has access to them
+      from outside, unobstructed for firefighting or rescue: a person''s check.'
+  - given:
+      sprinklered_903_3_1_1: true
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '903.2.11.1.1: the openings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_11_1_2_openings_on_one_side
+  kind: flag
+  topic: means_of_egress
+  title: Openings on one side only (BCNYS 903.2.11.1.2)
+  applies_when: not sprinklered_903_3_1_1 and not occupancy_group in ["U"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 48
+    - 50
+    quote: '[F] 903.2.11.1.2 Openings on one side only. Where openings in a story are provided on only one side and the opposite
+      wall of such story is more than 75 feet (22 860 mm) from such openings, the story shall be equipped throughout with
+      an approved automatic sprinkler system, or openings shall be provided on not fewer than two sides of the story.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where a story''s openings are on one side only and the opposite wall is more than 75 feet from them, the story
+      is sprinklered throughout, or has openings on at least two sides: a person''s check.'
+  - given:
+      sprinklered_903_3_1_1: true
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '903.2.11.1.2: the openings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_11_1_3_basements
+  kind: flag
+  topic: means_of_egress
+  title: Basements far from openings (BCNYS 903.2.11.1.3)
+  applies_when: not sprinklered_903_3_1_1 and not occupancy_group in ["U"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 51
+    - 53
+    quote: '[F] 903.2.11.1.3 Basements. Where any portion of a basement is located more than 75 feet (22 860 mm) from openings
+      required by Section 903.2.11.1, or where walls, partitions or other obstructions are installed that restrict the application
+      of water from hose streams, the basement shall be equipped throughout with an approved automatic sprinkler system.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where any part of a basement is more than 75 feet from the openings 903.2.11.1 requires, or walls, partitions or
+      other obstructions restrict hose streams, the basement is sprinklered throughout: a person''s check.'
+  - given:
+      sprinklered_903_3_1_1: true
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '903.2.11.1.3: the openings aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part
+    c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_11_2_chutes
+  kind: flag
+  topic: means_of_egress
+  title: Rubbish and linen chutes (BCNYS 903.2.11.2)
+  applies_when: not occupancy_group in ["U"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 272
+    lines:
+    - 54
+    - 59
+    quote: '[F] 903.2.11.2 Rubbish and linen chutes. An automatic sprinkler system shall be installed at the top of rubbish
+      and linen chutes and in their terminal rooms. Chutes shall have additional sprinkler heads installed at alternate floors
+      and at the lowest intake. Where a rubbish chute extends through a building more than one floor below the lowest intake,
+      the extension shall have sprinklers installed that are recessed from the drop area of the chute and protected from freezing
+      in accordance with Section 903.3.1.1. Such sprinklers shall be installed at alternate floors, beginning with the second
+      level below the last intake and ending with the floor above the discharge. Access to sprinklers in chutes shall be provided
+      for servicing.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Rubbish and linen chutes have sprinklers at the top, in their terminal rooms, at alternate floors and the lowest
+      intake, and a chute''s extension more than one floor below the lowest intake recessed, freeze-protected sprinklers per
+      903.3.1.1 at alternate floors, with access for servicing: a person''s check.'
+  - given:
+      occupancy_group: U
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '903.2.11.2: chutes aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_11_3_buildings_55_feet
+  kind: flag
+  topic: means_of_egress
+  title: Buildings 55 feet or more in height (BCNYS 903.2.11.3)
+  applies_when: not sprinklered_903_3_1_1 and not occupancy_group in ["U", "F-2"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 3
+    - 6
+    quote: '[F] 903.2.11.3 Buildings 55 feet or more in height. An automatic sprinkler system shall be installed throughout
+      buildings that have one or more stories with an occupant load of 30 or more located 55 feet (16 764 mm) or more above
+      the lowest level of fire department vehicle access, measured to the finished floor. Exception: Occupancies in Group
+      F-2.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A building with a story whose occupant load is 30 or more and whose finished floor is 55 feet or more above the
+      lowest level of fire department vehicle access is sprinklered throughout (Group F-2 aside): the fire department''s access
+      level isn''t in the model, a person''s check.'
+  - given:
+      sprinklered_903_3_1_1: true
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '903.2.11.3: the floor heights above the lowest level of fire department vehicle access aren''t in the model; set
+    aside in a building stated sprinklered throughout per 903.3.1.1 (903.3.1.2 is limited to lower buildings), or stated Group
+    U or F-2 (the exception). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_11_4_hazardous_exhaust_ducts
+  kind: flag
+  topic: means_of_egress
+  title: Ducts conveying hazardous exhausts (BCNYS 903.2.11.4)
+  applies_when: not occupancy_group in ["U"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 7
+    - 9
+    quote: '[F] 903.2.11.4 Ducts conveying hazardous exhausts. Where required by the Mechanical Code of New York State, automatic
+      sprinklers shall be provided in ducts conveying hazardous exhaust or flammable or combustible materials. Exception:
+      Ducts where the largest cross-sectional diameter of the duct is less than 10 inches (254 mm).'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where the Mechanical Code of New York State requires it, ducts conveying hazardous exhaust or flammable or combustible
+      materials are sprinklered, ducts under 10 inches across aside: a person''s check.'
+  - given:
+      occupancy_group: U
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '903.2.11.4: the ducts aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_11_5_commercial_cooking
+  kind: flag
+  topic: means_of_egress
+  title: Commercial kitchen exhaust hoods and ducts (BCNYS 903.2.11.5)
+  applies_when: not occupancy_group in ["U"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 10
+    - 11
+    quote: '[F] 903.2.11.5 Commercial cooking operations. An automatic sprinkler system shall be installed in commercial kitchen
+      exhaust hood and duct systems where an automatic sprinkler system is used to comply with Section 904.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where a sprinkler system is used to comply with Section 904, commercial kitchen exhaust hood and duct systems are
+      sprinklered: a person''s check.'
+  - given:
+      occupancy_group: U
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '903.2.11.5: kitchens'' hoods aren''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9
+    part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_11_6_other_required_systems
+  kind: flag
+  topic: means_of_egress
+  title: Other sections requiring sprinklers, Table 903.2.11.6 (BCNYS 903.2.11.6)
+  applies_when: not occupancy_group in ["U"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 12
+    - 36
+    quote: '[F] 903.2.11.6 Other required fire protection systems. In addition to the requirements of Section 903.2, the provisions
+      indi- cated in Table 903.2.11.6 require the installation of a fire protection system for certain buildings and areas.
+      [F] TABLE 903.2.11.6—ADDITIONAL REQUIRED PROTECTION SYSTEMS SECTION SUBJECT 402.5, 402.6.2 Covered and open mall buildings
+      403.3 High-rise buildings 404.3 Atriums 405.3 Underground structures 407.7 Group I-2 410.6 Stages 411.3 Special amusement
+      buildings 412.2.4 Airport traffic control towers 412.3.6, 412.3.6.1, 412.5.6 Aircraft hangars 415.11.11 Group H-5 HPM
+      exhaust ducts 416.5 Flammable finishes 417.4 Drying rooms 424.3 Play structures 428 Buildings containing laboratory
+      suites 507 Unlimited area buildings 508.5.7 Live/work units 509.4 Incidental uses 1030.6.2.3 Smoke-protected assembly
+      seating Automatic sprinkler system requirements as set forth in Section 903.2.11.6 of the Fire Code of New York FCNYS
+      State'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'In addition to 903.2, Table 903.2.11.6''s sections require sprinklers for their buildings and areas: covered and open
+      malls (402.5, 402.6.2),
+      high-rise buildings (403.3), atriums (404.3), underground structures (405.3), Group I-2 (407.7), stages (410.6), special
+      amusement buildings (411.3), airport traffic control towers (412.2.4), aircraft hangars (412.3.6, 412.3.6.1, 412.5.6),
+      Group H-5 HPM exhaust ducts (415.11.11), flammable finishes (416.5), drying rooms (417.4), play structures (424.3),
+      laboratory suites (428), unlimited area buildings (507), live/work units (508.5.7), incidental uses (509.4), smoke-protected
+      assembly seating (1030.6.2.3), and 903.2.11.6 of the Fire Code of New York State: a person''s check.'
+  - given:
+      occupancy_group: U
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '903.2.11.6 and Table 903.2.11.6: sections outside this chapter, not brought in, each a person''s check. Hand-drafted
+    in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_903_2_12_during_construction
+  kind: flag
+  topic: means_of_egress
+  title: Sprinklers during construction (BCNYS 903.2.12)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 273
+    lines:
+    - 37
+    - 38
+    quote: '[F] 903.2.12 During construction. Automatic sprinkler systems required during construction, alteration and demolition
+      opera- tions shall be provided in accordance with Chapter 33 of the Fire Code of New York State.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Sprinkler systems required during construction, alteration and demolition follow Chapter 33 of the Fire Code of
+      New York State: a person''s check.'
+  notes: '903.2.12: construction-time protection isn''t in the design model. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_903_3_1_2_nfpa_13r_limits
   kind: flag
   topic: means_of_egress
@@ -5991,6 +6281,648 @@ rules:
   notes: '903.3.1.3: NFPA 13D in one- and two-family dwellings, Group R-3, Group R-4 Condition 1 and townhouses. Set aside
     in a building stated Group R-3 alone, where it is permitted. Hand-drafted in a Claude Code session (2026-11-27, Chapter
     9 part a).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_1_3_listed_equipment
+  kind: flag
+  topic: means_of_egress
+  title: Fire alarm equipment listed and approved (BCNYS 907.1.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 284
+    lines:
+    - 24
+    - 24
+    quote: '[F] 907.1.3 Equipment. Systems and components shall be listed and approved for the purpose for which they are
+      installed.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire alarm systems and their components are listed and approved for the purpose they are installed for: a person''s
+      check.'
+  notes: '907.1.3: the equipment isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_where_required
+  kind: flag
+  topic: means_of_egress
+  title: A fire alarm system where 907.2 requires one (BCNYS 907.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 284
+    lines:
+    - 25
+    - 37
+    quote: '[F] 907.2 Where required—new buildings and structures. An approved fire alarm system installed in accordance with
+      the provi- sions of this code and NFPA 72 shall be provided in new buildings and structures in accordance with Sections
+      907.2.1 through 907.2.23 and provide occupant notification in accordance with Section 907.5, unless other requirements
+      are provided by another section of this code. Not fewer than one manual fire alarm box shall be provided in an approved
+      location to initiate a fire alarm signal for fire alarm systems employing automatic fire detectors or waterflow detection
+      devices. Where other sections of this code allow elimination of fire alarm boxes due to sprinklers, a single fire alarm
+      box shall be installed. Exceptions: 1. The manual fire alarm box is not required for fire alarm systems dedicated to
+      elevator recall control and supervisory service. 2. The manual fire alarm box is not required for Group R-2 occupancies
+      unless required by the fire code official to provide a means for fire watch personnel to initiate an alarm during a
+      sprinkler system impairment event. Where provided, the manual fire alarm box shall not be located in an area that is
+      open to the public.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Where Sections 907.2.1 to 907.2.23 require a fire alarm system, it is approved, installed per this code and NFPA
+      72, and gives occupant notification per 907.5; one with automatic detectors or waterflow detection has at least one
+      manual fire alarm box (not for elevator recall and supervisory service only, nor in Group R-2 unless the fire code official
+      asks one for fire watch): a person''s check.'
+  notes: '907.2: a fire alarm system isn''t in the model; the groups'' sections say where one is required. Hand-drafted in
+    a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_1_group_a_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group A's manual fire alarm system (BCNYS 907.2.1)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 284
+    lines:
+    - 38
+    - 57
+    quote: '[F] 907.2.1 Group A. A manual fire alarm system that activates the occupant notification system in accordance
+      with Section 907.5 shall be installed in Group A occupancies where the occupant load due to the assembly occupancy is
+      300 or more, or where the Group A occupant load is more than 100 persons above or below the lowest level of exit discharge.
+      Group A occupancies not sepa- rated from one another in accordance with Section 707.3.10 shall be considered as a single
+      occupancy for the purposes of applying this section. Portions of Group E occupancies occupied for assembly purposes
+      shall be provided with a fire alarm system as required for the Group E occupancy. Exceptions: 1. Manual fire alarm boxes
+      are not required where the building is equipped throughout with an automatic sprinkler system installed in accordance
+      with Section 903.3.1.1 and the occupant notification appliances will activate through- out the notification zones upon
+      sprinkler water flow. 2. Manual fire alarm boxes and the associated occupant notification system or emergency voice/alarm
+      communication system are not required for Group A-5 outdoor bleacher-type seating having an occupant load of greater
+      than or equal to 300 and less than 15,000 occupants, provided that all of the following are met: 2.1. A public address
+      system with standby power is provided. 2.2. Enclosed spaces attached to or within 5 feet (1524 mm) of the outdoor bleacher-type
+      seating compose, in the aggregate, a maximum of 10 percent of the overall area of the outdoor bleacher-type seating
+      or 1,000 square feet (92.9 m[fn2]), whichever is less. 2.3. Enclosed accessory spaces under or attached to the outdoor
+      bleacher-type seating shall be separated from the bleacher-type seating in accordance with Section 1030.1.1.1. 2.4.
+      All means of egress from the bleacher-type seating are open to the outside.'
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 3
+    - 8
+    quote: '3. Manual fire alarm boxes and the associated occupant notification system or emergency voice/alarm communication
+      system are not required for temporary Group A-5 outdoor bleacher-type seating, provided that all of the following are
+      met: 3.1. There are no enclosed spaces under or attached to the outdoor bleacher-type seating. 3.2. The bleacher-type
+      seating is erected for a period of less than 180 days. 3.3. Evacuation of the bleacher-type seating is included in an
+      approved fire safety plan.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A manual fire alarm system activating occupant notification per 907.5 is installed where the assembly occupant
+      load is 300 or more, or the Group A occupant load is more than 100 above or below the lowest level of exit discharge
+      (Group A occupancies not separated per 707.3.10 counted as one; Group E''s assembly portions as Group E); boxes may
+      be left out with a 903.3.1.1 system that activates notification on water flow, and for Group A-5 outdoor bleachers on
+      2.1 to 2.4''s or 3.1 to 3.3''s conditions (a public address system with standby power, small enclosed spaces separated
+      per 1030.1.1.1, egress open to the outside; temporary seating under 180 days): a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.1: no fire alarm fact is stated yet (the Revit-fields queue), so a person checks the system. Hand-drafted
+    in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_1_1_group_a_voice_alarm
+  kind: rule
+  topic: means_of_egress
+  title: 'Group A of 1,000 or more: voice/alarm system (BCNYS 907.2.1.1)'
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5"]
+  check: emergency_voice_alarm_system
+  review_when:
+  - when: not emergency_voice_alarm_system and not story_occupant_load >= 1000
+    reason: 'An occupant load of 1,000 or more on this story alone isn''t shown (its load is under 1,000 or not worked out);
+      the Group A occupancy''s load on every floor together, which the model may not wholly hold, may reach it: a person checks.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 9
+    - 14
+    quote: '[F] 907.2.1.1 System initiation in Group A occupancies with an occupant load of 1,000 or more. Activation of the
+      fire alarm in Group A occupancies with an occupant load of 1,000 or more shall initiate a signal using an emergency
+      voice/alarm communi- cations system in accordance with Section 907.5.2.2. Exception: Where approved, the prerecorded
+      announcement is allowed to be manually deactivated for a period of time, not to exceed 3 minutes, for the sole purpose
+      of allowing a live voice announcement from an approved, constantly attended location.'
+  examples:
+  - given:
+      occupancy_group: A-1
+      emergency_voice_alarm_system: true
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures:
+          story_occupant_load: 1050
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: An emergency voice/alarm communication system per 907.5.2.2, as the building states it.
+  - given:
+      occupancy_group: A-1
+      emergency_voice_alarm_system: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures:
+          story_occupant_load: 1000
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A story with 1000 occupants: the Group A-1 occupancy''s load is 1,000 or more, so a voice/alarm system is required,
+      and none is stated.'
+  - given:
+      occupancy_group: A-1
+      emergency_voice_alarm_system: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures:
+          story_occupant_load: 999
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A story under the limit: the other floors'' occupants together may reach it, a person checks.'
+  - given:
+      occupancy_group: A-1
+      emergency_voice_alarm_system: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The story''s occupant load isn''t worked out: a person checks.'
+  - given:
+      occupancy_group: A-1
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures:
+          story_occupant_load: 1000
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Whether the building has a voice/alarm system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+      emergency_voice_alarm_system: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures:
+          story_occupant_load: 1000
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not this group: not applicable.'
+  - given:
+      occupancy_group: A-1
+      emergency_voice_alarm_system: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story in the model: with none, the rule needs review.'
+  notes: 'The occupancy''s occupant load is at least any one story''s: a story whose own load (both readings) is 1,000 or
+    more settles that a voice/alarm system is required, and with none stated the row fails; a stated system passes. Read for
+    a building stated as one group (a building of two or more groups is its fire alarm flag''s). The manual fire alarm system
+    itself is a flag (no fire alarm fact yet). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_1_2_captions
+  kind: flag
+  topic: means_of_egress
+  title: Captions for stadiums, arenas and grandstands (BCNYS 907.2.1.2)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 15
+    - 16
+    quote: '[F] 907.2.1.2 Emergency voice/alarm communication captions. Stadiums, arenas and grandstands required to caption
+      audible public announcements shall be in accordance with Section 907.5.2.2.4.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Stadiums, arenas and grandstands required to caption audible public announcements do so per 907.5.2.2.4: a person''s
+      check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.1.2: captioning isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_1_3_group_a_smoke_detection
+  kind: flag
+  topic: means_of_egress
+  title: Group A's smoke detection, New York's (BCNYS 907.2.1.3)
+  applies_when: occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 17
+    - 19
+    quote: '[NY] 907.2.1.3 Automatic smoke detection system. An automatic smoke detection system that activates the occupant
+      notifi- cation system in accordance with Section 907.5 shall be installed in Group A occupancies unless the fire area
+      is protected with an automatic sprinkler system, that activates the occupant notification system, installed in accordance
+      with Section 903.3.1.1.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'New York requires an automatic smoke detection system activating occupant notification per 907.5 in Group A, unless
+      the fire area has a 903.3.1.1 sprinkler system that activates the occupant notification system: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '[NY] 907.2.1.3: a New York addition; detection and notification aren''t in the model. Hand-drafted in a Claude Code
+    session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_2_group_b_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group B's manual fire alarm system (BCNYS 907.2.2)
+  applies_when: occupancy_group in ["B", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 20
+    - 27
+    quote: '[F] 907.2.2 Group B. A manual fire alarm system, which activates the occupant notification system in accordance
+      with Section 907.5, shall be installed in Group B occupancies where one of the following conditions exists: 1. The combined
+      Group B occupant load of all floors is 500 or more. 2. The Group B occupant load is more than 100 persons above or below
+      the lowest level of exit discharge. 3. The fire area contains an ambulatory care facility. Exception: Manual fire alarm
+      boxes are not required where the building is equipped throughout with an automatic sprinkler system installed in accordance
+      with Section 903.3.1.1 and the occupant notification appliances will activate throughout the notification zones upon
+      sprinkler water flow.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A manual fire alarm system activating occupant notification per 907.5 is installed in Group B where the Group B
+      occupant load of all floors together is 500 or more, more than 100 are above or below the lowest level of exit discharge,
+      or a fire area holds an ambulatory care facility; boxes may be left out with a 903.3.1.1 system that activates notification
+      on water flow: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.2: no fire alarm fact is stated yet; the floors'' occupant loads together aren''t worked out (a model may
+    hold only some floors). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_2_1_ambulatory_care_detection
+  kind: flag
+  topic: means_of_egress
+  title: Ambulatory care facilities' smoke detection (BCNYS 907.2.2.1)
+  applies_when: ambulatory_care_facility
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 28
+    - 32
+    quote: '[F] 907.2.2.1 Ambulatory care facilities. Fire areas containing ambulatory care facilities shall be provided with
+      an electroni- cally supervised automatic smoke detection system installed within the ambulatory care facility and in
+      public use areas outside of tenant spaces, including public corridors and elevator lobbies. Exception: Buildings equipped
+      throughout with an automatic sprinkler system in accordance with Section 903.3.1.1, provided that the occupant notification
+      appliances will activate throughout the notification zones upon sprinkler water flow.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Fire areas holding an ambulatory care facility have an electronically supervised automatic smoke detection system
+      in the facility and in public use areas outside tenant spaces (public corridors, elevator lobbies), unless the building
+      has a 903.3.1.1 system that activates notification on water flow: a person''s check.'
+  - given:
+      ambulatory_care_facility: false
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.2.1: narrowed by the building''s stated ambulatory care facility. Hand-drafted in a Claude Code session (2026-11-27,
+    Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_2_2_battery_laboratory_detection
+  kind: flag
+  topic: means_of_egress
+  title: Laboratories testing lithium batteries (BCNYS 907.2.2.2)
+  applies_when: occupancy_group in ["B", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 33
+    - 35
+    quote: '[F] 907.2.2.2 Laboratories involving research and development or testing. A fire alarm system activated by an
+      air- sampling-type smoke detection system or a radiant-energy-sensing detection system shall be installed throughout
+      the entire fire area utilized for the research and development or testing of lithium-ion or lithium metal batteries.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A fire area used for research and development or testing of lithium-ion or lithium metal batteries has a fire alarm
+      system activated by air-sampling smoke detection or radiant-energy-sensing detection throughout: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.2.2: what a laboratory tests isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter
+    9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_3_group_e_manual_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group E's manual fire alarm system (BCNYS 907.2.3)
+  applies_when: occupancy_group in ["E", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 36
+    - 57
+    quote: '[F] 907.2.3 Group E. A manual fire alarm system that initiates the occupant notification signal utilizing an emergency
+      voice/alarm communication system meeting the requirements of Section 907.5.2.2 and installed in accordance with Section
+      907.6 shall be installed in Group E occupancies. Where automatic sprinkler systems or smoke detectors are installed,
+      such systems or detectors shall be connected to the building fire alarm system. Exceptions: 1. A manual fire alarm system
+      shall not be required in Group E occupancies with an occupant load of 50 or less. 2. Emergency voice/alarm communication
+      systems meeting the requirements of Section 907.5.2.2 and installed in accordance with Section 907.6 shall not be required
+      in Group E occupancies with occupant loads of 100 or less, provided that activation of the manual fire alarm system
+      initiates an approved occupant notification signal in accor- dance with Section 907.5. 3. Manual fire alarm boxes shall
+      not be required in Group E occupancies where all of the following apply: 3.1. Interior corridors are protected by smoke
+      detectors. 3.2. Auditoriums, cafeterias, gymnasiums and similar areas are protected by heat detectors or other approved
+      detection devices. 3.3. Shops and laboratories involving dusts or vapors are protected by heat detectors or other approved
+      detec- tion devices. 3.4. Manual activation is provided from a normally occupied location. 4. Manual fire alarm boxes
+      shall not be required in Group E occupancies where all of the following apply: 4.1. The building is equipped throughout
+      with an approved automatic sprinkler system installed in accordance with Section 903.3.1.1. 4.2. The emergency voice/alarm
+      communication system will activate on sprinkler waterflow. 4.3. Manual activation is provided from a normally occupied
+      location.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group E has a manual fire alarm system per 907.6 initiating notification through an emergency voice/alarm communication
+      system per 907.5.2.2, sprinklers and smoke detectors connected to it (exception 1: none at an occupant load of 50 or
+      less; exception 2: no voice/alarm system at 100 or less where the manual system initiates an approved notification
+      signal per 907.5; exceptions 3 and 4: boxes left out with smoke detectors in corridors, heat detectors in assembly areas and shops
+      and manual activation from a normally occupied location, or with a 903.3.1.1 system activating the voice/alarm system
+      on water flow): a person''s check. Whether the voice/alarm system is required is the rule of its own.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.3: the manual fire alarm system and its connections aren''t stated (no fire alarm fact yet); the voice/alarm
+    system, a stated fact, is the rule beside it. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_3_group_e_voice_alarm
+  kind: rule
+  topic: means_of_egress
+  title: 'Group E over 100 occupants: voice/alarm system (BCNYS 907.2.3)'
+  applies_when: occupancy_group in ["E"]
+  check: emergency_voice_alarm_system
+  review_when:
+  - when: not emergency_voice_alarm_system and not story_occupant_load > 100
+    reason: 'An occupant load of more than 100 on this story alone isn''t shown (its load is 100 or less, or not worked out);
+      the Group E occupancy''s load on every floor together, which the model may not wholly hold, may exceed it (exception
+      2 leaves the voice/alarm system out only at 100 or less): a person checks.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 36
+    - 57
+    quote: '[F] 907.2.3 Group E. A manual fire alarm system that initiates the occupant notification signal utilizing an emergency
+      voice/alarm communication system meeting the requirements of Section 907.5.2.2 and installed in accordance with Section
+      907.6 shall be installed in Group E occupancies. Where automatic sprinkler systems or smoke detectors are installed,
+      such systems or detectors shall be connected to the building fire alarm system. Exceptions: 1. A manual fire alarm system
+      shall not be required in Group E occupancies with an occupant load of 50 or less. 2. Emergency voice/alarm communication
+      systems meeting the requirements of Section 907.5.2.2 and installed in accordance with Section 907.6 shall not be required
+      in Group E occupancies with occupant loads of 100 or less, provided that activation of the manual fire alarm system
+      initiates an approved occupant notification signal in accor- dance with Section 907.5. 3. Manual fire alarm boxes shall
+      not be required in Group E occupancies where all of the following apply: 3.1. Interior corridors are protected by smoke
+      detectors. 3.2. Auditoriums, cafeterias, gymnasiums and similar areas are protected by heat detectors or other approved
+      detection devices. 3.3. Shops and laboratories involving dusts or vapors are protected by heat detectors or other approved
+      detec- tion devices. 3.4. Manual activation is provided from a normally occupied location. 4. Manual fire alarm boxes
+      shall not be required in Group E occupancies where all of the following apply: 4.1. The building is equipped throughout
+      with an approved automatic sprinkler system installed in accordance with Section 903.3.1.1. 4.2. The emergency voice/alarm
+      communication system will activate on sprinkler waterflow. 4.3. Manual activation is provided from a normally occupied
+      location.'
+  examples:
+  - given:
+      occupancy_group: E
+      emergency_voice_alarm_system: true
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures:
+          story_occupant_load: 151
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: An emergency voice/alarm communication system per 907.5.2.2, as the building states it.
+  - given:
+      occupancy_group: E
+      emergency_voice_alarm_system: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures:
+          story_occupant_load: 101
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'A story with 101 occupants: the Group E occupancy''s load is more than 100, so a voice/alarm system is required,
+      and none is stated.'
+  - given:
+      occupancy_group: E
+      emergency_voice_alarm_system: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures:
+          story_occupant_load: 100
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'A story under the limit: the other floors'' occupants together may reach it, a person checks.'
+  - given:
+      occupancy_group: E
+      emergency_voice_alarm_system: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures: {}
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'The story''s occupant load isn''t worked out: a person checks.'
+  - given:
+      occupancy_group: E
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures:
+          story_occupant_load: 101
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: 'Whether the building has a voice/alarm system isn''t stated: a person checks.'
+  - given:
+      occupancy_group: R-2
+      emergency_voice_alarm_system: false
+    parts:
+      story:
+      - id: p1
+        name: Level 1
+        measures:
+          story_occupant_load: 101
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not this group: not applicable.'
+  - given:
+      occupancy_group: E
+      emergency_voice_alarm_system: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story in the model: with none, the rule needs review.'
+  notes: 'The occupancy''s occupant load is at least any one story''s: a story whose own load (both readings) is more than
+    100 settles that a voice/alarm system is required, and with none stated the row fails; a stated system passes. Read for
+    a building stated as one group (a building of two or more groups is its fire alarm flag''s). The manual fire alarm system
+    itself is a flag (no fire alarm fact yet). Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_4_group_f_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group F's manual fire alarm system (BCNYS 907.2.4)
+  applies_when: occupancy_group in ["F-1", "F-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 285
+    lines:
+    - 58
+    - 59
+    quote: '[F] 907.2.4 Group F. A manual fire alarm system that activates the occupant notification system in accordance
+      with Section 907.5 shall be installed in Group F occupancies where both of the following conditions exist:'
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 3
+    - 7
+    quote: '1. The Group F occupancy is two or more stories in height. 2. The Group F occupancy has a combined occupant load
+      of 500 or more above or below the lowest level of exit discharge. Exception: Manual fire alarm boxes are not required
+      where the building is equipped throughout with an automatic sprinkler system installed in accordance with Section 903.3.1.1
+      and the occupant notification appliances will activate throughout the notification zones upon sprinkler water flow.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A manual fire alarm system activating occupant notification per 907.5 is installed in Group F of two or more stories
+      with a combined occupant load of 500 or more above or below the lowest level of exit discharge; boxes may be left out
+      with a 903.3.1.1 system that activates notification on water flow: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.4: no fire alarm fact is stated yet. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_4_1_battery_manufacturing
+  kind: flag
+  topic: means_of_egress
+  title: Manufacturing with lithium batteries (BCNYS 907.2.4.1)
+  applies_when: occupancy_group in ["F-1", "F-2", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 8
+    - 12
+    quote: '[F] 907.2.4.1 Manufacturing involving lithium-ion or lithium metal batteries. A fire alarm system activated by
+      an air- sampling-type smoke detection system or a radiant-energy-sensing detection system shall be installed throughout
+      the entire fire area where lithium-ion or lithium metal batteries are manufactured; and where the manufacturer of vehicles,
+      energy stor- age systems or equipment containing lithium-ion or lithium metal batteries when the batteries are installed
+      as part of the manufacturing process.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A fire area where lithium-ion or lithium metal batteries are made, or vehicles, energy storage systems or equipment
+      holding them, has a fire alarm system activated by air-sampling smoke detection or radiant-energy detection throughout:
+      a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.4.1: the use isn''t in the model. Hand-drafted in a Claude Code session (2026-11-27, Chapter 9 part c).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_907_2_5_group_h_fire_alarm
+  kind: flag
+  topic: means_of_egress
+  title: Group H's fire alarm and detection (BCNYS 907.2.5)
+  applies_when: occupancy_group in ["H-1", "H-2", "H-3", "H-4", "H-5", "mixed"]
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 286
+    lines:
+    - 13
+    - 16
+    quote: '[F] 907.2.5 Group H. A manual fire alarm system that activates the occupant notification system in accordance
+      with Section 907.5 shall be installed in Group H-5 occupancies and in occupancies used for the manufacture of organic
+      coatings. An automatic smoke detection system shall be installed for highly toxic gases, organic peroxides and oxidizers
+      in accordance with Chapters 60, 62 and 63, respectively, of the Fire Code of New York State.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'A manual fire alarm system activating occupant notification per 907.5 in Group H-5 and where organic coatings are
+      made, and automatic smoke detection for highly toxic gases, organic peroxides and oxidizers per Chapters 60, 62 and
+      63 of the Fire Code of New York State: a person''s check.'
+  - given:
+      occupancy_group: R-2
+    expect: not_applicable
+    note: 'Set aside by what the building states: not applicable.'
+  notes: '907.2.5: no fire alarm fact is stated yet; what is stored isn''t in the model. Hand-drafted in a Claude Code session
+    (2026-11-27, Chapter 9 part c).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1004_7_outdoor_areas
