@@ -132,6 +132,128 @@ results:
   general.bc_1010_1_1_door_capacity: needs_review
   general.bc_1010_1_1_1_projections: needs_review
   general.bc_1010_1_doors_general: needs_review
+  # section group 6b: every door is side-hinged (eval_marks.yaml door_types, Gordium: Operation): 1010.1.2's flag for a
+  # door of another kind sets each aside; 1010.1.2.1's swing needs review: which side each door swings into isn't
+  # stated (no Revit mark yet), and how many people each door serves isn't worked out (50 or more can't be ruled out)
+  general.bc_1010_1_2_door_types: not_applicable
+  general.bc_1010_1_2_1_direction_of_swing: needs_review
+  # Chapter 7 part a (2026-11-26, 28 flags): the fire barriers and shaft enclosures that build exit stairway and passageway
+  # enclosures (703.2.1.1, 703.5, 707, 713): nothing they ask is in the model (an enclosure's rating, the stories it
+  # connects, its walls' construction, penetrations, joints), so each is a person's check for every building
+  general.bc_703_2_1_1_nonsymmetrical_walls: needs_review
+  general.bc_703_5_marking: needs_review
+  general.bc_707_3_2_exit_stairway_fire_barriers: needs_review
+  general.bc_707_3_4_exit_passageway_fire_barriers: needs_review
+  general.bc_707_3_5_horizontal_exit_separation: needs_review
+  general.bc_707_4_exterior_walls: needs_review
+  general.bc_707_5_continuity: needs_review
+  general.bc_707_5_1_supporting_construction: needs_review
+  general.bc_707_6_openings: needs_review
+  general.bc_707_7_penetrations: needs_review
+  general.bc_707_7_1_prohibited_penetrations: needs_review
+  general.bc_707_8_joints: needs_review
+  general.bc_707_9_voids: needs_review
+  general.bc_707_10_ducts: needs_review
+  general.bc_713_1_shafts_and_exit_stairways: needs_review
+  general.bc_713_2_shaft_construction: needs_review
+  general.bc_713_4_shaft_rating: needs_review
+  general.bc_713_5_shaft_continuity: needs_review
+  general.bc_713_6_shaft_exterior_walls: needs_review
+  general.bc_713_7_shaft_openings: needs_review
+  general.bc_713_7_1_shaft_prohibited_openings: needs_review
+  general.bc_713_8_shaft_penetrations: needs_review
+  general.bc_713_8_1_shaft_prohibited_penetrations: needs_review
+  general.bc_713_9_shaft_joints: needs_review
+  general.bc_713_10_shaft_ducts: needs_review
+  general.bc_713_11_shaft_bottom: needs_review
+  general.bc_713_12_shaft_top: needs_review
+  general.bc_713_14_hoistways: needs_review
+  # Chapter 7 part b (2026-11-26, 24 flags): opening protectives (716.1, Tables 716.1(1) to (3), 716.2 to 716.2.4):
+  # nothing in the model gives a door's or a wall's rating; the corridor doors' row is per corridor (rating not
+  # stated: needs review), and 716.2.2.3's temperature rise applies (no sprinkler system)
+  general.bc_716_1_opening_protectives_general: needs_review
+  general.bc_table_716_1_2__exit_enclosures: needs_review
+  general.bc_table_716_1_2__corridors: needs_review
+  general.bc_table_716_1_2__smoke_barriers: needs_review
+  general.bc_table_716_1_2__other_assemblies: needs_review
+  general.bc_table_716_1_3__fire_windows: needs_review
+  general.bc_716_1_2_1_safety_glazing: needs_review
+  general.bc_716_1_2_2_marking_glazing: needs_review
+  general.bc_716_1_2_2_1_glazing_identification: needs_review
+  general.bc_716_1_2_2_2_fire_protection_glazing_identification: needs_review
+  general.bc_716_1_2_2_3_fire_resistance_glazing_identification: needs_review
+  general.bc_716_2_1_fire_door_testing: needs_review
+  general.bc_716_2_1_1_swinging_door_tests: needs_review
+  general.bc_716_2_1_2_other_door_tests: needs_review
+  general.bc_716_2_1_3_transom_sidelight_glazing: needs_review
+  general.bc_716_2_1_4_smoke_draft_control_test: needs_review
+  general.bc_716_2_2_fire_door_performance: needs_review
+  general.bc_716_2_2_1_corridor_smoke_barrier_doors: needs_review
+  general.bc_716_2_2_1_1_smoke_draft_control: needs_review
+  general.bc_716_2_2_2_other_fire_partition_doors: needs_review
+  general.bc_716_2_2_3_exit_enclosure_door_temperature_rise: needs_review
+  general.bc_716_2_2_3_1_glazing_in_exit_enclosure_doors: needs_review
+  general.bc_716_2_3_fire_doors: needs_review
+  general.bc_716_2_4_fire_door_frames: needs_review
+  # Chapter 7 part c (2026-11-26, 31 flags): fire partitions, smoke barriers and smoke partitions (708 to 710): no wall's
+  # rating or construction is in the model; 709.5.1 (Group I-2 and ambulatory care smoke barrier doors) needs review too
+  # (no ambulatory care facility ruled out); 710.5.3 (Group I-2 Condition 2) doesn't apply to the stated Group R-2
+  general.bc_708_1_which_walls_are_fire_partitions: needs_review
+  general.bc_708_3_fire_partition_rating: needs_review
+  general.bc_708_4_fire_partition_continuity: needs_review
+  general.bc_708_4_1_elevator_lobby_fire_partitions: needs_review
+  general.bc_708_4_2_fire_partition_support: needs_review
+  general.bc_708_4_3_fireblocks_draftstops: needs_review
+  general.bc_708_5_fire_partition_exterior_walls: needs_review
+  general.bc_708_6_fire_partition_openings: needs_review
+  general.bc_708_7_fire_partition_penetrations: needs_review
+  general.bc_708_8_fire_partition_joints: needs_review
+  general.bc_708_9_fire_partition_ducts: needs_review
+  general.bc_709_3_smoke_barrier_rating: needs_review
+  general.bc_709_4_smoke_barrier_continuity: needs_review
+  general.bc_709_4_1_smoke_compartment_barriers: needs_review
+  general.bc_709_4_2_refuge_lobby_smoke_barriers: needs_review
+  general.bc_709_5_smoke_barrier_openings: needs_review
+  general.bc_709_5_1_i2_smoke_barrier_doors: needs_review
+  general.bc_709_6_smoke_barrier_penetrations: needs_review
+  general.bc_709_7_smoke_barrier_joints: needs_review
+  general.bc_709_8_smoke_barrier_ducts: needs_review
+  general.bc_710_3_smoke_partition_rating: needs_review
+  general.bc_710_4_smoke_partition_continuity: needs_review
+  general.bc_710_4_1_elevator_lobby_smoke_partitions: needs_review
+  general.bc_710_5_1_smoke_partition_windows: needs_review
+  general.bc_710_5_2_1_smoke_partition_door_louvers: needs_review
+  general.bc_710_5_2_2_smoke_partition_draft_control_doors: needs_review
+  general.bc_710_5_2_3_smoke_partition_self_closing_doors: needs_review
+  general.bc_710_5_3_i2_pass_through_openings: not_applicable   # Group R-2 stated: not Group I-2
+  general.bc_710_6_smoke_partition_penetrations: needs_review
+  general.bc_710_7_smoke_partition_joints: needs_review
+  general.bc_710_8_smoke_partition_ducts: needs_review
+  # Chapter 7 part d (2026-11-26, 23 flags): rated floors, vertical openings and penetrations of rated walls (711, 712,
+  # 714): none of it is in the model
+  general.bc_711_2_2_horizontal_assembly_continuity: needs_review
+  general.bc_711_2_3_horizontal_assembly_support: needs_review
+  general.bc_711_2_4_horizontal_assembly_rating: needs_review
+  general.bc_711_2_4_4_smoke_compartment_floors: needs_review
+  general.bc_711_2_4_6_other_horizontal_separations: needs_review
+  general.bc_711_3_2_unrated_floor_continuity: needs_review
+  general.bc_712_1_vertical_openings: needs_review
+  general.bc_712_1_9_two_story_openings: needs_review
+  general.bc_714_2_penetration_firestop_installation: needs_review
+  general.bc_714_3_sleeves: needs_review
+  general.bc_714_4_rated_wall_penetrations: needs_review
+  general.bc_714_4_1_through_penetrations: needs_review
+  general.bc_714_4_1_1_tested_assembly_penetrations: needs_review
+  general.bc_714_4_1_2_through_penetration_firestop: needs_review
+  general.bc_714_4_2_membrane_penetrations: needs_review
+  general.bc_714_4_3_dissimilar_materials: needs_review
+  general.bc_714_5_horizontal_assembly_penetrations: needs_review
+  general.bc_714_5_1_floor_through_penetrations: needs_review
+  general.bc_714_5_1_1_floor_tested_assembly_penetrations: needs_review
+  general.bc_714_5_1_2_floor_firestop_systems: needs_review
+  general.bc_714_5_2_floor_membrane_penetrations: needs_review
+  general.bc_714_5_3_floor_dissimilar_materials: needs_review
+  general.bc_714_5_4_smoke_barrier_penetrations: needs_review
   general.bc_table_1020_3_other_occupancies: not_applicable   # one group
   # 1016.2 for every group but I-4: the rooms a path crosses aren't measured yet (space_egress_* not measured)
   general.bc_1016_2_intervening_spaces_other_groups: needs_review

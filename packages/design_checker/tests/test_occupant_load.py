@@ -392,7 +392,7 @@ def test_a_walk_over_group_3s_facts_never_passes_where_a_reading_or_a_load_not_w
     where the load isn't worked out, at no load and at a million), a fail fails at both; the loads themselves are the
     law's (above). 40 seeded cases (the seed fixed, so a failure names its case)."""
     routes = _routes(apartment)
-    monkeypatch.setattr(egress, "measure_routes", lambda interior: copy.deepcopy(routes))
+    monkeypatch.setattr(egress, "measure_routes", lambda interior, **_: copy.deepcopy(routes))
     applied = occupant_load.apply
     laws = egress.laws("regulations/jurisdictions/new_york/ithaca_city")
     rules, rng, seen = _load_rules(), random.Random(1004), set()
@@ -449,7 +449,7 @@ def test_an_exits_reason_never_says_no_rule_asks_for_its_load(apartment, monkeyp
     apartment taken as I-4, with no sprinkler system, each stair enclosure's row passes, never a fail."""
     assert "ask nothing" not in occupant_load.IS_EXIT and "person's check" in occupant_load.IS_EXIT
     routes = _routes(apartment)
-    monkeypatch.setattr(egress, "measure_routes", lambda interior: copy.deepcopy(routes))
+    monkeypatch.setattr(egress, "measure_routes", lambda interior, **_: copy.deepcopy(routes))
     desc = copy.deepcopy(apartment)
     desc["building"] = {"occupancy_groups": ["I-4"], "sprinkler_system": "none"}
     got = egress.check(egress.laws("regulations/jurisdictions/new_york/ithaca_city"), desc,
@@ -569,6 +569,7 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         "EXIT_FUNCTION": (ol.EXIT_FUNCTION.format(name="s", f="business"), model),
         "CORRIDOR_FUNCTION": (ol.CORRIDOR_FUNCTION.format(name="c", f="business"), model),
         "GROSS_NOT_MEASURED": (ol.GROSS_NOT_MEASURED, model), "AREAS_OVER": (ol.AREAS_OVER, model),
+        "UNREAD_ROOMS": (ol.UNREAD_ROOMS, model),                   # a room of the description that can't be read
         # section group 4: a corridor's (asked on the corridor, below: _asked_corridor)
         "CORRIDOR_NOT_RULED_OUT": (ol.CORRIDOR_NOT_RULED_OUT, "mark"),    # Gordium: Other levels reach corridors
         "CORRIDOR_OTHER_LEVELS": (ol.CORRIDOR_OTHER_LEVELS, by_hand),
@@ -620,3 +621,26 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     closet = _space(parts, "s13")["not_measured"]["space_occupant_load"]
     assert "st egresses through it" in closet
     assert not any(h.startswith(("Fix the model", "Mark the")) for h in _asked(closet)), closet
+
+
+@pytest.mark.parametrize("bad", [["X"], {"id": "X"}, 5, None, "SHARED", 7.5])
+def test_a_room_id_that_isnt_one_rooms_text_leaves_every_load_unknown(apartment, bad):
+    """A description room whose id isn't text (a list, a mapping, a number, none) or is another room's is never
+    indexed, never a crash, and never quietly left out of a story's total: every load is not known (needs review),
+    never one with a room missing."""
+    desc = copy.deepcopy(apartment)
+    room = next(r for r in desc["rooms"] if r.get("function"))
+    room["id"] = next(r["id"] for r in desc["rooms"] if r is not room) if bad == "SHARED" else bad
+    parts = _routes(apartment)["parts"]                 # the routes as drawn: only the description's ids are odd
+    occupant_load.apply(parts, desc, FACTORS, {"occupant_load_increased": False})
+    for s in parts["story"]:
+        assert not _values(s, "story_occupant_load"), (bad, s["id"])
+        assert "can't be read" in s["not_measured"]["story_occupant_load"]
+    for p in parts["space"]:
+        assert not _values(p, "space_occupant_load"), bad
+
+
+def test_rooms_that_arent_a_list_are_never_a_crash():
+    for bad in (5, True, "x", {"a": 1}):
+        assert occupant_load.readable_rooms({"rooms": bad}) == ({}, False)
+    assert occupant_load.readable_rooms({}) == ({}, True)

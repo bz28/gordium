@@ -22,3 +22,9 @@ build/
 # Claude Code (personal settings and scratch worktrees; commands are shared)
 .claude/settings.local.json
 .claude/worktrees/
+
+# Published law certificates: generated (python -m rule_format publish) while rules are draft, never committed
+# (docs/decisions/2026-11-23_laws_validation_speed.md, phase 1); the publish lock and its temporary files
+regulations/jurisdictions/*/*/7_published_rulebooks/*.published.json
+regulations/jurisdictions/*/*/7_published_rulebooks/.*.tmp
+regulations/jurisdictions/.publishing.lock
