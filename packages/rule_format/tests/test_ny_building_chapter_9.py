@@ -130,7 +130,7 @@ def test_every_chapter_9_flag_is_a_persons_check_never_a_pass(labels, book, ctx)
     isn't stated."""
     allowed = ctx.allowed()
     by = {"occupancy_group", "group_h_present", "sprinklered_903_3_1_1", "sprinklered_903_3_1_2", "sprinklered_903_3_1_3",
-          "occupied_outdoor_areas", "ambulatory_care_facility",            # part b: 903.2.1.6, 903.2.2.1
+          "nfpa_13r_stated", "occupied_outdoor_areas", "ambulatory_care_facility",   # part b: 903.2.1.6, 903.2.2.1
           "emergency_voice_alarm_system"}                                 # part c: 907.2.1.1's mixed flag
     for pid, v in labels.items():
         if v["label"] != "flag":
@@ -200,6 +200,8 @@ def _required(rid: str, groups, system, stories, townhouse, sleeping):
         return {"pass"}                           # 903.3.1.1; 903.2.8.1 with 903.3.1.3
     if system == "none":
         return {"fail"}
+    if system == "nfpa_13r" and all(g.startswith("R-") for g in groups) and stories is not None and stories > 4:
+        return {"fail"}                           # 903.3.1.2 item 1: the Group R occupancy, here the building
     if one is None:
         return {"needs_review"}
     if system == "nfpa_13r":                      # 903.3.1.2: four stories or fewer, heights not in the model
@@ -260,11 +262,12 @@ def test_the_walks_oracle_catches_a_rule_changed(book, ctx):
         rule = {**_rule(book, rid), **change}
         assert any(_answer(rule, _building(*c), allowed) not in _required(rid, *c)
                    for c in _cases()), rid
-    r = _rule(book, "general.bc_903_2_8_group_r_sprinklers")
-    no_stories = {**r, "review_when": [w if "stories_above_grade_plane" not in w["when"] else
-                                       {**w, "when": w["when"].split(" and not stories_above_grade_plane")[0]}
-                                       for w in r["review_when"]]}
-    assert _answer(no_stories, _building(["R-2"], "nfpa_13r", 5, None, None), allowed) == "needs_review"                 # the stories ignored: a fail missed, which the walk sees
+    # the stories: since review round 3 a stated count over four makes the 13R fact itself no (code_scope), so the
+    # building measures, not the rule's band, are what a slip would break
+    rule = _rule(book, "general.bc_903_2_8_group_r_sprinklers")
+    stated = code_scope.building_measures(_building(["R-2"], "nfpa_13r", 5, None, None))
+    assert stated["sprinklered_903_3_1_2"] is False
+    assert _answer(rule, _building(["R-2"], "nfpa_13r", 5, None, None), allowed) == "fail"
     assert _required(RULES[2], ["R-2"], "nfpa_13r", 5, None, None) == {"fail"}
 
 
@@ -487,21 +490,37 @@ def test_the_separation_thresholds_are_decided_with_the_groups_not_stated(book, 
 
 
 def test_the_13r_flag_says_what_chapter_10_counts(book, ctx):
-    """Review round 2: the 903.3.1.2 flag said Chapter 10 never counts a 13R system beyond 903.3.1.2's limits, but
-    within a stated Group R Chapter 10 takes the stories and heights on the architect's statement (1007.1.1 passes a
-    Group R-2 story at one-third whatever the stated stories); 903.2.8's rule is what fails 13R above four stories. The
-    shown words say exactly that."""
+    """Review rounds 2 and 3: a stated NFPA 13R system counts in Chapter 10's allowances only in a building stated
+    Group R alone, and not where it states more than four stories above grade plane (903.3.1.2 item 1: a Group R
+    occupancy of six stories isn't one 13R is permitted in, so 1007.1.1's one-third doesn't apply); its heights are the
+    architect's statement. The flag's shown words say exactly that."""
     note = _shown_note(_rule(book, "general.bc_903_3_1_2_nfpa_13r_limits"))
-    assert "only in a building stated Group R" in note and "on the architect's statement" in note
-    assert "903.2.8" in note and "nor one Chapter 10" not in note
+    assert "only in a building stated Group R" in note and "more than four" in note and "nor one Chapter 10" not in note
     allowed = ctx.allowed()
-    b = {"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r", "stories_above_grade_plane": 6}
-    [row] = parts.rows(_rule(book, "general.bc_1007_1_1_remoteness"),
-                       {"story": [{"id": "p1", "name": "L1", "measures": {"story_exit_count": 2,
-                                                                         "exit_remoteness_ratio": 0.4}}]},
-                       code_scope.building_measures(b), allowed)
-    assert row["outcome"] == "pass"                     # what the note says Chapter 10 does
-    assert _answer(_rule(book, "general.bc_903_2_8_group_r_sprinklers"), b, allowed) == "fail"
+    def story(stories, ratio):
+        b = {"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r"}
+        if stories is not None:
+            b["stories_above_grade_plane"] = stories
+        [row] = parts.rows(_rule(book, "general.bc_1007_1_1_remoteness"),
+                           {"story": [{"id": "p1", "name": "L1", "measures": {"story_exit_count": 2,
+                                                                             "exit_remoteness_ratio": ratio}}]},
+                           code_scope.building_measures(b), allowed)
+        return row["outcome"]
+    assert story(6, 0.4) != "pass" and story(6, 0.6) == "pass"
+    assert story(4, 0.4) == "pass" and story(None, 0.4) == "pass"        # the stories stated within, or not stated
+    assert code_scope.building_measures({"occupancy_groups": ["M", "R-2"], "sprinkler_system": "nfpa_13r",
+                                         "stories_above_grade_plane": 6})["sprinklered_903_3_1_2"] is True
+
+
+def test_the_vehicle_storage_flags_show_for_every_group(book, ctx):
+    """Part b review round 2: 903.2.10.1 and 903.2.10.2 are worded for buildings used to store vehicles, whatever
+    their group, and storage accessory to another occupancy is part of it (311.1.1), so a Group B office's truck bay
+    or a Group R-2 building's car stacker is its own: both flags show for every group."""
+    allowed = ctx.allowed()
+    for rid in ("general.bc_903_2_10_1_commercial_parking", "general.bc_903_2_10_2_mechanical_access_garages"):
+        for groups in (["B"], ["F-1"], ["R-2"], ["M"], ["S-2"]):
+            assert outcome(_rule(book, rid), code_scope.building_measures({"occupancy_groups": groups}),
+                           allowed) == "needs_review", (rid, groups)
 
 
 # ---- part c (2026-11-27): the emergency voice/alarm system by the occupancy's occupant load (907.2.1.1, 907.2.3) ----
