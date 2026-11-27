@@ -579,7 +579,8 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     }
     fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "FUNCTION_ROOMS", "LOAD_STATED",
                  "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "OTHER_LEVELS_FIELD", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
-                 "CORRIDOR_READINGS", "FUNCTIONS_ONLY"}     # the readings' own words: a load given, never asked
+                 "CORRIDOR_READINGS", "FUNCTIONS_ONLY",     # the readings' own words: a load given, never asked
+                 "SEATING_STORY", "SEATING_SPACE"}        # the assembly seating measures' names (1030.7), never a reason
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
     corridor = {k: reasons[k] for k in ("CORRIDOR_NOT_RULED_OUT", "CORRIDOR_OTHER_LEVELS", "CORRIDOR_NO_STORY",
@@ -678,3 +679,131 @@ def test_rooms_that_arent_a_list_are_never_a_crash():
     for bad in (5, True, "x", {"a": 1}):
         assert occupant_load.readable_rooms({"rooms": bad}) == ({}, False)
     assert occupant_load.readable_rooms({}) == ({}, True)
+
+
+# ---- assembly seating on a story (BCNYS 1030.7, p.354 lines 50-51; 1030.9; 1030.13.1) -------------------------------
+
+def test_the_assembly_functions_are_exactly_table_1004_5s_rows_under_its_assembly_heading():
+    """Table 1004.5 prints "Assembly" on p.312, line 19, its rows on lines 20 to 27 (Gaming floors to Bowling centers),
+    "Business areas" on line 28: the functions that name a room used for assembly purposes are those rows, read from
+    the frozen table's own sources; the ones that may be an assembly use are among its other rows."""
+    rows = load(NY / OCCUPANT_LOAD_FACTORS)["functions"]
+    under = {f for f, v in rows.items() if v["source"]["page"] == 312 and 20 <= v["source"]["lines"][0] <= 27}
+    assert set(occupant_load.ASSEMBLY_FUNCTIONS) == under
+    assert set(occupant_load.ASSEMBLY_LIKE_FUNCTIONS) <= set(rows) - under and len(occupant_load.ASSEMBLY_LIKE_FUNCTIONS) == 7
+
+
+_SEATING_PARTS = {}
+
+
+def _seating_story(fn=None, use="other", more=None, building=None):
+    r = room("r", rect(0, 0, 20, 15), use=use, **({"function": fn} if fn is not None else {}))
+    desc = description([r, room("c", rect(-20, 15.5, 40, 23.5))],
+                       [door("d", (10, 15.25), (1, 0), ("r", "c")),
+                        door("w", (-20.25, 19.5), (0, 1), ("c", "outside"), exit_id="A"),
+                        door("e", (40.25, 19.5), (0, 1), ("c", "outside"), exit_id="B")])
+    desc.update(more or {})
+    if not _SEATING_PARTS:                          # a function or use changes no geometry: measured once (the
+        _SEATING_PARTS["r"] = measure(desc)["parts"]   # seating reads each room's function and use from the description)
+    parts = copy.deepcopy(_SEATING_PARTS["r"])
+    occupant_load.assembly_seating(parts, desc, FACTORS, building)
+    story = parts["story"][0]
+    assert all(p["measures"][occupant_load.SEATING_SPACE] == story["measures"][occupant_load.SEATING_STORY]
+               for p in parts["space"])
+    return story["measures"][occupant_load.SEATING_STORY]
+
+
+@pytest.mark.parametrize("fn", sorted(FACTORS["functions"]) + [None, "not a function"])
+def test_a_story_may_seat_people_served_by_aisles_unless_every_room_states_another_function(fn):
+    """1030.7 (p.354, lines 50-51): "Where aisles are provided for seating, the distance shall be measured along the
+    aisles and aisle accessways without travel over or on the seats", fixed seats or loose (1030.9: aisles wherever
+    seats, tables or displays are; 1030.13.1: aisle accessways for seating at tables). A story with a room stating an
+    Assembly function (a restaurant's assembly_unconcentrated among them), one that may be an assembly use, one
+    that is none of the table's, or none at all may hold such seating; only rooms all stating the table's other
+    functions rule it out. The corridor with no function holds none."""
+    want = fn is None or fn not in FACTORS["functions"] or fn in occupant_load.ASSEMBLY_FUNCTIONS + \
+        occupant_load.ASSEMBLY_LIKE_FUNCTIONS
+    assert _seating_story(fn) is want, fn
+
+
+def test_a_room_unseen_never_rules_seating_out():
+    """An enclosed space with no room drawn in it, a room that can't be read, or a room no story holds may be such a
+    room: every story may hold seating then, whatever the rooms read say."""
+    assert _seating_story("business") is False
+    assert _seating_story("business", more={"unknown_spaces": [{"id": "u", "name": "Enclosed area"}]}) is True
+    _seating_story("business")
+    base = _SEATING_PARTS["r"]                      # the same rooms: r and the corridor c
+    for extra in ({"id": "ghost", "name": "ghost"}, "not a room", {"id": 7}):     # placed nowhere, or unreadable
+        parts = copy.deepcopy(base)
+        occupant_load.assembly_seating(parts, _seating_desc_with_extra(extra), FACTORS)
+        assert all(s["measures"][occupant_load.SEATING_STORY] is True for s in parts["story"]), extra
+        assert all(p["measures"][occupant_load.SEATING_SPACE] is True for p in parts["space"]), extra
+    parts = copy.deepcopy(base)
+    parts["space"].append({"id": "lost", "measures": {}, "not_measured": {}})     # a space no story holds
+    occupant_load.assembly_seating(parts, _seating_desc_with_extra(None), FACTORS)
+    assert parts["space"][-1]["measures"][occupant_load.SEATING_SPACE] is True
+    for use in occupant_load.SUPPORT_USES:                  # a closet or toilet with no function: no seats
+        assert _seating_story(None, use=use) is (use not in occupant_load.SUPPORT_USES)
+
+
+def _seating_desc_with_extra(extra):
+    desc = description([room("r", rect(0, 0, 20, 15), use="other", function="business"),
+                        room("c", rect(-20, 15.5, 40, 23.5))],
+                       [door("d", (10, 15.25), (1, 0), ("r", "c")),
+                        door("w", (-20.25, 19.5), (0, 1), ("c", "outside"), exit_id="A"),
+                        door("e", (40.25, 19.5), (0, 1), ("c", "outside"), exit_id="B")])
+    if extra is not None:
+        desc["rooms"].append(extra)
+    return desc
+
+
+def test_the_apartments_stories_seat_no_one_served_by_aisles(apartment):
+    """The four-unit apartment: its apartments state residential, its stairs are exits and its corridors state no
+    function, so neither story may hold seating served by aisles; with one apartment's function left out, its story
+    may (the room may be anything)."""
+    parts = _loads(apartment)
+    assert {s["id"]: s["measures"][occupant_load.SEATING_STORY] for s in parts["story"]} == {"L1": False, "L2": False}
+    desc = copy.deepcopy(apartment)
+    next(r for r in desc["rooms"] if r["id"] == "L2N").pop("function")
+    parts = _loads(desc)
+    assert {s["id"]: s["measures"][occupant_load.SEATING_STORY] for s in parts["story"]} == {"L1": False, "L2": True}
+
+
+@pytest.mark.parametrize("groups", [["A-1"], ["A-2"], ["A-3"], ["A-4"], ["A-5"], ["B", "A-3"]])
+def test_a_building_stated_group_a_with_no_assembly_room_shown_may_seat_people_on_every_story(groups):
+    """Review round 1 (P2): Group A is an assembly use (303.1 to 303.6), so a building stated Group A has a room used
+    for assembly purposes (1030.1); where no room states an Assembly function or one that may be an assembly use (a
+    lecture hall stated a classroom, every room stated business), that room isn't shown and any room may be it. Stated
+    another group, a story of business rooms seats no one; Group A with a dining room stated, a business story beside
+    it doesn't either (the assembly room is shown)."""
+    building = {"occupancy_groups": groups}
+    for fn in ("business", "classroom", "residential"):
+        assert _seating_story(fn, building=building) is True, (groups, fn)
+    assert _seating_story("business", building={"occupancy_groups": ["B"]}) is False
+    assert _seating_story("business", building={"occupancy_groups": ["R-2", "M"]}) is False
+    assert _seating_story("business", building={}) is False
+    shown = copy.deepcopy(_SEATING_PARTS["r"])
+    desc = _seating_desc_with_extra({"id": "dining", "name": "dining", "function": "assembly_unconcentrated"})
+    shown["space"].append({"id": "dining", "within": "elsewhere", "measures": {}, "not_measured": {}})
+    occupant_load.assembly_seating(shown, desc, FACTORS, building)
+    assert shown["story"][0]["measures"][occupant_load.SEATING_STORY] is False      # the dining room is shown, elsewhere
+
+
+@pytest.mark.parametrize("fn", ["assembly_unconcentrated", "business", "residential"])
+def test_an_exit_stating_a_function_may_seat_people(fn):
+    """Review round 3 (P2): a room the routes take for an exit (an exit enclosure's or passageway's door enters it) yet
+    stating a function is a room whose use isn't known (EXIT_FUNCTION); it was ruled out as seating, so a dining room
+    mis-marked an exit passed its story's travel. Now it may seat people, whatever the function; an exit stating none
+    still doesn't."""
+    parts = copy.deepcopy(_SEATING_PARTS.get("r") or measure(_seating_desc_with_extra(None))["parts"])
+    space = next(p for p in parts["space"] if p["id"] == "r")
+    space["measures"]["space_is_exit"] = True
+    desc = _seating_desc_with_extra(None)
+    desc["rooms"][0]["function"] = fn
+    occupant_load.assembly_seating(parts, desc, FACTORS)
+    assert parts["story"][0]["measures"][occupant_load.SEATING_STORY] is True
+    desc["rooms"][0].pop("function")
+    parts2 = copy.deepcopy(parts)
+    occupant_load.assembly_seating(parts2, desc, FACTORS)
+    assert parts2["story"][0]["measures"][occupant_load.SEATING_STORY] is False
+
