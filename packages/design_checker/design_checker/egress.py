@@ -404,7 +404,7 @@ def _measured(law: dict, interior, readings: dict, ground: dict | None = None, v
                 problems += [str(p) for p in one["problems"] if str(p) not in problems]
                 parts.update(one["parts"])
             if escape:                                # each sleeping room linked to its story and doors (8a)
-                escape_openings.link(parts, interior)
+                escape_openings.link(parts, interior, law.get("rules"))   # 8d: the law's limits, which comply
             readings[kind] = {"parts": parts, "problems": problems, "not_checked": [], "has_none": {}}
         else:
             readings[kind] = measure_interior(interior)
