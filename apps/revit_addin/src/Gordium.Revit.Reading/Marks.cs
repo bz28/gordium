@@ -378,6 +378,23 @@ public static class Marks
         "With an automatic sprinkler system throughout too (NFPA 13; NFPA 13R in Group R only, elsewhere a person checks), BCNYS 1005.3.1 and 1005.3.2 exception 1 lower the egress capacity factors (other than Groups H and I-2): 0.15 in per occupant for corridors and other components, 0.2 in for stairways. " +
         "No: the full factors (0.2 in and 0.3 in). Blank: a capacity met only at the lower factor needs review.");
 
+    /// <summary>Whether the building is a high-rise or more than 420 ft in building height (<c>building.high_rise_building</c>,
+    /// BCNYS 202 HIGH-RISE BUILDING, Section 403: 403.2.2, 403.5.2).</summary>
+    public static readonly MarkDefinition HighRiseBuilding = new(
+        "Gordium: High-rise building", new("50749eaa-b331-40c1-af60-c1bf02acbc28"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.high_rise_building",
+        "Yes when the building is a high-rise, or more than 420 ft in building height. BCNYS 202: \"A building with an occupied floor or occupiable roof located more than 75 feet (22 860 mm) above the lowest level of fire department vehicle access.\" " +
+        "The model can't show where fire trucks reach the building, so Gordium never decides it; its question may give the model's height over the lowest finished ground as a hint. " +
+        "Yes: Section 403's requirements are a person's check, and outside Group R-2 a story with no more exits than 1006.3 asks needs review (403.5.2: one more interior exit stairway over 420 ft). No: neither. Blank: as for Yes.");
+
+    /// <summary>Whether a floor level used for human occupancy is more than 30 ft below the lowest level of exit
+    /// discharge (<c>building.underground_building</c>, BCNYS 405.1, 405.7.1).</summary>
+    public static readonly MarkDefinition UndergroundBuilding = new(
+        "Gordium: Underground building", new("0b116213-0d7e-4e3c-b03b-e71a9f387d05"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "building.underground_building",
+        "Yes when a floor level used for human occupancy is more than 30 ft below the finished floor of the lowest level of exit discharge. BCNYS 405.1: \"The provisions of Sections 405.2 through 405.9 apply to building spaces having a floor level used for human occupancy more than 30 feet (9144 mm) below the finished floor of the lowest level of exit discharge.\" " +
+        "Yes: Section 405's requirements are a person's check, and a story with one exit needs review (405.7.1: two exits on each floor level). No: none. Blank: as for Yes.");
+
     /// <summary>Whether the building has an atrium (<c>building.building_has_atrium</c>, BCNYS 1017.3.2.3).</summary>
     public static readonly MarkDefinition Atrium = new(
         "Gordium: Atrium", new("8c3211a5-546b-463e-8d8c-b70fd753c1b6"), MarkValueKind.YesNo,
@@ -677,7 +694,7 @@ public static class Marks
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, AssemblyFixedSeating, SpecialEgressSpaces, MerchandisePads, EgressBalconyIncrease, R2SleepingUnits,
         EscapeOpenings1031, Atrium, OccupiedOutdoorAreas, OccupantLoadIncreased, OtherLevelsReachCorridors,
-        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm,
+        AmbulatoryCareFacility, CorridorsWithinDwellingUnits, EmergencyVoiceAlarm, HighRiseBuilding, UndergroundBuilding,
         DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
         AduDetached, AdusOnParcel,
         StreamNearLot, StreamDistance, UnrelatedPersons, OwnerOccupied, FunctionalFamilyUnit, GarageCars, PrivateGarages,

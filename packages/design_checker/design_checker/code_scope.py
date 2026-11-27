@@ -153,7 +153,9 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane", "stor
         "other_level_egress_into_corridors": "Gordium: Other levels reach corridors",
         "ambulatory_care_facility": "Gordium: Ambulatory care facility",
         "corridors_within_dwelling_units": "Gordium: Corridors within dwelling units",
-        "emergency_voice_alarm_system": "Gordium: Emergency voice/alarm system"}
+        "emergency_voice_alarm_system": "Gordium: Emergency voice/alarm system",
+        # Chapter 4 part b's: a high-rise (202, or over 420 ft in building height) and an underground building (405.1)
+        "high_rise_building": "Gordium: High-rise building", "underground_building": "Gordium: Underground building"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise

@@ -50,6 +50,7 @@ MARK, FIX_MODEL, SURVEY, DECIDE, MEASURE, OPEN_QUESTION = ("mark", "fix_model", 
 KINDS = (MARK, FIX_MODEL, SURVEY, DECIDE, MEASURE, OPEN_QUESTION)
 
 # the headline of a project question, by the field that answers it
+HIGH_RISE_FIELD = "building.high_rise_building"      # the fact the model's figure hints at (high_rise_hint.py)
 FIELD_HEADLINES = {
     "building.occupancy_groups": "Set the occupancy group",
     "building.sprinkler_system": "Set the sprinkler system",
@@ -468,9 +469,11 @@ def limit_words(item: dict, rule: dict | None, values: dict) -> str | None:
 # ---- adding them to the view ----------------------------------------------------------------------------------
 
 def add(view: dict, *, rules_by_id: dict, laws: list[dict], site: dict | None, values: dict, place=None,
-        place_folder=None, documents: dict | None = None) -> None:
+        place_folder=None, documents: dict | None = None, high_rise_hint: str | None = None) -> None:
     """Every new field onto the view's items, and the view's `contents` (the module's note). Never a crash: a field
-    that can't be worked out is left out, the rest of the answer as it was."""
+    that can't be worked out is left out, the rest of the answer as it was. `high_rise_hint`: the model's figure for
+    the high-rise question (design_checker/high_rise_hint.py), added to the words of each ask for that fact; it
+    decides nothing (the fact stays unstated until the architect answers)."""
     from design_checker import contents as contents_mod
     law_rules = {(law["key"], r.get("id")): r for law in laws for r in law.get("rules") or [] if isinstance(r, dict)}
     rule_kinds = {r.get("id"): r.get("for_each") for law in laws for r in law.get("rules") or []
@@ -494,6 +497,11 @@ def add(view: dict, *, rules_by_id: dict, laws: list[dict], site: dict | None, v
                     "why": str(c.get("words") or ""), "elements": list(c.get("elements") or [])}
                    for c in item.get("causes") or []] if item.get("status") == present.REVIEW else None
         if got is not None:
+            if high_rise_hint:
+                for a in got:
+                    if a.get("field") == HIGH_RISE_FIELD:
+                        a["why"] = (str(a.get("why") or "") + " " + high_rise_hint).strip()
+                        a["hint"] = high_rise_hint
             item["asks"] = got
         try:
             name = rule_name(item, rule)
