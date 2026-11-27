@@ -1032,6 +1032,7 @@
 "packages/rule_format/tests/test_names_kept.py::test_asking_again_is_fast": 1.7,
 "packages/rule_format/tests/test_names_kept.py::test_every_formula_in_the_repository_has_the_same_names_cold_warm_and_fresh": 5.0,
 "packages/rule_format/tests/test_names_kept.py::test_there_are_formulas_to_compare": 6.6,
+"packages/rule_format/tests/test_ny_building_chapter_9.py::test_no_rule_passes_on_a_13r_system_outside_group_r": 5.4,
 "packages/rule_format/tests/test_ny_building_door_walk.py::test_no_door_height_passes_short_of_the_law_or_fails_within_it": 2.3,
 "packages/rule_format/tests/test_ny_building_door_walk.py::test_no_door_width_passes_short_of_the_law_or_fails_within_it[A-1]": 8.9,
 "packages/rule_format/tests/test_ny_building_door_walk.py::test_no_door_width_passes_short_of_the_law_or_fails_within_it[I-1]": 6.9,
