@@ -152,7 +152,7 @@ def test_a_row_not_in_review_has_no_asks():
     ({"kind": "mark", "key": "mark:space:space_occupant_load", "measure": "space_occupant_load",
       "words": "occupant load: stated by the architect (the space's occupant load), and Gordium has no mark for it "
                "in the model yet"}, ui_data.MEASURE,
-     "Work out the occupant load by hand: Gordium has no field for it yet"),
+     "Work out the occupant load by hand (a person's check)"),
     ({"kind": "measure_by_hand", "key": "gap:space:space_egress_through_locked_room",
       "words": "egress through locked room: Gordium doesn't measure this yet: measure it by hand"}, ui_data.MEASURE,
      "Check by hand: does the path pass through a room that can be locked?"),
@@ -675,6 +675,18 @@ def test_the_plan_never_says_a_marked_facts_revit_mark_is_still_to_come():
         if re.search(r"Revit mark\S* (is|are) a follow-up|marks? join group", sentence):
             named = [k for k in code_scope.MARK if k in sentence]
             assert not named, (named, sentence[:200])
+
+
+def test_the_corridor_rating_card_names_the_unit_its_revit_mark_takes():
+    # corridor asks review round 1 (P2): the card said "in hours" while the Revit mark it opens takes minutes, so an
+    # architect typing 1 for one hour sent 1/60 hour; the card and the mark both say minutes
+    import re
+    text = (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")
+    m = re.search(r'new\(\s*"(Gordium: [^"]+)", new\("[^"]+"\), MarkValueKind\.(\w+),\s*MarkBinding\.\w+, \[Rooms\], '
+                  r'"rooms\[\]\.fire_rating_hours"', text)
+    assert m and m.group(2) == "Integer" and "minutes" in m.group(1), m
+    headline = ui_data.FIELD_HEADLINES["rooms[].fire_rating_hours"]
+    assert "minutes" in headline and "in hours" not in headline
 
 
 def test_a_door_whose_leaves_arent_given_is_asked_for_by_the_field_its_type_mark_answers():

@@ -582,17 +582,20 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         "CORRIDOR_NOT_RULED_OUT": (ol.CORRIDOR_NOT_RULED_OUT, "mark"),    # Gordium: Other levels reach corridors
         "CORRIDOR_OTHER_LEVELS": (ol.CORRIDOR_OTHER_LEVELS, by_hand),
         "CORRIDOR_NO_STORY": (ol.CORRIDOR_NO_STORY, by_hand),
+        # the egress UI audit's finding 5: a story waiting on its rooms' functions asks those, never by hand
+        "CORRIDOR_NO_FUNCTION": (ol.CORRIDOR_NO_FUNCTION, function),
     }
     fragments = {"QUESTION", "LOWER", "UPPER", "FUNCTION_STATED", "FUNCTION_FIELD", "FUNCTION_ROOMS", "LOAD_STATED",
                  "STORY_STATED", "STORY_FUNCTION", "OTHER_LEVELS", "OTHER_LEVELS_FIELD", "CORRIDOR_QUESTION", "CORRIDOR_NONE", "CORRIDOR_STORY", "CORRIDOR_BY_HAND",
-                 "CORRIDOR_READINGS",     # the readings' own words: a load given, never asked
+                 "CORRIDOR_READINGS", "FUNCTIONS_ONLY",     # the readings' own words: a load given, never asked
                  # the ceiling's (a load bounded, never a reason a load isn't given; BOUND_FACT_WHY is a fact's ask)
                  "NOT_BY_AREA", "OUTDOOR", "MEZZANINES", "BOUND", "IF_STATED",
                  "BOUND_WHY", "BOUND_FACT_WHY",
                  "SEATING_STORY", "SEATING_SPACE"}        # the assembly seating measures' names (1030.7), never a reason
     defined = {k for k, v in vars(ol).items() if k.isupper() and isinstance(v, str)} - fragments
     assert defined == set(reasons), defined ^ set(reasons)
-    corridor = {k: reasons[k] for k in ("CORRIDOR_NOT_RULED_OUT", "CORRIDOR_OTHER_LEVELS", "CORRIDOR_NO_STORY")}
+    corridor = {k: reasons[k] for k in ("CORRIDOR_NOT_RULED_OUT", "CORRIDOR_OTHER_LEVELS", "CORRIDOR_NO_STORY",
+                                        "CORRIDOR_NO_FUNCTION")}
     for why, kind in corridor.values():
         heads = _asked_corridor(why)
         assert heads and not any(h.startswith(("Mark the", "Fix the model")) for h in heads), (why, heads)
@@ -601,6 +604,8 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
         # architect's to work out (other levels do reach the corridors, or the story's isn't known): by hand
         if kind == "mark":
             assert heads == ["Say whether another level's occupants reach the corridors"], (why, heads)
+        elif kind == function:
+            assert heads == ["Set the room's function"], (why, heads)
         else:
             assert any(h.startswith("Work out") for h in heads) and not any(h.startswith("Say whether") for h in heads), \
                 (why, kind, heads)
@@ -633,6 +638,35 @@ def test_every_reason_for_a_load_not_worked_out_is_asked_the_way_it_can_be_answe
     closet = _space(parts, "s13")["not_measured"]["space_occupant_load"]
     assert "st egresses through it" in closet
     assert not any(h.startswith(("Fix the model", "Mark the")) for h in _asked(closet)), closet
+
+
+def _story_with_corridor(second_area=690.0):
+    parts = {"story": [{"id": "L1", "measures": {"story_gross_floor_area": 1800.0}, "not_measured": {}}],
+             "space": [{"id": "a", "name": "A", "within": "L1", "measures": {"space_floor_area": 690.0,
+                                                                            "space_is_exit": False}, "not_measured": {}},
+                       {"id": "b", "name": "B", "within": "L1", "measures": {"space_is_exit": False}, "not_measured": {}}],
+             "corridor": [{"id": "c", "name": "C", "within": "L1", "measures": {}, "not_measured": {}, "more": {}}]}
+    if second_area is not None:
+        parts["space"][1]["measures"]["space_floor_area"] = second_area
+    desc = {"rooms": [{"id": "a"}, {"id": "b"}, {"id": "c", "use": "corridor"}]}
+    return parts, desc
+
+
+def test_a_corridor_asks_the_rooms_functions_only_where_they_alone_wait():
+    """Review round 1 of the corridor asks (P3): a story whose load waits on more than functions (a room's floor area
+    not measured too) once had its corridor say the load 'isn't worked out until its rooms' functions are set' and
+    ask only for them, though setting them wouldn't give it. Now only a story waiting on functions alone asks them;
+    any other is by hand."""
+    parts, desc = _story_with_corridor()
+    occupant_load.apply(parts, desc, FACTORS, {occupant_load.OTHER_LEVELS: False})
+    c = parts["corridor"][0]
+    assert c["not_measured"]["corridor_occupant_load"] == occupant_load.CORRIDOR_NO_FUNCTION
+    assert c["more"]["corridor_occupant_load"][occupant_load.FUNCTION_ROOMS] == ["a", "b"]
+    parts, desc = _story_with_corridor(second_area=None)               # B's area not measured as well
+    occupant_load.apply(parts, desc, FACTORS, {occupant_load.OTHER_LEVELS: False})
+    c = parts["corridor"][0]
+    assert c["not_measured"]["corridor_occupant_load"] == occupant_load.CORRIDOR_NO_STORY
+    assert "corridor_occupant_load" not in c["more"]
 
 
 # ---- the ceiling on a load not worked out (occupant_load._bounds; docs/decisions/2026-11-26_occupant_load_upper_bound.md)

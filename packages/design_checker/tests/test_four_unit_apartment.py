@@ -393,6 +393,81 @@ def test_chapter_4_part_fs_facts_stated_on_the_apartment(no_mall, laws):
     # with special egress spaces stated no (the fixture), 411.4's two are set aside already
     assert {k: v for k, v in no_mall["results"].items() if k.startswith("general.bc_411_4")} == {
         "general.bc_411_4_exit_marking": "not_applicable", "general.bc_411_4_1_photoluminescent_exit_signs": "not_applicable"}
+# ---- the corridor's facts and asks (2026-11-26: the egress UI audit's finding 5) ----------------------------------------
+
+RATING_R = "general.bc_table_1020_2_r"
+
+
+def _corridor_case(rating=None, functions=True, **building):
+    desc = build.interior_of()
+    for r in desc["rooms"]:
+        if not functions:
+            r.pop("function", None)
+        if r.get("use") == "corridor" and rating is not None:
+            r["fire_rating_hours"] = rating
+    desc["building"] = {**desc["building"], **building}
+    return desc
+
+
+def test_the_corridor_asks_are_the_rooms_functions_and_its_stated_rating_never_by_hand_for_want_of_a_field(routes):
+    """Before: with no room function stated, each corridor's occupant load said "work out by hand: Gordium has no
+    field for it yet", though the model gives the load once the rooms' functions are set (the story's load bounds
+    the corridor's where no other level reaches it, group 4a); and the corridor's fire rating had no way in at all.
+    Now the corridor rows ask for the rooms' functions (selecting the rooms that lack one, never the corridor), and
+    for the corridor walls' rating by the corridor room's own field; no ask says "field"."""
+    from design_checker import panel_data, ui_data
+    from design_checker.each_part import GORDIUM_GAPS
+    got = _check(_corridor_case(functions=False, other_level_egress_into_corridors=False), routes)
+    apartments = {p["id"] for p in got["interior"]["parts"]["space"] if p["name"].startswith("Apartment")}
+    items = [i for i in got["items"] if i["rule"] in (RATING_R, "general.bc_table_1020_3_corridor_width")]
+    assert len(items) == 4 and all(i["status"] == present.REVIEW for i in items)
+    for i in items:
+        asks = [ui_data._from_cause(c, "corridor") for c in i["causes"]]
+        assert not any("field" in a["headline"] for a in asks), asks
+        fn = [a for a in asks if a.get("field") == "rooms[].function"]
+        assert fn and set(fn[0]["elements"]) <= apartments and fn[0]["elements"], (i["name"], asks)
+    rated = [i for i in got["items"] if i["rule"] == "general.bc_1020_2_fire_partitions"]
+    assert rated and all(ui_data._from_cause(c, "corridor").get("field") == "rooms[].fire_rating_hours"
+                         for i in rated for c in i["causes"] if c.get("measure") == "corridor_fire_rating_hours")
+    assert panel_data.MEASURE_FIELDS["corridor_fire_rating_hours"] in ui_data.FIELD_HEADLINES and GORDIUM_GAPS
+
+
+def _rated(routes, desc):
+    """The building's routes as measured (`routes`) with each corridor's stated facts read again from `desc` by the
+    routes' own reader (model_measurement.routes._corridor_stated): a stated fact changes no geometry."""
+    from model_measurement.routes import CORRIDOR_STATED, _corridor_stated
+    got = copy.deepcopy(routes)
+    items = {r["id"]: r for r in desc["rooms"]}
+    for c in got["parts"]["corridor"]:
+        for m in CORRIDOR_STATED:
+            c["measures"].pop(m, None)
+            c["not_measured"].pop(m, None)
+        _corridor_stated(c, items.get(c["id"]))
+    return got
+
+
+@pytest.fixture(scope="module")
+def unrated(routes):
+    """The apartment with an NFPA 13R system and no other level reaching its corridors, no rating stated."""
+    return _check(_corridor_case(sprinkler_system="nfpa_13r", other_level_egress_into_corridors=False), routes)
+
+
+@pytest.mark.parametrize("rating, want", [(1, "pass"), (0.5, "pass"), (0, present.REVIEW), (None, present.REVIEW)])
+def test_a_stated_corridor_rating_moves_table_1020_2s_row(routes, unrated, rating, want):
+    """Group R-2 with an NFPA 13R system, no other level reaching the corridors: the corridor's load is two readings,
+    none and the story's (257.1); Table 1020.2's R row asks a 0.5-hour rating over 10 occupants with the sprinkler
+    system. A stated rating of 0.5 or 1 hour complies at both; 0 complies only at none (needs review, never a pass);
+    not stated, it needs review as before. Only the rows reading the rating move, and never to a fail here."""
+    base = unrated
+    desc = _corridor_case(rating, sprinkler_system="nfpa_13r", other_level_egress_into_corridors=False)
+    now = _check(desc, _rated(routes, desc))
+    assert all(c["measures"].get("corridor_fire_rating_hours") == rating for c in now["interior"]["parts"]["corridor"])
+    assert now["results"][RATING_R] == want, now["results"][RATING_R]
+    rules = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+                                      / "5_building_code_rules/drafted/general.yaml")["rules"]}
+    for k in (k for k in now["results"] if now["results"][k] != base["results"].get(k)):
+        assert "corridor_fire_rating_hours" in str([rules[k].get(f) for f in ("check", "review_when", "applies_when")]), k
+        assert base["results"][k] == present.REVIEW and now["results"][k] != "fail", (k, now["results"][k])
 
 
 # ---- the ceiling on an occupant load not worked out (occupant_load._bounds, 2026-11-26: the egress UI audit's 6) -------
